@@ -44,7 +44,7 @@ export function registerRoutes({
 
   registerExistingIndicesPath(router);
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
-  registerFields(router, getStartServices, isRollupsEnabled);
+  registerFields(router, isRollupsEnabled);
   registerHasDataViewsRoute(router);
   registerHasEsDataRoute(router, logger, hasEsDataTimeout);
 }

@@ -14,28 +14,31 @@ import type { Validation } from '../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
+  titleId: string;
 }
 
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, validation }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.title',
-    {
-      defaultMessage: 'Model memory limit',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.description"
-          defaultMessage="An approximate upper limit for the amount of memory that can be used by the analytical models."
-        />
+export const Description: FC<PropsWithChildren<Props>> = memo(
+  ({ children, validation, titleId }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.title',
+      {
+        defaultMessage: 'Model memory limit',
       }
-    >
-      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.description"
+            defaultMessage="An approximate upper limit for the amount of memory that can be used by the analytical models."
+          />
+        }
+      >
+        <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);

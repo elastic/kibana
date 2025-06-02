@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
@@ -96,19 +89,6 @@ export const CreateIndexCodeView = ({
           showTour={false}
         />
       </EuiFlexItem>
-      {!!selectedWorkflow && (
-        <>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>{selectedWorkflow?.title}</h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText color="subdued" size="s">
-              <p>{selectedWorkflow?.summary}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </>
-      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false} css={{ minWidth: '150px' }}>
           <LanguageSelector

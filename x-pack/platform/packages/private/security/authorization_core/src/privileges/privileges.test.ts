@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ApiOperation } from '@kbn/core-security-server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ApiOperation } from '@kbn/security-plugin-types-common';
 
 import { getReplacedByForPrivilege, privilegesFactory } from './privileges';
 import { licenseMock } from '../__fixtures__/licensing.mock';

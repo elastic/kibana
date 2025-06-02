@@ -15,7 +15,6 @@ import { MarkdownRenderer } from './renderer';
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
   text-overflow: ellipsis;
-  word-break: break-word;
   display: -webkit-box;
   -webkit-box-orient: vertical;
 `;

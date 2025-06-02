@@ -27,14 +27,7 @@ exports[`ElasticAgentCard props button 1`] = `
     image={
       <EuiImage
         alt=""
-        css={
-          Object {
-            "background": "aliceblue",
-            "height": 240,
-            "objectFit": "cover",
-            "width": "max(100%, 360px)",
-          }
-        }
+        css="unknown styles"
         size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
@@ -78,14 +71,7 @@ exports[`ElasticAgentCard props category 1`] = `
     image={
       <EuiImage
         alt=""
-        css={
-          Object {
-            "background": "aliceblue",
-            "height": 240,
-            "objectFit": "cover",
-            "width": "max(100%, 360px)",
-          }
-        }
+        css="unknown styles"
         size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
@@ -129,14 +115,7 @@ exports[`ElasticAgentCard props href 1`] = `
     image={
       <EuiImage
         alt=""
-        css={
-          Object {
-            "background": "aliceblue",
-            "height": 240,
-            "objectFit": "cover",
-            "width": "max(100%, 360px)",
-          }
-        }
+        css="unknown styles"
         size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
@@ -185,14 +164,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
     image={
       <EuiImage
         alt=""
-        css={
-          Object {
-            "background": "aliceblue",
-            "height": 240,
-            "objectFit": "cover",
-            "width": "max(100%, 360px)",
-          }
-        }
+        css="unknown styles"
         size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
@@ -236,14 +208,7 @@ exports[`ElasticAgentCard renders 1`] = `
     image={
       <EuiImage
         alt=""
-        css={
-          Object {
-            "background": "aliceblue",
-            "height": 240,
-            "objectFit": "cover",
-            "width": "max(100%, 360px)",
-          }
-        }
+        css="unknown styles"
         size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />

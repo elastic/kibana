@@ -1,3 +1,682 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Tls Table Component Rendering it renders the default Domains table 1`] = `null`;
+exports[`Tls Table Component Rendering it renders the default Domains table 1`] = `
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c2 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c3 tbody th,
+.c3 tbody td {
+  vertical-align: top;
+}
+
+.c3 tbody .euiTableCellContent {
+  display: block;
+}
+
+.c4 {
+  margin-top: 4px;
+}
+
+@media only screen and (min-width:575px) {
+  .c2 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
+  }
+
+  .c2 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+@media only screen and (min-width:768px) {
+  .c5 .euiButtonIcon:last-child {
+    margin-left: 28px;
+  }
+
+  .c5 .euiPagination {
+    position: relative;
+  }
+
+  .c5 .euiPagination::before {
+    bottom: 0;
+    color: #515761;
+    content: '\\2026';
+    font-size: 14px;
+    padding: 5px 8px;
+    position: absolute;
+    right: 24px;
+  }
+}
+
+<div
+  class="c0"
+  data-test-subj="hoverVisibilityContainer"
+>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c1 emotion-euiPanel-grow-m-m-plain-hasBorder"
+    data-test-subj="table-tls-loading-false"
+  >
+    <header
+      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      data-test-subj="header-section"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+        data-test-subj="headerSectionOuterFlexGroup"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+            data-test-subj="headerSectionInnerFlexGroup"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                        data-test-subj="query-toggle-header"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h2
+                        class="euiTitle emotion-euiTitle-l"
+                        data-test-subj="header-section-title"
+                      >
+                        <span
+                          class="eui-textBreakNormal"
+                        >
+                          Transport Layer Security
+                        </span>
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button
+                    aria-label="Inspect"
+                    class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                    data-test-subj="inspect-icon-button"
+                    disabled=""
+                    title="Inspect"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="inspect"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="c2 siemSubtitle"
+            data-test-subj="header-section-subtitle"
+          >
+            <p
+              class="siemSubtitle__item siemSubtitle__item--text"
+              data-test-subj="header-panel-subtitle"
+            >
+              Showing: 1 server certificate
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      class="euiBasicTable c3"
+      data-test-subj="paginated-basic-table"
+    >
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
+      >
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Issuer"
+                >
+                  Issuer
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Subject"
+                >
+                  Subject
+                </span>
+              </div>
+            </th>
+            <th
+              aria-sort="descending"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node._id_2"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="SHA1 fingerprint"
+                    >
+                      SHA1 fingerprint
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node_3"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="JA3 fingerprint"
+                >
+                  JA3 fingerprint
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node_4"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Valid until"
+                >
+                  Valid until
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
+        >
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                DigiCert SHA2 Secure Server CA
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                *.elastic.co
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                2fe3bdf168af35b9e0ce5dc583bab007c40d47de
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                7851693188210d3b271aa1713d8c68c2
+                fb4726d465c5f28b84cd6d14cedd13a7
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  Apr 22, 2021 @ 12:00:00.000
+                </span>
+                 
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                DigiCert SHA2 Secure Server CA
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                api.snapcraft.io
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                61749734b3246f1584029deb4f5276c64da00ada
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                839868ad711dc55bde0d37a87f14740d
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  May 22, 2019 @ 12:00:00.000
+                </span>
+                 
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                Let's Encrypt Authority X3
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                changelogs.ubuntu.com
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                6560d3b7dd001c989b85962fa64beb778cdae47a
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                da12c94da8021bbaf502907ad086e7bc
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                >
+                  Jun 27, 2019 @ 01:09:59.000
+                </span>
+                 
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiPopover emotion-euiPopover-inline-block"
+          data-test-subj="loadingMoreSizeRowPopover"
+          id="customizablePagination"
+        >
+          <button
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                class="eui-textTruncate euiButtonEmpty__text"
+              >
+                Rows per page: 10
+              </span>
+              <span
+                color="inherit"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem c5 emotion-euiFlexItem-growZero"
+      >
+        <nav
+          class="euiPagination emotion-euiPagination"
+          data-test-subj="numberedPagination"
+        >
+          <span
+            aria-atomic="true"
+            aria-relevant="additions text"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
+          >
+            Page 1 of 5
+          </span>
+          <button
+            aria-label="Previous page"
+            class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+            data-test-subj="pagination-button-previous"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowLeft"
+            />
+          </button>
+          <ul
+            class="euiPagination__list emotion-euiPagination__list"
+          >
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-current="page"
+                aria-label="Page 1 of 5"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                data-test-subj="pagination-button-0"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    1
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-label="Page 2 of 5"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                data-test-subj="pagination-button-1"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    2
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-label="Page 3 of 5"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                data-test-subj="pagination-button-2"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    3
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-label="Page 4 of 5"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                data-test-subj="pagination-button-3"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    4
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-label="Page 5 of 5"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+                data-test-subj="pagination-button-4"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    5
+                  </span>
+                </span>
+              </button>
+            </li>
+          </ul>
+          <button
+            aria-label="Next page"
+            class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
+            data-test-subj="pagination-button-next"
+            title="Next page"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -29,6 +29,8 @@ export const INTEGRATIONS_SEARCHBAR = {
   BADGE: 'epmList.categoryBadge',
   REMOVE_BADGE_BUTTON: 'epmList.categoryBadge.closeBtn',
 };
+export const INSTALLED_INTEGRATIONS_DASHBOARDS_LINK = 'installedIntegrationsDashboardsLink';
+export const INSTALLED_INTEGRATIONS_TABLE_ROW = 'installedIntegrationsTableRow';
 
 export const SETTINGS = {
   INSTALL_ASSETS_BTN: 'installAssetsButton',

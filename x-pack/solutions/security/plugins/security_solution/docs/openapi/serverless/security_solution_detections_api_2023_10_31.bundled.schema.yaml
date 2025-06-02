@@ -1480,6 +1480,20 @@ paths:
         multiple detection rules. The bulk action is applied to all rules that
         match the query or to the rules listed by their IDs.
 
+
+        The edit action allows you to add, delete, or set tags, index patterns,
+        investigation fields, rule actions and schedules for multiple rules at
+        once. 
+
+        The edit action is idempotent, meaning that if you add a tag to a rule
+        that already has that tag, no changes are made. The same is true for
+        other edit actions, for example removing an index pattern that is not
+        specified in a rule will not result in any changes. The only exception
+        is the `add_rule_actions` and `set_rule_actions` action, which is
+        non-idempotent. This means that if you add or set a rule action to a
+        rule that already has that action, a new action is created with a new
+        unique ID.
+
         > warn
 
         > When used with  [API
@@ -1523,49 +1537,75 @@ paths:
         content:
           application/json:
             examples:
-              example1:
-                description: The following request activates all rules with the test tag
-                summary: Enable all rules with the test tag
+              example01:
+                description: The following request activates all rules with the test tag.
+                summary: Enable - Enable all rules with the test tag
                 value:
                   action: enable
                   query: 'alert.attributes.tags: "test"'
-              example2:
+              example02:
                 description: The following request enables the rule with the specified ID.
-                summary: Enable a specific rule by ID
+                summary: Enable - Enable a specific rule by ID.
                 value:
                   action: enable
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
-              example3:
+              example03:
                 description: The following request disables the rule with the specified ID.
-                summary: Disable a specific rule by ID
+                summary: Disable - Disable a specific rule by ID
                 value:
                   action: disable
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
-              example4:
+              example04:
                 description: >-
-                  The following request adds tags tag-1 and tag-2 to the rules
-                  that have the IDs sent in the payload
-                summary: Add tags to rules
+                  The following request duplicates rules with the specified IDs,
+                  including exceptions but not expired exceptions.
+                summary: Duplicate - Duplicate rules with specific IDs
                 value:
-                  action: edit
-                  edit:
-                    - type: add_tags
-                      value:
-                        - tag-1
-                        - tag-2
+                  action: duplicate
+                  duplicate:
+                    include_exceptions: true
+                    include_expired_exceptions: false
                   ids:
-                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
-                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
-              example5:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 461a4c22-416e-4009-a9a7-cf79656454bf
+              example05:
+                description: The following request deletes the rule with the specified ID.
+                summary: Delete - Delete a specific rule by ID
+                value:
+                  action: delete
+                  ids:
+                    - cf4abfd1-7c37-4519-ab0f-5ea5c75fac60
+              example06:
+                description: >-
+                  The following request runs the rule with the specified ID
+                  within the given date range.
+                summary: Run - Run a specific rule by ID
+                value:
+                  action: run
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
+              example07:
+                description: >-
+                  The following request exports the rules with the specified
+                  IDs.
+                summary: Export - Export specific rules by ID
+                value:
+                  action: export
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+              example08:
                 description: >-
                   The following request will validate that the
                   add_index_patterns bulk action can be successfully applied to
                   three rules. The dry_run parameter is specified in query
                   parameters, e.g. POST
                   api/detection_engine/rules/_bulk_action?dry_run=true
-                summary: Dry run - Validate add_index_patterns bulk action
+                summary: Edit - dry run - Validate add_index_patterns bulk action
                 value:
                   action: edit
                   edit:
@@ -1576,48 +1616,310 @@ paths:
                     - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
                     - de8f5af0-0831-11ed-ac8b-05a222bd8d4a
-              example6:
+              example09:
                 description: >-
-                  The following request duplicates rules with the specified IDs,
-                  including exceptions but not expired exceptions.
-                summary: Duplicate rules with specific IDs
+                  The following request adds the tag "tag-1" to the rules with
+                  the specified IDs. If the tag already exists for a rule, no
+                  changes are made.
+                summary: Edit - Add a tag to rules (idempotent)
                 value:
-                  action: duplicate
-                  duplicate:
-                    include_exceptions: true
-                    include_expired_exceptions: false
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                    - 461a4c22-416e-4009-a9a7-cf79656454bf
-              example7:
-                description: The following request deletes the rule with the specified ID.
-                summary: Delete a specific rule by ID
-                value:
-                  action: delete
-                  ids:
-                    - cf4abfd1-7c37-4519-ab0f-5ea5c75fac60
-              example8:
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example10:
                 description: >-
-                  The following request runs the rule with the specified ID
-                  within the given date range.
-                summary: Run a specific rule by ID
+                  The following request adds two tags at the same time, tag-1
+                  and tag-2, to the rules that have the IDs sent in the payload.
+                  If the tags already exist for a rule, no changes are made.
+                summary: Edit - Add two tags to rules (idempotent)
                 value:
-                  action: run
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
+                        - tag-2
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                  run:
-                    end_date: '2025-03-10T23:59:59.999Z'
-                    start_date: '2025-03-01T00:00:00.000Z'
-              example9:
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example11:
                 description: >-
-                  The following request exports the rules with the specified
-                  IDs.
-                summary: Export specific rules by ID
+                  The following request removes the tag "tag-1" from the rules
+                  with the specified IDs. If the tag does not exist for a rule,
+                  no changes are made.
+                summary: Edit - Delete a tag from rules (idempotent)
                 value:
-                  action: export
+                  action: edit
+                  edit:
+                    - type: delete_tags
+                      value:
+                        - tag-1
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                    - 13199674-aff1-418a-9e93-04f585fe36d1
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example12:
+                description: >-
+                  The following request sets the tags "tag-1" and "tag-2" for
+                  the rules with the specified IDs, overwriting any existing
+                  tags. If the set of tags is the same as the existing tags, no
+                  changes are made.
+                summary: Edit - Set (overwrite existing) tags for rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_tags
+                      value:
+                        - tag-1
+                        - tag-2
+                  ids:
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example13:
+                description: >-
+                  The following request adds the index pattern "test-*" to the
+                  rules with the specified IDs. If the index pattern already
+                  exists for a rule, no changes are made.
+                summary: Edit - Add index patterns to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: add_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example14:
+                description: >-
+                  The following request removes the index pattern "test-*" from
+                  the rules with the specified IDs. If the index pattern does
+                  not exist for a rule, no changes are made.
+                summary: Edit - Remove index patterns from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example15:
+                description: >-
+                  The following request sets the index patterns "test-*" and
+                  "prod-*" for the rules with the specified IDs, overwriting any
+                  existing index patterns. If the set of index patterns is the
+                  same as the existing index patterns, no changes are made.
+                summary: >-
+                  Edit - Set (overwrite existing) index patterns for rules
+                  patterns (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example16:
+                description: >-
+                  The following request adds investigation field to the rules
+                  with the specified IDs.
+                summary: Edit - Add investigation field to rules
+                value:
+                  action: edit
+                  edit:
+                    - type: add_investigation_fields
+                      value:
+                        field_names:
+                          - alert.status
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example17:
+                description: >-
+                  The following request deletes investigation fields from the
+                  rules with the specified IDs. If the field does not exist for
+                  a rule, no changes are made.
+                summary: Edit - Delete investigation fields from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_investigation_fields
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+                  value:
+                    - field1
+                    - field2
+              example18:
+                description: >-
+                  The following request sets investigation fields for the rules
+                  with the specified IDs, overwriting any existing investigation
+                  fields. If the set of investigation fields is the same as the
+                  existing investigation fields, no changes are made.
+                summary: >-
+                  Edit - Set (overwrite existing) investigation fields for rules
+                  (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_investigation_fields
+                      value:
+                        - field1
+                        - field2
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example19:
+                description: >-
+                  The following request sets a timeline template for the rules
+                  with the specified IDs. If the same timeline template is
+                  already set for a rule, no changes are made.
+                summary: >-
+                  Edit - Set (overwrite existing) timeline template for rules
+                  (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_timeline
+                      value:
+                        timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                        timeline_title: Alerts Involving a Single User Timeline
+                  ids:
+                    - eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+              example20:
+                description: >-
+                  The following request sets a schedule for the rules with the
+                  specified IDs. If the same schedule is already set for a rule,
+                  no changes are made.
+                summary: >-
+                  Edit - Set (overwrite existing) schedule for rules
+                  (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_schedule
+                      value:
+                        interval: 1h
+                        lookback: 30m
+                  ids:
+                    - 99887766-5544-3322-1100-aabbccddeeff
+              example21:
+                description: >-
+                  The following request adds rule actions to the rules with the
+                  specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules (non-idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+              example22:
+                description: >-
+                  The following request sets rule actions for the rules with the
+                  specified IDs. Each action receives its own unique ID.
+                summary: >-
+                  Edit - Set (overwrite existing) rule actions for rules
+                  (non-idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_rule_actions
+                      value:
+                        actions:
+                          - group: default
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+              example23:
+                description: >-
+                  The following request adds rule actions to the rules with the
+                  specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a webhook connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example24:
+                description: >-
+                  The following request adds rule actions to the rules with the
+                  specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for an email connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              message: The message body
+                              subject: Subject
+                              to: address@domain.com
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example25:
+                description: >-
+                  The following request adds rule actions to the rules with the
+                  specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a slack connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              message: The content of the message
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example26:
+                description: >-
+                  The following request adds rule actions to the rules with the
+                  specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a PagerDuty connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              eventAction: trigger
+                              severity: critical
+                              summary: The message body
+                              timestamp: 2023-10-31T00:00:00.000Z
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
             schema:
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
@@ -1632,7 +1934,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                example01:
                   description: >-
                     In this response one rule was updated and one was skipped.
                     Objects returned in attributes.results.skipped will only
@@ -1722,7 +2024,7 @@ paths:
                         total: 2
                     rules_count: 1
                     success: true
-                example2:
+                example02:
                   description: >-
                     If processing of any rule fails, a partial error outputs the
                     ID and/or name of the affected rule and the corresponding
@@ -1844,7 +2146,7 @@ paths:
                       rules_count: 2
                       status_code: 500
                       success: false
-                example3:
+                example03:
                   description: >-
                     The attributes.errors section of the response shows that two
                     rules failed to update and one succeeded. The same results
@@ -1882,6 +2184,454 @@ paths:
                         total: 3
                     message: Bulk edit partially failed
                     status_code: 500
+                example04:
+                  description: >-
+                    This example presents the successful setting of tags for 2
+                    rules. There was a difference between the set of tags that
+                    were being added and the tags that were already set in the
+                    rules, that's why the rules were updated.
+                  summary: Set tags successsully for 2 rules
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions: []
+                            author: []
+                            created_at: '2025-03-25T11:46:41.899Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-6m
+                            id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 5m
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Rule 1
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 1
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 6fb746a0-dfe5-40fa-b03f-5cbb84f3e32e
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                            threat: []
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:47:11.350Z'
+                            updated_by: elastic
+                            version: 2
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Rule 2
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 33
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:47:11.357Z'
+                            updated_by: elastic
+                            version: 24
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 2
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example05:
+                  description: >-
+                    This example presents the idempotent behavior of the edit
+                    action with set_tags request. Both rules already had exactly
+                    the same tags that were being added, so no changes were made
+                    in any of them.
+                  summary: Idempotent behavior of set_tags
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            name: Rule 1
+                            skip_reason: RULE_NOT_MODIFIED
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated: []
+                      summary:
+                        failed: 0
+                        skipped: 2
+                        succeeded: 0
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example06:
+                  description: >-
+                    This example presents the idempotent behavior of the edit
+                    action with add_tags request. One rule was updated and one
+                    was skipped. The rule that was skipped already had all the
+                    tags that were being added.
+                  summary: Idempotent behavior of add_tags
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Test Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 34
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:55:12.752Z'
+                            updated_by: elastic
+                            version: 25
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 1
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example07:
+                  description: >-
+                    This example shows a non-idempotent nature of the
+                    set_rule_actions requests. Regardless if the actions are the
+                    same as the existing actions for a rule, the actions are
+                    always set in the rule and receive a new unique ID.
+                  summary: Non-idempotent behavior for set_rule_actions
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: e48428e5-efac-4856-b8ad-b271c14eaa91
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - >-
+                                  Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 39
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T12:17:40.528Z'
+                            updated_by: elastic
+                            version: 30
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 1
+                        total: 1
+                    rules_count: 1
+                    success: true
+                example08:
+                  description: >-
+                    This example shows a non-idempotent nature of the
+                    add_rule_actions requests. Regardless if the added action is
+                    the same as another existing action for a rule, the new
+                    action is added to the rule and receives a new unique ID.
+                  summary: Non-idempotent behavior for add_rule_actions
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                uuid: 0309347e-3954-429c-9168-5da2663389af
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                uuid: 49ddaa94-d63d-410e-90dc-8c1bad9552bd
+                            author: []
+                            created_at: '2025-04-02T12:42:03.400Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-6m
+                            id: 0d3eb0cd-88c4-4651-ac87-6d9f0cb87217
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 5m
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Jacek test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 2
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 2684c020-1370-4719-ac27-eafe6428fe10
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags: []
+                            threat: []
+                            to: now
+                            type: query
+                            updated_at: '2025-04-02T12:51:40.215Z'
+                            updated_by: elastic
+                            version: 2
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 1
+                        total: 1
+                    rules_count: 1
+                    success: true
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
@@ -3058,9 +3808,23 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
     BulkActionEditPayloadIndexPatterns:
+      description: >
+        Edits index patterns of rulesClient.
+
+
+        - `add_index_patterns` adds index patterns to rules. If an index pattern
+        already exists for a rule, no changes are made.
+
+        - `delete_index_patterns` removes index patterns from rules. If an index
+        pattern does not exist for a rule, no changes are made.
+
+        - `set_index_patterns` sets index patterns for rules, overwriting any
+        existing index patterns. If the set of index patterns is the same as the
+        existing index patterns, no changes are made.
       type: object
       properties:
         overwrite_data_views:
+          description: Resets the data view for the rule.
           type: boolean
         type:
           enum:
@@ -3074,6 +3838,20 @@ components:
         - type
         - value
     BulkActionEditPayloadInvestigationFields:
+      description: >
+        Edits investigation fields of rules.
+
+
+        - `add_investigation_fields` adds investigation fields to rules. If an
+        investigation field already exists for a rule, no changes are made.
+
+        - `delete_investigation_fields` removes investigation fields from rules.
+        If an investigation field does not exist for a rule, no changes are
+        made.
+
+        - `set_investigation_fields` sets investigation fields for rules. If the
+        set of investigation fields is the same as the existing investigation
+        fields, no changes are made.
       type: object
       properties:
         type:
@@ -3088,6 +3866,18 @@ components:
         - type
         - value
     BulkActionEditPayloadRuleActions:
+      description: >
+        Edits rule actions of rules.
+
+
+        - `add_rule_actions` adds rule actions to rules. This action is
+        non-idempotent, meaning that even if the same rule action already exists
+        for a rule, it will be added again with a new unique ID.
+
+        - `set_rule_actions` sets rule actions for rules. This action is
+        non-idempotent, meaning that even if the same set of rule actions
+        already exists for a rule, it will be set again and the actions will
+        receive new unique IDs.
       type: object
       properties:
         type:
@@ -3110,6 +3900,18 @@ components:
         - type
         - value
     BulkActionEditPayloadSchedule:
+      description: >
+        Overwrites schedule of rules. 
+
+
+        - `set_schedule` sets a schedule for rules. If the same schedule already
+        exists for a rule, no changes are made.
+
+
+        Both `interval` and `lookback` have a format of "{integer}{time_unit}",
+        where accepted time units are `s` for seconds, `m` for minutes, and `h`
+        for hours. The integer must be positive and larger than 0. Examples:
+        "45s", "30m", "6h"
       type: object
       properties:
         type:
@@ -3127,7 +3929,13 @@ components:
               pattern: ^[1-9]\d*[smh]$
               type: string
             lookback:
-              description: Lookback time for the rule
+              description: >
+                Lookback time for the rules.
+
+
+                Additional look-back time that the rule analyzes. For example,
+                "10m" means the rule analyzes the last 10 minutes of data in
+                addition to the frequency interval.
               example: 1h
               pattern: ^[1-9]\d*[smh]$
               type: string
@@ -3138,6 +3946,18 @@ components:
         - type
         - value
     BulkActionEditPayloadTags:
+      description: >
+        Edits tags of rules.
+
+
+        - `add_tags` adds tags to rules. If a tag already exists for a rule, no
+        changes are made.
+
+        - `delete_tags` removes tags from rules. If a tag does not exist for a
+        rule, no changes are made.
+
+        - `set_tags` sets tags for rules, overwriting any existing tags. If the
+        set of tags is the same as the existing tags, no changes are made.
       type: object
       properties:
         type:
@@ -3152,6 +3972,12 @@ components:
         - type
         - value
     BulkActionEditPayloadTimeline:
+      description: >
+        Edits timeline of rules.
+
+
+        - `set_timeline` sets a timeline for rules. If the same timeline already
+        exists for a rule, no changes are made.
       type: object
       properties:
         type:
@@ -3443,6 +4269,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
@@ -6840,6 +7667,13 @@ components:
       properties:
         execution_gap_duration_s:
           description: Duration in seconds of execution gap
+          minimum: 0
+          type: integer
+        frozen_indices_queried_count:
+          description: >-
+            Count of frozen indices queried during the rule execution. These
+            indices could not be entirely excluded after applying the time range
+            filter.
           minimum: 0
           type: integer
         gap_range:

@@ -19,6 +19,7 @@ target
 /build
 .jruby
 .idea
+.windsurf
 *.iml
 *.log
 types.eslint.config.js
@@ -77,6 +78,7 @@ selenium
 .webpack.babelcache
 *.swp
 *.swo
+*.swn
 *.out
 package-lock.json
 !/.buildkite/package-lock.json

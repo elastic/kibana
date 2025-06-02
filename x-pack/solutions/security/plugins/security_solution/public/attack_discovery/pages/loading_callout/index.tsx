@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingElastic,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
+import * as i18n from './translations';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+import { getIsTerminalState } from './get_is_terminal_state';
+import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
 
 const BACKGROUND_COLOR_LIGHT = '#E6F1FA';
 const BACKGROUND_COLOR_DARK = '#0B2030';
@@ -22,28 +34,55 @@ const BORDER_COLOR_DARK = '#0B2030';
 interface Props {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
+  averageSuccessfulDurationNanoseconds?: number;
   connectorIntervals: GenerationInterval[];
+  connectorName?: string;
   end?: string | null;
+  executionUuid?: string;
+  discoveries?: number;
+  generationEndTime?: string;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  loadingMessage?: string;
+  reason?: string;
+  refetchGenerations?: () => void;
   start?: string | null;
+  status?: 'started' | 'succeeded' | 'failed' | 'canceled' | 'dismissed';
+  successfulGenerations?: number;
 }
 
 const LoadingCalloutComponent: React.FC<Props> = ({
   alertsContextCount,
   approximateFutureTime,
+  averageSuccessfulDurationNanoseconds,
   connectorIntervals,
+  connectorName,
+  discoveries,
   end,
+  executionUuid,
+  generationEndTime,
   localStorageAttackDiscoveryMaxAlerts,
+  loadingMessage,
+  reason,
+  refetchGenerations,
   start,
+  status,
+  successfulGenerations,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { theme } = useKibana().services;
+  const isDarkMode = useKibanaIsDarkMode();
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
+  const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 
   const leftContent = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" data-test-subj="leftContent" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiLoadingElastic data-test-subj="loadingElastic" size="l" />
+          {isTerminalState ? (
+            <EuiIcon type="logoElastic" size="l" />
+          ) : (
+            <EuiLoadingElastic data-test-subj="loadingElastic" size="l" />
+          )}
         </EuiFlexItem>
 
         <EuiFlexItem
@@ -54,23 +93,104 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         >
           <LoadingMessages
             alertsContextCount={alertsContextCount}
+            connectorName={connectorName}
+            discoveries={discoveries}
             end={end}
+            generationEndTime={generationEndTime}
+            loadingMessage={loadingMessage}
             localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+            reason={reason}
             start={start}
+            status={status}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsContextCount, end, euiTheme.size.m, localStorageAttackDiscoveryMaxAlerts, start]
+    [
+      alertsContextCount,
+      connectorName,
+      discoveries,
+      end,
+      euiTheme.size.m,
+      generationEndTime,
+      isTerminalState,
+      loadingMessage,
+      localStorageAttackDiscoveryMaxAlerts,
+      reason,
+      start,
+      status,
+    ]
   );
 
-  const isDarkMode = theme.getTheme().darkMode === true;
+  const backgroundColor = useMemo(() => {
+    const defaultBackgroundColor = isDarkMode ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR_LIGHT;
+    const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
+    const failedBackgroundColor = euiTheme.colors.backgroundBaseDanger;
+
+    if (status === 'succeeded') {
+      return successBackgroundColor;
+    }
+
+    if (status === 'failed') {
+      return failedBackgroundColor;
+    }
+
+    return defaultBackgroundColor;
+  }, [
+    euiTheme.colors.backgroundBaseDanger,
+    euiTheme.colors.backgroundBaseSuccess,
+    isDarkMode,
+    status,
+  ]);
+
+  const borderColor = useMemo(() => {
+    const defaultBorderColor = isDarkMode ? BORDER_COLOR_DARK : euiTheme.colors.lightShade;
+    const successBorderColor = euiTheme.colors.borderBaseSuccess;
+    const failedBorderColor = euiTheme.colors.borderBaseDanger;
+
+    if (status === 'succeeded') {
+      return successBorderColor;
+    }
+
+    if (status === 'failed') {
+      return failedBorderColor;
+    }
+
+    return defaultBorderColor;
+  }, [
+    euiTheme.colors.borderBaseDanger,
+    euiTheme.colors.borderBaseSuccess,
+    euiTheme.colors.lightShade,
+    isDarkMode,
+    status,
+  ]);
+
+  const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
+
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  const dismissGeneration = useCallback(async () => {
+    try {
+      if (executionUuid != null) {
+        setIsDismissing(true);
+        await dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid });
+        refetchGenerations?.(); // force a refresh of the generations list
+      }
+    } finally {
+      setIsDismissing(false);
+    }
+  }, [
+    attackDiscoveryAlertsEnabled,
+    dismissAttackDiscoveryGeneration,
+    executionUuid,
+    refetchGenerations,
+  ]);
 
   return (
     <div
       css={css`
-        background-color: ${isDarkMode ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR_LIGHT};
-        border: 1px solid ${isDarkMode ? BORDER_COLOR_DARK : euiTheme.colors.lightShade};
+        background-color: ${backgroundColor};
+        border: 1px solid ${borderColor};
         border-radius: 6px;
         padding: ${euiTheme.size.base};
       `}
@@ -80,10 +200,44 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>{leftContent}</EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <Countdown
-            approximateFutureTime={approximateFutureTime}
-            connectorIntervals={connectorIntervals}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            {!isTerminalState && (
+              <EuiFlexItem grow={false}>
+                <Countdown
+                  approximateFutureTime={approximateFutureTime}
+                  averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
+                  connectorIntervals={connectorIntervals}
+                  successfulGenerations={successfulGenerations}
+                />
+              </EuiFlexItem>
+            )}
+
+            {attackDiscoveryAlertsEnabled && (
+              <EuiFlexItem
+                css={css`
+                  margin-left: ${euiTheme.size.m};
+                `}
+                grow={false}
+              >
+                {isDismissing ? (
+                  <EuiLoadingSpinner
+                    data-test-subj="loadingSpinner"
+                    size="m"
+                    css={css`
+                      color: ${euiTheme.colors.text};
+                    `}
+                  />
+                ) : (
+                  <EuiButtonIcon
+                    aria-label={i18n.CLOSE}
+                    disabled={isDismissing}
+                    iconType="cross"
+                    onClick={dismissGeneration}
+                  />
+                )}
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

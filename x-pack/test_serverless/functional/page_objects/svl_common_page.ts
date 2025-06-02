@@ -68,6 +68,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
      * Login to Kibana using SAML authentication with provided project-specfic role
      */
     async loginWithRole(role: string) {
+      svlUserManager.checkRoleIsSupported(role);
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
       await retry.waitForWithTimeout(

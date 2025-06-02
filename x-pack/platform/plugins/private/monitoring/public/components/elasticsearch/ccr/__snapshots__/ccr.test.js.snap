@@ -56,19 +56,7 @@ exports[`Ccr that it renders normally 1`] = `
             },
           ]
         }
-        css={
-          Object {
-            "map": undefined,
-            "name": "f6xtqm",
-            "next": undefined,
-            "styles": "
-  .euiTableRow-isExpandedRow > .euiTableRowCell > .euiTableCellContent {
-    padding: 0;
-  }
-",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         executeQueryOptions={
           Object {
             "defaultFields": Array [
@@ -138,7 +126,6 @@ exports[`Ccr that it renders normally 1`] = `
           ]
         }
         pagination={false}
-        searchFormat="eql"
         sorting={
           Object {
             "sort": Object {
@@ -147,7 +134,6 @@ exports[`Ccr that it renders normally 1`] = `
             },
           }
         }
-        tableLayout="fixed"
       />
     </EuiPanel>
   </EuiPageBody>

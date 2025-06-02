@@ -6,6 +6,7 @@
  */
 
 import dedent from 'dedent';
+import { KnowledgeBaseState } from '../../common';
 import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
 import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
 import type { RegistrationCallback } from '../service/types';
@@ -81,7 +82,8 @@ ${
       If the user asks how to change the language, reply in the same language the user asked in.`);
   }
 
-  const { ready: isKnowledgeBaseReady } = await client.getKnowledgeBaseStatus();
+  const { kbState } = await client.getKnowledgeBaseStatus();
+  const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];

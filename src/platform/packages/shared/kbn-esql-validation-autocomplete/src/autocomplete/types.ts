@@ -63,6 +63,11 @@ export interface SuggestionRawDefinition {
   };
   /**
    * The range that should be replaced when the suggestion is applied
+   *
+   * IMPORTANT NOTE!!!
+   *
+   * This range is ZERO-based and NOT end-inclusive — [start, end)
+   * Also, do NOT try to account for newline characters. This is taken care of later.
    */
   rangeToReplace?: {
     start: number;

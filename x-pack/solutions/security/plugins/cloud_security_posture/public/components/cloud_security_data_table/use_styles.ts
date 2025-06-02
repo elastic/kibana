@@ -66,6 +66,9 @@ export const useStyles = () => {
     & .unifiedDataTable__inner .euiDataGrid__controls {
       border-top: none;
     }
+    & .euiDataGrid__leftControls {
+      flex-grow: 1;
+    }
   `;
 
   const groupBySelector = css`

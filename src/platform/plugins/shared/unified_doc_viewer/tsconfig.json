@@ -42,7 +42,9 @@
     "@kbn/elastic-agent-utils",
     "@kbn/data-view-utils",
     "@kbn/apm-ui-shared",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/embeddable-plugin",
+    "@kbn/apm-types-shared"
   ],
   "exclude": ["target/**/*"]
 }

@@ -83,7 +83,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
           defaultMessage: 'Policy name',
         }
       ),
-      description: ilm.policy,
+      description: ilm.policy!,
     },
     {
       title: i18n.translate(
@@ -153,7 +153,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
                 <EuiLink
                   color="primary"
                   href={getUrlForApp('management', {
-                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy)}`,
+                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy!)}`,
                   })}
                   target="_blank"
                 >

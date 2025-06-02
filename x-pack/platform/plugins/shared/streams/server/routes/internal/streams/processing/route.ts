@@ -12,11 +12,16 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
 import { handleProcessingSuggestion } from './suggestions_handler';
+import {
+  handleProcessingDateSuggestions,
+  processingDateSuggestionsSchema,
+} from './suggestions/date_suggestions_handler';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -34,9 +39,7 @@ export const simulateProcessorRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: paramsSchema,
@@ -45,7 +48,7 @@ export const simulateProcessorRoute = createServerRoute({
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     return simulateProcessing({ params, scopedClusterClient, streamsClient });
@@ -76,9 +79,7 @@ export const processingSuggestionRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: suggestionsParamsSchema,
@@ -96,7 +97,36 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
+export const processingDateSuggestionsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/date',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: processingDateSuggestionsSchema,
+  handler: async ({ params, request, getScopedClients }) => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
+
+    const { read } = await checkAccess({ name, scopedClusterClient });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
+    }
+    const { text_structure: hasTextStructurePrivileges } = await streamsClient.getPrivileges(name);
+    if (!hasTextStructurePrivileges) {
+      throw new SecurityError(`Cannot access text structure capabilities, insufficient privileges`);
+    }
+
+    return handleProcessingDateSuggestions({ params, scopedClusterClient });
+  },
+});
+
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingSuggestionRoute,
+  ...processingDateSuggestionsRoute,
 };

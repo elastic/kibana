@@ -18,5 +18,6 @@ export const createMaintenanceWindowParamsSchema = schema.object({
     rRule: rRuleRequestSchema,
     categoryIds: maintenanceWindowCategoryIdsSchema,
     scopedQuery: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
+    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
   }),
 });

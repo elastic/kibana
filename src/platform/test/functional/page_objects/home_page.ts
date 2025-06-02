@@ -249,16 +249,4 @@ export class HomePageObject extends FtrService {
   async collapseObservabibilitySideNav() {
     await this.testSubjects.click('collapsibleNavGroup-observability');
   }
-
-  async loadSavedObjects() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('loadSavedObjects');
-      const successMsgExists = await this.testSubjects.exists('loadSavedObjects_success', {
-        timeout: 5000,
-      });
-      if (!successMsgExists) {
-        throw new Error('Failed to load saved objects');
-      }
-    });
-  }
 }

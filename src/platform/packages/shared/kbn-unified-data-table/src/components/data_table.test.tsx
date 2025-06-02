@@ -1555,7 +1555,7 @@ describe('UnifiedDataTable', () => {
 
         expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
 
-        screen.getByTestId(BUTTON_TEST_SUBJ).click();
+        await userEvent.click(screen.getByTestId(BUTTON_TEST_SUBJ));
 
         expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
 

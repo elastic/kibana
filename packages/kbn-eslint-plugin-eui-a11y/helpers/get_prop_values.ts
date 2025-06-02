@@ -7,30 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scope } from 'eslint';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import * as EsLint from 'eslint';
+import * as TypescriptEsTree from '@typescript-eslint/typescript-estree';
 
 export function getPropValues({
+  jsxOpeningElement,
   propNames,
-  node,
-  getScope,
+  sourceCode,
 }: {
+  jsxOpeningElement: TypescriptEsTree.TSESTree.JSXOpeningElement;
   propNames: string[];
-  node: TSESTree.JSXOpeningElement;
-  getScope: () => Scope.Scope;
-}): Record<(typeof propNames)[number], string> {
+  sourceCode: EsLint.SourceCode;
+}): Record<
+  (typeof propNames)[number],
+  TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpression
+> {
+  const scope = sourceCode.getScope(jsxOpeningElement as any);
+
+  if (!scope) return {};
+
   // Loop over the input propNames array
-  const result = propNames.reduce((acc, propName) => {
+  return propNames.reduce((acc, propName) => {
     // Loop over the attributes of the input JSXOpeningElement
-    for (const prop of node.attributes) {
-      // If the prop is an JSXAttribute and the name of the prop is equal to the propName, get the value
-      if (prop.type === AST_NODE_TYPES.JSXAttribute && propName === prop.name.name) {
-        const value = String('value' in prop && 'value' in prop.value! && prop.value.value) || '';
-        acc[propName] = value;
+    for (const prop of jsxOpeningElement.attributes) {
+      if (
+        prop.type === TypescriptEsTree.AST_NODE_TYPES.JSXAttribute &&
+        propName === prop.name.name &&
+        prop.value
+      ) {
+        acc[propName] = prop.value; // can be a string or an function
       }
 
       // If the prop is a JSXSpreadAttribute, get the value of the spreaded variable
-      if (prop.type === AST_NODE_TYPES.JSXSpreadAttribute) {
+      if (prop.type === TypescriptEsTree.AST_NODE_TYPES.JSXSpreadAttribute) {
         // If the spreaded variable is an Expression, break
         if (!('argument' in prop) || !('name' in prop.argument)) {
           break;
@@ -43,17 +52,19 @@ export function getPropValues({
         const { name } = prop.argument;
 
         // the variable definition of the spreaded variable
-        const variable = getScope().variables.find((v) => v.name === name);
+        const variable = scope.variables.find((v) => v.name === name);
 
         // Get the value of the propName from the spreaded variable
-        const value: string | undefined =
+        const value =
           variable && variable.defs.length > 0
-            ? variable.defs[0].node.init?.properties?.find((property: TSESTree.Property) => {
-                if ('value' in property.key) {
-                  return propNames.includes(String(property.key.value));
+            ? variable.defs[0].node.init?.properties?.find(
+                (property: TypescriptEsTree.TSESTree.Property) => {
+                  if ('value' in property.key && property.key.value) {
+                    return property.key.value;
+                  }
+                  return undefined;
                 }
-                return undefined;
-              })
+              )
             : undefined;
 
         if (value) {
@@ -62,7 +73,5 @@ export function getPropValues({
       }
     }
     return acc;
-  }, {} as Record<(typeof propNames)[number], string>);
-
-  return result;
+  }, {} as Record<(typeof propNames)[number], TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpression>);
 }

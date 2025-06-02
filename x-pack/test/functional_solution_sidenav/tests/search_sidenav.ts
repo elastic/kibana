@@ -45,25 +45,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'enterpriseSearch',
         });
 
-        // check the Content > Indices section
+        // check the Data > Indices section
         await solutionNavigation.sidenav.clickLink({
           deepLinkId: 'elasticsearchIndexManagement',
         });
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'elasticsearchIndexManagement',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Indices',
         });
 
         // navigate to a different section
-        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
@@ -71,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'enterpriseSearch',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Content',
+          text: 'Data',
         });
 
         await expectNoPageReload();

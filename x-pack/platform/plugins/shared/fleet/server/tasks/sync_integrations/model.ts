@@ -9,14 +9,17 @@ export interface IntegrationsData {
   package_name: string;
   package_version: string;
   updated_at: string;
+  install_status: string;
 }
 
-export interface CustomAssetsData {
+export interface BaseCustomAssetsData {
   type: string;
   name: string;
   package_name: string;
   package_version: string;
-  is_deleted: boolean;
+  is_deleted?: boolean;
+}
+export interface CustomAssetsData extends BaseCustomAssetsData {
   deleted_at?: string;
   [key: string]: any;
 }
@@ -31,6 +34,7 @@ export interface SyncIntegrationsData {
     name: string;
     hosts: string[];
     sync_integrations: boolean;
+    sync_uninstalled_integrations?: boolean;
   }>;
   integrations: IntegrationsData[];
   custom_assets: {

@@ -101,7 +101,6 @@ export class HomePublicPlugin
           toastNotifications: coreStart.notifications.toasts,
           banners: coreStart.overlays.banners,
           docLinks: coreStart.docLinks,
-          savedObjectsClient: coreStart.savedObjects.client,
           chrome: coreStart.chrome,
           application: coreStart.application,
           uiSettings: core.uiSettings,

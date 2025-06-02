@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -48,7 +48,7 @@ export const AddDocumentsCodeExample = ({
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
-  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples, workflow } = useWorkflow();
+  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples } = useWorkflow();
   const selectedCodeExamples = ingestExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
@@ -84,76 +84,58 @@ export const AddDocumentsCodeExample = ({
       data-test-subj="SearchIndicesAddDocumentsCode"
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup
-          justifyContent={indexHasMappings ? 'flexEnd' : 'spaceBetween'}
-          alignItems="center"
-        >
-          {!indexHasMappings && (
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
-                    defaultMessage: 'Select a workflow guide',
-                  })}
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          )}
+        {!indexHasMappings && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
-                <LanguageSelector
-                  options={LanguageOptions}
-                  selectedLanguage={selectedLanguage}
-                  onSelectLanguage={onSelectLanguage}
-                  showLabel
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TryInConsoleButton
-                  request={
-                    !indexHasMappings
-                      ? `${ingestExamples.sense.updateMappingsCommand(
-                          codeParams
-                        )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                      : ingestExamples.sense.ingestCommand(codeParams)
-                  }
-                  application={application}
-                  sharePlugin={share}
-                  consolePlugin={consolePlugin}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem>
-          {!indexHasMappings && (
-            <EuiFlexItem grow={false}>
-              <GuideSelector
-                selectedWorkflowId={selectedWorkflowId}
-                onChange={(workflowId: WorkflowId) => {
-                  setSelectedWorkflowId(workflowId);
-                  usageTracker.click([
-                    AnalyticsEvents.indexDetailsWorkflowSelect,
-                    `${AnalyticsEvents.indexDetailsWorkflowSelect}_${workflowId}`,
-                  ]);
-                }}
-                showTour
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexItem>
-        {!!workflow && (
-          <EuiFlexItem>
-            <EuiTitle>
-              <h3>{workflow.title}</h3>
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+                  defaultMessage: 'Select a workflow guide',
+                })}
+              </h5>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>{workflow.summary}</p>
-            </EuiText>
           </EuiFlexItem>
         )}
+        {!indexHasMappings && (
+          <EuiFlexItem grow={false}>
+            <GuideSelector
+              selectedWorkflowId={selectedWorkflowId}
+              onChange={(workflowId: WorkflowId) => {
+                setSelectedWorkflowId(workflowId);
+                usageTracker.click([
+                  AnalyticsEvents.indexDetailsWorkflowSelect,
+                  `${AnalyticsEvents.indexDetailsWorkflowSelect}_${workflowId}`,
+                ]);
+              }}
+              showTour
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+            <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+              <LanguageSelector
+                options={LanguageOptions}
+                selectedLanguage={selectedLanguage}
+                onSelectLanguage={onSelectLanguage}
+                showLabel
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton
+                request={
+                  !indexHasMappings
+                    ? `${ingestExamples.sense.updateMappingsCommand(
+                        codeParams
+                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                    : ingestExamples.sense.ingestCommand(codeParams)
+                }
+                application={application}
+                sharePlugin={share}
+                consolePlugin={consolePlugin}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample

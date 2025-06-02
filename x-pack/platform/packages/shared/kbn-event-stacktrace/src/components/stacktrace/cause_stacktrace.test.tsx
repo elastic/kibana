@@ -43,9 +43,7 @@ describe('CauseStacktrace', () => {
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
-        expect(
-          shallow(<CauseStacktrace {...props} />).find('Styled(EuiAccordionClass)')
-        ).toHaveLength(1);
+        expect(shallow(<CauseStacktrace {...props} />).find('Accordion')).toHaveLength(1);
       });
     });
   });

@@ -122,20 +122,23 @@ const Contents: FC<{
   filter?: EntityCellFilter;
   influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const dividerStyle = useMemo(() => {
     return isPopulatedObject(anomaly.source.anomaly_score_explanation)
-      ? { borderRight: `1px solid ${colors.lightShade}` }
+      ? { borderRight: `1px solid ${euiTheme.colors.lightShade}` }
       : {};
-  }, [colors, anomaly]);
+  }, [euiTheme.colors, anomaly]);
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
+        <div
+          css={{
+            padding: euiTheme.size.m,
+          }}
+          data-test-subj="mlAnomaliesListRowDetails"
+        >
           <Description anomaly={anomaly} />
           <EuiSpacer size="m" />
 
@@ -210,7 +213,11 @@ const Details: FC<{
         {isInterimResult === true && (
           <>
             <EuiIcon type="warning" />
-            <span className="interim-result">
+            <span
+              css={{
+                fontStyle: 'italic',
+              }}
+            >
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel"
                 defaultMessage="Interim result"
@@ -306,18 +313,25 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
   definition,
   examples,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
       gutterSize="xs"
-      className="mlAnomalyCategoryExamples"
+      css={{
+        padding: euiTheme.size.l,
+      }}
     >
       {definition !== undefined && definition.terms && (
         <>
           <EuiFlexItem key={`example-terms`}>
             <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
+              <h4
+                css={{
+                  display: 'inline',
+                }}
+              >
                 {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
                   defaultMessage: 'Terms',
                 })}
@@ -352,7 +366,11 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
         <>
           <EuiFlexItem key={`example-regex`}>
             <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
+              <h4
+                css={{
+                  display: 'inline',
+                }}
+              >
                 {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
                   defaultMessage: 'Regex',
                 })}
@@ -396,7 +414,13 @@ const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[]
                 </h4>
               </EuiText>
             )}
-            <span className="mlAnomalyCategoryExamples__item">{example}</span>
+            <span
+              css={{
+                fontFamily: euiTheme.font.familyCode,
+              }}
+            >
+              {example}
+            </span>
           </EuiFlexItem>
         );
       })}

@@ -9,7 +9,7 @@ mapped_pages:
 
 ### OpenID Connect [ec_openid_connect]
 
-If you are using OpenID Connect to secure your clusters, these settings are supported in Elasticsearch Service.
+If you are using OpenID Connect to secure your clusters, these settings are supported on {{ech}}.
 
 `xpack.security.authc.providers.oidc.<provider-name>.order`
 :   Specifies order of the OpenID Connect authentication provider in the authentication chain.
@@ -28,7 +28,7 @@ To learn more, check [configuring Kibana to use OpenID Connect](docs-content://d
 
 ### Anonymous authentication [ec_anonymous_authentication]
 
-If you want to allow anonymous authentication in Kibana, these settings are supported in Elasticsearch Service. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
+If you want to allow anonymous authentication in Kibana, these settings are supported on {{ech}}. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
 
 #### Supported versions before 8.0.0 [ec_supported_versions_before_8_0_0]
 

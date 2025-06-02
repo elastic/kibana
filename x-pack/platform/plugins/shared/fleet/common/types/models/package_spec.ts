@@ -104,6 +104,7 @@ export type PackageSpecCategory =
   | 'proxy_security'
   | 'sdk_search'
   | 'security'
+  | 'siem'
   | 'stream_processing'
   | 'support'
   | 'threat_intel'

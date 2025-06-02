@@ -9,16 +9,22 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstTimeseriesCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
@@ -34,7 +40,7 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -88,7 +94,7 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
   sources: ESQLSource[];
 }
 
@@ -104,6 +110,14 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
     pvalue: ESQLColumn;
   };
 }
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  inferenceId: ESQLIdentifierOrParam;
+}
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
@@ -289,7 +303,7 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  cluster?: string;
+  cluster?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.
@@ -298,7 +312,16 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  index?: string;
+  index?: ESQLStringLiteral | undefined;
+
+  /**
+   * Represents the selector (component) part of the source identifier.
+   *
+   * ```
+   * FROM <index>[::<selector>]
+   * ```
+   */
+  selector?: ESQLStringLiteral | undefined;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
@@ -402,6 +425,18 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 
   value: string;
   valueUnquoted: string;
+
+  /**
+   * Whether the string was parsed as "unqouted" and/or can be pretty-printed
+   * unquoted, i.e. in the source text it did not have any quotes (not single ",
+   * not triple """) quotes. This happens in FROM command source parsing, the
+   * cluster and selector can be unquoted strings:
+   *
+   * ```
+   * FROM <cluster>:index:<selector>
+   * ```
+   */
+  unquoted?: boolean;
 }
 
 // @internal
@@ -466,13 +501,6 @@ export interface ESQLMessage {
   location: ESQLLocation;
   code: string;
 }
-
-export type AstProviderFn = (text: string | undefined) =>
-  | Promise<{
-      ast: ESQLAst;
-      errors: EditorError[];
-    }>
-  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;

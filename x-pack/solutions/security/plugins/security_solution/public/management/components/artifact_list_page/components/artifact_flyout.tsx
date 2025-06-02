@@ -47,7 +47,6 @@ import { createExceptionListItemForCreate } from '../../../../../common/endpoint
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
-import type { PolicyData } from '../../../../../common/endpoint/types';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
@@ -162,8 +161,6 @@ const createFormInitialState = (
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
-  policies: PolicyData[];
-  policiesIsLoading: boolean;
   onSuccess(): void;
   onClose(): void;
   submitHandler?: (
@@ -188,8 +185,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
     apiClient,
     item,
-    policies,
-    policiesIsLoading,
     FormComponent,
     onSuccess,
     onClose,
@@ -493,8 +488,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               item={formState.item}
               error={submitError ?? undefined}
               mode={formMode}
-              policies={policies}
-              policiesIsLoading={policiesIsLoading}
             />
           )}
         </EuiFlyoutBody>

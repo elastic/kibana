@@ -10,9 +10,24 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  tracing: schema.object(
+    {
+      langsmith: schema.maybe(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          apiKey: schema.string(),
+          apiUrl: schema.string({ defaultValue: 'https://api.smith.langchain.com' }),
+          project: schema.string(),
+        })
+      ),
+    },
+    { defaultValue: {} }
+  ),
 });
 
 export type WorkChatAppConfig = TypeOf<typeof configSchema>;
+
+export type WorkChatTracingConfig = WorkChatAppConfig['tracing'];
 
 export const config: PluginConfigDescriptor<WorkChatAppConfig> = {
   exposeToBrowser: {},

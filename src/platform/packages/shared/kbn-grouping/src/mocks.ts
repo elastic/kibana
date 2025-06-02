@@ -25,7 +25,6 @@ export const groupingBucket = {
       { key: 'medium', doc_count: 480 },
     ],
   },
-  countSeveritySubAggregation: { value: 4 },
 };
 
 export const mocktestProps1: GroupingQueryArgs = {
@@ -47,13 +46,6 @@ export const mocktestProps1: GroupingQueryArgs = {
       rulesCountAggregation: {
         cardinality: {
           field: 'kibana.alert.rule.rule_id',
-        },
-      },
-    },
-    {
-      countSeveritySubAggregation: {
-        cardinality: {
-          field: 'kibana.alert.severity',
         },
       },
     },

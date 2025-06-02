@@ -340,7 +340,7 @@ export function parseRuleTypeBucket(
     alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
   };
   for (const bucket of buckets ?? []) {
-    const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
+    const ruleType: string = replaceDotSymbols(`${bucket?.key ?? ''}`);
     const numExecutions: number = bucket?.doc_count ?? 0;
     const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
     const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
@@ -391,7 +391,7 @@ export function parseExecutionFailureByRuleType(
   const executionFailuresWithRuleTypeBuckets: FlattenedExecutionFailureBucket[] = flatMap(
     buckets ?? [],
     (bucket) => {
-      const ruleType: string = replaceDotSymbols(bucket.key);
+      const ruleType: string = replaceDotSymbols(`${bucket.key}`);
 
       /**
        * Execution failure bucket format
@@ -409,7 +409,7 @@ export function parseExecutionFailureByRuleType(
 
       const executionFailuresBuckets = bucket?.execution_failures?.by_reason
         ?.buckets as AggregationsStringTermsBucketKeys[];
-      return (executionFailuresBuckets ?? []).map((b) => ({ ...b, ruleType }));
+      return (executionFailuresBuckets ?? []).map((b) => ({ ...b, key: `${b.key}`, ruleType }));
     }
   );
 
@@ -548,7 +548,7 @@ export function parseExecutionCountAggregationResults(results: {
     countTotalFailedExecutions: results?.execution_failures?.doc_count ?? 0,
     countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce<Record<string, number>>(
       (acc, bucket: AggregationsStringTermsBucketKeys) => {
-        const reason: string = bucket.key;
+        const reason: string = `${bucket.key}`;
         acc[reason] = bucket.doc_count ?? 0;
         return acc;
       },
