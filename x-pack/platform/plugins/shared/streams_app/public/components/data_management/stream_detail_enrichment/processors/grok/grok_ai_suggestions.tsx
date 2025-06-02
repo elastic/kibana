@@ -39,7 +39,7 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import {
   useSimulatorSelector,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
@@ -178,7 +178,7 @@ function InnerGrokAiSuggestions({
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 

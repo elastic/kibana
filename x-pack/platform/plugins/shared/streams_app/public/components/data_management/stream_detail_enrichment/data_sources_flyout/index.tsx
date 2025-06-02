@@ -15,36 +15,30 @@ import {
   EuiText,
   EuiCallOut,
   EuiFlexGroup,
-  EuiPanel,
-  EuiSwitch,
   EuiAccordion,
   EuiEmptyPrompt,
   EuiCheckableCard,
   EuiButtonIcon,
   EuiBadge,
   EuiFlexItem,
-  useEuiTheme,
   EuiButton,
   EuiContextMenu,
   EuiPopover,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiLoadingLogo,
   EuiFormRow,
   EuiFieldText,
   EuiFieldTextProps,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import useAsync from 'react-use/lib/useAsync';
 import { Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EnrichmentDataSource, KqlSamplesDataSource } from '../../../../../common/url_schema';
+import { EnrichmentDataSource } from '../../../../../common/url_schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import {
-  useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../state_management/stream_enrichment_state_machine';
@@ -55,10 +49,7 @@ import {
 import { AssetImage } from '../../../asset_image';
 import { PreviewTable } from '../../preview_table';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
-import {
-  EnrichmentDataSourceWithUIAttributes,
-  KqlSamplesDataSourceWithUIAttributes,
-} from '../types';
+import { KqlSamplesDataSourceWithUIAttributes } from '../types';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -396,7 +387,7 @@ const DataSourceCard = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
             <EuiTitle size="xs">
-              <h3>{title ?? dataSource.name ?? dataSource.type}</h3>
+              <h3>{title ?? dataSource.type}</h3>
             </EuiTitle>
             <EuiFlexItem grow={false}>
               <EuiBadge color="success" isDisabled={!isEnabled}>
@@ -433,6 +424,7 @@ const DataSourceCard = ({
         initialIsOpen={dataPreviewIsOpen}
       >
         <EuiSpacer size="s" />
+        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
         {isEmpty(previewDocs) ? (
           <EuiEmptyPrompt
             icon={<AssetImage type="noResults" size="s" />}
@@ -442,19 +434,6 @@ const DataSourceCard = ({
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.noData',
                   { defaultMessage: 'No documents to preview available' }
-                )}
-              </h4>
-            }
-          />
-        ) : isLoading ? (
-          <EuiEmptyPrompt
-            icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
-            titleSize="xxs"
-            title={
-              <h4>
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.loadingSamples',
-                  { defaultMessage: 'Loading samples preview' }
                 )}
               </h4>
             }

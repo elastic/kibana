@@ -18,13 +18,12 @@ import {
 import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Sample } from '@kbn/grok-ui';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -151,11 +150,11 @@ const OutcomePreviewTable = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
-  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)
   );
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 

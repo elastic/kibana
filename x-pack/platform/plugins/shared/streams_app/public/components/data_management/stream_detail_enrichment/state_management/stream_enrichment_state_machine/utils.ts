@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { Condition, FieldDefinition, Streams, UnaryOperator } from '@kbn/streams-schema';
+import { isEmpty, uniq } from 'lodash';
+import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { StreamEnrichmentContextType } from './types';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
+  getSourceFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 import { EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { dataSourceConverter } from '../../utils';
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,
@@ -23,6 +27,20 @@ export const defaultEnrichmentUrlState: EnrichmentUrlState = {
     },
   ],
 };
+
+export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
+  return context.dataSourcesRefs.map((dataSourceRef) =>
+    dataSourceConverter.toUrlSchema(dataSourceRef.getSnapshot().context.dataSource)
+  );
+}
+
+export function getDataSourcesSamples(context: StreamEnrichmentContextType) {
+  const dataSources = context.dataSourcesRefs.map(
+    (dataSourceRef) => dataSourceRef.getSnapshot().context
+  );
+  const samples = dataSources.flatMap((dataSource) => dataSource.data);
+  return samples;
+}
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
@@ -62,4 +80,27 @@ export function getUpsertWiredFields(
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
+}
+
+export function composeSamplingCondition(
+  context: StreamEnrichmentContextType
+): Condition | undefined {
+  const stagedProcessors = getStagedProcessors(context);
+
+  if (isEmpty(stagedProcessors)) {
+    return undefined;
+  }
+
+  const uniqueFields = uniq(getSourceFields(stagedProcessors));
+
+  if (isEmpty(uniqueFields)) {
+    return ALWAYS_CONDITION;
+  }
+
+  const conditions = uniqueFields.map((field) => ({
+    field,
+    operator: 'exists' as UnaryOperator,
+  }));
+
+  return { or: conditions };
 }

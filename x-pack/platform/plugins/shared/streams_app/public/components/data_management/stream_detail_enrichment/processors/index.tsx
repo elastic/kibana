@@ -67,7 +67,7 @@ export function AddProcessorPanel() {
   );
   const getEnrichmentState = useGetStreamEnrichmentState();
 
-  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
   const isOpen = Boolean(processorRef);
   const defaultValuesGetter = useCallback(
@@ -232,9 +232,9 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
-  
+
   const canEdit = useStreamEnrichmentSelector((s) => s.context.definition.privileges.simulate);
-  const grokCollection = useStreamsEnrichmentSelector((_state) => _state.context.grokCollection);
+  const grokCollection = useStreamEnrichmentSelector((_state) => _state.context.grokCollection);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 

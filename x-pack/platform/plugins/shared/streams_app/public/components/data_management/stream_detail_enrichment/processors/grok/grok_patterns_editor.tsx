@@ -35,7 +35,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
 import { GrokAiSuggestions } from './grok_ai_suggestions';
-import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 
 export const GrokPatternsEditor = () => {
   const {
@@ -44,7 +44,7 @@ export const GrokPatternsEditor = () => {
     setValue,
   } = useFormContext();
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
