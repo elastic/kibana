@@ -61,7 +61,7 @@ export const PointVisibilityOption: React.FC<PointVisibilityOptionProps> = ({
         legend={i18n.translate('xpack.lens.xyChart.pointVisibilityLabel', {
           defaultMessage: 'Point visibility',
         })}
-        data-test-subj="lens-point-vis-btn"
+        data-test-subj="lnsPointVisibilityOption"
         buttonSize="compressed"
         options={pointVisibilityOptions}
         idSelected={
