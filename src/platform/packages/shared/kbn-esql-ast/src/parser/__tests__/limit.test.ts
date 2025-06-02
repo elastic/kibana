@@ -18,6 +18,37 @@ describe('LIMIT', () => {
       expect(ast[1].args).toHaveLength(1);
       expect(ast[1].args).toMatchObject([{ type: 'literal', value: 100 }]);
     });
+
+    it('LIMIT (with param)', () => {
+      const query = 'FROM index | LIMIT ?param';
+      const { ast } = parse(query);
+
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'limit',
+          args: [
+            [
+              {
+                incomplete: false,
+                name: '',
+                paramKind: '?',
+                paramType: 'named',
+                text: '?param',
+                type: 'literal',
+                literalType: 'param',
+                value: 'param',
+                location: {
+                  max: 24,
+                  min: 19,
+                },
+              },
+            ],
+          ],
+        },
+      ]);
+    });
   });
 
   describe('when incorrectly formatted, returns errors', () => {
