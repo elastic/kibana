@@ -150,7 +150,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       this.registerSubAction({
         name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         method: 'getRTRCloudScripts',
-        schema: null,
+        schema: CrowdstrikeRTRCommandParamsSchema, // Empty schema
       });
     }
   }
