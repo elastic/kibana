@@ -277,10 +277,6 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectAllButtonLabel', {
         defaultMessage: 'Select all',
       }),
-    getDeselectAllButtonLabel: () =>
-      i18n.translate('controls.optionsList.popover.deselectAllButtonLabel', {
-        defaultMessage: 'Deselect all',
-      }),
     getMaximumBulkSelectionTooltip: () =>
       i18n.translate('controls.optionsList.popover.maximumBulkSelectionTooltip', {
         defaultMessage: 'Bulk selection is only available for fewer than {maxOptions} options',

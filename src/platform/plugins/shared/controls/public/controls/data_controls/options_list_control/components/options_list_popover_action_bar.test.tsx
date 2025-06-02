@@ -81,25 +81,25 @@ describe('Options list popover', () => {
     );
   });
 
-  test('displays "Select all" and "Deselect all" next to total cardinality', async () => {
+  test('displays "Select all" checkbox next to total cardinality', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.setTotalCardinality(80);
     contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll').checked).toBeFalse();
   });
 
-  test('enabled deselect all when there is at least one selection', async () => {
+  test('Select all is checked when all available options are selected ', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.setTotalCardinality(80);
-    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setAvailableOptions(['moo']);
     contextMock.componentApi.setSelectedOptions(['moo']);
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeEnabled();
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll').checked).toBeTrue();
   });
 
   test('bulk selections are disabled when there are more than 100 available options', async () => {
@@ -109,7 +109,6 @@ describe('Options list popover', () => {
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeDisabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
   });
 
   test('bulk selections are disabled when there are no available options', async () => {
@@ -119,7 +118,6 @@ describe('Options list popover', () => {
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeDisabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
   });
 
   test('bulk selections are disabled when showOnlySelected is true', async () => {
@@ -129,6 +127,5 @@ describe('Options list popover', () => {
     const actionBarComponent = mountComponent({ ...contextMock, showOnlySelected: true });
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeDisabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
   });
 });

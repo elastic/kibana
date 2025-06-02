@@ -11,11 +11,11 @@ import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButtonEmpty,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -44,6 +44,7 @@ export const OptionsListPopoverActionBar = ({
 }: OptionsListPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const { componentApi, displaySettings } = useOptionsListContext();
+  const [areAllSelected, setAllSelected] = useState<boolean>(false);
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
@@ -106,6 +107,14 @@ export const OptionsListPopoverActionBar = ({
     [availableOptions, loadMoreOptions, totalCardinality]
   );
 
+  useEffect(() => {
+    if (availableOptions.some(({value}) => !selectedOptions.includes(value as string))) {
+      if (areAllSelected) setAllSelected(false);
+    } else {
+      if (!areAllSelected) setAllSelected(true);
+    }
+  },[availableOptions, selectedOptions, areAllSelected])
+
   return (
     <div className="optionsList__actions">
       {compatibleSearchTechniques.length > 0 && (
@@ -154,33 +163,22 @@ export const OptionsListPopoverActionBar = ({
                   : undefined
               }
             >
-              <EuiButtonEmpty
+              <EuiCheckbox
                 size="xs"
                 disabled={isBulkSelectDisabled}
                 data-test-subj="optionsList-control-selectAll"
-                onClick={() => handleBulkAction(componentApi.selectAll)}
+                onClick={() => {
+                  if (areAllSelected)
+                    handleBulkAction(componentApi.deselectAll);
+                    setAllSelected(false);
+                  } else {
+                    handleBulkAction(componentApi.selectAll);
+                    setAllSelected(true);
+                  }
+                }
                 css={{ padding: 0 }}
-              >
-                {OptionsListStrings.popover.getSelectAllButtonLabel()}
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                hasTooManyOptions
-                  ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
-                  : undefined
-              }
-            >
-              <EuiButtonEmpty
-                size="xs"
-                css={{ padding: 0, paddingLeft: euiTheme.size.xs }}
-                disabled={isBulkSelectDisabled || selectedOptions.length < 1}
-                data-test-subj="optionsList-control-deselectAll"
-                onClick={() => handleBulkAction(componentApi.deselectAll)}
-              >
-                {OptionsListStrings.popover.getDeselectAllButtonLabel()}
+                label={OptionsListStrings.popover.getSelectAllButtonLabel()}
+                />
               </EuiButtonEmpty>
             </EuiToolTip>
           </EuiFlexItem>
