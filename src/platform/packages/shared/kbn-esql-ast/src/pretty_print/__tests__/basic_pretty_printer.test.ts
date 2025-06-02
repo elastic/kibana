@@ -235,6 +235,32 @@ describe('single line query', () => {
         );
       });
     });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
   });
 
   describe('expressions', () => {
