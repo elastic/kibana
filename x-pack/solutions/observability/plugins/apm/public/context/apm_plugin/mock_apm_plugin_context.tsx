@@ -6,11 +6,11 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
+import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
 import {
   createObservabilityRuleTypeRegistryMock,
   enableComparisonByDefault,
@@ -32,6 +32,21 @@ import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
+
+const mockShareService = {
+  url: {
+    locators: {
+      get: jest.fn(() => {
+        // MlManagementLocatorInternal wraps the management locator (getUrl mocked below) and adds path formatting to match ML app paths
+        return {
+          getUrl: async ({ sectionId, appId }: { sectionId: string; appId: string }) => {
+            return `/app/management/${sectionId}/${appId}`;
+          },
+        };
+      }),
+    },
+  },
+};
 
 const mockCore = merge({}, coreStart, {
   application: {
@@ -65,7 +80,6 @@ const mockCore = merge({}, coreStart, {
           value: 100000,
         },
         [enableComparisonByDefault]: true,
-        [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
     },
@@ -105,6 +119,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: false,
     ruleFormV2Enabled: false,
   },
@@ -119,10 +134,14 @@ const urlService = new UrlService({
   shortUrls: () => ({ get: () => {} } as any),
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
+const mlManagementLocator = new MlManagementLocatorInternal(
+  mockShareService as unknown as SharePublicStart
+);
 
 const mockPlugin = {
   ml: {
     locator,
+    managementLocator: mlManagementLocator,
   },
   data: {
     query: {

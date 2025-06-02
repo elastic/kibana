@@ -65,9 +65,7 @@ async function getPackagePoliciesToBump(savedObjectType: string) {
     });
   return {
     total: result.total,
-    items: result.saved_objects.map((so) =>
-      mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
-    ),
+    items: result.saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so)),
   };
 }
 

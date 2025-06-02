@@ -418,19 +418,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         }
         rightSideItems={[
-          <RuleActionsPopover
-            canSaveRule={canSaveRule}
-            rule={rule}
-            onDelete={(ruleId) => {
-              setIsDeleteModalVisibility(true);
-              setRulesToDelete([ruleId]);
-            }}
-            onApiKeyUpdate={(ruleId) => {
-              setRulesToUpdateAPIKey([ruleId]);
-            }}
-            onEnableDisable={onEnableDisable}
-            onRunRule={onRunRule}
-          />,
+          canSaveRule && (
+            <RuleActionsPopover
+              rule={rule}
+              onDelete={(ruleId) => {
+                setIsDeleteModalVisibility(true);
+                setRulesToDelete([ruleId]);
+              }}
+              onApiKeyUpdate={(ruleId) => {
+                setRulesToUpdateAPIKey([ruleId]);
+              }}
+              onEnableDisable={onEnableDisable}
+              onRunRule={onRunRule}
+            />
+          ),
           editButton,
           <EuiButtonEmpty
             data-test-subj="refreshRulesButton"

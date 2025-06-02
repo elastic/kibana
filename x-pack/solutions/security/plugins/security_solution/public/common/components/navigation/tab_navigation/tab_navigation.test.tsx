@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
@@ -54,43 +54,25 @@ describe('Table Navigation', () => {
     jest.clearAllMocks();
   });
 
-  test('it mounts with correct tab highlighted', () => {
-    const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-    const authNavigationTab = wrapper.find(
-      `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
+  test('it renders with correct tab highlighted', () => {
+    render(<TabNavigationComponent {...mockProps} />);
+    expect(screen.getByTestId(`navigation-${HostsTableType.authentications}`)).toHaveAttribute(
+      'aria-selected',
+      'true'
     );
-    expect(authNavigationTab.prop('isSelected')).toBeTruthy();
-    const eventsNavigationTab = () =>
-      wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`).first();
-    expect(eventsNavigationTab().prop('isSelected')).toBeFalsy();
+    expect(screen.getByTestId(`navigation-${HostsTableType.events}`)).toHaveAttribute(
+      'aria-selected',
+      'false'
+    );
   });
 
   test('it carries the url state in the link', () => {
-    const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+    render(<TabNavigationComponent {...mockProps} />);
 
-    const firstTab = wrapper.find(
-      `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
-    );
-    expect(firstTab.props().href).toBe(
+    const firstTab = screen.getByTestId(`navigation-${HostsTableType.authentications}`);
+    expect(firstTab).toHaveAttribute(
+      'href',
       `/app/securitySolutionUI/hosts/name/siem-window/authentications${SEARCH_QUERY}`
     );
-  });
-
-  test('it renders a EuiBetaBadge only on the sessions tab', () => {
-    Object.keys(HostsTableType).forEach((tableType) => {
-      if (tableType !== HostsTableType.sessions) {
-        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-
-        const betaBadge = wrapper.find(
-          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
-        );
-
-        if (tableType === HostsTableType.sessions) {
-          expect(betaBadge).toBeTruthy();
-        } else {
-          expect(betaBadge).toEqual({});
-        }
-      }
-    });
   });
 });

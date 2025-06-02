@@ -37,4 +37,5 @@ export const DEFAULTS = {
   EPHEMERAL_PROJECT_IDS: 0,
   ALIGN_EVENTS_TO_INTERVAL: true,
   CARDINALITY: 1,
+  SLASH_LOGS: false,
 };

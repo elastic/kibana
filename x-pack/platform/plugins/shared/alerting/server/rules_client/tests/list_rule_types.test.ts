@@ -84,7 +84,6 @@ describe('listRuleTypes', () => {
     solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
-    hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
 
@@ -102,7 +101,6 @@ describe('listRuleTypes', () => {
     solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
-    hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
 
@@ -155,7 +153,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "myAppAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -189,7 +186,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "alertingAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -240,7 +236,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "myAppAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -275,7 +270,6 @@ describe('listRuleTypes', () => {
           solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -294,7 +288,6 @@ describe('listRuleTypes', () => {
           solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -334,7 +327,6 @@ describe('listRuleTypes', () => {
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
             "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
             "id": "myType",
             "isExportable": true,
             "minimumLicenseRequired": "basic",

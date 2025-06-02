@@ -111,15 +111,17 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      const { conversationUpdates } = await saveSystemPromptSettings();
-      await saveConversationsSettings(conversationUpdates);
-      await refetchPrompts();
-      await refetchSystemPromptConversations();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      param?.callback?.();
+      const { success, conversationUpdates } = await saveSystemPromptSettings();
+      if (success) {
+        await saveConversationsSettings(conversationUpdates);
+        await refetchPrompts();
+        await refetchSystemPromptConversations();
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        param?.callback?.();
+      }
     },
     [
       refetchPrompts,

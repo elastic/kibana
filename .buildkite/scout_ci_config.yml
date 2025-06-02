@@ -5,5 +5,7 @@ ui_tests:
     - discover_enhanced
     - maps
     - observability_onboarding
+    - painless_lab
     - security_solution
+    - streams_app
   disabled:

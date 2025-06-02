@@ -2012,6 +2012,13 @@ export default function (providerContext: FtrProviderContext) {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
         });
+        await generateAgent(
+          providerContext,
+          'uninstalled',
+          'agent-3',
+          policyWithAgents.id,
+          '8.16.1'
+        );
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/analytics-ftr-helpers-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "analyticsFtrHelpers",
     "server": true,

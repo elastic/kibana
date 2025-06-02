@@ -29,6 +29,10 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
     setIsLoading(true);
 
     (async () => {
+      if (dataView !== undefined) {
+        return;
+      }
+
       try {
         if (indexPatternsOrDataViewId.indexPatterns) {
           const indexPatternsDataView = await dataViewsService.create({
@@ -51,6 +55,7 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
       }
     })();
   }, [
+    dataView,
     dataViewsService,
     indexPatternsOrDataViewId.indexPatterns,
     indexPatternsOrDataViewId.dataViewId,

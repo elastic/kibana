@@ -18,8 +18,8 @@ const exampleAssignment = (
   valuesCount = 1,
   type = 'categorical',
   overrides = {}
-): ColorMapping.Config['assignments'][number] => {
-  const color: ColorMapping.Config['assignments'][number]['color'] =
+): ColorMapping.Assignment => {
+  const color: ColorMapping.Assignment['color'] =
     type === 'categorical'
       ? {
           type: 'categorical',
@@ -32,10 +32,10 @@ const exampleAssignment = (
         };
 
   return {
-    rule: {
-      type: 'matchExactly',
-      values: Array.from({ length: valuesCount }, () => faker.string.alpha()),
-    },
+    rules: Array.from({ length: valuesCount }, () => faker.string.alpha()).map((value) => ({
+      type: 'raw',
+      value,
+    })),
     color,
     touched: false,
     ...overrides,
@@ -51,9 +51,11 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   ],
   specialAssignments: [
     {
-      rule: {
-        type: 'other',
-      },
+      rules: [
+        {
+          type: 'other',
+        },
+      ],
       color: {
         type: 'categorical',
         paletteId: KbnPalette.ElasticClassic,

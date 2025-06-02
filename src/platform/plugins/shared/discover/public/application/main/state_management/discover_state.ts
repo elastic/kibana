@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -71,9 +70,9 @@ export interface DiscoverStateContainerParams {
    */
   customizationContext: DiscoverCustomizationContext;
   /**
-   * a custom url state storage
+   * URL state storage
    */
-  stateStorageContainer?: IKbnUrlStateStorage;
+  stateStorageContainer: IKbnUrlStateStorage;
   /**
    * Internal shared state that's used at several places in the UI
    */
@@ -240,26 +239,12 @@ export function getDiscoverStateContainer({
   tabId,
   services,
   customizationContext,
-  stateStorageContainer,
+  stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts;
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  /**
-   * state storage for state in the URL
-   */
-  const stateStorage =
-    stateStorageContainer ??
-    createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      history: services.history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
-      ...(toasts && withNotifyOnErrors(toasts)),
-    });
 
   /**
    * Search session logic
@@ -287,6 +272,7 @@ export function getDiscoverStateContainer({
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
+    tabId,
     stateStorage,
     internalState,
     savedSearchContainer,
@@ -318,7 +304,7 @@ export function getDiscoverStateContainer({
     appStateContainer,
     internalState,
     runtimeStateManager,
-    getSavedSearch: savedSearchContainer.getState,
+    savedSearchContainer,
     setDataView,
     injectCurrentTab,
     getCurrentTab,
@@ -447,6 +433,10 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
+    const updateTabAppStateAndGlobalState = () =>
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateTabAppStateAndGlobalState)()
+      );
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
@@ -454,7 +444,11 @@ export function getDiscoverStateContainer({
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
+      updateTabAppStateAndGlobalState();
     });
+
+    // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+    const unsubscribeSavedSearchUrlTracking = savedSearchContainer.initUrlTracking();
 
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
@@ -471,6 +465,10 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
+    const savedSearchChangesSubscription = savedSearchContainer
+      .getCurrent$()
+      .subscribe(updateTabAppStateAndGlobalState);
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
@@ -505,9 +503,11 @@ export function getDiscoverStateContainer({
     );
 
     internalStopSyncing = () => {
+      savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
+      unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();
     };

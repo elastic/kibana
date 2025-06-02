@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
+import { get, groupBy, isEmpty, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { FlattenRecord } from '@kbn/streams-schema';
 import { StreamsClient } from '../../../../lib/streams/client';
@@ -194,10 +194,6 @@ async function processPattern(
           streamsClient,
         });
 
-        if (simulationResult.documents_metrics.parsed_rate === 0) {
-          return null;
-        }
-
         // TODO if success rate is zero, try to strip out the date part and try again
 
         return {
@@ -208,8 +204,13 @@ async function processPattern(
     )
   ).filter((simulation): simulation is SimulationWithPattern => simulation !== null);
 
+  const matchingSimulations = simulations.filter(
+    (simulation) => simulation.documents_metrics.parsed_rate > 0
+  );
+
   return {
     chatResponse,
-    simulations,
+    // When no simulation is successful, we return all of them, otherwise we return only the successful ones
+    simulations: isEmpty(matchingSimulations) ? simulations : matchingSimulations,
   };
 }

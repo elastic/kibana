@@ -6,15 +6,16 @@
  */
 
 import React, { useCallback, useState, KeyboardEvent } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextArea,
-  EuiPanel,
   keys,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { chatCommonLabels } from './i18n';
 
 interface ChatInputFormProps {
   disabled: boolean;
@@ -24,6 +25,7 @@ interface ChatInputFormProps {
 
 export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading, onSubmit }) => {
   const [message, setMessage] = useState<string>('');
+  const { euiTheme } = useEuiTheme();
 
   const handleSubmit = useCallback(() => {
     if (loading || !message.trim()) {
@@ -48,34 +50,44 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
     [handleSubmit]
   );
 
+  const topContainerClass = css`
+    padding-bottom: ${euiTheme.size.m};
+  `;
+
+  const inputFlexItemClass = css`
+    max-width: 900px;
+  `;
+
   return (
-    <EuiPanel paddingSize="s">
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-        <EuiFlexItem>
-          <EuiTextArea
-            data-test-subj="workchatAppChatInputFormTextArea"
-            fullWidth
-            rows={1}
-            value={message}
-            onChange={handleChange}
-            onKeyDown={handleTextAreaKeyDown}
-            placeholder={i18n.translate('xpack.workchatApp.chatInputForm.placeholder', {
-              defaultMessage: 'Ask anything',
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="workchatAppChatInputFormSubmitButton"
-            iconType="kqlFunction"
-            onClick={handleSubmit}
-            disabled={loading || disabled}
-            isLoading={loading}
-            display="base"
-            size="m"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+      alignItems="center"
+      justifyContent="center"
+      className={topContainerClass}
+    >
+      <EuiFlexItem className={inputFlexItemClass}>
+        <EuiTextArea
+          data-test-subj="workchatAppChatInputFormTextArea"
+          fullWidth
+          rows={1}
+          value={message}
+          onChange={handleChange}
+          onKeyDown={handleTextAreaKeyDown}
+          placeholder={chatCommonLabels.userInputBox.placeholder}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          data-test-subj="workchatAppChatInputFormSubmitButton"
+          iconType="kqlFunction"
+          display="fill"
+          size="m"
+          onClick={handleSubmit}
+          disabled={loading || disabled}
+          isLoading={loading}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

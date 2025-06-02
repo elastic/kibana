@@ -30,16 +30,10 @@ export const storybookAliases = {
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
-  expression_error: 'src/platform/plugins/shared/expression_error/.storybook',
-  expression_image: 'src/platform/plugins/shared/expression_image/.storybook',
   expression_metric_vis:
     'src/platform/plugins/shared/chart_expressions/expression_legacy_metric/.storybook',
-  expression_metric: 'src/platform/plugins/shared/expression_metric/.storybook',
   expression_partition_vis:
     'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
-  expression_repeat_image: 'src/platform/plugins/shared/expression_repeat_image/.storybook',
-  expression_reveal_image: 'src/platform/plugins/shared/expression_reveal_image/.storybook',
-  expression_shape: 'src/platform/plugins/shared/expression_shape/.storybook',
   expression_tagcloud:
     'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',
@@ -47,7 +41,6 @@ export const storybookAliases = {
   home: 'src/platform/plugins/shared/home/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
-  investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
@@ -73,4 +66,5 @@ export const storybookAliases = {
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
+  upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/.storybook',
 };

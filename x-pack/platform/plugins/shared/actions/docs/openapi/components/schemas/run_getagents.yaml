@@ -1,0 +1,11 @@
+title: The getAgents subaction
+type: object
+required:
+  - subAction
+description: The `getAgents` subaction for SentinelOne connectors.
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - getAgents

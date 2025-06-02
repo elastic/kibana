@@ -214,8 +214,8 @@ function SpanFlyoutBody({
 
   const spanLinksTabContent = getSpanLinksTabContent({
     spanLinksCount,
-    traceId: span.trace.id,
-    spanId: span.span.id,
+    traceId: span.trace?.id,
+    spanId: span.span?.id,
     processorEvent: ProcessorEvent.span,
   });
 

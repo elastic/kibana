@@ -24,6 +24,9 @@
     "@kbn/core-http-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/logging",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/try-in-console",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

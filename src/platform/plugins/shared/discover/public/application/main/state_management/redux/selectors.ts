@@ -7,9 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverInternalState } from './types';
-
-export const selectAllTabs = (state: DiscoverInternalState) =>
-  state.tabs.allIds.map((id) => state.tabs.byId[id]);
+import { createSelector } from '@reduxjs/toolkit';
+import type { DiscoverInternalState, RecentlyClosedTabState } from './types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
+
+export const selectAllTabs = createSelector(
+  [
+    (state: DiscoverInternalState) => state.tabs.allIds,
+    (state: DiscoverInternalState) => state.tabs.byId,
+  ],
+  (allIds, byId) => allIds.map((id) => byId[id])
+);
+
+export const selectRecentlyClosedTabs = createSelector(
+  [
+    (state: DiscoverInternalState) => state.tabs.recentlyClosedTabIds,
+    (state: DiscoverInternalState) => state.tabs.byId,
+  ],
+  (recentlyClosedTabIds, byId) =>
+    recentlyClosedTabIds
+      .map((id) => byId[id])
+      .filter((tab) => tab && 'closedAt' in tab) as RecentlyClosedTabState[]
+);

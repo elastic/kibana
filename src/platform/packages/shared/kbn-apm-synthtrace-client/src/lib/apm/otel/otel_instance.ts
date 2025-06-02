@@ -7,64 +7,118 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Span } from './span';
-import { Transaction } from './transaction';
-import { ApmOtelFields, OtelSpanParams } from './apm_otel_fields';
+import { OtelSpan } from './otel_span';
+import { ApmOtelFields, SpanKind } from './apm_otel_fields';
 import { ApmOtelError } from './apm_otel_error';
 import { Entity } from '../../entity';
-
+import { HttpMethod } from '../span';
+import { ApmApplicationMetricFields } from '../apm_fields';
+import { OtelMetricset } from './apm_otel_metrics';
 export class OtelInstance extends Entity<ApmOtelFields> {
-  transaction(
-    ...options:
-      | [{ transactionName: string; transactionType?: string }]
-      | [string]
-      | [string, string]
-  ) {
-    let transactionName: string;
-    let transactionType: string | undefined;
-    if (options.length === 2) {
-      transactionName = options[0];
-      transactionType = options[1];
-    } else if (typeof options[0] === 'string') {
-      transactionName = options[0];
-    } else {
-      transactionName = options[0].transactionName;
-      transactionType = options[0].transactionType;
-    }
-
-    return new Transaction({
+  span({
+    name,
+    kind,
+    ...fields
+  }: ApmOtelFields & { kind: Extract<SpanKind, 'Internal' | 'Server'> }) {
+    return new OtelSpan({
       ...this.fields,
-      'attributes.transaction.name': transactionName,
-      'attributes.transaction.type': transactionType || 'request',
-    });
-  }
-
-  span(...options: [string, string] | [string, string, string] | [OtelSpanParams]) {
-    let spanName: string;
-    let spanType: string | undefined;
-    let spanSubtype: string | undefined;
-    let spanKind: string | undefined;
-    let fields: ApmOtelFields;
-
-    if (options.length === 3 || options.length === 2) {
-      // When two or three arguments are passed
-      spanName = options[0];
-      spanType = options[1];
-      spanSubtype = options[2] || 'unknown'; // Default to 'unknown' if no third argument
-      fields = {};
-    } else {
-      ({ spanName, spanType, spanSubtype = 'unknown', ...fields } = options[0]);
-    }
-
-    return new Span({
-      ...this.fields,
+      ...(kind === 'Server'
+        ? {
+            'attributes.server.address': 'elastic.co',
+            'attributes.url.scheme': 'https',
+            'attributes.http.response.status_code': 200,
+            'attributes.http.request.method': 'GET',
+          }
+        : {}),
       ...fields,
-      'attributes.span.name': spanName,
-      'attributes.span.type': spanType,
-      'attributes.span.kind': spanKind,
-      'attributes.span.subtype': spanSubtype,
+      kind,
+      name,
     });
   }
+
+  httpExitSpan({
+    name,
+    destinationUrl,
+  }: {
+    name: string;
+    destinationUrl: string;
+    method?: HttpMethod;
+    statusCode?: number;
+  }) {
+    const destination = new URL(destinationUrl);
+
+    return new OtelSpan({
+      ...this.fields,
+      name,
+      kind: 'Client',
+
+      // http
+      'attributes.http.url': destinationUrl,
+
+      // destination
+      'attributes.service.target.name': destination.host,
+      'attributes.service.target.type': destination.hostname,
+      'attributes.span.destination.service.resource': destination.host,
+    });
+  }
+
+  dbExitSpan({ name, type, statement }: { name: string; type: string; statement?: string }) {
+    return new OtelSpan({
+      ...this.fields,
+      name,
+      kind: 'Client',
+      // db
+      ...(statement ? { 'attributes.db.statement': statement } : undefined),
+      'attributes.db.system': type,
+
+      // destination
+      'attributes.span.destination.service.resource': type,
+    });
+  }
+
+  messagingExitSpan({
+    name,
+    type,
+    operation,
+    destination,
+  }: {
+    name: string;
+    type: string;
+    destination: string;
+    operation: 'publish' | 'receive';
+  }) {
+    return new OtelSpan({
+      ...this.fields,
+      name,
+      kind: operation === 'publish' ? 'Producer' : 'Consumer',
+      // db
+      'attributes.messaging.system': type,
+      'attributes.messaging.operation': operation,
+      'attributes.messaging.destination.name': destination,
+
+      // destination
+      'attributes.span.destination.service.resource': `${type}/${operation}`,
+    });
+  }
+
+  rpcSpan({ name, method, service }: { name: string; method: string; service: string }) {
+    return new OtelSpan({
+      ...this.fields,
+      name,
+      kind: 'Server',
+      // rpc
+      'attributes.rpc.method': method,
+      'attributes.rpc.service': service,
+    });
+  }
+
+  appMetrics(metrics: ApmApplicationMetricFields) {
+    return new OtelMetricset<ApmOtelFields>({
+      ...this.fields,
+      ...metrics,
+    });
+  }
+
   error({
     message,
     type,
@@ -83,6 +137,15 @@ export class OtelInstance extends Entity<ApmOtelFields> {
       'attributes.exception.message': message,
       'attributes.error.stack_trace': stackTrace,
     });
+  }
+
+  containerId(containerId: string) {
+    this.fields['resource.attributes.container.id'] = containerId;
+    return this;
+  }
+  podId(podId: string) {
+    this.fields['resource.attributes.k8s.pod.name'] = podId;
+    return this;
   }
 
   hostName(hostName: string) {

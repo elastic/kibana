@@ -38,7 +38,7 @@ turns into:
 ```
 <EuiButtonIcon
     aria-label={i18n.translate('xpack.apm.discoveryRule.pencilButton.ariaLabel', {
-        defaultMessage: 'Pencil Button',
+        defaultMessage: 'Pencil',
     })}
     iconType="pencil"
     onClick={() => {
@@ -50,37 +50,28 @@ turns into:
 Another example:
 
 ```
-/* file is in: `x-pack/solutions/observability/plugins/infra/public/components/beta_badge.tsx` */
+/* file is in: `x-pack/solutions/observability/plugins/infra/public/components/foo.tsx` */
 
-export const InfraBetaBadge = ({ iconType, tooltipPosition, tooltipContent }: Props) => (
-  <EuiBetaBadge
-    label={i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
-      defaultMessage: 'Beta',
-    })}
-    tooltipContent={tooltipContent}
-    iconType={iconType}
-    tooltipPosition={tooltipPosition}
-    data-test-id="infra-beta-badge"
-  />
+const Foo = ({ ... }: Props) => (
+  <EuiFormRow>
+    <EuiComboBox
+      ...
+    />
+  </EuiFormRow>
 );
 ```
 
 gets transformed into:
 
 ```
-export const InfraBetaBadge = ({ iconType, tooltipPosition, tooltipContent }: Props) => (
-  <EuiBetaBadge
-    aria-label={i18n.translate('xpack.infra.infraBetaBadge.betaBadge.ariaLabel', {
-      defaultMessage: 'Beta Badge',
-    })}
-    label={i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
-      defaultMessage: 'Beta',
-    })}
-    tooltipContent={tooltipContent}
-    iconType={iconType}
-    tooltipPosition={tooltipPosition}
-    data-test-id="infra-beta-badge"
-  />
+const Foo = ({ ... }: Props) => (
+  <EuiFormRow aria-label={i18n.translate('xpack.infra.foo.ariaLabel', {
+      defaultMessage: 'Foo',
+    })}>
+    <EuiComboBox
+      ...
+    />
+  </EuiFormRow>
 );
 ```
 

@@ -13,14 +13,8 @@ import { useLensAttributes } from '../../use_lens_attributes';
 import { getKpiUserAuthenticationsBarLensAttributes } from './kpi_user_authentications_bar';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('c8165fc3-7180-4f1b-8c87-bc3ea04c6df7')
-    .mockReturnValueOnce('e959c351-a3a2-4525-b244-9623f215a8fd')
-    .mockReturnValueOnce('938b445a-a291-4bbc-84fe-4f47b69c20e4')
-    .mockReturnValueOnce('430e690c-9992-414f-9bce-00812d99a5e7')
-    .mockReturnValueOnce('b9acd453-f476-4467-ad38-203e37b73e55')
-    .mockReturnValueOnce('31213ae3-905b-4e88-b987-0cccb1f3209f'),
+  ...jest.requireActual('uuid'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../sourcerer/containers', () => ({

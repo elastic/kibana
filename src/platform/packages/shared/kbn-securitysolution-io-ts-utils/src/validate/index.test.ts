@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { left, right } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/Either';
 import * as t from 'io-ts';
 import { validate, validateEither } from '.';
 

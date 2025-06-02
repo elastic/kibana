@@ -399,5 +399,8 @@ export const ENROLLMENT_API_KEY_MAPPINGS = {
     updated_at: {
       type: 'date',
     },
+    hidden: {
+      type: 'boolean',
+    },
   },
 } as const;

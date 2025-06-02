@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.createAnomalyDetectionJob(jobConfig);
       await ml.api.openAnomalyDetectionJob(jobId);
 
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToMemoryUsage();
+      await ml.navigation.navigateToMemoryUsageManagement();
     });
 
     after(async () => {
@@ -48,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('memory usage - memory usage tab - page', async () => {
-      await ml.memoryUsage.selectTab('memory-usage');
+      await ml.navigation.navigateToOverview();
       await a11y.testAppSnapshot();
     });
   });

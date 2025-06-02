@@ -10,6 +10,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+
 import {
   AreaSeries,
   Axis,
@@ -36,6 +37,7 @@ import {
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
@@ -106,6 +108,23 @@ describe('XYChart component', () => {
     return shallow(<XYChart {...defaultProps} args={args} />);
   };
 
+  const dataFromESQL: Datatable = {
+    type: 'datatable',
+    columns: [
+      { id: 'a', name: 'a', meta: { type: 'number' } },
+      { id: 'b', name: 'b', meta: { type: 'number' } },
+      { id: 'c', name: 'c', meta: { type: 'string' } },
+      { id: 'd', name: 'd', meta: { type: 'string' } },
+    ],
+    rows: [
+      { a: 1, b: 2, c: 'I', d: 'Row 1' },
+      { a: 1, b: 5, c: 'J', d: 'Row 2' },
+    ],
+    meta: {
+      type: ESQL_TABLE_TYPE,
+    },
+  };
+
   beforeEach(() => {
     convertSpy = jest.fn((x) => x);
     getFormatSpy = jest.fn();
@@ -133,6 +152,7 @@ describe('XYChart component', () => {
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       setChartSize: jest.fn(),
+      onCreateAlertRule: jest.fn(),
     };
   });
 
@@ -966,7 +986,7 @@ describe('XYChart component', () => {
 
   test('it renders regular bar empty placeholder for no results', () => {
     const { data, args } = sampleArgs();
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{
@@ -989,7 +1009,7 @@ describe('XYChart component', () => {
         return layer;
       }
     });
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{
@@ -1517,6 +1537,69 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
   });
 
+  test('legendAction is not triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
+    const { args } = sampleArgs();
+
+    const newArgs = {
+      ...args,
+      layers: args.layers.map((l) => ({
+        ...l,
+        table: dataFromESQL,
+      })),
+    };
+    const dataMock = dataPluginMock.createStartContract();
+    const newProps = {
+      ...defaultProps,
+      data: {
+        ...dataMock,
+        query: {
+          ...dataMock.query,
+          queryString: {
+            ...dataMock.query.queryString,
+            getQuery: () => ({
+              language: 'kuery',
+              query: 'field:value',
+            }),
+          },
+        },
+      },
+    };
+    const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
+
+    expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
+  });
+
+  test('legendAction is triggering event on ES|QL charts when unified search is on ES|QL mode', () => {
+    const { args } = sampleArgs();
+
+    const newArgs = {
+      ...args,
+      layers: args.layers.map((l) => ({
+        ...l,
+        table: dataFromESQL,
+      })),
+    };
+    const dataMock = dataPluginMock.createStartContract();
+    const newProps = {
+      ...defaultProps,
+      data: {
+        ...dataMock,
+        query: {
+          ...dataMock.query,
+          queryString: {
+            ...dataMock.query.queryString,
+            getQuery: () => ({
+              esql: 'FROM "index-pattern" WHERE "field" = "value"',
+            }),
+          },
+        },
+      },
+    };
+    const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
+
+    expect(wrapper.find(Settings).first().prop('legendAction')).toBeDefined();
+  });
+
   test('it renders stacked bar', () => {
     const { args } = sampleArgs();
     const component = shallow(
@@ -1585,7 +1668,7 @@ describe('XYChart component', () => {
   test('it renders stacked bar empty placeholder for no results', () => {
     const { args } = sampleArgs();
 
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{

@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { TableTab } from './table_tab';
 import { TestProviders } from '../../../../common/mock';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID } from '../components/test_ids';
+import {
+  FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID,
+  TABLE_TAB_SETTING_BUTTON_TEST_ID,
+  TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID,
+  TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID,
+  TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
+} from '../components/test_ids';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -24,13 +31,36 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+const mockGet = jest.fn();
+const mockSet = jest.fn();
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        storage: {
+          get: mockGet,
+          set: mockSet,
+        },
+      },
+    }),
+  };
+});
+
+// FLAKY: https://github.com/elastic/kibana/issues/216393
 describe('<TableTab />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render table component', () => {
     const contextValue = {
       eventId: 'some_Id',
       browserFields: {},
       dataFormattedForFieldBrowser: [],
+      investigationFields: [],
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = render(
@@ -42,6 +72,7 @@ describe('<TableTab />', () => {
     );
 
     expect(getByTestId(TABLE_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TABLE_TAB_SETTING_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should renders the column headers and a field/value pair', () => {
@@ -73,5 +104,32 @@ describe('<TableTab />', () => {
     expect(queryByText('kibana.alert.workflow_status')).not.toBeInTheDocument();
     expect(queryByText('open')).not.toBeInTheDocument();
     expect(queryByTestId(FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should fetch the table state from local storage', async () => {
+    mockGet.mockReturnValue({
+      [FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE]: {
+        pinnedFields: [],
+        showHighlightedFields: true,
+        hideEmptyFields: false,
+        hideAlertFields: true,
+      },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
+          <TableTab />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    const settingsButton = getByTestId(TABLE_TAB_SETTING_BUTTON_TEST_ID);
+    act(async () => {
+      await userEvent.click(settingsButton);
+      expect(screen.getByTestId(TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID)).toBeChecked();
+      expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID)).not.toBeChecked();
+      expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID)).toBeChecked();
+    });
   });
 });

@@ -45,6 +45,7 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
 
     esClientInstance = createEsClientForTesting({
       esUrl: elasticsearchUrl,
+      isCloud: config.isCloud,
       authOverride: { username, password },
     });
   }

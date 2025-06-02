@@ -8,20 +8,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { useStartServices } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useBulkActions } from '../hooks/use_bulk_actions';
-
-import { ConfirmBulkUpgradeModal } from './confirm_bulk_upgrade_modal';
-import { ConfirmBulkUninstallModal } from './confirm_bulk_uninstall_modal';
+import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const startServices = useStartServices();
 
   const button = (
     <EuiButton
@@ -38,40 +32,18 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   );
 
   const {
-    actions: { bulkUpgradeIntegrations, bulkUninstallIntegrations },
-  } = useBulkActions();
+    actions: { bulkUpgradeIntegrationsWithConfirmModal, bulkUninstallIntegrationsWithConfirmModal },
+  } = useInstalledIntegrationsActions();
 
   const openUpgradeModal = useCallback(() => {
     setIsOpen(false);
-    const ref = startServices.overlays.openModal(
-      toMountPoint(
-        <ConfirmBulkUpgradeModal
-          onClose={() => {
-            ref.close();
-          }}
-          onConfirm={({ updatePolicies }) => bulkUpgradeIntegrations(selectedItems, updatePolicies)}
-          selectedItems={selectedItems}
-        />,
-        startServices
-      )
-    );
-  }, [selectedItems, startServices, bulkUpgradeIntegrations]);
+    return bulkUpgradeIntegrationsWithConfirmModal(selectedItems);
+  }, [selectedItems, bulkUpgradeIntegrationsWithConfirmModal]);
 
-  const openUninstallModal = useCallback(() => {
+  const openUninstallModal = useCallback(async () => {
     setIsOpen(false);
-    const ref = startServices.overlays.openModal(
-      toMountPoint(
-        <ConfirmBulkUninstallModal
-          onClose={() => {
-            ref.close();
-          }}
-          onConfirm={() => bulkUninstallIntegrations(selectedItems)}
-          selectedItems={selectedItems}
-        />,
-        startServices
-      )
-    );
-  }, [selectedItems, startServices, bulkUninstallIntegrations]);
+    return bulkUninstallIntegrationsWithConfirmModal(selectedItems);
+  }, [selectedItems, bulkUninstallIntegrationsWithConfirmModal]);
 
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(

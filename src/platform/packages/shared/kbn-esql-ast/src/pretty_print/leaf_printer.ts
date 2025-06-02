@@ -29,11 +29,14 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  */
 export const LeafPrinter = {
   source: (node: ESQLSource): string => {
-    const { index, name, cluster } = node;
-    let text = index || name || '';
+    const { index, name, cluster, selector } = node;
+    let text = (index ? LeafPrinter.string(index) : name) || '';
 
     if (cluster) {
-      text = `${cluster}:${text}`;
+      text = `${LeafPrinter.string(cluster)}:${text}`;
+    }
+    if (selector) {
+      text = `${text}::${LeafPrinter.string(selector)}`;
     }
 
     return text;
@@ -82,8 +85,13 @@ export const LeafPrinter = {
     return formatted;
   },
 
-  string: (node: ESQLStringLiteral) => {
+  string: (node: Pick<ESQLStringLiteral, 'valueUnquoted' | 'unquoted'>) => {
     const str = node.valueUnquoted;
+
+    if (node.unquoted === true) {
+      return str;
+    }
+
     const strFormatted =
       '"' +
       str

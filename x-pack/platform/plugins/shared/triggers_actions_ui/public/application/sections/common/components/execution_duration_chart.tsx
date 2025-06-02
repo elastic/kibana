@@ -18,15 +18,9 @@ import {
   EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  CurveType,
-  LineSeries,
-  Settings,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+
 import { assign, fill } from 'lodash';
 import moment from 'moment';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
@@ -61,6 +55,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   isLoading,
 }: ComponentOpts) => {
   const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const paddedExecutionDurations = padOrTruncateDurations(
     executionDuration.valuesWithTimestamp,
@@ -122,8 +117,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                     line: { stroke: euiTheme.colors.accent },
                   },
                 }}
-                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                baseTheme={LEGACY_LIGHT_THEME}
+                baseTheme={chartBaseTheme}
                 locale={i18n.getLocale()}
               />
               <BarSeries

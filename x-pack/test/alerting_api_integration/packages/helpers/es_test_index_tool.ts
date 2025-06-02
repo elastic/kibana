@@ -154,10 +154,12 @@ export class ESTestIndexTool {
     return result;
   }
 
-  async getAll(size: number = 10) {
+  async getAll(size: number = 10, sort?: string) {
     const params = {
       index: this.index,
       size,
+      sort: {},
+      ...(sort ? { sort: [{ [sort]: 'asc' as const }] } : {}),
       query: {
         match_all: {},
       },

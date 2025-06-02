@@ -195,12 +195,16 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           type: entry.type as EntryTypes,
         })
       ) {
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardPathWarning(index)
-        );
+        if (entry.type === 'wildcard') {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardPathWarning(index)
+          );
+        } else {
+          addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
+        }
       }
     });
   }
@@ -230,7 +234,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
 });
 
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
+  ({ item, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -543,10 +547,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
                 item={item}
-                options={policies}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
-                isLoading={policiesIsLoading}
                 onChange={handleEffectedPolicyOnChange}
               />
             </EuiFormRow>

@@ -84,6 +84,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -112,6 +113,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -210,6 +212,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -238,6 +241,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -336,6 +340,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -364,6 +369,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             />
           }
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >

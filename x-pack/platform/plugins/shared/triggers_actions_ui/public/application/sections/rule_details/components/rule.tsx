@@ -112,7 +112,7 @@ export function RuleComponent({
   });
 
   const renderRuleAlertList = useCallback(() => {
-    if (ruleType.hasAlertsMappings || ruleType.hasFieldsForAAD) {
+    if (ruleType.hasAlertsMappings) {
       return (
         <AlertsTable
           id="rule-detail-alerts-table"
@@ -154,7 +154,6 @@ export function RuleComponent({
     readOnly,
     rule.id,
     ruleType.hasAlertsMappings,
-    ruleType.hasFieldsForAAD,
     ruleType.id,
     settings,
   ]);

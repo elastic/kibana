@@ -7,9 +7,9 @@
 
 import { Parser } from 'expr-eval';
 import { z } from '@kbn/zod';
-import { type McpTool, toolResult } from '@kbn/wci-server';
+import { type McpServerTool, toolResultFactory } from '@kbn/wci-server';
 
-export const getCalculatorTool = (): McpTool => {
+export const getCalculatorTool = (): McpServerTool => {
   return {
     name: 'calculator',
     description: `
@@ -25,9 +25,9 @@ export const getCalculatorTool = (): McpTool => {
     },
     execute: async ({ input }) => {
       try {
-        return toolResult.text(Parser.evaluate(input).toString());
+        return toolResultFactory.text(Parser.evaluate(input).toString());
       } catch (e) {
-        return toolResult.error(`Error evaluating expression: ${e.message}`);
+        return toolResultFactory.error(`Error evaluating expression: ${e.message}`);
       }
     },
   };

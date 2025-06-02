@@ -58,7 +58,7 @@ describe('parseTestFlags', () => {
     );
   });
 
-  it(`should parse with correct config and serverless flags`, async () => {
+  it(`should parse with serverless flag for local target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       stateful: false,
@@ -80,7 +80,7 @@ describe('parseTestFlags', () => {
     });
   });
 
-  it(`should parse with correct config and stateful flags`, async () => {
+  it(`should parse with stateful flag for local target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       testTarget: 'local',
@@ -118,7 +118,30 @@ describe('parseTestFlags', () => {
     );
   });
 
-  it(`should throw an error with incorrect '--testTarget' flag set to 'cloud'`, async () => {
+  it(`should parse with serverless flag for cloud target`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testTarget: 'cloud',
+      stateful: false,
+      serverless: 'oblt',
+      logToFile: false,
+      headed: false,
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'serverless=oblt',
+      configPath: '/path/to/config',
+      testTarget: 'cloud',
+      headed: false,
+      esFrom: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse with stateful flag for cloud target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       testTarget: 'cloud',
@@ -128,8 +151,16 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
-    await expect(parseTestFlags(flags)).rejects.toThrow(
-      'Running tests against Cloud / MKI is not supported yet'
-    );
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      configPath: '/path/to/config',
+      testTarget: 'cloud',
+      headed: true,
+      esFrom: 'snapshot',
+      installDir: undefined,
+      logsDir: undefined,
+    });
   });
 });

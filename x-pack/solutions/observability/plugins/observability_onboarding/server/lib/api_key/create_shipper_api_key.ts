@@ -14,8 +14,10 @@ import {
 
 export function createShipperApiKey(esClient: ElasticsearchClient, name: string, withAPM = false) {
   // Based on https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
+  const timestamp = new Date().toISOString();
+
   return esClient.security.createApiKey({
-    name,
+    name: `${name}-${timestamp}`,
     metadata: {
       managed: true,
       application: 'logs',

@@ -36,23 +36,19 @@ export const SeverityHealth: React.FC<Props> = ({ severity }) => {
 
   const severityData = {
     low: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.vis.euiColorSeverity5,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.severity.neutral,
       label: LOW,
     },
     medium: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.vis.euiColorSeverity7,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.severity.warning,
       label: MEDIUM,
     },
     high: {
-      color: isAmsterdam
-        ? euiTheme.colors.vis.euiColorVis7
-        : euiTheme.colors.vis.euiColorSeverity10,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis7 : euiTheme.colors.severity.risk,
       label: HIGH,
     },
     critical: {
-      color: isAmsterdam
-        ? euiTheme.colors.vis.euiColorVis9
-        : euiTheme.colors.vis.euiColorSeverity14,
+      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.severity.danger,
       label: CRITICAL,
     },
   };

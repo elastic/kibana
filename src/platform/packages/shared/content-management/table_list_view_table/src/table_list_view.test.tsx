@@ -59,7 +59,6 @@ describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
-    listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
@@ -1896,7 +1895,6 @@ describe('TableList', () => {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
-    listingLimit: 500,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
     onFetchSuccess: jest.fn(),
     tableCaption: 'test title',

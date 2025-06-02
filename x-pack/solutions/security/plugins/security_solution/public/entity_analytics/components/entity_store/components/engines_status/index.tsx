@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useStoreEntityTypes } from '../../../../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
@@ -42,7 +42,7 @@ export const EngineStatus: React.FC = () => {
     isLoading: isStatusAPILoading,
     error,
   } = useEntityStoreStatus({ withComponents: true });
-  const enabledEntityTypes = useStoreEntityTypes();
+  const enabledEntityTypes = useEntityStoreTypes();
 
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);

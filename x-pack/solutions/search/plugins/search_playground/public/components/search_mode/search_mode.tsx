@@ -7,10 +7,9 @@
 
 import {
   EuiEmptyPrompt,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -21,19 +20,19 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useQueryClient } from '@tanstack/react-query';
 import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
-import { ChatForm, ChatFormFields, Pagination } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 import { useIndexMappings } from '../../hooks/use_index_mappings';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { control, handleSubmit } = useFormContext<ChatForm>();
+  const { control } = useFormContext<PlaygroundForm>();
   const {
     field: { value: searchBarValue },
     formState: { isSubmitting },
-  } = useController<ChatForm, ChatFormFields.searchQuery>({
-    name: ChatFormFields.searchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
+    name: PlaygroundFormFields.searchQuery,
   });
 
   const [searchQuery, setSearchQuery] = React.useState<{
@@ -75,26 +74,26 @@ export const SearchMode: React.FC = () => {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())}>
-                <Controller
-                  control={control}
-                  name={ChatFormFields.searchQuery}
-                  render={({ field }) => (
-                    <EuiFieldText
-                      data-test-subj="searchPlaygroundSearchModeFieldText"
-                      {...field}
-                      value={searchBarValue}
-                      icon="search"
-                      fullWidth
-                      placeholder={i18n.translate(
-                        'xpack.searchPlayground.searchMode.searchBar.placeholder',
-                        { defaultMessage: 'Search for documents' }
-                      )}
-                      isLoading={isSubmitting}
-                    />
-                  )}
-                />
-              </EuiForm>
+              <Controller
+                control={control}
+                name={PlaygroundFormFields.searchQuery}
+                render={({ field }) => (
+                  <EuiFieldSearch
+                    data-test-subj="searchPlaygroundSearchModeFieldText"
+                    {...field}
+                    value={searchBarValue}
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.searchPlayground.searchMode.searchBar.placeholder',
+                      { defaultMessage: 'Search for documents' }
+                    )}
+                    isLoading={isSubmitting}
+                    isClearable
+                    incremental
+                    onSearch={handleSearch}
+                  />
+                )}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup direction="column">
@@ -109,12 +108,10 @@ export const SearchMode: React.FC = () => {
                     />
                   ) : (
                     <EuiEmptyPrompt
-                      iconType={'checkInCircleFilled'}
-                      iconColor="success"
                       title={
                         <h2>
                           {i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
-                            defaultMessage: 'Ready to search',
+                            defaultMessage: 'We are ready to search!',
                           })}
                         </h2>
                       }
@@ -122,7 +119,7 @@ export const SearchMode: React.FC = () => {
                         <p>
                           {i18n.translate('xpack.searchPlayground.searchMode.searchPrompt', {
                             defaultMessage:
-                              'Type in a query in the search bar above or view the query we automatically created for you.',
+                              'Fine tune a traditional search with your data. Start by entering a query above to see what results you get and go from there!',
                           })}
                         </p>
                       }

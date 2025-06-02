@@ -3,7 +3,7 @@
 exports[`DetailPanelCopy component When DetailPanelCopy is mounted renders DetailPanelCopy correctly 1`] = `
 <div>
   <div
-    class="euiText emotion-EuiText"
+    class="euiText emotion-euiText-s-DetailPanelListItem"
     data-test-subj="sessionView:detail-panel-list-item"
   >
     <span

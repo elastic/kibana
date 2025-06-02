@@ -83,6 +83,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { canEnableSyncIntegrations } from './setup/fleet_synced_integrations';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -364,6 +365,18 @@ async function updateAgentPoliciesDataOutputId(
         );
       }
     }
+  }
+}
+
+function validateRemoteSyncIntegrationsCanBeEnabled(output: Partial<NewOutput>) {
+  if (
+    output.type === outputType.RemoteElasticsearch &&
+    (output.sync_integrations === true || output.sync_uninstalled_integrations === true) &&
+    !canEnableSyncIntegrations()
+  ) {
+    throw new OutputUnauthorizedError(
+      'Remote sync integrations require at least an Enterprise license.'
+    );
   }
 }
 
@@ -679,6 +692,8 @@ class OutputService {
       }
     }
 
+    validateRemoteSyncIntegrationsCanBeEnabled(output);
+
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
     // Store secret values if enabled; if not, store plain text values
@@ -705,9 +720,6 @@ class OutputService {
       ) {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
-        }
-        if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
-          data.kibana_api_key = output.secrets?.kibana_api_key as string;
         }
       }
     }
@@ -1106,6 +1118,7 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+    validateRemoteSyncIntegrationsCanBeEnabled(data);
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {
@@ -1132,9 +1145,6 @@ class OutputService {
       ) {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
-        }
-        if (!data.kibana_api_key && data.secrets?.kibana_api_key) {
-          updateData.kibana_api_key = data.secrets?.kibana_api_key as string;
         }
       }
     }

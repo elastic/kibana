@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
@@ -18,6 +18,7 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
@@ -35,7 +36,6 @@ export class UpdateSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
     private spaceId: string,
@@ -65,7 +65,10 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    await assertExpectedIndicatorSourceIndexPrivileges(updatedSlo, this.esClient);
+    await assertExpectedIndicatorSourceIndexPrivileges(
+      updatedSlo,
+      this.scopedClusterClient.asCurrentUser
+    );
 
     const rollbackOperations = [];
     await this.repository.update(updatedSlo);
@@ -152,7 +155,7 @@ export class UpdateSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.index({
+          this.scopedClusterClient.asCurrentUser.index({
             index: SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${updatedSlo.id}`,
             document: createTempSummaryDocument(updatedSlo, this.spaceId, this.basePath),
@@ -208,23 +211,16 @@ export class UpdateSLO {
   private async deleteOriginalSLO(originalSlo: SLODefinition) {
     try {
       const originalRollupTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-      await this.transformManager.stop(originalRollupTransformId);
       await this.transformManager.uninstall(originalRollupTransformId);
 
       const originalSummaryTransformId = getSLOSummaryTransformId(
         originalSlo.id,
         originalSlo.revision
       );
-      await this.summaryTransformManager.stop(originalSummaryTransformId);
       await this.summaryTransformManager.uninstall(originalSummaryTransformId);
 
       await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(originalSlo.id, originalSlo.revision) },
-        { ignore: [404] }
-      );
-
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(originalSlo.id, originalSlo.revision) },
+        { id: getWildcardPipelineId(originalSlo.id, originalSlo.revision) },
         { ignore: [404] }
       );
     } catch (err) {
@@ -239,7 +235,7 @@ export class UpdateSLO {
   }
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       conflicts: 'proceed',
@@ -253,7 +249,7 @@ export class UpdateSLO {
   }
 
   private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       wait_for_completion: false,

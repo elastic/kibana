@@ -17,6 +17,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 import {
   asMillisecondDuration,
@@ -50,8 +51,16 @@ type TraceGroup = Required<Props['response']>['data']['items'][number];
 
 export function getTraceListColumns({
   query,
+  link,
 }: {
   query: TypeOf<ApmRoutes, '/traces'>['query'];
+  link: (
+    path: '/services/{serviceName}/transactions/view',
+    params: {
+      path: { serviceName: string };
+      query: TypeOf<ApmRoutes, '/services/{serviceName}/transactions/view'>['query'];
+    }
+  ) => string;
 }): Array<ITableColumn<TraceGroup>> {
   return [
     {
@@ -64,9 +73,17 @@ export function getTraceListColumns({
       render: (_: string, { serviceName, transactionName, transactionType }: TraceGroup) => (
         <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
           <StyledTransactionLink
-            serviceName={serviceName}
             transactionName={transactionName}
-            transactionType={transactionType}
+            href={link('/services/{serviceName}/transactions/view', {
+              path: { serviceName },
+              query: {
+                ...query,
+                transactionName,
+                transactionType,
+                serviceGroup: '',
+                showCriticalPath: false,
+              },
+            })}
           >
             {transactionName}
           </StyledTransactionLink>
@@ -166,8 +183,9 @@ export function TraceList({ response }: Props) {
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/traces');
+  const { link } = useApmRouter();
 
-  const traceListColumns = useMemo(() => getTraceListColumns({ query }), [query]);
+  const traceListColumns = useMemo(() => getTraceListColumns({ query, link }), [query, link]);
 
   useEffect(() => {
     if (status === FETCH_STATUS.SUCCESS) {

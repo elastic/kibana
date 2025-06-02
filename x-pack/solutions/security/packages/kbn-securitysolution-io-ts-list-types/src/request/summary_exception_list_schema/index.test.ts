@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
+import { left } from 'fp-ts/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getSummaryExceptionListSchemaMock } from './index.mock';

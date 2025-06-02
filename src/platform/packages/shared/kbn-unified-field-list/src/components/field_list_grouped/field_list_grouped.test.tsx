@@ -372,7 +372,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     });
 
     await act(async () => {
-      await wrapper.find('[data-test-subj="typeFilter-date"]').first().simulate('click');
+      await wrapper.find('button[data-test-subj="typeFilter-date"]').first().simulate('click');
       await wrapper.update();
     });
 

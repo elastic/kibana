@@ -11,28 +11,13 @@ import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
-import { AnonymousAccessServiceContract } from '../../../common';
-import type {
-  ShareMenuItemV2,
-  UrlParamExtension,
-  BrowserUrlService,
-  ShareContext,
-} from '../../types';
+import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
-export type { ShareMenuItemV2, ShareContextObjectTypeConfig } from '../../types';
-
-export interface IShareContext extends ShareContext {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
-  shareMenuItems: ShareMenuItemV2[];
-  embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
+export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
+  onClose: () => void;
+  shareMenuItems: ShareConfigs[];
   theme: ThemeServiceSetup;
   i18n: I18nStart;
-  publicAPIEnabled?: boolean;
-  anchorElement?: HTMLElement;
 }
 
 const ShareTabsContext = createContext<IShareContext | null>(null);
@@ -44,14 +29,42 @@ export const ShareMenuProvider = ({
   return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
 };
 
-export const useShareTabsContext = () => {
+export const useShareContext = () => {
   const context = useContext(ShareTabsContext);
 
   if (!context) {
     throw new Error(
-      'Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
+      'Failed to call `useShareContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
     );
   }
 
   return context;
+};
+
+export const useShareTabsContext = <
+  T extends Exclude<ShareTypes, 'legacy'>,
+  G extends T extends 'integration' ? string : never
+>(
+  shareType: T,
+  groupId?: G
+) => {
+  const context = useShareContext();
+
+  const { shareMenuItems, objectTypeMeta, ...rest } = context;
+
+  // the integration share type can have multiple implementations
+  const shareTypeImplementations: T extends 'integration'
+    ? Array<Extract<ShareConfigs, { shareType: T; groupId?: G }>>
+    : Extract<ShareConfigs, { shareType: T }> = (
+    shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
+  ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
+
+  return {
+    ...rest,
+    objectTypeMeta: {
+      ...objectTypeMeta,
+      config: objectTypeMeta.config[shareType],
+    },
+    shareMenuItems: shareTypeImplementations,
+  };
 };

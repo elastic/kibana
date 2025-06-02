@@ -52,5 +52,6 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./install_runtime_field'));
     loadTestFile(require.resolve('./get_templates_inputs'));
     loadTestFile(require.resolve('./data_views'));
+    loadTestFile(require.resolve('./custom_integrations'));
   });
 }

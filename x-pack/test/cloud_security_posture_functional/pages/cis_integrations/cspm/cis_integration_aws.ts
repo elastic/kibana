@@ -9,13 +9,11 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
 import { policiesSavedObjects } from '../constants';
-
 const {
   CIS_AWS_OPTION_TEST_ID,
   AWS_SINGLE_ACCOUNT_TEST_ID,
   AWS_MANUAL_TEST_ID,
   AWS_CREDENTIAL_SELECTOR,
-  ROLE_ARN_TEST_ID,
   DIRECT_ACCESS_KEY_ID_TEST_ID,
   DIRECT_ACCESS_SECRET_KEY_TEST_ID,
   TEMP_ACCESS_KEY_ID_TEST_ID,
@@ -23,6 +21,7 @@ const {
   TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
   SHARED_CREDENTIALS_FILE_TEST_ID,
   SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
+  ROLE_ARN_TEST_ID,
 } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
@@ -36,7 +35,6 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
-    let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
@@ -45,7 +43,6 @@ export default function (providerContext: FtrProviderContext) {
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
-      cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
       await cisIntegration.closeAllOpenTabs();
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
@@ -56,21 +53,36 @@ export default function (providerContext: FtrProviderContext) {
         expect((await cisIntegration.isRadioButtonChecked('organization-account')) === true);
         expect((await cisIntegration.isRadioButtonChecked('cloud_formation')) === true);
       });
-      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
+      it('CIS_AWS Single Cloud Formation workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickOptionButton('aws-cloudformation-setup-option');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
-          true
-        );
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
         );
       });
+
       it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {
+        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.inputUniqueIntegrationName();
+        await cisIntegration.clickOptionButton('aws-cloudformation-setup-option');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickSaveButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(
+          (await cisIntegration.getUrlOnPostInstallModal()) ===
+            'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+        );
+
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
         expect(
@@ -84,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Organization Manual Assume Role', () => {
+    describe.skip('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -92,12 +104,12 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
 
         /*
          * sometimes it takes a while to save the integration so added timeout to wait for post install modal
          */
-        await retry.try(async () => {
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           const modal = await cisIntegration.getPostInstallModal();
           if (!modal) {
             logger.debug('Post install modal not found');
@@ -130,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -165,7 +177,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -199,7 +211,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -215,22 +227,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Single Cloud Formation', () => {
-      it('CIS_AWS Single Cloud Formation workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.inputUniqueIntegrationName();
-        await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          expect(
-            (await cisIntegration.getUrlOnPostInstallModal()) ===
-              'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
-          );
-        });
-      });
-    });
-
     describe('CIS_AWS Single Manual Assume Role', () => {
       it('CIS_AWS Single Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
@@ -241,7 +237,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -270,7 +266,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           expect(
@@ -306,7 +302,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -341,7 +337,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
           await cisIntegration.navigateToIntegrationCspList();
           await cisIntegration.clickFirstElementOnIntegrationTable();

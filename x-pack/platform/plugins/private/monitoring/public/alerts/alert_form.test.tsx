@@ -11,6 +11,7 @@
 
 import React, { Fragment, lazy } from 'react';
 import { nextTick } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -155,27 +156,29 @@ describe('alert_form', () => {
         const actionWrapper = mount(
           <I18nProvider>
             <KibanaReactContext.Provider>
-              <ActionForm
-                actions={initialAlert.actions}
-                defaultActionGroupId={'default'}
-                setActionIdByIndex={(id: string, index: number) => {
-                  initialAlert.actions[index].id = id;
-                }}
-                setActions={() => {}}
-                setActionParamsProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                actionTypeRegistry={actionTypeRegistry}
-                featureId="alerting"
-                producerId="alerting"
-                ruleTypeId=".es-query"
-              />
+              <QueryClientProvider client={new QueryClient()}>
+                <ActionForm
+                  actions={initialAlert.actions}
+                  defaultActionGroupId={'default'}
+                  setActionIdByIndex={(id: string, index: number) => {
+                    initialAlert.actions[index].id = id;
+                  }}
+                  setActions={() => {}}
+                  setActionParamsProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  actionTypeRegistry={actionTypeRegistry}
+                  featureId="alerting"
+                  producerId="alerting"
+                  ruleTypeId=".es-query"
+                />
+              </QueryClientProvider>
             </KibanaReactContext.Provider>
           </I18nProvider>
         );

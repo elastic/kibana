@@ -10,7 +10,7 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 
 const RIGHT = 'right';
 
-spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
+spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity'] }, () => {
   let ruleName: string;
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
@@ -28,6 +28,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     const urlBeforeAlertDetails = page.url();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
@@ -37,7 +38,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     await expect(headerTitle).toHaveText(ruleName);
 
     await page.reload();
-    await page.waitForLoadingIndicatorHidden();
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
 
     const urlAfterReload = page.url();
     expect(urlAfterReload).toContain(RIGHT);

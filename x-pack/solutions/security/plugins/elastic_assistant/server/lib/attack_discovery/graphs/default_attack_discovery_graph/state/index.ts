@@ -9,7 +9,8 @@ import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import { Annotation } from '@langchain/langgraph';
 
-import { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
+import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
+import { AttackDiscoveryPrompts } from '../prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
@@ -25,15 +26,15 @@ export interface Options {
 
 export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Options) =>
   Annotation.Root({
-    attackDiscoveries: Annotation<AttackDiscovery[] | null>({
+    insights: Annotation<AttackDiscovery[] | null>({
       reducer: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
       default: () => null,
     }),
-    attackDiscoveryPrompt: Annotation<string>({
+    prompt: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
       default: () => prompts.default,
     }),
-    anonymizedAlerts: Annotation<Document[]>({
+    anonymizedDocuments: Annotation<Document[]>({
       reducer: (x: Document[], y?: Document[]) => y ?? x,
       default: () => [],
     }),
@@ -49,8 +50,8 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
       reducer: (x: string, y?: string) => y ?? x,
       default: () => prompts.continue,
     }),
-    end: Annotation<string | null | undefined>({
-      reducer: (x?: string | null, y?: string | null) => y ?? x,
+    end: Annotation<DateMath | undefined>({
+      reducer: (x?: DateMath, y?: DateMath) => y ?? x,
       default: () => end,
     }),
     errors: Annotation<string[], string[]>({
@@ -97,8 +98,8 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
       reducer: (x: Replacements, y?: Replacements) => y ?? x,
       default: () => ({}),
     }),
-    start: Annotation<string | null | undefined, string | null | undefined>({
-      reducer: (x?: string | null, y?: string | null) => y ?? x,
+    start: Annotation<DateMath | undefined, DateMath | undefined>({
+      reducer: (x?: DateMath, y?: DateMath) => y ?? x,
       default: () => start,
     }),
     unrefinedResults: Annotation<AttackDiscovery[] | null>({

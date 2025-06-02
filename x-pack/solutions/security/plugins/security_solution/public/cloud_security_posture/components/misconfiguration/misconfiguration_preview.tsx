@@ -27,30 +27,42 @@ import {
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
+interface MisconfigurationPreviewDistributionBarProps {
+  key: string;
+  count: number;
+  color: string;
+}
+
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+  const misconfigurationStats: MisconfigurationPreviewDistributionBarProps[] = [];
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
-  return [
-    {
+  if (passedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
         {
-          defaultMessage: 'Passed findings',
+          defaultMessage: '{count, plural, one {Passed finding} other {Passed findings}}',
+          values: { count: passedFindingsStats },
         }
       ),
       count: passedFindingsStats,
       color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
-    },
-    {
+    });
+  }
+  if (failedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
         {
-          defaultMessage: 'Failed findings',
+          defaultMessage: '{count, plural, one {Failed finding} other {Failed findings}}',
+          values: { count: failedFindingsStats },
         }
       ),
       count: failedFindingsStats,
       color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
-    },
-  ];
+    });
+  }
+  return misconfigurationStats;
 };
 
 const MisconfigurationPreviewScore = ({

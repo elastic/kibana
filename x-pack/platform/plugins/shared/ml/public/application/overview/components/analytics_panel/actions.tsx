@@ -14,7 +14,11 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlLink, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import {
+  useMlLink,
+  useMlManagementLocatorInternal,
+  useNavigateToPath,
+} from '../../../contexts/kibana';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -59,7 +63,7 @@ export const ViewLink: FC<Props> = ({ item }) => {
 };
 
 export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
-  const locator = useMlLocator();
+  const mlManagementLocator = useMlManagementLocatorInternal();
   const navigateToPath = useNavigateToPath();
 
   return [
@@ -74,13 +78,16 @@ export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
       type: 'icon',
       icon: 'list',
       onClick: async (item) => {
-        const path = await locator?.getUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-          pageState: {
-            jobId: item.id,
+        const { url } = await mlManagementLocator?.getUrl(
+          {
+            page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+            pageState: {
+              jobId: item.id,
+            },
           },
-        });
-        await navigateToPath(path);
+          'analytics'
+        );
+        await navigateToPath(url);
       },
     },
     {

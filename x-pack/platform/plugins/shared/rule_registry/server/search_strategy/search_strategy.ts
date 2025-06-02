@@ -172,6 +172,8 @@ export const ruleRegistrySearchStrategyProvider = (
               from: request.pagination ? request.pagination.pageIndex * size : 0,
               query,
               ...(request.runtimeMappings ? { runtime_mappings: request.runtimeMappings } : {}),
+              ...(request.minScore ? { min_score: request.minScore } : {}),
+              ...(request.trackScores ? { track_scores: request.trackScores } : {}),
             },
           };
           return (isAnyRuleTypeESAuthorized ? requestUserEs : internalUserEs).search(

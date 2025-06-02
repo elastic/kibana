@@ -64,9 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         job_ids: [jobId],
       });
 
-      await ml.navigation.navigateToMl();
-
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
     });
 
     after(async () => {
@@ -88,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with annotations should navigate to Single Metric Viewer on button click', async () => {
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       const annotationsFromApi = await ml.api.getAnnotations(jobId);
 
@@ -96,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with annotations can be edited', async () => {
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       const annotationsFromApi = await ml.api.getAnnotations(jobId);
 
