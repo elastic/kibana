@@ -71,7 +71,6 @@ export default function ({
     });
 
     after('clean up archives', async () => {
-      // await exports.closeExportFlyout();
       await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
