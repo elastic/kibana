@@ -22,7 +22,6 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
-  apmEnableProfilingIntegration,
   profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
@@ -31,7 +30,6 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
-  enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
@@ -167,21 +165,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.number({ min: 1 }),
     solution: 'oblt',
   },
-  [enableInfrastructureProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
-      defaultMessage: 'Universal Profiling integration in Infrastructure',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
-      {
-        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
-    solution: 'oblt',
-  },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
@@ -314,16 +297,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [apmEnableProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
-      defaultMessage: 'Enable Universal Profiling integration in APM',
-    }),
-    value: true,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [profilingShowErrorFrames]: {
