@@ -67,7 +67,6 @@ const mapFeatureTooltipTable = css({
 const mapFeatureTooltipActionsRow = css({
   display: 'flex',
   justifyContent: 'flex-end',
-  background: 'pink',
 });
 
 export class FeatureProperties extends Component<Props, State> {
