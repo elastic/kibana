@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -75,6 +76,7 @@ interface FlyoutHeaderPanelProps {
 export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
   ({ timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
+    const { euiTheme } = useEuiTheme();
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const { browserFields: sourcererBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
@@ -152,6 +154,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
                   grow={false}
                   data-test-subj="timeline-modal-header-title"
                   css={whiteSpaceNoWrapCSS}
+                  color={euiTheme.colors.textHeading}
                 >
                   <h3>{title}</h3>
                 </EuiText>
