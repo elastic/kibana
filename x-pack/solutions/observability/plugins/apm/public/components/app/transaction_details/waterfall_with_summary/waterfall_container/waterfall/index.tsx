@@ -154,7 +154,7 @@ export function Waterfall({
           }}
         />
         <TimelineAxisContainer
-          marks={[...agentMarks, ...errorMarks]}
+          marks={[...agentMarks, ...(!isEmbeddable ? errorMarks : [])]}
           xMax={duration}
           margins={timelineMargins}
         />
