@@ -2176,6 +2176,47 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.2.0.tgz#0f32724e394f3bfa35d18ef8fa2e79da47191779"
   integrity sha512-EDp5FP8nbzGXwAMWM2xo6SL2LdsUwEVrt6idE8AoW45KybuJZ9Dr8IB8z6+wCr7Jxrg+nwdst039LpaslDur+g==
 
+"@elastic/eui-amsterdam@npm:@elastic/eui@102.2.0-amsterdam.0":
+  version "102.2.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0-amsterdam.0.tgz#f520caecd95e1054de6b8e21d67f76768ae0b345"
+  integrity sha512-VqZAac9KHMaPS8yFaibSvD/j2+5/F2/smXrVXIOoTZb7EfK7Fg0UVJOzRdlLon+4W0gHaHvijbe2q8lmym7q6A==
+  dependencies:
+    "@elastic/eui-theme-common" "1.0.0"
+    "@elastic/prismjs-esql" "^1.1.0"
+    "@hello-pangea/dnd" "^16.6.0"
+    "@types/lodash" "^4.14.202"
+    "@types/numeral" "^2.0.5"
+    "@types/react-window" "^1.8.8"
+    "@types/refractor" "^3.4.0"
+    chroma-js "^2.4.2"
+    classnames "^2.5.1"
+    lodash "^4.17.21"
+    mdast-util-to-hast "^10.2.0"
+    numeral "^2.0.6"
+    prop-types "^15.8.1"
+    react-dropzone "^11.7.1"
+    react-element-to-jsx-string "^15.0.0"
+    react-focus-on "^3.9.1"
+    react-is "^17.0.2"
+    react-remove-scroll-bar "^2.3.4"
+    react-virtualized-auto-sizer "^1.0.24"
+    react-window "^1.8.10"
+    refractor "^3.6.0"
+    rehype-raw "^5.1.0"
+    rehype-react "^6.2.1"
+    rehype-stringify "^8.0.0"
+    remark-breaks "^2.0.2"
+    remark-emoji "^2.1.0"
+    remark-parse-no-trim "^8.0.4"
+    remark-rehype "^8.1.0"
+    tabbable "^5.3.3"
+    text-diff "^1.0.1"
+    unified "^9.2.2"
+    unist-util-visit "^2.0.3"
+    url-parse "^1.5.10"
+    uuid "^8.3.0"
+    vfile "^4.2.1"
+
 "@elastic/eui-theme-borealis@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-1.0.0.tgz#f85679d2d72dfc43a620241cbf4161d4e4e81841"
@@ -2190,10 +2231,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@102.1.0":
-  version "102.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.1.0.tgz#ca3ba0389779822c6081d016ebaae06e52baff9f"
-  integrity sha512-h8w4r8OKMWYAGMzz3tDyNDeayW6q+EBMwyXTw5+kQlmkenOxFyHgX7SwsOQTUf2+83aMsrdlMAvSaIfYYljgXA==
+"@elastic/eui@102.2.0":
+  version "102.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0.tgz#cba90fece1afa78686fd51ba9fa5fd019fd0c6a0"
+  integrity sha512-ksFQ66kKtftvcaEuHuzI7vI6CSDeet9QU5nkBDOl18QuoA3VyeGzX4ISranWj+Gyk22SGn2K9BEudXSVkoDBWg==
   dependencies:
     "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -2287,10 +2328,10 @@
     "@elastic/react-search-ui-views" "^1.23.1"
     "@elastic/search-ui" "^1.23.0"
 
-"@elastic/request-converter@^9.0.1":
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.0.1.tgz#68a715df0ade05c338c6960275c88935610a7946"
-  integrity sha512-+uJ/r/Ii963lswDiHHSvFzbSD9cZIpp65SI2rBvG4U8eExJX21XNSjezVMJX0IyzYnKMOV2+8jZtkAvMFYqlUQ==
+"@elastic/request-converter@^9.1.0":
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.1.0.tgz#e2d8c601b7b809d56bb601fd5f390e83fb285cd0"
+  integrity sha512-jwjfF+l6MoH84tvExkaSdINBwV1ecAHNqoQRoJ25CY3QK1AliLhWqZ5qriOLxRMxKNeDd7jP2ShD6cEE0RX2jg==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
@@ -5918,6 +5959,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/intercepts-plugin@link:x-pack/platform/plugins/private/intercepts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
   version "0.0.0"
   uid ""
@@ -6466,6 +6511,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/onechat-browser@link:x-pack/platform/packages/shared/onechat/onechat-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-server@link:x-pack/platform/packages/shared/onechat/onechat-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/open-telemetry-instrumented-plugin@link:src/platform/test/common/plugins/otel_metrics":
   version "0.0.0"
   uid ""
@@ -6575,6 +6636,10 @@
   uid ""
 
 "@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-intercept-plugin@link:x-pack/platform/plugins/private/product_intercept":
   version "0.0.0"
   uid ""
 
@@ -7506,6 +7571,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/spaces-utils@link:src/platform/packages/shared/kbn-spaces-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sse-example-plugin@link:examples/sse_example":
   version "0.0.0"
   uid ""
@@ -8218,25 +8287,25 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.17.0.tgz#963978fc1d64f7166e72928c101805a3899b0142"
-  integrity sha512-HYQNc4xbE58hBOO1yZsqE+BHOC36AYrHPZ5hwvlHoZRSsaoYCPM+Q/n+O+N3JhWXTqGsu6SwUzqUzTyxg8prGg==
+"@launchdarkly/js-sdk-common@2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.18.0.tgz#252b1d7f57fbc0dc6975169eff0940b4a54b130e"
+  integrity sha512-ojfkS8H92qkSmnMkJoIRjL1uh7iLLthVWDiZv4oxHduVurpNP+Eq4ByteaRlfyX1PpXZAgDvnELTyNKU1ZG9mA==
 
-"@launchdarkly/js-server-sdk-common@2.15.1":
-  version "2.15.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.15.1.tgz#355ee04f6cdfa2aa9e006e3acdbcd7a11d863993"
-  integrity sha512-dAp2Uvo4r8nmIXHEUaRvxspLBYJmwVX3ZTCBvgX128pDi+ucJoW0IT10r8hD/OQrN5UJA66LDxI6RMr0kgqwGA==
+"@launchdarkly/js-server-sdk-common@2.15.2":
+  version "2.15.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.15.2.tgz#7e728da9115d4d7d954e3c1c204c38e33b5fe582"
+  integrity sha512-GuLic2jo/eYFT1wVl/Ap0QnZTw3hWIu0esft5gA4p31UpyxQbF8f541JzjilvCmg1jhxY1pKx0vZHD/3YLnWTQ==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.17.0"
+    "@launchdarkly/js-sdk-common" "2.18.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.9.1":
-  version "9.9.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.9.1.tgz#899e3e79c15a8a262af3e415a0c3c6de1d2a3f8e"
-  integrity sha512-4XM5RpqgkFtbDrmwqjsh0/T7X1bgnq+ds1yjZLuB8F2O8z0UJvlneMs9UjcQDJ+yetiJExVqrq8LsJ3geNyiJQ==
+"@launchdarkly/node-server-sdk@^9.9.2":
+  version "9.9.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.9.2.tgz#4e6095fc71e3fa130fd0cdae467fa7a01b039e48"
+  integrity sha512-rXAVlEa44A7jidWvgtakczgoTG6ABPkH892pan3QODaJgIOC/Kq3sauEQ1H/FrPObK4NnWuTXNQK62u9UC74Rg==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.15.1"
+    "@launchdarkly/js-server-sdk-common" "2.15.2"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.1.0"
 
@@ -11366,25 +11435,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/color-convert@*":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/color-convert/-/color-convert-2.0.0.tgz#8f5ee6b9e863dcbee5703f5a517ffb13d3ea4e22"
-  integrity sha512-m7GG7IKKGuJUXvkZ1qqG3ChccdIM/qBBo913z+Xft0nKCX4hAU/IxKwZBU4cpRZ7GS5kV4vOblUkILtSShCPXQ==
-  dependencies:
-    "@types/color-name" "*"
-
-"@types/color-name@*":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
-  integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
-
-"@types/color@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.3.tgz#e6d8d72b7aaef4bb9fe80847c26c7c786191016d"
-  integrity sha512-X//qzJ3d3Zj82J9sC/C18ZY5f43utPbAJ6PhYt/M7uG6etcF6MRpKdN880KBy43B0BMzSfeT96MzrsNjFI3GbA==
-  dependencies:
-    "@types/color-convert" "*"
-
 "@types/command-line-args@^5.2.3":
   version "5.2.3"
   resolved "https://registry.yarnpkg.com/@types/command-line-args/-/command-line-args-5.2.3.tgz#553ce2fd5acf160b448d307649b38ffc60d39639"
@@ -12571,11 +12621,6 @@
   integrity sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==
   dependencies:
     "@types/node" "*"
-
-"@types/tinycolor2@^1.4.0", "@types/tinycolor2@^1.4.1":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.2.tgz#721ca5c5d1a2988b4a886e35c2ffc5735b6afbdf"
-  integrity sha512-PeHg/AtdW6aaIO2a+98Xj7rWY4KC1E6yOy7AFknJQ7VXUGNrMlyxDFxJo7HqLtjQms/ZhhQX52mLVW/EX3JGOw==
 
 "@types/topojson-client@3.1.5":
   version "3.1.5"
@@ -17328,7 +17373,7 @@ diff@^5.0.0, diff@^5.1.0, diff@^5.2.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
   integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
 
-diff@^8.0.0:
+diff@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.1.tgz#1562531dbca460fe5be98a026412996ccab1abd5"
   integrity sha512-rEaM3KmVm78zE3dFZaop3aCQa2MTm+T4kcigUFLVU/KbOYdiY6JnL2g2puOYnct3QFw9pjZadaCbCZ1O8ArMlQ==
@@ -26789,13 +26834,13 @@ printj@~1.1.0:
   integrity sha512-zA2SmoLaxZyArQTOPj5LXecR+RagfPSU5Kw1qP+jkWeNlrq+eJZyY2oS68SU1Z/7/myXM4lo9716laOFAVStCQ==
 
 prismjs@^1.29.0:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.29.0.tgz#f113555a8fa9b57c35e637bba27509dcf802dd12"
-  integrity sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.30.0.tgz#d9709969d9d4e16403f6f348c63553b19f0975a9"
+  integrity sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==
 
 prismjs@~1.27.0:
   version "1.27.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.27.0.tgz#bb6ee3138a0b438a3653dd4d6ce0cc6510a45057"
+  resolved "https://registry.npmjs.org/prismjs/-/prismjs-1.27.0.tgz"
   integrity sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==
 
 process-nextick-args@^2.0.0, process-nextick-args@~2.0.0:
@@ -30831,19 +30876,6 @@ tiny-warning@^1.0.0, tiny-warning@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
-
-tinycolor2@1.4.1, tinycolor2@^1.0.0:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.4.1.tgz#f4fad333447bc0b07d4dc8e9209d8f39a8ac77e8"
-  integrity sha1-9PrTM0R7wLB9TcjpIJ2POaisd+g=
-
-tinygradient@0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/tinygradient/-/tinygradient-0.4.3.tgz#0a8dfde56f8865deec4c435a51bd5b0c0dec59fa"
-  integrity sha512-tBPYQSs6eWukzzAITBSmqcOwZCKACvRa/XjPPh1mj4mnx4G3Drm51HxyCTU/TKnY8kG4hmTe5QlOh9O82aNtJQ==
-  dependencies:
-    "@types/tinycolor2" "^1.4.0"
-    tinycolor2 "^1.0.0"
 
 tinyqueue@^2.0.3:
   version "2.0.3"
