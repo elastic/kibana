@@ -1616,4 +1616,47 @@ describe('SearchSource', () => {
       );
     });
   });
+
+  describe('parseActiveIndexPatternFromQueryString', () => {
+    it.each([
+      {
+        indexPattern: '_index: logs-2024-06-27',
+        expectedResult: ['logs-2024-06-27'],
+        description: 'a single index name without wildcards',
+      },
+      {
+        indexPattern: '_index: logs-*',
+        expectedResult: ['logs-*'],
+        description: 'a single index name with wildcards',
+      },
+      {
+        indexPattern: '_index: logs-2024-06-27 or _index: foo-2024-06-27',
+        expectedResult: ['logs-2024-06-27', 'foo-2024-06-27'],
+        description: 'multiple index names',
+      },
+      {
+        indexPattern: "_index: 'logs-2024-06-27'",
+        expectedResult: ['logs-2024-06-27'],
+        description: 'index names with single quotes',
+      },
+      {
+        indexPattern: '_index: "logs-2024-06-27"',
+        expectedResult: ['logs-2024-06-27'],
+        description: 'index names with double quotes',
+      },
+      {
+        indexPattern: '_index: "logs-2024-06-27\'',
+        expectedResult: [],
+        description: 'index pattern with mixed quotes',
+      },
+      {
+        indexPattern: 'foo: bar',
+        expectedResult: [],
+        description: 'no index pattern when _index is not present',
+      },
+    ])('should extract $description', ({ indexPattern: actualIndexPattern, expectedResult }) => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString(actualIndexPattern);
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });
