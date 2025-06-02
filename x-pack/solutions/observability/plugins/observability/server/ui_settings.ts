@@ -25,10 +25,8 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -44,8 +42,6 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
-  profilingFetchTopNFunctionsFromStacktraces,
-  enableInfrastructureContainerAssetView,
   searchExcludedDataTiers,
   apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
@@ -242,31 +238,6 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     solution: 'oblt',
   },
-  [enableInfrastructureHostsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
-      defaultMessage: 'Infrastructure Hosts view',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
-    }),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureContainerAssetView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
-      defaultMessage: 'Container view',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
-      {
-        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
-  },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
@@ -433,21 +404,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service transaction metrics',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
-      defaultMessage:
-        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     solution: 'oblt',
   },
   [apmEnableContinuousRollups]: {
@@ -675,22 +631,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [profilingFetchTopNFunctionsFromStacktraces]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
-      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
-    }),
-    description: i18n.translate(
-      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
-      {
-        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
-      }
-    ),
-    value: false,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [searchExcludedDataTiers]: {

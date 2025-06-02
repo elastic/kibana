@@ -16,12 +16,13 @@ import { SecurityPageName } from '../app/types';
 import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ExploreLandingPage } from './landing';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const ExploreLanding = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} redirectOnMissing>
       <ExploreLandingPage />
-    </TrackApplicationView>
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 

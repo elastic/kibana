@@ -142,6 +142,34 @@ export const PrebuiltRuleVersion = z.object({
 });
 
 /**
+ * The rule migration object ( without Id ) with its settings.
+ */
+export type RuleMigrationData = z.infer<typeof RuleMigrationData>;
+export const RuleMigrationData = z.object({
+  /**
+   * The user profile ID of the user who created the migration.
+   */
+  created_by: NonEmptyString,
+  /**
+   * The moment migration was created
+   */
+  created_at: NonEmptyString,
+});
+
+/**
+ * The rule migration object with its settings.
+ */
+export type RuleMigration = z.infer<typeof RuleMigration>;
+export const RuleMigration = z
+  .object({
+    /**
+     * The rule migration id
+     */
+    id: NonEmptyString,
+  })
+  .merge(RuleMigrationData);
+
+/**
  * The rule translation result.
  */
 export type RuleMigrationTranslationResult = z.infer<typeof RuleMigrationTranslationResult>;
@@ -185,8 +213,8 @@ export const RuleMigrationComments = z.array(RuleMigrationComment);
 /**
  * The rule migration document object.
  */
-export type RuleMigrationData = z.infer<typeof RuleMigrationData>;
-export const RuleMigrationData = z.object({
+export type RuleMigrationRuleData = z.infer<typeof RuleMigrationRuleData>;
+export const RuleMigrationRuleData = z.object({
   /**
    * The moment of creation
    */
@@ -232,15 +260,15 @@ export const RuleMigrationData = z.object({
 /**
  * The rule migration document object.
  */
-export type RuleMigration = z.infer<typeof RuleMigration>;
-export const RuleMigration = z
+export type RuleMigrationRule = z.infer<typeof RuleMigrationRule>;
+export const RuleMigrationRule = z
   .object({
     /**
      * The rule migration id
      */
     id: NonEmptyString,
   })
-  .merge(RuleMigrationData);
+  .merge(RuleMigrationRuleData);
 
 /**
  * The status of the migration task.
@@ -363,8 +391,8 @@ export const RuleMigrationTranslationStats = z.object({
 /**
  * The rule migration data object for rule update operation
  */
-export type UpdateRuleMigrationData = z.infer<typeof UpdateRuleMigrationData>;
-export const UpdateRuleMigrationData = z.object({
+export type UpdateRuleMigrationRule = z.infer<typeof UpdateRuleMigrationRule>;
+export const UpdateRuleMigrationRule = z.object({
   /**
    * The rule migration id
    */
