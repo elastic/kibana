@@ -23,6 +23,7 @@ import {
   ESQLIdentifier,
   ESQLMap,
   ESQLMapEntry,
+  ESQLAstRerankCommand,
 } from '../types';
 import { walk, Walker } from './walker';
 
@@ -879,12 +880,15 @@ describe('structurally can walk all nodes', () => {
 
 describe('Walker.commands()', () => {
   test('can collect all commands', () => {
-    const { ast } = parse('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
+    const { ast } = parse(
+      'FROM index | STATS a = 123 | WHERE 123 | LIMIT 10 | RERANK "query" ON field WITH id'
+    );
     const commands = Walker.commands(ast);
 
     expect(commands.map(({ name }) => name).sort()).toStrictEqual([
       'from',
       'limit',
+      'rerank',
       'stats',
       'where',
     ]);
@@ -1046,6 +1050,29 @@ describe('Walker.find()', () => {
     expect(fn).toMatchObject({
       type: 'function',
       name: 'bucket',
+    });
+  });
+
+  test('can find RERANK command by inference ID', () => {
+    const query =
+      'FROM b | RERANK "query" ON field WITH abc | RERANK "query" ON field WITH my_id | LIMIT 10';
+    const command = Walker.find(parse(query).root, (node) => {
+      if (node.type === 'command' && node.name === 'rerank') {
+        const cmd = node as ESQLAstRerankCommand;
+        if (cmd.inferenceId.name === 'my_id') {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    expect(command).toMatchObject({
+      type: 'command',
+      name: 'rerank',
+      inferenceId: {
+        type: 'identifier',
+        name: 'my_id',
+      },
     });
   });
 
