@@ -43,6 +43,7 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
                 // NOTE: DataViewManagerScopeName.timeline is omitted here because timelines do their own init
                 // that sets the data view. If it was there, a race condition would occur
                 DataViewManagerScopeName.default,
+                DataViewManagerScopeName.timeline,
               ],
             })
           );
