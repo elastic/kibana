@@ -67,7 +67,7 @@ export const useAwsCredentialsForm = ({
   const awsCredentialsType: AwsCredentialsType =
     getAwsCredentialsType(input) || AWS_SETUP_FORMAT.CLOUD_FORMATION;
 
-  const group = options[awsCredentialsType];
+  const group = options[awsCredentialsType as keyof typeof options];
   const fields = getInputVarsFields(input, group.fields);
   const fieldsSnapshot = useRef({});
 
