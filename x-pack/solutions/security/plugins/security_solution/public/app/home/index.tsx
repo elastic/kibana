@@ -43,8 +43,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const sourcererScope = getScopeFromPath(pathname);
   const { browserFields: oldBrowserFields } = useInitSourcerer(sourcererScope);
   const { browserFields: experimentalBrowserFields } = useBrowserFields(sourcererScope);
-  useInitDataViewManager();
-  useRestoreDataViewManagerStateFromURL(sourcererScope);
+
+  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), sourcererScope);
+
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
