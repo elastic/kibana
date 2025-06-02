@@ -104,7 +104,7 @@ export const createRerankCommand = (ctx: RerankCommandContext): ESQLAstRerankCom
       : undefined
   );
 
-  if (query.incomplete || inferenceId.incomplete || !onCtx || !withCtx) {
+  if (query.incomplete || inferenceId.incomplete || !onCtx) {
     command.incomplete = true;
   }
 

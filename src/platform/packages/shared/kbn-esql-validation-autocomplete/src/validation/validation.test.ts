@@ -487,20 +487,17 @@ describe('validation logic', () => {
 
     describe('limit', () => {
       testErrorsAndWarnings('from index | limit ', [
-        `SyntaxError: missing INTEGER_LITERAL at '<EOF>'`,
+        `SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}`,
       ]);
       testErrorsAndWarnings('from index | limit 4 ', []);
-      testErrorsAndWarnings('from index | limit 4.5', [
-        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL",
-      ]);
       testErrorsAndWarnings('from index | limit a', [
-        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL",
+        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
       ]);
       testErrorsAndWarnings('from index | limit doubleField', [
-        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL",
+        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
       ]);
       testErrorsAndWarnings('from index | limit textField', [
-        "SyntaxError: mismatched input 'textField' expecting INTEGER_LITERAL",
+        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
       ]);
       testErrorsAndWarnings('from index | limit 4', []);
     });
