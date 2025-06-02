@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable no-console */
+
 /**
  * Add LogsHub sample data using:
  *
@@ -25,12 +28,16 @@ import uniq from 'lodash/uniq';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';
+import yargs from 'yargs/yargs';
+import { flattenObject } from '@kbn/object-utils';
+import { get } from 'lodash';
 import { getLogGroups } from './get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
 const ES_USER = 'elastic';
 const ES_PASS = 'changeme';
 const KIBANA_URL = 'http://localhost:5601/dev';
+const MESSAGE_FIELD = 'body.text';
 
 const esClient = new Client({
   node: ES_URL,
@@ -59,33 +66,55 @@ async function fetchDocs(index: string | string[], size = 100) {
       query: { match_all: {} },
       _source: true,
     })
-    .then((res) => res.hits.hits.map((h: any) => h._source));
+    .then((res) => res.hits.hits.map((h: any) => flattenObject(h._source)));
 }
 
 async function getStreams(): Promise<string[]> {
-  const res = await fetch(`${KIBANA_URL}/api/streams`, {
+  const data = await fetch(`${KIBANA_URL}/api/streams`, {
     method: 'GET',
     headers: getKibanaAuthHeaders(),
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new Error(`HTTP Response Code: ${res.status}`);
   });
-  const data = await res.json();
   return data.streams.map((s: any) => s.name).filter((name: string) => name.startsWith('logs.'));
 }
 
+async function getConnectors(): Promise<string[]> {
+  const data = await fetch(`${KIBANA_URL}/api/actions/connectors`, {
+    method: 'GET',
+    headers: getKibanaAuthHeaders(),
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new Error(`HTTP Response Code: ${res.status}`);
+  });
+  return data.map((c: any) => c.id);
+}
+
 async function getSuggestions(stream: string, connectorId: string, samples: any[]) {
-  const res = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions`, {
+  const data = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions`, {
     method: 'POST',
     headers: getKibanaAuthHeaders(),
     body: JSON.stringify({
       connectorId,
-      field: 'message',
+      field: MESSAGE_FIELD,
       samples,
     }),
+  }).then(async (res) => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new Error(`HTTP Response Code: ${res.status}`);
   });
-  return res.json();
+  return data;
 }
 
 async function simulateGrokProcessor(stream: string, documents: any[], grokProcessor: any) {
-  const res = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_simulate`, {
+  const data = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_simulate`, {
     method: 'POST',
     headers: getKibanaAuthHeaders(),
     body: JSON.stringify({
@@ -104,8 +133,13 @@ async function simulateGrokProcessor(stream: string, documents: any[], grokProce
         },
       ],
     }),
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new Error(`HTTP Response Code: ${res.status}`);
   });
-  return res.json();
+  return data;
 }
 
 async function getParsingScore(
@@ -127,8 +161,20 @@ async function getParsingScore(
   return parsedDocs / documents.length;
 }
 
-export async function evaluateSuggestions() {
-  const streams = await getStreams();
+export async function evaluateGrokSuggestions() {
+  const [streams, connectors] = await Promise.all([getStreams(), getConnectors()]);
+
+  if (streams.length === 0) {
+    throw new Error('No streams found. Please ensure you have sample data loaded.');
+  }
+
+  if (connectors.length === 0) {
+    throw new Error(
+      'No connectors found. Please ensure you have at least one connector configured.'
+    );
+  }
+
+  const connector = connectors[connectors.length - 1]; // Use the last connector for evaluation
 
   // 1. Get AI suggestions
   console.log(chalk.bold('Getting suggestions...'));
@@ -137,17 +183,14 @@ export async function evaluateSuggestions() {
     streams.map(async (stream) => {
       const sampleDocs = await fetchDocs(stream, 100);
 
-      const suggestion = await getSuggestions(stream, 'azure-gpt4o', sampleDocs);
+      const suggestion = await getSuggestions(stream, connector, sampleDocs);
       const grokProcessor = suggestion[0]?.grokProcessor;
       if (!grokProcessor) {
         throw new Error('No grokProcessor returned');
       }
       console.log(`- ${stream}: ${chalk.dim(grokProcessor.patterns.join(', '))}`);
 
-      return {
-        stream,
-        ...grokProcessor,
-      };
+      return { stream, ...grokProcessor };
     })
   );
 
@@ -155,7 +198,6 @@ export async function evaluateSuggestions() {
   console.log();
   console.log(chalk.bold('Simulate processing...'));
   console.log();
-
   const output = await Promise.all(
     suggestions.map(async (suggestion) => {
       const sampleDocs = await fetchDocs(suggestion.stream, 100);
@@ -203,38 +245,55 @@ export async function evaluateSuggestions() {
   }, {});
 }
 
-evaluateSuggestions()
-  .then((result) => {
-    const file = `suggestion_results.${Date.now()}.json`;
+export async function evaluateLogGrouping() {
+  const allDocs = await fetchDocs('logs.*', 10_000);
+  const groups = getLogGroups(
+    allDocs.map((doc) => `${get(doc, MESSAGE_FIELD)}|||${get(doc, 'attributes.filepath')}`),
+    1
+  );
+  const output = groups.map((g) => {
+    return {
+      pattern: g.pattern,
+      logs: g.logs.length,
+      streams: uniq(g.logs.map((log) => log.split('|||')[1])),
+    };
+  });
+  output.forEach((g) => {
     console.log();
-    console.log(`Evaluation complete. Writing results to ${chalk.underline.dim(file)}`);
-    console.log();
-    return writeFile(join(__dirname, file), JSON.stringify(result, null, 2));
-  })
-  .catch(console.error);
+    console.log(chalk.bold(`"${g.pattern}" (${g.logs} logs):`));
+    g.streams.forEach((stream) => {
+      console.log(`- ${chalk.green(stream)}`);
+    });
+  });
+  return output;
+}
 
-// export async function evaluateLogGrouping() {
-//   const allDocs = await fetchDocs('logs*', 10_000);
-//   const groups = getLogGroups(
-//     allDocs.map((doc) => `${doc.message}|||${doc.filepath}`),
-//     1
-//   );
-//   return groups.map((g) => {
-//     return {
-//       pattern: g.pattern,
-//       logs: g.logs.length,
-//       streams: uniq(g.logs.map((log) => log.split('|||')[1])),
-//     };
-//   });
-// }
+async function runGrokSuggestionsEvaluation() {
+  await evaluateGrokSuggestions()
+    .then((result) => {
+      const file = `suggestion_results.${Date.now()}.json`;
+      console.log();
+      console.log(`Evaluation complete. Writing results to ${chalk.underline.dim(file)}`);
+      console.log();
+      return writeFile(join(__dirname, file), JSON.stringify(result, null, 2));
+    })
+    .catch(console.error);
+}
 
-// console.log();
-// console.log('Starting evaluation of Log Grouping...');
-// evaluateLogGrouping()
-//   .then((result) => {
-//     const file = `grouping_results.${Date.now()}.json`;
-//     console.log();
-//     console.log(`Evaluation complete. Writing results to ${file}`);
-//     return writeFile(join(__dirname, file), JSON.stringify(result, null, 2));
-//   })
-//   .catch(console.error);
+async function runLogGroupingEvaluation() {
+  console.log();
+  console.log('Starting evaluation of Log Grouping...');
+  await evaluateLogGrouping()
+    .then((result) => {
+      const file = `grouping_results.${Date.now()}.json`;
+      console.log();
+      console.log(`Evaluation complete. Writing results to ${file}`);
+      return writeFile(join(__dirname, file), JSON.stringify(result, null, 2));
+    })
+    .catch(console.error);
+}
+
+yargs(process.argv.slice(2))
+  .command('*', 'Evaluate AI suggestions for Grok patterns', runGrokSuggestionsEvaluation)
+  .command('grouping', 'Evaluate log grouping patterns', runLogGroupingEvaluation)
+  .parse();
