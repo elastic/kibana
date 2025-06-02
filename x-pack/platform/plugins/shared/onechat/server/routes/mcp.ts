@@ -95,9 +95,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         await server.connect(transport);
         logger.info('MCP: Server connected to transport');
 
-        // Handle the request through the transport
-        await transport.handleRequest(request, response);
+        // Handle the request through the transport and return the response
+        const result = await transport.handleRequest(request, response);
         logger.info('MCP: Request handled');
+        return result;
       } catch (error) {
         logger.error('MCP: Error handling request', { error });
         // Clean up resources on error

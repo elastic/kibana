@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
+import { z } from 'zod';
 
 export class OnechatPlugin
   implements
@@ -41,6 +42,21 @@ export class OnechatPlugin
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices();
+
+    serviceSetups.tools.register({
+      id: 'my_tool',
+      name: 'Onechat Tool',
+      description: 'Increments a number by 42',
+      meta: {
+        tags: ['increment', 'math'],
+      },
+      schema: z.object({
+        someNumber: z.number().describe('Some number'),
+      }),
+      handler: ({ someNumber }, context) => {
+        return 42 + someNumber;
+      },
+    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({

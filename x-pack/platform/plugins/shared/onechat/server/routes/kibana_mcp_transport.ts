@@ -7,8 +7,7 @@
 
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import type { JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaResponseFactory, KibanaRequest } from '@kbn/core-http-server';
 import {
   isJSONRPCRequest,
   isJSONRPCResponse,
@@ -19,7 +18,6 @@ import {
 import { Logger } from '@kbn/logging';
 import { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types';
 import { randomUUID } from 'node:crypto';
-import { CoreKibanaRequest } from '@kbn/core/packages/http/router-server-internal';
 import type { IKibanaResponse } from '@kbn/core/server';
 
 /**
@@ -37,6 +35,7 @@ export class KibanaMCPTransport implements Transport {
   private _pendingResponses: Map<RequestId, JSONRPCMessage> = new Map();
   private _requestIds: Set<RequestId> = new Set();
   private logger: Logger;
+  private _responseCallbacks: Map<string, (response: IKibanaResponse) => void> = new Map();
 
   sessionId?: string | undefined;
   onclose?: () => void;
@@ -49,15 +48,19 @@ export class KibanaMCPTransport implements Transport {
   }
 
   /**
+   * Registers a callback for when a response is ready for a specific stream
+   */
+  registerResponseCallback(streamId: string, callback: (response: IKibanaResponse) => void) {
+    this._responseCallbacks.set(streamId, callback);
+  }
+
+  /**
    * Handles an incoming HTTP request, whether GET or POST
    */
-  async handleRequest(
-    req: CoreKibanaRequest,
-    res: KibanaResponseFactory
-  ): Promise<IKibanaResponse> {
+  async handleRequest(req: KibanaRequest, res: KibanaResponseFactory): Promise<IKibanaResponse> {
     // todo: figure out how to handle GET and DELETE requests
     if (true) {
-      await this.handlePostRequest(req, res);
+      return await this.handlePostRequest(req, res);
     } else {
       throw new Error('Unsupported request method');
     }
@@ -198,21 +201,24 @@ export class KibanaMCPTransport implements Transport {
       if (!hasRequests) {
         this.logger.info('Processing notifications/responses only');
         // if it only contains notifications or responses, return 202
-        responseFactory.accepted();
+        const response = responseFactory.accepted();
 
         // handle each message
         for (const message of messages) {
           this.onmessage?.(message);
         }
-      } else if (hasRequests) {
+        return response;
+      } else {
         this.logger.info('Processing requests with potential streaming');
-        // The default behavior is to use SSE streaming
-        // but in some cases server will return JSON responses
         const streamId = randomUUID();
         this.logger.info(`Generated stream ID: ${streamId}`);
 
-        // Store the response for this request to send messages back through this connection
-        // We need to track by request ID to maintain the connection
+        // Create a promise that will resolve when the response is ready
+        const responsePromise = new Promise<IKibanaResponse>((resolve) => {
+          this.registerResponseCallback(streamId, resolve);
+        });
+
+        // Store the response factory for this request to send messages back through this connection
         for (const message of messages) {
           if (isJSONRPCRequest(message)) {
             this.logger.info(`Mapping request ID ${message.id} to stream ${streamId}`);
@@ -220,10 +226,12 @@ export class KibanaMCPTransport implements Transport {
             this._requestToStreamMapping.set(message.id, streamId);
           }
         }
+
         // Set up close handler for client disconnects
         request.events.aborted$.subscribe(() => {
           this.logger.info(`Stream ${streamId} aborted by client`);
           this._streamMapping.delete(streamId);
+          this._responseCallbacks.delete(streamId);
         });
 
         // handle each message
@@ -231,6 +239,9 @@ export class KibanaMCPTransport implements Transport {
           this.onmessage?.(message);
         }
         this.logger.info('Finished processing all messages');
+
+        // Wait for the response to be ready
+        return await responsePromise;
       }
     } catch (error) {
       this.logger.error(`Error processing request: ${error}`);
@@ -247,13 +258,14 @@ export class KibanaMCPTransport implements Transport {
           id: null,
         }),
       });
+      this.onerror?.(error as Error);
     }
   }
 
   /**
    * Sends a JSON-RPC message
    */
-  async send(message: JSONRPCMessage, options?: { relatedRequestId?: RequestId }): Promise<any> {
+  async send(message: JSONRPCMessage, options?: { relatedRequestId?: RequestId }): Promise<void> {
     try {
       this.logger.info(`Sending message: ${JSON.stringify(message)}`);
 
@@ -274,7 +286,7 @@ export class KibanaMCPTransport implements Transport {
       const streamId = this._requestToStreamMapping.get(requestId);
       this.logger.info(`Found stream ID for request ${String(requestId)}: ${streamId}`);
 
-      const response = this._streamMapping.get(streamId!);
+      const responseFactory = this._streamMapping.get(streamId!);
       if (!streamId) {
         const error = `No connection established for request ID: ${String(requestId)}`;
         this.logger.error(error);
@@ -285,7 +297,7 @@ export class KibanaMCPTransport implements Transport {
         this.logger.info(`Processing response/error message for request ${String(requestId)}`);
         this._requestResponseMap.set(requestId, message);
         const relatedIds = Array.from(this._requestToStreamMapping.entries())
-          .filter(([_, streamId]) => this._streamMapping.get(streamId) === response)
+          .filter(([_, sid]) => this._streamMapping.get(sid) === responseFactory)
           .map(([id]) => id);
 
         this.logger.info(`Found related request IDs: ${relatedIds.join(', ')}`);
@@ -295,7 +307,7 @@ export class KibanaMCPTransport implements Transport {
         this.logger.info(`All responses ready: ${allResponsesReady}`);
 
         if (allResponsesReady) {
-          if (!response) {
+          if (!responseFactory) {
             const error = `No connection established for request ID: ${String(requestId)}`;
             this.logger.error(error);
             throw new Error(error);
@@ -315,16 +327,25 @@ export class KibanaMCPTransport implements Transport {
             responses.length === 1 ? JSON.stringify(responses[0]) : JSON.stringify(responses);
           this.logger.info(`Sending response body: ${responseBody}`);
 
+          const response = responseFactory.ok({
+            headers,
+            body: responseBody,
+          });
+
+          // Trigger the response callback
+          const callback = this._responseCallbacks.get(streamId);
+          if (callback) {
+            callback(response);
+            this._responseCallbacks.delete(streamId);
+          }
+
           // Clean up
           for (const id of relatedIds) {
             this._requestResponseMap.delete(id);
             this._requestToStreamMapping.delete(id);
           }
-
-          return response.ok({
-            headers,
-            body: responseBody,
-          });
+          this._streamMapping.delete(streamId);
+          this.logger.info('Cleaned up request mappings');
         }
       }
     } catch (error) {
