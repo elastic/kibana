@@ -88,7 +88,7 @@ export const SpanFlyout = ({
       flattened: flattenObject(span),
     };
   }, [docId, span]);
-
+  const isSpan = !!documentAsHit?.flattened[PARENT_ID_FIELD];
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
   const renderTabs = () => {
@@ -115,7 +115,10 @@ export const SpanFlyout = ({
         <EuiTitle size="m">
           <h2 id={flyoutId}>
             {i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.title', {
-              defaultMessage: 'Detail',
+              defaultMessage: '{docType} document',
+              values: {
+                docType: isSpan ? 'Span' : 'Transaction',
+              },
             })}
           </h2>
         </EuiTitle>
