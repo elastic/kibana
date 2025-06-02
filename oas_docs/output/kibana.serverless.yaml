@@ -70545,7 +70545,10 @@ components:
           description: The Google Gemini request URL.
         defaultModel:
           type: string
-          description: The generative artificial intelligence model for Google Gemini to use.
+          description: |
+            The generative artificial intelligence model for Google Gemini to use.
+            > info
+            > Refer to the [Google Gemini Models documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable) to check when specific models are retired.
           default: gemini-1.5-pro-002
         gcpRegion:
           type: string
