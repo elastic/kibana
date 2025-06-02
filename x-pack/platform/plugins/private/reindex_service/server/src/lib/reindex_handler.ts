@@ -17,7 +17,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 
-import { ReindexOperation, ReindexStatus } from '../../../common/types';
+import { ReindexOperation, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 
 import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';
