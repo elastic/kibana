@@ -153,7 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('inherits dlm', async () => {
+      it('inherits dsl', async () => {
         // create two branches, one that inherits from root and
         // another one that overrides the root lifecycle
         await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
@@ -320,7 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         });
 
-        it('updates when transitioning from ilm to dlm', async () => {
+        it('updates when transitioning from ilm to dsl', async () => {
           const name = 'logs.ilm-with-backing-indices';
           await putStream(apiClient, name, {
             dashboards: [],
@@ -356,8 +356,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await expectLifecycle([name], { dsl: { data_retention: '7d' }, from: name });
         });
 
-        it('updates when transitioning from dlm to ilm', async () => {
-          const name = 'logs.dlm-with-backing-indices';
+        it('updates when transitioning from dsl to ilm', async () => {
+          const name = 'logs.dsl-with-backing-indices';
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
