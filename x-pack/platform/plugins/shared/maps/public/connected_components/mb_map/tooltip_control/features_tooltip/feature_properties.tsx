@@ -279,7 +279,7 @@ export class FeatureProperties extends Component<Props, State> {
       <td>{applyFilterButton}</td>
     ) : (
       <td className="mapFeatureTooltip_actionsRow">
-        <span>
+        <span css={mapFeatureTooltipActionsRow}>
           {applyFilterButton}
           <EuiButtonEmpty
             size="xs"
