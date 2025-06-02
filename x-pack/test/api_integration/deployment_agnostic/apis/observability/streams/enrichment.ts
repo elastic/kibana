@@ -194,14 +194,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       {
                         // apply custom processor
                         uppercase: {
-                          field: 'abc',
+                          field: 'attributes.abc',
                         },
                       },
                       {
                         // apply condition
                         lowercase: {
-                          field: 'def',
-                          if: "ctx.def == 'yes'",
+                          field: 'attributes.def',
+                          if: "ctx.attributes.def == 'yes'",
                         },
                       },
                       {
@@ -211,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                             // execute on failure pipeline
                             {
                               set: {
-                                field: 'fail_failed',
+                                field: 'attributes.fail_failed',
                                 value: 'yes',
                               },
                             },
@@ -247,11 +247,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await fetchDocument(esClient, 'logs.nginx', response._id);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:11.000Z',
-          abc: 'SHOULD BECOME UPPERCASE',
-          def: 'SHOULD NOT BECOME LOWERCASE',
-          fail_failed: 'yes',
-          'host.name': 'routeme',
-          'stream.name': 'logs.nginx',
+          attributes: {
+            abc: 'SHOULD BECOME UPPERCASE',
+            def: 'SHOULD NOT BECOME LOWERCASE',
+            fail_failed: 'yes',
+          },
+          resource: {
+            attributes: {
+              'host.name': 'routeme',
+            },
+          },
+          'stream': {
+            name: 'logs.nginx',
+          },
         });
       });
 
