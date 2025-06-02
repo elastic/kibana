@@ -54,13 +54,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { euiTheme } = useEuiTheme();
-
-  const bulkDeleteButtonCss = css`
-    .euiButtonEmpty__text {
-      padding-top: ${euiTheme.size.xs};
-    }
-  `;
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
   const isPerformingAction = isEnablingRules || isDisablingRules || isBulkEditing;
@@ -367,7 +360,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             color="danger"
             isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
             data-test-subj="bulkDelete"
-            css={bulkDeleteButtonCss}
             className="actBulkActionPopover__deleteAll"
           >
             <FormattedMessage

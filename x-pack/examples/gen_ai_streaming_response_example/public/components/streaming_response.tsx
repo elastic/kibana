@@ -148,11 +148,6 @@ export const StreamingResponse = ({
     <EuiPanel color="primary">
       <EuiAccordion
         id={`streamingResponse`}
-        css={css`
-          .euiButtonIcon {
-            color: ${euiTheme.colors.textPrimary};
-          }
-        `}
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
