@@ -138,7 +138,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('Node Details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/222073
+  describe.skip('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);

@@ -39,7 +39,6 @@ export {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
   profilingShowErrorFrames,
