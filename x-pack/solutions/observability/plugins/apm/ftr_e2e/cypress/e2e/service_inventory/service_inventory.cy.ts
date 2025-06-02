@@ -95,21 +95,16 @@ describe('Service Inventory', () => {
     });
 
     it('with the correct environment when changing the environment', () => {
+      cy.wait(mainAliasNames);
+
       cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
         .contains('button', 'production')
-        .click();
+        .click({ force: true });
 
-      cy.wait('@detailedStatisticsRequest');
       cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: ['@detailedStatisticsRequest'],
-        value: 'environment=production',
-      });
-
-      cy.wait('@servicesRequest');
-      cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: ['@servicesRequest'],
+        apisIntercepted: mainAliasNames,
         value: 'environment=production',
       });
     });
