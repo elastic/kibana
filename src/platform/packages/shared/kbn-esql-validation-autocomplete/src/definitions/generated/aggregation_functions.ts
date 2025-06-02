@@ -1917,7 +1917,7 @@ const valuesDefinition: FunctionDefinition = {
   name: 'values',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
     defaultMessage:
-      'Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use `MV_SORT`.',
+      'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
   preview: true,
   alias: undefined,
