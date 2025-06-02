@@ -5745,6 +5745,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/document-data-cascader@link:src/platform/packages/shared/shared-ux/document_data_cascader/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dom-drag-drop@link:src/platform/packages/shared/kbn-dom-drag-drop":
   version "0.0.0"
   uid ""
@@ -5922,10 +5926,6 @@
   uid ""
 
 "@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-data-pooler@link:src/platform/packages/shared/shared-ux/esql_data_pooler/impl":
   version "0.0.0"
   uid ""
 

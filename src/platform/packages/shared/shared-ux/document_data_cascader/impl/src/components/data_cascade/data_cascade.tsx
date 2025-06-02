@@ -8,38 +8,89 @@
  */
 
 import React, { Fragment, useEffect, useTransition } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiProgress, EuiTreeView, EuiTreeViewItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiProgress,
+  EuiTreeView,
+  EuiIcon,
+  EuiSelect,
+} from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useReactTable, createColumnHelper, getCoreRowModel  } from '@tanstack/react-table';
+import {
+  useReactTable,
+  createColumnHelper,
+  getCoreRowModel,
+  getExpandedRowModel,
+} from '@tanstack/react-table';
 import { useDataCascadeState } from '../../lib';
 import { Toolbar } from './toolbar';
 
-interface DataCascadeProps {
+interface DataCascadeProps<T extends Record<string, unknown>> {
+  data: T[];
   onGroupByChange?: (groupBy: string) => void;
 }
 
+const DataRow = () => {
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>Data Row</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>Details</EuiText>
+        <EuiSelect
+          id={basicSelectId}
+          options={options}
+          value={value}
+          onChange={(e) => onChange(e)}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export function DataCascade<T extends Record<string, unknown>>({
+  data,
   onGroupByChange,
-}: DataCascadeProps) {
+}: DataCascadeProps<T>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
   const [isPending, startTransition] = useTransition();
-  const state = useDataCascadeState();
   const columnHelper = createColumnHelper<T>();
 
   const table = useReactTable({
-    data: state.data as T[],
+    data: data as T[],
     columns: [
       columnHelper.display({
         id: 'groupBy',
-        header: 'Group By',
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          console.log('info from groupBy:: %o \n', info);
+
+          const groupByColumn = info.column.columnDef.header as string;
+
+          return (
+            <EuiSelect
+              options={data.map((item) => ({
+                value: item[groupByColumn] as string,
+                text: item[groupByColumn] as string,
+              }))}
+              value={info.row.original[groupByColumn] as string}
+              onChange={(e) => {
+                startTransition(() => {
+                  onGroupByChange?.(e.target.value);
+                });
+              }}
+              aria-label={`Group by ${groupByColumn}`}
+            />
+          );
+        },
       }),
     ],
     getCoreRowModel: getCoreRowModel(),
-    // getSubRows: (row) => {
-      
-    // },
+    // getSubRows: (row) => {},
     getExpandedRowModel: getExpandedRowModel(),
     autoResetExpanded: false,
     // onSortingChange: (sorting) => {
@@ -54,38 +105,45 @@ export function DataCascade<T extends Record<string, unknown>>({
     // rangeExtractor
   });
 
+  const { rows, flatRows } = table.getRowModel();
+
   const rowVirtualizer = useVirtualizer({
-    count: table.getRowModel().rows.length,
+    count: flatRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 35,
-    getScrollElement: () => parentRef.current,
     overscan: 5,
     onChange: (instance) => {
       // virtualizer scroll instance
     },
   });
 
-  useEffect(() => {
-    startTransition(() => {
-      onGroupByChange?.(state.currentGroupByColumn!);
-    });
-  }, [onGroupByChange, state.currentGroupByColumn]);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <Toolbar />
+        <Toolbar onSelectionChange={onGroupByChange} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText>
-          <div>
-            <h1>ESQL Data Pooler</h1>
-            <p>Query: {state.currentQueryString}</p>
-          </div>
-        </EuiText>
         <div ref={parentRef} style={{ height: '400px', overflow: 'auto' }}>
           <Fragment>{isPending && <EuiProgress />}</Fragment>
-          <EuiTreeView></EuiTreeView>
+          <Fragment>
+            {rowVirtualizer.getVirtualItems().map(function buildCascadeRows(virtualItem) {
+              const row = flatRows[virtualItem.index];
+              return (
+                <EuiTreeView
+                  key={row.id}
+                  items={row.getVisibleCells().map((cell) => ({
+                    label: cell.column.columnDef.cell,
+                    id: cell.id,
+                    icon: <EuiIcon type="arrowRight" />,
+                    iconWhenExpanded: <EuiIcon type="arrowDown" />,
+                    isExpanded: row.getIsExpanded(),
+                    children: [],
+                  }))}
+                  aria-label="Data Cascade Tree View"
+                />
+              );
+            })}
+          </Fragment>
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
