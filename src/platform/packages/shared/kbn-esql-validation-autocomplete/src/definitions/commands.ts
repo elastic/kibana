@@ -73,6 +73,7 @@ import {
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForCompletion } from '../autocomplete/commands/completion';
 import {
   suggest as suggestForStats,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
@@ -717,7 +718,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
     examples: [],
 
-    suggest: () => [],
+    suggest: suggestForCompletion,
     validate: validateCompletion,
   },
 ];
