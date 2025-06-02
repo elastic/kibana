@@ -111,8 +111,8 @@ describe('useRestoreDataViewManagerStateFromURL', () => {
       detections: { id: 'det-id', selectedPatterns: ['b'] },
     });
     expect(initDataViewSelection).toHaveBeenCalledWith([
-      { fallbackPatterns: ['a'], id: 'test-id', scope: ['default'] },
-      { fallbackPatterns: ['b'], id: 'det-id', scope: ['detections'] },
+      { fallbackPatterns: ['a'], id: 'test-id', scope: 'default' },
+      { fallbackPatterns: ['b'], id: 'det-id', scope: 'detections' },
     ]);
   });
 });
