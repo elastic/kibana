@@ -27,7 +27,6 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmLabsButton,
   enableInfrastructureProfilingIntegration,
   apmEnableTableSearchBar,
   entityCentricExperience,
