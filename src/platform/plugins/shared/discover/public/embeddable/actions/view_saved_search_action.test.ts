@@ -17,6 +17,7 @@ import { createStartContractMock } from '../../__mocks__/start_contract';
 import { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -33,7 +34,7 @@ const compatibleEmbeddableApi: SearchEmbeddableApi = {
 
 jest
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
-  .mockReturnValue(new BehaviorSubject('test'));
+  .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {

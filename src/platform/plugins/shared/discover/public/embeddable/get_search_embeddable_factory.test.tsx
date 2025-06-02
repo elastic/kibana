@@ -29,6 +29,9 @@ import {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
 } from './types';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+
+jest.mock('./utils/serialization_utils', () => ({}));
 
 describe('saved search embeddable', () => {
   const mockServices = {
@@ -216,7 +219,7 @@ describe('saved search embeddable', () => {
     beforeAll(() => {
       jest
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject('test'));
+        .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
     });
 
     afterAll(() => {
