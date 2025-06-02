@@ -6,18 +6,38 @@
  */
 
 import { orderBy } from 'lodash';
+import { ALL_CAPTURE_CHARS } from './split_on_capture_chars';
 
-export const TOKEN_SPLIT_CHARS = [':', '|', ',', ';', '.', '-', '.', '@', '/', '\\', '[', ']', ' '];
+const sanitize = (s: string) => s.replaceAll(/[.^$*+?()\[\]{}|\\]/g, '\\$&');
 
-const sanitize = (s: string) => s.replace(/[\\.\\^\\$\\*\\+\\?\\(\\)\\[\\]\\{\\\\\|]/, '(\\$&)');
-export const PATTERN_OVERRIDES: Record<string, string> = {
-  CAPTUREGROUP: '(%{\\d+})',
-  // override potentially catastrophic unixpath regex
-  UNIXPATH: '^/(?:[w_%!$@:.,+~-]|\\.)+(?:/(?:[w_%!$@:.,+~-]|\\.)+)*$',
-  SPLITCHARS: `(${TOKEN_SPLIT_CHARS.map((val) => sanitize(val)).join('|')}){1}`,
+// ^ , $ , \ , . , * , + , ? , ( , ) , [ , ] , { , } , and |
+const TOKEN_SPLIT_CHARS = [
+  ':',
+  '|',
+  ',',
+  ';',
+  '.',
+  '-',
+  '.',
+  '@',
+  '/',
+  '\\',
+  ...ALL_CAPTURE_CHARS,
+  ' ',
+];
+
+const SPLIT_CHARS_REGEXES = Object.fromEntries(
+  TOKEN_SPLIT_CHARS.map((token) => {
+    return [token, `(${[token].map((val) => sanitize(val)).join('|')})`];
+  })
+);
+
+const PATTERN_OVERRIDES: Record<string, string> = {
+  CAPTUREGROUP: '(%\\{[A-Za-z0-9_]+:\\d+\\})',
+  ...SPLIT_CHARS_REGEXES,
 };
 
-export const PATTERN_PRECEDENCE = [
+const PATTERN_PRECEDENCE = [
   'LOGLEVEL',
   'UUID',
   'URN',
@@ -29,39 +49,42 @@ export const PATTERN_PRECEDENCE = [
   'IPV4',
   'IP',
   'HOSTPORT',
-  'PATH',
+  // 'PATH',
   'TTY',
   'WINPATH',
-  'URI',
-  'DATE_US',
-  'DATE_EU',
+  // 'URI',
   'TIMESTAMP_ISO8601',
-  'DATE',
   'DATESTAMP',
   'DATESTAMP_RFC822',
   'DATESTAMP_RFC2822',
   'DATESTAMP_OTHER',
   'DATESTAMP_EVENTLOG',
+  'DATE_US',
+  'DATE_EU',
+  'DATE',
   'SYSLOGTIMESTAMP',
-  'SYSLOGPROG',
-  'SYSLOGHOST',
   'SYSLOGFACILITY',
   'HTTPDATE',
   'EMAILADDRESS',
   'SYSLOGBASE',
   'MONTH',
-  'UNIXPATH',
+  'MONTHDAY',
+  'MONTHNUM',
+  'MONTHNUM2',
+  'TIME',
+  // 'UNIXPATH',
   'INT',
-  'SPLITCHARS',
+  // 'HOSTNAME',
+  ...TOKEN_SPLIT_CHARS,
   'WORD',
   'SPACE',
   'NOTSPACE',
-  'GREEDYDATA',
   'DATA',
+  'GREEDYDATA',
   // nothing else
 ];
 
-export const COLLAPSIBLE_PATTERNS = ['NOTSPACE', 'DATA', 'GREEDYDATA'];
+const COLLAPSIBLE_PATTERNS = ['NOTSPACE', 'DATA', 'GREEDYDATA'];
 const unsortedFirstPassPatterns = [
   'TIMESTAMP_ISO8601',
   'IPV4',
@@ -73,24 +96,20 @@ const unsortedFirstPassPatterns = [
   'CISCOMAC',
   'WINDOWSMAC',
   'COMMONMAC',
-  'HOSTPORT',
   'TTY',
-  'URI',
-  'DATE_US',
-  'DATE_EU',
-  'DATE_US',
-  'DATE_EU',
   'TIMESTAMP_ISO8601',
-  'DATE',
-  'DATESTAMP',
-  'DATESTAMP_RFC822',
-  'DATESTAMP_RFC2822',
-  'DATESTAMP_OTHER',
-  'DATESTAMP_EVENTLOG',
   'SYSLOGTIMESTAMP',
 ];
 
-export const FIRST_PASS_PATTERNS = orderBy(unsortedFirstPassPatterns, (pattern) => {
+const FIRST_PASS_PATTERNS = orderBy(unsortedFirstPassPatterns, (pattern) => {
   const idx = PATTERN_PRECEDENCE.indexOf(pattern);
   return idx === -1 ? Number.POSITIVE_INFINITY : idx;
 });
+
+export {
+  TOKEN_SPLIT_CHARS,
+  COLLAPSIBLE_PATTERNS,
+  FIRST_PASS_PATTERNS,
+  PATTERN_OVERRIDES,
+  PATTERN_PRECEDENCE,
+};

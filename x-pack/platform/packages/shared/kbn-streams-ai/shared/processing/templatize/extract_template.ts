@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { partition, pull } from 'lodash';
 import { formatRoot } from './format_root';
-import { buildGrokRegexMap } from './get_pattern_regex_map';
 import { maskCapturingBrackets } from './mask_capturing_brackets';
 import { maskQuotes } from './mask_quotes';
 import { FIRST_PASS_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
-import { splitOnCaptureChars } from './split_on_capture_chars';
+import { ALL_CAPTURE_CHARS } from './split_on_capture_chars';
+import { normalizeTokensForColumn } from './normalize_tokens';
 import { ExtractTemplateResult } from './types';
+import { findMatchingPatterns } from './find_matching_patterns';
+import { GROK_REGEX_MAP } from './get_pattern_regex_map';
+import { tokenize } from './tokenize';
 
-const GROK_REGEX_MAP = buildGrokRegexMap();
 const FIRST_PASS_REGEXES = Object.fromEntries(
   FIRST_PASS_PATTERNS.map((pattern) => {
     const original = GROK_REGEX_MAP[pattern];
@@ -37,7 +40,7 @@ function maskFirstPassPatterns(
     replaceWith ||
     ((pattern, match) => {
       literals.push(match);
-      return `%{${literals.length - 1}}`;
+      return `%{${pattern}:${literals.length - 1}}`;
     });
 
   // Process patterns in a single loop
@@ -56,7 +59,7 @@ function maskFirstPassPatterns(
 function restoreMaskedPatterns(masked: string, literals: string[]): string {
   let out = masked;
   literals.forEach((val, idx) => {
-    out = out.replace(`%{${idx}}`, val);
+    out = out.replace(new RegExp(`%\\{[A-Za_z0-9_]+\\:${idx}\\}`), val);
   });
   return out;
 }
@@ -112,61 +115,6 @@ function findDelimiter(msgs: string[]): string {
   return highestMinCount > 0 ? bestDelimiter : '\\s+';
 }
 
-function tokenizeColumn(col: string, literals: string[]): string[] {
-  if (col === '') {
-    return [];
-  }
-
-  // handle previous replaced patterns
-  const tokens: string[] = literals.length
-    ? col
-        .split(GROK_REGEX_MAP.CAPTUREGROUP.partial)
-        .filter((token) => !!token)
-        .flatMap((token) => {
-          if (token.match(GROK_REGEX_MAP.CAPTUREGROUP.complete)) {
-            // if this is [...], ".." etc unwrap and tokenize
-            const value = restoreMaskedPatterns(token, literals);
-
-            return splitOnCaptureChars(value) ?? [token];
-          }
-          return [token];
-        })
-    : [col];
-
-  let segments: string[] = tokens;
-
-  // Process each split character one at a time
-  for (const char of TOKEN_SPLIT_CHARS) {
-    const newSegments: string[] = [];
-
-    for (const segment of segments) {
-      // leave patterns like IP addresses etc alone
-      const tokenMatch = segment.match(GROK_REGEX_MAP.CAPTUREGROUP.complete);
-      if (tokenMatch) {
-        newSegments.push(segment);
-        continue;
-      }
-
-      const parts = segment.split(char);
-
-      for (let i = 0; i < parts.length; i++) {
-        if (parts[i] !== '') {
-          newSegments.push(parts[i]);
-        }
-
-        // Add the delimiter if not the last part
-        if (i < parts.length - 1) {
-          newSegments.push(char);
-        }
-      }
-    }
-
-    segments = newSegments;
-  }
-
-  return segments.filter((token) => token !== '');
-}
-
 /**
  * split on whitespace, but not on consective whitespace chars
  */
@@ -179,34 +127,25 @@ function createDelimiterRegex(delimiter: string): RegExp {
   return new RegExp(delimiter, 'g');
 }
 
-/* -----------------------------------------------------------
- *  MAIN IMPLEMENTATION
- * --------------------------------------------------------- */
-
-export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
-  if (!messages.length) {
-    return {
-      root: {
-        formatted: '',
-        columns: [],
-        delimiter: '',
-      },
-      templates: [],
-    };
-  }
-
-  // mask messages by matching highly specific patterns
-  const maskedMessages = messages.map((msg) => maskFirstPassPatterns(msg));
-
-  // find the most likely delimiter
-  const delimiter = findDelimiter(maskedMessages.map(({ masked }) => masked));
-  const templates = maskedMessages.map(({ literals, masked }, index) => {
+function tokenizeLines(
+  {
+    delimiter,
+    messages,
+    maskedMessages,
+  }: {
+    delimiter: string;
+    messages: string[];
+    maskedMessages: Array<{ masked: string; literals: string[] }>;
+  },
+  splitChars?: string[][]
+) {
+  return maskedMessages.map(({ literals, masked }, index) => {
     const original = messages[index];
 
     // split log line on likely delimiter
-    const columns = masked.split(createDelimiterRegex(delimiter)).map((column) => {
+    const columns = masked.split(createDelimiterRegex(delimiter)).map((column, idx) => {
       // tokenize before restoring masked values
-      const tokens = tokenizeColumn(column.trim(), literals);
+      const tokens = tokenize(column.trim(), literals, splitChars?.[idx] ?? TOKEN_SPLIT_CHARS);
 
       const result = {
         value: column,
@@ -214,12 +153,7 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
           const value = restoreMaskedPatterns(token, literals);
 
           // find all patterns that (completely) match this token
-          const patterns = PATTERN_PRECEDENCE.flatMap((pattern, idx) => {
-            if (GROK_REGEX_MAP[pattern]?.complete.test(value)) {
-              return [idx];
-            }
-            return [];
-          });
+          const patterns = findMatchingPatterns(value);
 
           return {
             value,
@@ -237,6 +171,110 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
       columns,
     };
   });
+}
+
+function findConsistentSplitChars(
+  messages: Array<{
+    delimiter: string;
+    original: string;
+    columns: Array<{
+      value: string;
+      tokens: Array<{
+        value: string;
+        patterns: number[];
+      }>;
+    }>;
+  }>
+): string[][] {
+  const splitTokenCountPerColumn: Array<Record<string, number>> = [];
+
+  const consistentTokensPerColumn: string[][] = [];
+
+  const [splitCharsToCheck, quoteSplitChars] = partition(
+    TOKEN_SPLIT_CHARS,
+    (token) => !ALL_CAPTURE_CHARS.includes(token)
+  );
+
+  messages.forEach((message) => {
+    message.columns.forEach((column, idx) => {
+      const counter: Record<string, number> = Object.fromEntries(
+        splitCharsToCheck.map((token) => [token, 0])
+      );
+
+      column.tokens.forEach((token) => {
+        if (splitCharsToCheck.includes(token.value)) {
+          counter[token.value]++;
+        }
+      });
+
+      if (!splitTokenCountPerColumn[idx]) {
+        consistentTokensPerColumn[idx] = splitCharsToCheck.concat();
+        splitTokenCountPerColumn[idx] = counter;
+        return;
+      }
+
+      consistentTokensPerColumn[idx].forEach((splitToken) => {
+        const countForThisRow = counter[splitToken];
+        const previousCount = splitTokenCountPerColumn[idx][splitToken];
+
+        if (countForThisRow !== previousCount) {
+          pull(consistentTokensPerColumn[idx], splitToken);
+        }
+      });
+    });
+  });
+
+  return consistentTokensPerColumn.map((tokens, idx) => {
+    return splitCharsToCheck
+      .filter((token) => {
+        return tokens.includes(token);
+      })
+      .concat(quoteSplitChars);
+  });
+}
+
+/* -----------------------------------------------------------
+ *  MAIN IMPLEMENTATION
+ * --------------------------------------------------------- */
+
+export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
+  if (!messages.length) {
+    return {
+      root: {
+        values: {},
+        formatted: {
+          display: '',
+          grok: '',
+        },
+        columns: [],
+        delimiter: '',
+      },
+      templates: [],
+    };
+  }
+
+  // mask messages by matching highly specific patterns
+  const maskedMessages = messages.map((msg) => maskFirstPassPatterns(msg));
+
+  // find the most likely delimiter
+  const delimiter = findDelimiter(maskedMessages.map(({ masked }) => masked));
+
+  const firstPassTemplates = tokenizeLines({
+    delimiter,
+    maskedMessages,
+    messages,
+  });
+
+  const nextPassSplitChars = findConsistentSplitChars(firstPassTemplates);
+
+  const templates = tokenizeLines(
+    {
+      delimiter,
+      maskedMessages,
+      messages,
+    },
+    nextPassSplitChars
+  );
 
   const columnLengths = templates.map((template) => template.columns.length);
 
@@ -251,154 +289,19 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
   const TRAILING_WHITESPACE = /\s+$/;
 
   const roots = new Array(minColumns).fill(undefined).map((_, idx) => {
-    const rootTokens: Array<{
-      patterns: number[];
-      values: string[];
-    }> = [];
-
-    let maxLeading = 0;
-    let maxTrailing = 0;
-
     const tokenLists = templates.map((template) => template.columns[idx].tokens);
 
+    // Calculate whitespace stats
+    let maxLeading = 0;
+    let maxTrailing = 0;
     templates.forEach((template) => {
       const column = template.columns[idx];
       maxLeading = Math.max(maxLeading, column.value.match(LEADING_WHITESPACE)?.[0].length ?? 0);
       maxTrailing = Math.max(maxTrailing, column.value.match(TRAILING_WHITESPACE)?.[0].length ?? 0);
     });
 
-    // uses longest common prefix & longest common suffix for literal values, and collapses in between
-    // could maybe use patterns here instead of values... but not sure.
-
-    let lcpLength = 0;
-    let lcpContinue = true;
-
-    // first get longest common prefix
-    while (lcpContinue) {
-      if (tokenLists.some((tokens) => tokens.length <= lcpLength)) {
-        lcpContinue = false;
-        continue;
-      }
-
-      const tokenValues = tokenLists.map((tokens) => tokens[lcpLength].value);
-      const firstValue = tokenValues[0];
-
-      if (tokenValues.every((value) => value === firstValue)) {
-        // Compute intersection of patterns across all tokens at this position
-        const commonPatterns = tokenLists[0][lcpLength].patterns.filter((pattern) =>
-          tokenLists.every((tokens) => tokens[lcpLength].patterns.includes(pattern))
-        );
-
-        rootTokens.push({
-          patterns:
-            commonPatterns.length > 0 ? commonPatterns : [PATTERN_PRECEDENCE.indexOf('DATA')],
-          values: tokenValues,
-        });
-
-        lcpLength++;
-      } else {
-        lcpContinue = false;
-      }
-    }
-
-    // now do longest common suffix, starting at end, but only if there are mismatches in LCP
-    let lcsLength = 0;
-    let lcsContinue = true;
-    const lcsSuffixTokens: Array<{
-      patterns: number[];
-      values: string[];
-    }> = [];
-
-    while (lcsContinue) {
-      // Check if all lists have enough tokens for this suffix position
-      // and ensure we don't overlap with the prefix
-      const suffixPos = lcsLength + 1; // position from the end
-
-      if (
-        tokenLists.some((tokens) => tokens.length < lcpLength + suffixPos) ||
-        tokenLists.some((tokens) => tokens.length - suffixPos < lcpLength)
-      ) {
-        lcsContinue = false;
-        continue;
-      }
-
-      // Get token at this position from the end for all lists
-      const tokenValues = tokenLists.map((tokens) => tokens[tokens.length - suffixPos].value);
-      const firstValue = tokenValues[0];
-
-      // If all token values match, this is part of the LCS
-      if (tokenValues.every((value) => value === firstValue)) {
-        // Compute intersection of patterns
-        const commonPatterns = tokenLists[0][tokenLists[0].length - suffixPos].patterns.filter(
-          (pattern) =>
-            tokenLists.every((tokens) =>
-              tokens[tokens.length - suffixPos].patterns.includes(pattern)
-            )
-        );
-
-        lcsSuffixTokens.unshift({
-          patterns:
-            commonPatterns.length > 0 ? commonPatterns : [PATTERN_PRECEDENCE.indexOf('DATA')],
-          values: tokenValues,
-        });
-
-        lcsLength++;
-      } else {
-        lcsContinue = false;
-      }
-    }
-
-    // normalize middle segments
-    const allHaveMiddle = tokenLists.every((tokens) => tokens.length > lcpLength + lcsLength);
-    const sameMiddleLength = tokenLists.every(
-      (tokens) =>
-        tokens.length - lcpLength - lcsLength === tokenLists[0].length - lcpLength - lcsLength
-    );
-
-    if (allHaveMiddle) {
-      if (sameMiddleLength) {
-        // if all middle segments have the same length, process token by token
-        const middleLength = tokenLists[0].length - lcpLength - lcsLength;
-
-        for (let i = 0; i < middleLength; i++) {
-          const middlePos = lcpLength + i;
-          const middleTokens = tokenLists.map((tokens) => tokens[middlePos]);
-          const middleValues = middleTokens.map((token) => token.value);
-
-          // Find common patterns across these middle tokens
-          const commonPatterns = middleTokens[0]?.patterns.filter((pattern) =>
-            middleTokens.every((token) => token.patterns.includes(pattern))
-          ) || [PATTERN_PRECEDENCE.indexOf('DATA')];
-
-          rootTokens.push({
-            patterns:
-              commonPatterns.length > 0 ? commonPatterns : [PATTERN_PRECEDENCE.indexOf('DATA')],
-            values: middleValues,
-          });
-        }
-      } else {
-        // collapse variable length middle segments into %{DATA}
-        rootTokens.push({
-          patterns: [PATTERN_PRECEDENCE.indexOf('DATA')],
-          values: tokenLists.map((tokens) =>
-            tokens
-              .slice(lcpLength, tokens.length - lcsLength)
-              .map((token) => token.value)
-              .join('')
-          ),
-        });
-      }
-    }
-
-    rootTokens.push(...lcsSuffixTokens);
-
-    return {
-      tokens: rootTokens,
-      whitespace: {
-        leading: maxLeading,
-        trailing: maxTrailing,
-      },
-    };
+    // Use the normalize_tokens module to handle the token normalization
+    return normalizeTokensForColumn(tokenLists, maxLeading, maxTrailing);
   });
 
   // append %{GREEDYDATA} if some columns in some messages have not been processed
