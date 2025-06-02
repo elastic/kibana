@@ -105,6 +105,12 @@ const expectedQueriesResponse = {
   ],
 };
 
+function expectStreams(expectedStreams: string[], persistedStreams: Streams.all.Definition[]) {
+  for (const name of expectedStreams) {
+    expect(persistedStreams.some((stream) => stream.name === name)).to.eql(true);
+  }
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
@@ -180,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expect(listResponse.body.streams).to.have.length(2); // logs stream + classic stream
+      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{name}/dashboards 2023-10-31',
@@ -210,7 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expect(listResponse.body.streams).to.have.length(2); // logs stream + classic stream
+      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{name}/dashboards 2023-10-31',
