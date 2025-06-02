@@ -72,15 +72,6 @@ type GetUrlForApp = (
     | undefined
 ) => string;
 
-interface DocLinks {
-  readonly ELASTIC_WEBSITE_URL: DocLinksStart['ELASTIC_WEBSITE_URL'];
-  readonly ELASTIC_LLM_LINK: string;
-  readonly ELASTIC_LLM_USAGE_COST_LINK: string;
-  readonly THIRD_PARTY_LLM_LINK: string;
-  readonly ELASTIC_AI_FEATURES_LINK: string;
-  readonly LLM_PERFORMANCE_LINK: string;
-  readonly DOC_LINK_VERSION: DocLinksStart['DOC_LINK_VERSION'];
-}
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
@@ -92,7 +83,7 @@ export interface AssistantProviderProps {
   ) => CodeBlockDetails[][];
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  docLinks: DocLinks;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
   getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
@@ -125,7 +116,7 @@ export interface UseAssistantContext {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  docLinks: DocLinks;
+  docLinks: DocLinksStart;
   basePath: string;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;

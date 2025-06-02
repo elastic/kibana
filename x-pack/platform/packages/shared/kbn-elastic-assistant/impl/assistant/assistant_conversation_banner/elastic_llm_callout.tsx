@@ -19,7 +19,11 @@ import { useTourStorageKey } from '../../tour/common/hooks/use_tour_storage_key'
 export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean }) => {
   const {
     getUrlForApp,
-    docLinks: { ELASTIC_LLM_USAGE_COST_LINK },
+    docLinks: {
+      links: {
+        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
+      },
+    },
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { euiTheme } = useEuiTheme();

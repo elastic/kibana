@@ -20,6 +20,7 @@ import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import {
   getActionTypeTitle,
   getGenAiConfig,
+  isElasticManagedLlmConnector,
 } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { AIConnector } from './types';
@@ -80,26 +81,31 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
       [connectors, onConnectorSelected]
     );
 
-    const betaBadgeProps = selectedConnector?.isPreconfigured
-      ? {
-          label: (
-            <EuiTitle
-              css={css`
-                font-size: ${euiTheme.size.s};
-                font-weight: ${euiTheme.font.weight.bold};
-                line-height: ${euiTheme.base * 1.25}px;
-              `}
-            >
-              <h5>{i18n.PRECONFIGURED_CONNECTOR_LABEL}</h5>
-            </EuiTitle>
-          ),
-          title: i18n.PRECONFIGURED_CONNECTOR_LABEL,
-          color: 'subdued' as const,
-          css: css`
-            height: ${euiTheme.base * 1.25}px;
-          `,
-        }
-      : undefined;
+    const betaBadgeProps = useMemo(() => {
+      if (!selectedConnector || !isElasticManagedLlmConnector(selectedConnector)) {
+        return;
+      }
+
+      return {
+        label: (
+          <EuiTitle
+            data-test-subj="connectorSelectorPanelBetaBadge"
+            css={css`
+              font-size: ${euiTheme.size.s};
+              font-weight: ${euiTheme.font.weight.bold};
+              line-height: ${euiTheme.base * 1.25}px;
+            `}
+          >
+            <span>{i18n.PRECONFIGURED_CONNECTOR_LABEL}</span>
+          </EuiTitle>
+        ),
+        title: i18n.PRECONFIGURED_CONNECTOR_LABEL,
+        color: 'subdued' as const,
+        css: css`
+          height: ${euiTheme.base * 1.25}px;
+        `,
+      };
+    }, [euiTheme, selectedConnector]);
 
     return (
       <EuiCard

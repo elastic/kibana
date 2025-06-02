@@ -12,7 +12,14 @@ import { useAssistantContext } from '../../assistant_context';
 
 export const CostAwareness = () => {
   const {
-    docLinks: { ELASTIC_LLM_USAGE_COST_LINK, ELASTIC_LLM_LINK },
+    docLinks: {
+      links: {
+        alerting: {
+          elasticManagedLlm: ELASTIC_LLM_LINK,
+          elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK,
+        },
+      },
+    },
   } = useAssistantContext();
 
   return (

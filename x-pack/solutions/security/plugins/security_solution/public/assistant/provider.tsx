@@ -140,14 +140,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
     storage,
     triggersActionsUi: { actionTypeRegistry },
-    docLinks: {
-      ELASTIC_WEBSITE_URL,
-      links: {
-        securitySolution: { elasticAiFeatures, thirdPartyLlmProviders, llmPerformanceMatrix },
-        alerting: { elasticManagedLlm, elasticManagedLlmUsageCost },
-      },
-      DOC_LINK_VERSION,
-    },
+    docLinks,
     userProfile,
     chrome,
     productDocBase,
@@ -233,15 +226,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
-      docLinks={{
-        ELASTIC_WEBSITE_URL,
-        ELASTIC_LLM_LINK: elasticManagedLlm,
-        ELASTIC_LLM_USAGE_COST_LINK: elasticManagedLlmUsageCost,
-        THIRD_PARTY_LLM_LINK: thirdPartyLlmProviders,
-        ELASTIC_AI_FEATURES_LINK: elasticAiFeatures,
-        LLM_PERFORMANCE_LINK: llmPerformanceMatrix,
-        DOC_LINK_VERSION,
-      }}
+      docLinks={docLinks}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
       getUrlForApp={getUrlForApp}

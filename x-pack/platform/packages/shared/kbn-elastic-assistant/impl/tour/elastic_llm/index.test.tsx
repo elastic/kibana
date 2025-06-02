@@ -37,8 +37,12 @@ describe('ElasticLLMCostAwarenessTour', () => {
     (useAssistantContext as jest.Mock).mockReturnValue({
       inferenceEnabled: true,
       docLinks: {
-        ELASTIC_LLM_LINK: 'llm-link',
-        ELASTIC_LLM_USAGE_COST_LINK: 'usage-cost-link',
+        links: {
+          alerting: {
+            elasticManagedLlm: `/reference/kibana/connectors-kibana/elastic-managed-llm`,
+            elasticManagedLlmUsageCost: `https://www.elastic.co/pricing`,
+          },
+        },
       },
     });
     (useLoadConnectors as jest.Mock).mockReturnValue({
