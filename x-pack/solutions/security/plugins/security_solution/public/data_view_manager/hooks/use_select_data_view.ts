@@ -29,7 +29,7 @@ export const useSelectDataView = () => {
       /**
        * Data view selection will be applied to the scopes listed here
        */
-      scope: DataViewManagerScopeName[];
+      scope: DataViewManagerScopeName;
     }) => {
       dispatch(selectDataViewAsync(params));
     },

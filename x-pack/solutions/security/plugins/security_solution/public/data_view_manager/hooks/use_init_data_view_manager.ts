@@ -19,6 +19,7 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
+import { DataViewManagerScopeName } from '../constants';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -50,18 +51,32 @@ export const useInitDataViewManager = () => {
       dataViews: services.dataViews,
     });
 
-    const dataViewSelectedListener = createDataViewSelectedListener({
-      dataViews: services.dataViews,
-    });
-
     dispatch(addListener(dataViewsLoadingListener));
-    dispatch(addListener(dataViewSelectedListener));
+
+    // NOTE: Every scope has its own listener instance; this allows for cancellation
+    const listeners = [
+      DataViewManagerScopeName.default,
+      DataViewManagerScopeName.timeline,
+      DataViewManagerScopeName.detections,
+      DataViewManagerScopeName.analyzer,
+    ].map((scope) =>
+      createDataViewSelectedListener({
+        scope,
+        dataViews: services.dataViews,
+      })
+    );
+
+    listeners.forEach((dataViewSelectedListener) => {
+      dispatch(addListener(dataViewSelectedListener));
+    });
 
     // NOTE: this kicks off the data loading in the Data View Picker
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));
-      dispatch(removeListener(dataViewSelectedListener));
+      listeners.forEach((dataViewSelectedListener) => {
+        dispatch(removeListener(dataViewSelectedListener));
+      });
     };
   }, [dispatch, newDataViewPickerEnabled, services.dataViews]);
 

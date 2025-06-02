@@ -19,7 +19,7 @@ export interface SelectDataViewAsyncPayload {
   /**
    * Specify one or more security solution scopes where the data view selection should be applied
    */
-  scope: DataViewManagerScopeName[];
+  scope: DataViewManagerScopeName;
 }
 
 // NOTE: You should not need to dispatch any actions by yourself. Instead, use one of the hooks that we built to faciliate data view selection and retrieval based on current scope.

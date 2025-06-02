@@ -87,7 +87,7 @@ describe('createDataViewSelectedListener', () => {
 
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
-      selectDataViewAsync({ id: 'adhoc_test-*', scope: [DataViewManagerScopeName.default] }),
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
       mockListenerApi
     );
 
@@ -99,7 +99,7 @@ describe('createDataViewSelectedListener', () => {
       selectDataViewAsync({
         id: 'fetched-id',
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );
@@ -126,7 +126,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );
@@ -156,7 +156,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );

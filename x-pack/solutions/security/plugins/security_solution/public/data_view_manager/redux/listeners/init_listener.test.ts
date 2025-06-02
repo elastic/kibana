@@ -51,13 +51,25 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [DataViewManagerScopeName.default, DataViewManagerScopeName.timeline],
+        scope: DataViewManagerScopeName.default,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [DataViewManagerScopeName.detections, DataViewManagerScopeName.analyzer],
+        scope: DataViewManagerScopeName.timeline,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
       })
     );
   });

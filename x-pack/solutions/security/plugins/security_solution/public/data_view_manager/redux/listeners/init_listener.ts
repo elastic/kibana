@@ -26,28 +26,22 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
 
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
-        // Preload the default data view for related scopes
-        listenerApi.dispatch(
-          selectDataViewAsync({
-            id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-            scope: [DataViewManagerScopeName.detections, DataViewManagerScopeName.analyzer],
-          })
-        );
-
-        // If the scope is empty
-        if (!action.payload.length) {
+        // Preload the default data view for all the scopes
+        // Immediate calls that would dispatch this call from other places will cancel this action,
+        // preventing race conditions
+        [
+          DataViewManagerScopeName.detections,
+          DataViewManagerScopeName.analyzer,
+          DataViewManagerScopeName.timeline,
+          DataViewManagerScopeName.default,
+        ].forEach((scope) => {
           listenerApi.dispatch(
             selectDataViewAsync({
               id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-              scope: [
-                // NOTE: DataViewManagerScopeName.timeline is omitted here because timelines do their own init
-                // that sets the data view. If it was there, a race condition would occur
-                DataViewManagerScopeName.default,
-                DataViewManagerScopeName.timeline,
-              ],
+              scope,
             })
           );
-        }
+        });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)
         action.payload.forEach((defaultSelection) => {

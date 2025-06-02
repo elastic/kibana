@@ -142,7 +142,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [testScope],
+            scope: testScope,
           })
         );
 
@@ -154,7 +154,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [DataViewManagerScopeName.analyzer],
+            scope: DataViewManagerScopeName.analyzer,
           })
         );
 

@@ -60,7 +60,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   // hence - it is the only place where we should update the url param for the data view selection.
   const handleChangeDataView = useCallback(
     (id: string, indexPattern: string = '') => {
-      selectDataView({ id, scope: [scope] });
+      selectDataView({ id, scope });
 
       if (isDefaultSourcerer) {
         updateUrlParam({
