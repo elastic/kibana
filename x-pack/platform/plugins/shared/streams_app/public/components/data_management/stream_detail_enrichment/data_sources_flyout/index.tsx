@@ -24,17 +24,19 @@ import {
   EuiButton,
   EuiContextMenu,
   EuiPopover,
-  EuiLoadingLogo,
   EuiFormRow,
   EuiFieldText,
   EuiFieldTextProps,
   EuiProgress,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
 import useAsync from 'react-use/lib/useAsync';
 import { Query, TimeRange } from '@kbn/es-query';
+import { CodeEditor } from '@kbn/code-editor';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EnrichmentDataSource } from '../../../../../common/url_schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
@@ -49,7 +51,10 @@ import {
 import { AssetImage } from '../../../asset_image';
 import { PreviewTable } from '../../preview_table';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
-import { KqlSamplesDataSourceWithUIAttributes } from '../types';
+import {
+  CustomSamplesDataSourceWithUIAttributes,
+  KqlSamplesDataSourceWithUIAttributes,
+} from '../types';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -184,6 +189,7 @@ const DataSourcesContextMenu = ({
                     type: 'custom-samples',
                     name: '',
                     enabled: true,
+                    documents: [],
                   });
                   closeMenu();
                 },
@@ -307,6 +313,21 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
 };
 
 const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  const dataSource = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => snapshot.context.dataSource as CustomSamplesDataSourceWithUIAttributes
+  );
+
+  const isDisabled = useDataSourceSelector(dataSourceRef, (snapshot) =>
+    snapshot.matches('disabled')
+  );
+
+  const handleChange = ({
+    documents,
+  }: Pick<CustomSamplesDataSourceWithUIAttributes, 'documents'>) => {
+    dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, documents } });
+  };
+
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
@@ -318,7 +339,55 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.subtitle',
         { defaultMessage: 'Manually defined sample documents.' }
       )}
-    />
+    >
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
+          { defaultMessage: 'Documents' }
+        )}
+        helpText={
+          <FormattedMessage
+            id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.helpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: (
+                <EuiCode>
+                  {JSON.stringify([
+                    {
+                      _index: 'index',
+                      _id: 'id',
+                      _source: {
+                        foo: 'bar',
+                      },
+                    },
+                  ])}
+                </EuiCode>
+              ),
+            }}
+          />
+        }
+        isDisabled={isDisabled}
+        fullWidth
+      >
+        <CodeEditor
+          height={200}
+          languageId="json"
+          value={JSON.stringify(dataSource.documents, null, 2)}
+          options={{
+            tabSize: 2,
+            automaticLayout: true,
+          }}
+          onChange={(value) => {
+            try {
+              handleChange({ documents: JSON.parse(value) });
+            } catch (error: unknown) {
+              // no-op
+            }
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </DataSourceCard>
   );
 };
 

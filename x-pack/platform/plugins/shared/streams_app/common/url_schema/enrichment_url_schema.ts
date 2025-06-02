@@ -6,6 +6,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { SampleDocument, sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
 
 export interface RandomSamplesDataSource {
@@ -52,12 +53,14 @@ export interface CustomSamplesDataSource {
   enabled: boolean;
   name?: string;
   type: 'custom-samples';
+  documents: SampleDocument[];
 }
 
 const customSamplesDataSourceSchema = z.object({
   enabled: z.boolean(),
   name: z.string().optional(),
   type: z.literal('custom-samples'),
+  documents: z.array(sampleDocument),
 }) satisfies z.Schema<CustomSamplesDataSource>;
 
 export type EnrichmentDataSource =

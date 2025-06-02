@@ -163,7 +163,7 @@ export const simulationMachine = setup({
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulation' }],
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
       },
     ],
   },

@@ -10,7 +10,7 @@ import { Condition, SampleDocument, conditionToQueryDsl } from '@kbn/streams-sch
 import { ErrorActorEvent, fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
-import { Observable, filter, from, map } from 'rxjs';
+import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { getFormattedError } from '../../../../../util/errors';
 import { DataSourceMachineDeps } from './types';
@@ -43,10 +43,10 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
     }
 
     if (input.dataSource.type === 'custom-samples') {
-      return from<SampleDocument[]>([]);
+      return of(input.dataSource.documents);
     }
 
-    return from<SampleDocument[]>([]);
+    return of<SampleDocument[]>([]);
   });
 }
 
@@ -66,7 +66,7 @@ function collectKqlData({
   time?: TimeRange;
   streamName: string;
   size?: number;
-}) {
+}): Observable<SampleDocument[]> {
   const abortController = new AbortController();
 
   return new Observable((observer) => {
