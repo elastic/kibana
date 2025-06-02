@@ -24,6 +24,7 @@ import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
   canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
 } from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
@@ -223,6 +224,8 @@ export class SyncIntegrationsTask {
         return;
       }
     }
+
+    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
     const newDoc: SyncIntegrationsData = {
       remote_es_hosts: remoteESOutputs.map((output) => {

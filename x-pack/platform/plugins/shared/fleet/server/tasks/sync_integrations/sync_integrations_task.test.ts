@@ -146,6 +146,15 @@ describe('SyncIntegrationsTask', () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
       esClient.indices.exists.mockResolvedValue(true);
+      esClient.indices.getMapping.mockResolvedValue({
+        'fleet-synced-integrations': {
+          mappings: {
+            _meta: {
+              version: '1.0',
+            },
+          },
+        },
+      });
       esClient.cluster.getComponentTemplate.mockResolvedValue({
         component_templates: [
           {

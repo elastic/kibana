@@ -150,32 +150,6 @@ describe('fleet_synced_integrations', () => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
     });
 
-    it('should not create index', async () => {
-      mockExists.mockResolvedValue(false);
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
-
-      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
-
-      expect(esClientMock.indices.create).not.toHaveBeenCalled();
-    });
-
-    it('should not update index', async () => {
-      mockExists.mockResolvedValue(true);
-      mockGetMapping.mockResolvedValue({
-        'fleet-synced-integrations': {
-          mappings: {
-            _meta: {
-              version: '0.0',
-            },
-          },
-        },
-      });
-
-      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
-
-      expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
-    });
-
     it('should not create index patterns for remote clusters', async () => {
       await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
 

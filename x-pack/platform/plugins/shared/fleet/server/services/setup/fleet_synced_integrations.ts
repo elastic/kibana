@@ -28,7 +28,7 @@ export const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrat
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
   settings: {
     auto_expand_replicas: '0-1',
-    hidden: true,
+    // hidden: true,
   },
   mappings: {
     dynamic: false,
@@ -72,10 +72,6 @@ export const canEnableSyncIntegrations = () => {
 };
 
 export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
-  if (!canEnableSyncIntegrations()) {
-    return;
-  }
-
   await createOrUpdateIndex(
     esClient,
     FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
