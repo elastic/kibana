@@ -25,6 +25,7 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -71,6 +72,7 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+  density?: DataGridDensity;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -643,6 +645,7 @@ export const getDatatableVisualization = ({
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
+      density: state.density ?? DataGridDensity.NORMAL,
     }).toAst();
 
     return {

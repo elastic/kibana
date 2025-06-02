@@ -42,7 +42,6 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
-  'observability:apmEnableServiceMetrics': boolean;
   'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
@@ -162,7 +161,6 @@ export interface UsageStats {
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
-  'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
   'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
