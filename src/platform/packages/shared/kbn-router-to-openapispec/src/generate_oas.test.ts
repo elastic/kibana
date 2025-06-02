@@ -45,6 +45,10 @@ interface RecursiveType {
   self: undefined | RecursiveType;
 }
 
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
     it('generates the expected OpenAPI document for the shared schema', async () => {
