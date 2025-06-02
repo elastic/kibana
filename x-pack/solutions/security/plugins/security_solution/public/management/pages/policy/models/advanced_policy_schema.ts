@@ -2110,7 +2110,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.disable_origin_info_collection',
       {
         defaultMessage:
-          'If set to 'true', file events exclude file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: false',
+          'If set to true, file events exclude file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file\'s Mark of the Web. Default: false',
       }
     ),
   },
