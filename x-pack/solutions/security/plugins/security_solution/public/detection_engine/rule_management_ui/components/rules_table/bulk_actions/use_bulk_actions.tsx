@@ -95,13 +95,13 @@ export const useBulkActions = ({
   } = rulesTableContext;
   const globalQuery = useMemo(() => {
     const gapRange = filterOptions?.showRulesWithGaps
-    ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
-    : undefined;
+      ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
+      : undefined;
 
     return {
       query: kql,
       ...(gapRange && { gapRange }),
-    }
+    };
   }, [kql, filterOptions]);
 
   const getBulkItemsPopoverContent = useCallback(
