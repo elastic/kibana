@@ -14,6 +14,7 @@ import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
+import { PointVisibilityOption } from './point_visibility_option';
 import { XYState } from '../../types';
 import {
   flipSeriesType,
@@ -141,6 +142,23 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             <ToolbarDivider />
           </>
         ) : null}
+
+        {isHasNonBarSeries ? (
+          <>
+            <PointVisibilityOption
+              selectedPointVisibility={state?.pointVisibility ?? 'auto'}
+              onChange={(newValue) => {
+                setState({
+                  ...state,
+                  pointVisibility: newValue,
+                });
+              }}
+            />
+
+            <ToolbarDivider />
+          </>
+        ) : null}
+
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}

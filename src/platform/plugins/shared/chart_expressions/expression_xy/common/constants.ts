@@ -135,3 +135,9 @@ export const AxisModes = {
   WIGGLE: 'wiggle',
   SILHOUETTE: 'silhouette',
 } as const;
+
+export const PointVisibilityOptions = {
+  ALWAYS: 'always',
+  NEVER: 'never',
+  AUTO: 'auto',
+} as const;

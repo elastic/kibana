@@ -14,6 +14,7 @@ import {
   ValueLabelModes,
   X_AXIS_CONFIG,
   Y_AXIS_CONFIG,
+  PointVisibilityOptions,
 } from '../constants';
 import { strings } from '../i18n';
 import { LayeredXyVisFn, XyVisFn } from '../types';
@@ -102,5 +103,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
   minBarHeight: {
     types: ['number'],
     help: strings.getMinBarHeightHelp(),
+  },
+  pointVisibility: {
+    types: ['string'],
+    help: strings.getPointVisibilityHelp(),
+    options: [...Object.values(PointVisibilityOptions)],
+    default: PointVisibilityOptions.AUTO,
   },
 };

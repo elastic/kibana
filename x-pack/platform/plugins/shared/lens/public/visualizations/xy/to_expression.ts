@@ -343,6 +343,7 @@ export const buildXYExpression = (
     emphasizeFitting: state.emphasizeFitting ?? true,
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
+    pointVisibility: state.pointVisibility ?? 'auto',
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:
