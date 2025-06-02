@@ -140,10 +140,8 @@ describe('Alerts', () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
     await esClient.deleteByQuery({
       index: '.alerts-observability-*',
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
       refresh: true,
     });
