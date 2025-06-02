@@ -24,8 +24,14 @@ export const registerSolutionNavigation = async (
     ? createAiNavigationTree()
     : createNavigationTree(services);
 
-  services.securitySolution.setSolutionNavigationTree(navigationTree);
-
+  if (shouldUseAINavigation) {
+    console.log('setting ai for soc navigation tree');
+    console.log(services.securitySolutionAiForSoc);
+    console.log(navigationTree);
+    services.securitySolutionAiForSoc?.setSolutionNavigationTree(navigationTree);
+  } else {
+    services.securitySolution.setSolutionNavigationTree(navigationTree);
+  }
   services.serverless.initNavigation('security', Rx.of(navigationTree), {
     dataTestSubj: 'securitySolutionSideNav',
   });

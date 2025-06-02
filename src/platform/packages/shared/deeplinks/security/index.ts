@@ -8,13 +8,19 @@
  */
 
 import type { SecurityPageName } from './deep_links';
+import type { SecurityPageNameAiSoc } from './deep_links_ai_soc';
 
 export { SecurityPageName } from './deep_links';
+export { SecurityPageNameAiSoc } from './deep_links_ai_soc';
 
 export const SECURITY_APP_ID = 'securitySolutionUI';
 
 export type AppId = typeof SECURITY_APP_ID;
 
-export type LinkId = `${SecurityPageName}`;
+export const AI_FOR_SOC_APP_ID = 'aiForSocUI';
+export type AiSocAppId = typeof AI_FOR_SOC_APP_ID;
 
-export type DeepLinkId = AppId | `${AppId}:${LinkId}`;
+export type LinkId = `${SecurityPageName}`;
+export type AiSocLinkId = `${SecurityPageNameAiSoc}`;
+
+export type DeepLinkId = AppId | `${AppId}:${LinkId}` | AiSocAppId | `${AiSocAppId}:${AiSocLinkId}`;

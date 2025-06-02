@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "skipLibCheck": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "config.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/security-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/discover-plugin"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+} 
