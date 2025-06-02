@@ -352,7 +352,7 @@ export const streamEnrichmentMachine = setup({
         enrichment: {
           initial: 'displayingSimulation',
           on: {
-            'dataSource.loaded': {
+            'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
           },
@@ -482,7 +482,6 @@ export const createStreamEnrichmentMachineImplementations = ({
   streamsRepositoryClient,
   core,
   data,
-  timeState$,
   urlStateStorageContainer,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
   typeof streamEnrichmentMachine
@@ -498,7 +497,6 @@ export const createStreamEnrichmentMachineImplementations = ({
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
         data,
-        timeState$,
         streamsRepositoryClient,
         toasts: core.notifications.toasts,
       })

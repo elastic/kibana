@@ -223,7 +223,17 @@ const RandomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
       subtitle={i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.subtitle', {
         defaultMessage: 'Automatically samples random data from the stream.',
       })}
-    />
+    >
+      <EuiCallOut
+        iconType="iInCircle"
+        size="s"
+        title={i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.callout', {
+          defaultMessage:
+            'The random samples data source cannot be deleted to guarantee available samples for the simulation. You can still disable it if you want to focus on other data sources samples.',
+        })}
+      />
+      <EuiSpacer size="m" />
+    </DataSourceCard>
   );
 };
 
@@ -403,7 +413,16 @@ const DataSourceCard = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow />
-            {canDeleteDataSource && <EuiButtonIcon iconType="trash" onClick={deleteDataSource} />}
+            {canDeleteDataSource && (
+              <EuiButtonIcon
+                iconType="trash"
+                onClick={deleteDataSource}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.deleteDataSourceLabel',
+                  { defaultMessage: 'Delete data source' }
+                )}
+              />
+            )}
           </EuiFlexGroup>
           <EuiText component="p" color="subdued" size="xs">
             {subtitle}

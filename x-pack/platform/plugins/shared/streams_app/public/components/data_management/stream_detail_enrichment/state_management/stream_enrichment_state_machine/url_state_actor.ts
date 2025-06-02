@@ -7,9 +7,13 @@
 
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
+import {
+  ENRICHMENT_URL_STATE_KEY,
+  EnrichmentDataSource,
+  enrichmentUrlSchema,
+} from '../../../../../../common/url_schema';
 import { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
-import { defaultEnrichmentUrlState } from './utils';
+import { defaultEnrichmentUrlState, defaultRandomSamplesDataSource } from './utils';
 
 export function createUrlInitializerActor({
   core,
@@ -29,6 +33,10 @@ export function createUrlInitializerActor({
     const urlState = enrichmentUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
+      if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
+        urlState.data.dataSources.unshift(defaultRandomSamplesDataSource);
+      }
+
       sendBack({
         type: 'url.initialized',
         urlState: urlState.data,
@@ -44,6 +52,10 @@ export function createUrlInitializerActor({
     }
   });
 }
+
+const hasDefaultRandomSamplesDataSource = (dataSources: EnrichmentDataSource[]) => {
+  return dataSources.some((dataSource) => dataSource.type === 'random-samples');
+};
 
 export function createUrlUpdaterAction({
   urlStateStorageContainer,

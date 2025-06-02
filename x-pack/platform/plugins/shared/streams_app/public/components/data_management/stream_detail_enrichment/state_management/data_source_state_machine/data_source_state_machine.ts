@@ -51,7 +51,7 @@ export const dataSourceMachine = setup({
         },
       })
     ),
-    storeCondition: assign((_, params: { condition: Condition }) => ({
+    storeCondition: assign((_, params: { condition?: Condition }) => ({
       condition: params.condition,
     })),
     storeData: assign((_, params: { data: SampleDocument[] }) => ({
@@ -64,9 +64,9 @@ export const dataSourceMachine = setup({
       ({ context }) => context.parentRef,
       ({ context }) => ({ type: 'dataSource.change', id: context.dataSource.id })
     ),
-    notifyDataLoadedToParent: sendTo(
+    notifyDataChangeToParent: sendTo(
       ({ context }) => context.parentRef,
-      ({ context }) => ({ type: 'dataSource.loaded', id: context.dataSource.id })
+      ({ context }) => ({ type: 'dataSource.dataChange', id: context.dataSource.id })
     ),
     notifyDeleteEventToParent: sendTo(
       ({ context }) => context.parentRef,
@@ -107,11 +107,11 @@ export const dataSourceMachine = setup({
         'dataSource.toggleActivity': {
           target: 'disabled',
           actions: [
-            { type: 'notifyChangeEventToParent' },
             {
               type: 'storeDataSource',
               params: ({ context }) => ({ dataSource: { ...context.dataSource, enabled: false } }),
             },
+            { type: 'notifyChangeEventToParent' },
           ],
         },
         'dataSource.change': {
@@ -124,7 +124,10 @@ export const dataSourceMachine = setup({
         'dataSource.receive_condition': '.loadingData',
         'dataSource.refresh': '.loadingData',
       },
-      exit: [{ type: 'storeData', params: () => ({ data: [] }) }],
+      exit: [
+        { type: 'storeData', params: () => ({ data: [] }) },
+        { type: 'notifyDataChangeToParent' },
+      ],
       states: {
         idle: {
           on: {
@@ -175,7 +178,7 @@ export const dataSourceMachine = setup({
                     type: 'storeData',
                     params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
                   },
-                  { type: 'notifyDataLoadedToParent' },
+                  { type: 'notifyDataChangeToParent' },
                 ],
               },
             ],
@@ -183,7 +186,7 @@ export const dataSourceMachine = setup({
               target: 'idle',
               actions: [
                 { type: 'storeData', params: () => ({ data: [] }) },
-                { type: 'notifyDataLoadedToParent' },
+                { type: 'notifyDataChangeToParent' },
                 { type: 'notifyDataCollectionFailure' },
               ],
             },
@@ -196,11 +199,11 @@ export const dataSourceMachine = setup({
         'dataSource.toggleActivity': {
           target: 'enabled',
           actions: [
-            { type: 'notifyChangeEventToParent' },
             {
               type: 'storeDataSource',
               params: ({ context }) => ({ dataSource: { ...context.dataSource, enabled: true } }),
             },
+            { type: 'notifyChangeEventToParent' },
           ],
         },
       },

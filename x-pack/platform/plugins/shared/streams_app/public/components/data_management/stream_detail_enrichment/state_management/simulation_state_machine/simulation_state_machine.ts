@@ -82,12 +82,13 @@ export const simulationMachine = setup({
     unmapField: assign(({ context }, params: { fieldName: string }) => ({
       detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
     })),
-    resetSimulation: assign({
-      processors: [],
-      detectedSchemaFields: [],
+    resetSimulationOutcome: assign({
       simulation: undefined,
+      detectedSchemaFields: [],
       previewDocsFilter: 'outcome_filter_all',
     }),
+    resetProcessors: assign({ processors: [] }),
+    resetSamples: assign({ samples: [] }),
   },
   delays: {
     debounceTime: 800,
@@ -96,7 +97,7 @@ export const simulationMachine = setup({
     canSimulate: ({ context }, params: ProcessorEventParams) =>
       hasSamples(context.samples) && hasValidProcessors(params.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
-    hasSamples: ({ context }) => hasSamples(context.samples),
+    '!hasSamples': (_, params: { samples: SampleDocument[] }) => !hasSamples(params.samples),
     hasValidProcessors: (_, params: ProcessorEventParams) => hasValidProcessors(params.processors),
   },
 }).createMachine({
@@ -117,12 +118,27 @@ export const simulationMachine = setup({
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulation' }],
+      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
     },
-    'simulation.receive_samples': {
-      target: '.assertingSimulationRequirements',
-      actions: [{ type: 'storeSamples', params: ({ event }) => event }],
-    },
+    'simulation.receive_samples': [
+      {
+        guard: { type: '!hasSamples', params: ({ event }) => event },
+        target: '.idle',
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSamples' }],
+      },
+      {
+        guard: {
+          type: 'hasProcessors',
+          params: ({ context }) => ({ processors: context.processors }),
+        },
+        target: '.assertingSimulationRequirements',
+        actions: [{ type: 'storeSamples', params: ({ event }) => event }],
+      },
+      {
+        target: '.idle',
+        actions: [{ type: 'storeSamples', params: ({ event }) => event }],
+      },
+    ],
     // Handle adding/reordering processors
     'processors.*': {
       target: '.assertingSimulationRequirements',

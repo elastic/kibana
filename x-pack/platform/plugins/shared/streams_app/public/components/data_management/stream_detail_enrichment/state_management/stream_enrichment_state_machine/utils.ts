@@ -15,17 +15,17 @@ import {
   getSourceFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import { EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { EnrichmentUrlState, RandomSamplesDataSource } from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
+
+export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
+  type: 'random-samples',
+  enabled: true,
+};
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,
-  dataSources: [
-    {
-      type: 'random-samples',
-      enabled: true,
-    },
-  ],
+  dataSources: [defaultRandomSamplesDataSource],
 };
 
 export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {

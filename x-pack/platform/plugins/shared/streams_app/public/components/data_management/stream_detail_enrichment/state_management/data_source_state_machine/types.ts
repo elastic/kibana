@@ -19,7 +19,7 @@ export interface DataSourceMachineDeps {
 export type DataSourceToParentEvent =
   | { type: 'dataSource.change'; id: string }
   | { type: 'dataSource.delete'; id: string }
-  | { type: 'dataSource.loaded'; id: string };
+  | { type: 'dataSource.dataChange'; id: string };
 
 export interface DataSourceInput {
   parentRef: DataSourceParentActor;
