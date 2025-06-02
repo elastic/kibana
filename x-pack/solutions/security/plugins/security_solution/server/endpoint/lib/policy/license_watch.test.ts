@@ -6,13 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
 import { LicenseService } from '../../../../common/license';
-import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -21,6 +15,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
+import { createMockEndpointAppContextService } from '../../mocks';
 
 const MockPackagePolicyWithEndpointPolicy = (
   cb?: (p: PolicyConfig) => PolicyConfig
@@ -37,9 +32,7 @@ const MockPackagePolicyWithEndpointPolicy = (
 };
 
 describe('Policy-Changing license watcher', () => {
-  const logger = loggingSystemMock.create().get('license_watch.test');
-  const soStartMock = savedObjectsServiceMock.createStartContract();
-  const esStartMock = elasticsearchServiceMock.createStart();
+  let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
   let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
 
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -47,14 +40,16 @@ describe('Policy-Changing license watcher', () => {
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
 
   beforeEach(() => {
-    packagePolicySvcMock = createPackagePolicyServiceMock();
+    endpointServiceMock = createMockEndpointAppContextService();
+    packagePolicySvcMock = endpointServiceMock.getInternalFleetServices()
+      .packagePolicy as jest.Mocked<PackagePolicyClient>;
   });
 
   it('is activated on license changes', () => {
     // mock a license-changing service to test reactivity
     const licenseEmitter: Subject<ILicense> = new Subject();
     const licenseService = new LicenseService();
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
+    const pw = new PolicyWatcher(endpointServiceMock);
 
     // swap out watch function, just to ensure it gets called when a license change happens
     const mockWatch = jest.fn();
@@ -99,7 +94,7 @@ describe('Policy-Changing license watcher', () => {
         perPage: 100,
       });
 
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
+    const pw = new PolicyWatcher(endpointServiceMock);
     await pw.watch(Gold); // just manually trigger with a given license
 
     expect(packagePolicySvcMock.list.mock.calls.length).toBe(3); // should have asked for 3 pages of resuts
@@ -126,7 +121,7 @@ describe('Policy-Changing license watcher', () => {
       perPage: 100,
     });
 
-    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
+    const pw = new PolicyWatcher(endpointServiceMock);
 
     // emulate a license change below paid tier
     await pw.watch(Basic);

@@ -21,29 +21,25 @@ export async function reIndexKnowledgeBaseWithLock({
   core,
   logger,
   esClient,
-  inferenceId,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   logger: Logger;
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
-  inferenceId: string;
 }): Promise<void> {
   const lmService = new LockManagerService(core, logger);
   return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
-    reIndexKnowledgeBase({ logger, esClient, inferenceId })
+    reIndexKnowledgeBase({ logger, esClient })
   );
 }
 
 async function reIndexKnowledgeBase({
   logger,
   esClient,
-  inferenceId,
 }: {
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
-  inferenceId: string;
 }): Promise<void> {
   const activeReindexingTask = await getActiveReindexingTaskId(esClient);
   if (activeReindexingTask) {
@@ -57,18 +53,11 @@ async function reIndexKnowledgeBase({
     logger,
   });
 
-  await createKnowledgeBaseIndex({ esClient, logger, inferenceId, indexName: nextWriteIndexName });
+  await createKnowledgeBaseIndex({ esClient, logger, indexName: nextWriteIndexName });
 
   logger.info(
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
   );
-
-  const reindexResponse = await esClient.asInternalUser.reindex({
-    source: { index: currentWriteIndexName },
-    dest: { index: nextWriteIndexName },
-    refresh: true,
-    wait_for_completion: false,
-  });
 
   // Point write index alias to the new index
   await updateKnowledgeBaseWriteIndexAlias({
@@ -76,6 +65,13 @@ async function reIndexKnowledgeBase({
     logger,
     nextWriteIndexName,
     currentWriteIndexName,
+  });
+
+  const reindexResponse = await esClient.asInternalUser.reindex({
+    source: { index: currentWriteIndexName },
+    dest: { index: nextWriteIndexName },
+    refresh: true,
+    wait_for_completion: false,
   });
 
   const taskId = reindexResponse.task?.toString();
@@ -196,9 +192,6 @@ export async function isReIndexInProgress({
     lmService.getLock(KB_REINDEXING_LOCK_ID),
     getActiveReindexingTaskId(esClient),
   ]);
-
-  logger.debug(`Lock: ${!!lock}`);
-  logger.debug(`ES re-indexing task: ${!!activeReindexingTask}`);
 
   return lock !== undefined || activeReindexingTask !== undefined;
 }

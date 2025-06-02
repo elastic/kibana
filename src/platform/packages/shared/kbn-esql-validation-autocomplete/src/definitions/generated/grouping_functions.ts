@@ -44,44 +44,6 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
-        },
-        {
-          name: 'buckets',
-          type: 'date_period',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          constantOnly: true,
-        },
-        {
-          name: 'startDate',
-          type: 'date',
-          constantOnly: true,
-        },
-        {
-          name: 'endDate',
-          type: 'date',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date_nanos',
         },
         {
@@ -96,21 +58,25 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+        },
+        {
+          name: 'buckets',
+          type: 'date_period',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date_nanos',
         },
         {
           name: 'buckets',
-          type: 'integer',
-          constantOnly: true,
-        },
-        {
-          name: 'startDate',
-          type: 'date',
-          constantOnly: true,
-        },
-        {
-          name: 'endDate',
-          type: 'date',
+          type: 'time_literal',
           constantOnly: true,
         },
       ],
@@ -155,6 +121,124 @@ const bucketDefinition: FunctionDefinition = {
           type: 'integer',
           constantOnly: true,
         },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+        {
+          name: 'startDate',
+          type: 'date',
+          constantOnly: true,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+        {
+          name: 'startDate',
+          type: 'date',
+          constantOnly: true,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
         {
           name: 'startDate',
           type: 'double',
@@ -368,20 +452,6 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'buckets',
-          type: 'double',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-        },
-        {
-          name: 'buckets',
           type: 'integer',
           constantOnly: true,
         },
@@ -585,20 +655,6 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'endDate',
           type: 'long',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-        },
-        {
-          name: 'buckets',
-          type: 'double',
           constantOnly: true,
         },
       ],
@@ -855,6 +911,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
     {
@@ -865,6 +922,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
   ],

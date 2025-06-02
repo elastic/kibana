@@ -241,6 +241,9 @@ export function createAlertingUsageCollector(
           },
           count_alerts_total: 0,
           count_alerts_by_rule_type: {},
+          count_rules_snoozed_by_type: {},
+          count_rules_muted_by_type: {},
+          count_ignored_fields_by_rule_type: {},
         };
       }
     },
@@ -316,6 +319,9 @@ export function createAlertingUsageCollector(
       percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
       count_alerts_total: { type: 'long' },
       count_alerts_by_rule_type: byTypeSchema,
+      count_rules_snoozed_by_type: byTypeSchema,
+      count_rules_muted_by_type: byTypeSchema,
+      count_ignored_fields_by_rule_type: byTypeSchema,
     },
   });
 }

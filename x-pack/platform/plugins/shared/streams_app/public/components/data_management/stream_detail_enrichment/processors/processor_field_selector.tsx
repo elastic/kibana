@@ -14,7 +14,13 @@ import { ProcessorFormState } from '../types';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { selectUnsupportedDottedFields } from '../state_management/simulation_state_machine/selectors';
 
-export const ProcessorFieldSelector = ({ helpText }: { helpText?: string }) => {
+export const ProcessorFieldSelector = ({
+  helpText,
+  onChange,
+}: {
+  helpText?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const unsupportedFields = useSimulatorSelector((state) =>
@@ -33,6 +39,13 @@ export const ProcessorFieldSelector = ({ helpText }: { helpText?: string }) => {
 
   const { ref, value, ...inputProps } = field;
   const { invalid, error } = fieldState;
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    field.onChange(event);
+    if (onChange) {
+      onChange(event);
+    }
+  };
 
   const isUnsupported = unsupportedFields.some((unsupportedField) =>
     value.startsWith(unsupportedField)
@@ -58,6 +71,7 @@ export const ProcessorFieldSelector = ({ helpText }: { helpText?: string }) => {
         <EuiFieldText
           data-test-subj="streamsAppProcessorFieldSelectorFieldText"
           {...inputProps}
+          onChange={handleChange}
           value={value}
           inputRef={ref}
           isInvalid={invalid}
