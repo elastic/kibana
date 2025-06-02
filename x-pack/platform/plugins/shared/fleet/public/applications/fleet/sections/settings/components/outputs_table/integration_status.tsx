@@ -160,7 +160,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                       {!packageInfo ? (
                         <Loading />
                       ) : (
-                        <EuiTitle 
+                        <EuiTitle
                           size="xs"
                           css={css`
                             color: ${titleTextColor};
