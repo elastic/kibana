@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
