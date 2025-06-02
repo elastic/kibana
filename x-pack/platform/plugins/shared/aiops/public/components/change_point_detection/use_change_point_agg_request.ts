@@ -377,9 +377,7 @@ export function useChangePointResults(
   }, [results]);
 
   // Flag to indicate if we're using sample data
-  const isUsingSampleData = useMemo(() => {
-    return results.length === 0 && sampleChangePointResponse.current !== null;
-  }, [results]);
+  const isUsingSampleData = results.length === 0 && sampleChangePointResponse.current !== null;
 
   return {
     results: finalResults,
