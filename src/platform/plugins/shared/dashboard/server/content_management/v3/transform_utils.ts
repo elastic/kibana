@@ -11,20 +11,10 @@ import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
-  DashboardAttributes,
-  DashboardGetOut,
-  DashboardItem,
-  ItemAttrsToSavedObjectParams,
-  ItemAttrsToSavedObjectReturn,
-  ItemAttrsToSavedObjectWithTagsParams,
-  PartialDashboardItem,
-  SavedObjectToItemReturn,
-} from './types';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import type {
   ControlGroupAttributes as ControlGroupAttributesV2,
   DashboardCrudTypes as DashboardCrudTypesV2,
 } from '../../../common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
   transformControlGroupIn,
   transformControlGroupOut,
@@ -34,6 +24,16 @@ import {
   transformSearchSourceIn,
   transformSearchSourceOut,
 } from './transforms';
+import type {
+  DashboardAttributes,
+  DashboardGetOut,
+  DashboardItem,
+  ItemAttrsToSavedObjectParams,
+  ItemAttrsToSavedObjectReturn,
+  ItemAttrsToSavedObjectWithTagsParams,
+  PartialDashboardItem,
+  SavedObjectToItemReturn,
+} from './types';
 
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -46,6 +46,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -53,7 +54,6 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
-
   // Inject any tag names from references into the attributes
   let tags: string[] | undefined;
   if (getTagNamesFromReferences && references && references.length) {
@@ -68,7 +68,7 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON) }),
+    ...((panelsJSON || sections) && { panels: transformPanelsOut(panelsJSON, sections) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
@@ -107,7 +107,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels) : '[]',
+    panelsJSON: panels ? transformPanelsIn(panels, true).panelsJSON : '[]',
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,
@@ -130,6 +130,8 @@ export const itemAttrsToSavedObject = ({
 }: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
+    const { panelsJSON, sections } = transformPanelsIn(panels);
+
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -139,8 +141,9 @@ export const itemAttrsToSavedObject = ({
         optionsJSON: JSON.stringify(options),
       }),
       ...(panels && {
-        panelsJSON: transformPanelsIn(panels),
+        panelsJSON,
       }),
+      ...(sections?.length && { sections }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
@@ -217,7 +220,6 @@ export function savedObjectToItem(
     version,
     managed,
   } = savedObject;
-
   try {
     const attributesOut = allowedAttributes
       ? pick(

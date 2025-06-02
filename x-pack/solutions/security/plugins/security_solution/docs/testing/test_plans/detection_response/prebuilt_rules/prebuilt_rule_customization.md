@@ -76,7 +76,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
-- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
 - **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 - **customizing bulk action**: a bulk action that updates values of customizable fields in multiple rules at once. See list below.
 ```Gherkin
@@ -378,7 +377,7 @@ And the all shown table rows should NOT have the Modified badge present
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When user navigates to the rule edit page of a prebuilt rule
 Then About, Definition and Schedule views should be disabled
 When user tries to access the disabled views
@@ -391,7 +390,7 @@ And required license name should be included in the message
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user selects one or more prebuilt rules in the rule management table
 And user's selection doesn't contain any custom rules
 And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
@@ -405,7 +404,7 @@ And no button to proceed with applying the action should be displayed
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user selects one or more prebuilt rules in the rule management table
 And user also selects one or more custom rules
 And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
@@ -419,7 +418,7 @@ And a button to proceed with applying the action only to custom rules should not
 **Automation**: Multiple API integration tests - one for each bulk action type.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user sends a request to bulk edit API
 And request's "dry run" parameter is set to false
 And the bulk edit action is <customizing_bulk_action>
