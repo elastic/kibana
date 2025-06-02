@@ -571,6 +571,7 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
+            env: { serverless: false },
           }
         );
 
