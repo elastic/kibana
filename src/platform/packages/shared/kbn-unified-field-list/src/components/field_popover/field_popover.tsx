@@ -17,7 +17,6 @@ import {
   EuiPopoverTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
@@ -33,8 +32,6 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderFooter,
   ...otherPopoverProps
 }) => {
-  const styles = useMemoizedStyles(componentStyles);
-
   let header: React.ReactNode | null = null;
   let content: React.ReactNode | null = null;
   let footer: React.ReactNode | null = null;
@@ -72,19 +69,23 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       data-test-subj="fieldPopover"
       panelClassName="unifiedFieldList__fieldPopover__fieldPopoverPanel"
       panelProps={{
-        css: styles.fieldPopoverPanel,
+        css: componentStyles.fieldPopoverPanel,
       }}
       {...otherPopoverProps}
     >
       {isOpen && (
-        <EuiFlexGroup gutterSize="none" direction="column" css={styles.popoverContentContainer}>
+        <EuiFlexGroup
+          gutterSize="none"
+          direction="column"
+          css={componentStyles.popoverContentContainer}
+        >
           {Boolean(header) && (
             <EuiFlexItem grow={false}>
               {content ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
             </EuiFlexItem>
           )}
           {content ? (
-            <EuiFlexItem className="eui-yScrollWithShadows" css={styles.popoverContent}>
+            <EuiFlexItem className="eui-yScrollWithShadows" css={componentStyles.popoverContent}>
               {content}
             </EuiFlexItem>
           ) : (
