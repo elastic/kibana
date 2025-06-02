@@ -12,8 +12,8 @@ import styled from 'styled-components';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { ruleSwitchAriaLabel } from './translations';
 
 const StaticSwitch = styled(EuiSwitch)`
