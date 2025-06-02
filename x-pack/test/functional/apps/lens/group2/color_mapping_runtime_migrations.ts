@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const oldColorMappingsDashboardFixture =
   'x-pack/test/functional/fixtures/kbn_archiver/lens/old_color_mapping_dashboard.json';
 
-const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });
+const palettes = getKbnPalettes({ darkMode: false });
 const defaultPaletteColors = palettes
   .get(KbnPalette.Default)
   .colors()
