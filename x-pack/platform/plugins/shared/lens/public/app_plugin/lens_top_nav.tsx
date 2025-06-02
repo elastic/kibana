@@ -661,6 +661,7 @@ export const LensTopNavMenu = ({
           }),
           config: {
             link: {
+              attachToAnchorIfIsolate: true,
               draftModeCallOut: (
                 <EuiCallOut
                   color="warning"

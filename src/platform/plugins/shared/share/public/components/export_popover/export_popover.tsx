@@ -190,6 +190,7 @@ function ManagedFlyout({
                       <EuiCodeBlock
                         data-test-subj="exportAssetValue"
                         css={{ overflowWrap: 'break-word' }}
+                        overflowHeight={360}
                         language={exportIntegration.config.copyAssetURIConfig.contentType}
                         isCopyable
                         copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
@@ -328,7 +329,19 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 label={menuItem.config.label}
                 data-test-subj={`exportMenuItem-${menuItem.config.label}`}
                 isDisabled={menuItem.config.disabled}
-                onClick={() => openFlyout(menuItem)}
+                onClick={async () => {
+                  if (
+                    !menuItem.config.copyAssetURIConfig &&
+                    !menuItem.config.generateAssetComponent
+                  ) {
+                    await menuItem.config.generateAssetExport({
+                      intl,
+                      optimizedForPrinting: false,
+                    });
+                  } else {
+                    openFlyout(menuItem);
+                  }
+                }}
               />
             </EuiToolTip>
           ))}

@@ -8,6 +8,8 @@
  */
 
 import React, { type FC } from 'react';
+import { copyToClipboard } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareProvider, useShareContext, type IShareContext } from './context';
@@ -25,7 +27,7 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareContext();
 
-  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, toasts, isDirty } = shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
@@ -34,12 +36,37 @@ export const ShareMenuTabs = () => {
     tabs.push(linkTab);
   }
 
-  // Embed is disabled in the serverless offering, hence the need to check that we received it
+  // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
   if (
     shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
     !objectTypeMeta?.config?.embed?.disabled
   ) {
     tabs.push(embedTab);
+  }
+
+  /**
+   * If there is only one tab and the link is configured to allow copying the link without showing the modal,
+   * we will copy the link to the clipboard and show a success toast.
+   */
+  if (
+    !isDirty &&
+    tabs.length === 1 &&
+    !objectTypeMeta?.config.link?.disabled &&
+    objectTypeMeta.config?.link?.attachToAnchorIfIsolate &&
+    objectTypeMeta.config?.link?.delegatedShareUrlHandler
+  ) {
+    void (async function () {
+      const shareableUrl = await objectTypeMeta.config?.link?.delegatedShareUrlHandler!();
+      copyToClipboard(shareableUrl!);
+      toasts.addSuccess({
+        title: objectTypeMeta.title,
+        text: i18n.translate('share.shareContextMenu.copyLinkSuccess', {
+          defaultMessage: 'Link copied to clipboard',
+        }),
+      });
+    })();
+
+    return null;
   }
 
   return Boolean(tabs.length) ? (
