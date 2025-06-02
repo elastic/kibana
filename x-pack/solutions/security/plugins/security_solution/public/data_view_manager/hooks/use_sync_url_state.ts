@@ -108,7 +108,7 @@ export const useRestoreDataViewManagerStateFromURL = (
           }
 
           return {
-            scope: [scope],
+            scope,
             id: initialState[scope]?.id,
             fallbackPatterns: initialState[scope]?.selectedPatterns,
           };
