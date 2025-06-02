@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-server';
+import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import {
   ReindexSavedObject,
   ReindexStatus,

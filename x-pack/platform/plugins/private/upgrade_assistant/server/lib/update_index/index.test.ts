@@ -8,12 +8,12 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndex } from '.';
 import { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getReindexWarnings } from '@kbn/upgrade-assistant-server';
+import { getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import { versionService } from '../version';
 // import { getMockVersionInfo } from '../__fixtures__/version';
 
 // Mock the getReindexWarnings function
-jest.mock('@kbn/upgrade-assistant-server', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getReindexWarnings: jest.fn(),
 }));
 

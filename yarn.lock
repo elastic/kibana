@@ -6693,6 +6693,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reindex-service-plugin@link:x-pack/platform/plugins/private/reindex_service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/relocate@link:packages/kbn-relocate":
   version "0.0.0"
   uid ""
@@ -7913,15 +7917,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/upgrade-assistant-pkg-common@link:x-pack/platform/packages/private/upgrade-assistant/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/upgrade-assistant-pkg-public@link:x-pack/platform/packages/private/upgrade-assistant/public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/upgrade-assistant-pkg-server@link:x-pack/platform/packages/private/upgrade-assistant/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/upgrade-assistant-plugin@link:x-pack/platform/plugins/private/upgrade_assistant":
-  version "0.0.0"
-  uid ""
-
-"@kbn/upgrade-assistant-public@link:x-pack/platform/packages/private/upgrade-assistant/public":
-  version "0.0.0"
-  uid ""
-
-"@kbn/upgrade-assistant-server@link:x-pack/platform/packages/private/upgrade-assistant/server":
   version "0.0.0"
   uid ""
 

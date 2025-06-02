@@ -1,6 +1,6 @@
 {
-  "type": "shared-server",
-  "id": "@kbn/upgrade-assistant-pkg-server",
+  "type": "shared-common",
+  "id": "@kbn/upgrade-assistant-pkg-common",
   "owner": [
     "@elastic/kibana-management"
   ],

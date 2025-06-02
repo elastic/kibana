@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Version } from '@kbn/upgrade-assistant-server';
+import { Version } from '@kbn/upgrade-assistant-pkg-server';
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;

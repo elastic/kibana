@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/reindexing_service/lib/index_settings';
-import { getIndexState, Version } from '@kbn/upgrade-assistant-server';
-import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-server';
+import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

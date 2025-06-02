@@ -10,7 +10,7 @@ import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
-jest.mock('@kbn/upgrade-assistant-server', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 

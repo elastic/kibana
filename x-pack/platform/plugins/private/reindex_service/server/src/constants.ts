@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { Version } from '@kbn/upgrade-assistant-pkg-server';
-
-const versionService = new Version();
-
-export { versionService };
+// todo rename path
+export const API_BASE_PATH = '/api/upgrade_assistant';

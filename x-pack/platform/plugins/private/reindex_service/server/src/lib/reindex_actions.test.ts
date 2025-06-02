@@ -22,7 +22,7 @@ import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
-jest.mock('@kbn/upgrade-assistant-server', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getRollupJobByIndexName: jest.fn(),
 }));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('@kbn/upgrade-assistant-server', () => ({ esIndicesStateCheck: jest.fn() }));
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
 import { TransportResult } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/core/server';
@@ -22,7 +22,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../../lib/__fixtures__/version'; // this will need to be addressed
-import { esIndicesStateCheck } from '@kbn/upgrade-assistant-server';
+import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 import { versionService } from './version';
 
 import { ReindexService, reindexServiceFactory } from './reindex_service';

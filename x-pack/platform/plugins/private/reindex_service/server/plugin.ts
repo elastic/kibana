@@ -25,7 +25,7 @@ import {
 // import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 // import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 
-import { hiddenTypes } from '@kbn/upgrade-assistant-server';
+import { hiddenTypes } from '@kbn/upgrade-assistant-pkg-server';
 import { versionService } from './src/lib/version';
 // import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { RouteDependencies } from './src/types';
@@ -73,6 +73,7 @@ export class ReindexServiceServerPlugin implements Plugin {
       lib: {
         handleEsError,
       },
+      current: versionService.getCurrentVersion(),
     };
 
     registerReindexIndicesRoutes(dependencies, () => this.getWorker());

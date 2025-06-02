@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
-import { API_BASE_PATH } from '../../../common/constants';
-import { REINDEX_OP_TYPE, ReindexStatus } from '../../../common/types';
+import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { API_BASE_PATH } from '../constants';
 import { ReindexWorker } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { sortAndOrderReindexOperations } from '../lib/op_utils';
@@ -28,6 +28,7 @@ export function registerBatchReindexIndicesRoutes(
     log,
     getSecurityPlugin,
     lib: { handleEsError },
+    current,
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
@@ -49,7 +50,7 @@ export function registerBatchReindexIndicesRoutes(
       },
       validate: {},
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
         savedObjects,
@@ -100,7 +101,7 @@ export function registerBatchReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         savedObjects: { getClient },
         elasticsearch: { client: esClient },

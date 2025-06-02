@@ -67,20 +67,3 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
-
-// ug, todo
-export interface ReindexStatusResponse {
-  meta: {
-    indexName: string;
-    reindexName: string;
-    // Array of aliases pointing to the index being reindexed
-    aliases: string[];
-    isReadonly: boolean;
-    isFrozen: boolean;
-    isInDataStream: boolean;
-    isFollowerIndex: boolean;
-  };
-  warnings?: IndexWarning[];
-  reindexOp?: ReindexOperation;
-  hasRequiredPrivileges?: boolean;
-}

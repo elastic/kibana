@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH, CLOUD_SNAPSHOT_REPOSITORY } from '../../common/constants';
 import { RouteDependencies } from '../types';
 

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH, RECENT_DURATION_MS } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';

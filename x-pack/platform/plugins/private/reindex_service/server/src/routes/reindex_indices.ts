@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
-import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-server';
-import { API_BASE_PATH } from '../../../common/constants';
-import { ReindexStatusResponse } from '../../../common/types';
+import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatusResponse } from '@kbn/upgrade-assistant-pkg-common';
+import { API_BASE_PATH } from '../constants';
 import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { RouteDependencies } from '../types';

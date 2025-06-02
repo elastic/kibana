@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
 import { DataStreamReindexStatusResponse } from '../../../common/types';

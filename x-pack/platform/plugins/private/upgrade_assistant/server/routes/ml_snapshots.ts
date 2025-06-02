@@ -11,7 +11,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { RouteDependencies } from '../types';

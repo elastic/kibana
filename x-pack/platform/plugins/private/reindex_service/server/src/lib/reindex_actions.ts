@@ -13,9 +13,9 @@ import {
   ElasticsearchClient,
   Logger,
 } from '@kbn/core/server';
-import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-server';
-import type { Version } from '@kbn/upgrade-assistant-server';
-import { FlatSettings } from '@kbn/upgrade-assistant-server';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
 import {
   REINDEX_OP_TYPE,
   ReindexOperation,

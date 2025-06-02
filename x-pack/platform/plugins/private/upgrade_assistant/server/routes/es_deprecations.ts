@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// import { reindexActionsFactory, reindexServiceFactory } from '@kbn/upgrade-assistant-server';
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+// import { reindexActionsFactory, reindexServiceFactory } from '@kbn/upgrade-assistant-pkg-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import type { RouteDependencies } from '../types';

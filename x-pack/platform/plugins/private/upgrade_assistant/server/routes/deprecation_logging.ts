@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
-import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import {
   API_BASE_PATH,
   APPS_WITH_DEPRECATION_LOGS,
