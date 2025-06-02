@@ -23,4 +23,6 @@ module.exports = function (serviceName = name) {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
   process.on('beforeExit', shutdown);
+
+  return shutdown;
 };

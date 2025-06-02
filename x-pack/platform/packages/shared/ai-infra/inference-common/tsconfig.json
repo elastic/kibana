@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/sse-utils",
+    "@kbn/zod",
+    "@kbn/logging",
   ]
 }

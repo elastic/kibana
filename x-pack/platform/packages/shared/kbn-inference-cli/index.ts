@@ -6,3 +6,4 @@
  */
 export { createInferenceClient } from './src/create_inference_client';
 export type { InferenceCliClient } from './src/client';
+export { runRecipe } from './src/run_recipe';

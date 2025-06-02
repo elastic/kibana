@@ -33,6 +33,7 @@ export const RunActionParamsSchema = schema.object({
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   raw: schema.maybe(schema.boolean()),
   telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  generationConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const RunApiResponseSchema = schema.object(
@@ -81,6 +82,7 @@ export const InvokeAIActionParamsSchema = schema.object({
     })
   ),
   telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  generationConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
@@ -94,6 +96,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
   timeout: schema.maybe(schema.number()),
   tools: schema.maybe(schema.arrayOf(schema.any())),
   telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  generationConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({

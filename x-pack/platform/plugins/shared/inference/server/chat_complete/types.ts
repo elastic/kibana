@@ -15,6 +15,8 @@ import type {
   ToolOptions,
   ChatCompleteMetadata,
 } from '@kbn/inference-common';
+import { KibanaRequest } from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
 import type { InferenceExecutor } from './utils';
 
 /**
@@ -44,6 +46,7 @@ export type InferenceAdapterChatCompleteOptions = {
   modelName?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
+  invokeParameters?: Record<string, any>;
 } & ToolOptions;
 
 /**
@@ -54,3 +57,13 @@ export type InferenceAdapterChatCompleteOptions = {
 export type InferenceConnectorAdapterChatCompleteEvent =
   | ChatCompletionChunkEvent
   | ChatCompletionTokenCountEvent;
+
+/**
+ * Options for createChatCompleteApi
+ */
+
+export interface CreateChatCompleteApiOptions {
+  request: KibanaRequest;
+  actions: ActionsPluginsStart;
+  logger: Logger;
+}
