@@ -158,13 +158,14 @@ describe('Add Integration - Real API', () => {
           });
         }
       ).as('packages');
+      cy.intercept('/api/fleet/epm/packages/1password/*').as('1passwordPackage');
 
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
-      cy.getBySel(LOADING_SPINNER).should('not.exist');
-      cy.getBySel(ADD_INTEGRATION_FLYOUT.SELECT_INTEGRATION_COMBOBOX)
-        .click()
-        .type('{downArrow}{enter}');
+      const packageComboBox = cy.getBySel(ADD_INTEGRATION_FLYOUT.SELECT_INTEGRATION_COMBOBOX);
+      packageComboBox.click();
+      cy.wait('@1passwordPackage');
+      packageComboBox.type('{downArrow}{enter}');
       cy.getBySel(ADD_INTEGRATION_FLYOUT.PASSWORD_INPUT).type('test');
       cy.getBySel(ADD_INTEGRATION_FLYOUT.SUBMIT_BTN).click();
       cy.get('.euiBasicTable-loading').should('not.exist');
