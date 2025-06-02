@@ -256,7 +256,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [

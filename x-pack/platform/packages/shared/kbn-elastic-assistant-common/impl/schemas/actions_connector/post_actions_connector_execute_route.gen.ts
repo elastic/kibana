@@ -54,7 +54,7 @@ export const ExecuteConnectorRequestBody = z.object({
   langSmithApiKey: z.string().optional(),
   screenContext: ScreenContext.optional(),
   /**
-   * optional system prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
+   * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
    */
   promptIds: PromptIds.optional(),
 });

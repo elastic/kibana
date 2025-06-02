@@ -20,7 +20,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const meta = getDocLinksMeta({ kibanaBranch, buildFlavor });
 
   const DOC_LINK_VERSION = meta.version;
-  const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
@@ -33,13 +32,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
   const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
-  const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
-  const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
-  const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
-  const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
   const isServerless = buildFlavor === 'serverless';
 
@@ -54,29 +49,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
     },
     apm: {
-      kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
-      supportedServiceMaps: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-service-map.html#observability-apm-service-map-supported-apm-agents`
-        : `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
-      customLinks: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-create-custom-links.html`
-        : `${KIBANA_DOCS}custom-links.html`,
-      droppedTransactionSpans: `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-data-model-dropped-spans`,
-      upgrading: `${OBSERVABILITY_DOCS}apm-upgrade.html`,
-      metaData: `${OBSERVABILITY_DOCS}apm-data-model-metadata.html`,
-      overview: `${OBSERVABILITY_DOCS}apm.html`,
-      tailSamplingPolicies: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
-        : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
-      elasticAgent: `${OBSERVABILITY_DOCS}/apm-upgrade-to-apm-integration.html`,
-      storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
-      spanCompression: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-compress-spans.html`
-        : `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-spans-span-compression`,
-      transactionSampling: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
-        : `${OBSERVABILITY_DOCS}sampling.html`,
-      indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
+      kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
+      supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
+      customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
+      droppedTransactionSpans: `${ELASTIC_DOCS}solutions/observability/apm/spans#apm-data-model-dropped-spans`,
+      upgrading: `${ELASTIC_DOCS}solutions/observability/apm/upgrade`,
+      metaData: `${ELASTIC_DOCS}solutions/observability/apm/metadata`,
+      overview: `${ELASTIC_DOCS}solutions/observability/apm`,
+      tailSamplingPolicies: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
+      elasticAgent: `${ELASTIC_DOCS}solutions/observability/apm/switch-to-elastic-apm-integration`,
+      storageExplorer: `${ELASTIC_DOCS}solutions/observability/apm/storage-explorer`,
+      spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
+      transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
+      indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -104,20 +89,20 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       documentExplorer: `${ELASTIC_DOCS}explore-analyze/discover/document-explorer`,
     },
     filebeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
-      installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
-      configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
-      elasticsearchModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`,
-      elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
-      startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
-      exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
-      suricataModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-suricata.html`,
-      zeekModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-zeek.html`,
+      base: `${ELASTIC_DOCS}reference/beats/filebeat`,
+      installation: `${ELASTIC_DOCS}reference/beats/filebeat/filebeat-installation-configuration`,
+      configuration: `${ELASTIC_DOCS}reference/beats/filebeat/configuring-howto-filebeat`,
+      elasticsearchModule: `${ELASTIC_DOCS}reference/beats/filebeat/filebeat-module-elasticsearch`,
+      elasticsearchOutput: `${ELASTIC_DOCS}reference/beats/filebeat/elasticsearch-output`,
+      startup: `${ELASTIC_DOCS}reference/beats/filebeat/filebeat-starting`,
+      exportedFields: `${ELASTIC_DOCS}reference/beats/filebeat/exported-fields`,
+      suricataModule: `${ELASTIC_DOCS}reference/beats/filebeat/filebeat-module-suricata`,
+      zeekModule: `${ELASTIC_DOCS}reference/beats/filebeat/filebeat-module-zeek`,
     },
     auditbeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
-      auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
-      systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
+      base: `${ELASTIC_DOCS}reference/beats/auditbeat`,
+      auditdModule: `${ELASTIC_DOCS}reference/beats/auditbeat/auditbeat-module-auditd`,
+      systemModule: `${ELASTIC_DOCS}reference/beats/auditbeat/auditbeat-module-system`,
     },
     enterpriseSearch: {
       aiSearchDoc: `${ESRE_DOCS}`,
@@ -209,24 +194,25 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
     metricbeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
-      configure: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/configuring-howto-metricbeat.html`,
-      httpEndpoint: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/http-endpoint.html`,
-      install: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-installation-configuration.html`,
-      start: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}/metricbeat-starting.html`,
+      base: `${ELASTIC_DOCS}reference/beats/metricbeat`,
+      configure: `${ELASTIC_DOCS}reference/beats/metricbeat/configuring-howto-metricbeat`,
+      httpEndpoint: `${ELASTIC_DOCS}reference/beats/metricbeat/http-endpoint`,
+      install: `${ELASTIC_DOCS}reference/beats/metricbeat/metricbeat-installation-configuration`,
+      start: `${ELASTIC_DOCS}reference/beats/metricbeat/metricbeat-starting`,
     },
     heartbeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
+      base: `${ELASTIC_DOCS}reference/beats/heartbeat`,
+      monitorTags: `${ELASTIC_DOCS}reference/beats/heartbeat/monitor-options#monitor-tags`,
     },
     libbeat: {
-      getStarted: `${ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${DOC_LINK_VERSION}/getting-started.html`,
+      getStarted: `${ELASTIC_DOCS}reference/beats`,
     },
     logstash: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
-      inputElasticAgent: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/plugins-inputs-elastic_agent.html`,
+      base: `${ELASTIC_DOCS}reference/logstash`,
+      inputElasticAgent: `${ELASTIC_DOCS}reference/logstash/plugins/plugins-inputs-elastic_agent`,
     },
     winlogbeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
+      base: `${ELASTIC_DOCS}reference/beats/winlogbeat`,
     },
     aggs: {
       composite: `${ELASTIC_DOCS}reference/aggregations/search-aggregations-bucket-composite-aggregation`,
@@ -291,7 +277,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       runtimeFields: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#runtime-fields`,
       migrateOffScriptedFields: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#migrate-off-scripted-fields`,
     },
-    addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
+    addData: `${ELASTIC_DOCS}manage-data/ingest`,
     kibana: {
       askElastic: `${ELASTIC_WEBSITE_URL}products/kibana/ask-elastic?blade=kibanaaskelastic`,
       createGithubIssue: `${ELASTIC_GITHUB}kibana/issues/new/choose`,
@@ -442,7 +428,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       publicBaseUrl: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-publicBaseUrl`,
     },
     logging: {
-      enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,
+      enableDeprecationHttpDebugLogs: `${ELASTIC_DOCS}reference/kibana/configuration-reference/logging-settings#enable-http-debug-logs`,
     },
     securitySolution: {
       artifactControl: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-updates-for-protection-artifacts`,
@@ -584,51 +570,27 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
     observability: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}what-is-observability-serverless.html`
-        : `${OBSERVABILITY_DOCS}index.html`,
-      infrastructureThreshold: `${OBSERVABILITY_DOCS}infrastructure-threshold-alert.html`,
-      logsThreshold: `${OBSERVABILITY_DOCS}logs-threshold-alert.html`,
-      metricsThreshold: `${OBSERVABILITY_DOCS}metrics-threshold-alert.html`,
-      customThreshold: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-custom-threshold-alert-rule.html`
-        : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
-      monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
-      monitorUptime: isServerless
-        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.html`
-        : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
-      tlsCertificate: `${OBSERVABILITY_DOCS}tls-certificate-alert.html`,
-      uptimeDurationAnomaly: `${OBSERVABILITY_DOCS}duration-anomaly-alert.html`,
-      monitorLogs: isServerless
-        ? `${SERVERLESS_DOCS}observability-discover-and-explore-logs.html`
-        : `${OBSERVABILITY_DOCS}monitor-logs.html`,
-      analyzeMetrics: isServerless
-        ? `${SERVERLESS_DOCS}observability-infrastructure-monitoring.html`
-        : `${OBSERVABILITY_DOCS}analyze-metrics.html`,
-      monitorUptimeSynthetics: isServerless
-        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.html`
-        : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
-      userExperience: `${OBSERVABILITY_DOCS}user-experience.html`,
-      createAlerts: isServerless
-        ? `${SERVERLESS_DOCS}observability-alerting.html`
-        : `${OBSERVABILITY_DOCS}create-alerts.html`,
-      syntheticsAlerting: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-settings.html#synthetics-settings-alerting`
-        : `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
-      syntheticsCommandReference: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-configuration.html#synthetics-configuration-playwright-options`
-        : `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
-      syntheticsProjectMonitors: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-get-started-project.html`
-        : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
-      syntheticsMigrateFromIntegration: `${OBSERVABILITY_DOCS}synthetics-migrate-from-integration.html`,
-      slo: isServerless
-        ? `${SERVERLESS_DOCS}observability-slos.html`
-        : `${OBSERVABILITY_DOCS}slo.html`,
-      sloBurnRateRule: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-slo-burn-rate-alert-rule.html`
-        : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
-      aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
+      guide: `${ELASTIC_DOCS}solutions/observability`,
+      infrastructureThreshold: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-inventory-rule`,
+      logsThreshold: `${ELASTIC_DOCS}solutions/observability/incident-management/create-log-threshold-rule`,
+      metricsThreshold: `${ELASTIC_DOCS}solutions/observability/incident-management/create-metric-threshold-rule`,
+      customThreshold: `${ELASTIC_DOCS}solutions/observability/incident-management/create-custom-threshold-rule`,
+      monitorStatus: `${ELASTIC_DOCS}solutions/observability/incident-management/create-monitor-status-rule`,
+      monitorUptime: `${ELASTIC_DOCS}solutions/observability/synthetics`,
+      tlsCertificate: `${ELASTIC_DOCS}solutions/observability/incident-management/create-tls-certificate-rule`,
+      uptimeDurationAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-uptime-duration-anomaly-rule`,
+      monitorLogs: `${ELASTIC_DOCS}solutions/observability/logs/explore-logs`,
+      analyzeMetrics: `${ELASTIC_DOCS}solutions/observability/infra-and-hosts/analyze-infrastructure-host-metrics`,
+      monitorUptimeSynthetics: `${ELASTIC_DOCS}solutions/observability/synthetics`,
+      userExperience: `${ELASTIC_DOCS}solutions/observability/applications/user-experience`,
+      createAlerts: `${ELASTIC_DOCS}solutions/observability/incident-management/alerting`,
+      syntheticsAlerting: `${ELASTIC_DOCS}solutions/observability/synthetics/configure-settings#synthetics-settings-alerting`,
+      syntheticsCommandReference: `${ELASTIC_DOCS}solutions/observability/synthetics/configure-projects#synthetics-configuration-playwright-options`,
+      syntheticsProjectMonitors: `${ELASTIC_DOCS}solutions/observability/synthetics/create-monitors-with-projects`,
+      syntheticsMigrateFromIntegration: `${ELASTIC_DOCS}solutions/observability/synthetics/migrate-from-elastic-synthetics-integration`,
+      slo: `${ELASTIC_DOCS}solutions/observability/incident-management/service-level-objectives-slos`,
+      sloBurnRateRule: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-slo-burn-rate-rule`,
+      aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
@@ -669,20 +631,20 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       termJoinsExample: `${ELASTIC_DOCS}explore-analyze/visualize/maps/terms-join#_example_term_join`,
     },
     monitoring: {
-      alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
-      alertsKibanaCpuThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-cpu-threshold`,
-      alertsKibanaDiskThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-disk-usage-threshold`,
-      alertsKibanaJvmThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-jvm-memory-threshold`,
-      alertsKibanaMissingData: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-missing-monitoring-data`,
-      alertsKibanaThreadpoolRejections: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-thread-pool-rejections`,
-      alertsKibanaCCRReadExceptions: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-ccr-read-exceptions`,
-      alertsKibanaLargeShardSize: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-large-shard-size`,
-      alertsKibanaClusterAlerts: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-cluster-alerts`,
-      metricbeatBlog: `${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
-      monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
-      monitorKibana: `${KIBANA_DOCS}monitoring-metricbeat.html`,
-      monitorLogstash: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`,
-      troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
+      alertsKibana: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts`,
+      alertsKibanaCpuThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-cpu-threshold`,
+      alertsKibanaDiskThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-disk-usage-threshold`,
+      alertsKibanaJvmThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-jvm-memory-threshold`,
+      alertsKibanaMissingData: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-missing-monitoring-data`,
+      alertsKibanaThreadpoolRejections: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-thread-pool-rejections`,
+      alertsKibanaCCRReadExceptions: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-ccr-read-exceptions`,
+      alertsKibanaLargeShardSize: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-large-shard-size`,
+      alertsKibanaClusterAlerts: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-cluster-alerts`,
+      metricbeatBlog: `https://www.elastic.co/blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
+      monitorElasticsearch: `${ELASTIC_DOCS}deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-metricbeat`,
+      monitorKibana: `${ELASTIC_DOCS}deploy-manage/monitor/stack-monitoring/kibana-monitoring-metricbeat`,
+      monitorLogstash: `${ELASTIC_DOCS}reference/logstash/monitoring-with-metricbeat`,
+      troubleshootKibana: `${ELASTIC_DOCS}troubleshoot/kibana/monitoring`,
     },
     reporting: {
       cloudMinimumRequirements: `${ELASTIC_DOCS}explore-analyze/report-and-share#_embed_outside_of_kib`,
@@ -815,108 +777,115 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },
     ingest: {
-      append: `${ELASTICSEARCH_DOCS}append-processor.html`,
-      attachment: `${ELASTIC_DOCS}reference/enrich-processor/attachment`,
-      bytes: `${ELASTICSEARCH_DOCS}bytes-processor.html`,
-      circle: `${ELASTICSEARCH_DOCS}ingest-circle-processor.html`,
-      convert: `${ELASTICSEARCH_DOCS}convert-processor.html`,
-      csv: `${ELASTICSEARCH_DOCS}csv-processor.html`,
-      date: `${ELASTICSEARCH_DOCS}date-processor.html`,
-      dateIndexName: `${ELASTICSEARCH_DOCS}date-index-name-processor.html`,
-      dissect: `${ELASTICSEARCH_DOCS}dissect-processor.html`,
-      dissectKeyModifiers: `${ELASTICSEARCH_DOCS}dissect-processor.html#dissect-key-modifiers`,
-      dotExpander: `${ELASTICSEARCH_DOCS}dot-expand-processor.html`,
-      drop: `${ELASTICSEARCH_DOCS}drop-processor.html`,
-      enrich: `${ELASTICSEARCH_DOCS}ingest-enriching-data.html`,
-      fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
-      foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
-      geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
-      geoMatch: `${ELASTICSEARCH_DOCS}geo-match-enrich-policy-type.html`,
-      grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
-      gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
-      htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,
-      inference: `${ELASTICSEARCH_DOCS}inference-processor.html`,
-      inferenceClassification: `${ELASTICSEARCH_DOCS}inference-processor.html#inference-processor-classification-opt`,
-      inferenceRegression: `${ELASTICSEARCH_DOCS}inference-processor.html#inference-processor-regression-opt`,
-      join: `${ELASTICSEARCH_DOCS}join-processor.html`,
-      json: `${ELASTICSEARCH_DOCS}json-processor.html`,
-      kv: `${ELASTICSEARCH_DOCS}kv-processor.html`,
-      lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
-      pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
-      pipelines: isServerless
-        ? `${SERVERLESS_DOCS}ingest-pipelines.html`
-        : `${ELASTICSEARCH_DOCS}ingest.html`,
-      csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-converting.html`,
-      pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
-      processors: `${ELASTICSEARCH_DOCS}processors.html`,
-      arrayOrJson: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-array-json-handling`,
-      dataEnrichment: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-enrichment`,
-      dataFiltering: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-filtering`,
-      dataTransformation: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-data-transformation`,
-      pipelineHandling: `${ELASTICSEARCH_DOCS}processors.html#ingest-process-category-pipeline-handling`,
-      remove: `${ELASTICSEARCH_DOCS}remove-processor.html`,
-      rename: `${ELASTICSEARCH_DOCS}rename-processor.html`,
-      script: `${ELASTICSEARCH_DOCS}script-processor.html`,
-      set: `${ELASTICSEARCH_DOCS}set-processor.html`,
-      setSecurityUser: `${ELASTICSEARCH_DOCS}ingest-node-set-security-user-processor.html`,
-      sort: `${ELASTICSEARCH_DOCS}sort-processor.html`,
-      split: `${ELASTICSEARCH_DOCS}split-processor.html`,
-      trim: `${ELASTICSEARCH_DOCS}trim-processor.html`,
-      uppercase: `${ELASTICSEARCH_DOCS}uppercase-processor.html`,
-      uriParts: `${ELASTICSEARCH_DOCS}uri-parts-processor.html`,
-      urlDecode: `${ELASTICSEARCH_DOCS}urldecode-processor.html`,
-      userAgent: `${ELASTICSEARCH_DOCS}user-agent-processor.html`,
+      append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
+      circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
+      community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,
+      convert: `${ELASTIC_DOCS}reference/enrich-processor/convert-processor`,
+      csv: `${ELASTIC_DOCS}reference/enrich-processor/csv-processor`,
+      date: `${ELASTIC_DOCS}reference/enrich-processor/date-processor`,
+      dateIndexName: `${ELASTIC_DOCS}reference/enrich-processor/date-index-name-processor`,
+      dissect: `${ELASTIC_DOCS}reference/enrich-processor/dissect-processor`,
+      dissectKeyModifiers: `${ELASTIC_DOCS}reference/enrich-processor/dissect-processor#dissect-key-modifiers`,
+      dotExpander: `${ELASTIC_DOCS}reference/enrich-processor/dot-expand-processor`,
+      drop: `${ELASTIC_DOCS}reference/enrich-processor/drop-processor`,
+      enrich: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/data-enrichment`,
+      fail: `${ELASTIC_DOCS}reference/enrich-processor/fail-processor`,
+      foreach: `${ELASTIC_DOCS}reference/enrich-processor/foreach-processor`,
+      geoGrid: `${ELASTIC_DOCS}reference/enrich-processor/ingest-geo-grid-processor`,
+      geoIp: `${ELASTIC_DOCS}reference/enrich-processor/geoip-processor`,
+      geoMatch: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/example-enrich-data-based-on-geolocation`,
+      grok: `${ELASTIC_DOCS}reference/enrich-processor/grok-processor`,
+      gsub: `${ELASTIC_DOCS}reference/enrich-processor/gsub-processor`,
+      htmlString: `${ELASTIC_DOCS}reference/enrich-processor/htmlstrip-processor`,
+      inference: `${ELASTIC_DOCS}reference/enrich-processor/inference-processor`,
+      inferenceClassification: `${ELASTIC_DOCS}reference/enrich-processor/inference-processor#inference-processor-classification-opt`,
+      inferenceRegression: `${ELASTIC_DOCS}reference/enrich-processor/inference-processor#inference-processor-regression-opt`,
+      ipLocation: `${ELASTIC_DOCS}reference/enrich-processor/ip-location-processor`,
+      join: `${ELASTIC_DOCS}reference/enrich-processor/join-processor`,
+      json: `${ELASTIC_DOCS}reference/enrich-processor/json-processor`,
+      kv: `${ELASTIC_DOCS}reference/enrich-processor/kv-processor`,
+      lowercase: `${ELASTIC_DOCS}reference/enrich-processor/lowercase-processor`,
+      network: `${ELASTIC_DOCS}reference/enrich-processor/network-direction-processor`,
+      pipeline: `${ELASTIC_DOCS}reference/enrich-processor/pipeline-processor`,
+      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
+      csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
+      pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
+      processors: `${ELASTIC_DOCS}reference/enrich-processor`,
+      arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
+      dataEnrichment: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-enrichment`,
+      dataFiltering: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-filtering`,
+      dataTransformation: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-transformation`,
+      pipelineHandling: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-pipeline-handling`,
+      redact: `${ELASTIC_DOCS}reference/enrich-processor/redact-processor`,
+      registeredDomain: `${ELASTIC_DOCS}reference/enrich-processor/registered-domain-processor`,
+      remove: `${ELASTIC_DOCS}reference/enrich-processor/remove-processor`,
+      rename: `${ELASTIC_DOCS}reference/enrich-processor/rename-processor`,
+      reroute: `${ELASTIC_DOCS}reference/enrich-processor/reroute-processor`,
+      script: `${ELASTIC_DOCS}reference/enrich-processor/script-processor`,
+      set: `${ELASTIC_DOCS}reference/enrich-processor/set-processor`,
+      setSecurityUser: `${ELASTIC_DOCS}reference/enrich-processor/ingest-node-set-security-user-processor`,
+      sort: `${ELASTIC_DOCS}reference/enrich-processor/sort-processor`,
+      split: `${ELASTIC_DOCS}reference/enrich-processor/split-processor`,
+      terminate: `${ELASTIC_DOCS}reference/enrich-processor/terminate-processor`,
+      trim: `${ELASTIC_DOCS}reference/enrich-processor/trim-processor`,
+      uppercase: `${ELASTIC_DOCS}reference/enrich-processor/uppercase-processor`,
+      uriParts: `${ELASTIC_DOCS}reference/enrich-processor/uri-parts-processor`,
+      urlDecode: `${ELASTIC_DOCS}reference/enrich-processor/urldecode-processor`,
+      userAgent: `${ELASTIC_DOCS}reference/enrich-processor/user-agent-processor`,
     },
     fleet: {
-      guide: `${FLEET_DOCS}index.html`,
-      fleetServer: `${FLEET_DOCS}fleet-server.html`,
-      fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
-      settings: `${FLEET_DOCS}fleet-settings.html`,
-      kafkaSettings: `${FLEET_DOCS}kafka-output-settings.html`,
-      kafkaOutputTopicsSettings: `${FLEET_DOCS}kafka-output-settings.html#_topics_settings`,
-      logstashSettings: `${FLEET_DOCS}ls-output-settings.html`,
-      esSettings: `${FLEET_DOCS}es-output-settings.html`,
-      settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
-      settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
-      troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
-      elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
-      beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
-      datastreams: `${FLEET_DOCS}data-streams.html`,
-      datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
-      datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
-      datastreamsManualRollover: `${ELASTICSEARCH_DOCS}use-a-data-stream.html#manually-roll-over-a-data-stream`,
-      datastreamsTSDS: `${ELASTICSEARCH_DOCS}tsds.html`,
-      datastreamsTSDSMetrics: `${ELASTICSEARCH_DOCS}tsds.html#time-series-metric`,
-      datastreamsDownsampling: `${ELASTICSEARCH_DOCS}downsampling.html`,
-      installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
-      installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
-      grantESAccessToStandaloneAgents: `${FLEET_DOCS}grant-access-to-elasticsearch.html`,
-      upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
-      learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
+      guide: `${ELASTIC_DOCS}reference/fleet`,
+      fingerprint: `${ELASTIC_DOCS}reference/fleet/fingerprint-processor`,
+      fleetServer: `${ELASTIC_DOCS}reference/fleet/fleet-server`,
+      fleetServerAddFleetServer: `${ELASTIC_DOCS}reference/fleet/deployment-models`,
+      settings: `${ELASTIC_DOCS}reference/fleet/fleet-settings`,
+      kafkaSettings: `${ELASTIC_DOCS}reference/fleet/kafka-output-settings`,
+      kafkaOutputTopicsSettings: `${ELASTIC_DOCS}reference/fleet/kafka-output-settings#_topics_settings`,
+      logstashSettings: `${ELASTIC_DOCS}reference/fleet/ls-output-settings`,
+      esSettings: `${ELASTIC_DOCS}reference/fleet/es-output-settings`,
+      settingsFleetServerHostSettings: `${ELASTIC_DOCS}reference/fleet/fleet-settings#fleet-server-hosts-setting`,
+      settingsFleetServerProxySettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/fleet-settings#fleet-data-visualizer-settings`,
+      troubleshooting: `${ELASTIC_DOCS}troubleshoot/ingest/fleet/common-problems`,
+      elasticAgent: `${ELASTIC_DOCS}reference/fleet/install-elastic-agents`,
+      beatsAgentComparison: `${ELASTIC_DOCS}manage-data/ingest/tools`,
+      datastreams: `${ELASTIC_DOCS}reference/fleet/data-streams`,
+      datastreamsILM: `${ELASTIC_DOCS}reference/fleet/data-streams#data-streams-ilm`,
+      datastreamsNamingScheme: `${ELASTIC_DOCS}reference/fleet/data-streams#data-streams-naming-scheme`,
+      datastreamsManualRollover: `${ELASTIC_DOCS}manage-data/data-store/data-streams/use-data-stream#manually-roll-over-a-data-stream`,
+      datastreamsTSDS: `${ELASTIC_DOCS}manage-data/data-store/data-streams/time-series-data-stream-tsds`,
+      datastreamsTSDSMetrics: `${ELASTIC_DOCS}manage-data/data-store/data-streams/time-series-data-stream-tsds#time-series-metric`,
+      datastreamsDownsampling: `${ELASTIC_DOCS}manage-data/data-store/data-streams/downsampling-time-series-data-stream`,
+      installElasticAgent: `${ELASTIC_DOCS}reference/fleet/install-fleet-managed-elastic-agent`,
+      installElasticAgentStandalone: `${ELASTIC_DOCS}reference/fleet/install-standalone-elastic-agent`,
+      grantESAccessToStandaloneAgents: `${ELASTIC_DOCS}reference/fleet/grant-access-to-elasticsearch`,
+      upgradeElasticAgent: `${ELASTIC_DOCS}reference/fleet/upgrade-elastic-agent`,
+      learnMoreBlog: `https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: isServerless
-        ? `${SERVERLESS_DOCS}api-keys.html`
-        : `${KIBANA_DOCS}api-keys.html`,
-      onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
-      packageSignatures: `${FLEET_DOCS}package-signatures.html`,
-      secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
-      agentPolicy: `${FLEET_DOCS}agent-policy.html`,
+        ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
+        : `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+      onPremRegistry: `${ELASTIC_DOCS}reference/fleet/air-gapped`,
+      packageSignatures: `${ELASTIC_DOCS}reference/fleet/package-signatures`,
+      secureLogstash: `${ELASTIC_DOCS}reference/fleet/secure-logstash-connections`,
+      agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
-      api: `${FLEET_DOCS}fleet-api-docs.html`,
-      uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
-      installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
-      elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
-      policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
-      remoteESOoutput: `${FLEET_DOCS}remote-elasticsearch-output.html`,
-      performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
-      scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
-      roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
-      proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
-      unprivilegedMode: `${FLEET_DOCS}elastic-agent-unprivileged.html#unprivileged-change-mode`,
-      httpMonitoring: `${FLEET_DOCS}agent-policy.html#change-policy-enable-agent-monitoring`,
-      agentLevelLogging: `${FLEET_DOCS}monitor-elastic-agent.html#change-logging-level`,
+      api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
+      uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
+      installAndUninstallIntegrationAssets: `${ELASTIC_DOCS}reference/fleet/install-uninstall-integration-assets`,
+      elasticAgentInputConfiguration: `${ELASTIC_DOCS}reference/fleet/elastic-agent-input-configuration`,
+      policySecrets: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-secret-values`,
+      remoteESOoutput: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output`,
+      performancePresets: `${ELASTIC_DOCS}reference/fleet/es-output-settings#es-output-settings-performance-tuning-settings`,
+      scalingKubernetesResourcesAndLimits: `${ELASTIC_DOCS}reference/fleet/scaling-on-kubernetes#_specifying_resources_and_limits_in_agent_manifests`,
+      roleAndPrivileges: `${ELASTIC_DOCS}reference/fleet/fleet-roles-privileges`,
+      proxiesSettings: `${ELASTIC_DOCS}reference/fleet/fleet-agent-proxy-support`,
+      unprivilegedMode: `${ELASTIC_DOCS}reference/fleet/elastic-agent-unprivileged#unprivileged-change-mode`,
+      httpMonitoring: `${ELASTIC_DOCS}reference/fleet/agent-policy#change-policy-enable-agent-monitoring`,
+      agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
+      remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
     },
     integrationDeveloper: {
-      upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,
+      upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
     },
     ecs: {
       guide: `${ELASTIC_DOCS}reference/ecs`,
@@ -1013,9 +982,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apiKeyPrivileges: `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys#api-keys-restrict-privileges`,
     },
     synthetics: {
-      featureRoles: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-feature-roles.html`
-        : `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
+      featureRoles: `${ELASTIC_DOCS}solutions/observability/synthetics/grant-access-to-secured-resources`,
     },
     telemetry: {
       settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,

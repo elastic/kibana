@@ -107,7 +107,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
       const hit = results.body.hits.hits[0];
       expect(hit._source).to.eql({
-        numAlerts: 20,
+        numAlerts: 110,
       });
     });
 
@@ -149,7 +149,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
       const hit = results.body.hits.hits[0];
       expect(hit._source).to.eql({
-        numAlerts: 20,
+        numAlerts: 110,
       });
     });
 
