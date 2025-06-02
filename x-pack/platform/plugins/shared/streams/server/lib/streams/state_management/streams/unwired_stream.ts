@@ -210,7 +210,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
-    if (this._lifecycleChanged) {
+    if (this._lifecycleChanged && !isInheritLifecycle(this.getLifecycle())) {
       actions.push({
         type: 'update_lifecycle',
         request: {
