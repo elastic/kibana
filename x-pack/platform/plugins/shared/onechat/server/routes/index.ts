@@ -7,7 +7,9 @@
 
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
+import { registerMCPRoutes } from './mcp';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
+  registerMCPRoutes(dependencies);
 };
