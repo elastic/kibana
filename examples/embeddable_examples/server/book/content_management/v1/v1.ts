@@ -51,8 +51,9 @@ export const bookSearchOptionsSchema = schema.maybe(
 );
 
 export const bookResponseSchema = schema.object({
-  data: bookAttributesSchema,
+  item: bookAttributesSchema,
   meta: schema.object({
+    id: schema.string(),
     type: schema.string(),
     version: schema.maybe(schema.string()),
     createdAt: schema.maybe(schema.string()),

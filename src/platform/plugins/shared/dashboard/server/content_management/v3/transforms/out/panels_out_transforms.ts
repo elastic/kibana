@@ -138,6 +138,7 @@ function savedPanelToItem(
   panelType: SavedDashboardPanel['type'],
   embeddable: EmbeddableStart
 ) {
+  if (!embeddableConfig.attributes) return embeddableConfig;
   const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
   if (!embeddableCmDefintions) return embeddableConfig;
   const { savedObjectToItem } =

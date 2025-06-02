@@ -94,7 +94,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
         './react_embeddables/saved_book/saved_book_react_embeddable'
       );
       const [coreStart, deps] = await startServicesPromise;
-      return getSavedBookEmbeddableFactory(coreStart, deps.embeddable);
+      return getSavedBookEmbeddableFactory(coreStart, deps);
     });
 
     registerSearchEmbeddable(
