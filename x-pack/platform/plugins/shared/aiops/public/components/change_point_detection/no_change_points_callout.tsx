@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FC } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface NoChangePointsCalloutProps {
   reason?: string;
@@ -18,23 +18,28 @@ export const NoChangePointsCallout: FC<NoChangePointsCalloutProps> = ({ reason }
   return (
     <EuiCallOut
       data-test-subj="aiopsNoChangePointsWarningCallout"
-      title={i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundTitle', {
-        defaultMessage: 'No change points found',
-      })}
+      title={
+        <FormattedMessage
+          id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
+          defaultMessage="No change points found"
+        />
+      }
       color="warning"
       iconType="warning"
     >
       <p data-test-subj="aiopsNoChangePointsWarningCalloutText">
-        {reason
-          ? `${reason} ${i18n.translate(
-              'xpack.aiops.changePointDetection.showingSampleMetricData',
-              {
-                defaultMessage: '- showing sample metric data',
-              }
-            )}`
-          : i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
-              defaultMessage: 'No change points detected - showing sample metric data',
-            })}
+        {reason ? (
+          <FormattedMessage
+            id="xpack.aiops.changePointDetection.reasonWithSampleMetricData"
+            defaultMessage="{reason} - showing sample metric data"
+            values={{ reason }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
+            defaultMessage="No change points detected - showing sample metric data"
+          />
+        )}
       </p>
     </EuiCallOut>
   );
