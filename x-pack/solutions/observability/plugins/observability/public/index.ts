@@ -38,8 +38,6 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
-  enableInfrastructureHostsView,
-  enableInfrastructureContainerAssetView,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
   apmEnableServiceMapApiV2,
