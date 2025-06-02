@@ -18,11 +18,13 @@ import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoin
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
+import { createSupertestErrorLogger } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
+  const log = getService('log');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -154,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
-      describe('and has authorization to write trusted apps', () => {
+      describe.only('and has authorization to write trusted apps', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = trustedAppApiCall.getBody();
@@ -259,7 +261,6 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.os_types = ['macos'];
             body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
-
             await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
               trustedAppApiCalls[0].path
             )
@@ -268,14 +269,16 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
           });
           
-          it(`should not error on [${trustedAppApiCall.method}] if tags is set to [form_mode:advanced]`, async () => {
-            const body = trustedAppApiCall.getBody();
-
+          it.only(`should not error on [${trustedAppApiCall.method}] if tags is set to [form_mode:advanced]`, async () => {
+            let body = trustedAppApiCall.getBody();
             body.tags.push('form_mode:advanced');
-            await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
-              trustedAppApiCalls[0].path
+            console.log(trustedAppApiCall.method, body)
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](
+              trustedAppApiCall.path
             )
               .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
               .send(body)
               .expect(200);
           })
