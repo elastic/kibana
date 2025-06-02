@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getErrorBoundaryLabels } from './error_boundary_labels';
+export const getErrorBoundaryLabels = (
+  errorType: 'PageFatalReactError' | 'SectionFatalReactError'
+) => {
+  return {
+    errorType,
+  };
+};
