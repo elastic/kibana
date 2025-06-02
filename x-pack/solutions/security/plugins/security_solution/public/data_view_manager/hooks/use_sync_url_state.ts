@@ -14,7 +14,7 @@ import type { State } from '../../common/store/types';
 import { sourcererSelectors } from '../../common/store/selectors';
 import { sourcererActions } from '../../common/store/actions';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSelectDataView } from './use_select_data_view';
+import { type SelectDataViewAsyncPayload } from '../redux/actions';
 
 // TODO: remove this in cleanup phase Remove deprecated sourcerer code https://github.com/elastic/security-team/issues/12665
 export const useSyncSourcererUrlState = (
@@ -81,10 +81,10 @@ export const useSyncSourcererUrlState = (
  * The param itself is updated in the picker component, after user changes the selection manually.
  */
 export const useRestoreDataViewManagerStateFromURL = (
+  initDataViewPickerWithSelection: (initialSelection: SelectDataViewAsyncPayload[]) => void,
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const selectDataView = useSelectDataView();
 
   const onInitializeUrlParam = useCallback(
     (initialState: SourcererUrlState | null) => {
@@ -95,23 +95,29 @@ export const useRestoreDataViewManagerStateFromURL = (
       }
 
       if (initialState === null) {
-        return;
+        return initDataViewPickerWithSelection([]);
       }
 
       // Select data view for specific scope, based on the UrlParam.
-      (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
-        // NOTE: looks like this is about skipping the init when the active page is detections
-        // We should investigate this.
-        if (!(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)) {
-          selectDataView({
-            id: initialState[scope]?.id,
+      const urlBasedSelection = (Object.keys(initialState) as SourcererScopeName[])
+        .map((scope) => {
+          // NOTE: looks like this is about skipping the init when the active page is detections
+          // We should investigate this.
+          if (scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections) {
+            return undefined;
+          }
+
+          return {
             scope: [scope],
+            id: initialState[scope]?.id,
             fallbackPatterns: initialState[scope]?.selectedPatterns,
-          });
-        }
-      });
+          };
+        })
+        .filter(Boolean) as SelectDataViewAsyncPayload[];
+
+      initDataViewPickerWithSelection(urlBasedSelection);
     },
-    [newDataViewPickerEnabled, scopeId, selectDataView]
+    [initDataViewPickerWithSelection, newDataViewPickerEnabled, scopeId]
   );
 
   useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);

@@ -6,7 +6,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import {
   addListener as originalAddListener,
@@ -18,6 +18,7 @@ import { createDataViewSelectedListener } from '../redux/listeners/data_view_sel
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
+import { type SelectDataViewAsyncPayload } from '../redux/actions';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -57,11 +58,17 @@ export const useInitDataViewManager = () => {
     dispatch(addListener(dataViewSelectedListener));
 
     // NOTE: this kicks off the data loading in the Data View Picker
-    dispatch(sharedDataViewManagerSlice.actions.init());
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));
       dispatch(removeListener(dataViewSelectedListener));
     };
   }, [dispatch, newDataViewPickerEnabled, services.dataViews]);
+
+  return useCallback(
+    (initialSelection: SelectDataViewAsyncPayload[]) => {
+      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection));
+    },
+    [dispatch]
+  );
 };

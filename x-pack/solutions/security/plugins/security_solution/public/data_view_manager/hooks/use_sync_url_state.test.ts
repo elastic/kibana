@@ -13,7 +13,6 @@ import {
 import * as reactRedux from 'react-redux';
 import * as experimentalFeatures from '../../common/hooks/use_experimental_features';
 import * as globalQueryString from '../../common/utils/global_query_string';
-import * as useSelectDataViewModule from './use_select_data_view';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 
 jest.mock('react-redux');
@@ -83,48 +82,37 @@ describe('useRestoreDataViewManagerStateFromURL', () => {
   const mockUseIsExperimentalFeatureEnabled =
     experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock;
   const mockUseInitializeUrlParam = globalQueryString.useInitializeUrlParam as jest.Mock;
-  const mockUseSelectDataView = useSelectDataViewModule.useSelectDataView as jest.Mock;
-  const selectDataView = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSelectDataView.mockReturnValue(selectDataView);
     mockUseInitializeUrlParam.mockImplementation((_key, cb) => cb);
   });
 
-  it('should not call selectDataView if newDataViewPickerEnabled is false', () => {
+  it('should not call initDataViewSelection if newDataViewPickerEnabled is false', () => {
+    const initDataViewSelection = jest.fn();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    renderHook(() => useRestoreDataViewManagerStateFromURL(SourcererScopeName.default));
+    renderHook(() =>
+      useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
+    );
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({ default: { id: 'test-id', selectedPatterns: ['a'] } });
-    expect(selectDataView).not.toHaveBeenCalled();
+    expect(initDataViewSelection).not.toHaveBeenCalled();
   });
 
-  it('should call selectDataView for each scope if newDataViewPickerEnabled is true', () => {
+  it('should call initDataViewSelection for each scope if newDataViewPickerEnabled is true', () => {
+    const initDataViewSelection = jest.fn();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    renderHook(() => useRestoreDataViewManagerStateFromURL(SourcererScopeName.default));
+    renderHook(() =>
+      useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
+    );
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({
       default: { id: 'test-id', selectedPatterns: ['a'] },
       detections: { id: 'det-id', selectedPatterns: ['b'] },
     });
-    expect(selectDataView).toHaveBeenCalledWith({
-      id: 'test-id',
-      scope: ['default'],
-      fallbackPatterns: ['a'],
-    });
-    expect(selectDataView).toHaveBeenCalledWith({
-      id: 'det-id',
-      scope: ['detections'],
-      fallbackPatterns: ['b'],
-    });
-  });
-
-  it('should not call selectDataView if initialState is null', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    renderHook(() => useRestoreDataViewManagerStateFromURL(SourcererScopeName.default));
-    const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
-    onInitializeUrlParam(null);
-    expect(selectDataView).not.toHaveBeenCalled();
+    expect(initDataViewSelection).toHaveBeenCalledWith([
+      { fallbackPatterns: ['a'], id: 'test-id', scope: ['default'] },
+      { fallbackPatterns: ['b'], id: 'det-id', scope: ['detections'] },
+    ]);
   });
 });
