@@ -258,10 +258,12 @@ export const convertFormStateToProcessor = (
     const { processors, ignore_failure } = formState;
 
     return {
-      manual_ingest_pipeline: {
-        if: formState.if,
-        processors,
-        ignore_failure,
+      processorDefinition: {
+        manual_ingest_pipeline: {
+          if: formState.if,
+          processors,
+          ignore_failure,
+        },
       },
     };
   }
