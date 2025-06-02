@@ -683,6 +683,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               services={services}
               bulkAddToChatConfig={isAgentBuilderEnabled ? bulkAddToChatConfig : undefined}
               {...tablePropsOverrides}
+              //  Setting maxRowCount to 10k because of elasticsearch limitations
+              //  More info here: https://github.com/elastic/kibana/issues/151913
+              maxRowCount={10_000}
             />
           </AlertTableCellContextProvider>
         </EuiDataGridContainer>
