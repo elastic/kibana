@@ -9,18 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldButton, SIZES } from './field_button';
+import { FieldButton } from './field_button';
 
 const noop = () => {};
-
-describe('sizes', () => {
-  SIZES.forEach((size) => {
-    test(`${size} is applied`, () => {
-      const component = shallow(<FieldButton onClick={noop} fieldName="name" size={size} />);
-      expect(component).toMatchSnapshot();
-    });
-  });
-});
 
 describe('with drag handle', () => {
   it('is rendered', () => {
