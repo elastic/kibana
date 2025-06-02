@@ -10,18 +10,17 @@ import type {
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
-// remove
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
-import { createToolHandlerContext, RunnerManager } from './runner';
+import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
   manager,
-  toolExecutionParams,
+  agentExecutionParams,
 }: {
-  toolExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
   manager: RunnerManager;
 }): AgentHandlerContext => {
-  const { onEvent } = toolExecutionParams;
+  const { onEvent } = agentExecutionParams;
   const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService } =
     manager.deps;
   return {
@@ -34,28 +33,30 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
   };
 };
 
-//
-
 export const runAgent = async <TParams = Record<string, unknown>, TResult = unknown>({
-  toolExecutionParams,
+  agentExecutionParams,
   parentManager,
 }: {
-  toolExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn<TResult>> => {
-  const { agentId, agentParams } = toolExecutionParams;
+  const { agentId, agentParams } = agentExecutionParams;
 
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 
-  // / TODO: adapt to use agent service
-  const { toolsService, request } = manager.deps;
-  const tool = await toolsService.registry.get({ toolId, request });
-  const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
-  const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
-  // / END TODO
+  const { agentsService, request } = manager.deps;
+  const agent = await agentsService.registry.get({ agentId, request });
+  const agentHandlerContext = createAgentHandlerContext<TParams>({ agentExecutionParams, manager });
+  const agentResult = await agent.handler(
+    {
+      runId: 'foo',
+      agentParams: agentParams as TParams,
+    },
+    agentHandlerContext
+  );
 
   return {
-    result: toolResult as TResult,
+    result: agentResult.result as TResult,
   };
 };

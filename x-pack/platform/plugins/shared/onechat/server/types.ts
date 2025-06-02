@@ -6,7 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn, ScopedRunToolFn, ToolProvider } from '@kbn/onechat-server';
+import type {
+  RunToolFn,
+  ScopedRunToolFn,
+  RunAgentFn,
+  ToolProvider,
+  AgentRegistry,
+} from '@kbn/onechat-server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
@@ -51,7 +57,7 @@ export interface ToolsStart {
   /**
    * Return a version of the tool APIs scoped to the provided request.
    */
-  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart;
+  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart; // TODO: remove, useless in the end
 }
 
 /**
@@ -68,6 +74,17 @@ export interface ScopedToolsStart {
   execute: ScopedRunToolFn;
 }
 
+export interface AgentsStart {
+  /**
+   * Agents registry
+   */
+  registry: AgentRegistry;
+  /**
+   * Execute an agent.
+   */
+  execute: RunAgentFn;
+}
+
 /**
  * Setup contract of the onechat plugin.
  */
@@ -80,4 +97,5 @@ export interface OnechatPluginSetup {
  */
 export interface OnechatPluginStart {
   tools: ToolsStart;
+  agents: AgentsStart;
 }

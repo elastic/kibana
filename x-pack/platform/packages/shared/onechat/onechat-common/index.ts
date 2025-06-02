@@ -38,7 +38,9 @@ export {
 } from './base/errors';
 export {
   OneChatDefaultAgentId,
+  OneChatDefaultAgentProviderId,
   AgentType,
+  type AgentDescriptor,
   type AgentIdentifier,
   type PlainIdAgentIdentifier,
   type SerializedAgentIdentifier,

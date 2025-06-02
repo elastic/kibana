@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentIdentifier, ChatAgentEvent } from '@kbn/onechat-common';
 
 export interface RunAgentReturn<TResult = unknown> {
+  /** return from the agent */
   result: TResult;
+  /** ID of this run */
+  runId: string;
 }
 
 /**

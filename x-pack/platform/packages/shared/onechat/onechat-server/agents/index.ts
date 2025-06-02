@@ -14,9 +14,9 @@ export type {
   ConversationalAgentHandlerFn,
   ConversationalAgentResponse,
   AgentEventEmitter,
-  BaseAgentDescriptor,
-  ConversationalAgentDescriptor,
-  AgentDescriptor,
+  AgentDefinitionBase,
+  ConversationalAgentDefinition,
+  AgentDefinition,
   AgentProvider,
 } from './provider';
 export type {
@@ -27,3 +27,11 @@ export type {
   ScopedRunnerRunAgentParams,
   RunAgentOnEventFn,
 } from './runner';
+export type {
+  ExecutableAgent,
+  ExecutableAgentHandlerFn,
+  ExecutableAgentHandlerParams,
+  ExecutableAgentBase,
+  ExecutableConversationalAgent,
+  AgentRegistry,
+} from './registry';

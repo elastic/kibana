@@ -12,6 +12,7 @@ import type {
   SerializedAgentIdentifier,
 } from '@kbn/onechat-common';
 import type { RunEventHandlerFn } from './events';
+import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
 /**
  * Return type for tool invocation APIs.
@@ -38,6 +39,10 @@ export interface ScopedRunner {
    * Execute a tool.
    */
   runTool: ScopedRunToolFn;
+  /**
+   * Execute an agent
+   */
+  runAgent: ScopedRunAgentFn;
 }
 
 /**
@@ -124,4 +129,8 @@ export interface Runner {
    * Execute a tool.
    */
   runTool: RunToolFn;
+  /**
+   * Execute an agent;
+   */
+  runAgent: RunAgentFn;
 }

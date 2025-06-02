@@ -7,19 +7,22 @@
 
 import {
   OneChatDefaultAgentId,
+  OneChatDefaultAgentProviderId,
   AgentType,
   createAgentNotFoundError,
   toSerializedAgentIdentifier,
 } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/core/server';
-import type { AgentProvider, ConversationalAgentDescriptor } from '@kbn/onechat-server';
+import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
+import type { AgentProviderWithId } from '../types';
 import { createHandler } from './handler';
 
 /**
  * Returns an agent provider exposing the default onechat agent.
  */
-export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): AgentProvider => {
-  const provider: AgentProvider = {
+export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): AgentProviderWithId => {
+  const provider: AgentProviderWithId = {
+    id: OneChatDefaultAgentProviderId,
     has: ({ agentId }) => {
       return agentId === OneChatDefaultAgentId;
     },
@@ -38,7 +41,7 @@ const createDefaultAgentDescriptor = ({
   logger,
 }: {
   logger: Logger;
-}): ConversationalAgentDescriptor => {
+}): ConversationalAgentDefinition => {
   return {
     type: AgentType.conversational,
     id: OneChatDefaultAgentId,

@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
-import { combineToolProviders } from './utils';
+import { createInternalRegistry } from './utils';
 import { createDefaultAgentProvider } from './conversational';
 
 export interface AgentsServiceSetupDeps {
@@ -34,8 +34,9 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
+    const { getRunner } = startDeps;
     const defaultAgentProvider = createDefaultAgentProvider({ logger });
-    const registry = combineToolProviders(defaultAgentProvider);
+    const registry = createInternalRegistry({ providers: [defaultAgentProvider], getRunner });
 
     return {
       registry,

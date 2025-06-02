@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { AgentProvider } from '@kbn/onechat-server';
+import type { AgentWithIdProvider, AgentProviderWithId } from '../types';
 
 /**
  * Creates a tool provider that combines multiple tool providers.
  *
  * Note: order matters - providers will be checked in the order they are in the list (in case of ID conflict)
  */
-export const combineToolProviders = (...providers: AgentProvider[]): AgentProvider => {
-  const combined: AgentProvider = {
+export const combineToolProviders = (...providers: AgentProviderWithId[]): AgentWithIdProvider => {
+  const combined: AgentWithIdProvider = {
     has: async (options) => {
       for (const provider of providers) {
         if (await provider.has(options)) {
@@ -25,7 +25,11 @@ export const combineToolProviders = (...providers: AgentProvider[]): AgentProvid
     get: async (options) => {
       for (const provider of providers) {
         if (await provider.has(options)) {
-          return provider.get(options);
+          const agent = await provider.get(options);
+          return {
+            ...agent,
+            providerId: provider.id,
+          };
         }
       }
       throw new Error(`Agent with id ${options.agentId} not found`);

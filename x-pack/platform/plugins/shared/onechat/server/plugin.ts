@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { OnechatConfig } from './config';
 import type {
   OnechatPluginSetup,
@@ -40,7 +40,7 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const serviceSetups = this.serviceManager.setupServices();
+    const serviceSetups = this.serviceManager.setupServices({ logger: this.logger });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
@@ -75,7 +75,7 @@ export class OnechatPlugin
       inference,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
@@ -89,6 +89,12 @@ export class OnechatPlugin
               return runner.runTool({ ...args, request });
             },
           };
+        },
+      },
+      agents: {
+        registry: agents.registry.asPublicRegistry(),
+        execute: async (args) => {
+          return runner.runAgent(args);
         },
       },
     };

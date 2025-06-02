@@ -6,3 +6,4 @@
  */
 
 export { combineToolProviders } from './combine_providers';
+export { createInternalRegistry } from './create_registry';

@@ -5,13 +5,36 @@
  * 2.0.
  */
 
-import type { AgentProvider } from '@kbn/onechat-server';
-
-export type AgentRegistry = AgentProvider;
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { MaybePromise } from '@kbn/utility-types';
+import { AgentIdentifier } from '@kbn/onechat-common';
+import type { AgentProvider, AgentRegistry, AgentDefinition } from '@kbn/onechat-server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentsServiceSetup {}
 
 export interface AgentsServiceStart {
-  registry: AgentRegistry;
+  registry: InternalAgentRegistry;
 }
+
+// TODO ->
+
+export type AgentProviderWithId = AgentProvider & {
+  id: string;
+};
+
+export type AgentDefinitionWithProviderId = AgentDefinition & {
+  providerId: string;
+};
+
+export interface AgentWithIdProvider {
+  has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
+  get(opts: {
+    agentId: AgentIdentifier;
+    request: KibanaRequest;
+  }): MaybePromise<AgentDefinitionWithProviderId>;
+}
+
+export type InternalAgentRegistry = AgentWithIdProvider & {
+  asPublicRegistry: () => AgentRegistry;
+};

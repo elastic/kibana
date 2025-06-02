@@ -85,14 +85,6 @@ export interface ConversationalAgentParams {
 
 export interface ConversationalAgentResponse {
   /**
-   * Id of the run, can use used for tracing / debugging
-   */
-  // runId: string; TODO: on the final API, not on the provider
-  /**
-   * The final response from the assistant.
-   */
-  // response: AssistantResponse; TODO: on the final API, not on the provider
-  /**
    * The full round of conversation, can be used for persistence for example.
    */
   round: ConversationRound;
@@ -106,15 +98,15 @@ export type ConversationalAgentHandlerFn = AgentHandlerFn<
   ConversationalAgentResponse
 >;
 
-export interface BaseAgentDescriptor<TType extends AgentType, TParams, TResponse> {
+export interface AgentDefinitionBase<TType extends AgentType, TParams, TResponse> {
   type: TType;
   id: PlainIdAgentIdentifier;
   description: string;
   handler: AgentHandlerFn<TParams, TResponse>;
 }
 
-export interface ConversationalAgentDescriptor
-  extends BaseAgentDescriptor<
+export interface ConversationalAgentDefinition
+  extends AgentDefinitionBase<
     AgentType.conversational,
     ConversationalAgentParams,
     ConversationalAgentResponse
@@ -123,12 +115,12 @@ export interface ConversationalAgentDescriptor
   handler: ConversationalAgentHandlerFn;
 }
 
-export type AgentDescriptor = ConversationalAgentDescriptor;
+export type AgentDefinition = ConversationalAgentDefinition;
 
 /**
  * Provider that can be registered to expose agents to onechat
  */
 export interface AgentProvider {
   has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<AgentDescriptor>;
+  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<AgentDefinition>;
 }

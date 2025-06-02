@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { AgentType, OneChatDefaultAgentId } from './constants';
+export {
+  AgentType,
+  OneChatDefaultAgentId,
+  OneChatDefaultAgentProviderId,
+  type AgentDescriptor,
+} from './descriptor';
 export {
   ChatAgentEventType,
   type ChatAgentEvent,
