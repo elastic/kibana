@@ -188,13 +188,10 @@ export class AnonymizationService {
     // Initialize hash map from existing entities
     const hashMap = buildDetectedEntitiesMap(messages);
 
-    // Process each message and collect results
-    const result: Message[] = [];
-
+    // Process each message and mutate in place
     for (const message of messages) {
       // Skip messages that already have entities detected
       if (message.message.detected_entities) {
-        result.push(message);
         continue;
       }
 
@@ -204,21 +201,14 @@ export class AnonymizationService {
       if (role === 'user' && content) {
         try {
           const entities = await this.detectEntities(content);
-          const processedMessage = {
-            ...message,
-            message: {
-              ...message.message,
-              detected_entities: entities.map((ent) => ({
-                entity: ent.entity,
-                class_name: ent.class_name,
-                start_pos: ent.start_pos,
-                end_pos: ent.end_pos,
-                type: ent.type,
-                hash: ent.hash,
-              })),
-            },
-          };
-
+          message.message.detected_entities = entities.map((ent) => ({
+            entity: ent.entity,
+            class_name: ent.class_name,
+            start_pos: ent.start_pos,
+            end_pos: ent.end_pos,
+            type: ent.type,
+            hash: ent.hash,
+          }));
           // Update hash map with newly detected entities
           entities.forEach((entity) => {
             hashMap.set(entity.hash, {
@@ -227,25 +217,22 @@ export class AnonymizationService {
               type: entity.type,
             });
           });
-
-          result.push(processedMessage);
+          continue;
         } catch (error) {
           this.logger.error(
             new Error('Entity detection failed for user message', { cause: error })
           );
-          // Add the original message without entities detected
-          result.push(message);
+          // Add the original message without entities detected (do nothing)
+          continue;
         }
       }
       // Process assistant messages - replace hash placeholders
       else if (role === 'assistant') {
-        result.push(this.processAssistantMessage(message, hashMap));
-      } else {
-        result.push(message);
+        this.processAssistantMessage(message, hashMap);
       }
     }
 
-    return { anonymizedMessages: result };
+    return { anonymizedMessages: messages };
   }
 
   /**
@@ -261,34 +248,24 @@ export class AnonymizationService {
   private processAssistantMessage(
     message: Message,
     hashMap: Map<string, { value: string; class_name: string; type: DetectedEntityType }>
-  ): Message {
+  ): void {
     const { content } = message.message;
-
-    // Create a new message object to avoid mutations
-    const processedMessage = {
-      ...message,
-      message: {
-        ...message.message,
-      },
-    };
 
     // Process content if it exists
     if (content) {
       const { unhashedText, detectedEntities } = deanonymizeText(content, hashMap);
-      processedMessage.message.content = unhashedText;
-      processedMessage.message.detected_entities = detectedEntities;
+      message.message.content = unhashedText;
+      message.message.detected_entities = detectedEntities;
     }
 
     // Process function call arguments if they exist
-    if (processedMessage.message.function_call?.arguments) {
-      processedMessage.message.function_call = {
-        ...processedMessage.message.function_call,
-        arguments: unhashString(processedMessage.message.function_call.arguments, hashMap),
-      };
+    if (message.message.function_call?.arguments) {
+      message.message.function_call.arguments = unhashString(
+        message.message.function_call.arguments,
+        hashMap
+      );
     }
 
     // TODO: process other fields?
-
-    return processedMessage;
   }
 }

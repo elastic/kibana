@@ -334,7 +334,8 @@ export class ObservabilityAIAssistantClient {
                     initialMessages.concat(addedMessages)
                   )
                 ).pipe(
-                  switchMap(({ anonymizedMessages: allMessages }) => {
+                  switchMap(() => {
+                    const allMessages = initialMessages.concat(addedMessages);
                     const lastMessage = last(allMessages);
 
                     // if a function request is at the very end, close the stream to consumer
@@ -491,7 +492,7 @@ export class ObservabilityAIAssistantClient {
     if (stream) {
       return defer(() =>
         from(this.dependencies.anonymizationService.processMessages(messages)).pipe(
-          switchMap(({ anonymizedMessages }) => {
+          switchMap(() => {
             this.dependencies.logger.debug(
               () =>
                 `Calling inference client for name: "${name}" with options: ${JSON.stringify(
@@ -501,7 +502,7 @@ export class ObservabilityAIAssistantClient {
             return this.dependencies.inferenceClient.chatComplete({
               ...options,
               stream: true,
-              messages: convertMessagesForInference(anonymizedMessages, this.dependencies.logger),
+              messages: convertMessagesForInference(messages, this.dependencies.logger),
             });
           })
         )
