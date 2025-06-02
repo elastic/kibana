@@ -35,6 +35,7 @@ export const DeleteGridSectionModal = ({
 
   return (
     <EuiModal
+      data-test-subj={`kbnGridLayoutDeleteSectionModal-${sectionId}`}
       onClose={() => {
         setDeleteModalVisible(false);
       }}
