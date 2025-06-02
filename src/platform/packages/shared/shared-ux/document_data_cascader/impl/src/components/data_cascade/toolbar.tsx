@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SelectionDropdown } from '../selection_dropdown';
 
-export function Toolbar() {
+type ToolbarProps = Pick<ComponentProps<typeof SelectionDropdown>, 'onSelectionChange'>;
+
+export function Toolbar({ onSelectionChange }: ToolbarProps) {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText>
           {i18n.translate('sharedUXPackages.data_pooler.toolbar.query_string', {
-            defaultMessage: '4 {entities} | 4 groups',
-            // values: { query: state.currentQueryString },
+            defaultMessage: '4 {entities} | {groupCount} groups',
+            values: { groupCount: 20 },
           })}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SelectionDropdown />
+        <SelectionDropdown onSelectionChange={onSelectionChange} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

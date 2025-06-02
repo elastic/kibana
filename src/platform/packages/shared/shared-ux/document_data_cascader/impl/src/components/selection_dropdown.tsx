@@ -22,7 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDataCascadeState, useDataCascadeDispatch } from '../lib/store';
 
-export function SelectionDropdown({}) {
+interface SelectionDropdownProps {
+  onSelectionChange?: (groupByColumn: string) => void;
+}
+
+export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps) {
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
   const { groupByColumns, currentGroupByColumn } = useDataCascadeState();
@@ -38,6 +42,7 @@ export function SelectionDropdown({}) {
 
   const onGroupByColumnSelection = (groupByColumn: string) => {
     dispatch({ type: 'SET_GROUP_BY_COLUMN', payload: groupByColumn });
+    onSelectionChange?.(groupByColumn);
     closePopover();
   };
 

@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { StoryObj, Meta } from '@storybook/react';
-import { DataCascadeProvider } from '../../lib';
+import { EuiText } from '@elastic/eui';
+import { faker } from '@faker-js/faker';
+import { DataCascadeProvider, useDataCascadeDispatch, useDataCascadeState } from '../../lib';
 import { DataCascade } from '..';
 
 /**
@@ -23,7 +25,42 @@ export const GridImplementation: StoryObj<{ query: string }> = {
   render: (args) => {
     return (
       <DataCascadeProvider query={args.query}>
-        <DataCascade />
+        {React.createElement(function DataCascadeWrapper() {
+          const state = useDataCascadeState();
+          const dispatch = useDataCascadeDispatch();
+
+          React.useEffect(() => {
+            dispatch({
+              type: 'SET_INITIAL_STATE',
+              payload: new Array(100).fill(null).map(() => ({
+                customer_full_name: faker.person.fullName(),
+                customer_birth_date: faker.date.birthdate().toISOString(),
+                customer_first_name: faker.person.firstName(),
+                count: faker.number.int({ min: 1, max: 100 }),
+              })),
+            });
+          }, [dispatch]);
+
+          return (
+            <React.Fragment>
+              {/* <EuiText>
+                <div>
+                  <h1>ESQL Data Pooler</h1>
+                  <p>Query: {data.currentQueryString}</p>
+                </div>
+              </EuiText> */}
+              <DataCascade
+                data={state.data}
+                groupByColumns={state.groupByColumns}
+                currentGroupByColumn={state.currentGroupByColumn}
+                onGroupByChange={(groupBy) => {
+                  // Handle group by change if needed
+                  console.log('Group By Changed:', groupBy);
+                }}
+              />
+            </React.Fragment>
+          );
+        })}
       </DataCascadeProvider>
     );
   },
