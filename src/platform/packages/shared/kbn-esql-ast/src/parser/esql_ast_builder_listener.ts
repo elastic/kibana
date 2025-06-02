@@ -34,10 +34,12 @@ import {
   type WhereCommandContext,
   RerankCommandContext,
   CompletionCommandContext,
+  RrfCommandContext,
+  SampleCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import type { ESQLAst } from '../types';
-import { createCommand, createFunction, textExistsAndIsValid } from './factories';
+import { createCommand, createFunction, createLiteral, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createEvalCommand } from './factories/eval';
@@ -364,7 +366,32 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitCompletionCommand(ctx: CompletionCommandContext): void {
     const command = createCompletionCommand(ctx);
+    this.ast.push(command);
+  }
 
+  exitSampleCommand(ctx: SampleCommandContext): void {
+    const command = createCommand('sample', ctx);
+    this.ast.push(command);
+
+    if (ctx._probability) {
+      command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
+    }
+    if (ctx._seed) {
+      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
+    }
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rrfCommand`.
+   *
+   * Parse the RRF (Reciprocal Rank Fusion) command:
+   *
+   * RRF
+   *
+   * @param ctx the parse tree
+   */
+  exitRrfCommand(ctx: RrfCommandContext): void {
+    const command = createCommand('rrf', ctx);
     this.ast.push(command);
   }
 

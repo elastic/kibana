@@ -526,6 +526,18 @@ export class CompletionCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
+// SAMPLE <probability> [SEED <seed>]
+export class SampleCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
+// RRF
+export class RrfCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
 // Expressions -----------------------------------------------------------------
 
 export class ExpressionVisitorContext<
