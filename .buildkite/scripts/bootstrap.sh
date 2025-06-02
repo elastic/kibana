@@ -39,7 +39,9 @@ if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install
+  echo "Actually - this shouldn't happen. Let's exit and count these."
+  exit 33
+#  yarn kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
