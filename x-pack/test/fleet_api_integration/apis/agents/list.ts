@@ -13,15 +13,12 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const fleetAndAgents = getService('fleetAndAgents');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
 
   describe('fleet_list_agent', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
-      await fleetAndAgents.setup();
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
         .set('kbn-xsrf', 'xxxx')
@@ -37,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
@@ -272,6 +268,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not return agentless agents when showAgentless=false', async () => {
+      // Set up default Fleet Server host
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'default-fleet-server-host',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+        })
+        .expect(200);
+
       // Create an agentless agent policy
       const { body: policyRes } = await supertest
         .post('/api/fleet/agent_policies')
@@ -317,12 +325,16 @@ export default function ({ getService }: FtrProviderContext) {
       const agentIds = apiResponse.items.map((agent: any) => agent.id);
       expect(agentIds).not.contain(agentId);
 
-      // Cleanup: delete the agent and policy
+      // Cleanup: delete the fleet server, agent, and policy
       await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId: agentlessPolicyId })
+        .expect(200);
+      await supertest
+        .delete(`/api/fleet/fleet_server_hosts/default-fleet-server-host`)
+        .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
 
