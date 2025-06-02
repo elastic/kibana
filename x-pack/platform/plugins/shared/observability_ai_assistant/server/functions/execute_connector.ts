@@ -65,13 +65,34 @@ export function registerExecuteConnectorFunction({
   );
 }
 
-export const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
-  '.slack': convertSchemaToOpenApi(SlackParamsSchema),
-  [SLACK_API_CONNECTOR_ID]: convertSchemaToOpenApi(SlackApiParamsSchema),
-  [EmailConnectorTypeId]: convertSchemaToOpenApi(EmailParamsSchema),
-  [WebhookConnectorTypeId]: convertSchemaToOpenApi(WebhookParamsSchema),
-  [JiraConnectorTypeId]: convertSchemaToOpenApi(JiraParamsSchema),
-  [PagerDutyConnectorTypeId]: convertSchemaToOpenApi(PagerdutyParamsSchema),
+export const connectorParamsSchemas: Record<
+  string,
+  { params: CompatibleJSONSchema; description: string }
+> = {
+  '.slack': {
+    params: convertSchemaToOpenApi(SlackParamsSchema),
+    description: 'Use this connector to send messages to Slack channels.',
+  },
+  [SLACK_API_CONNECTOR_ID]: {
+    params: convertSchemaToOpenApi(SlackApiParamsSchema),
+    description: 'Use this connector to send messages to Slack channels using the Slack API.',
+  },
+  [EmailConnectorTypeId]: {
+    params: convertSchemaToOpenApi(EmailParamsSchema),
+    description: 'Use this connector to send emails.',
+  },
+  [WebhookConnectorTypeId]: {
+    params: convertSchemaToOpenApi(WebhookParamsSchema),
+    description: 'Use this connector to send HTTP requests to a specified URL.',
+  },
+  [JiraConnectorTypeId]: {
+    params: convertSchemaToOpenApi(JiraParamsSchema),
+    description: 'Use this connector to create Jira issues.',
+  },
+  [PagerDutyConnectorTypeId]: {
+    params: convertSchemaToOpenApi(PagerdutyParamsSchema),
+    description: 'Use this connector to trigger PagerDuty incidents.',
+  },
 };
 
 export const GET_CONNECTOR_INFO_FUNCTION_NAME = 'get_connector_info';
@@ -106,8 +127,11 @@ export function registerGetConnectorInfoFunction({
         // filter out AI connectors
         .filter((connector) => !excludedConnectorIds.has(connector.actionTypeId))
         .map((connector) => ({
-          ...connector,
-          params: connectorParamsSchemas[connector.actionTypeId] ?? {},
+          id: connector.id,
+          actionTypeId: connector.actionTypeId,
+          name: connector.name,
+          // Include the connector parameters schema and description
+          ...(connectorParamsSchemas[connector.actionTypeId] ?? {}),
         }));
       return { content: filteredConnectors };
     }
