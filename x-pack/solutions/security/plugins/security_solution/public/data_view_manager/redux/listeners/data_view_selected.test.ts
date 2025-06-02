@@ -90,6 +90,15 @@ describe('createDataViewSelectedListener', () => {
     });
   });
 
+  it('should cancel previous effects that would set the data view for given scope', async () => {
+    await listener.effect(
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
+      mockListenerApi
+    );
+
+    expect(mockListenerApi.cancelActiveListeners).toHaveBeenCalled();
+  });
+
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
       selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
