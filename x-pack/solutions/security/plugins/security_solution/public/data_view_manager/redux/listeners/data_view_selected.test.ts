@@ -75,6 +75,8 @@ const mockGetState = jest.fn(() => mockedState);
 const mockListenerApi = {
   dispatch: mockDispatch,
   getState: mockGetState,
+  cancelActiveListeners: jest.fn(),
+  signal: { aborted: false },
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
 describe('createDataViewSelectedListener', () => {
@@ -82,7 +84,10 @@ describe('createDataViewSelectedListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    listener = createDataViewSelectedListener({ dataViews: mockDataViewsService });
+    listener = createDataViewSelectedListener({
+      dataViews: mockDataViewsService,
+      scope: DataViewManagerScopeName.default,
+    });
   });
 
   it('should return cached adhoc data view first', async () => {

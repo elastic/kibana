@@ -121,7 +121,7 @@ describe('DataViewPicker', () => {
 
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
     });
   });
 
@@ -169,7 +169,7 @@ describe('DataViewPicker', () => {
     );
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
     });
   });
 
