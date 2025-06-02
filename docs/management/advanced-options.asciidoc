@@ -44,7 +44,7 @@ Change the settings that apply only to {kib} spaces.
 When disabled, autocompletes the suggestions from your data set instead of the time range.
 
 [[bfetch-disable]]`bfetch:disable`::
-deprecated:[8.15.0] When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.  
+deprecated:[8.15.0] When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.
 
 [[bfetch-disable-compression]]`bfetch:disableCompression`::
 deprecated:[8.15.0] When disabled, allows you to debug individual requests, but increases the response size.
@@ -228,7 +228,7 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. 
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll.
 //For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
@@ -414,9 +414,6 @@ Set the AWS Lambda cost per million requests.
 beta:[] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution.
 On larger time ranges, lower resolution metrics will be used, which will improve loading times.
 
-[[apm-enable-service-metrics]]`observability:apmEnableServiceMetrics`::
-beta:[] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
-
 [[observability-apm-labs]]`observability:apmLabsButton`::
 Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
 // See <<apm-labs>> to learn more.
@@ -494,9 +491,6 @@ If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your disc
 
 [[observability-profiling-azure-cost-discount-rate]]`observability:profilingAzureCostDiscountRate`::
 If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
-
-[[observability-profiling-use-topNFunctions-from-stacktraces]]`observability:profilingFetchTopNFunctionsFromStacktraces`::
-Switch to fetch the TopN Functions from the Stacktraces API.
 
 [[observability-profiling-cost-per-vcpu-per-hour]]`observability:profilingCostPervCPUPerHour`::
 Default Hourly Cost per CPU Core for machines not on AWS or Azure.

@@ -42,7 +42,9 @@ export class KibanaErrorService {
    * or treated with "danger" coloring and include a detailed error message.
    */
   private getIsFatal(error: Error) {
-    const isChunkLoadError = MATCH_CHUNK_LOADERROR.test(error.name);
+    const customError: Error & { react_error_type?: string; original_name?: string } = error;
+    const errorName = customError.original_name ?? customError.name;
+    const isChunkLoadError = MATCH_CHUNK_LOADERROR.test(errorName);
     return !isChunkLoadError; // "ChunkLoadError" is recoverable by refreshing the page
   }
 
