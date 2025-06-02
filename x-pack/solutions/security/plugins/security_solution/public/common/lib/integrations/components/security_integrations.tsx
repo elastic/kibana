@@ -30,8 +30,7 @@ export const SecurityIntegrations = withAvailablePackages<SecurityIntegrationsPr
   }) => {
     const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
 
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage } =
-      useSelectedTab('secyrity_integrations');
+    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage } = useSelectedTab();
 
     const list = useIntegrationCardList({
       integrationsList: availablePackages.filteredCards,

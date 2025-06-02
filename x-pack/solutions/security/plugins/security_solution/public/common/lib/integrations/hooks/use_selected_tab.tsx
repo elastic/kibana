@@ -12,8 +12,7 @@ import { useIntegrationContext } from './integration_context';
 
 export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
-export const useSelectedTab = (source: string) => {
-  console.log(`useSelectedTab called from: ${source}`);
+export const useSelectedTab = () => {
   const { spaceId, integrationTabs } = useIntegrationContext();
   const [lastTabId, setLastTabIdToStorage] = useStoredIntegrationTabId(
     spaceId,
@@ -43,6 +42,5 @@ export const useSelectedTab = (source: string) => {
     },
     [setLastTabIdToStorage]
   );
-  console.log(`useSelectedTab returning: ${JSON.stringify(selectedTab)}`);
-  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs };
+  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage };
 };

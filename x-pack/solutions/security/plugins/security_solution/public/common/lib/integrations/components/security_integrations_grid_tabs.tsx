@@ -25,6 +25,7 @@ import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
 import type { AvailablePackages } from './with_available_packages';
 import { useCreateAutoImportCard } from '../hooks/use_create_auto_import_card';
+import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
 export interface SecurityIntegrationsGridTabsProps {
   activeIntegrationsCount: number;
@@ -35,6 +36,9 @@ export interface SecurityIntegrationsGridTabsProps {
   packageListGridOptions?: {
     showCardLabels?: boolean;
   };
+  toggleIdSelected?: UseSelectedTabReturn['toggleIdSelected'];
+  setSelectedTabIdToStorage?: UseSelectedTabReturn['setSelectedTabIdToStorage'];
+  selectedTab: UseSelectedTabReturn['selectedTab'];
 }
 
 const emptyStateStyles = { paddingTop: '16px' };
@@ -54,7 +58,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     integrationList,
     availablePackages,
     packageListGridOptions,
-    toggleIdSelected,
+    toggleIdSelected = '',
     setSelectedTabIdToStorage,
     selectedTab,
   }) => {
@@ -96,9 +100,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
         const id = stringId as IntegrationTabId;
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
-        setSelectedTabIdToStorage(id);
-        // setCategory(selectedTab.category ?? '');
-        // setSelectedSubCategory(selectedTab.subCategory);
+        setSelectedTabIdToStorage?.(id);
         reportLinkClick?.(trackId);
       },
       [setSelectedTabIdToStorage, reportLinkClick]
