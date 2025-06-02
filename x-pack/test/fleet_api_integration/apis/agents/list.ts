@@ -19,8 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet_list_agent', () => {
     before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
@@ -37,8 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
