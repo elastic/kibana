@@ -38,6 +38,10 @@ export const createCompletionCommand = (
       : undefined
   );
 
+  if (inferenceId.incomplete || !withCtx) {
+    optionWith.incomplete = true;
+  }
+
   command.args.push(optionWith);
 
   if (ctx._targetField && ctx._targetField.getText()) {

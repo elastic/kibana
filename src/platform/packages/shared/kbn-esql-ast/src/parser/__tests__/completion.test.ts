@@ -167,6 +167,17 @@ describe('COMPLETION command', () => {
       expect(errors.length).toBe(1);
     });
 
+    it('sets incomplete flag on WITH argument if not inferenceId provided', () => {
+      const text = `FROM index | COMPLETION prompt WITH `;
+      const { ast } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1].args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+    });
+
     it('throws on inferenceId wrapped in double quotes', () => {
       const text = `FROM index | COMPLETION prompt WITH "inferenceId"`;
       const { errors } = EsqlQuery.fromSrc(text);
