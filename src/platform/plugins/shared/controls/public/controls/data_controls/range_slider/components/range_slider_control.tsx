@@ -144,11 +144,13 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj,
       placeholder,
       ariaLabel,
+      uuid,
     }: {
       inputValue: string;
       testSubj: string;
       placeholder: string;
       ariaLabel: string;
+      uuid: string;
     }) => {
       return {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
@@ -163,6 +165,8 @@ export const RangeSliderControl: FC<Props> = ({
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
+        'aria-labelledby': `control-title-${uuid}`,
+        id: `controls-range-slider-${uuid}`,
       };
     },
     [isInvalid, step, styles]
@@ -174,8 +178,9 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'lowerBoundFieldNumber',
       placeholder: String(min ?? -Infinity),
       ariaLabel: RangeSliderStrings.control.getLowerBoundAriaLabel(fieldName),
+      uuid,
     });
-  }, [getCommonInputProps, displayedValue, min, fieldName]);
+  }, [getCommonInputProps, displayedValue, min, fieldName, uuid]);
 
   const maxInputProps = useMemo(() => {
     return getCommonInputProps({
@@ -183,8 +188,9 @@ export const RangeSliderControl: FC<Props> = ({
       testSubj: 'upperBoundFieldNumber',
       placeholder: String(max ?? Infinity),
       ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
+      uuid,
     });
-  }, [getCommonInputProps, displayedValue, max, fieldName]);
+  }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
   return (
     <span

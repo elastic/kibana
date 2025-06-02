@@ -128,6 +128,11 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
+    getSearchAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Filter suggestions for {fieldName} control',
+        values: { fieldName },
+      }),
     getSuggestionsAriaLabel: (fieldName: string, optionCount: number) =>
       i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
         defaultMessage:

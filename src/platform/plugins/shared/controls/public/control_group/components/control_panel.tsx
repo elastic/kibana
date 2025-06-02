@@ -122,10 +122,11 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
+  const controlLabel = usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined;
   return (
     <EuiFlexItem
       ref={setNodeRef}
-      style={style}
+      css={style}
       grow={controlGrow}
       data-control-id={uuid}
       data-test-subj="control-frame"
@@ -152,7 +153,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
+          label={controlLabel}
+          id={`control-title-${uuid}`}
+          aria-label={`Control for ${controlLabel}`}
         >
           <EuiFormControlLayout
             fullWidth
