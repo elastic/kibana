@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
+import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { performBulkAction } from '../../../../detection_engine/rule_management/api/api';
+import { performBulkAction } from '../../../rule_management/api/api';
 import { RuleSwitchComponent } from '.';
 import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import { useRulesTableContextMock } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 import { TestProviders } from '../../../../common/mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../detection_engine/rule_management/api/api');
-jest.mock(
-  '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context'
-);
+jest.mock('../../../rule_management/api/api');
+jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 
 const useAppToastsValueMock = useAppToastsMock.create();
