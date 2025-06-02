@@ -21,8 +21,6 @@ import { checkLicense } from '../..';
 
 export const reportingCsvExportProvider = ({
   apiClient,
-  application,
-  license,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const getShareMenuItems = ({
@@ -30,17 +28,6 @@ export const reportingCsvExportProvider = ({
     sharingData,
     toasts,
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    const licenseToolTipContent = licenseCheck.message;
-    const licenseHasCsvReporting = licenseCheck.showLinks;
-    const licenseDisabled = !licenseCheck.enableLinks;
-
-    const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
-
-    if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
-      return null;
-    }
-
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
       absoluteTime,
@@ -138,12 +125,9 @@ export const reportingCsvExportProvider = ({
 
     return {
       name: panelTitle,
-      toolTipContent: licenseToolTipContent,
       exportType: reportType,
       label: 'CSV',
-      disabled: licenseDisabled,
       generateAssetExport: generateReportingJobCSV,
-      generateAssetURIValue: () => absoluteUrl,
       helpText: (
         <FormattedMessage
           id="reporting.share.csv.reporting.helpTextCSV"
@@ -151,21 +135,48 @@ export const reportingCsvExportProvider = ({
           values={{ objectType }}
         />
       ),
-      generateExportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.share.generateButtonLabelCSV"
           data-test-subj="generateReportButton"
           defaultMessage="Generate CSV"
         />
       ),
-      renderCopyURIButton: true,
+      copyAssetURIConfig: {
+        headingText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHeading', {
+          defaultMessage: 'Post URL',
+        }),
+        helpText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHelpText', {
+          defaultMessage:
+            'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+        }),
+        contentType: 'text',
+        generateAssetURIValue: () => absoluteUrl,
+      },
     };
   };
 
   return {
     shareType: 'integration',
-    id: 'csvReportsModal',
+    id: 'csvReports',
     groupId: 'export',
     config: getShareMenuItems,
+    prerequisiteCheck: ({ license, capabilities }) => {
+      if (!license) {
+        return false;
+      }
+
+      const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+
+      const licenseHasCsvReporting = licenseCheck.showLinks;
+
+      const capabilityHasCsvReporting = capabilities.discover_v2?.generateCsv === true;
+
+      if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };
