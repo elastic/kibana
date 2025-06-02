@@ -37,6 +37,7 @@ import { bookCmDefinitions } from '../common/book/content_management/cm_services
 import { fieldListCmDefinitions } from '../common/field_list/content_management/cm_services';
 import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
 import { setKibanaServices } from './kibana_services';
+import { BookSerializedState } from './react_embeddables/saved_book/types';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -110,6 +111,25 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       version: {
         latest: BOOK_LATEST_VERSION,
       },
+    });
+
+    embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<BookSerializedState>(
+          {
+            panelType: BOOK_CONTENT_ID,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+            },
+          },
+          true
+        );
+      },
+      savedObjectType: BOOK_CONTENT_ID,
+      savedObjectName: 'Book',
+      getIconForSavedObject: () => 'article',
     });
   }
 
