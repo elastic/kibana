@@ -812,7 +812,9 @@ x-pack/platform/packages/private/security/authorization_core @elastic/kibana-sec
 x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
-x-pack/platform/packages/private/upgrade-assistant @elastic/kibana-management
+x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-management
+x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
+x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
@@ -889,6 +891,7 @@ x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
+x-pack/platform/plugins/private/reindex_service @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/reporting @elastic/response-ops
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
