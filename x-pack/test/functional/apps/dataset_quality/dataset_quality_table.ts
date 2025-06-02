@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
         const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
-        expect(failedDocsColCellTexts).to.eql(['0%', '0%', '20%', '0%']);
+        expect(failedDocsColCellTexts).to.eql(['N/A', 'N/A', '20%', 'N/A']);
       });
     });
   });
