@@ -170,7 +170,8 @@ describe(
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
       });
 
-      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+      // Skipped: https://github.com/elastic/kibana/issues/222182
+      it.skip('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
         const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
         selectEsqlRuleType();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
