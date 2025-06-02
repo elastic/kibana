@@ -28,6 +28,7 @@ export function createScenarios(
     'dashboard',
     'discover',
     'canvas',
+    'exports',
   ]);
   const scenariosAPI = createAPIScenarios(context);
 
@@ -101,38 +102,42 @@ export function createScenarios(
     await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
   };
   const tryDiscoverCsvFail = async () => {
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.reporting.openExportPopover();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
+
   const tryDiscoverCsvNotAvailable = async () => {
-    await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('Export');
+    expect(await PageObjects.exports.exportButtonExists()).to.be(false);
   };
+
   const tryDiscoverCsvSuccess = async () => {
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.reporting.openExportPopover();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PDF');
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`Export`);
+    await PageObjects.exports.clickExportTopNavButton();
+    await testSubjects.missingOrFail(`exportMenuItem-PDF`);
   };
   const tryGeneratePdfSuccess = async () => {
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PDF');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePngSuccess = async () => {
-    await PageObjects.reporting.openExportTab();
-    await testSubjects.click('pngV2-radioOption');
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PNG');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
+
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
     await testSubjects.missingOrFail('Export');
