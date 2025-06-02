@@ -163,7 +163,6 @@ export const createNavigationTree = ({
                   },
                   { link: 'metrics:hosts' },
                   { link: 'metrics:settings' },
-                  { link: 'metrics:assetDetails' },
                 ],
               },
             ],
