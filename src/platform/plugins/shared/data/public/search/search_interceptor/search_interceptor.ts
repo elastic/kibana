@@ -89,6 +89,7 @@ import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
+import { deepFreeze } from '@kbn/std';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -585,7 +586,7 @@ export class SearchInterceptor {
           searchOptions,
           requestHash
         );
-
+        
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
         // Abort the replay if the abortSignal is aborted.
@@ -618,6 +619,8 @@ export class SearchInterceptor {
             ) {
               this.showRestoreWarning(sessionId);
             }
+
+            deepFreeze(response);
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
