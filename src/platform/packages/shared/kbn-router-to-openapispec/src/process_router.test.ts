@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('./util', () => {
+  const module = jest.requireActual('./util');
+  return {
+    ...module,
+    setXState: jest.fn(module.setXState),
+  };
+});
+
 import { schema } from '@kbn/config-schema';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
 import { extractResponses, processRouter } from './process_router';
 import { type InternalRouterRoute } from './type';
-import { createOpIdGenerator } from './util';
+import { createOpIdGenerator, setXState } from './util';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
@@ -149,24 +157,39 @@ describe('processRouter', () => {
   } as unknown as Router;
 
   it('only provides routes for version 2023-10-31', async () => {
-    const result1 = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
-      version: '2023-10-31',
-      access: 'public',
+    const result1 = await processRouter({
+      appRouter: testRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: {
+        version: '2023-10-31',
+        access: 'public',
+      },
     });
 
     expect(Object.keys(result1.paths!)).toHaveLength(5);
 
-    const result2 = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
-      version: '2024-10-31',
-      access: 'public',
+    const result2 = await processRouter({
+      appRouter: testRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: {
+        version: '2024-10-31',
+        access: 'public',
+      },
     });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 
   it('updates description with privileges required', async () => {
-    const result = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
-      version: '2023-10-31',
-      access: 'public',
+    const result = await processRouter({
+      appRouter: testRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: {
+        version: '2023-10-31',
+        access: 'public',
+      },
     });
 
     expect(result.paths['/qux']?.post).toBeDefined();
@@ -177,6 +200,24 @@ describe('processRouter', () => {
 
     expect(result.paths['/quux']?.post?.description).toEqual(
       'This a test route description.<br/><br/>[Required authorization] Route required privileges: (manage_spaces AND taskmanager) AND (console OR devtools).'
+    );
+  });
+
+  it('calls setXState with correct arguments', async () => {
+    const result = await processRouter({
+      appRouter: testRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: {
+        version: '2023-10-31',
+        access: 'public',
+      },
+    });
+
+    expect(setXState).toHaveBeenCalledWith(
+      { stability: 'stable' as const, since: '8.0.0' },
+      result.paths['/qux']?.post,
+      { serverless: false }
     );
   });
 });
