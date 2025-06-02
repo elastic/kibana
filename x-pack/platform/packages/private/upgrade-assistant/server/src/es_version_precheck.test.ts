@@ -16,7 +16,6 @@ import {
   getAllNodeVersions,
   verifyAllMatchKibanaVersion,
 } from './es_version_precheck';
-import { versionService } from './version';
 
 const { currentMajor, currentVersion } = getMockVersionInfo();
 
@@ -94,10 +93,6 @@ describe('verifyAllMatchKibanaVersion', () => {
 });
 
 describe('EsVersionPrecheck', () => {
-  beforeEach(() => {
-    versionService.setup('8.0.0');
-  });
-
   it('returns a 403 when callCluster fails with a 403', async () => {
     const ctx = xpackMocks.createRequestHandlerContext();
 
@@ -105,7 +100,8 @@ describe('EsVersionPrecheck', () => {
 
     const result = await esVersionCheck(
       coreMock.createCustomRequestHandlerContext(ctx),
-      kibanaResponseFactory
+      kibanaResponseFactory,
+      currentMajor
     );
     expect(result).toHaveProperty('status', 403);
   });
@@ -124,7 +120,8 @@ describe('EsVersionPrecheck', () => {
 
     const result = await esVersionCheck(
       coreMock.createCustomRequestHandlerContext(ctx),
-      kibanaResponseFactory
+      kibanaResponseFactory,
+      currentMajor
     );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', false);
@@ -144,7 +141,8 @@ describe('EsVersionPrecheck', () => {
 
     const result = await esVersionCheck(
       coreMock.createCustomRequestHandlerContext(ctx),
-      kibanaResponseFactory
+      kibanaResponseFactory,
+      currentMajor
     );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', true);
@@ -163,7 +161,11 @@ describe('EsVersionPrecheck', () => {
     });
 
     await expect(
-      esVersionCheck(coreMock.createCustomRequestHandlerContext(ctx), kibanaResponseFactory)
+      esVersionCheck(
+        coreMock.createCustomRequestHandlerContext(ctx),
+        kibanaResponseFactory,
+        currentMajor
+      )
     ).resolves.toBe(undefined);
   });
 });

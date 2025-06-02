@@ -10,8 +10,6 @@ export type {
   IndexWarning,
   IndexWarningType,
   ResolveIndexResponseFromES,
-  DataSourceExclusions, // probably doesn't need to be shared
-  FeatureSet, // probably doesn't need to be shared
 } from './src/types';
 export { getRollupJobByIndexName } from './src/rollup_job';
 export { getReindexWarnings } from './src/index_settings';

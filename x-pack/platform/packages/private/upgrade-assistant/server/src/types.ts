@@ -58,12 +58,3 @@ export interface ResolveIndexResponseFromES {
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
-
-export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
-
-export interface FeatureSet {
-  migrateSystemIndices: boolean;
-  mlSnapshots: boolean;
-  reindexCorrectiveActions: boolean;
-  migrateDataStreams: boolean;
-}
