@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { capitalize } from 'lodash';
 import {
   BehaviorSubject,
+  distinctUntilChanged,
   endWith,
   map,
   skipUntil,
@@ -17,16 +19,18 @@ import {
   takeUntil,
 } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-server-internal';
-import type { KibanaRequest, OnPreAuthHandler } from '@kbn/core-http-server';
+import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
-import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
+import { EluTerm, type InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 
 /** @internal */
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
 }
+
+type RateLimiterState = { overloaded: false } | { overloaded: true; retryAfter: number };
 
 /** @internal */
 export type InternalRateLimiterSetup = void;
@@ -38,29 +42,36 @@ export type InternalRateLimiterStart = void;
 export class HttpRateLimiterService
   implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
 {
-  private overloaded$ = new BehaviorSubject(false);
+  private state$ = new BehaviorSubject<RateLimiterState>({
+    overloaded: false,
+  });
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
 
   private handler: OnPreAuthHandler = (request, response, toolkit) => {
-    if (!this.shouldBeThrottled(request)) {
+    const state = this.state$.getValue();
+    if (request.route.options.excludeFromRateLimiter || !state.overloaded) {
       return toolkit.next();
     }
+
+    const timeout = Math.ceil((state.retryAfter - Date.now()) / 1000);
 
     return response.customError({
       statusCode: 429,
       body: 'Server is overloaded',
+      headers: {
+        'Retry-After': `${timeout}`,
+        RateLimit: `"elu";r=0;t=${timeout}`,
+      },
     });
   };
-
-  private shouldBeThrottled(request: KibanaRequest): boolean {
-    return !request.route.options.excludeFromRateLimiter && this.overloaded$.getValue();
-  }
 
   private watch(
     metrics$: Observable<EluMetrics>,
     { elu, term }: InternalHttpServiceSetup['rateLimiter']
   ) {
+    const period = EluTerm[capitalize(term)];
+
     metrics$
       .pipe(
         skipUntil(this.ready$),
@@ -69,9 +80,22 @@ export class HttpRateLimiterService
           ({ short, medium, long }) =>
             short >= elu && (term === 'short' || medium >= elu) && (term !== 'long' || long >= elu)
         ),
-        endWith(false)
+        endWith(false),
+        map((overloaded) =>
+          overloaded
+            ? {
+                overloaded,
+                retryAfter: Date.now() + period,
+              }
+            : { overloaded }
+        ),
+        distinctUntilChanged(
+          (previous, current) =>
+            previous.overloaded === current.overloaded &&
+            (!previous.overloaded || previous.retryAfter - Date.now() > 0)
+        )
       )
-      .subscribe(this.overloaded$);
+      .subscribe(this.state$);
   }
 
   public setup({ http, metrics }: SetupDeps): InternalRateLimiterSetup {
