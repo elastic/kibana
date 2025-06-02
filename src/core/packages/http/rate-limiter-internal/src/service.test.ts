@@ -133,6 +133,51 @@ describe('HttpRateLimiterService', () => {
           expect(handler(request, response, toolkit)).toBe(expected);
         }
       );
+
+      it.each`
+        term        | timeout
+        ${'short'}  | ${15}
+        ${'medium'} | ${30}
+        ${'long'}   | ${60}
+      `(
+        'should return headers with the $timeout seconds timeout for the $term-term',
+        ({ term, timeout }) => {
+          config.term = term;
+          service.setup({ http, metrics });
+          [handler] = http.registerOnPreAuth.mock.lastCall!;
+          service.start();
+
+          elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+          handler(request, response, toolkit);
+
+          expect(response.customError).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: {
+                'Retry-After': `${timeout}`,
+                RateLimit: `"elu";r=0;t=${timeout}`,
+              },
+            })
+          );
+        }
+      );
+
+      it('should not reset timer on consecutive overload', () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        jest.useFakeTimers().setSystemTime(Date.now() + 7 * 1000);
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        handler(request, response, toolkit);
+        jest.useRealTimers();
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              'Retry-After': '8',
+              RateLimit: `"elu";r=0;t=8`,
+            },
+          })
+        );
+      });
     });
   });
 });
