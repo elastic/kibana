@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": ".",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types"
+    ],
+    "sourceMap": true,
+    "declaration": true,
+    "module": "commonjs",
+    "target": "es5",
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+  },
+  "include": [
+    "../**/*.ts",
+    "../**/*.tsx",
+  ],
+  "kbn_references": [],
+  "exclude": [
+    "../target/**/*",
+    "../packaging/**/*",
+  ]
+}
