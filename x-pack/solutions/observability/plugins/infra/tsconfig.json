@@ -85,8 +85,6 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
-    "@kbn/management-settings-components-field-row",
-    "@kbn/core-ui-settings-browser",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
