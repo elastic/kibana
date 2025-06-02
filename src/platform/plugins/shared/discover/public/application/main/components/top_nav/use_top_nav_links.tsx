@@ -142,7 +142,7 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
         });
-        items.push(shareAppMenuItem);
+        items.push(...shareAppMenuItem);
       }
 
       return items;
