@@ -50,12 +50,12 @@ export async function getTotalAlertsCountAggregations({
               field: 'kibana.alert.rule.rule_type_id',
               size: NUM_ALERTING_RULE_TYPES,
             },
-          },
-          aggs: {
-            ignored_field: {
-              terms: {
-                field: '_ignored',
-                size: NUM_ALERTING_RULE_TYPES,
+            aggs: {
+              ignored_field: {
+                terms: {
+                  field: '_ignored',
+                  size: NUM_ALERTING_RULE_TYPES,
+                },
               },
             },
           },
