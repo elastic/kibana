@@ -25781,8 +25781,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -26451,8 +26454,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -27376,8 +27382,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -57214,6 +57223,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -57557,6 +57567,25 @@ components:
         - updated_at
       example: created_at
       type: string
+    Security_AI_Assistant_API_HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     Security_AI_Assistant_API_IndexEntry:
       allOf:
         - type: object
