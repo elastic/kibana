@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
@@ -83,6 +84,35 @@ describe('extractPanelsState', () => {
           version: undefined,
         },
       });
+    });
+  });
+
+  describe('< 7.3 panels state', () => {
+    test('should ignore state and notify user', () => {
+      const dashboardState = extractPanelsState({
+        panels: [
+          {
+            col: 1,
+            id: 'Visualization-MetricChart',
+            panelIndex: 1,
+            row: 1,
+            size_x: 6,
+            size_y: 3,
+            type: 'visualization',
+          },
+          {
+            col: 7,
+            id: 'Visualization-PieChart',
+            panelIndex: 2,
+            row: 1,
+            size_x: 6,
+            size_y: 3,
+            type: 'visualization',
+          },
+        ],
+      });
+      expect(dashboardState).toEqual({});
+      expect(coreServices.notifications.toasts.addWarning).toHaveBeenCalled();
     });
   });
 });
