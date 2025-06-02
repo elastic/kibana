@@ -102,6 +102,17 @@ FROM index
   | LIMIT 123`);
     });
   });
+
+  describe('RERANK', () => {
+    test('comments around all elements', () => {
+      assertReprint(
+        `FROM a
+  | /*0*/ RERANK /*1*/ "query" /*2*/
+        ON /*3*/ field /*4*/
+        WITH /*5*/ id /*6*/`
+      );
+    });
+  });
 });
 
 describe('expressions', () => {
@@ -460,7 +471,7 @@ ROW 1
         // 2
         /* 3 */
         // 4
-        /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */, // 9
+        /* 5 */ /* 6 */ a AS b, /* 7 */ /* 8 */ // 9
         
         x AS y
         `;
@@ -475,7 +486,7 @@ ROW 1
       /* 3 */
       // 4
       /* 5 */ /* 6 */ a AS
-        b, /* 7 */ /* 8 */ // 9
+        b /* 7 */ /* 8 */, // 9
       x AS y`);
     });
 
@@ -497,7 +508,7 @@ ROW 1
       /* 1 */
       /* 2 */ a /* 3 */ AS
         /* 4 */
-        /* 5 */ b, /* 6 */
+        /* 5 */ b /* 6 */,
       x AS y`);
     });
   });

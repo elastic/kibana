@@ -26,9 +26,6 @@ import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
-import { Assets } from './assets';
-import { Investigations } from './investigations';
-import { MachineLearning } from './machine_learning';
 import { SiemMigrations } from './siem_migrations';
 
 /**
@@ -51,9 +48,6 @@ const subPluginClasses = {
   CloudSecurityPosture,
   ThreatIntelligence,
   EntityAnalytics,
-  Assets,
-  Investigations,
-  MachineLearning,
   SiemMigrations,
 };
 export { subPluginClasses };
