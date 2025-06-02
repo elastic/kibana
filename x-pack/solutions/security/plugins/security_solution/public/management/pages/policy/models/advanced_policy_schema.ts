@@ -2241,8 +2241,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.provider_etw',
       {
-         defaultMessage:
-          'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for behavioral protection. Set to false to disable the provider. Default: true.',	 
+        defaultMessage:
+          'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for behavioral protection. Set to false to disable the provider. Default: true.',
       }
     ),
   },
