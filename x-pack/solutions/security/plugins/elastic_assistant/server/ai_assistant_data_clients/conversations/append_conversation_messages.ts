@@ -56,6 +56,9 @@ export const appendConversationMessages = async ({
               newMessage.is_error = message.is_error;
               newMessage.reader = message.reader;
               newMessage.role = message.role;
+              if (message.user != null) {
+                newMessage.user = message.user;
+              }
               if (message.trace_data != null) {
                 newMessage.trace_data = message.trace_data;
               }
@@ -103,6 +106,7 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
+      user: message.user,
       ...(message.metadata
         ? {
             metadata: {

@@ -50,6 +50,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       content: 'Message 3',
       role: 'user',
       timestamp: '2024-02-14T22:29:43.862Z',
+      user: {
+        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        name: 'elastic',
+      },
     },
     {
       content: 'Message 4',
@@ -62,6 +66,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   namespace: 'default',
   updatedAt: '2020-04-20T15:25:31.830Z',
   timestamp: '2020-04-20T15:25:31.830Z',
+  createdBy: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
   users: [
     {
       id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',

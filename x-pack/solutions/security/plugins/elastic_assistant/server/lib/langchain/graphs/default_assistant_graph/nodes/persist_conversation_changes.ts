@@ -63,8 +63,9 @@ export async function persistConversationChanges({
     };
   }
 
+  const currentConversation = conversation ? conversation : state.conversation;
   const updatedConversation = await conversationsDataClient?.appendConversationMessages({
-    existingConversation: conversation ? conversation : state.conversation,
+    existingConversation: currentConversation,
     messages: [
       {
         content: replaceAnonymizedValuesWithOriginalValues({
@@ -72,6 +73,7 @@ export async function persistConversationChanges({
           replacements,
         }),
         role: 'user',
+        user: currentConversation.createdBy,
         timestamp: new Date().toISOString(),
       },
     ],
