@@ -94,19 +94,14 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
   const globalQuery = useMemo(() => {
-    const queryObject: {
-      query: string;
-      gapRange?: {
-        start: string;
-        end: string;
-      };
-    } = { query: kql };
+    const gapRange = filterOptions?.showRulesWithGaps
+    ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
+    : undefined;
 
-    if (filterOptions?.showRulesWithGaps) {
-      queryObject.gapRange = getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue);
+    return {
+      query: kql,
+      ...(gapRange && { gapRange }),
     }
-
-    return queryObject;
   }, [kql, filterOptions]);
 
   const getBulkItemsPopoverContent = useCallback(
