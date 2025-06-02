@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     username: string,
     provider: AuthenticationProvider
   ) {
-    cost apiResponse = await supertest
+    const apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', sessionCookie.cookieString())
