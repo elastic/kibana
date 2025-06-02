@@ -67,3 +67,8 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
   );
   return queue;
 };
+
+// Clear the queue when done
+export const clearQueue = () => {
+  queue = null;
+};

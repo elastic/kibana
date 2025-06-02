@@ -10,6 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { createConfig } from './lib/create_config';
 import { run } from './run';
 import { PartialConfig } from './types';
+import { clearQueue } from './lib/queue';
 
 export const generate = async ({
   client,
@@ -21,5 +22,6 @@ export const generate = async ({
   logger: ToolingLog;
 }): Promise<string[]> => {
   const config = createConfig(partialConfig);
+  clearQueue(); // Clear the queue before starting a new data generation process
   return await run(config, client, logger);
 };
