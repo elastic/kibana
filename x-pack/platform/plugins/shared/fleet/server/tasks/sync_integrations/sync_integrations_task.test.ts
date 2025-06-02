@@ -30,6 +30,7 @@ jest.mock('../../services', () => ({
     start: jest.fn(),
     getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
   },
+}));
 
 jest.mock('../../services/output', () => ({
   outputService: {
