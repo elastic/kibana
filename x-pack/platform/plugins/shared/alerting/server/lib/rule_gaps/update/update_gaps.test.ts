@@ -86,7 +86,7 @@ describe('updateGaps', () => {
           ruleId: 'test-rule-id',
           start: '2024-01-01T00:00:00.000Z',
           end: '2024-01-01T01:00:00.000Z',
-          perPage: 500,
+          perPage: 1000,
           statuses: ['partially_filled', 'unfilled'],
           sortField: '@timestamp',
           sortOrder: 'asc',
@@ -298,14 +298,6 @@ describe('updateGaps', () => {
         searchAfter: undefined,
       });
 
-      const backfillSchedule = [
-        {
-          runAt: '2024-01-01T00:30:00.000Z',
-          interval: '30m',
-          status: adHocRunStatus.COMPLETE,
-        },
-      ];
-
       await updateGaps({
         ruleId: 'test-rule-id',
         start: new Date('2024-01-01T00:00:00.000Z'),
@@ -314,14 +306,26 @@ describe('updateGaps', () => {
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         savedObjectsRepository: mockSavedObjectsRepository,
-        backfillSchedule,
+        backfillSchedule: [
+          {
+            runAt: '2024-01-01T00:30:00.000Z',
+            interval: '30m',
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
         backfillClient: mockBackfillClient,
         actionsClient: mockActionsClient,
       });
 
       expect(updateGapFromSchedule).toHaveBeenCalledWith({
         gap: testGap,
-        backfillSchedule,
+        scheduledItems: [
+          {
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:30:00.000Z'),
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
       });
       expect(calculateGapStateFromAllBackfills).not.toHaveBeenCalled();
     });

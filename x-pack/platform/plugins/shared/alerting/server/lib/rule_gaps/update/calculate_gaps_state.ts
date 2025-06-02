@@ -10,6 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Gap } from '../gap';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
+import { toScheduledItem } from './utils';
 
 /**
  * Find all overlapping backfill tasks and update the gap status accordingly
@@ -40,9 +41,10 @@ export const calculateGapStateFromAllBackfills = async ({
     if ('error' in backfill) {
       continue;
     }
+    const scheduledItems = backfill?.schedule.map(toScheduledItem) ?? [];
     gap = updateGapFromSchedule({
       gap,
-      backfillSchedule: backfill?.schedule ?? [],
+      scheduledItems,
     });
   }
 
