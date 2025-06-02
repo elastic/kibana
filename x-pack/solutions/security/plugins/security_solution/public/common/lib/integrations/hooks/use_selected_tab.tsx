@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useStoredIntegrationTabId } from './use_stored_state';
-import type { Tab } from '../types';
+import type { IntegrationTabId, Tab } from '../types';
 import { useIntegrationContext } from './integration_context';
 
 export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
-export const useSelectedTab = () => {
+export const useSelectedTab = (source: string) => {
+  console.log(`useSelectedTab called from: ${source}`);
   const { spaceId, integrationTabs } = useIntegrationContext();
-  const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
+  const [lastTabId, setLastTabIdToStorage] = useStoredIntegrationTabId(
     spaceId,
     integrationTabs[0].id
   );
+
+  const [toggleIdSelected, setToggleIdSelected] = useState(lastTabId);
 
   const integrationTabsById = useMemo(
     () => Object.fromEntries(integrationTabs.map((tab: Tab) => [tab.id, tab])),
@@ -33,5 +36,13 @@ export const useSelectedTab = () => {
     [integrationTabs, integrationTabsById, toggleIdSelected]
   );
 
+  const setSelectedTabIdToStorage = useCallback(
+    (id: IntegrationTabId) => {
+      setToggleIdSelected(id);
+      setLastTabIdToStorage(id);
+    },
+    [setLastTabIdToStorage]
+  );
+  console.log(`useSelectedTab returning: ${JSON.stringify(selectedTab)}`);
   return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs };
 };

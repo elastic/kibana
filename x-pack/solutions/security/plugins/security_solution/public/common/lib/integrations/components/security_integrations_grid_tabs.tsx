@@ -21,7 +21,6 @@ import {
 } from '../constants';
 import type { TopCalloutRenderer } from '../types';
 import { IntegrationTabId } from '../types';
-import { useSelectedTab } from '../hooks/use_selected_tab';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
 import type { AvailablePackages } from './with_available_packages';
@@ -55,14 +54,18 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     integrationList,
     availablePackages,
     packageListGridOptions,
+    toggleIdSelected,
+    setSelectedTabIdToStorage,
+    selectedTab,
   }) => {
     const {
       spaceId,
       telemetry: { reportLinkClick },
+      integrationTabs,
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
-      useSelectedTab();
+    // const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
+    //   useSelectedTab('SecurityIntegrationsGridTabs');
     const createAutoImportCard = useCreateAutoImportCard();
 
     const integrationTabOptions = useMemo<EuiButtonGroupOptionProps[]>(
@@ -84,19 +87,22 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     }, [integrationList, createAutoImportCard, selectedTab.appendAutoImportCard]);
 
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
+
+    const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =
+      availablePackages;
+
     const onTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
+        // setCategory(selectedTab.category ?? '');
+        // setSelectedSubCategory(selectedTab.subCategory);
         reportLinkClick?.(trackId);
       },
       [setSelectedTabIdToStorage, reportLinkClick]
     );
-
-    const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =
-      availablePackages;
 
     const buttonGroupStyles = useIntegrationCardGridTabsStyles();
 
