@@ -12,15 +12,38 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, header, home } = getPageObjects([
+  const { common, dashboard, dashboardControls, header, home } = getPageObjects([
     'common',
     'dashboard',
+    'dashboardControls',
     'header',
     'home',
   ]);
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const deployment = getService('deployment');
+  const find = getService('find');
+
+  async function assertDashboardRendered() {
+    await header.waitUntilLoadingHasFinished();
+    await dashboard.waitForRenderComplete();
+
+    const controlIds = await dashboardControls.getAllControlIds();
+    expect(controlIds.length).to.be(1);
+    const selectionString = await dashboardControls.optionsListGetSelectionsString(controlIds[0]);
+    expect(selectionString).to.be('win 7');
+
+    const panels = await dashboard.getDashboardPanels();
+    expect(panels.length).to.be(1);
+
+    const titles = await dashboard.getPanelTitles();
+    expect(titles.length).to.be(1);
+    expect(titles[0]).to.equal('Custom map');
+
+    // can not use maps page object because its in x-pack
+    // TODO - move map page object to src/test page objects
+    expect((await find.allByCssSelector('.mapTocEntry')).length).to.be(4);
+  }
 
   describe('bwc short urls', () => {
     let baseUrl: string;
@@ -50,13 +73,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // 8.14 pre-embeddable rebuild, URL state is runtime state with injected references
-    it('should load dashboard from short url (8.14)', async () => {
-      await browser.navigateTo(baseUrl + '/app/r/s/Jh1lq');
-      await header.waitUntilLoadingHasFinished();
-      await dashboard.waitForRenderComplete();
-      const panels = await dashboard.getDashboardPanels();
-      expect(panels.length).to.be(2);
+    // 8.14 before the Embeddable refactor
+    it('should load dashboard with 8.14 state', async () => {
+      await browser.navigateTo(baseUrl + '/goto/url_to_8_14_dashboard');
+      await assertDashboardRendered();
+    });
+
+    // 8.18 after the embeddable refactor and before Serialized state only
+    it('should load dashboard with 8.14 state', async () => {
+      await browser.navigateTo(baseUrl + '/goto/url_to_8_18_dashboard');
+      await assertDashboardRendered();
     });
   });
 }
