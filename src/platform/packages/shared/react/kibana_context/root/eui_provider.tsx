@@ -40,12 +40,6 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
 // https://eui.elastic.co/#/utilities/provider#cache-location
 const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
 
-const emotionCache = createCache({
-  key: 'css',
-  stylisPlugins,
-  container: document.querySelector('meta[name="emotion"]') as HTMLElement,
-});
-
 const globalCache = createCache({
   key: EUI_STYLES_GLOBAL,
   stylisPlugins,
@@ -59,11 +53,8 @@ const utilitiesCache = createCache({
 });
 
 // Enable "compat mode" in Emotion caches.
-emotionCache.compat = true;
 globalCache.compat = true;
 utilitiesCache.compat = true;
-
-const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
@@ -95,6 +86,8 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
 
+  const treeCache = useEmotionCache();
+
   const getUserProfile$ = useMemo(
     () => userProfile?.getUserProfile$ ?? Rx.of,
     [userProfile?.getUserProfile$]
@@ -111,6 +104,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // This logic was drawn from the Core theme provider, and wasn't present (or even used)
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
+  const cache = { default: treeCache, global: globalCache, utility: utilitiesCache };
 
   return (
     <EuiProvider
@@ -127,4 +121,33 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
       {children}
     </EuiProvider>
   );
+};
+
+// Create a new cache for each Kibana tree and clean it up when the tree unmounts.
+const useEmotionCache = () => {
+  function randomStr(length: number) {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    let str = '';
+    const alphabetLength = alphabet.length;
+    for (let i = 0; i < length; i++) {
+      str += alphabet.charAt(Math.floor(Math.random() * alphabetLength));
+    }
+    return str;
+  }
+
+  const [cache] = React.useState(() => {
+    const _cache = createCache({
+      key: `css-${randomStr(16)}`,
+      stylisPlugins,
+      container: document.querySelector('meta[name="emotion"]') as HTMLElement,
+    });
+    _cache.compat = true;
+    return _cache;
+  });
+  React.useInsertionEffect(() => {
+    return () => {
+      cache.sheet.flush();
+    };
+  }, []);
+  return cache;
 };
