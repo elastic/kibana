@@ -64,6 +64,7 @@ export const createActionHandler = async (
       allAgentsSelected: !!agentAll,
       platformsSelected: agentPlatforms,
       policiesSelected: agentPolicyIds,
+      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
     }
   );
 
@@ -136,6 +137,7 @@ export const createActionHandler = async (
           error,
         }),
   };
+
   const fleetActions = !error
     ? map(
         filter(osqueryAction.queries, (query) => !query.error),

@@ -46,7 +46,10 @@ export interface ActionDetails {
   }>;
 }
 
-export type ActionsRequestOptions = RequestOptionsPaginated;
+export interface ActionsRequestOptions extends RequestOptionsPaginated {
+  policyIds?: string[];
+  spaceId?: string;
+}
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
   actionDetails: estypes.SearchHit<ActionDetails>;
@@ -55,6 +58,8 @@ export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
 
 export interface ActionDetailsRequestOptions extends RequestOptions {
   actionId: string;
+  policyIds?: string[];
+  spaceId?: string;
 }
 
 export interface ActionResultsStrategyResponse

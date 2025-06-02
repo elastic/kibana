@@ -10,6 +10,7 @@ import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
@@ -25,13 +26,18 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
-import { getActionResponses } from './utils';
+import { fetchOsqueryPackagePolicyIds, getActionResponses } from './utils';
 import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
-export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const getLiveQueryResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -62,6 +68,20 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+            osqueryContext,
+            request
+          );
+
+          const osqueryPackagePolicyIdsWithinCurrentSpace = await fetchOsqueryPackagePolicyIds(
+            spaceScopedClient,
+            osqueryContext
+          );
+
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
@@ -69,10 +89,16 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                 actionId: request.params.id,
                 kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
+                policyIds: osqueryPackagePolicyIdsWithinCurrentSpace,
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
           );
+
+          if (!actionDetails) {
+            return response.notFound({ body: { message: 'Action not found' } });
+          }
 
           const queries = actionDetails?._source?.queries;
 

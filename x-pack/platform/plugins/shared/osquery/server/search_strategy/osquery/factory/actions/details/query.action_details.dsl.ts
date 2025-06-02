@@ -16,6 +16,8 @@ export const buildActionDetailsQuery = ({
   actionId,
   kuery,
   componentTemplateExists,
+  policyIds,
+  spaceId,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   let filter = actionIdQuery;
@@ -23,13 +25,35 @@ export const buildActionDetailsQuery = ({
     filter = filter + ` AND ${kuery}`;
   }
 
-  const filterQuery = getQueryFilter({ filter });
+  const {
+    bool: { filter: baseFilter },
+  } = getQueryFilter({ filter });
+
+  let extendedFilter = baseFilter;
+
+  if (Array.isArray(policyIds) && policyIds.length > 0) {
+    if (spaceId === 'default') {
+      extendedFilter = [
+        {
+          bool: {
+            should: [
+              { terms: { policy_ids: policyIds } },
+              { bool: { must_not: { exists: { field: 'policy_ids' } } } },
+            ],
+          },
+        },
+        ...baseFilter,
+      ];
+    } else {
+      extendedFilter = [...baseFilter, { terms: { policy_ids: policyIds } }];
+    }
+  }
 
   const dslQuery = {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    query: { bool: { filter: filterQuery } },
+    query: { bool: { filter: extendedFilter } },
     size: 1,
     fields: ['*'],
   };

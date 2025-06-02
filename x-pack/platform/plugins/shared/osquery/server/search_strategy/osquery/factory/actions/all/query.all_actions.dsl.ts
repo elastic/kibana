@@ -9,19 +9,45 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
+
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
+
+import type { ActionsRequestOptions } from '../../../../../../common/search_strategy/osquery/actions';
 
 export const buildActionsQuery = ({
   kuery = '',
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
-}: AgentsRequestOptions): ISearchRequestParams => {
+  policyIds,
+  spaceId,
+}: ActionsRequestOptions): ISearchRequestParams => {
   const {
     bool: { filter },
   } = getQueryFilter({ filter: kuery });
+
+  let extendedFilter = filter;
+
+  if (Array.isArray(policyIds) && policyIds.length > 0) {
+    if (spaceId === 'default') {
+      // For default space, include docs with matching policyIds OR where policy_ids does not exist
+      extendedFilter = [
+        {
+          bool: {
+            should: [
+              { terms: { policy_ids: policyIds } },
+              { bool: { must_not: { exists: { field: 'policy_ids' } } } },
+            ],
+          },
+        },
+        ...filter,
+      ];
+    } else {
+      // For other spaces, only include docs matching policyIds
+      extendedFilter = [...filter, { terms: { policy_ids: policyIds } }];
+    }
+  }
 
   return {
     allow_no_indices: true,
@@ -29,7 +55,7 @@ export const buildActionsQuery = ({
     ignore_unavailable: true,
     query: {
       bool: {
-        filter,
+        filter: extendedFilter,
         must: [
           {
             term: {
