@@ -815,7 +815,7 @@
               " | null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
@@ -1273,7 +1273,7 @@
           " | null; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
         "initialIsOpen": false
       },
