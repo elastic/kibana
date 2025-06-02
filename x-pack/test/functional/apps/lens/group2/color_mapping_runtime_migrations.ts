@@ -116,21 +116,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const chartData = await getPanelChartDebugState('Custom assigned');
           const seriesColors = getBarColors(chartData);
 
-          const dualAssignedColor = '#ffc9c2';
           expect(seriesColors).to.eql([
             ['CN', neutralPaletteColors[3]],
             ['IN', neutralPaletteColors[2]],
-            ['US', '#702339'], // custom picked colors below
-            ['ID', '#08b725'],
-            ['PK', '#f1ff86'],
-            ['BR', '#ffc7db'],
-            ['RU', '#f6726a'],
-            ['NG', dualAssignedColor],
-            ['JP', dualAssignedColor],
-            ['BD', '#eaae01'],
-            ['MX', '#fcd883'],
-            ['PH', '#51d4d0'],
-            ['IR', '#d76042'],
+            ['US', '#702339'], // custom color
+            ['ID', '#08b725'], // custom color
+            ['PK', '#f1ff86'], // custom color
+            ['BR', defaultPaletteColors[5]],
+            ['RU', defaultPaletteColors[6]],
+            ['NG', defaultPaletteColors[7]], // dual color assignment with JP below
+            ['JP', defaultPaletteColors[7]],
+            ['BD', defaultPaletteColors[8]],
+            ['MX', defaultPaletteColors[9]],
+            ['PH', defaultPaletteColors[10]], // custom color
+            ['IR', '#d76042'], // custom color
             ['VN', neutralPaletteColors[4]], // rest are same color
             ['EG', neutralPaletteColors[4]],
           ]);
