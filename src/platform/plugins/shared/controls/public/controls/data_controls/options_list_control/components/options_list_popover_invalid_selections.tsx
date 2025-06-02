@@ -10,7 +10,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -83,9 +82,6 @@ export const OptionsListPopoverInvalidSelections = () => {
             <label>
               {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">{invalidSelections.size}</EuiNotificationBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>

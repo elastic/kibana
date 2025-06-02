@@ -218,7 +218,7 @@ export const OptionsListStrings = {
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName} ({invalidSelectionCount})',
         values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
