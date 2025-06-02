@@ -16,7 +16,7 @@ import {
 import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
-const TWO_PANELS_DASHBOARD_ID = 'c22ba8ed-fd4b-4864-a98c-3cba1d11cfb2';
+const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
 
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should
 // always make sure that existing definitions and links keep working.
@@ -32,7 +32,7 @@ const assetLinks = [
   },
   {
     'asset.type': 'dashboard',
-    'asset.id': TWO_PANELS_DASHBOARD_ID,
+    'asset.id': TEST_DASHBOARD_ID,
     'asset.uuid': 'a9e60eb2bc5fa77d1f66a612db29d2764ff8cf4a',
     'stream.name': TEST_STREAM_NAME,
   },
@@ -88,7 +88,7 @@ const expectedStreamsResponse: Streams.UnwiredStream.Definition = {
 const expectedDashboardsResponse = {
   dashboards: [
     {
-      id: TWO_PANELS_DASHBOARD_ID,
+      id: TEST_DASHBOARD_ID,
       title: 'Logs count and top 10 messages',
       tags: [],
     },
@@ -114,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     // this archive contains a dashboard with esql panel and a lens panel referencing a data view
     // both read from `logs`
-    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/content_pack_two_panels.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/content_pack_four_panels.json',
   ];
 
   // This test verifies that it's still possible to read an existing stream definition without
@@ -132,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           path: {
             name: 'logs',
-            dashboardId: TWO_PANELS_DASHBOARD_ID,
+            dashboardId: TEST_DASHBOARD_ID,
           },
         },
       });
@@ -140,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           path: {
             name: 'logs',
-            dashboardId: TWO_PANELS_DASHBOARD_ID,
+            dashboardId: TEST_DASHBOARD_ID,
           },
         },
       });
