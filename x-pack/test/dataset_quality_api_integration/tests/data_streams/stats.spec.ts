@@ -76,6 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.datasetUserPrivileges).to.eql({
           canRead: true,
           canMonitor: true,
+          canReadFailureStore: true,
           canViewIntegrations: true,
           canReadFailureStore: true,
         });
