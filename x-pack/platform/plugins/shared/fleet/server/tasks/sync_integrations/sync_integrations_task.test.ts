@@ -24,14 +24,6 @@ import { licenseService } from '../../services/license';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
-jest.mock('../../services', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
-    start: jest.fn(),
-    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
-  },
-}));
-
 jest.mock('../../services/output', () => ({
   outputService: {
     list: jest.fn(),
@@ -48,6 +40,7 @@ jest.mock('../../services/app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     start: jest.fn(),
+    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
   },
 }));
 
