@@ -13,18 +13,24 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
 export async function clearKnowledgeBase(es: Client) {
-  return es.deleteByQuery({
-    index: resourceNames.indexPatterns.kb,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-    refresh: true,
-  });
+  return pRetry(
+    () => {
+      return es.deleteByQuery({
+        index: resourceNames.indexPatterns.kb,
+        conflicts: 'proceed',
+        query: { match_all: {} },
+        refresh: true,
+      });
+    },
+    { retries: 5 }
+  );
 }
 
 export async function waitForKnowledgeBaseIndex(
@@ -86,7 +92,7 @@ export async function setupKnowledgeBase(
   const statusResult = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
   log.debug(
-    `Setting up knowledge base with inference endpoint = "${TINY_ELSER_INFERENCE_ID}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
+    `Setting up knowledge base with inferenceId = "${inferenceId}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
   );
   const { body, status } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
