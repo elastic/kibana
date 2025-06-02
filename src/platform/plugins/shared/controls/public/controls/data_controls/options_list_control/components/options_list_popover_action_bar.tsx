@@ -94,11 +94,11 @@ export const OptionsListPopoverActionBar = ({
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
+      bulkAction(availableOptions.map(({ value }) => value as string));
+
       if (totalCardinality > availableOptions.length) {
         const newAvailableOptions = (await loadMoreOptions()) ?? [];
         bulkAction(newAvailableOptions.map(({ value }) => value as string));
-      } else {
-        bulkAction(availableOptions.map(({ value }) => value as string));
       }
     },
     [availableOptions, loadMoreOptions, totalCardinality]
