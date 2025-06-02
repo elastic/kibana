@@ -156,7 +156,7 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 {{#ubuntu}}
 # Ubuntu 24 containers include ubuntu:1000:1000 as part of a non-root standardization effort
-# Remove ubuntu we can maintain the expected kibana user definition
+# Remove ubuntu to maintain the expected kibana user definition
 RUN userdel -r ubuntu
 {{/ubuntu}}
 
