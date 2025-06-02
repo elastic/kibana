@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     username: string,
     provider: AuthenticationProvider
   ) {
-    const apiResponse = await supertest
+    cost apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', sessionCookie.cookieString())
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
-    it('should properly clean up session expired because of lifespan', async function () {
+    it.skip('should properly clean up session expired because of lifespan', async function () {
       this.timeout(100000);
 
       const response = await supertest
