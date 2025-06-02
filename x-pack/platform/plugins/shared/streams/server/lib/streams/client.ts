@@ -26,7 +26,6 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { migrateOnRead } from './helpers/migrate_on_read';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -329,9 +328,7 @@ export class StreamsClient {
     if (!source) {
       throw new DefinitionNotFoundError(`Cannot find stream definition`);
     }
-    const migratedSource = migrateOnRead(source);
-    Streams.all.Definition.asserts(migratedSource);
-    return migratedSource;
+    return source;
   }
 
   /**
