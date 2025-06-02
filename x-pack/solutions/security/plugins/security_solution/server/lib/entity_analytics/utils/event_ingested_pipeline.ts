@@ -105,6 +105,11 @@ const getAllRiskEngineSpaces = async (
   return allRiskEngineConfigurations.flatMap((config) => config.namespaces || []);
 };
 
+/**
+ * Creates the `event.ingested` ingest pipeline in all namespaces where either asset criticality or risk engine configurations exist.
+ * In 9.0 and 8.18, this pipeline creation was missing, stopping risk scoring from working.
+ * This function fixes that.
+ **/
 export const createEventIngestedPipelineInAllNamespaces = async ({
   getStartServices,
   logger,
