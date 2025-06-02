@@ -135,19 +135,21 @@ export const streamEnrichmentMachine = setup({
     addDataSource: assign(
       ({ context, spawn, self }, { dataSource }: { dataSource: EnrichmentDataSource }) => {
         const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
-        return {
-          dataSourcesRefs: context.dataSourcesRefs.concat(
-            spawn('dataSourceMachine', {
-              id: dataSourceWithUIAttributes.id,
-              input: {
-                parentRef: self,
-                streamName: context.definition.stream.name,
-                dataSource: dataSourceWithUIAttributes,
-                condition: composeSamplingCondition(context),
-              },
-            })
-          ),
-        };
+        const dataSourcesRefs = context.dataSourcesRefs.slice();
+
+        dataSourcesRefs.unshift(
+          spawn('dataSourceMachine', {
+            id: dataSourceWithUIAttributes.id,
+            input: {
+              parentRef: self,
+              streamName: context.definition.stream.name,
+              dataSource: dataSourceWithUIAttributes,
+              condition: composeSamplingCondition(context),
+            },
+          })
+        );
+
+        return { dataSourcesRefs };
       }
     ),
     stopDataSource: stopChild((_, params: { id: string }) => params.id),

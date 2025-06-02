@@ -8,11 +8,13 @@ import React from 'react';
 import { isEqual } from 'lodash';
 import { TimeRange } from '@kbn/es-query';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import {
+  UncontrolledStreamsAppSearchBar,
+  UncontrolledStreamsAppSearchBarProps,
+} from './uncontrolled_streams_app_bar';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { useKibana } from '../../hooks/use_kibana';
 
-export type StreamsAppSearchBarProps = StatefulSearchBarProps;
+export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
 // If the absolute time stays the same
 function needsRefresh(left: TimeRange, right: TimeRange) {
@@ -23,15 +25,7 @@ function needsRefresh(left: TimeRange, right: TimeRange) {
   return isEqual(leftAbsolute, rightAbsolute);
 }
 
-export function StreamsAppSearchBar({
-  onQuerySubmit,
-  ...props
-}: Omit<StreamsAppSearchBarProps, 'appName'>) {
-  const {
-    dependencies: {
-      start: { unifiedSearch },
-    },
-  } = useKibana();
+export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
   const { timeState, setTime, refresh } = useTimefilter();
 
   function refreshOrSetTime(next: TimeRange) {
@@ -43,8 +37,7 @@ export function StreamsAppSearchBar({
   }
 
   return (
-    <unifiedSearch.ui.SearchBar
-      appName="streamsApp"
+    <UncontrolledStreamsAppSearchBar
       onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
           refreshOrSetTime(dateRange);
@@ -53,13 +46,6 @@ export function StreamsAppSearchBar({
       }}
       dateRangeFrom={timeState.timeRange.from}
       dateRangeTo={timeState.timeRange.to}
-      showDatePicker={false}
-      showFilterBar={false}
-      showQueryMenu={false}
-      showQueryInput={false}
-      submitButtonStyle="iconOnly"
-      displayStyle="inPage"
-      disableQueryLanguageSwitcher
       {...props}
     />
   );

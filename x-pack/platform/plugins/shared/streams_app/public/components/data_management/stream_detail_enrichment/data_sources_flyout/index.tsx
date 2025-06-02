@@ -55,6 +55,7 @@ import {
   CustomSamplesDataSourceWithUIAttributes,
   KqlSamplesDataSourceWithUIAttributes,
 } from '../types';
+import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -293,17 +294,19 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
       <EuiSpacer />
       {streamDataView && (
         <>
-          <StreamsAppSearchBar
-            showDatePicker
-            showFilterBar
-            showQueryInput
+          <UncontrolledStreamsAppSearchBar
+            dateRangeFrom={dataSource.time.from}
+            dateRangeTo={dataSource.time.to}
             filters={dataSource.filters}
-            query={dataSource.query}
+            indexPatterns={[streamDataView]}
+            isDisabled={isDisabled}
             onFiltersUpdated={(filters) => handleChange({ filters })}
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQueryChange}
-            indexPatterns={[streamDataView]}
-            isDisabled={isDisabled}
+            query={dataSource.query}
+            showDatePicker
+            showFilterBar
+            showQueryInput
           />
           <EuiSpacer size="s" />
         </>
