@@ -38,7 +38,8 @@ export function DataCascadeProvider({
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStore();
-  const initialState = useRef({
+  const initialState = useRef<IStoreState>({
+    data: [],
     currentQueryString: '',
     groupByColumns: null,
     currentGroupByColumn: null,
@@ -49,6 +50,7 @@ export function DataCascadeProvider({
       if (query !== state.currentQueryString) {
         const columns = getStatsGroupByColumnsFromQuery(query);
         return {
+          ...state,
           currentQueryString: query,
           groupByColumns: columns,
           currentGroupByColumn: columns.length > 0 ? columns[0] : null,
@@ -67,7 +69,7 @@ export function DataCascadeProvider({
 const useDataCascadeStore = () => {
   const ctx = useContext(createStore());
   if (!ctx) {
-    throw new Error('useDataPoolerStore must be used within a DataPoolerProvider');
+    throw new Error('useDataCascadeStore must be used within a DataCascadeProvider');
   }
   return ctx as IStoreContext;
 };
