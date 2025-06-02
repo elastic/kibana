@@ -125,7 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return clipboardValue;
   };
 
-  describe('Discover CSV Export', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/222247
+  describe.skip('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
