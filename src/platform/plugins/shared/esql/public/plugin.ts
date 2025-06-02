@@ -30,7 +30,7 @@ import {
 } from './triggers/update_esql_query/update_esql_query_trigger';
 import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
@@ -127,7 +127,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
 
-    // needs caching, make solutionId from argument
     const getEditorExtensionsAutocomplete = async (
       queryString: string,
       activeSolutionId: SolutionId
@@ -135,17 +134,21 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       const result = await core.http.get(
         `/internal/esql_registry/extensions/${activeSolutionId}/${queryString}`
       );
-      if (!result) {
-        throw new Error('Failed to fetch ESQL editor extensions');
-      }
-
       return result;
     };
+
+    // Create a cached version of getEditorExtensionsAutocomplete
+    const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
+      getEditorExtensionsAutocomplete,
+      (queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
 
     const start = {
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
-      getEditorExtensionsAutocomplete,
+      getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };

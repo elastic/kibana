@@ -36,7 +36,7 @@ export class ESQLExtensionsRegistry {
     }
     for (const recommendedQuery of recommendedQueries) {
       if (typeof recommendedQuery.name !== 'string' || typeof recommendedQuery.query !== 'string') {
-        throw new Error('Each recommended query must have a name and a query string');
+        continue; // Skip if the recommended query is malformed
       }
       const indexPattern = getIndexPatternFromESQLQuery(recommendedQuery.query);
       if (!indexPattern) {

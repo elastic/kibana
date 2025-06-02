@@ -34,7 +34,9 @@ Plugins can easily register their desired ES|QL extensions by adding a dependenc
 
 Here's an example of how to register `recommendedQueries`:
 
-**Add `esql` plugin dependency** in your plugin's `setup` method:
+- Add **esql** as a dependency on your kibana.jsonc file
+
+- **Add `esql` plugin dependency** in your plugin's `setup` method:
 
     ```typescript
     import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
