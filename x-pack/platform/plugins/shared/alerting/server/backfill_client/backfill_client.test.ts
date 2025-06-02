@@ -2590,12 +2590,8 @@ describe('BackfillClient', () => {
 
     test('should process bulk create in chunks of 10', async () => {
       // Create 25 mock rules and backfill params to test chunking
-      const mockRules = Array.from({ length: 25 }, (_, i) => 
-        getMockRule({ id: `${i + 1}` })
-      );
-      const mockData = Array.from({ length: 25 }, (_, i) => 
-        getMockData({ ruleId: `${i + 1}` })
-      );
+      const mockRules = Array.from({ length: 25 }, (_, i) => getMockRule({ id: `${i + 1}` }));
+      const mockData = Array.from({ length: 25 }, (_, i) => getMockData({ ruleId: `${i + 1}` }));
 
       // Create mock responses for each chunk
       const mockResponses = Array.from({ length: 3 }, (_, chunkIndex) => {
@@ -2605,7 +2601,7 @@ describe('BackfillClient', () => {
           saved_objects: Array.from({ length: endIdx - startIdx }, (_, i) => {
             const idx = startIdx + i;
             return getBulkCreateParam(`id-${idx}`, `${idx + 1}`, getMockAdHocRunAttributes());
-          })
+          }),
         };
       });
 
