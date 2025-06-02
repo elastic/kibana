@@ -21,24 +21,26 @@ export const createCompletionCommand = (
   const prompt = visitPrimaryExpression(ctx._prompt);
   command.args.push(prompt);
 
-  const inferenceIdCtx = ctx._inferenceId;
-  const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
-
   const withCtx = ctx.WITH();
-  const optionWith = Builder.option(
-    {
-      name: 'with',
-      args: [inferenceId],
-    },
-    withCtx && inferenceIdCtx
-      ? {
-          location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
-        }
-      : undefined
-  );
 
-  command.args.push(optionWith);
+  if (withCtx) {
+    const inferenceIdCtx = ctx._inferenceId;
+    const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
+    const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+
+    const optionWith = Builder.option(
+      {
+        name: 'with',
+        args: [inferenceId],
+      },
+      withCtx && inferenceIdCtx
+        ? {
+            location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
+          }
+        : undefined
+    );
+    command.args.push(optionWith);
+  }
 
   if (ctx._targetField && ctx._targetField.getText()) {
     const targetField = createColumn(ctx._targetField);
