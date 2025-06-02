@@ -14,27 +14,27 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
-import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
-import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useKibana } from '../../../../common/lib/kibana';
-import { canEditRuleWithActions } from '../../../../common/utils/privileges';
-import type { Rule } from '../../../../detection_engine/rule_management/logic';
-import { useBulkExport } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
+import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
+import type { TimeRange } from '../../../../rule_gaps/types';
+import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
+import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { getRulesUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
+import type { Rule } from '../../../../rule_management/logic';
+import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import {
   goToRuleEditPage,
   useExecuteBulkAction,
-} from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { useDownloadExportedRules } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_download_exported_rules';
-import * as i18nActions from '../../../../detection_engine/common/translations';
+} from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
+import * as i18nActions from '../../../../common/translations';
 import * as i18n from './translations';
-import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
+import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {

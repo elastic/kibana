@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { cleanup, waitFor, renderHook } from '@testing-library/react';
+import { cleanup, renderHook, waitFor } from '@testing-library/react';
 
 import { useIntegrations } from './use_integrations';
 
-import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
+import { fleetIntegrationsApi } from '../../../fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
 import { createReactQueryWrapper } from '../../../../common/mock';
 
-jest.mock('../../../../detection_engine/fleet_integrations/api');
+jest.mock('../../../fleet_integrations/api');
 jest.mock('../../../../common/lib/kibana');
 
 describe('useIntegrations', () => {

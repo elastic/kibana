@@ -8,24 +8,22 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { RuleActionsOverflow } from '.';
-import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
-import { TestProviders } from '../../../../common/mock';
-import { useBulkExport } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
-import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
+import { TestProviders } from '../../../../../common/mock';
+import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
+import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock(
-  '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action'
-);
-jest.mock('../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export');
+jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
+jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
 
 const mockReportEvent = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: jest.fn().mockImplementation(() => {

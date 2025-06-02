@@ -8,11 +8,11 @@
 import { EuiBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { INSTALL_PREBUILT_RULES_ANCHOR } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/rules_management_tour';
+import { INSTALL_PREBUILT_RULES_ANCHOR } from '../rules_table/rules_table/guided_onboarding/rules_management_tour';
 import * as i18n from './translations';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../../common';
-import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 interface AddElasticRulesButtonProps {
   'data-test-subj'?: string;

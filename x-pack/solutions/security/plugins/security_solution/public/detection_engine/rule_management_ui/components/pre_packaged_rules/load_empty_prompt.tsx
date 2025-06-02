@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { useUserData } from '../../user_info';
+import { useUserData } from '../../../../detections/components/user_info';
 import { AddElasticRulesButton } from './add_elastic_rules_button';
 import * as i18n from './translations';
 
