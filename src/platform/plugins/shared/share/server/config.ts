@@ -9,6 +9,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
+  DEFAULT_MAX_PAGE_SIZE,
   DEFAULT_URL_EXPIRATION_CHECK_INTERVAL,
   DEFAULT_URL_EXPIRATION_DURATION,
   DEFAULT_URL_EXPIRATION_PIT_KEEP_ALIVE,
@@ -32,6 +33,9 @@ export const configSchema = schema.object({
     }),
     pit_keep_alive: schema.duration({
       defaultValue: DEFAULT_URL_EXPIRATION_PIT_KEEP_ALIVE,
+    }),
+    max_page_size: schema.number({
+      defaultValue: DEFAULT_MAX_PAGE_SIZE,
     }),
   }),
 });

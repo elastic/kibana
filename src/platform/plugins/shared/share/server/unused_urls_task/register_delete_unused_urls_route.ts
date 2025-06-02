@@ -16,15 +16,17 @@ export const registerDeleteUnusedUrlsRoute = ({
   core,
   urlExpirationDuration,
   pitKeepAlive,
+  maxPageSize,
   logger,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
   pitKeepAlive: Duration;
+  maxPageSize: number;
   logger: Logger;
 }) => {
-  router.delete(
+  router.post(
     {
       path: '/api/unused_urls_cleanup/run',
       security: {
@@ -41,10 +43,17 @@ export const registerDeleteUnusedUrlsRoute = ({
       validate: {},
     },
     async (_ctx, _req, res) => {
-      await runDeleteUnusedUrlsTask({ core, urlExpirationDuration, pitKeepAlive, logger });
+      await runDeleteUnusedUrlsTask({
+        core,
+        urlExpirationDuration,
+        pitKeepAlive,
+        maxPageSize,
+        logger,
+      });
+
       return res.ok({
         body: {
-          message: 'Unused URLs cleanup task has been initiated.',
+          message: 'Unused URLs cleanup task has finished.',
         },
       });
     }

@@ -14,7 +14,7 @@ import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { groupBy } from 'lodash';
 import { Duration } from 'moment';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
+import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
 export const durationToSeconds = (duration: Duration) => `${duration.asSeconds()}s`;
 
@@ -64,10 +64,12 @@ export const fetchAllUnusedUrls = async ({
   savedObjectsRepository,
   filter,
   pitKeepAlive,
+  maxPageSize,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   filter: string;
   pitKeepAlive: string;
+  maxPageSize: number;
 }) => {
   const results: SavedObjectsBulkDeleteObjectWithNamespace[] = [];
 
@@ -85,7 +87,7 @@ export const fetchAllUnusedUrls = async ({
         filter,
         pit: { id: pitId, keepAlive: pitKeepAlive },
         searchAfter,
-        perPage: MAX_PAGE_SIZE,
+        perPage: maxPageSize,
         namespaces: ['*'],
         fields: ['type'],
       });
@@ -97,7 +99,7 @@ export const fetchAllUnusedUrls = async ({
           namespace: namespaces ? namespaces[0] : 'default',
         }))
       );
-      hasMore = savedObjects.length === MAX_PAGE_SIZE;
+      hasMore = savedObjects.length === maxPageSize;
 
       if (hasMore) {
         searchAfter = savedObjects[savedObjects.length - 1].sort;
@@ -116,11 +118,13 @@ export const runDeleteUnusedUrlsTask = async ({
   core,
   urlExpirationDuration,
   pitKeepAlive,
+  maxPageSize,
   logger,
 }: {
   core: CoreSetup;
   urlExpirationDuration: Duration;
   pitKeepAlive: Duration;
+  maxPageSize: number;
   logger: Logger;
 }) => {
   logger.debug('Unused URLs cleanup started');
@@ -135,6 +139,7 @@ export const runDeleteUnusedUrlsTask = async ({
     savedObjectsRepository,
     filter,
     pitKeepAlive: durationToSeconds(pitKeepAlive),
+    maxPageSize,
   });
 
   if (Object.keys(unusedUrlsGroupedByNamespace).length) {
