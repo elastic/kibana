@@ -18,6 +18,14 @@ export const createBookSavedObjectType = (): SavedObjectsType => ({
   getTitle: (obj) => obj.attributes.title,
   hidden: false,
   namespaceType: 'multiple-isolated',
+  management: {
+    visibleInManagement: true,
+    importableAndExportable: true,
+    getTitle(savedObject) {
+      return savedObject.attributes.bookTitleAsArray.join('');
+    },
+    icon: 'article',
+  },
   modelVersions: {
     1: {
       changes: [],

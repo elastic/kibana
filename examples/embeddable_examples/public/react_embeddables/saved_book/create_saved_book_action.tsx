@@ -13,7 +13,7 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext, initializeStateManager } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { CanGetEmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { defaultBookAttributes } from './book_state';
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
@@ -23,7 +23,7 @@ import { BookAttributes, BookSerializedState } from './types';
 export const registerCreateSavedBookAction = (
   uiActions: UiActionsPublicStart,
   core: CoreStart,
-  embeddableStart: CanGetEmbeddableContentManagementDefinition
+  contentManagement: ContentManagementPublicStart
 ) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SAVED_BOOK_ACTION_ID,
@@ -44,7 +44,7 @@ export const registerCreateSavedBookAction = (
         parent: embeddable,
         isCreate: true,
         core,
-        embeddable: embeddableStart,
+        contentManagement,
       });
 
       const bookAttributes = newPanelStateManager.getLatestState();

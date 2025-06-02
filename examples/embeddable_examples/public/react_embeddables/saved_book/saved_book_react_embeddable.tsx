@@ -158,7 +158,7 @@ export const getSavedBookEmbeddableFactory = (
             isCreate: false,
             core,
             api,
-            embeddable,
+            contentManagement,
           }).then((result) => {
             const nextIsByReference = Boolean(result.savedObjectId);
 

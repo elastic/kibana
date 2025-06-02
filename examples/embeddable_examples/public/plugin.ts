@@ -124,7 +124,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerCreateDataTableAction(deps.uiActions);
 
-    registerCreateSavedBookAction(deps.uiActions, core, deps.embeddable);
+    registerCreateSavedBookAction(deps.uiActions, core, deps.contentManagement);
   }
 
   public stop() {}
