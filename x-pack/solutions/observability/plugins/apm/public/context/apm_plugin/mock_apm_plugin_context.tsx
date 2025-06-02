@@ -11,7 +11,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
-import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   createObservabilityRuleTypeRegistryMock,
   enableComparisonByDefault,
@@ -81,7 +80,6 @@ const mockCore = merge({}, coreStart, {
           value: 100000,
         },
         [enableComparisonByDefault]: true,
-        [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
     },
@@ -121,6 +119,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: false,
     ruleFormV2Enabled: false,
   },
