@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import {
@@ -22,6 +22,7 @@ import { omit } from 'lodash';
 import type { BookAttributes, BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
 import {
+  BOOK_CONTENT_ID,
   itemToSavedObject,
   savedObjectToItem,
 } from '../../../common/book/content_management/schema';
@@ -59,6 +60,48 @@ export class SavedBookStorage implements ContentStorage {
   }
 
   private readonly logger: Logger;
+
+  mSearch = {
+    savedObjectType: BOOK_SAVED_OBJECT_TYPE,
+    toItemResult: (ctx: StorageContext, savedObject: SavedObject<unknown>) => {
+      const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+
+      let item;
+
+      try {
+        item = savedObjectToItem(savedObject as SavedObject<SavedBookAttributes>);
+      } catch (error) {
+        this.logger.error(`Error transforming saved book attributes: ${error.message}`);
+        throw Boom.badRequest(`Invalid response. ${error.message}`);
+      }
+
+      const response = {
+        ...item,
+        id: savedObject.id,
+        attributes: {
+          ...item.attributes,
+          name: item.attributes.bookTitle,
+          title: item.attributes.bookTitle,
+        },
+        type: BOOK_CONTENT_ID,
+      };
+
+      const { value, error: resultError } = transforms.mSearch.out.result.down(
+        response,
+        undefined,
+        {
+          validate: false,
+        }
+      );
+
+      if (resultError) {
+        this.logger.error(`Error transforming saved book attributes: ${resultError.message}`);
+        throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+      }
+
+      return value;
+    },
+  };
 
   async get(ctx: StorageContext, id: string) {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);

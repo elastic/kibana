@@ -105,10 +105,10 @@ export const getSavedBookEmbeddableFactory = (
         state,
         defaultBookAttributes as WithAllKeys<BookAttributes>
       );
-
       const isByReference = Boolean(state.savedObjectId);
 
       const serializeBook = (byReference: boolean, newId?: string) => {
+        console.trace();
         if (byReference) {
           // if this book is currently by reference, we serialize the reference only.
           const bookByReferenceState: BookByReferenceSerializedState = {
