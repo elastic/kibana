@@ -6,9 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { FlattenRecord } from '@kbn/streams-schema';
+import { FlattenRecord, Streams } from '@kbn/streams-schema';
 import {
   MessageRole,
   type FromToolSchema,
@@ -19,13 +19,14 @@ import { StreamsClient } from '../../../../lib/streams/client';
 import { simulateProcessing, type SimulationDocReport } from './simulation_handler';
 import { ProcessingSuggestionBody } from './route';
 import { getLogGroups, sortByProbability, getVariedSamples } from './get_log_groups';
+import { convertEcsFieldsToOtel } from './convert_ecs_fields_to_otel';
 
 export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
   pattern: string;
 }
 
 export const handleProcessingSuggestion = async (
-  name: string,
+  streamName: string,
   body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
@@ -33,11 +34,14 @@ export const handleProcessingSuggestion = async (
 ) => {
   const { field, samples } = body;
   const groups = getLogMessageGroups(samples, field).slice(0, 1);
+  const stream = await streamsClient.getStream(streamName);
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
   return await Promise.all(
     groups.map((exampleValues) =>
       processPattern(
         exampleValues,
-        name,
+        streamName,
+        isWiredStream,
         body,
         inferenceClient,
         scopedClusterClient,
@@ -52,6 +56,7 @@ export const handleProcessingSuggestion = async (
 async function processPattern(
   exampleValues: string[],
   streamName: string,
+  isWiredStream: boolean,
   body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
@@ -219,6 +224,7 @@ ${exampleValues.join('\n')}
 
   const firstPass = await suggestAndValidateGrokProcessor({
     streamName,
+    isWiredStream,
     streamsClient,
     scopedClusterClient,
     inferenceClient,
@@ -241,6 +247,7 @@ ${exampleValues.join('\n')}
 
   const secondPass = await suggestAndValidateGrokProcessor({
     streamName,
+    isWiredStream,
     streamsClient,
     scopedClusterClient,
     inferenceClient,
@@ -309,6 +316,9 @@ const ingestPipelineSchema = {
   },
 } as const;
 
+type Mutable<T> = {
+  -readonly [P in keyof T]: Mutable<T[P]>;
+};
 type IngestPipeline = FromToolSchema<typeof ingestPipelineSchema>;
 type UnknownProcessor = IngestPipeline['processors'][number];
 type GrokProcessor = Pick<Required<UnknownProcessor>, 'grok'>;
@@ -356,6 +366,7 @@ function getErrorMessageGroups(errors: string[]) {
 interface SuggestAndValidateGrokProcessorParams
   extends Pick<OutputOptions, 'connectorId' | 'system' | 'previousMessages' | 'input'> {
   streamName: string;
+  isWiredStream: boolean;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
@@ -366,6 +377,7 @@ const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
 async function suggestAndValidateGrokProcessor({
   streamName,
+  isWiredStream,
   streamsClient,
   scopedClusterClient,
   inferenceClient,
@@ -384,10 +396,20 @@ async function suggestAndValidateGrokProcessor({
     schema: ingestPipelineSchema,
   });
 
-  const grokProcessor = chatResponse.output.processors.find(isGrokProcessor);
-  if (!grokProcessor) {
+  const grokProcessorWithEcsFields = chatResponse.output.processors.find(isGrokProcessor);
+  if (!grokProcessorWithEcsFields) {
     throw new Error(
       `Missing Grok processor in '${chatResponse.id}' response by '${connectorId}' connector`
+    );
+  }
+
+  // Convert fields to OpenTelemetry semantic convention
+  const grokProcessor: Mutable<GrokProcessor> = isWiredStream
+    ? cloneDeep(grokProcessorWithEcsFields)
+    : grokProcessorWithEcsFields;
+  if (isWiredStream) {
+    grokProcessor.grok.patterns = grokProcessor.grok.patterns.map((pattern) =>
+      convertEcsFieldsToOtel(pattern)
     );
   }
 
@@ -422,7 +444,7 @@ async function suggestAndValidateGrokProcessor({
 ${JSON.stringify(
   {
     description: chatResponse.output.description,
-    processors: [grokProcessor],
+    processors: [grokProcessorWithEcsFields],
   },
   null,
   2
