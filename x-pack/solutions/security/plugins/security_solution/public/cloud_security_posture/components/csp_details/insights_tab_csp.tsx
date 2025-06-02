@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,6 +82,11 @@ export const InsightsTabCsp = memo(
     };
 
     const [activeInsightsId, setActiveInsightsId] = useState(getDefaultTab());
+    useEffect(() => {
+      if (subTab) {
+        setActiveInsightsId(subTab);
+      }
+    }, [subTab]);
 
     const insightsButtons: EuiButtonGroupOptionProps[] = useMemo(() => {
       const buttons: EuiButtonGroupOptionProps[] = [];
@@ -161,7 +166,7 @@ export const InsightsTabCsp = memo(
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
           <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} />
+          <VulnerabilitiesFindingsDetailsTable value={value} scopeId={scopeId} />
         ) : (
           <AlertsDetailsTable field={field} value={value} />
         )}
