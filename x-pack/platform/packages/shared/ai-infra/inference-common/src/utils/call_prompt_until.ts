@@ -358,7 +358,7 @@ export async function callPromptUntil({
           : {};
 
         const nextToolChoice =
-          isFinalizing || (!canCallAllPlanningTools && !canCallTaskTools) || willReason
+          isFinalizing || (!canCallAllPlanningTools && !canCallTaskTools)
             ? ToolChoiceType.none
             : requireResolution
             ? ToolChoiceType.required

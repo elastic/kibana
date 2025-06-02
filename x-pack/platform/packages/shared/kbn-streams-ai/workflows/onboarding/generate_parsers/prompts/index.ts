@@ -11,49 +11,95 @@ import dedent from 'dedent';
 import systemPromptTemplate from './system_prompt_template.txt';
 import contentPromptTemplate from './content_prompt_template.txt';
 
-export const DescribeFormatPrompt = createPrompt({
-  name: 'describe_format_prompt',
-  description: 'Describe the format of log messages',
-  input: z.object({
-    messages: z.string(),
-    // suggested template
-    suggested_template: z.string(),
-  }),
-})
-  .version({
-    temperature: 0.2,
-    system: `Explain A) what system these log messages are from, B) what (standard?) format
-        it is.
+const getDescribePrompt = (id: string, system: string) =>
+  createPrompt({
+    name: id,
+    description: 'Describe the format of log messages',
+    input: z.object({
+      stream: z.object({
+        name: z.string(),
+        description: z.string(),
+      }),
+      find_structure: z.object({
+        grok_pattern: z.string(),
+        timestamp_formats: z.string(),
+      }),
+      suggested_template: z.object({
+        display: z.string(),
+        grok: z.string(),
+        values: z.string(),
+      }),
+      patterns: z.string(),
+    }),
+  })
+    .version({
+      temperature: 0.2,
+      system: dedent(`Explain A) what system these log messages are from, B) what data is in
+        these log messages, based on the samples.
         
-        A suggested template will be included. The template is a bit of a mix between regexes
-        and grok. it's not a suggestion to use grok. digits have been replaced by 0 if the
-        template part is of fixed length, otherwise you'll see \\d+. variable white-space is
-        indicated by the literal string \\s+, otherwise any space is a single space. Describe
-        the columns that you see, and separately mention possible columns that can be extracted
-        from the details (usually defined as %{GREEDYDATA}). Clearly separate columns that are
-        available in the suggested template and columns that you see in the remaining part of
-        the message.
-        `,
-    template: {
-      mustache: {
-        template: dedent(`
+        An extracted template will be included, with placeholder field names. For each
+        placeholder field name, suggested a descriptive field name, with only 
+        alphanumerical characters and underscores, ie [a-z0-9_]+, e.g. \`log_level\`. For the
+        last GREEDYDATA column use \`message_details\`.
+        
+        Split up your response in "Description" and "Fields" sections.`),
+      template: {
+        mustache: {
+          template: dedent(`
 
-        These are the messages. They're wrapped in backticks, and newline-separated,
-        anything else is part of the message, including any characters at the
-        or the end.
-        
-        This is the suggested template:
-        \`{{{suggested_template}}}\`
-        
-        \`\`\`
-        {{{messages}}}
-        \`\`\`
+        ## Stream
+
+        {{stream.name}}
+
+        Description:
+
+        {{{stream.description}}}
+
+        ## Template
+        - {{{suggested_template.display}}}
+
+        ## Template as a grok pattern:
+        - {{{suggested_template.grok}}}
+
+        ## Example values from template
+        {{{suggested_template.values}}}
+
+        ## Results from _find_structure
+
+        Detected grok pattern:
+        - {{{find_structure.grok_pattern}}}
+
+        Detected timestamp formats:
+        {{{find_structure.timestamp_formats}}}
+
+        ## Messages
+
+        {{{patterns}}}
         
         `),
+        },
       },
-    },
-  })
-  .get();
+    })
+    .get();
+
+export const DescribeFormatGrokPrompt = getDescribePrompt(
+  'describe_format_grok_prompt',
+  dedent(`Based on this information, recommend grok patterns for processing the log messages.
+    
+  Generate one or two simple grok patterns that can be used to parse the main message,
+  and separately suggestions for parsing out message_details. If either the template or
+  results from _find_structure suggest patterns - use those, preferring the most specific
+  ones.
+
+  Swap out enums for their corresponding grok pattern definition, e.g. replace \`(FOO|BAR)\` with
+  \`%{WORD}\`.`)
+);
+
+export const DescribeFormatDissectPrompt = getDescribePrompt(
+  'describe_format_dissect_prompt',
+  dedent(`Based on this information, recommend a _dissect_ pattern, as the template contains
+  simple delimiters without variable whitespace. Use descriptive field names.`)
+);
 
 export const GenerateParsersPrompt = createPrompt({
   name: 'generate_parsers_prompt',

@@ -7,11 +7,12 @@
 
 import Piscina from 'piscina';
 import path from 'path';
-import { ExtractTemplateResult } from './types';
+import type { ExtractTemplateResult } from './types';
 
 const worker = new Piscina({
   filename: path.resolve(__dirname, './worker.js'),
-  maxThreads: 1,
+  maxThreads: 4,
+  minThreads: 1,
   closeTimeout: 250,
   trackUnmanagedFds: true,
   // Terminate workers if they exceed resource limits
@@ -28,7 +29,7 @@ const worker = new Piscina({
  */
 export async function extractTemplate(
   messages: string[],
-  timeout: number = 2500
+  timeout: number = 5000
 ): Promise<ExtractTemplateResult> {
   const controller = new AbortController();
 
@@ -46,13 +47,15 @@ export async function extractTemplate(
       // Force terminate any stuck workers
       if (worker.threads.length > 0) {
         // Attempt to terminate stuck threads
-        worker.threads.forEach((thread) => {
-          try {
-            thread.terminate();
-          } catch (e) {
-            // Ignore termination errors
-          }
-        });
+        await Promise.all(
+          worker.threads.map(async (thread) => {
+            try {
+              await thread.terminate();
+            } catch (e) {
+              // Ignore termination errors
+            }
+          })
+        );
       }
       throw new Error('Template extraction timed out - worker terminated');
     }

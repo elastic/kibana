@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { BRACKET_PAIRS } from './mask_capturing_brackets';
 import { QUOTE_PAIRS } from './mask_quotes';
 
@@ -13,12 +14,12 @@ export const ALL_PAIRS = {
   ...BRACKET_PAIRS,
 };
 
-const allCaptureChars = Object.entries(ALL_PAIRS).flat();
+export const ALL_CAPTURE_CHARS = uniq(Object.entries(ALL_PAIRS).flat());
 
 const allPairEntries = Object.entries(ALL_PAIRS);
 
 export function isCaptureChar(value: string): boolean {
-  return allCaptureChars.includes(value);
+  return ALL_CAPTURE_CHARS.includes(value);
 }
 
 export function splitOnCaptureChars(value: string) {

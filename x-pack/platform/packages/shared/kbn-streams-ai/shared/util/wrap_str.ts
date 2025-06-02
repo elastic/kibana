@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { buildGrokRegexMap } from '../grok/parse_patterns';
-import { PATTERN_OVERRIDES } from './pattern_precedence';
-
-const GROK_REGEX_MAP = buildGrokRegexMap(PATTERN_OVERRIDES);
-
-export { GROK_REGEX_MAP };
+export function wrapStr(str: string | undefined, wrapToken: string, fallback: string = 'none') {
+  return str === undefined ? fallback : `${wrapToken}${str}${wrapToken}`;
+}

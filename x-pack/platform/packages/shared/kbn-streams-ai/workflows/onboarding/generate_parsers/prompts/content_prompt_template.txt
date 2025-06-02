@@ -11,7 +11,10 @@ Input:
 ```
 
 `suggested_template`:
-{{{suggested_template}}}
+- {{{suggested_template.display}}}
+
+As a grok pattern:
+- {{{suggested_template.grok}}}
 
 `format_description`:
 {{{format_description}}}

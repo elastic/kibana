@@ -90,7 +90,7 @@ runRecipe(
 
               log.info(`Generating parsers for ${name}`);
               const nextState = await generateParsers({ context, state: initialState });
-              log.info(inspect(nextState.stream, { depth: null }));
+              // log.info(inspect(nextState.stream, { depth: null }));
 
               if (flags.apply) {
                 await apply(nextState);

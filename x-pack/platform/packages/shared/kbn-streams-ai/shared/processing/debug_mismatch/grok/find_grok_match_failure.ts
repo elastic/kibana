@@ -11,7 +11,7 @@ import {
   PatternMatchTokenLiteral,
   PatternMatchTokenResult,
 } from '../types';
-import { GrokPatternMap, getGrokPatternMap } from '../../grok/parse_patterns';
+import { GrokPatternMap, GrokRegexMap, buildGrokRegexMap } from '../../grok/parse_patterns';
 
 /**
  * Parse a GROK expression into tokens.
@@ -50,7 +50,7 @@ function matchToken(
   token: PatternMatchToken,
   message: string,
   pos: number,
-  dict: GrokPatternMap | undefined,
+  dict: GrokRegexMap,
   lookAhead?: string
 ): { value: string; length: number } | null {
   const slice = message.slice(pos);
@@ -71,7 +71,9 @@ function matchToken(
         if (!rxSource) return null;
 
         // If we have a look‑ahead literal, constrain the match to be followed by it.
-        const cappedSource = lookAhead ? `(?:${rxSource})(?=${lookAhead})` : rxSource;
+        const cappedSource = lookAhead
+          ? `(?:${rxSource.partial.source})(?=${lookAhead})`
+          : rxSource;
         const re = new RegExp('^' + cappedSource);
         const m = slice.match(re);
 
@@ -100,10 +102,7 @@ export function findGrokMatchFailure(
   const results: PatternMatchTokenResult[] = [];
   let pos = 0;
 
-  dict = {
-    ...dict,
-    ...getGrokPatternMap(),
-  };
+  const regexMap = buildGrokRegexMap(dict ?? {});
 
   let matched: string = '';
 
@@ -114,12 +113,19 @@ export function findGrokMatchFailure(
       | PatternMatchTokenLiteral
       | undefined;
 
-    const info = matchToken(token, message, pos, dict, nextLit?.value);
+    const info = matchToken(token, message, pos, regexMap, nextLit?.value);
     if (info) {
       results.push({ ...token, captured: info.value });
       matched += info.value;
       pos += info.length;
     } else {
+      console.log({
+        matchToken,
+        message,
+        pos,
+        regexMap,
+        nextLit,
+      });
       return {
         pattern,
         message,

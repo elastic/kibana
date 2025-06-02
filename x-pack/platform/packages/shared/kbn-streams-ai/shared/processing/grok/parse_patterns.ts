@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { once } from 'lodash';
+
 import patternsFile from './pattern_file.txt';
 
 export type GrokPatternMap = Record<string, string>;
@@ -54,7 +54,7 @@ interface ResolveResult {
  *   • *cycle*    – circular dependencies (A → B → … → A)
  *   • *syntax*   – pattern cannot be compiled by JS RegExp after PCRE → JS
  */
-function buildResolvedPatterns(patterns: GrokPatternMap): ResolveResult {
+export function buildResolvedPatterns(patterns: GrokPatternMap): ResolveResult {
   const resolved = new Map<string, string>();
   const inProgress = new Set<string>();
   const issues: VerificationIssue[] = [];
@@ -124,7 +124,7 @@ function buildResolvedPatterns(patterns: GrokPatternMap): ResolveResult {
  * preventing Kibana from starting with an invalid pattern set.
  */
 
-export const getRawPatternMap = once(() => {
+export function getRawPatternMap() {
   // 1. Parse the raw file into a key → raw-regex map
   const rawMap: GrokPatternMap = {};
   for (const raw of patternsFile.split(/\r?\n/)) {
@@ -134,19 +134,31 @@ export const getRawPatternMap = once(() => {
     rawMap[key] = rest.join(' ');
   }
   return rawMap;
-});
+}
 
-export const getGrokPatternMap = once((): GrokPatternMap => {
-  const rawMap = getRawPatternMap();
-
-  // 2. Resolve nested references and validate
-  const { resolved, issues } = buildResolvedPatterns(rawMap);
-  if (issues.length) {
-    throw new Error(
-      `Encountered ${issues.length} issue(s) while resolving grok patterns:\n` +
-        JSON.stringify(issues, null, 2)
-    );
+export type GrokRegexMap = Record<
+  string,
+  {
+    complete: RegExp;
+    partial: RegExp;
   }
+>;
 
-  return resolved;
-});
+export function buildGrokRegexMap(overrides: Record<string, any>): GrokRegexMap {
+  const map = getRawPatternMap();
+  const { resolved: rawMap } = buildResolvedPatterns({
+    ...map,
+    ...overrides,
+  });
+
+  const compiled: GrokRegexMap = {};
+  Object.keys(rawMap).forEach((key) => {
+    const raw = rawMap[key];
+    compiled[key] = {
+      complete: new RegExp(`^${raw}$`),
+      partial: new RegExp(raw),
+    };
+  });
+
+  return compiled;
+}

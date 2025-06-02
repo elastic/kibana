@@ -6,10 +6,25 @@
  */
 
 import { uniq } from 'lodash';
-import { COLLAPSIBLE_PATTERNS, PATTERN_PRECEDENCE } from './pattern_precedence';
+import { COLLAPSIBLE_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
 import { TemplateRoot } from './types';
 
-function replacementFor(values: string[], enumThreshold: number): string | null {
+function isCollapsibleToken(token: string) {
+  return token === 'NOTSPACE' || token === 'DATA';
+}
+
+function collapse(lhs: string, rhs: string) {
+  if (lhs === rhs && isCollapsibleToken(lhs)) {
+    return '';
+  }
+  return rhs;
+}
+
+function sanitize(value: string) {
+  return value.replaceAll(/[\.\[\]\{\}]/g, '\\$&');
+}
+
+function getDisplayValue(values: string[], enumThreshold: number): string | null {
   if (!values.length) return null;
 
   // helper predicates
@@ -26,7 +41,7 @@ function replacementFor(values: string[], enumThreshold: number): string | null 
   }
 
   if (!alpha && !numeric && !whitespace && !alnum) {
-    return distinct.length === 1 ? `(${distinct[0]}` : null;
+    return distinct.length === 1 ? distinct[0] : null;
   }
 
   const lengths = Array.from(new Set(values.map((v) => v.length)));
@@ -37,7 +52,7 @@ function replacementFor(values: string[], enumThreshold: number): string | null 
   const len = usefulLength ? `{${uniq([minLength, maxLength]).join(',')}}` : '+';
 
   if (numeric) {
-    return fixedLen ? '0'.repeat(minLength) : len ? `(\\d${len})` : '%{INT}';
+    return fixedLen ? '0'.repeat(minLength) : len ? `(\\d${len})` : '<INT>';
   }
 
   if (whitespace) {
@@ -45,11 +60,11 @@ function replacementFor(values: string[], enumThreshold: number): string | null 
   }
 
   if (distinct.length <= enumThreshold) {
-    return `(${distinct.join('|')})`;
+    return distinct.length === 1 ? distinct[0] : `(${distinct.join('|')})`;
   }
 
   if (alpha || alnum) {
-    return fixedLen ? 'a'.repeat(minLength) : '%{WORD}';
+    return fixedLen ? 'a'.repeat(minLength) : '<WORD>';
   }
 
   return null; // give up → keep original placeholder
@@ -68,22 +83,33 @@ export function formatRoot(
   }>,
   delimiter: string
 ): TemplateRoot {
+  let counter: number = 0;
+  function uniqueId() {
+    return String(counter++);
+  }
+
   const columns = roots.map((column) => {
     const tokens = column.tokens.map(({ values, patterns }) => {
-      const uniqueValues = uniq(values);
-      // Collect all values from the token row
-      const patternIndex = patterns[0];
+      // const uniqueValues = uniq(values);
+      // // Collect all values from the token row
+      // const patternIndex = patterns[0];
 
-      const pattern = patternIndex !== undefined ? PATTERN_PRECEDENCE[patternIndex] : undefined;
+      // const pattern = patternIndex !== undefined ? PATTERN_PRECEDENCE[patternIndex] : undefined;
 
-      const patternDisplay = pattern !== undefined ? `%{${pattern}}` : values[0];
+      // const patternDisplay = pattern !== undefined ? `%{${pattern}}` : values[0];
 
-      const shouldReplacePattern =
-        patternIndex === undefined || patternIndex > PATTERN_PRECEDENCE.indexOf('MONTH');
+      // const shouldReplacePattern =
+      //   patternIndex === undefined || patternIndex > PATTERN_PRECEDENCE.indexOf('INT');
+
+      // return {
+      //   pattern: patternDisplay || values[0],
+      //   value: (shouldReplacePattern && replacementFor(uniqueValues, 5)) || patternDisplay,
+      // };
 
       return {
-        pattern: patternDisplay || values[0],
-        value: (shouldReplacePattern && replacementFor(uniqueValues, 5)) || patternDisplay,
+        id: uniqueId(),
+        pattern: PATTERN_PRECEDENCE[patterns[0]],
+        values,
       };
     });
 
@@ -93,38 +119,100 @@ export function formatRoot(
     };
   });
 
-  const collapsiblePatterns = COLLAPSIBLE_PATTERNS.map((pattern) => `%{${pattern}}`);
-
   const usefulColumns = columns.slice(
     0,
     Math.min(
       8,
       columns.findLastIndex((col) => {
-        return col.tokens.some((token) => collapsiblePatterns.indexOf(token.pattern) === -1);
+        return col.tokens.some(
+          (token) => token.pattern && COLLAPSIBLE_PATTERNS.indexOf(token.pattern) === -1
+        );
       }) + 1
     )
   );
 
   if (usefulColumns.length < columns.length) {
     usefulColumns.push({
-      tokens: [{ pattern: '%{GREEDYDATA}', value: '%{GREEDYDATA}' }],
+      tokens: [{ pattern: 'GREEDYDATA', values: [], id: uniqueId() }],
       whitespace: { leading: 0, trailing: 0 },
     });
   }
 
+  function getDisplayedTokens(tokens: Array<{ id: string; pattern: string; values: string[] }>) {
+    const next: Array<{ id: string; pattern: string; values: string[] }> = [];
+
+    tokens.forEach((token, idx) => {
+      if (
+        tokens[idx - 1] &&
+        isCollapsibleToken(tokens[idx - 1].pattern) &&
+        isCollapsibleToken(token.pattern)
+      ) {
+        next[next.length - 1].values = next[next.length - 1].values.map((val, index) => {
+          return val + token.values[index];
+        });
+        return;
+      }
+      next.push(token);
+    });
+
+    return next;
+  }
+
+  function formatColumns(
+    displayToken: (token: { id: string; pattern: string; values: string[] }) => string
+  ) {
+    return usefulColumns.reduce((acc, { tokens, whitespace }) => {
+      return (
+        (acc ? acc + (delimiter === '\\s' ? ' ' : delimiter) : '') +
+        ' '.repeat(whitespace.leading) +
+        getDisplayedTokens(tokens)
+          .map((token) => displayToken(token))
+          .join('') +
+        ' '.repeat(whitespace.trailing)
+      );
+    }, '');
+  }
+
+  function sanitizeWhitespace(str: string) {
+    return str.replaceAll(/[\s]{2,}/g, '\\s+').replaceAll(/\s/g, '\\s');
+  }
+
+  const displayedTokens = usefulColumns
+    .flatMap((col) => getDisplayedTokens(col.tokens))
+    .filter((token) => !TOKEN_SPLIT_CHARS.includes(token.pattern));
+
+  const fieldValueExamples = Object.fromEntries(
+    displayedTokens.map((token) => {
+      return [`field_${token.id}`, token.values];
+    })
+  );
+
+  const grok = sanitizeWhitespace(
+    formatColumns((token) => {
+      return !TOKEN_SPLIT_CHARS.includes(token.pattern)
+        ? `%{${token.pattern}:field_${token.id}}`
+        : sanitize(token.pattern);
+    })
+  );
+
   return {
     columns,
-    formatted: usefulColumns
-      .reduce((prev, { tokens, whitespace }, idx) => {
-        return (
-          (prev ? prev + (delimiter === '\\s' ? ' ' : delimiter) : '') +
-          ' '.repeat(whitespace.leading) +
-          tokens.map((token) => token.value).join('') +
-          ' '.repeat(whitespace.trailing)
-        );
-      }, '')
-      .replaceAll(/[\s]{2,}/g, '\\s+')
-      .replaceAll(/\s/g, '\\s'),
     delimiter,
+    values: fieldValueExamples,
+    formatted: {
+      display: sanitizeWhitespace(
+        formatColumns(({ values, pattern }) => {
+          const uniqueValues = uniq(values);
+
+          const displayValue = getDisplayValue(uniqueValues, 5);
+
+          if (displayValue) {
+            return `${displayValue}`;
+          }
+          return `<${pattern}>`;
+        })
+      ),
+      grok,
+    },
   };
 }

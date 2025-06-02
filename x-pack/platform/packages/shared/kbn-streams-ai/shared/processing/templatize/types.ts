@@ -30,10 +30,14 @@ export interface TemplateRoot {
   columns: Array<{
     tokens: Array<{
       pattern: string;
-      value: string;
+      values: string[];
     }>;
   }>;
-  formatted: string;
+  values: Record<string, string[]>;
+  formatted: {
+    display: string;
+    grok: string;
+  };
 }
 
 /** Final API return type */
