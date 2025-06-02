@@ -50,7 +50,9 @@ const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_RULES_TO_BULK_EDIT = 2000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
-const validateBulkAction = (body: PerformRulesBulkActionRequestBody) => {
+type ValidationError = { body: string; statusCode: number };
+
+const validateBulkAction = (body: PerformRulesBulkActionRequestBody): ValidationError | undefined  => {
   if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
     return {
       body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
@@ -83,6 +85,8 @@ const validateBulkAction = (body: PerformRulesBulkActionRequestBody) => {
       statusCode: 400,
     };
   }
+
+  return undefined;
 };
 
 export const performBulkActionRoute = (
