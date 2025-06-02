@@ -24,6 +24,7 @@ SRCS = glob(
 BUNDLER_DEPS = [
   "@npm//react",
   "@npm//tslib",
+  "@npm//@elastic/apm-rum",
 ]
 
 js_library(
