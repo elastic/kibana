@@ -11,7 +11,9 @@ import {
   isDenied,
   getIsDataAnonymizable,
   replaceAnonymizedValuesWithOriginalValues,
+  replaceOriginalValuesWithUuidValues,
 } from '.';
+import type { Replacements } from '../../schemas';
 
 const anonymizationFields = [
   { id: 'fieldName1', field: 'fieldName1', allowed: true, anonymized: false },
@@ -156,6 +158,82 @@ describe('helpers', () => {
       expect(result).toEqual(
         'User {{ user.name not-an-administrator }} added a member to the Administrators group on host {{ host.name domain-controller }}, which is unusual because {{ user.name not-an-administrator }} is not a member of the Administrators group.'
       );
+    });
+  });
+
+  describe('replaceOriginalValuesWithUuidValues', () => {
+    it('replaces all occurrences of a value with its uuid', () => {
+      const messageContent = 'foo bar foo';
+      const replacements = { 'uuid-1': 'foo', 'uuid-2': 'bar' };
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('uuid-1 uuid-2 uuid-1');
+    });
+
+    it('does not replace if replacements is null', () => {
+      const messageContent = 'foo bar';
+
+      const result = replaceOriginalValuesWithUuidValues({
+        messageContent,
+        replacements: null as unknown as Replacements,
+      });
+      expect(result).toBe('foo bar');
+    });
+
+    it('does not replace if replacements is empty', () => {
+      const messageContent = 'foo bar';
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements: {} });
+      expect(result).toBe('foo bar');
+    });
+
+    it('handles overlapping values (substring)', () => {
+      const messageContent = 'foobar foo';
+      const replacements = { 'uuid-1': 'foo', 'uuid-2': 'foobar' };
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('uuid-2 uuid-1');
+    });
+
+    it('does not replace empty string values', () => {
+      const messageContent = 'foo bar';
+      const replacements = { 'uuid-1': '' };
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('foo bar');
+    });
+
+    it('handles values that are regex special characters', () => {
+      const messageContent = 'foo.*+?^${}()|[]\\bar';
+      const replacements = { 'uuid-1': 'foo.*+?^${}()|[]\\bar' };
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('uuid-1');
+    });
+
+    it('does not replace if value is not found in messageContent', () => {
+      const messageContent = 'hello world';
+      const replacements = { 'uuid-1': 'notfound' };
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('hello world');
+    });
+
+    it('handles multiple replacements with same value', () => {
+      const messageContent = 'foo foo';
+      const replacements = { 'uuid-1': 'foo', 'uuid-2': 'foo' };
+      // Only the first key will be used for all replacements
+      const result = replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      expect(result).toBe('uuid-1 uuid-1');
+    });
+
+    it('does not overflow and throw an exception if UUID contains another replacements value', () => {
+      const messageContent = '1111111111111111';
+      const replacements = {
+        '22222222-2222-2222-2222-222222222222': '1',
+        '33333333-3333-3333-3333-333333333333': '2',
+        '44444444-4444-4444-4444-444444444444': '3',
+        '55555555-5555-5555-5555-555555555555': '4',
+        '66666666-6666-6666-6666-666666666666': '5',
+      };
+
+      expect(() => {
+        replaceOriginalValuesWithUuidValues({ messageContent, replacements });
+      }).not.toThrow();
     });
   });
 });
