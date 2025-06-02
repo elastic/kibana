@@ -32,7 +32,7 @@ export const getDefaultRiskEngineConfiguration = ({
   range: { start: 'now-30d', end: 'now' },
   _meta: {
     // Upgrade this property when changing mappings
-    mappingsVersion: 5,
+    mappingsVersion: 4,
   },
 });
 

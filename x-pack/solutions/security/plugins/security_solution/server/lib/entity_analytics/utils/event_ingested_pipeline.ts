@@ -45,7 +45,7 @@ export const createEventIngestedPipeline = async (
   }
 };
 
-const getEventIngestedPipeline = async (
+const hasEventIngestedPipeline = async (
   esClient: ElasticsearchClient,
   namespace: string
 ): Promise<boolean> => {
@@ -124,7 +124,7 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   const uniqueNamespaces = new Set([...assetCriticalitySpaces, ...riskEngineSpaces]);
 
   for (const namespace of uniqueNamespaces) {
-    const pipelineExists = await getEventIngestedPipeline(esClient, namespace);
+    const pipelineExists = await hasEventIngestedPipeline(esClient, namespace);
     if (!pipelineExists) {
       logger.info(`Creating event.ingested ingest pipeline for namespace: ${namespace}`);
       await createEventIngestedPipeline(esClient, namespace);
