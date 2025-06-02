@@ -10,6 +10,7 @@
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
@@ -28,19 +29,34 @@ module.exports = {
     filename: 'index.js',
   },
   devtool: 'source-map',
-  externals: {
-    '@elastic/eui': 'commonjs @elastic/eui',
-    '@emotion/css': 'commonjs @emotion/css',
-    '@emotion/react': 'commonjs @emotion/react',
-    classnames: 'commonjs classnames',
-    react: 'commonjs react',
-    '@kbn/i18n': 'commonjs @kbn/i18n',
-    "monaco-editor": 'commonjs monaco-editor',
-    "moment": 'commonjs moment',
-    "moment-duration-format": 'commonjs moment-duration-format',
-    "moment-timezone": 'commonjs moment-timezone',
-    "@elastic/datemath": 'commonjs @elastic/datemath',
-  },
+  externals: [
+    {
+      '@elastic/eui': 'commonjs @elastic/eui',
+      '@emotion/css': 'commonjs @emotion/css',
+      '@emotion/react': 'commonjs @emotion/react',
+      classnames: 'commonjs classnames',
+      react: 'commonjs react',
+      "lodash": 'commonjs lodash',
+      "react-dom": 'commonjs react-dom',
+      "react-markdown": "commonjs react-markdown",
+      "monaco-editor": 'commonjs monaco-editor',
+      "moment": 'commonjs moment',
+      "rxjs": "commonjs rxjs",
+      "moment-duration-format": 'commonjs moment-duration-format',
+      "moment-timezone": 'commonjs moment-timezone',
+      "@elastic/datemath": 'commonjs @elastic/datemath',
+    },
+    // Handle monaco and react-dom internal imports
+    function(context, request, callback) {
+      if (/^monaco-editor\/esm\/vs\//.test(request)) {
+        return callback(null, 'commonjs ' + request);
+      }
+      if (/^react-dom\//.test(request)) {
+        return callback(null, 'commonjs ' + request);
+      }
+      callback();
+    }
+  ],
   module: {
     rules: [
       {
@@ -188,5 +204,5 @@ module.exports = {
     noEmitOnErrors: true,
   },
 
-  plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin()],
+  plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin(), new BundleAnalyzerPlugin()],
 };
