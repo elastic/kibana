@@ -48,7 +48,6 @@ export async function createAgentAction(
   esClient: ElasticsearchClient,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
-  console.log('the action is', newAgentAction);
   const actionId = newAgentAction.id ?? uuidv4();
   const now = Date.now();
   const timestamp = new Date(now).toISOString();
