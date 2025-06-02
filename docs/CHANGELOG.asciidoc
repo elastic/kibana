@@ -134,6 +134,7 @@ The 8.18.1 release includes the following known issues, enhancements and fixes.
 [[known-issues-8.18.1]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
 
@@ -175,6 +176,19 @@ Review the following information about the {kib} 8.18.0 release.
 [float]
 [[known-issues-8.18.0]]
 === Known issues
+
+// tag::known-issue-320[]
+.Errors in rule executions occur when maintenance windows have filters.
+[%collapsible]
+====
+*Details* +
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+
+*Workaround* +
+Remove any filters added to the active maintenance window.
+
+====
+// end::known-issue-320[]
 
 // tag::known-issue-1508[]
 .Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function.
