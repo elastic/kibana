@@ -323,13 +323,13 @@ describe('DefaultAlertService', () => {
             alertTypeId,
           };
           if (alertTypeId === 'xpack.synthetics.alerts.monitorStatus') {
-            if (monitorStatusRule.find((rule) => rule.id === id)) {
+            if (monitorStatusRule.find((rule) => (rule as { id: string }).id === id)) {
               throw new Error('document already exists');
             }
             monitorStatusRule.push(createdRule);
           }
           if (alertTypeId === 'xpack.synthetics.alerts.tls') {
-            if (tlsRule.find((rule) => rule.id === id)) {
+            if (tlsRule.find((rule) => (rule as { id: string }).id === id)) {
               throw new Error('document already exists');
             }
             tlsRule.push(createdRule);
@@ -437,11 +437,7 @@ describe('DefaultAlertService', () => {
         );
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
         await expect(
-          service.createDefaultRuleIfNotExist(
-            'xpack.synthetics.alerts.monitorStatus',
-            'name',
-            '1m'
-          )
+          service.createDefaultRuleIfNotExist('xpack.synthetics.alerts.monitorStatus', 'name', '1m')
         ).rejects.toThrow('some error');
         expect(error).toHaveBeenCalled();
       });

@@ -21,7 +21,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import { DefaultRuleType } from '../../../common/types/default_alerts';
+import { DefaultRuleType, SyntheticsDefaultRule } from '../../../common/types/default_alerts';
 
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
@@ -99,7 +99,7 @@ export class DefaultAlertService {
     );
   }
 
-  async getExistingAlert(ruleType: DefaultRuleType) {
+  async getExistingAlert(ruleType: DefaultRuleType): Promise<SyntheticsDefaultRule | undefined> {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const { data } = await rulesClient.find({
@@ -117,7 +117,11 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+  async createDefaultRuleIfNotExist(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string
+  ): Promise<SyntheticsDefaultRule | undefined> {
     // short circuit if the rule already exists
     let defaultRule = await this.getExistingAlert(ruleType);
     if (defaultRule) {
@@ -133,7 +137,7 @@ export class DefaultAlertService {
         actions: actionsFromRules = [],
         systemActions = [],
         ...newAlert
-      } = await rulesClient.create<{}>({
+      } = await rulesClient.create({
         data: {
           actions,
           params: {},
@@ -239,7 +243,7 @@ export class DefaultAlertService {
       };
     }
 
-    return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
+    return this.createDefaultRuleIfNotExist(ruleType, name, interval);
   }
 
   async getRuleActions(ruleType: DefaultRuleType) {

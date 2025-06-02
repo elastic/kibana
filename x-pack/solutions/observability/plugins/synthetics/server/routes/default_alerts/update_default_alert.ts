@@ -15,12 +15,7 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({
-    request,
-    context,
-    server,
-    savedObjectsClient,
-  }): Promise<DEFAULT_ALERT_RESPONSE> => {
+  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
       await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
