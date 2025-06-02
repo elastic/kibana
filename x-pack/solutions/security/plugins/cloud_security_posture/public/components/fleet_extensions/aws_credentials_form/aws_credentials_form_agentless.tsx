@@ -312,6 +312,15 @@ export const AwsCredentialsFormAgentless = ({
 
   const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
   const fields = getInputVarsFields(input, group.fields);
+
+  const disabledFields =
+    !!isEditPage &&
+    awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
+    showCloudConnectors;
+
+  const showCloudFormationAccordion =
+    isCloudFormationSupported && showCloudCredentialsButton && !disabledFields;
+
   return (
     <>
       <AWSSetupInfoContent
@@ -343,7 +352,7 @@ export const AwsCredentialsFormAgentless = ({
             ? getAwsCloudConnectorsFormAgentlessOptions()
             : getAwsCredentialsFormAgentlessOptions()
         }
-        disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS}
+        disabled={disabledFields}
         onChange={(optionId) => {
           updatePolicy(
             getPosturePolicy(
@@ -371,7 +380,7 @@ export const AwsCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {showCloudCredentialsButton && isCloudFormationSupported && (
+      {showCloudFormationAccordion && (
         <>
           <EuiSpacer size="m" />
           <EuiAccordion
@@ -404,6 +413,7 @@ export const AwsCredentialsFormAgentless = ({
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}
+        disabled={disabledFields}
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
