@@ -43,6 +43,13 @@ export interface FeatureTypeUsage {
   response_actions: ResponseActionsUsage;
 }
 
+export interface UpgradeableRulesSummary {
+  total: number;
+  customized: number;
+  enabled: number;
+  disabled: number;
+}
+
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
   query_custom: FeatureTypeUsage;
@@ -71,6 +78,7 @@ export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  detection_rule_upgrade_status: UpgradeableRulesSummary;
   spaces_usage: SpacesUsage;
 }
 
@@ -81,6 +89,7 @@ export interface RuleMetric {
   rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
+  is_customized: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;

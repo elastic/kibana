@@ -13,6 +13,7 @@ interface StubRuleOptions {
   ruleType: string;
   enabled: boolean;
   elasticRule: boolean;
+  isCustomized: boolean;
   alertCount: number;
   caseCount: number;
   hasLegacyNotification: boolean;
@@ -32,6 +33,7 @@ const createStubRule = ({
   ruleType,
   enabled,
   elasticRule,
+  isCustomized,
   alertCount,
   caseCount,
   hasLegacyNotification,
@@ -52,6 +54,7 @@ const createStubRule = ({
   rule_version: 1,
   enabled,
   elastic_rule: elasticRule,
+  is_customized: isCustomized,
   created_on: '2022-01-06T20:02:45.306Z',
   updated_on: '2022-01-06T20:02:45.306Z',
   alert_count_daily: alertCount,
@@ -72,11 +75,83 @@ const createStubRule = ({
 
 describe('Detections Usage and Metrics', () => {
   describe('Update metrics with rule information', () => {
-    it('Should update elastic and eql rule metric total', async () => {
+    it('Should update elastic_total and eql rule metric total', async () => {
       const stubRule = createStubRule({
         ruleType: 'eql',
         enabled: true,
         elasticRule: true,
+        isCustomized: false,
+        alertCount: 1,
+        caseCount: 1,
+        hasLegacyNotification: false,
+        hasNotification: false,
+        hasLegacyInvestigationField: false,
+        hasAlertSuppressionMissingFieldsStrategyDoNotSuppress: false,
+        hasAlertSuppressionPerRuleExecution: true,
+        hasAlertSuppressionPerTimePeriod: false,
+        alertSuppressionFieldsCount: 3,
+      });
+      const usage = updateRuleUsage(stubRule, getInitialRulesUsage());
+
+      expect(usage).toEqual<RulesTypeUsage>({
+        ...getInitialRulesUsage(),
+        elastic_total: {
+          alerts: 1,
+          cases: 1,
+          disabled: 0,
+          enabled: 1,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 1,
+            suppressed_fields_count: {
+              one: 0,
+              three: 1,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 1,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 1,
+          },
+        },
+        eql: {
+          alerts: 1,
+          cases: 1,
+          disabled: 0,
+          enabled: 1,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 1,
+            suppressed_fields_count: {
+              one: 0,
+              three: 1,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 1,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 1,
+          },
+        },
+      });
+    });
+
+    it('Should update elastic_total, and eql rule metric total', async () => {
+      const stubRule = createStubRule({
+        ruleType: 'eql',
+        enabled: true,
+        elasticRule: true,
+        isCustomized: true,
         alertCount: 1,
         caseCount: 1,
         hasLegacyNotification: false,
@@ -165,10 +240,26 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('Should update based on multiple metrics', async () => {
-      const stubEqlRule = createStubRule({
+      const stubEqlRuleOne = createStubRule({
         ruleType: 'eql',
         enabled: true,
         elasticRule: true,
+        isCustomized: false,
+        alertCount: 1,
+        caseCount: 1,
+        hasLegacyNotification: false,
+        hasNotification: false,
+        hasLegacyInvestigationField: false,
+        hasAlertSuppressionMissingFieldsStrategyDoNotSuppress: true,
+        hasAlertSuppressionPerRuleExecution: false,
+        hasAlertSuppressionPerTimePeriod: false,
+        alertSuppressionFieldsCount: 0,
+      });
+      const stubEqlRuleTwo = createStubRule({
+        ruleType: 'eql',
+        enabled: true,
+        elasticRule: true,
+        isCustomized: true,
         alertCount: 1,
         caseCount: 1,
         hasLegacyNotification: false,
@@ -187,6 +278,7 @@ describe('Detections Usage and Metrics', () => {
         ruleType: 'query',
         enabled: true,
         elasticRule: true,
+        isCustomized: false,
         alertCount: 5,
         caseCount: 2,
         hasLegacyNotification: false,
@@ -205,6 +297,7 @@ describe('Detections Usage and Metrics', () => {
         ruleType: 'query',
         enabled: true,
         elasticRule: false,
+        isCustomized: false,
         alertCount: 5,
         caseCount: 2,
         hasLegacyNotification: false,
@@ -223,6 +316,7 @@ describe('Detections Usage and Metrics', () => {
         ruleType: 'machine_learning',
         enabled: false,
         elasticRule: false,
+        isCustomized: false,
         alertCount: 0,
         caseCount: 10,
         hasLegacyNotification: false,
@@ -241,6 +335,7 @@ describe('Detections Usage and Metrics', () => {
         ruleType: 'machine_learning',
         enabled: true,
         elasticRule: true,
+        isCustomized: false,
         alertCount: 22,
         caseCount: 44,
         hasLegacyNotification: false,
@@ -255,12 +350,29 @@ describe('Detections Usage and Metrics', () => {
         hasResponseActionsEndpoint: false,
         hasResponseActionsOsquery: false,
       });
+      const stubNewTermsOne = createStubRule({
+        ruleType: 'new_terms',
+        enabled: false,
+        elasticRule: true,
+        isCustomized: true,
+        alertCount: 1,
+        caseCount: 1,
+        hasLegacyNotification: false,
+        hasNotification: false,
+        hasLegacyInvestigationField: false,
+        hasAlertSuppressionMissingFieldsStrategyDoNotSuppress: true,
+        hasAlertSuppressionPerRuleExecution: false,
+        hasAlertSuppressionPerTimePeriod: false,
+        alertSuppressionFieldsCount: 0,
+      });
 
-      let usage = updateRuleUsage(stubEqlRule, getInitialRulesUsage());
+      let usage = updateRuleUsage(stubEqlRuleOne, getInitialRulesUsage());
+      usage = updateRuleUsage(stubEqlRuleTwo, usage);
       usage = updateRuleUsage(stubQueryRuleOne, usage);
       usage = updateRuleUsage(stubQueryRuleTwo, usage);
       usage = updateRuleUsage(stubMachineLearningOne, usage);
       usage = updateRuleUsage(stubMachineLearningTwo, usage);
+      usage = updateRuleUsage(stubNewTermsOne, usage);
 
       expect(usage).toEqual<RulesTypeUsage>({
         ...getInitialRulesUsage(),
@@ -298,10 +410,10 @@ describe('Detections Usage and Metrics', () => {
           },
         },
         elastic_total: {
-          alerts: 28,
-          cases: 47,
-          disabled: 0,
-          enabled: 3,
+          alerts: 30,
+          cases: 49,
+          disabled: 1,
+          enabled: 4,
           legacy_notifications_enabled: 0,
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
@@ -331,10 +443,10 @@ describe('Detections Usage and Metrics', () => {
           },
         },
         eql: {
-          alerts: 1,
-          cases: 1,
+          alerts: 2,
+          cases: 2,
           disabled: 0,
-          enabled: 1,
+          enabled: 2,
           legacy_notifications_enabled: 0,
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
@@ -495,6 +607,30 @@ describe('Detections Usage and Metrics', () => {
           },
           has_exceptions: 1,
         },
+        new_terms: {
+          alerts: 1,
+          cases: 1,
+          disabled: 1,
+          enabled: 0,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 0,
+            suppressed_fields_count: {
+              one: 0,
+              three: 0,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 0,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 0,
+          },
+        },
       });
     });
 
@@ -575,6 +711,7 @@ describe('Detections Usage and Metrics', () => {
             ruleType,
             enabled,
             elasticRule: false,
+            isCustomized: false,
             hasLegacyNotification,
             hasNotification,
             alertCount: 0,
@@ -607,6 +744,7 @@ describe('Detections Usage and Metrics', () => {
             ruleType,
             enabled,
             elasticRule: false,
+            isCustomized: false,
             hasLegacyNotification,
             hasNotification,
             alertCount: 0,
