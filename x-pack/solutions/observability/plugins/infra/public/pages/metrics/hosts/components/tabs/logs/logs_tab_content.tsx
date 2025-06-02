@@ -6,20 +6,15 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
-import { InfraLoadingPanel } from '../../../../../../components/loading';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
-import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { LogsLinkToStream } from './logs_link_to_stream';
-import { LogsSearchBar } from './logs_search_bar';
 
 export const LogsTabContent = () => {
   const {
@@ -28,91 +23,70 @@ export const LogsTabContent = () => {
     },
   } = useKibanaContextForPlugin();
   const isLogsOverviewEnabled = LogsOverview.useIsEnabled();
-  if (isLogsOverviewEnabled) {
-    return <LogsTabLogsOverviewContent />;
-  } else {
-    return <LogsTabLogStreamContent />;
-  }
+  return isLogsOverviewEnabled ? <LogsTabLogsOverviewContent /> : <LogsSavedSearchComponent />;
 };
 
-export const LogsTabLogStreamContent = () => {
-  const [filterQuery] = useLogsSearchUrlState();
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
+export const LogsSavedSearchComponent = () => {
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+  const {
+    parsedDateRange: { from, to },
+  } = useUnifiedSearchContext();
+
   const { hostNodes, loading } = useHostsViewContext();
 
   const hostsFilterQuery = useMemo(
-    () =>
-      buildCombinedAssetFilter({
-        field: 'host.name',
-        values: hostNodes.map((p) => p.name),
-      }),
+    () => ({
+      query: hostNodes.map((node) => `host.name: "${node.name}"`).join(' or '),
+      language: 'kuery',
+    }),
     [hostNodes]
   );
 
-  const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
-    id: 'hosts-logs-view',
-    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.LogsByHostWidgetName', {
-      defaultMessage: 'Logs by host',
-    }),
-    extraFields: ['host.name'],
-  });
-
-  const logsLinkToStreamQuery = useMemo(() => {
-    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
-
-    if (filterQuery.query && hostsFilterQueryParam) {
-      return `${filterQuery.query} and ${hostsFilterQueryParam}`;
-    }
-
-    return filterQuery.query || hostsFilterQueryParam;
-  }, [filterQuery.query, hostNodes]);
-
-  if (loading || logViewLoading || !logView) {
-    return <LogsTabLoadingContent />;
+  if (!hostNodes.length && !loading) {
+    return <LogsTabNoResults />;
   }
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <LogsSearchBar />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LogsLinkToStream
-            startTime={from}
-            endTime={to}
-            query={logsLinkToStreamQuery}
-            logView={logView}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexItem>
-        <LogStream
-          height={500}
-          logView={logView}
-          startTimestamp={from}
-          endTimestamp={to}
-          filters={[hostsFilterQuery]}
-          query={filterQuery}
-          showFlyoutAction
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return logSources.value ? (
+    <LazySavedSearchComponent
+      dependencies={{ embeddable, searchSource, dataViews }}
+      index={logSources.value}
+      timeRange={{ from, to }}
+      query={hostsFilterQuery}
+      height={'60vh'}
+      displayOptions={{
+        solutionNavIdOverride: 'oblt',
+        enableDocumentViewer: true,
+        enableFilters: false,
+      }}
+    />
+  ) : null;
 };
 
-const createHostsFilterQueryParam = (hostNodes: string[]): string => {
-  if (!hostNodes.length) {
-    return '';
-  }
-
-  const joinedHosts = hostNodes.join(' or ');
-  const hostsQueryParam = `host.name:(${joinedHosts})`;
-
-  return hostsQueryParam;
-};
+const LogsTabNoResults = () => (
+  <EuiFlexGroup css={{ height: '60vh' }} direction="column" alignItems="stretch">
+    <EuiFlexItem grow>
+      <EuiText size="xs" color="subdued">
+        <EuiIcon type="discoverApp" size="m" color="subdued" />
+        <EuiSpacer size="s" />
+        <FormattedMessage id="xpack.infra.logs.noResultsFound" defaultMessage="No results found" />
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const LogsTabLogsOverviewContent = () => {
   const {
@@ -146,20 +120,3 @@ const LogsTabLogsOverviewContent = () => {
     return <LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
   }
 };
-
-const LogsTabLoadingContent = () => (
-  <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
-    <EuiFlexItem grow>
-      <InfraLoadingPanel
-        width="100%"
-        height="100%"
-        text={
-          <FormattedMessage
-            id="xpack.infra.hostsViewPage.tabs.logs.loadingEntriesLabel"
-            defaultMessage="Loading entries"
-          />
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
