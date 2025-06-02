@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
+
+const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
 
 describe('extractDashboardState', () => {
   test('should extract all DashboardState fields', () => {
@@ -25,30 +28,12 @@ describe('extractDashboardState', () => {
     };
     expect(
       extractDashboardState({
-        ...DEFAULT_DASHBOARD_STATE,
+        ...DASHBOARD_STATE,
         ...optionalState,
-        // panels stored as array in URL
-        panels: [
-          {
-            gridData: {},
-            panelConfig: {},
-            panelIndex: '9a545750-c833-496e-999f-59aff71c17e7',
-            type: 'testEmbeddable',
-          },
-        ],
       })
     ).toEqual({
-      ...DEFAULT_DASHBOARD_STATE,
+      ...DASHBOARD_STATE,
       ...optionalState,
-      panels: {
-        ['9a545750-c833-496e-999f-59aff71c17e7']: {
-          gridData: {},
-          explicitInput: {},
-          panelRefName: undefined,
-          type: 'testEmbeddable',
-          version: undefined,
-        },
-      },
     });
   });
 });
