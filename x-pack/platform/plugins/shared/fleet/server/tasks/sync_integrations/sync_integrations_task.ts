@@ -19,7 +19,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { outputService } from '../../services';
+import { appContextService, outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
