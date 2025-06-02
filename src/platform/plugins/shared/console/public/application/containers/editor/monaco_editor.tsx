@@ -179,6 +179,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             };
           });
         }
+        return [];
       },
     };
     return callbacks;

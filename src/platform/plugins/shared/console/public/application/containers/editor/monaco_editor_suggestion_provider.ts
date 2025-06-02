@@ -40,7 +40,7 @@ export const getSuggestionProvider = (
           esqlCallbacks
         );
         return {
-          suggestions: getEsqlCompletionItems(model, position, esqlSuggestions),
+          suggestions: getEsqlCompletionItems(fullText, position, esqlSuggestions),
         };
       } else if (actionsProvider.current) {
         return actionsProvider.current?.provideCompletionItems(model, position, context);

@@ -298,16 +298,10 @@ export const getBodyCompletionItems = async (
  * This function returns an array of completion items for the esql suggestions
  */
 export const getEsqlCompletionItems = (
-  model: monaco.editor.ITextModel,
+  fullText: string,
   position: monaco.Position,
   suggestions: SuggestionRawDefinition[]
 ): monaco.languages.CompletionItem[] => {
-  const range = {
-    startLineNumber: position.lineNumber,
-    startColumn: position.column,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column,
-  };
   return suggestions.map(
     ({
       label,
@@ -336,7 +330,12 @@ export const getEsqlCompletionItems = (
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
+        range: (rangeToReplace && offsetRangeToMonacoRange(fullText, rangeToReplace)) || {
+          startLineNumber: position.lineNumber,
+          startColumn: position.column,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        },
       };
     }
   );
