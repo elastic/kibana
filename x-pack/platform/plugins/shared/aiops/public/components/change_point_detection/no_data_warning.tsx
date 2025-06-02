@@ -28,7 +28,7 @@ export const NoDataFoundWarning = (props: { onRenderComplete?: () => void }) => 
         <p>
           <FormattedMessage
             id="xpack.aiops.changePointDetection.noDataFoundMessage"
-            defaultMessage="No data was found for the selected metric and time range. Please adjust your selection to include data from your indices."
+            defaultMessage="No data found for the selected metric and time range. Try adjusting your selection to include data from your indices."
           />
         </p>
       }
