@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(200);
           });
-          
+
           it(`should not error on [${trustedAppApiCall.method}] if tags is set to [form_mode:advanced]`, async () => {
             const body = trustedAppApiCall.getBody();
 
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(200);
-          })
+          });
 
           it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
             const body = trustedAppApiCall.getBody();

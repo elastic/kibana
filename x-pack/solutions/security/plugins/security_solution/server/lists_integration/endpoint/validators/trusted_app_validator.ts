@@ -290,14 +290,14 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateBasicData(item);
 
     try {
-      const isTAAdvancedModeFeatureFlagEnabled = this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
+      const isTAAdvancedModeFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
       const isAdvancedMode = item.tags.includes('form_mode:advanced');
       if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
         throw new Error('Trusted apps advanced mode feature is not enabled');
       } else if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
         TrustedAppAdvancedModeDataSchema.validate(item);
-      }
-      else {
+      } else {
         TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
       }
     } catch (error) {
