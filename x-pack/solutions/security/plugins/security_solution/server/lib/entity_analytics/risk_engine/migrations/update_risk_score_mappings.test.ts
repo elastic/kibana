@@ -17,6 +17,7 @@ const mockUpdateUnderlyingMapping = jest.fn();
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: (...params: unknown[]) =>
     mockCreateOrUpdateComponentTemplate(...params),
+  createOrUpdateIndexTemplate: jest.fn(),
 }));
 
 jest.mock('../../utils/create_or_update_index', () => ({
