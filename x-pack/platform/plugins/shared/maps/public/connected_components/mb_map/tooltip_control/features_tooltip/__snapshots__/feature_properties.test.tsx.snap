@@ -7,11 +7,13 @@ exports[`FeatureProperties should render 1`] = `
 >
   <tbody>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop1
-         2222
       </td>
       <td>
         foobar1
@@ -19,11 +21,13 @@ exports[`FeatureProperties should render 1`] = `
       <td />
     </MapFeatureTooltipRow>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop2
-         2222
       </td>
       <td>
         foobar2
@@ -54,50 +58,39 @@ exports[`FeatureProperties should show filter button for filterable properties 1
 >
   <tbody>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop1
-         2222
       </td>
       <td>
         foobar1
       </td>
       <td>
-        <span
-          css="unknown styles"
+        <EuiButtonEmpty
+          aria-label="Filter on property"
+          data-test-subj="mapTooltipCreateFilterButton"
+          onClick={[Function]}
+          size="xs"
+          title="Filter on property"
         >
-          <EuiButtonEmpty
-            aria-label="Filter on property"
-            data-test-subj="mapTooltipCreateFilterButton"
-            onClick={[Function]}
-            size="xs"
-            title="Filter on property"
-          >
-            <EuiIcon
-              type="filter"
-            />
-          </EuiButtonEmpty>
-          <EuiButtonEmpty
-            aria-label="View filter actions"
-            data-test-subj="mapTooltipMoreActionsButton"
-            onClick={[Function]}
-            size="xs"
-            title="View filter actions"
-          >
-            <EuiIcon
-              type="arrowRight"
-            />
-          </EuiButtonEmpty>
-        </span>
+          <EuiIcon
+            type="filter"
+          />
+        </EuiButtonEmpty>
       </td>
     </MapFeatureTooltipRow>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop2
-         2222
       </td>
       <td>
         foobar2
@@ -115,16 +108,20 @@ exports[`FeatureProperties should show view actions button when there are availa
 >
   <tbody>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop1
-         2222
       </td>
       <td>
         foobar1
       </td>
-      <td>
+      <td
+        className="mapFeatureTooltip_actionsRow"
+      >
         <span
           css="unknown styles"
         >
@@ -154,11 +151,13 @@ exports[`FeatureProperties should show view actions button when there are availa
       </td>
     </MapFeatureTooltipRow>
     <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
-      <td>
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
         prop2
-         2222
       </td>
       <td>
         foobar2
