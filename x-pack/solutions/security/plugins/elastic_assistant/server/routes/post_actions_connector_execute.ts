@@ -124,6 +124,21 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
+          if (conversationId) {
+            const conversation = await conversationsDataClient?.getConversation({
+              id: conversationId,
+            });
+            if (
+              conversation?.createdBy.name !== checkResponse.currentUser?.username ||
+              conversation?.createdBy.id !== checkResponse.currentUser?.profile_uid
+            ) {
+              return resp.error({
+                body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                statusCode: 403,
+              });
+            }
+          }
+
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,

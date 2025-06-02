@@ -6,7 +6,7 @@
  */
 
 import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
@@ -14,6 +14,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import { UserAvatar } from './user_avatar';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -99,23 +100,6 @@ export const getComments: GetAssistantMessages = ({
       ]
     : [];
 
-  const UserAvatar = () => {
-    if (currentUserAvatar) {
-      return (
-        <EuiAvatar
-          name="user"
-          size="l"
-          color={currentUserAvatar?.color ?? 'subdued'}
-          {...(currentUserAvatar?.imageUrl
-            ? { imageUrl: currentUserAvatar.imageUrl as string }
-            : { initials: currentUserAvatar?.initials })}
-        />
-      );
-    }
-
-    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
-  };
-
   return [
     ...(systemPromptContent && currentConversation.messages.length
       ? [
@@ -151,7 +135,7 @@ export const getComments: GetAssistantMessages = ({
 
       const messageProps = {
         timelineAvatar: isUser ? (
-          <UserAvatar />
+          <UserAvatar user={message.user} />
         ) : (
           <AssistantAvatar name="machine" size="l" color="subdued" />
         ),
@@ -160,7 +144,7 @@ export const getComments: GetAssistantMessages = ({
             ? new Date().toLocaleString()
             : new Date(message.timestamp).toLocaleString()
         ),
-        username: isUser ? i18n.YOU : i18n.ASSISTANT,
+        username: isUser ? message.user?.name ?? i18n.YOU : i18n.ASSISTANT,
         eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
       };
 

@@ -67,6 +67,15 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
               statusCode: 404,
             });
           }
+          if (
+            existingConversation.createdBy.name !== authenticatedUser?.username ||
+            existingConversation.createdBy.id !== authenticatedUser?.profile_uid
+          ) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}". Updating a conversation is only allowed for the owner of the conversation. :(`,
+              statusCode: 403,
+            });
+          }
           const conversation = await dataClient?.updateConversation({
             conversationUpdateProps: { ...request.body, id },
           });
