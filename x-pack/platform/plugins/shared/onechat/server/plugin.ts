@@ -44,7 +44,7 @@ export class OnechatPlugin
     const serviceSetups = this.serviceManager.setupServices();
 
     serviceSetups.tools.register({
-      id: 'my_tool',
+      id: 'onechat_tool',
       name: 'Onechat Tool',
       description: 'Increments a number by 42',
       meta: {
@@ -53,7 +53,8 @@ export class OnechatPlugin
       schema: z.object({
         someNumber: z.number().describe('Some number'),
       }),
-      handler: ({ someNumber }, context) => {
+      handler: (args) => {
+        const { someNumber } = args as { someNumber: number };
         return 42 + someNumber;
       },
     });

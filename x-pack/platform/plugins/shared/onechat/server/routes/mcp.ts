@@ -9,14 +9,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { KibanaMCPTransport } from './kibana_mcp_transport';
-import { z } from '@kbn/zod';
-import type { ZodRawShape } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
-
-interface AddInput {
-  a: number;
-  b: number;
-}
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -43,10 +36,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       validate: { body: schema.object({}, { unknowns: 'allow' }) },
     },
     wrapHandler(async (ctx, request, response) => {
-      logger.info('MCP: Received POST request');
-
-      logger.info(JSON.stringify(request.body));
-
       const transport = new KibanaMCPTransport({ sessionIdGenerator: undefined, logger });
       let server: McpServer | undefined;
 
@@ -56,28 +45,26 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           name: 'kibana-mcp-server',
           version: '1.0.0',
         });
-        logger.debug('MCP: Created new server instance');
 
-        // Register addition tool
-        const addSchema: ZodRawShape = {
-          a: z.number().describe('First number'),
-          b: z.number().describe('Second number'),
-        };
+        const { tools: toolService } = getInternalServices();
 
-        server.tool(
-          'add',
-          'Adds two numbers together',
-          addSchema,
-          async (args: { [x: string]: any }) => {
-            logger.debug('MCP: Add tool called with args', args);
-            const { a, b } = args as AddInput;
-            const result = a + b;
-            logger.debug(`MCP: Add tool result: ${result}`);
-            return {
-              content: [{ type: 'text', text: `Result: ${result}` }],
-            };
-          }
-        );
+        const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const tools = await registry.list({});
+
+        for (const tool of tools) {
+          server.tool(
+            tool.id,
+            tool.description,
+            tool.schema.shape,
+            async (args: { [x: string]: any }) => {
+              const toolResult = await tool.execute({ toolParams: args });
+              return {
+                content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+              };
+            }
+          );
+        }
+
         logger.info('MCP: Registered add tool');
 
         // Handle client disconnect
