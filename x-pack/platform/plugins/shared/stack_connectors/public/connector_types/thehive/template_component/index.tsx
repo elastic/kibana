@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -52,14 +52,59 @@ const templates: Template[] = [
   },
 ];
 
-export const TemplateOptions: React.FunctionComponent<Props> = ({
-  buttonTitle,
-  paramsProperty,
-  onSelectEventHandler,
-}) => {
-  const [isTemplatesPopoverOpen, setIsTemplatesPopoverOpen] = useState<boolean>(false);
-
+const ToolTipContent = React.memo(({ description, label }: { description: string; label: string }) => {
   const { euiTheme } = useEuiTheme();
+  return (
+    <>
+      <EuiText
+        size="s"
+        style={{
+          fontWeight: euiTheme.font.weight.bold,
+        }}
+      >
+        {label}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <hr />
+      <EuiSpacer size="s" />
+      <EuiText size="xs">{description}</EuiText>
+    </>
+  );
+});
+
+const RenderOption = React.memo(({ option, searchValue }: { option: EuiSelectableOption<{ description?: string }>; searchValue: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup data-test-subj={`templateMenuButton-${option.label}`}>
+      <EuiFlexItem>
+        <EuiText
+          size="s"
+          style={{
+            fontWeight: euiTheme.font.weight.bold,
+          }}
+        >
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        {option.description && (
+          <>
+            <EuiToolTip
+              display="block"
+              position="top"
+              content={<ToolTipContent description={option.description} label={option.label} />}
+              data-test-subj={`${option.label}-tooltip`}
+            >
+              <TruncatedText text={option.description || ''} />
+            </EuiToolTip>
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+
+export const TemplateOptions = React.memo(({ buttonTitle, paramsProperty, onSelectEventHandler }: Props) => {
+  const [isTemplatesPopoverOpen, setIsTemplatesPopoverOpen] = useState<boolean>(false);
 
   const templatesObject: Record<string, Template> = {};
   templates?.forEach((template) => {
@@ -88,57 +133,12 @@ export const TemplateOptions: React.FunctionComponent<Props> = ({
     [buttonTitle, isTemplatesPopoverOpen, paramsProperty]
   );
 
-  const ToolTipContent = ({ description, label }: { description: string; label: string }) => {
-    return (
-      <>
-        <EuiText
-          size="s"
-          style={{
-            fontWeight: euiTheme.font.weight.bold,
-          }}
-        >
-          {label}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <hr />
-        <EuiSpacer size="s" />
-        <EuiText size="xs">{description}</EuiText>
-      </>
-    );
-  };
-
-  const renderOption = (
-    option: EuiSelectableOption<{ description?: string }>,
-    searchValue: string
-  ) => {
-    return (
-      <EuiFlexGroup data-test-subj={`templateMenuButton-${option.label}`}>
-        <EuiFlexItem>
-          <EuiText
-            size="s"
-            style={{
-              fontWeight: euiTheme.font.weight.bold,
-            }}
-          >
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          {option.description && (
-            <>
-              <EuiToolTip
-                display="block"
-                position="top"
-                content={<ToolTipContent description={option.description} label={option.label} />}
-                data-test-subj={`${option.label}-tooltip`}
-              >
-                <TruncatedText text={option.description || ''} />
-              </EuiToolTip>
-            </>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
+  const renderOption = useCallback(
+    (option: EuiSelectableOption<{ description?: string }>, searchValue: string) => (
+      <RenderOption option={option} searchValue={searchValue} />
+    ),
+    []
+  );
 
   return (
     <EuiPopover
@@ -175,4 +175,4 @@ export const TemplateOptions: React.FunctionComponent<Props> = ({
       </EuiSelectable>
     </EuiPopover>
   );
-};
+});
