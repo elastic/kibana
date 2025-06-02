@@ -20,6 +20,7 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
 } from '@elastic/eui';
 import {
@@ -75,9 +76,14 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
+const INVESTIGATION_GUIDE_TAB_ID = 'investigation_guide';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
-type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
+type TabId =
+  | typeof OVERVIEW_TAB_ID
+  | typeof METADATA_TAB_ID
+  | typeof RELATED_ALERTS_TAB_ID
+  | typeof INVESTIGATION_GUIDE_TAB_ID;
 
 export const getPageTitle = (ruleCategory: string) => {
   return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
@@ -123,7 +129,13 @@ export function AlertDetails() {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
 
-    return urlTabId && [OVERVIEW_TAB_ID, METADATA_TAB_ID, RELATED_ALERTS_TAB_ID].includes(urlTabId)
+    return urlTabId &&
+      [
+        OVERVIEW_TAB_ID,
+        METADATA_TAB_ID,
+        RELATED_ALERTS_TAB_ID,
+        INVESTIGATION_GUIDE_TAB_ID,
+      ].includes(urlTabId)
       ? (urlTabId as TabId)
       : OVERVIEW_TAB_ID;
   });
@@ -316,6 +328,29 @@ export function AlertDetails() {
       }),
       'data-test-subj': 'metadataTab',
       content: metadataTab,
+    },
+    {
+      id: 'investigation_guide',
+      name: (
+        <FormattedMessage
+          id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+          defaultMessage="Investigation guide"
+        />
+      ),
+      'data-test-subj': 'investigationGuideTab',
+      disabled: !rule?.artifacts?.investigation_guide?.blob,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiMarkdownFormat
+            css={css`
+              word-wrap: break-word;
+            `}
+          >
+            {rule?.artifacts?.investigation_guide?.blob ?? ''}
+          </EuiMarkdownFormat>
+        </>
+      ),
     },
     {
       id: RELATED_ALERTS_TAB_ID,
