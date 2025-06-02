@@ -39,19 +39,19 @@ describe('layout manager', () => {
   };
 
   it('can register child APIs', () => {
-    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
-    panelsManager.internalApi.registerChildApi(childApi);
-    expect(panelsManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(childApi);
+    const layoutManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
+    layoutManager.internalApi.registerChildApi(childApi);
+    expect(layoutManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(childApi);
   });
 
   it('serializes the latest state of all panels', () => {
-    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
+    const layoutManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
 
-    panelsManager.internalApi.registerChildApi(childApi);
-    panelsManager.internalApi.setChildState(panels.panelOne.gridData.i, {
+    layoutManager.internalApi.registerChildApi(childApi);
+    layoutManager.internalApi.setChildState(panels.panelOne.gridData.i, {
       rawState: { title: 'Updated Panel One' },
     });
-    const serializedLayout = panelsManager.internalApi.serializeLayout();
+    const serializedLayout = layoutManager.internalApi.serializeLayout();
     expect(serializedLayout.panels).toEqual({
       panelOne: {
         gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
@@ -61,14 +61,12 @@ describe('layout manager', () => {
     });
   });
 
-  it('serializes the latest state of all panels when an unrecoverable error has occurred on a child API', () => {
-    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
+  it('serializes the latest state of all panels when a child API is unavailable', () => {
+    const layoutManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
+    expect(layoutManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(undefined);
 
-    // if an unrecoverable error occurred, the child API should not be registered
-    expect(panelsManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(undefined);
-
-    // serializing should still work, returning the last known state of the panel
-    const serializedLayout = panelsManager.internalApi.serializeLayout();
+    // serializing should still work without an API present, returning the last known state of the panel
+    const serializedLayout = layoutManager.internalApi.serializeLayout();
     expect(serializedLayout.panels).toEqual({
       panelOne: {
         gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
