@@ -199,28 +199,30 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 };
 
 const controlPanelStyles = {
-  containerBase: ({ euiTheme }: UseEuiTheme) => ({
-    width: '100%',
-    maxInlineSize: '100% !important',
-    height: euiTheme.size.xl,
-    boxShadow: 'none !important',
-    borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
-  }),
-  containerRoundedBorders: ({ euiTheme }: UseEuiTheme) => ({
-    borderRadius: `${euiTheme.border.radius.medium} !important`,
-  }),
-  containerHidden: {
+  containerBase: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      maxInlineSize: '100% !important',
+      height: euiTheme.size.xl,
+      boxShadow: 'none !important',
+      borderRadius: `0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 !important`,
+    }),
+  containerRoundedBorders: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: `${euiTheme.border.radius.medium} !important`,
+    }),
+  containerHidden: css({
     display: 'none', // Don't unmount, just hide
-  },
-  formLabel: {
+  }),
+  formLabel: css({
     padding: '0 !important',
     height: '100%',
     maxWidth: '100%',
     overflow: 'hidden !important',
     textOverflow: 'ellipsis !important',
-    whiteSpace: 'nowrap !important',
-  },
-  formControl: {
+    whiteSpace: `nowrap !important` as 'nowrap',
+  }),
+  formControl: css({
     '.euiFormControlLayout__prepend': {
       paddingLeft: 0,
       gap: 0,
@@ -228,54 +230,59 @@ const controlPanelStyles = {
         paddingInlineStart: `0 !important`,
       },
     },
-  },
-  formControlEditableTwoLines: {
+  }),
+  formControlEditableTwoLines: css({
     '.euiFormControlLayout__prepend': {
       paddingInlineStart: `0 !important`,
       paddingInlineEnd: `0 !important`,
     },
-  },
-  formControlEditableOneLine: ({ euiTheme }: UseEuiTheme) => ({
-    '.euiFormControlLayout__prepend': {
-      paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
-    },
   }),
-  formControlNonEditableTwoLines: {
+  formControlEditableOneLine: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiFormControlLayout__prepend': {
+        paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
+      },
+    }),
+  formControlNonEditableTwoLines: css({
     '.euiFormControlLayout__prepend': {
       paddingInline: `0 !important`,
     },
-  },
-  formControlNonEditableOneLine: ({ euiTheme }: UseEuiTheme) => ({
-    '.euiFormControlLayout__prepend': {
-      paddingInlineStart: `${euiTheme.size.s} !important`,
-    },
   }),
-  formControlAfter: ({ euiTheme }: UseEuiTheme) => ({
-    '&:after': {
-      content: "''",
-      position: 'absolute' as const,
-      borderRadius: euiTheme.border.radius.medium,
-      top: 0,
-      bottom: 0,
-      width: euiTheme.size.xxs,
-      backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
-    },
-  }),
-  afterInsertBefore: ({ euiTheme }: UseEuiTheme) => ({
-    '&:after': {
-      left: `calc(-${euiTheme.size.xs} - 1px)`,
-    },
-  }),
-  afterInsertAfter: ({ euiTheme }: UseEuiTheme) => ({
-    '&:after': {
-      right: `calc(-${euiTheme.size.xs} - 1px)`,
-    },
-  }),
-  tooltipAnchor: {
+  formControlNonEditableOneLine: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiFormControlLayout__prepend': {
+        paddingInlineStart: `${euiTheme.size.s} !important`,
+      },
+    }),
+  formControlAfter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:after': {
+        content: "''",
+        position: 'absolute' as const,
+        borderRadius: euiTheme.border.radius.medium,
+        top: 0,
+        bottom: 0,
+        width: euiTheme.size.xxs,
+        backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+      },
+    }),
+  afterInsertBefore: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:after': {
+        left: `calc(-${euiTheme.size.xs} - 1px)`,
+      },
+    }),
+  afterInsertAfter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:after': {
+        right: `calc(-${euiTheme.size.xs} - 1px)`,
+      },
+    }),
+  tooltipAnchor: css({
     height: '100%',
-  },
-  draggingItem: {
+  }),
+  draggingItem: css({
     opacity: 0,
-  },
+  }),
   responsiveControlWidthStyles,
 };

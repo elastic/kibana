@@ -40,7 +40,6 @@
     "@kbn/std",
     "@kbn/react-hooks",
     "@kbn/esql-types",
-    "@kbn/ui-theme",
   ],
   "exclude": ["target/**/*"]
 }

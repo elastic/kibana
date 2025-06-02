@@ -22,9 +22,9 @@ import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoizedStyles } from '@kbn/core/public';
 
+import { DEFAULT_CONTROL_GROW } from '../../../common';
 import { DefaultControlApi } from '../../controls/types';
 import { responsiveControlWidthStyles, controlPanelWidthStyles } from './control_panel.styles';
-import { DEFAULT_CONTROL_GROW } from '@kbn/controls-plugin/common';
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
@@ -48,7 +48,9 @@ export const ControlClone = ({
   const styles = useMemoizedStyles(controlCloneStyles);
 
   return (
-    <EuiFlexItem css={[styles.container, styles.responsiveControlWidthStyles, controlPanelWidthStyles(width),]}>
+    <EuiFlexItem
+      css={[styles.container, styles.responsiveControlWidthStyles, controlPanelWidthStyles(width)]}
+    >
       {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
