@@ -47,6 +47,7 @@ const createRulesClientMock = () => {
     findBackfill: jest.fn(),
     deleteBackfill: jest.fn(),
     getSpaceId: jest.fn(),
+    bulkGet: jest.fn(),
     bulkEdit: jest.fn(),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),

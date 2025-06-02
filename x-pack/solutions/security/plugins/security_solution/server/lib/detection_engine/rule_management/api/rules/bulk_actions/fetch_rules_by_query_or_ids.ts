@@ -8,41 +8,41 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { gapStatus } from '@kbn/alerting-plugin/common';
-import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../../common/constants';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
-import { initPromisePool } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { findRules } from '../../../logic/search/find_rules';
 
 export const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
-  abortSignal,
   maxRules,
   gapRange,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
-  abortSignal: AbortSignal;
   maxRules: number;
   gapRange?: { start: string; end: string };
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
-    return initPromisePool({
-      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-      items: ids,
-      executor: async (id: string) => {
-        const rule = await readRules({ id, rulesClient, ruleId: undefined });
-        if (rule == null) {
-          throw Error('Rule not found');
+    const { rules, errors } = await rulesClient.bulkGet({ ids });
+    return {
+      results: rules.map((rule) => ({
+        item: rule.id,
+        result: rule,
+      })),
+      errors: errors.map(({ id, error }) => {
+        let message = 'Error resolving the rule';
+        if (error.statusCode === 404) {
+          message = 'Rule not found';
         }
-        return rule;
-      },
-      abortSignal,
-    });
+        return {
+          item: id,
+          error: new Error(message),
+        };
+      }),
+    };
   }
 
   let ruleIdsWithGaps: string[] | undefined;

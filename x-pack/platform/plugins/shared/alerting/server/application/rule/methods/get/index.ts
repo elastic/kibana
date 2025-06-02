@@ -6,4 +6,6 @@
  */
 
 export type { GetRuleParams } from './types';
+export type { GetRulesParams } from './types';
 export { getRule } from './get_rule';
+export { getRules } from './get_rules';
