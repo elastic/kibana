@@ -63,12 +63,16 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           throw new Error('Could not find locator params for report');
         }
 
+        // Do not allow locatorParams to use LEGACY_SHORT_URL_LOCATOR
+        if (locatorParams.id === 'LEGACY_SHORT_URL_LOCATOR') {
+          throw new Error('The legacy short URL locator is not supported for opening report URLs.');
+        }
+
         share.navigate(locatorParams);
       } catch (e) {
         setError(e);
         // eslint-disable-next-line no-console
         console.error(i18nTexts.consoleMessagePrefix, e.message);
-        throw e;
       }
     })();
   }, [apiClient, screenshotMode, share]);
