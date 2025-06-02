@@ -49,7 +49,9 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     }
   }, [settings?.item]);
 
-  const { filteredCards } = useAvailablePackages({ prereleaseIntegrationsEnabled: prerelease });
+  const { filteredCards, isLoading } = useAvailablePackages({
+    prereleaseIntegrationsEnabled: prerelease,
+  });
 
   const options = useMemo(() => {
     return filteredCards
@@ -114,6 +116,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
                 options={options}
                 selectedOptions={selectedOptions}
                 onChange={onChange}
+                isLoading={isLoading}
               />
             </EuiFormRow>
           </EuiFlexItem>

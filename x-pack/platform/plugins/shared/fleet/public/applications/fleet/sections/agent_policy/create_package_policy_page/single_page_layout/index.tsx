@@ -298,6 +298,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         })
         .catch(() => {
           addIntegrationFlyoutProps?.onSubmitCompleted();
+        })
+        .finally(() => {
+          addIntegrationFlyoutProps?.onSubmitCompleted();
         });
     }
   }, [addIntegrationFlyoutProps, onSubmit, setFormState, formState]);
@@ -519,16 +522,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: !pkgName ? null : (
+      children: pkgName && (
         <>
-          {addIntegrationFlyoutProps ? (
+          {addIntegrationFlyoutProps && (
             <AddIntegrationFlyoutConfigureHeader
               pkgLabel={pkgLabel}
               pkgName={pkgName}
               pkgVersion={packageInfo?.version}
               integration={integration}
             />
-          ) : null}
+          )}
           {replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy}
         </>
       ),
