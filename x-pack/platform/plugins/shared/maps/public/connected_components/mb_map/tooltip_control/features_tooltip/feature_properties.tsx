@@ -7,6 +7,8 @@
 
 import _ from 'lodash';
 import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -14,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiIcon,
   EuiContextMenu,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
@@ -51,6 +54,21 @@ interface State {
   prevWidth: number | null;
   prevHeight: number | null;
 }
+
+const mapFeatureTooltipTableWrapper = css({
+  overflow: 'auto',
+  maxHeight: 'calc(49vh - 64px)',
+});
+
+const mapFeatureTooltipTable = css({
+  width: '100%',
+});
+
+const mapFeatureTooltipActionsRow = css({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  background: 'pink',
+});
 
 export class FeatureProperties extends Component<Props, State> {
   private _isMounted = false;
@@ -211,14 +229,12 @@ export class FeatureProperties extends Component<Props, State> {
 
     return (
       <div>
-        <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
+        <table css={mapFeatureTooltipTable} className="eui-yScrollWithShadows" ref={this._tableRef}>
           <tbody>
-            <tr>
-              <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
-                {tooltipProperty.getPropertyName()}
-              </td>
-              <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
-            </tr>
+            <MapFeatureTooltipRow>
+              <td>{tooltipProperty.getPropertyName()}</td>
+              <td>{tooltipProperty.getHtmlDisplayValue()}</td>
+            </MapFeatureTooltipRow>
           </tbody>
         </table>
         <EuiContextMenu initialPanelId={0} panels={[panel]} />
@@ -255,14 +271,9 @@ export class FeatureProperties extends Component<Props, State> {
       </EuiButtonEmpty>
     );
 
-    return this.props.getActionContext === undefined ||
-      this.state.actions.length === 0 ||
-      (this.state.actions.length === 1 &&
-        this.state.actions[0].id === ACTION_GLOBAL_APPLY_FILTER) ? (
-      <td>{applyFilterButton}</td>
-    ) : (
-      <td className="mapFeatureTooltip_actionsRow">
-        <span>
+    return (
+      <td>
+        <span css={mapFeatureTooltipActionsRow}>
           {applyFilterButton}
           <EuiButtonEmpty
             size="xs"
@@ -325,22 +336,41 @@ export class FeatureProperties extends Component<Props, State> {
 
     const rows = this.state.properties.map((tooltipProperty) => {
       return (
-        <tr key={tooltipProperty.getPropertyKey()} className="mapFeatureTooltip_row">
-          <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
-            {tooltipProperty.getPropertyName()}
-          </td>
-          <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
+        <MapFeatureTooltipRow key={tooltipProperty.getPropertyKey()}>
+          <td>{tooltipProperty.getPropertyName()} 2222</td>
+          <td>{tooltipProperty.getHtmlDisplayValue()}</td>
           {this._renderFilterCell(tooltipProperty)}
-        </tr>
+        </MapFeatureTooltipRow>
       );
     });
 
     return (
-      <div className="mapFeatureTooltip_tableWrapper">
-        <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
+      <div css={mapFeatureTooltipTableWrapper}>
+        <table css={mapFeatureTooltipTable} className="eui-yScrollWithShadows" ref={this._tableRef}>
           <tbody>{rows}</tbody>
         </table>
       </div>
     );
   }
 }
+
+const componentStyles = {
+  mapFeatureTooltipRowStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderBottom: `1px solid ${euiTheme.colors.lightestShade}`,
+      '& > td:first-of-type': {
+        minWidth: `${parseFloat(euiTheme.size.xl) * 2.5}px`,
+        maxWidth: `${parseFloat(euiTheme.size.xl) * 4}px`,
+        fontWeight: euiTheme.font.weight.bold,
+      },
+      td: {
+        overflowWrap: 'break-word',
+        wordBreak: 'break-word',
+        padding: euiTheme.size.xs,
+      },
+    }),
+};
+export const MapFeatureTooltipRow = ({ children }: { children: ReactNode }) => {
+  const styles = useMemoizedStyles(componentStyles);
+  return <tr css={styles.mapFeatureTooltipRowStyles}>{children}</tr>;
+};
