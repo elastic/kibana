@@ -25,6 +25,7 @@ import type {
   InMemoryPackagePolicy,
   PackageInfo,
   PackagePolicy,
+  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
@@ -49,7 +50,8 @@ export const PackagePoliciesPage = ({
   packageInfo: PackageInfo;
   embedded?: boolean;
 }) => {
-  const { name, version } = packageInfo;
+  const { name, version, type } = packageInfo;
+
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const addAgentToPolicyIdFromParams = useMemo(
@@ -79,18 +81,21 @@ export const PackagePoliciesPage = ({
         packagePolicy,
       }: { agentPolicies: AgentPolicy[]; packagePolicy: PackagePolicy },
       index: number
-    ) => {
-      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
+    ): { agentPolicies: AgentPolicy[]; packagePolicy: InMemoryPackagePolicy; rowIndex: number } => {
       return {
         agentPolicies,
         packagePolicy: {
           ...packagePolicy,
-          hasUpgrade,
+          package: {
+            ...(packagePolicy?.package as PackagePolicyPackage),
+            type,
+          },
+          hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
         },
         rowIndex: index,
       };
     },
-    [isPackagePolicyUpgradable]
+    [isPackagePolicyUpgradable, type]
   );
 
   // States and data for agent-based policies table
@@ -122,9 +127,10 @@ export const PackagePoliciesPage = ({
     }`,
   });
   useEffect(() => {
-    setAgentBasedPackageAndAgentPolicies(
-      !agentBasedData?.items ? [] : agentBasedData.items.map(mapPoliciesData)
-    );
+    const mappedPoliciesData = !agentBasedData?.items
+      ? []
+      : agentBasedData.items.map(mapPoliciesData);
+    setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
 
   // States and data for agentless policies table
