@@ -39,6 +39,8 @@ describe('unified_manifest_client', () => {
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.closePointInTime.mockResolvedValue({ succeeded: true, num_freed: 1 });
+
     unifiedManifestClient = new UnifiedManifestClient(savedObjectsClient);
   });
 
