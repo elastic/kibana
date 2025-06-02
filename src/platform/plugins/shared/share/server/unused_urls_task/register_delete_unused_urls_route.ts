@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter, Logger, ReservedPrivilegesSet } from '@kbn/core/server';
 import { CoreSetup } from '@kbn/core/server';
 import { Duration } from 'moment';
 import { runDeleteUnusedUrlsTask } from './task';
@@ -31,9 +31,7 @@ export const registerDeleteUnusedUrlsRoute = ({
       path: '/api/unused_urls_cleanup/run',
       security: {
         authz: {
-          enabled: false,
-          reason:
-            'This route is used by the unused URLs cleanup task and does not require authentication.',
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
         },
       },
       options: {
