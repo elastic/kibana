@@ -41,7 +41,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/upgrade-assistant-pkg-public",
     "@kbn/upgrade-assistant-pkg-server",
-    "@kbn/upgrade-assistant-pkg-common",
   ],
   "exclude": [
     "target/**/*",
