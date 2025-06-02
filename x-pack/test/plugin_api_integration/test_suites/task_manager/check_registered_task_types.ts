@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
+        'MetricsDataAccess:IndicesMetadata',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',
