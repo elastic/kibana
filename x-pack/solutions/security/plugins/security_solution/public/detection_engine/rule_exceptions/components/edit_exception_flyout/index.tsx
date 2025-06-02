@@ -486,6 +486,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         )}
       </FlyoutBodySection>
       <ExceptionFlyoutFooter
+        isEdit
         listType={listType}
         isSubmitButtonDisabled={isSubmitButtonDisabled}
         cancelButtonDataTestSubjId={'cancelExceptionEditButton'}
