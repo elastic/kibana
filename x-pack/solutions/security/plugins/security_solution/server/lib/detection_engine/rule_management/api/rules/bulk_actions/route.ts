@@ -35,6 +35,7 @@ import {
   dryRunValidateBulkEditRule,
   validateBulkDuplicateRule,
 } from '../../../logic/bulk_actions/validations';
+import { hasAlertSuppressionBulkEditAction } from '../../../logic/bulk_actions/utils';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import type { BulkActionError } from './bulk_actions_response';
@@ -44,6 +45,7 @@ import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { ConfigType } from '../../../../../../config';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../../common/detection_engine/constants';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
@@ -83,6 +85,7 @@ export const performBulkActionRoute = (
         },
       },
 
+      // eslint-disable-next-line complexity
       async (
         context,
         request,
@@ -300,6 +303,29 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.edit: {
+              const hasAlertSuppressionActions = hasAlertSuppressionBulkEditAction(body.edit);
+              const isAlertSuppressionEnabled =
+                config.experimentalFeatures.bulkEditAlertSuppressionEnabled;
+
+              if (hasAlertSuppressionActions) {
+                if (!isAlertSuppressionEnabled) {
+                  return siemResponse.error({
+                    body: `Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.`,
+                    statusCode: 400,
+                  });
+                }
+
+                const isAlertSuppressionLicenseValid = await ctx.licensing.license.hasAtLeast(
+                  MINIMUM_LICENSE_FOR_SUPPRESSION
+                );
+                if (!isAlertSuppressionLicenseValid) {
+                  return siemResponse.error({
+                    body: `Alert suppression is enabled with ${MINIMUM_LICENSE_FOR_SUPPRESSION} license or above.`,
+                    statusCode: 403,
+                  });
+                }
+              }
+
               if (isDryRun) {
                 // during dry run only validation is getting performed and rule is not saved in ES
                 const bulkActionOutcome = await initPromisePool({

@@ -11,6 +11,7 @@ import type {
   BulkActionEditType,
   NormalizedRuleAction,
   ThrottleForBulkActions,
+  BulkActionEditPayload,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
@@ -44,6 +45,16 @@ export const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType)
     BulkActionEditTypeEnum.set_alert_suppression,
   ];
   return indexPatternsActions.includes(editAction);
+};
+
+/**
+ * Checks if any of the actions is related to alert suppression, i.e. one of:
+ * 'add_alert_suppression', 'delete_alert_suppression', 'set_alert_suppression'
+ * @param actions {@link BulkActionEditPayload[][]}
+ * @returns {boolean}
+ */
+export const hasAlertSuppressionBulkEditAction = (actions: BulkActionEditPayload[]): boolean => {
+  return actions.some((action) => isAlertSuppressionBulkEditAction(action.type));
 };
 
 /**
