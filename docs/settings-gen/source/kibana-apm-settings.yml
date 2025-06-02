@@ -1,0 +1,605 @@
+---
+# This file is used to generate "APM settings in Kibana" page in the product docs
+
+product: Kibana
+collection: APM settings in Kibana
+page_description: |
+  These settings allow the APM app to function, and specify the data that it surfaces. Unless you've customized your setup, you do not need to configure any settings to use the APM app. It is enabled by default.
+
+note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
+
+groups:
+  - group: APM indices
+    id: apm-indices-settings-kb
+    description: |
+      The APM app uses data views to query APM indices. To change the default APM indices that the APM app queries, open the APM app and select **Settings** > **Indices**. Index settings in the APM app take precedence over those set in `kibana.yml`.
+
+      APM indices are {{kib}} space-aware; changes to APM index settings will only apply to the currently enabled space.
+
+  - group: General APM settings
+    id: general-apm-settings-kb
+    description: |
+      If you'd like to change any of the default values, copy and paste the relevant settings into your `kibana.yml` configuration file. Changing these settings may disable features of the APM App.
+
+    tip: More settings are available in the [Observability advanced settings](/reference/advanced-settings.md#observability-advanced-settings).
+    settings:
+
+      - setting: xpack.apm.maxSuggestions
+        # id:
+        description: |
+          Maximum number of suggestions fetched in autocomplete selection boxes.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 100
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapFingerprintBucketSize
+        # id:
+        description: |
+          Maximum number of unique transaction combinations sampled for generating service map focused on a specific service.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 100
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapFingerprintBucketSize
+        # id:
+        description: |
+          Maximum number of unique transaction combinations sampled for generating service map focused on a specific service.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 100
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapFingerprintGlobalBucketSize
+        # id:
+        description: |
+          Maximum number of unique transaction combinations sampled for generating the global service map.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 100
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapEnabled
+        # id:
+        description: |
+          Set to `false` to disable service maps.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapTraceIdBucketSize
+        # id:
+        description: |
+          Maximum number of trace IDs sampled for generating service map focused on a specific service.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 65
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapTraceIdGlobalBucketSize
+        # id:
+        description: |
+          Maximum number of trace IDs sampled for generating the global service map.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 6
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.serviceMapMaxTracesPerRequest
+        # id:
+        description: |
+          Maximum number of traces per request for generating the global service map.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 50
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.ui.enabled
+        # id:
+        description: |
+          Set to `false` to hide the APM app from the main menu.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.ui.maxTraceItems
+        # id:
+        description: |
+          Maximum number of child items displayed when viewing trace details.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 5000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.observability.annotations.index
+        # id:
+        description: |
+          Index name where Observability annotations are stored.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'observability-annotations'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.metricsInterval
+        # id:
+        description: |
+          Sets a `fixed_interval` for date histograms in metrics aggregations.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 30
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.agent.migrations.enabled
+        # id:
+        description: |
+          Set to `false` to disable cloud APM migrations.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.agent.migrations.enabled
+        # id:
+        description: |
+          Set to `false` to disable cloud APM migrations.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.error
+        # id:
+        description: |
+          Matcher for all error indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'logs-apm*,apm-*,traces-*.otel-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.onboarding
+        # id:
+        description: |
+          Matcher for all onboarding indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'apm-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.span
+        # id:
+        description: |
+          Matcher for all span indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'traces-apm*,apm-*,traces-*.otel-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.transaction
+        # id:
+        description: |
+          Matcher for all transaction indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'traces-apm*,apm-*,traces-*.otel-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.metric
+        # id:
+        description: |
+          Matcher for all metrics indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'metrics-apm*,apm-*,metrics-*.otel-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.indices.sourcemap
+        # id:
+        description: |
+             Matcher for all source map indices.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'apm-*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.autoCreateApmDataView
+        # id:
+        description: |
+             Set to `false` to disable the automatic creation of the APM data view when the APM app is opened.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.apm.latestAgentVersionsUrl
+        # id:
+        description: |
+             Specifies the URL of a self hosted file that contains latest agent versions. Set to `''` to disable requesting latest agent versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 'https://apm-agent-versions.elastic.co/versions.json'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+  - group: Logging settings
+    id: logging-settings
+    description: |
+      The following APM logging (legacy) settings are a subset of the valid settings.
+    settings:
+
+      - setting: logging.level
+        # id:
+        description: |
+             Specifies the minimum log level.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: enum
+        default: info
+        options:
+           - option: debug
+           - option: info
+           - option: warning
+           - option: error
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: logging.selectors
+        # id:
+        description: |
+             The list of debugging-only selector tags used by different APM Server components. Use `*` to enable debug output for all components. For example, add publish to display all the debug messages related to event publishing.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: logging.metrics.enabled
+        # id:
+        description: |
+             If enabled, APM Server periodically logs its internal metrics that have changed in the last period.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: logging.metrics.period
+        # id:
+        description: |
+             The period after which to log the internal metrics.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 30s
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
