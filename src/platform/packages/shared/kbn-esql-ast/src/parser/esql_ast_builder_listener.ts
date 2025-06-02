@@ -9,7 +9,6 @@
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
   type ChangePointCommandContext,
@@ -33,16 +32,12 @@ import {
   type TimeSeriesCommandContext,
   type WhereCommandContext,
   RerankCommandContext,
+  RrfCommandContext,
+  SampleCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
-import {
-  createAstBaseItem,
-  createCommand,
-  createFunction,
-  textExistsAndIsValid,
-  visitSource,
-} from './factories';
+import type { ESQLAst } from '../types';
+import { createCommand, createFunction, createLiteral, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createEvalCommand } from './factories/eval';
@@ -65,6 +60,7 @@ import {
   visitByOption,
   visitRenameClauses,
 } from './walkers';
+import { createTimeseriesCommand } from './factories/timeseries';
 import { createRerankCommand } from './factories/rerank';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
@@ -140,17 +136,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
-    const node: ESQLAstTimeseriesCommand = {
-      ...createAstBaseItem('ts', ctx),
-      type: 'command',
-      args: [],
-      sources: ctx
-        .indexPatternAndMetadataFields()
-        .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => visitSource(sourceCtx)),
-    };
-    this.ast.push(node);
-    node.args.push(...node.sources);
+    const command = createTimeseriesCommand(ctx);
+    this.ast.push(command);
   }
 
   /**
@@ -363,6 +350,32 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   exitRerankCommand(ctx: RerankCommandContext): void {
     const command = createRerankCommand(ctx);
 
+    this.ast.push(command);
+  }
+
+  exitSampleCommand(ctx: SampleCommandContext): void {
+    const command = createCommand('sample', ctx);
+    this.ast.push(command);
+
+    if (ctx._probability) {
+      command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
+    }
+    if (ctx._seed) {
+      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
+    }
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rrfCommand`.
+   *
+   * Parse the RRF (Reciprocal Rank Fusion) command:
+   *
+   * RRF
+   *
+   * @param ctx the parse tree
+   */
+  exitRrfCommand(ctx: RrfCommandContext): void {
+    const command = createCommand('rrf', ctx);
     this.ast.push(command);
   }
 

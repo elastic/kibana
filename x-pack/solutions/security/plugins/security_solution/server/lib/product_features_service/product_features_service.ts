@@ -28,7 +28,6 @@ import {
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
-import { APP_ID } from '../../../common';
 import { ProductFeatures } from './product_features';
 import {
   securityDefaultSavedObjects,
@@ -271,9 +270,6 @@ export class ProductFeaturesService {
     // Should be used only by routes that do not need RBAC, only direct productFeature control.
     const APP_FEATURE_TAG_PREFIX = 'securitySolutionProductFeature:';
 
-    /** @deprecated Use security.authz.requiredPrivileges instead */
-    const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
-
     const isAuthzEnabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzEnabled => {
       return Boolean((authz as AuthzEnabled)?.requiredPrivileges);
     };
@@ -293,8 +289,6 @@ export class ProductFeaturesService {
           isEnabled = this.isEnabled(
             tag.substring(APP_FEATURE_TAG_PREFIX.length) as ProductFeatureKeyType
           );
-        } else if (tag.startsWith(API_ACTION_TAG_PREFIX)) {
-          isEnabled = this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length));
         }
 
         if (!isEnabled) {

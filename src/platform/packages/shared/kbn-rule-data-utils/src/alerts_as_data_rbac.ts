@@ -21,6 +21,7 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  STREAMS: 'streams',
   SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
