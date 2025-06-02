@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { z } from '@kbn/zod';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -52,21 +53,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
     id: agents[0]?.id!,
     uri: '',
     enrollment_token: '',
-    settings: {
-      ca_sha256: null,
-      certificate_authorities: null,
-      elastic_agent_cert: null,
-      elastic_agent_cert_key: null,
-      elastic_agent_cert_key_passphrase: null,
-      headers: null,
-      insecure: false,
-      proxy_disabled: false,
-      proxy_headers: null,
-      proxy_url: null,
-      staging: false,
-      tags: null,
-      replace_token: false,
-    },
+    settings: {},
   });
 
   useEffect(() => {
@@ -80,11 +67,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
 
     const validateClusterURL = () => {
       if (formContent.uri) {
-        // check that the uri matches a valid URI schema
-        const uriRegex = new RegExp(
-          /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
-        );
-        setValidClusterURL(uriRegex.test(formContent.uri));
+        // check that the uri matches a valid URI schema using zod
+        const schema = z.string().url();
+        try {
+          schema.parse(formContent.uri);
+          setValidClusterURL(true);
+        } catch (e) {
+          setValidClusterURL(false);
+        }
       } else {
         setValidClusterURL(false);
       }
@@ -122,6 +112,32 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
         ),
       });
     }
+  };
+
+  const addEmptyProxyHeader = () => {
+    setFormContent({
+      ...formContent,
+      settings: {
+        ...formContent.settings,
+        proxy_headers: {
+          ...formContent.settings?.proxy_headers,
+          ...{ '': '' },
+        },
+      },
+    });
+  };
+
+  const addEmptyHeader = () => {
+    setFormContent({
+      ...formContent,
+      settings: {
+        ...formContent.settings,
+        headers: {
+          ...formContent.settings?.headers,
+          ...{ '': '' },
+        },
+      },
+    });
   };
 
   return (
@@ -350,15 +366,117 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                         />
                       }
                     >
-                      <EuiTextArea
-                        onChange={(e) =>
-                          setFormContent({
-                            ...formContent,
-                            settings: { ...formContent.settings, headers: e.target.value },
-                          })
-                        }
-                        fullWidth
-                      />
+                      <>
+                        {formContent.settings?.headers &&
+                          Object.entries(formContent.settings.headers).map(
+                            ([key, value], index) => {
+                              return (
+                                <>
+                                  <EuiFlexGroup>
+                                    <EuiFlexItem grow={5}>
+                                      <EuiFieldText
+                                        placeholder={i18n.translate(
+                                          'xpack.fleet.agentList.migrateAgentFlyout.headersKeyPlaceholder',
+                                          {
+                                            defaultMessage: 'Key',
+                                          }
+                                        )}
+                                        onChange={(e) => {
+                                          // Get all entries from headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.headers || {}
+                                          );
+                                          // update the entry at the specified index
+                                          const updatedEntries = entries.map((entry, i) =>
+                                            i === index ? [e.target.value, value] : entry
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                        value={key}
+                                        fullWidth
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={5}>
+                                      <EuiFieldText
+                                        value={value}
+                                        placeholder={i18n.translate(
+                                          'xpack.fleet.agentList.migrateAgentFlyout.headersValuePlaceholder',
+                                          {
+                                            defaultMessage: 'Value',
+                                          }
+                                        )}
+                                        onChange={(e) => {
+                                          // Get all entries from headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.headers || {}
+                                          );
+                                          // Create a new entries array with the updated value at the specified index
+                                          const updatedEntries = entries.map((entry, i) =>
+                                            i === index ? [key, e.target.value] : entry
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                        fullWidth
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={0}>
+                                      <EuiButtonEmpty
+                                        iconType="cross"
+                                        onClick={() => {
+                                          // Get all entries from headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.headers || {}
+                                          );
+                                          // Filter out the entry at the specified index
+                                          const updatedEntries = entries.filter(
+                                            (_, i) => i !== index
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                      />
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
+                                  <EuiSpacer size="m" />
+                                </>
+                              );
+                            }
+                          )}
+
+                        <EuiFormRow>
+                          <EuiButtonEmpty
+                            iconType="plusInCircle"
+                            onClick={() => {
+                              addEmptyHeader();
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.agentList.migrateAgentFlyout.addHeaderLabel"
+                              defaultMessage="Add Row"
+                            />
+                          </EuiButtonEmpty>
+                        </EuiFormRow>
+                      </>
                     </EuiFormRow>
                     <EuiFormRow
                       label={
@@ -368,15 +486,117 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                         />
                       }
                     >
-                      <EuiTextArea
-                        onChange={(e) =>
-                          setFormContent({
-                            ...formContent,
-                            settings: { ...formContent.settings, proxy_headers: e.target.value },
-                          })
-                        }
-                        fullWidth
-                      />
+                      <>
+                        {formContent.settings?.proxy_headers &&
+                          Object.entries(formContent.settings.proxy_headers).map(
+                            ([key, value], index) => {
+                              return (
+                                <>
+                                  <EuiFlexGroup>
+                                    <EuiFlexItem grow={5}>
+                                      <EuiFieldText
+                                        placeholder={i18n.translate(
+                                          'xpack.fleet.agentList.migrateAgentFlyout.proxyHeadersKeyPlaceholder',
+                                          {
+                                            defaultMessage: 'Key',
+                                          }
+                                        )}
+                                        onChange={(e) => {
+                                          // Get all entries from proxy_headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.proxy_headers || {}
+                                          );
+                                          // Create a new entries array with the updated key at the specified index
+                                          const updatedEntries = entries.map((entry, i) =>
+                                            i === index ? [e.target.value, value] : entry
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              proxy_headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                        value={key}
+                                        fullWidth
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={5}>
+                                      <EuiFieldText
+                                        value={value}
+                                        placeholder={i18n.translate(
+                                          'xpack.fleet.agentList.migrateAgentFlyout.proxyHeadersValuePlaceholder',
+                                          {
+                                            defaultMessage: 'Value',
+                                          }
+                                        )}
+                                        onChange={(e) => {
+                                          // Get all entries from proxy_headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.proxy_headers || {}
+                                          );
+                                          // Create a new entries array with the updated value at the specified index
+                                          const updatedEntries = entries.map((entry, i) =>
+                                            i === index ? [key, e.target.value] : entry
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              proxy_headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                        fullWidth
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem grow={0}>
+                                      <EuiButtonEmpty
+                                        iconType="cross"
+                                        onClick={() => {
+                                          // Get all entries from proxy_headers
+                                          const entries = Object.entries(
+                                            formContent.settings?.proxy_headers || {}
+                                          );
+                                          // Filter out the entry at the specified index
+                                          const updatedEntries = entries.filter(
+                                            (_, i) => i !== index
+                                          );
+                                          // Convert back to object and update the form state
+                                          setFormContent({
+                                            ...formContent,
+                                            settings: {
+                                              ...formContent.settings,
+                                              proxy_headers: Object.fromEntries(updatedEntries),
+                                            },
+                                          });
+                                        }}
+                                      />
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
+                                  <EuiSpacer size="m" />
+                                </>
+                              );
+                            }
+                          )}
+
+                        <EuiFormRow>
+                          <EuiButtonEmpty
+                            iconType="plusInCircle"
+                            onClick={() => {
+                              addEmptyProxyHeader();
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.agentList.migrateAgentFlyout.addProxyHeaderLabel"
+                              defaultMessage="Add Row"
+                            />
+                          </EuiButtonEmpty>
+                        </EuiFormRow>
+                      </>
                     </EuiFormRow>
                   </EuiAccordion>
                   <EuiSpacer size="m" />
@@ -451,7 +671,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                                 defaultMessage="Insecure"
                               />
                             }
-                            checked={formContent.settings.insecure}
+                            checked={formContent.settings?.insecure ?? false}
                             onChange={(e) =>
                               setFormContent({
                                 ...formContent,
@@ -468,7 +688,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                                 defaultMessage="Staging"
                               />
                             }
-                            checked={formContent.settings.staging}
+                            checked={formContent.settings?.staging ?? false}
                             onChange={(e) =>
                               setFormContent({
                                 ...formContent,
@@ -489,7 +709,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                                 defaultMessage="Proxy Disabled"
                               />
                             }
-                            checked={formContent.settings.proxy_disabled}
+                            checked={formContent.settings?.proxy_disabled ?? false}
                             onChange={(e) =>
                               setFormContent({
                                 ...formContent,
@@ -509,7 +729,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                                 defaultMessage="Replace Token"
                               />
                             }
-                            checked={formContent.settings.replace_token}
+                            checked={formContent.settings?.replace_token ?? false}
                             onChange={(e) =>
                               setFormContent({
                                 ...formContent,

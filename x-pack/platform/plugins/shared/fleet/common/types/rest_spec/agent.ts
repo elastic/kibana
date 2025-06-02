@@ -186,20 +186,20 @@ export interface MigrateSingleAgentRequest {
     id: string;
     enrollment_token: string;
     uri: string;
-    settings: {
-      ca_sha256: string | null;
-      certificate_authorities: string | null;
-      elastic_agent_cert: string | null;
-      elastic_agent_cert_key: string | null;
-      elastic_agent_cert_key_passphrase: string | null;
-      headers: string | null;
-      insecure: boolean;
-      proxy_disabled: boolean;
-      proxy_headers: string | null;
-      proxy_url: string | null;
-      staging: boolean;
-      tags: string | null;
-      replace_token: boolean;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: boolean;
+      tags?: string;
+      replace_token?: boolean;
     };
   };
 }

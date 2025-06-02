@@ -389,9 +389,7 @@ export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']
     body: {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
-      settings: Object.fromEntries(
-        Object.entries(options.settings).filter(([_, value]) => value !== null)
-      ),
+      settings: options.settings ?? {},
     },
   });
 }
