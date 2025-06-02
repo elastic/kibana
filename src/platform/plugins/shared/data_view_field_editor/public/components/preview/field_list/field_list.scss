@@ -28,15 +28,6 @@ $previewShowMoreHeight: 40px; /* [2] */
       flex-basis: 24px !important;
     }
 
-    &__actionsBtn {
-      display: none;
-    }
-
-    &--pinned .indexPatternFieldEditor__previewFieldList__item__actionsBtn,
-    &:hover .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
-      display: block;
-    }
-
     &__value .euiToolTipAnchor {
       width: 100%; /* [3] */
     }
