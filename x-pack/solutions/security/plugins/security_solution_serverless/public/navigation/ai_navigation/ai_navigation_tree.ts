@@ -21,8 +21,9 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'AI for SOC' }
 );
 
-const aiSocLink = (pageName: SecurityPageNameAiSoc): AppDeepLinkId =>
-  `${AI_FOR_SOC_APP_ID}:${pageName}`;
+export const aiSocLink = (pageName: SecurityPageNameAiSoc): AppDeepLinkId => {
+  return `${AI_FOR_SOC_APP_ID}:${pageName}`;
+};
 
 export const createAiNavigationTree = (): NavigationTreeDefinition => ({
   body: [
@@ -35,10 +36,10 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       defaultIsCollapsed: false,
       isCollapsible: false,
       children: [
-        /* {
+        {
           id: SecurityPageName.alertSummary,
           link: securityLink(SecurityPageName.alertSummary),
-        }, */
+        },
         {
           id: SecurityPageNameAiSoc.attackDiscovery,
           link: aiSocLink(SecurityPageNameAiSoc.attackDiscovery),
@@ -60,7 +61,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
                 },
               ],
             },
-            /*{
+            /* {
               id: SecurityPageName.configurations,
               link: securityLink(SecurityPageName.configurations),
               renderAs: 'item',
@@ -112,7 +113,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       children: [
         {
           id: SecurityPageNameAiSoc.landing,
-          link: aiSocLink(SecurityPageNameAiSoc.landing),
+          link: securityLink(SecurityPageNameAiSoc.landing),
           icon: 'launch',
         },
         {

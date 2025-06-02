@@ -25,9 +25,6 @@ export const registerSolutionNavigation = async (
     : createNavigationTree(services);
 
   if (shouldUseAINavigation) {
-    console.log('setting ai for soc navigation tree');
-    console.log(services.securitySolutionAiForSoc);
-    console.log(navigationTree);
     services.securitySolutionAiForSoc?.setSolutionNavigationTree(navigationTree);
   } else {
     services.securitySolution.setSolutionNavigationTree(navigationTree);
