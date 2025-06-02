@@ -52,24 +52,22 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   const { filteredCards } = useAvailablePackages({ prereleaseIntegrationsEnabled: prerelease });
 
   const options = useMemo(() => {
-    return (
-      filteredCards
-        .filter((pkg) => ['integration', 'input'].includes(pkg.type ?? ''))
-        .map((pkg) => ({
-          label: pkg.title,
-          value: pkg.name,
-          integration: pkg.integration,
-          prepend: (
-            <PackageIcon
-              packageName={pkg.name}
-              version={pkg.version}
-              integrationName={pkg.integration}
-              size="l"
-              tryApi={true}
-            />
-          ),
-        }))
-    );
+    return filteredCards
+      .filter((pkg) => ['integration', 'input'].includes(pkg.type ?? ''))
+      .map((pkg) => ({
+        label: pkg.title,
+        value: pkg.name,
+        integration: pkg.integration,
+        prepend: (
+          <PackageIcon
+            packageName={pkg.name}
+            version={pkg.version}
+            integrationName={pkg.integration}
+            size="l"
+            tryApi={true}
+          />
+        ),
+      }));
   }, [filteredCards]);
 
   const [selectedOptions, setSelectedOptions] = useState<
