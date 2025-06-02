@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPopover, EuiScreenReaderOnly, type EuiButtonIconProps } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiScreenReaderOnly,
+  type EuiButtonIconProps,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -59,6 +64,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
+  const [justClosed, setJustClosed] = useState(false);
 
   const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActionTypes });
 
@@ -85,6 +91,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
   const closePopover = useCallback(() => {
     openPopOverDebounced.cancel();
     setShowHoverContent(false);
+    setJustClosed(true);
   }, [openPopOverDebounced]);
 
   const closeExtraActions = useCallback(
@@ -96,6 +103,8 @@ export const HoverActionsPopover: React.FC<Props> = ({
     setIsExtraActionsPopoverOpen(true);
     closePopover();
   }, [closePopover, setIsExtraActionsPopoverOpen]);
+
+  const tooltipId = useGeneratedHtmlId();
 
   const onMouseEnter = useCallback(async () => {
     // Do not open actions with extra action popover is open
@@ -109,17 +118,80 @@ export const HoverActionsPopover: React.FC<Props> = ({
     openPopOverDebounced();
   }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
 
+  const onFocus = useCallback(
+    async (e: React.FocusEvent) => {
+      // If we’ve just closed via Esc, ignore this focus event once.
+      if (justClosed) {
+        setJustClosed(false);
+        return;
+      }
+
+      // Normal behavior: do exactly what onMouseEnter used to do
+      if (isExtraActionsPopoverOpen) return;
+      if (actions === undefined) {
+        loadActions(actionContext);
+      }
+      openPopOverDebounced();
+    },
+    [
+      justClosed,
+      isExtraActionsPopoverOpen,
+      actions,
+      openPopOverDebounced,
+      loadActions,
+      actionContext,
+    ]
+  );
+
+  const onBlur = useCallback(
+    (e: React.FocusEvent) => {
+      const next = e.relatedTarget as HTMLElement | null;
+
+      // If you're tabbing into your own trigger container, don't close
+      if (next && contentRef.current?.contains(next)) {
+        return;
+      }
+      // If you're tabbing into the tooltip panel itself, don't close
+      const panelEl = document.getElementById(tooltipId);
+      if (next && panelEl?.contains(next)) {
+        return;
+      }
+      // Otherwise, truly close
+      closePopover();
+    },
+    [closePopover, tooltipId]
+  );
+  // console.log({ justClosed });
   const content = useMemo(() => {
     return (
       // Hack - Forces extra actions popover to close when hover content is clicked.
       // This hack is required because we anchor the popover to the hover content instead
       // of anchoring it to the button that triggers the popover.
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
+      <div
+        ref={contentRef}
+        onMouseEnter={onMouseEnter}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        tabIndex={0}
+        aria-describedby={tooltipId}
+        onClick={closeExtraActions}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closePopover();
+            // Remove focus from the trigger so it cannot immediately re‐open
+            contentRef.current?.blur();
+          }
+        }}
+        css={css`
+          display: inline-block; /* ensure we get hover/focus events */
+        `}
+      >
         {children}
       </div>
     );
-  }, [onMouseEnter, closeExtraActions, children]);
+  }, [onMouseEnter, onFocus, onBlur, tooltipId, closeExtraActions, children, closePopover]);
 
   const panelStyle = useMemo(
     () => (anchorPosition === 'rightCenter' ? { marginTop: euiThemeVars.euiSizeS } : {}),
@@ -138,8 +210,15 @@ export const HoverActionsPopover: React.FC<Props> = ({
           isOpen={showHoverContent}
           panelPaddingSize="none"
           repositionOnScroll
-          ownFocus={false}
-          panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
+          ownFocus={true}
+          focusTrapProps={{ clickOutsideDisables: true }}
+          panelProps={{
+            'data-test-subj': 'hoverActionsPopover',
+            id: tooltipId,
+            role: 'tooltip',
+            onMouseEnter: openPopOverDebounced.cancel,
+            onMouseLeave: closePopover,
+          }}
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (
