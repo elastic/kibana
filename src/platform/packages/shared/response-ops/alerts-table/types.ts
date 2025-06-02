@@ -285,6 +285,12 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
      */
     cases?: CasesService;
   };
+
+  /**
+   * Limits the number of results to be paginated.
+   * @see https://github.com/elastic/kibana/issues/151913
+   */
+  maxRowCount?: number;
 }
 
 /**
@@ -478,6 +484,12 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onPaginateFlyout: (nextPageIndex: number) => void;
   onChangePageSize: (size: number) => void;
   onChangePageIndex: (index: number) => void;
+
+  /**
+   * Limits the number of results to be paginated.
+   * @see https://github.com/elastic/kibana/issues/151913
+   */
+  maxRowCount?: number;
 }
 
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
