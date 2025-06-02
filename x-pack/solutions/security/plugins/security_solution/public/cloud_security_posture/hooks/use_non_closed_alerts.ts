@@ -35,6 +35,12 @@ export const useNonClosedAlerts = ({
     queryId,
     to,
     from,
+    // TODO: Asset Inventory - remove temp runtime mappings
+    runtimeMappings: {
+      'related.entity': {
+        type: 'keyword',
+      },
+    },
   });
 
   const filteredAlertsData: ParsedAlertsData = alertsData
