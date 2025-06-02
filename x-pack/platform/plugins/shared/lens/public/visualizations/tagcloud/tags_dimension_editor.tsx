@@ -29,7 +29,7 @@ import {
 } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import { getDatatableColumn } from '../../../common/expressions/datatable/utils';
 
 interface Props {
   paletteService: PaletteRegistry;

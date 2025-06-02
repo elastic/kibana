@@ -34,7 +34,7 @@ import {
   isCollapsed,
 } from './visualization';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import { getDatatableColumn } from '../../../common/expressions/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
 
 export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
