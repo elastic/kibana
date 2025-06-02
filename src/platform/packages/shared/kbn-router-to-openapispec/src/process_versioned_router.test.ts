@@ -122,35 +122,35 @@ describe('extractVersionedResponses', () => {
 
 describe('processVersionedRouter', () => {
   it('correctly extracts the version based on the version filter', async () => {
-    const baseCase = await processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { access: 'public', version: '2023-10-31' }
-    );
+    const baseCase = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { access: 'public', version: '2023-10-31' },
+    });
 
     expect(Object.keys(get(baseCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json',
     ]);
 
-    const filteredCase = await processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { version: '2024-12-31', access: 'public' }
-    );
+    const filteredCase = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { version: '2024-12-31', access: 'public' },
+    });
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
       'application/test+json',
     ]);
   });
 
   it('correctly updates the authz description for routes that require privileges', async () => {
-    const results = await processVersionedRouter(
-      { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
-      new OasConverter(),
-      createOpIdGenerator(),
-      { version: '2023-10-31', access: 'public' }
-    );
+    const results = await processVersionedRouter({
+      appRouter: { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
+      converter: new OasConverter(),
+      getOpId: createOpIdGenerator(),
+      filters: { version: '2023-10-31', access: 'public' },
+    });
     expect(results.paths['/foo']).toBeDefined();
 
     expect(results.paths['/foo']!.get).toBeDefined();
