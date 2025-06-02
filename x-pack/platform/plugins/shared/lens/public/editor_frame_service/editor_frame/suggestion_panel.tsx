@@ -45,8 +45,8 @@ import {
   FramePublicAPI,
   DatasourceMap,
   VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -131,7 +131,7 @@ const PreviewRenderer = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -729,9 +729,9 @@ function getPreviewExpression(
             indexPatterns: frame.dataViews.indexPatterns,
           });
         }
+        suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];
       });
     }
-
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
@@ -743,7 +743,7 @@ function getPreviewExpression(
     return visualization.toPreviewExpression(
       visualizableState.visualizationState,
       suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
+      datasourceExpressionsByLayers
     );
   } catch (error) {
     showMemoizedErrorNotification(error);
