@@ -46,7 +46,6 @@ import type {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLFunctionCallExpression,
@@ -90,7 +89,7 @@ export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields 
   incomplete: Boolean(ctx.exception),
 });
 
-const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
+export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
   const text = node.getText();
   const symbol = node.symbol;
   const fields: AstNodeParserFields = {
@@ -450,34 +449,6 @@ export function sanitizeIdentifierString(ctx: ParserRuleContext) {
 
 export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
-}
-
-export function createSetting(policyName: Token, mode: string): ESQLCommandMode {
-  return {
-    type: 'mode',
-    name: mode.replace('_', '').toLowerCase(),
-    text: mode,
-    location: getPosition(policyName, { stop: policyName.start + mode.length - 1 }), // unfortunately this is the only location we have
-    incomplete: false,
-  };
-}
-
-/**
- * In https://github.com/elastic/elasticsearch/pull/103949 the ENRICH policy name
- * changed from rule to token type so we need to handle this specifically
- */
-export function createPolicy(token: Token, policy: string): ESQLSource {
-  return {
-    type: 'source',
-    name: policy,
-    text: policy,
-    sourceType: 'policy',
-    location: getPosition({
-      start: token.stop - policy.length + 1,
-      stop: token.stop,
-    }), // take into account ccq modes
-    incomplete: false,
-  };
 }
 
 const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {

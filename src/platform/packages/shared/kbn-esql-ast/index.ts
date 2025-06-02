@@ -15,7 +15,6 @@ export type {
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
   ESQLTimeInterval,
   ESQLLocation,
