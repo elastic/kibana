@@ -6,7 +6,7 @@
  */
 
 import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
 import { SearchQueryRulesQueryRule } from '../../types';
 import { normalizeQueryRuleset } from '../../utils/query_rules_utils';
@@ -16,7 +16,7 @@ interface UseQueryRulesetDetailStateProps {
 }
 
 export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailStateProps) => {
-  const { data, isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId);
+  const { data, isInitialLoading, isError, error, refetch } = useFetchQueryRuleset(rulesetId);
   const [queryRuleset, setQueryRuleset] = useState<QueryRulesQueryRuleset | null>(null);
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
 
@@ -35,11 +35,18 @@ export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailS
     setRules([...newRules]);
   };
 
+  // Add function to refresh rules from server
+  const refreshRules = useCallback(() => {
+    // Trigger a refetch of the ruleset data
+    refetch();
+  }, [refetch]);
+
   return {
     queryRuleset,
     rules,
     setNewRules: setRules,
     updateRule,
+    refreshRules,
     isInitialLoading,
     isError,
     error,
