@@ -108,6 +108,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       task.id,
       { namespace: spaceId }
     );
+
     const { notification } = reportSO.attributes;
     if (notification && notification.email && notification.email.to) {
       await this.emailNotificationService.notify({

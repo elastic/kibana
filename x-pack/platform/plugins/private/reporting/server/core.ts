@@ -91,10 +91,10 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
+  notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
-  notifications: NotificationsPluginStart;
 }
 
 /**
