@@ -200,6 +200,7 @@ export class GlobalVisitorContext<
       case 'completion': {
         if (!this.methods.visitCompletionCommand) break;
         return this.visitCompletionCommand(parent, commandNode, input as any);
+      }
       case 'sample': {
         if (!this.methods.visitSampleCommand) break;
         return this.visitSampleCommand(parent, commandNode, input as any);
@@ -435,6 +436,7 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitCompletionCommand'> {
     const context = new contexts.CompletionCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitCompletionCommand', context, input);
+  }
 
   public visitSampleCommand(
     parent: contexts.VisitorContext | null,
