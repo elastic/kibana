@@ -26,14 +26,14 @@ export const useLayoutStyles = () => {
 
     return css`
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
-        ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.colors.accentSecondary};
 
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
-        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
-      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
+        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
+        0 -${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
@@ -49,8 +49,7 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--dragPreview,
       .kbnGridSection--dragPreview {
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
-
-        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
       }
 
       .kbnGridPanel--resizeHandle {
@@ -112,7 +111,7 @@ export const useLayoutStyles = () => {
         // highlight the footer of a targeted section to make it clear where the section ends
         &--targeted {
           border-top: ${euiTheme.border.width.thick} solid
-            ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.5)};
+            ${transparentize(euiTheme.colors.accentSecondary, 0.5)};
         }
       }
       // hide footer border when section is being dragged
