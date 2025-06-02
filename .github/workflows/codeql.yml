@@ -7,7 +7,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: kibana
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
