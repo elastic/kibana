@@ -120,17 +120,12 @@ export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceEx
 export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
-  'observability:enableInfrastructureHostsView';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID =
-  'observability:enableInfrastructureContainerAssetView';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
   'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
   'observability:profilingElasticsearchPlugin';
-export const OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID = 'observability:apmEnableServiceMetrics';
 export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
