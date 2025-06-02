@@ -54,6 +54,7 @@ export interface ElasticsearchClientConfig {
   ssl?: ElasticsearchClientSslConfig;
   apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
   dnsCacheTtl: Duration;
+  serverMode?: 'stack' | 'serverless';
 }
 
 /**

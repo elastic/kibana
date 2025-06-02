@@ -53,6 +53,7 @@ test('set correct defaults', () => {
         "es-client-authentication",
       ],
       "requestTimeout": "PT30S",
+      "serverMode": undefined,
       "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
       "skipStartupConnectionCheck": false,
