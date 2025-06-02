@@ -8,6 +8,7 @@
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import { createCompletionCommand } from './factories/completion';
 import {
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -32,6 +33,7 @@ import {
   type TimeSeriesCommandContext,
   type WhereCommandContext,
   RerankCommandContext,
+  CompletionCommandContext,
   RrfCommandContext,
   SampleCommandContext,
 } from '../antlr/esql_parser';
@@ -350,6 +352,20 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   exitRerankCommand(ctx: RerankCommandContext): void {
     const command = createRerankCommand(ctx);
 
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.completionCommand`.
+   *
+   * Parse the COMPLETION command:
+   *
+   * COMPLETION <prompt> WITH <inferenceId> [ AS <targetField> ]
+   *
+   * @param ctx the parse tree
+   */
+  exitCompletionCommand(ctx: CompletionCommandContext): void {
+    const command = createCompletionCommand(ctx);
     this.ast.push(command);
   }
 
