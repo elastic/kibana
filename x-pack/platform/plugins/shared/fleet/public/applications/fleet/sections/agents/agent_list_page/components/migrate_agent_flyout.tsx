@@ -403,7 +403,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                     <EuiFormRow
                       label={
                         <FormattedMessage
-                          id="xpack.fleet.agentList.migrateAgentFlyout.headersLabel"
+                          id="xpack.fleet.agentList.migrateAgentFlyout.proxyUrlLabel"
                           defaultMessage="Proxy URL"
                         />
                       }
