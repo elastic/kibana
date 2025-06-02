@@ -78,7 +78,6 @@ const generateId = htmlIdGenerator();
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -90,17 +89,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     hasAttemptedSubmit: false,
   };
 
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
-
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -119,7 +111,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -154,9 +145,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         data-test-subj="savedObjectSaveModal"
         className={`kbnSavedObjectSaveModal${hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''}`}
         onClose={this.props.onClose}
+        aria-labelledby={modalTitleId}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (

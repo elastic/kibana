@@ -34,11 +34,9 @@ import {
 const SUPPRESS_BY_FIELDS = ['agent.type'];
 
 describe(
-  'Detection Rule Creation - EQL Rules - With Alert Suppression',
+  'EQL Rules - Alert suppression',
   {
-    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-    // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
-    tags: ['@ess', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       kbnServerArgs: [],
     },

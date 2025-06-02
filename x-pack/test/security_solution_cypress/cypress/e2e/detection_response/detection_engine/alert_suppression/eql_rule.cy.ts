@@ -35,7 +35,7 @@ const SUPPRESS_BY_FIELDS = ['agent.type'];
 
 // Skip in MKI due to flake
 describe(
-  'Detection Rule Creation - EQL Rules - With Alert Suppression',
+  'Detection EQL Rules - Alert suppression',
   {
     tags: ['@ess', '@skipInServerlessMKI'],
   },
