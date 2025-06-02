@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
+import { getMaxAlerts } from './helpers/get_max_alerts';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
-import { getMaxAlerts } from './helpers/get_max_alerts';
-
 import type { AlertsSelectionSettings } from '../types';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 interface Props {
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
+  connectorId?: string | undefined;
   filterManager: FilterManager;
   onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   settings: AlertsSelectionSettings;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
+  showConnectorSelector: boolean;
+  onConnectorIdSelected?: (connectorId: string) => void;
+  stats: AttackDiscoveryStats | null;
 }
 
 const AlertSelectionComponent: React.FC<Props> = ({
@@ -35,7 +42,13 @@ const AlertSelectionComponent: React.FC<Props> = ({
   settings,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
+  showConnectorSelector,
+  connectorId,
+  onConnectorIdSelected,
+  stats,
 }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const tabs = useMemo(
     () =>
       getTabs({
@@ -73,38 +86,48 @@ const AlertSelectionComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlexGroup data-test-subj="alertSelection" direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiText data-test-subj="customizeAlerts" size="s">
-          <p>{i18n.CUSTOMIZE_THE_ALERTS}</p>
-        </EuiText>
-      </EuiFlexItem>
+    <EuiForm data-test-subj="alertSelection" fullWidth>
+      {showConnectorSelector && (
+        <>
+          <EuiSpacer size="s" />
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+          <EuiText data-test-subj="customizeAlerts" size="s">
+            <p>{i18n.CUSTOMIZE_THE_CONNECTOR_AND_ALERTS}</p>
+          </EuiText>
 
-      <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow label={i18n.CONNECTOR}>
+            <ConnectorSelectorInline
+              fullWidth={true}
+              onConnectorSelected={noop}
+              onConnectorIdSelected={onConnectorIdSelected}
+              selectedConnectorId={connectorId}
+              stats={attackDiscoveryAlertsEnabled ? undefined : stats}
+            />
+          </EuiFormRow>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <EuiFormRow label={i18n.CUSTOM_QUERY}>
         <AlertSelectionQuery
           filterManager={filterManager}
           settings={settings}
           onSettingsChanged={onSettingsChanged}
         />
-      </EuiFlexItem>
+      </EuiFormRow>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer />
-      </EuiFlexItem>
+      <EuiSpacer size={'m'} />
 
-      <EuiFlexItem grow={false}>
+      <EuiFormRow label={i18n.SET_NUMBER_OF_ALERTS_TO_ANALYZE}>
         <AlertSelectionRange maxAlerts={settings.size} setMaxAlerts={onMaxAlertsChanged} />
-      </EuiFlexItem>
+      </EuiFormRow>
 
-      <EuiFlexItem grow={false}>
-        <EuiSpacer />
-      </EuiFlexItem>
+      <EuiSpacer size={'m'} />
 
-      <EuiTabs data-test-subj="tabs">
+      <EuiTabs data-test-subj="tabs" size="s">
         {tabs.map((tab) => (
           <EuiTab
             key={tab.id}
@@ -116,7 +139,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
         ))}
       </EuiTabs>
       {selectedTabContent}
-    </EuiFlexGroup>
+    </EuiForm>
   );
 };
 

@@ -14,7 +14,10 @@ import {
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
+import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
+import { getTlsWebhookServerUrls } from '../../../alerting_api_integration/common/lib/get_tls_webhook_servers';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -72,6 +75,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);
 
     /**
      * This is used by CI to set the docker registry port
@@ -121,11 +125,21 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // defined in MKI control plane. Necessary for Synthetics app testing
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+                `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
+                '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+              ]
+            : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,

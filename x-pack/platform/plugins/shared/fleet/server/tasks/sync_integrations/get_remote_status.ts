@@ -17,22 +17,19 @@ import { outputService } from '../../services';
 import { FleetError, FleetNotFoundError } from '../../errors';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
 
 export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   soClient: SavedObjectsClientContract,
   outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
   try {
     const output = await outputService.get(soClient, outputId);
-    if (!output) {
-      throw new FleetNotFoundError(`No output found with id ${outputId}`);
-    }
     if (output?.type !== 'remote_elasticsearch') {
       throw new FleetError(`Output ${outputId} is not a remote elasticsearch output`);
     }
@@ -63,14 +60,35 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       method: 'GET',
     };
     const url = `${kibanaUrl}/api/fleet/remote_synced_integrations/status`;
-    logger.info(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
+    logger.debug(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
 
+    let body;
+    let errorMessage;
     const res = await fetch(url, options);
+    try {
+      body = await res.json();
+    } catch (error) {
+      errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+    }
 
-    const body = await res.json();
+    if (body?.statusCode && body?.message) {
+      errorMessage = `GET ${url} failed with status ${body.statusCode}. ${body.message}`;
+    }
 
-    return body as GetRemoteSyncedIntegrationsStatusResponse;
+    return {
+      integrations: body?.integrations ?? [],
+      custom_assets: body?.custom_assets,
+      error: errorMessage ?? body?.error,
+    };
   } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return {
+        integrations: [],
+        error: `No output found with id ${outputId}`,
+      };
+    } else if (error.type === 'system' && error.code === 'ECONNREFUSED') {
+      throw new FleetError(`${error.message}${error.code}`);
+    }
     logger.error(`${error}`);
     throw error;
   }

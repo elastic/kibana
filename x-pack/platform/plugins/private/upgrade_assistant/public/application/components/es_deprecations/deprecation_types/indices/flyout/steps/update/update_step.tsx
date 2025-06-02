@@ -85,7 +85,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
     <Fragment>
       <EuiFlyoutBody>
         {isFrozen && <FrozenCallOut />}
-        <EuiTitle size="xs">
+        <EuiTitle size="xs" data-test-subj="updateIndexFlyoutTitle">
           <h3>
             {(status === 'inProgress' || status === 'incomplete') && (
               <FormattedMessage

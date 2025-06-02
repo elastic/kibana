@@ -16,11 +16,8 @@ import { Message, MessageRole } from '.';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
-    return JSON.parse(jsonString ?? '{}');
+    return JSON.parse(jsonString?.trim() ?? '{}');
   } catch (error) {
-    logger.error(
-      `Failed to parse function call arguments when converting messages for inference: ${error}`
-    );
     // if the LLM returns invalid JSON, it is likley because it is hallucinating
     // the function. We don't want to propogate the error about invalid JSON here.
     // Any errors related to the function call will be caught when the function and

@@ -25,6 +25,7 @@ import {
   FLEET_PROXY_API_ROUTES,
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
+  REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -137,6 +138,15 @@ export const epmRouteService = {
   },
   getInputsTemplatesPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INPUTS_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+  getUpdateCustomIntegrationsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
+  },
+  getDeletePackageDatastreamAssets: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS.replace('{pkgName}', pkgName).replace(
       '{pkgVersion}',
       pkgVersion
     );
@@ -313,6 +323,8 @@ export const outputRoutesService = {
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
   getOutputHealthPath: (outputId: string) =>
     OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
+  getRemoteSyncedIntegrationsStatusPath: (outputId: string) =>
+    REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
 };
 
 export const fleetProxiesRoutesService = {
@@ -342,6 +354,7 @@ export const settingsRoutesService = {
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
   getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
   getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+  postSpaceAwarenessMigrationPath: () => APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
 };
 
 export const appRoutesService = {

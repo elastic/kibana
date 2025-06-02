@@ -43,7 +43,14 @@ describe('useMonitorList', () => {
       handleFilterChange: jest.fn(),
     };
 
-    filterState = { locations: [], monitorTypes: [], projects: [], schedules: [], tags: [] };
+    filterState = {
+      locations: [],
+      monitorTypes: [],
+      projects: [],
+      schedules: [],
+      tags: [],
+      useLogicalAndFor: [],
+    };
     filterStateWithQuery = { ...filterState, query: 'xyz' };
   });
 

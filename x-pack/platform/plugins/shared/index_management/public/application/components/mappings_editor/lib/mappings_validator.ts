@@ -7,9 +7,9 @@
 
 import { pick, isPlainObject } from 'lodash';
 import * as t from 'io-ts';
-import { ordString } from 'fp-ts/lib/Ord';
-import { toArray } from 'fp-ts/lib/Set';
-import { isLeft, isRight } from 'fp-ts/lib/Either';
+import { ordString } from 'fp-ts/Ord';
+import { toArray } from 'fp-ts/Set';
+import { isLeft, isRight } from 'fp-ts/Either';
 
 import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION, MapperSizePluginId } from '../constants';

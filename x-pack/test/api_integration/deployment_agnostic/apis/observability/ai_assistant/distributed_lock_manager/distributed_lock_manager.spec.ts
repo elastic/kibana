@@ -8,22 +8,27 @@
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import {
-  LockId,
-  ensureTemplatesAndIndexCreated,
-  LockManager,
-  LockDocument,
-  LOCKS_CONCRETE_INDEX_NAME,
-  createLocksWriteIndex,
-  withLock,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import {
+  LockId,
+  LockManager,
+  LockDocument,
+  withLock,
+  runSetupIndexAssetEveryTime,
+} from '@kbn/lock-manager/src/lock_manager_client';
+import {
+  LOCKS_COMPONENT_TEMPLATE_NAME,
+  LOCKS_CONCRETE_INDEX_NAME,
+  LOCKS_INDEX_TEMPLATE_NAME,
+  setupLockManagerIndex,
+} from '@kbn/lock-manager/src/setup_lock_manager_index';
+
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getLoggerMock } from '../utils/logger';
+import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -32,11 +37,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    // These tests should be moved to Jest Integration tests: https://github.com/elastic/kibana/issues/216690
+    this.tags(['skipCloud']);
+    before(async () => {
+      // delete existing index mappings to ensure we start from a clean state
+      await deleteLockIndexAssets(es, log);
+
+      // ensure that the index and templates are created
+      runSetupIndexAssetEveryTime();
+    });
+
+    after(async () => {
+      await deleteLockIndexAssets(es, log);
+    });
+
     describe('Manual locking API', function () {
-      this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
@@ -219,15 +235,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lock?.metadata).to.eql({ attempt: 'one' });
         });
 
-        it('allows re-acquisition after expiration', async () => {
-          // Acquire with a very short TTL.
-          const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
-          expect(acquired).to.be(true);
+        describe('when a lock by "manager1" expires, and is attempted re-acquired by "manager2"', () => {
+          let expiredLock: LockDocument | undefined;
+          let reacquireResult: boolean;
+          beforeEach(async () => {
+            // Acquire with a very short TTL.
+            const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
+            expect(acquired).to.be(true);
+            await sleep(1000); // wait for lock to expire
+            expiredLock = await getLockById(es, LOCK_ID);
+            reacquireResult = await manager2.acquire({ metadata: { attempt: 'two' } });
+          });
 
-          await sleep(1000); // wait for lock to expire
+          it('can be re-acquired', async () => {
+            expect(reacquireResult).to.be(true);
+          });
 
-          const reacquired = await manager2.acquire({ metadata: { attempt: 'two' } });
-          expect(reacquired).to.be(true);
+          it('updates the token when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(expiredLock?.token).not.to.be(reacquiredLock?.token);
+          });
+
+          it('updates the metadata when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(reacquiredLock?.metadata).to.eql({ attempt: 'two' });
+          });
+
+          it('cannot be released by "manager1"', async () => {
+            const res = await manager1.release();
+            expect(res).to.be(false);
+          });
+
+          it('can be released by "manager2"', async () => {
+            const res = await manager2.release();
+            expect(res).to.be(true);
+          });
         });
       });
 
@@ -437,34 +479,48 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('withLock API', function () {
-      this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
       const LOCK_ID = 'my_lock_with_lock';
 
       describe('Successful execution and concurrent calls', () => {
-        let executions: number;
+        let successfulLockAcquisitions: number;
+        let failedLockAcquisitions: number;
         let runWithLock: () => Promise<string | undefined>;
         let results: Array<PromiseSettledResult<string | undefined>>;
 
         before(async () => {
-          executions = 0;
+          successfulLockAcquisitions = 0;
+          failedLockAcquisitions = 0;
           runWithLock = async () => {
-            return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
-              executions++;
-              await sleep(100);
-              return 'was called';
-            });
+            try {
+              return await withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
+                successfulLockAcquisitions++;
+                await pRetry(() => {
+                  if (failedLockAcquisitions < 2) {
+                    throw new Error(
+                      'Waiting for lock acquisition failures before releasing the lock'
+                    );
+                  }
+                });
+                return 'was called';
+              });
+            } catch (error) {
+              failedLockAcquisitions++;
+              throw error;
+            }
           };
           results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
         });
 
         it('executes the callback only once', async () => {
-          expect(executions).to.be(1);
+          expect(successfulLockAcquisitions).to.be(1);
+        });
+
+        it('makes failed lock acquisition attempts', async () => {
+          expect(failedLockAcquisitions).to.be(2);
         });
 
         it('returns the callback result for the successful call', async () => {
@@ -642,7 +698,123 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    describe('index assets', () => {
+      describe('when lock index is created with incorrect mappings', () => {
+        before(async () => {
+          await deleteLockIndexAssets(es, log);
+          await es.index({
+            refresh: true,
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: 'my_lock_with_incorrect_mappings',
+            document: {
+              token: 'my token',
+              expiresAt: new Date(Date.now() + 100000),
+              createdAt: new Date(),
+              metadata: { foo: 'bar' },
+            },
+          });
+        });
+
+        it('should delete the index and re-create it', async () => {
+          const mappingsBefore = await getMappings(es);
+          log.debug(`Mappings before: ${JSON.stringify(mappingsBefore)}`);
+          expect(mappingsBefore.properties?.token.type).to.eql('text');
+
+          // Simulate a scenario where the index mappings are incorrect and a lock is added
+          // it should delete the index and re-create it with the correct mappings
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          const mappingsAfter = await getMappings(es);
+          log.debug(`Mappings after: ${JSON.stringify(mappingsAfter)}`);
+          expect(mappingsAfter.properties?.token.type).to.be('keyword');
+        });
+      });
+
+      describe('when lock index is created with correct mappings', () => {
+        before(async () => {
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          // wait for the index to be created
+          await es.indices.refresh({ index: LOCKS_CONCRETE_INDEX_NAME });
+        });
+
+        it('should have the correct mappings for the lock index', async () => {
+          const mappings = await getMappings(es);
+
+          const expectedMapping = {
+            dynamic: 'false',
+            properties: {
+              token: { type: 'keyword' },
+              expiresAt: { type: 'date' },
+              createdAt: { type: 'date' },
+              metadata: { enabled: false, type: 'object' },
+            },
+          };
+
+          expect(mappings).to.eql(expectedMapping);
+        });
+
+        it('has the right number_of_replicas', async () => {
+          const settings = await getSettings(es);
+          expect(settings?.index?.auto_expand_replicas).to.eql('0-1');
+        });
+
+        it('does not delete the index when adding a new lock', async () => {
+          const settingsBefore = await getSettings(es);
+
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          const settingsAfter = await getSettings(es);
+          expect(settingsAfter?.uuid).to.be(settingsBefore?.uuid);
+        });
+      });
+
+      describe('when setting up index assets', () => {
+        beforeEach(async () => {
+          await deleteLockIndexAssets(es, log);
+        });
+
+        it('can run in parallel', async () => {
+          try {
+            await Promise.all([
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+            ]);
+          } catch (error) {
+            expect().fail(`Parallel setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+
+        it('can run in sequence', async () => {
+          try {
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+          } catch (error) {
+            expect().fail(`Sequential setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+      });
+    });
   });
+}
+
+async function deleteLockIndexAssets(es: Client, log: ToolingLog) {
+  log.debug(`Deleting index assets`);
+  await es.indices.delete({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [404] });
+  await es.indices.deleteIndexTemplate({ name: LOCKS_INDEX_TEMPLATE_NAME }, { ignore: [404] });
+  await es.cluster.deleteComponentTemplate(
+    { name: LOCKS_COMPONENT_TEMPLATE_NAME },
+    { ignore: [404] }
+  );
 }
 
 function clearAllLocks(es: Client, log: ToolingLog) {
@@ -695,4 +867,16 @@ async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocume
   );
 
   return res._source;
+}
+
+async function getMappings(es: Client) {
+  const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return mappings;
+}
+
+async function getSettings(es: Client) {
+  const res = await es.indices.getSettings({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return settings;
 }

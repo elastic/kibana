@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { MigrationLog } from '../../../types';
 import { getAliases } from '../../../model/helpers';
 import {

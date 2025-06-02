@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
@@ -26,7 +26,6 @@ import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_exp
 
 export class ResetSLO {
   constructor(
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
@@ -39,7 +38,7 @@ export class ResetSLO {
   public async execute(sloId: string) {
     const slo = await this.repository.findById(sloId);
 
-    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
+    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser);
 
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     await this.summaryTransformManager.uninstall(summaryTransformId);
@@ -74,7 +73,7 @@ export class ResetSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.index({
+          this.scopedClusterClient.asCurrentUser.index({
             index: SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
             document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
@@ -113,7 +112,7 @@ export class ResetSLO {
    * @param sloId
    */
   private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       refresh: true,
       conflicts: 'proceed',
@@ -133,7 +132,7 @@ export class ResetSLO {
    * @param sloId
    */
   private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       conflicts: 'proceed',

@@ -8,6 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -460,8 +461,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -486,8 +486,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -503,8 +503,7 @@ describe('utils', () => {
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -529,8 +528,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -546,8 +545,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -561,8 +559,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
@@ -578,8 +576,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -594,8 +591,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,

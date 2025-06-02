@@ -16,7 +16,7 @@ import type {
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
-import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
+import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';

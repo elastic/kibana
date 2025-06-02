@@ -20,12 +20,8 @@ interface VisualizationState {
 }
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('mockLayerId')
-    .mockReturnValueOnce('mockTopValuesOfStackByFieldColumnId')
-    .mockReturnValueOnce('mockCountColumnId')
-    .mockReturnValueOnce('mockTopValuesOfBreakdownFieldColumnId'),
+  ...jest.requireActual('uuid'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({
@@ -112,11 +108,12 @@ describe('getAlertsTableLensAttributes', () => {
     const state = result?.current?.state as VisualizationState;
     expect(result?.current).toMatchSnapshot();
 
-    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+    expect(state.datasourceStates.formBased.layers['layer-id-generated-uuid'].columnOrder)
+      .toMatchInlineSnapshot(`
       Array [
-        "mockTopValuesOfStackByFieldColumnId",
-        "mockTopValuesOfBreakdownFieldColumnId",
-        "mockCountColumnId",
+        "top-values-of-stack-by-field-column-id-generated-uuid",
+        "top-values-of-breakdown-field-column-id-generated-uuid",
+        "count-column-id-generated-uuid",
       ]
     `);
   });
@@ -136,21 +133,22 @@ describe('getAlertsTableLensAttributes', () => {
     expect(state.visualization?.columns).toMatchInlineSnapshot(`
       Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "top-values-of-stack-by-field-column-id-generated-uuid",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "count-column-id-generated-uuid",
           "isTransposed": false,
         },
       ]
     `);
 
-    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+    expect(state.datasourceStates.formBased.layers['layer-id-generated-uuid'].columnOrder)
+      .toMatchInlineSnapshot(`
       Array [
-        "mockTopValuesOfStackByFieldColumnId",
-        "mockCountColumnId",
+        "top-values-of-stack-by-field-column-id-generated-uuid",
+        "count-column-id-generated-uuid",
       ]
     `);
   });

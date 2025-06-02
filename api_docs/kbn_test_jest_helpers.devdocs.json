@@ -1000,10 +1000,10 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-common.renderReactTestingLibraryWithI18n",
+        "id": "def-common.renderWithI18n",
         "type": "Function",
         "tags": [],
-        "label": "renderReactTestingLibraryWithI18n",
+        "label": "renderWithI18n",
         "description": [],
         "signature": [
           "(ui: React.ReactNode, options?: Omit<",
@@ -1022,7 +1022,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-common.renderReactTestingLibraryWithI18n.$1",
+            "id": "def-common.renderWithI18n.$1",
             "type": "Object",
             "tags": [],
             "label": "args",

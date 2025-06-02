@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core/public';
@@ -24,7 +24,7 @@ import { toMountPoint as _toMountPoint } from '@kbn/react-kibana-mount';
 // dark mode is applied correctly.  This code is for compatibility purposes,
 // and will be removed when the deprecated usages are removed.
 const themeStart: ThemeServiceStart = {
-  theme$: new Observable((subscriber) => subscriber.next(defaultTheme)),
+  theme$: of(defaultTheme),
   getTheme: () => defaultTheme,
 };
 

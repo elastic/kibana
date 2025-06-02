@@ -13,8 +13,9 @@ import type {
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-
+type CloudConnectorType = 'cloud_connectors';
 export type AwsCredentialsType =
+  | CloudConnectorType
   | 'assume_role'
   | 'direct_access_keys'
   | 'temporary_keys'
@@ -192,3 +193,8 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type CredentialsType = Extract<
+  AwsCredentialsType,
+  'direct_access_keys' | 'assume_role' | 'temporary_keys' | 'cloud_connectors'
+>;

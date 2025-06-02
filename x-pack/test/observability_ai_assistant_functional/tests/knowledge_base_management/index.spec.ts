@@ -8,22 +8,24 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
-  TINY_ELSER,
-  clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
+import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
+  const retry = getService('retry');
+  const find = getService('find');
+  const browser = getService('browser');
+  const toasts = getService('toasts');
+
   const { common } = getPageObjects(['common']);
 
   async function saveKbEntry({
@@ -51,32 +53,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Knowledge management tab', () => {
     before(async () => {
       await clearKnowledgeBase(es);
-
-      // create a knowledge base model
-      await importTinyElserModel(ml);
-
-      await Promise.all([
-        // setup the knowledge base
-        observabilityAIAssistantAPIClient
-          .admin({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-            params: {
-              query: {
-                model_id: TINY_ELSER.id,
-              },
-            },
-          })
-          .expect(200),
-
-        // login as editor
-        ui.auth.login('editor'),
-      ]);
+      await deployTinyElserAndSetupKb(getService);
+      await ui.auth.login('editor');
     });
 
     after(async () => {
       await Promise.all([
-        deleteKnowledgeBaseModel(ml),
-        deleteInferenceEndpoint({ es }),
+        teardownTinyElserModelAndInferenceEndpoint(getService),
         clearKnowledgeBase(es),
         ui.auth.logout(),
       ]);
@@ -132,6 +115,86 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('shows two different authors', async () => {
         const entries = await getKnowledgeBaseEntries();
         expect(entries.map(({ author }) => author)).to.eql(['secondary_editor', 'editor']);
+      });
+    });
+
+    describe('User instruction management', () => {
+      async function openUserInstructionFlyout() {
+        await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
+      }
+
+      async function getUserInstructionContent() {
+        const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
+        return await retry.try(async () => {
+          const value = await editor.getAttribute('value');
+          if (!value) {
+            throw new Error('Content not loaded yet');
+          }
+          return value;
+        });
+      }
+
+      async function setUserInstructionContent(content?: string) {
+        const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
+        await editor.clearValue();
+        if (content) {
+          await editor.type(content);
+        }
+      }
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+        await common.navigateToUrlWithBrowserHistory(
+          'management',
+          '/kibana/observabilityAiAssistantManagement',
+          'tab=knowledge_base'
+        );
+      });
+
+      beforeEach(async () => {
+        await clearKnowledgeBase(es);
+        await browser.refresh();
+      });
+
+      afterEach(async () => {
+        await clearKnowledgeBase(es);
+        await browser.refresh();
+      });
+
+      after(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      it('creates a new user instruction', async () => {
+        await openUserInstructionFlyout();
+        const instruction = 'Always respond in a formal tone';
+        await setUserInstructionContent(instruction);
+        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+
+        // Re-open to verify content was saved
+        await openUserInstructionFlyout();
+        const savedContent = await getUserInstructionContent();
+        expect(savedContent).to.eql(instruction);
+      });
+
+      it('cancels editing without saving changes', async () => {
+        // First create an instruction
+        await openUserInstructionFlyout();
+        const originalInstruction = 'Original instruction';
+        await setUserInstructionContent(originalInstruction);
+        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+
+        // Make changes but cancel
+        await openUserInstructionFlyout();
+        await toasts.dismissAll();
+        await setUserInstructionContent('Changed instruction');
+        await testSubjects.click(ui.pages.kbManagementTab.editEntryCancelButton);
+
+        // Verify the original content remains unchanged
+        await openUserInstructionFlyout();
+        const savedContent = await getUserInstructionContent();
+        expect(savedContent).to.eql(originalInstruction);
       });
     });
   });

@@ -86,9 +86,11 @@ export interface FleetConfigType {
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
+    taskInterval?: string;
     retryDelays?: string[];
   };
   integrationsHomeOverride?: string;
+  prereleaseEnabledByDefault?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

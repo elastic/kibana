@@ -27,6 +27,10 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group7.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group8.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group9.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group10.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group11.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group12.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests

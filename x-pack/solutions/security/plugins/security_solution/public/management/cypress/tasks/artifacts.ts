@@ -63,7 +63,7 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
   [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS,
 };
 
-export const createArtifactList = (listId: string) => {
+export const createArtifactList = (listId: keyof typeof ENDPOINT_ARTIFACT_LIST_TYPES) => {
   request<ExceptionListSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_URL,
