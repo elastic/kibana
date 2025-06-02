@@ -51,7 +51,7 @@ const SETTINGS_KEYS = [
   apmEnableServiceMapApiV2,
 ];
 
-function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {
   if (isProfilingPluginEnabled) {
     SETTINGS_KEYS.push(...[apmEnableTransactionProfiling]);
   }
