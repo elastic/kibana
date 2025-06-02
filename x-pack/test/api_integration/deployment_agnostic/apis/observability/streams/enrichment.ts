@@ -257,7 +257,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'host.name': 'routeme',
             },
           },
-          'stream': {
+          stream: {
             name: 'logs.nginx',
           },
         });
