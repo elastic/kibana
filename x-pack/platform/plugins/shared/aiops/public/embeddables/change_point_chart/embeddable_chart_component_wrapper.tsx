@@ -25,7 +25,6 @@ import { useChangePointResults } from '../../components/change_point_detection/u
 import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
 import { NoDataFoundWarning } from '../../components/change_point_detection/no_data_warning';
 import { NoChangePointsCallout } from '../../components/change_point_detection/no_change_points_callout';
-import { useAnnotations } from '../../components/change_point_detection/use_annotations';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
@@ -97,17 +96,15 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     return { interval } as ChangePointDetectionRequestParams;
   }, [interval]);
 
-  const { results, isLoading, sampleChangePointResponse } = useChangePointResults(
+  const { results, isLoading, isUsingSampleData } = useChangePointResults(
     fieldConfig,
     requestParams,
     combinedQuery,
     10000
   );
 
-  const annotations = useAnnotations(results, sampleChangePointResponse);
-
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
-    let resultChangePoints: ChangePointAnnotation[] = annotations.sort((a, b) => {
+    let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
       if (defaultSort.direction === 'asc') {
         return (a[defaultSort.field] as number) - (b[defaultSort.field] as number);
       } else {
@@ -124,13 +121,11 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     }
 
     return resultChangePoints;
-  }, [annotations, maxSeriesToPlot, onChange]);
+  }, [results, maxSeriesToPlot, onChange]);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
-
-  const showCallout = results.length === 0 && sampleChangePointResponse;
 
   return (
     <div
@@ -139,9 +134,9 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
         width: 100%;
       `}
     >
-      {showCallout && (
+      {isUsingSampleData && (
         <div css={css({ padding: `${euiTheme.size.s}` })}>
-          <NoChangePointsCallout reason={changePoints[0]?.reason} />
+          <NoChangePointsCallout reason={results[0]?.reason} />
         </div>
       )}
       {changePoints.length > 0 ? (

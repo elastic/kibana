@@ -60,7 +60,6 @@ import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 import { NoChangePointsCallout } from './no_change_points_callout';
-import { useAnnotations } from './use_annotations';
 
 const selectControlCss = { width: '350px' };
 
@@ -218,7 +217,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
     results,
     isLoading: annotationsLoading,
     progress,
-    sampleChangePointResponse,
+    isUsingSampleData,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
   const selectedPartitions = useMemo(() => {
@@ -600,11 +599,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
       {isExpanded ? (
         <ChangePointResults
           fieldConfig={fieldConfig}
+          splitFieldCardinality={splitFieldCardinality}
           isLoading={annotationsLoading}
           results={results}
-          splitFieldCardinality={splitFieldCardinality}
+          isUsingSampleData={isUsingSampleData}
           onSelectionChange={onSelectionChange}
-          sampleChangePointResponse={sampleChangePointResponse}
         />
       ) : null}
 
@@ -724,7 +723,7 @@ interface ChangePointResultsProps {
   splitFieldCardinality: number | null;
   isLoading: boolean;
   results: ChangePointAnnotation[];
-  sampleChangePointResponse: ChangePointAnnotation | null;
+  isUsingSampleData: boolean;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
@@ -737,14 +736,10 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   isLoading,
   results,
   onSelectionChange,
-  sampleChangePointResponse,
+  isUsingSampleData,
 }) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
-
-  const showNoChangePointsCallout = results.length === 0 && sampleChangePointResponse;
-
-  const tableAnnotations = useAnnotations(results, sampleChangePointResponse);
 
   return (
     <>
@@ -775,15 +770,15 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
         </>
       ) : null}
 
-      {showNoChangePointsCallout && (
+      {isUsingSampleData && (
         <>
-          <NoChangePointsCallout reason={tableAnnotations[0]?.reason} />
+          <NoChangePointsCallout reason={results[0]?.reason} />
           <EuiSpacer size="m" />
         </>
       )}
 
       <ChangePointsTable
-        annotations={tableAnnotations}
+        annotations={results}
         fieldConfig={fieldConfig}
         isLoading={isLoading}
         onSelectionChange={onSelectionChange}
