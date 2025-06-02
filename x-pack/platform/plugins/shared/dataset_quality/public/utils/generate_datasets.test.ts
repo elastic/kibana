@@ -123,6 +123,7 @@ describe('generateDatasets', () => {
           percentage: 1.9607843137254901,
           count: 2,
         },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -149,6 +150,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -188,6 +190,7 @@ describe('generateDatasets', () => {
           percentage: 100,
           count: 2,
         },
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -214,6 +217,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -244,6 +248,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -267,6 +272,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -300,6 +306,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -323,6 +330,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'another',
@@ -346,6 +354,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -379,6 +388,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
       {
         name: 'synth',
@@ -405,6 +415,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
@@ -451,6 +462,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        hasFailureStore: false,
       },
     ]);
   });
