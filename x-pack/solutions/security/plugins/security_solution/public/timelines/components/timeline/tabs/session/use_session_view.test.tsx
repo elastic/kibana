@@ -11,13 +11,12 @@ import React, { memo } from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { mockTimelineModel, TestProviders } from '../../../../../common/mock';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { useSessionView, useSessionViewNavigation } from './use_session_view';
+import { useSessionViewNavigation } from './use_session_view';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 const mockDispatch = jest.fn();
@@ -46,9 +45,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
             siemV2: { crud_alerts: true, read_alerts: true },
           },
         },
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
         data: {
           search: jest.fn(),
           query: jest.fn(),
@@ -67,12 +63,10 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-describe('useSessionView with active timeline and a session id and graph event id', () => {
+describe('useSessionView with active timeline and graph event id', () => {
   let setTimelineFullScreen: jest.Mock;
   let setGlobalFullScreen: jest.Mock;
-  let kibana: ReturnType<typeof useKibana>;
   const Wrapper = memo<PropsWithChildren<unknown>>(({ children }) => {
-    kibana = useKibana();
     return <TestProviders>{children}</TestProviders>;
   });
   Wrapper.displayName = 'Wrapper';
@@ -89,30 +83,15 @@ describe('useSessionView with active timeline and a session id and graph event i
     (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
       return {
         ...mockTimelineModel,
-        activeTab: TimelineTabs.session,
+        activeTab: TimelineTabs.graph,
         graphEventId: 'current-graph-event-id',
-        sessionViewConfig: {
-          sessionEntityId: 'test',
-        },
         show: true,
       };
     });
   });
+
   afterEach(() => {
     (useDeepEqualSelector as jest.Mock).mockClear();
-  });
-
-  it('removes the full screen class from the overlay', () => {
-    renderHook(
-      () => {
-        const testProps = {
-          scopeId: TimelineId.active,
-        };
-        return useSessionView(testProps);
-      },
-      { wrapper: Wrapper }
-    );
-    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
   });
 
   it('calls setTimelineFullScreen with false when onCloseOverlay is called and the app is not in full screen mode', () => {
@@ -127,21 +106,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     );
     const navigation = result.current.Navigation;
     const renderResult = render(<TestProviders>{navigation}</TestProviders>);
-    expect(renderResult.getByText('Close session viewer')).toBeTruthy();
-  });
-
-  it('uses an optional height when passed', () => {
-    renderHook(
-      () => {
-        const testProps = {
-          scopeId: TimelineId.test,
-          height: 1118,
-        };
-        return useSessionView(testProps);
-      },
-      { wrapper: Wrapper }
-    );
-    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
+    expect(renderResult.getByText('Close analyzer')).toBeTruthy();
   });
 
   describe('useSessionView with non active timeline and graph event id set', () => {
@@ -158,14 +123,15 @@ describe('useSessionView with active timeline and a session id and graph event i
         return {
           ...mockTimelineModel,
           graphEventId: 'current-graph-event-id',
-          sessionViewConfig: null,
           show: true,
         };
       });
     });
+
     afterEach(() => {
       (useDeepEqualSelector as jest.Mock).mockClear();
     });
+
     it('renders the navigation component with the correct text for analyzer', () => {
       const { result } = renderHook(
         () => {
@@ -182,7 +148,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     });
   });
 
-  describe('useSessionView and useSessionViewNavigation should handle separate parts', () => {
+  describe('useSessionViewNavigation should handle separate parts', () => {
     beforeEach(() => {
       setTimelineFullScreen = jest.fn();
       setGlobalFullScreen = jest.fn();
@@ -195,35 +161,15 @@ describe('useSessionView with active timeline and a session id and graph event i
       (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
         return {
           ...mockTimelineModel,
-          activeTab: TimelineTabs.session,
+          activeTab: TimelineTabs.graph,
           graphEventId: 'current-graph-event-id',
-          sessionViewConfig: {
-            sessionEntityId: 'test',
-          },
           show: true,
         };
       });
     });
+
     afterEach(() => {
       (useDeepEqualSelector as jest.Mock).mockClear();
-    });
-    it('useSessionView should handle session view and details panel', () => {
-      const { result } = renderHook(
-        () => {
-          const testProps = {
-            scopeId: TimelineId.active,
-          };
-          return useSessionView(testProps);
-        },
-        { wrapper: Wrapper }
-      );
-      expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
-
-      expect(result.current).toHaveProperty('openEventDetailsPanel');
-      expect(result.current).toHaveProperty('SessionView');
-
-      expect(result.current).not.toHaveProperty('Navigation');
-      expect(result.current).not.toHaveProperty('onCloseOverlay');
     });
 
     it('useSessionViewNavigation should handle Navigation component and on close callback', () => {

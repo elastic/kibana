@@ -8,8 +8,8 @@
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
-  DataTableState,
   DataTableModel,
+  DataTableState,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
 import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
@@ -51,7 +51,6 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         itemsPerPageOptions: timelineModel.itemsPerPageOptions,
         showCheckboxes: timelineModel.showCheckboxes,
         graphEventId: timelineModel.graphEventId,
-        sessionViewConfig: timelineModel.sessionViewConfig,
         selectAll: timelineModel.selectAll,
         id: timelineModel.id,
         title: timelineModel.title,

@@ -11,7 +11,6 @@ import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
@@ -82,10 +81,6 @@ const PinnedTab = tabWithSuspense(
   lazy(() => import('./pinned')),
   <TimelineTabFallback />
 );
-const SessionTab = tabWithSuspense(
-  lazy(() => import('./session')),
-  <TimelineTabFallback />
-);
 const EsqlTab = tabWithSuspense(
   lazy(() => import('./esql')),
   <TimelineTabFallback />
@@ -130,8 +125,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             return <GraphTab timelineId={timelineId} />;
           case TimelineTabs.notes:
             return <NotesTab timelineId={timelineId} />;
-          case TimelineTabs.session:
-            return <SessionTab timelineId={timelineId} />;
           default:
             return null;
         }
@@ -140,8 +133,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     );
 
     const isGraphOrNotesTabs = useMemo(
-      () =>
-        [TimelineTabs.graph, TimelineTabs.notes, TimelineTabs.session].includes(activeTimelineTab),
+      () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
       [activeTimelineTab]
     );
 
@@ -194,7 +186,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         <LazyTimelineTabRenderer
           timelineId={timelineId}
           shouldShowTab={isGraphOrNotesTabs}
-          isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
           dataTestSubj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs ? getTab(activeTimelineTab) : null}
@@ -362,7 +353,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
-    if (!graphEventId && activeTab === TimelineTabs.graph) {
+    // we redirect to the Query tab in the following situations:
+    // - for the Analyzer tab but the graphEventId is missing from the url
+    // - for urls with Timeline saved with the Session tab, we automatically (as Session View is now rendered in the flyout)
+    // @ts-ignore
+    if ((!graphEventId && activeTab === TimelineTabs.graph) || activeTab === 'session') {
       setQueryAsActiveTab();
     }
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
