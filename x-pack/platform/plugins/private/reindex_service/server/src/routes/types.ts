@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReindexOperation } from '../../../common/types';
+import { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
 
 // These types represent contracts from the reindex RESTful API endpoints and
 // should be changed in a way that respects backwards compatibility.
