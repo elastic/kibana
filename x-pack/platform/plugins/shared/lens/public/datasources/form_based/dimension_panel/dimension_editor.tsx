@@ -480,7 +480,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
               <span
                 css={css`
                   overflow: hidden;
@@ -510,7 +510,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithSampling) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs }}>
               {label}
             </EuiFlexItem>
             {shouldDisplayDots && (
@@ -625,7 +625,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value!),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });

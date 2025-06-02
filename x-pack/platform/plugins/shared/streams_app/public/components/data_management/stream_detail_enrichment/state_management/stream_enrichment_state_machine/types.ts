@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { GrokCollection } from '@kbn/grok-ui';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
@@ -37,6 +38,7 @@ export interface StreamEnrichmentContextType {
   initialProcessorsRefs: ProcessorActorRef[];
   dataSourcesRefs: DataSourceActorRef[];
   processorsRefs: ProcessorActorRef[];
+  grokCollection: GrokCollection;
   simulatorRef?: SimulationActorRef;
   urlState: EnrichmentUrlState;
 }

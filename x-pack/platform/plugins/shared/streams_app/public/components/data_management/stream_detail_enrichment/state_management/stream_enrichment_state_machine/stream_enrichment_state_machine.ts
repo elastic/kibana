@@ -20,6 +20,7 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { GrokCollection } from '@kbn/grok-ui';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -50,6 +51,7 @@ import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
 } from '../data_source_state_machine';
+import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 
 const createId = htmlIdGenerator();
 
@@ -65,6 +67,7 @@ export const streamEnrichmentMachine = setup({
     initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
+    setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     processorMachine: getPlaceholderFor(() => processorMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
@@ -87,6 +90,7 @@ export const streamEnrichmentMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
+
     stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
     setupProcessors: assign(
       ({ self, spawn }, params: { definition: Streams.ingest.all.GetResponse }) => {
@@ -224,6 +228,7 @@ export const streamEnrichmentMachine = setup({
   context: ({ input }) => ({
     definition: input.definition,
     dataSourcesRefs: [],
+    grokCollection: new GrokCollection(),
     initialProcessorsRefs: [],
     processorsRefs: [],
     urlState: defaultEnrichmentUrlState,
@@ -245,7 +250,7 @@ export const streamEnrichmentMachine = setup({
       },
       on: {
         'url.initialized': {
-          target: 'ready',
+          target: 'setupGrokCollection',
           actions: [
             { type: 'storeUrlState', params: ({ event }) => event },
             { type: 'updateUrlState' },
@@ -253,6 +258,22 @@ export const streamEnrichmentMachine = setup({
         },
       },
     },
+    setupGrokCollection: {
+      invoke: {
+        id: 'setupGrokCollection',
+        src: 'setupGrokCollection',
+        input: ({ context }) => ({
+          grokCollection: context.grokCollection,
+        }),
+        onDone: {
+          target: 'ready',
+        },
+        onError: {
+          target: 'grokCollectionFailure',
+        },
+      },
+    },
+    grokCollectionFailure: {},
     ready: {
       id: 'ready',
       type: 'parallel',
@@ -416,6 +437,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   actors: {
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    setupGrokCollection: setupGrokCollectionActor(),
     processorMachine,
     dataSourceMachine: dataSourceMachine.provide(
       createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
