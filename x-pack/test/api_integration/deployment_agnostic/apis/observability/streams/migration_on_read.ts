@@ -89,7 +89,7 @@ const expectedDashboardsResponse = {
   dashboards: [
     {
       id: TEST_DASHBOARD_ID,
-      title: 'Logs count and top 10 messages',
+      title: 'dashboard-4-panels',
       tags: [],
     },
   ],
@@ -118,8 +118,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const SPACE_ID = 'default';
   const ARCHIVES = [
-    // this archive contains a dashboard with esql panel and a lens panel referencing a data view
-    // both read from `logs`
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/content_pack_four_panels.json',
   ];
 
