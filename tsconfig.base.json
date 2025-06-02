@@ -144,6 +144,8 @@
       "@kbn/cbor/*": ["src/platform/packages/shared/kbn-cbor/*"],
       "@kbn/cell-actions": ["src/platform/packages/shared/kbn-cell-actions"],
       "@kbn/cell-actions/*": ["src/platform/packages/shared/kbn-cell-actions/*"],
+      "@kbn/change-requests-plugin": ["x-pack/platform/plugins/shared/change_requests"],
+      "@kbn/change-requests-plugin/*": ["x-pack/platform/plugins/shared/change_requests/*"],
       "@kbn/chart-expressions-common": ["src/platform/packages/shared/chart-expressions-common"],
       "@kbn/chart-expressions-common/*": ["src/platform/packages/shared/chart-expressions-common/*"],
       "@kbn/chart-icons": ["src/platform/packages/shared/kbn-chart-icons"],

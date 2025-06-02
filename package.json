@@ -220,6 +220,7 @@
     "@kbn/cases-plugin": "link:x-pack/platform/plugins/shared/cases",
     "@kbn/cbor": "link:src/platform/packages/shared/kbn-cbor",
     "@kbn/cell-actions": "link:src/platform/packages/shared/kbn-cell-actions",
+    "@kbn/change-requests-plugin": "link:x-pack/platform/plugins/shared/change_requests",
     "@kbn/chart-expressions-common": "link:src/platform/packages/shared/chart-expressions-common",
     "@kbn/chart-icons": "link:src/platform/packages/shared/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/platform/plugins/shared/charts",

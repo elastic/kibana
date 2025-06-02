@@ -4025,6 +4025,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-requests-plugin@link:x-pack/platform/plugins/shared/change_requests":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
