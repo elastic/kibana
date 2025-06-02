@@ -31,6 +31,11 @@ export const storeReducer = (state: IStoreState, action: IDispatchAction) => {
         ...state,
         currentGroupByColumn: action.payload,
       };
+    case 'SET_INITIAL_STATE':
+      return {
+        ...state,
+        data: action.payload,
+      };
     case 'EMPTY_GROUP_BY_COLUMN_SELECTION':
       return {
         ...state,
