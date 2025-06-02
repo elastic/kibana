@@ -10,6 +10,7 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { FC, PropsWithChildren } from 'react';
+import { apm } from '@elastic/apm-rum';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
@@ -18,11 +19,14 @@ import { KibanaErrorService } from '../services/error_service';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
 
+jest.mock('@elastic/apm-rum');
+
 describe('<KibanaSectionErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     services = getServicesMock();
+    (apm.captureError as jest.Mock).mockClear();
   });
 
   const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -114,5 +118,20 @@ describe('<KibanaSectionErrorBoundary>', () => {
         'Error: This is an error to show the test user!'
       )
     ).toBe(true);
+  });
+
+  it('integrates with apm to capture the error', async () => {
+    const { findByTestId } = render(
+      <Template>
+        <BadComponent />
+      </Template>
+    );
+    (await findByTestId('clickForErrorBtn')).click();
+
+    expect(apm.captureError).toHaveBeenCalledTimes(1);
+    expect(apm.captureError).toHaveBeenCalledWith(
+      new Error('This is an error to show the test user!'),
+      { labels: { errorType: 'SectionFatalReactError' } }
+    );
   });
 });
