@@ -24,15 +24,15 @@ import { migrateByValueDashboardPanels } from './migrate_by_value_dashboard_pane
 import { createExtractPanelReferencesMigration } from './migrate_extract_panel_references';
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
-  embeddable: EmbeddableSetup;
-  core: CoreSetup<{ embeddable: EmbeddableStart }>;
+  embeddableSetup: EmbeddableSetup;
+  getEmbeddableStart: () => EmbeddableStart | undefined;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigration>(
-    deps.embeddable.getAllMigrations(),
+    deps.embeddableSetup.getAllMigrations(),
     migrateByValueDashboardPanels
   );
 
