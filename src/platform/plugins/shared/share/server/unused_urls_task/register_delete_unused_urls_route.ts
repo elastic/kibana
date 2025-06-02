@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { IRouter, Logger } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
+import { Duration } from 'moment';
+import { runDeleteUnusedUrlsTask } from './task';
+
+export const registerDeleteUnusedUrlsRoute = ({
+  router,
+  core,
+  urlExpirationDuration,
+  pitKeepAlive,
+  logger,
+}: {
+  router: IRouter;
+  core: CoreSetup;
+  urlExpirationDuration: Duration;
+  pitKeepAlive: Duration;
+  logger: Logger;
+}) => {
+  router.delete(
+    {
+      path: '/api/unused_urls_cleanup/run',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is used by the unused URLs cleanup task and does not require authentication.',
+        },
+      },
+      options: {
+        access: 'internal',
+        summary: 'Runs the unused URLs cleanup task',
+      },
+      validate: {},
+    },
+    async (_ctx, _req, res) => {
+      await runDeleteUnusedUrlsTask({ core, urlExpirationDuration, pitKeepAlive, logger });
+      return res.ok({
+        body: {
+          message: 'Unused URLs cleanup task has been initiated.',
+        },
+      });
+    }
+  );
+};

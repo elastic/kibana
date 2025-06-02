@@ -14,6 +14,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { registerDeleteUnusedUrlsRoute } from './unused_urls_task/register_delete_unused_urls_route';
 import {
   TASK_ID,
   runDeleteUnusedUrlsTask,
@@ -42,11 +43,11 @@ export interface SharePublicStart {
 }
 
 export interface SharePublicSetupDependencies {
-  taskManager: TaskManagerSetupContract;
+  taskManager?: TaskManagerSetupContract;
 }
 
 export interface SharePublicStartDependencies {
-  taskManager: TaskManagerStartContract;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class SharePlugin
@@ -90,6 +91,16 @@ export class SharePlugin
 
     registerUrlServiceSavedObjectType(core.savedObjects, this.url);
     registerUrlServiceRoutes(core, core.http.createRouter(), this.url);
+
+    if (this.config.url_expiration.enabled && taskManager) {
+      registerDeleteUnusedUrlsRoute({
+        router: core.http.createRouter(),
+        core,
+        urlExpirationDuration: this.config.url_expiration.duration,
+        pitKeepAlive: this.config.url_expiration.pit_keep_alive,
+        logger: this.logger,
+      });
+    }
 
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
