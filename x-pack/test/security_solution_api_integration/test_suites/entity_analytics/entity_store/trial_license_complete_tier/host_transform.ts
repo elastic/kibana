@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should successfully trigger a host transform', async () => {
-        const HOST_NAME: string = 'host-transform-test-ip';
+        const HOST_NAME: string = 'host-transform-test-ip-SMALL-CHANGE';
         const testDocs: EcsHost[] = [{ ip: '1.1.1.1' }, { ip: '2.2.2.2' }];
 
         await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, testDocs);
