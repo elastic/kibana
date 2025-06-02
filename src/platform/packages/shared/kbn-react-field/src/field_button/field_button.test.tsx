@@ -8,50 +8,70 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { FieldButton } from './field_button';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { FieldButton, FieldButtonProps } from './field_button';
 
 const noop = () => {};
 
-describe('with drag handle', () => {
-  it('is rendered', () => {
-    const component = shallow(
-      <FieldButton size="s" onClick={noop} fieldName="name" dragHandle={<span>drag</span>} />
-    );
-    expect(component).toMatchSnapshot();
-  });
-});
+const commonProps: FieldButtonProps = {
+  size: 's',
+  onClick: noop,
+  fieldName: 'name',
+};
 
-describe('fieldIcon', () => {
-  it('is rendered', () => {
-    const component = shallow(
-      <FieldButton size="s" onClick={noop} fieldName="name" fieldIcon={<span>fieldIcon</span>} />
-    );
-    expect(component).toMatchSnapshot();
-  });
-});
+describe('FieldButton', () => {
+  it('renders drag handle if passed', () => {
+    render(<FieldButton {...commonProps} dragHandle={<span>drag</span>} />);
 
-describe('fieldAction', () => {
-  it('is rendered', () => {
-    const component = shallow(
-      <FieldButton
-        size="s"
-        onClick={noop}
-        fieldName="name"
-        fieldAction={<span>fieldAction</span>}
-      />
-    );
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('kbnFieldButton_dragHandle')).toBeInTheDocument();
+    expect(screen.getByText('drag')).toBeInTheDocument();
   });
-});
 
-describe('isActive', () => {
-  it('defaults to false', () => {
-    const component = shallow(<FieldButton size="s" onClick={noop} fieldName="name" />);
-    expect(component).toMatchSnapshot();
+  it('renders field icon if passed', () => {
+    render(
+      <FieldButton {...commonProps} fieldIcon={<span data-testid="field-icon">fieldIcon</span>} />
+    );
+
+    expect(screen.getByTestId('kbnFieldButton_fieldIcon')).toBeInTheDocument();
+    expect(screen.getByText('fieldIcon')).toBeInTheDocument();
   });
-  it('renders true', () => {
-    const component = shallow(<FieldButton size="s" onClick={noop} fieldName="name" isActive />);
-    expect(component).toMatchSnapshot();
+
+  it('renders field action if passed', () => {
+    render(<FieldButton {...commonProps} fieldAction={<span>fieldAction</span>} />);
+
+    expect(screen.getByTestId('kbnFieldButton_fieldAction')).toBeInTheDocument();
+    expect(screen.getByText('fieldAction')).toBeInTheDocument();
+  });
+
+  it('defaults isActive to false', () => {
+    render(<FieldButton {...commonProps} />);
+
+    const wrapper = screen.getByRole('button').closest('.kbnFieldButton');
+    expect(wrapper).not.toHaveClass('kbnFieldButton-isActive');
+  });
+
+  it('applies isActive class when true', () => {
+    render(<FieldButton {...commonProps} isActive />);
+
+    const wrapper = screen.getByRole('button').closest('.kbnFieldButton');
+    expect(wrapper).toHaveClass('kbnFieldButton-isActive');
+  });
+
+  it('calls onClick when button is clicked', async () => {
+    const mockOnClick = jest.fn();
+    render(<FieldButton {...commonProps} onClick={mockOnClick} />);
+
+    const button = screen.getByRole('button');
+    await userEvent.click(button);
+
+    expect(mockOnClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders as div when no onClick is provided', () => {
+    render(<FieldButton size="s" fieldName="name" />);
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('name')).toBeInTheDocument();
   });
 });

@@ -96,7 +96,11 @@ export function FieldButton({
 
   const innerContent = (
     <>
-      {fieldIcon && <span css={styles.fieldIcon}>{fieldIcon}</span>}
+      {fieldIcon && (
+        <span data-test-subj="kbnFieldButton_fieldIcon" css={styles.fieldIcon}>
+          {fieldIcon}
+        </span>
+      )}
       {fieldName && (
         <span className="kbnFieldButton__name eui-textBreakAll" css={styles.buttonName}>
           <span className="kbnFieldButton__nameInner">{fieldName}</span>
@@ -121,7 +125,12 @@ export function FieldButton({
       {...rest}
     >
       {dragHandle && (
-        <div css={[styles.dragHandle, size === 'xs' && styles.dragHandleXs]}>{dragHandle}</div>
+        <div
+          data-test-subj="kbnFieldButton_dragHandle"
+          css={[styles.dragHandle, size === 'xs' && styles.dragHandleXs]}
+        >
+          {dragHandle}
+        </div>
       )}
       {onClick ? (
         <button
@@ -149,7 +158,12 @@ export function FieldButton({
       )}
 
       {fieldAction && (
-        <div css={[styles.fieldAction, size === 'xs' && styles.fieldActionXs]}>{fieldAction}</div>
+        <div
+          data-test-subj="kbnFieldButton_fieldAction"
+          css={[styles.fieldAction, size === 'xs' && styles.fieldActionXs]}
+        >
+          {fieldAction}
+        </div>
       )}
     </div>
   );
