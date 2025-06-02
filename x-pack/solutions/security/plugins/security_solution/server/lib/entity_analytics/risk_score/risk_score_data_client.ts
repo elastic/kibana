@@ -105,7 +105,8 @@ export class RiskScoreDataClient {
         index: getRiskScoreLatestIndex(this.options.namespace),
         mappings: mappingFromFieldMap(riskScoreFieldMap, false),
         settings: {
-          'index.default_pipeline': getIngestPipelineName(this.options.namespace),
+          // set to null because it was previously set but we now want it to be removed
+          'index.default_pipeline': null,
         },
       },
     });
