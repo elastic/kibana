@@ -12,6 +12,10 @@
 .dshDashboardViewport {
   width: 100%;
 
+  &.dshDashboardViewport--empty {
+    height: 100%;
+  }
+
   &--panelExpanded {
     flex: 1;
   }

@@ -24,6 +24,7 @@ import {
   SIEM_RULE_MIGRATION_STOP_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import {
   CreateRuleMigrationResponse,
@@ -323,6 +324,21 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
     }> => {
       const response = await supertest
         .get(SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    integrationStats: async ({ expectStatusCode = 200 }: RequestParams = {}): Promise<{
+      body: GetRuleMigrationIntegrationsResponse;
+    }> => {
+      const response = await supertest
+        .get(SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
