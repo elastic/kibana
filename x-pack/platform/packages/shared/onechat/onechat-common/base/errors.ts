@@ -6,7 +6,8 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from './tools';
+import type { SerializedToolIdentifier } from '../tools';
+import type { SerializedAgentIdentifier } from '../agents';
 
 /**
  * Code to identify onechat errors
@@ -14,6 +15,7 @@ import type { SerializedToolIdentifier } from './tools';
 export enum OnechatErrorCode {
   internalError = 'internalError',
   toolNotFound = 'toolNotFound',
+  agentNotFound = 'agentNotFound',
 }
 
 const OnechatError = ServerSentEventError;
@@ -78,12 +80,42 @@ export const createToolNotFoundError = ({
 };
 
 /**
+ * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
+ */
+export type OnechatAgentNotFoundError = OnechatError<OnechatErrorCode.agentNotFound>;
+
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
+export const isAgentNotFoundError = (err: unknown): err is OnechatInternalError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.agentNotFound;
+};
+
+export const createAgentNotFoundError = ({
+  agentId,
+  customMessage,
+  meta = {},
+}: {
+  agentId: SerializedAgentIdentifier;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): OnechatAgentNotFoundError => {
+  return new OnechatError(
+    OnechatErrorCode.agentNotFound,
+    customMessage ?? `Agent ${agentId} not found`,
+    { ...meta, agentId, statusCode: 404 }
+  );
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const OnechatErrorUtils = {
   isOnechatError,
   isInternalError,
   isToolNotFoundError,
+  isAgentNotFoundError,
   createInternalError,
   createToolNotFoundError,
+  createAgentNotFoundError,
 };

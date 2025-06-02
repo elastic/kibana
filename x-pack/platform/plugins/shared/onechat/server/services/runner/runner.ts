@@ -21,7 +21,7 @@ import type {
 import type { ToolsServiceStart } from '../tools';
 import { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext, forkContextForToolRun } from './utils/run_context';
-import { createEventEmitter, createNoopEventEmitter } from './utils/events';
+import { createToolEventEmitter, createNoopEventEmitter } from './utils/events';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -110,7 +110,7 @@ export const createToolHandlerContext = <TParams = Record<string, unknown>>({
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
     events: onEvent
-      ? createEventEmitter({ eventHandler: onEvent, context: manager.context })
+      ? createToolEventEmitter({ eventHandler: onEvent, context: manager.context })
       : createNoopEventEmitter(),
   };
 };

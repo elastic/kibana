@@ -12,12 +12,35 @@ import type {
   OnechatRunEventMeta,
   RunEventHandlerFn,
   RunEventEmitter,
+  AgentEventEmitter,
+  RunAgentOnEventFn,
 } from '@kbn/onechat-server';
 
 /**
  * Creates a run event emitter sending events to the provided event handler.
  */
-export const createEventEmitter = ({
+export const createAgentEventEmitter = ({
+  eventHandler,
+  context,
+}: {
+  eventHandler: RunAgentOnEventFn | undefined;
+  context: RunContext;
+}): AgentEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopEventEmitter();
+  }
+
+  return {
+    emit: (internalEvent) => {
+      eventHandler(internalEvent);
+    },
+  };
+};
+
+/**
+ * Creates a run event emitter sending events to the provided event handler.
+ */
+export const createToolEventEmitter = ({
   eventHandler,
   context,
 }: {
@@ -35,7 +58,7 @@ export const createEventEmitter = ({
 /**
  * Creates a run event emitter sending events to the provided event handler.
  */
-export const createNoopEventEmitter = (): RunEventEmitter => {
+export const createNoopEventEmitter = () => {
   return {
     emit: () => {},
   };
@@ -55,6 +78,7 @@ export const convertInternalEvent = <
   event: InternalRunEvent<TEventType, TData, TMeta>;
   context: RunContext;
 }): OnechatRunEvent<TEventType, TData, TMeta & OnechatRunEventMeta> => {
+  // TODO use OnechatEvent?
   return {
     type,
     data,

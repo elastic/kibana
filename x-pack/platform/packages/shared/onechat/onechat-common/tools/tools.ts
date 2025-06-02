@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createInternalError } from './errors';
+import { createInternalError } from '../base/errors';
 
 /**
  * Represents a plain toolId, without source information attached to it.

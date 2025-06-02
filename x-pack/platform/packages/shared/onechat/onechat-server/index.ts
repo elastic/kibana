@@ -44,3 +44,23 @@ export {
   type ToolResponseEvent,
   type ToolCallEvent,
 } from './src/events';
+export type {
+  AgentHandlerParams,
+  AgentHandlerContext,
+  AgentHandlerReturn,
+  AgentHandlerFn,
+  ConversationalAgentParams,
+  ConversationalAgentHandlerFn,
+  ConversationalAgentResponse,
+  RunAgentFn,
+  RunAgentParams,
+  RunAgentReturn,
+  ScopedRunAgentFn,
+  ScopedRunnerRunAgentParams,
+  AgentEventEmitter,
+  RunAgentOnEventFn,
+  BaseAgentDescriptor,
+  ConversationalAgentDescriptor,
+  AgentDescriptor,
+  AgentProvider,
+} from './agents';

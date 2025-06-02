@@ -11,7 +11,7 @@
 export interface OnechatEvent<
   TEventType extends string,
   TData extends Record<string, any>,
-  TMeta extends Record<string, any>
+  TMeta extends Record<string, any> = {}
 > {
   /**
    * Unique type identifier for the event.
@@ -24,5 +24,5 @@ export interface OnechatEvent<
   /**
    * Metadata bound to this event.
    */
-  meta: TMeta;
+  meta?: TMeta;
 }

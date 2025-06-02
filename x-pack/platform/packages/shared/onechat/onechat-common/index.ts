@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { OnechatEvent } from './src/events';
+export type { OnechatEvent } from './base/events';
 export {
   type ToolDescriptor,
   type ToolDescriptorMeta,
@@ -21,16 +21,54 @@ export {
   toSerializedToolIdentifier,
   createBuiltinToolId,
   builtinSourceId,
-} from './src/tools';
+} from './tools';
 export {
   OnechatErrorCode,
   OnechatErrorUtils,
   isInternalError,
   isToolNotFoundError,
   isOnechatError,
+  isAgentNotFoundError,
   createInternalError,
   createToolNotFoundError,
+  createAgentNotFoundError,
   type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
-} from './src/errors';
+} from './base/errors';
+export {
+  OneChatDefaultAgentId,
+  AgentType,
+  type AgentIdentifier,
+  type PlainIdAgentIdentifier,
+  type SerializedAgentIdentifier,
+  type StructuredAgentIdentifier,
+  ChatAgentEventType,
+  type ChatAgentEvent,
+  type ChatAgentEventMeta,
+  type ChatAgentEventBase,
+  type ToolResultEvent,
+  type ToolResultEventData,
+  type ToolCallEvent,
+  type ToolCallEventData,
+  type RoundInput,
+  type AssistantResponse,
+  type ToolCallWithResult,
+  type ConversationRound,
+  type MessageChunkEventData,
+  type MessageChunkEvent,
+  type MessageCompleteEventData,
+  type MessageCompleteEvent,
+  type RoundCompleteEventData,
+  type RoundCompleteEvent,
+  isToolCallEvent,
+  isToolResultEvent,
+  isMessageChunkEvent,
+  isMessageCompleteEvent,
+  isRoundCompleteEvent,
+  isSerializedAgentIdentifier,
+  isPlainAgentIdentifier,
+  isStructuredAgentIdentifier,
+  toSerializedAgentIdentifier,
+  toStructuredAgentIdentifier,
+} from './agents';
