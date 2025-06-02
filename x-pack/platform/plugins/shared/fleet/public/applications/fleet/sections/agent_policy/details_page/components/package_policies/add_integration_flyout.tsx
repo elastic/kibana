@@ -68,7 +68,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
               tryApi={true}
             />
           ),
-        })) ?? []
+        }))
     );
   }, [filteredCards]);
 
