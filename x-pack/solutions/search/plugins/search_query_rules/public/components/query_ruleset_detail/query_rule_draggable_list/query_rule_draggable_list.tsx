@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import {
   EuiDragDropContext,
@@ -32,6 +32,7 @@ import { DroppableContainer } from '../styles';
 import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
 import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';
 import { QueryRuleDraggableItemCriteriaDisplay } from './query_rule_draggable_item_criteria_display';
+import { DeleteRulesetRuleModal } from './delete_ruleset_rule_modal';
 
 export interface QueryRuleDraggableListItemProps {
   queryRule: QueryRulesQueryRule;
@@ -61,8 +62,16 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   const openPopover = useCallback(() => {
     setIsPopoverOpen(true);
   }, []);
+  const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
   return (
     <>
+      {rulesetToDelete && (
+        <DeleteRulesetRuleModal
+          rulesetId={rulesetToDelete}
+          ruleId={queryRule.rule_id}
+          closeDeleteModal={() => setRulesetToDelete(null)}
+        />
+      )}
       <EuiDraggable
         spacing="m"
         key={queryRule.rule_id}
@@ -169,7 +178,7 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
                             icon="trash"
                             data-test-subj="searchQueryRulesQueryRulesetDetailDeleteButton"
                             onClick={() => {
-                              // Logic to handle delete action
+                              setRulesetToDelete(queryRule.rule_id);
                               closePopover();
                             }}
                           >
