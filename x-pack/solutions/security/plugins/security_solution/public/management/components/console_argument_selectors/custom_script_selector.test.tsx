@@ -196,7 +196,7 @@ describe('CustomScriptSelector', () => {
     expect(screen.getByText('Test script 2')).toBeInTheDocument();
   });
 
-  test('sets search value based on valueText prop', async () => {
+  test('displays the selected script name in the search box', async () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
       <SelectorComponent
@@ -211,7 +211,7 @@ describe('CustomScriptSelector', () => {
     expect(searchbox).toHaveValue('Script 1');
   });
 
-  test('filters options based on valueText prop', async () => {
+  test('filters script options as the user types in the search box', async () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
       <SelectorComponent
