@@ -21,7 +21,10 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DataSourceExclusions, FeatureSet } from '@kbn/upgrade-assistant-pkg-server';
-import { reindexOperationSavedObjectType, mlSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
+import {
+  reindexOperationSavedObjectType,
+  mlSavedObjectType,
+} from '@kbn/upgrade-assistant-pkg-server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 // import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
