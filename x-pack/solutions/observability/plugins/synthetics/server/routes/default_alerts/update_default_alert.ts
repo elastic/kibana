@@ -15,18 +15,27 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
+  handler: async ({
+    context,
+    server,
+    savedObjectsClient,
+    request,
+  }): Promise<DEFAULT_ALERT_RESPONSE> => {
+    const currentSpacePromise = server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
       await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
 
-    const updateStatusRulePromise = defaultAlertService.updateStatusRule(defaultStatusRuleEnabled);
-    const updateTLSRulePromise = defaultAlertService.updateTlsRule(defaultTLSRuleEnabled);
+    const activeSpace = await currentSpacePromise;
 
+    console.log('activespace a', activeSpace);
     try {
       const [statusRule, tlsRule] = await Promise.all([
-        updateStatusRulePromise,
-        updateTLSRulePromise,
+        defaultAlertService.updateStatusRule(
+          activeSpace?.id ?? 'default',
+          defaultStatusRuleEnabled
+        ),
+        defaultAlertService.updateTlsRule(activeSpace?.id ?? 'default', defaultTLSRuleEnabled),
       ]);
       return {
         statusRule: statusRule || null,

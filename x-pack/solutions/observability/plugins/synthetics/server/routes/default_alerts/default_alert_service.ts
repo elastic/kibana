@@ -46,12 +46,12 @@ export class DefaultAlertService {
     return this.settings;
   }
 
-  async setupDefaultAlerts() {
+  async setupDefaultAlerts(spaceId: string) {
     this.settings = await this.getSettings();
 
     const [statusRule, tlsRule] = await Promise.allSettled([
-      this.setupStatusRule(),
-      this.setupTlsRule(),
+      this.setupStatusRule(spaceId),
+      this.setupTlsRule(spaceId),
     ]);
 
     if (statusRule.status === 'rejected') {
@@ -75,7 +75,7 @@ export class DefaultAlertService {
     return interval;
   }
 
-  setupStatusRule() {
+  setupStatusRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
@@ -83,11 +83,12 @@ export class DefaultAlertService {
     return this.createDefaultRuleIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      minimumRuleInterval
+      minimumRuleInterval,
+      spaceId
     );
   }
 
-  setupTlsRule() {
+  setupTlsRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
@@ -95,7 +96,8 @@ export class DefaultAlertService {
     return this.createDefaultRuleIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      minimumRuleInterval
+      minimumRuleInterval,
+      spaceId
     );
   }
 
@@ -120,7 +122,8 @@ export class DefaultAlertService {
   async createDefaultRuleIfNotExist(
     ruleType: DefaultRuleType,
     name: string,
-    interval: string
+    interval: string,
+    spaceId: string
   ): Promise<SyntheticsDefaultRule | undefined> {
     // short circuit if the rule already exists
     let defaultRule = await this.getExistingAlert(ruleType);
@@ -144,14 +147,13 @@ export class DefaultAlertService {
           consumer: 'uptime',
           alertTypeId: ruleType,
           schedule: { interval },
-
           tags: ['SYNTHETICS_DEFAULT_ALERT'],
           name,
           enabled: true,
           throttle: null,
         },
         options: {
-          id: `SNTHETICS_DEFAULT_ALERT_${ruleType}`,
+          id: `SYNTHETICS_DEFAULT_ALERT-${ruleType}-${spaceId}`,
         },
       });
       defaultRule = {
@@ -162,7 +164,6 @@ export class DefaultAlertService {
     } catch (error) {
       if (error.message && !error.message.includes('document already exists')) {
         this.server.logger.error(`Error creating default alert for ${ruleType}: ${error.message}`);
-        throw error;
       }
     }
 
@@ -179,13 +180,14 @@ export class DefaultAlertService {
     return this.getExistingAlert(ruleType);
   }
 
-  async updateStatusRule(enabled?: boolean) {
+  async updateStatusRule(spaceId: string, enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        spaceId
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -195,13 +197,14 @@ export class DefaultAlertService {
     }
   }
 
-  async updateTlsRule(enabled?: boolean) {
+  async updateTlsRule(spaceId: string, enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.upsertDefaultAlert(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
-        minimumRuleInterval
+        minimumRuleInterval,
+        spaceId
       );
     } else {
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -211,7 +214,12 @@ export class DefaultAlertService {
     }
   }
 
-  async upsertDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
+  async upsertDefaultAlert(
+    ruleType: DefaultRuleType,
+    name: string,
+    interval: string,
+    spaceId: string
+  ) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
@@ -243,7 +251,7 @@ export class DefaultAlertService {
       };
     }
 
-    return this.createDefaultRuleIfNotExist(ruleType, name, interval);
+    return this.createDefaultRuleIfNotExist(ruleType, name, interval, spaceId);
   }
 
   async getRuleActions(ruleType: DefaultRuleType) {

@@ -14,9 +14,15 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   method: 'POST',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
+  handler: async ({
+    context,
+    server,
+    savedObjectsClient,
+    request,
+  }): Promise<DEFAULT_ALERT_RESPONSE> => {
+    const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
-    return defaultAlertService.setupDefaultAlerts();
+    return defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
   },
 });

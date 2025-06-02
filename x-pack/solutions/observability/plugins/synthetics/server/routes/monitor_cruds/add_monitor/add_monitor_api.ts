@@ -216,13 +216,15 @@ export class AddEditMonitorAPI {
     }
   }
 
-  initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context } = this.routeContext;
+  async initDefaultAlerts(name: string) {
+    const { server, savedObjectsClient, context, request } = this.routeContext;
+    const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
+
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
       defaultAlertService
-        .setupDefaultAlerts()
+        .setupDefaultAlerts(activeSpace?.id ?? 'default')
         .then(() => {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
