@@ -336,7 +336,7 @@ export class FeatureProperties extends Component<Props, State> {
     const rows = this.state.properties.map((tooltipProperty) => {
       return (
         <MapFeatureTooltipRow key={tooltipProperty.getPropertyKey()}>
-          <td>{tooltipProperty.getPropertyName()} 2222</td>
+          <td>{tooltipProperty.getPropertyName()}</td>
           <td>{tooltipProperty.getHtmlDisplayValue()}</td>
           {this._renderFilterCell(tooltipProperty)}
         </MapFeatureTooltipRow>
