@@ -25,8 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const cloudProviderName1 = 'Amazon Web Services';
   const cloudProviderName2 = 'Google Cloud Platform';
 
-  // Failing: See https://github.com/elastic/kibana/issues/221220
-  describe.skip('Vulnerabilities Page - Grouping', function () {
+  describe('Vulnerabilities Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
@@ -48,8 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220578
-    describe.skip('Default Grouping', async () => {
+    describe('Default Grouping', async () => {
       it('groups vulnerabilities by cloud account and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();

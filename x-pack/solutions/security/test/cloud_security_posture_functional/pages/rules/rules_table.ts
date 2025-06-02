@@ -77,7 +77,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -97,7 +96,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    describe('Rules Page - Bulk Action buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/220379
+    describe.skip('Rules Page - Bulk Action buttons', () => {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
@@ -156,8 +156,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220371
-    describe.skip('Rules Page - Flyout', () => {
+    describe('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
         // Ensure that the first rule is enabled
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'enable');

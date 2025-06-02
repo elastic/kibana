@@ -13,8 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/209387
-  describe.skip('Findings Page onboarding', function () {
+  describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledCSP: typeof findings.notInstalledCSP;

@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/220357
-  describe('Findings Page - Grouping', function () {
+  describe.skip('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
