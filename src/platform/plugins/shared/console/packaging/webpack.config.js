@@ -36,18 +36,18 @@ module.exports = {
       '@emotion/react': 'commonjs @emotion/react',
       classnames: 'commonjs classnames',
       react: 'commonjs react',
-      "lodash": 'commonjs lodash',
-      "react-dom": 'commonjs react-dom',
-      "react-markdown": "commonjs react-markdown",
-      "monaco-editor": 'commonjs monaco-editor',
-      "moment": 'commonjs moment',
-      "rxjs": "commonjs rxjs",
-      "moment-duration-format": 'commonjs moment-duration-format',
-      "moment-timezone": 'commonjs moment-timezone',
-      "@elastic/datemath": 'commonjs @elastic/datemath',
+      lodash: 'commonjs lodash',
+      'react-dom': 'commonjs react-dom',
+      'react-markdown': 'commonjs react-markdown',
+      'monaco-editor': 'commonjs monaco-editor',
+      moment: 'commonjs moment',
+      rxjs: 'commonjs rxjs',
+      'moment-duration-format': 'commonjs moment-duration-format',
+      'moment-timezone': 'commonjs moment-timezone',
+      '@elastic/datemath': 'commonjs @elastic/datemath',
     },
     // Handle monaco and react-dom internal imports
-    function(context, request, callback) {
+    function (context, request, callback) {
       if (/^monaco-editor\/esm\/vs\//.test(request)) {
         return callback(null, 'commonjs ' + request);
       }
@@ -55,7 +55,7 @@ module.exports = {
         return callback(null, 'commonjs ' + request);
       }
       callback();
-    }
+    },
   ],
   module: {
     rules: [
