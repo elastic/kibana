@@ -13,7 +13,15 @@ import { installationStatuses } from '../../../../../../../common/constants';
 
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
+import { isPackageUpdatable } from '../../../../services';
 
+import {
+  useAuthz,
+  useConfig,
+  useGetPackagesQuery,
+  useGetSettingsQuery,
+  useStartServices,
+} from '../../../../hooks';
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import { InstalledPackages } from './installed_packages';
