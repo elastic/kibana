@@ -7,34 +7,33 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
-  EuiTourStep,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiPopover,
-  useGeneratedHtmlId,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiIcon,
+  EuiPopover,
   EuiTitle,
+  EuiTourStep,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useParams } from 'react-router-dom';
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useParams } from 'react-router-dom';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
-import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
-import { ErrorPrompt } from '../error_prompt/error_prompt';
-import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
-import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
-import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
+import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
+import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
+import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { DeleteRulesetModal } from '../query_rules_sets/delete_ruleset_modal';
+import { QueryRuleDetailPanel } from './query_rule_detail_panel';
+import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 export const QueryRulesetDetail: React.FC = () => {
   const {
@@ -44,19 +43,13 @@ export const QueryRulesetDetail: React.FC = () => {
     rulesetId?: string;
   }>();
 
+  const { queryRuleset, isInitialLoading, isError, error } = useQueryRulesetDetailState({
+    rulesetId,
+  });
   const [isPopoverActionsOpen, setPopoverActions] = useState(false);
   const splitButtonPopoverActionsId = useGeneratedHtmlId({
     prefix: 'splitButtonPopoverActionsId',
   });
-
-  const {
-    data: queryRulesetData,
-    isInitialLoading,
-    isError,
-    error,
-  } = useFetchQueryRuleset(rulesetId);
-
-  const [rules, setRules] = useState<QueryRulesQueryRule[]>(queryRulesetData?.rules ?? []);
   const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
 
   const tourConfig = {
@@ -143,12 +136,6 @@ export const QueryRulesetDetail: React.FC = () => {
 
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (queryRulesetData?.rules) {
-      setRules(queryRulesetData.rules);
-    }
-  }, [queryRulesetData?.rules, tourState]);
-
   const finishTour = () => {
     setTourState({
       ...tourState,
@@ -158,7 +145,7 @@ export const QueryRulesetDetail: React.FC = () => {
 
   return (
     <QueryRulesPageTemplate>
-      {!isInitialLoading && !isError && !!queryRulesetData && (
+      {!isInitialLoading && !isError && !!queryRuleset && (
         <KibanaPageTemplate.Header
           pageTitle={rulesetId}
           breadcrumbs={[
@@ -174,7 +161,7 @@ export const QueryRulesetDetail: React.FC = () => {
               color: 'primary',
               'aria-current': false,
               href: '#',
-              onClick: (e) =>
+              onClick: () =>
                 application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`)),
             },
           ]}
@@ -190,7 +177,7 @@ export const QueryRulesetDetail: React.FC = () => {
                   minWidth={tourState.tourPopoverWidth}
                   onFinish={finishTour}
                   step={1}
-                  stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
+                  stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
                   title={
                     <EuiTitle size="xs">
                       <h6>{tourStepsInfo[0].title}</h6>
@@ -201,7 +188,7 @@ export const QueryRulesetDetail: React.FC = () => {
                   footerAction={
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem>
-                        {queryRulesetData.rules.length > 1 ? (
+                        {queryRuleset.rules.length > 1 ? (
                           <EuiButtonEmpty
                             data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
                             size="s"
@@ -225,7 +212,7 @@ export const QueryRulesetDetail: React.FC = () => {
                           </EuiButton>
                         )}
                       </EuiFlexItem>
-                      {queryRulesetData.rules.length > 1 && (
+                      {queryRuleset.rules.length > 1 && (
                         <EuiFlexItem>
                           <EuiButton
                             data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
@@ -295,20 +282,10 @@ export const QueryRulesetDetail: React.FC = () => {
           ]}
         />
       )}
-      {rulesetToDelete && (
-        <DeleteRulesetModal
-          rulesetId={rulesetToDelete}
-          closeDeleteModal={() => {
-            setRulesetToDelete(null);
-          }}
-          onSuccessAction={() => {
-            application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`));
-          }}
-        />
-      )}
       {!isError && (
         <>
-          <QueryRuleDetailPanel tourInfo={tourStepsInfo[1]} rules={rules} setRules={setRules} />
+          <QueryRuleDetailPanel rulesetId={rulesetId} />
+
           {tourStepsInfo[1]?.tourTargetRef?.current && (
             <EuiTourStep
               anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
@@ -317,7 +294,7 @@ export const QueryRulesetDetail: React.FC = () => {
               maxWidth={tourState.tourPopoverWidth}
               onFinish={finishTour}
               step={1}
-              stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
+              stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
               title={
                 <EuiTitle size="xs">
                   <h6>{tourStepsInfo[1].title}</h6>
@@ -357,7 +334,18 @@ export const QueryRulesetDetail: React.FC = () => {
           )}
         </>
       )}
-      {isError && (
+      {rulesetToDelete && (
+        <DeleteRulesetModal
+          rulesetId={rulesetToDelete}
+          closeDeleteModal={() => {
+            setRulesetToDelete(null);
+          }}
+          onSuccessAction={() => {
+            application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`));
+          }}
+        />
+      )}
+      {isError && error && (
         <ErrorPrompt
           errorType={
             isPermissionError(error)
