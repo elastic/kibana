@@ -44,3 +44,25 @@
   "managed": false,
   "coreMigrationVersion": "8.8.0"
 }
+
+{
+  "id": "url_to_8_19_dashboard",
+  "type": "url",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-02T21:22:52.723Z",
+  "created_at": "2025-06-02T21:22:52.723Z",
+  "version": "WzEyNTcsMV0=",
+  "attributes": {
+    "accessCount": 0,
+    "accessDate": 1748899372723,
+    "createDate": 1748899372723,
+    "slug": "8mVkz",
+    "locatorJSON": "{\"id\":\"DASHBOARD_APP_LOCATOR\",\"version\":\"9.1.0\",\"state\":{\"preserveSavedFilters\":true,\"viewMode\":\"edit\",\"useHash\":false,\"timeRange\":{\"from\":\"2025-06-01T21:00:00.000Z\",\"to\":\"2025-06-02T21:22:52.704Z\"},\"references\":[{\"name\":\"controlGroup_eae4dc4e-63b0-4506-9566-5745d5bd50af:optionsListDataView\",\"type\":\"index-pattern\",\"id\":\"90943e30-9a47-11e8-b64d-95841ca0b247\"}],\"controlGroupInput\":{\"autoApplySelections\":true,\"chainingSystem\":\"HIERARCHICAL\",\"ignoreParentSettings\":{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false},\"labelPosition\":\"oneLine\",\"controls\":[{\"id\":\"eae4dc4e-63b0-4506-9566-5745d5bd50af\",\"grow\":false,\"order\":0,\"type\":\"optionsListControl\",\"width\":\"medium\",\"controlConfig\":{\"dataViewId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"fieldName\":\"machine.os.keyword\",\"exclude\":false,\"existsSelected\":false,\"selectedOptions\":[\"win 7\"],\"searchTechnique\":\"prefix\",\"sort\":{\"by\":\"_count\",\"direction\":\"desc\"}}}]},\"panels\":[{\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"7696a9aa-a648-4474-97fb-a6b3326636f2\"},\"panelIndex\":\"7696a9aa-a648-4474-97fb-a6b3326636f2\",\"panelConfig\":{\"description\":\"\",\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"hiddenLayers\":[],\"isLayerTOCOpen\":true,\"mapBuffer\":{\"minLon\":-112.5,\"minLat\":21.94305,\"maxLon\":-67.5,\"maxLat\":55.77657},\"mapCenter\":{\"lon\":-88.92107,\"lat\":42.16337,\"zoom\":3.64},\"openTOCDetails\":[]},\"title\":\"Custom map\",\"id\":\"de71f4f0-1902-11e9-919b-ffe5949a18d2\"}]}}",
+    "url": ""
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0"
+}

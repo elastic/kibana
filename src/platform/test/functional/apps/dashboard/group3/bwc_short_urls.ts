@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect((await find.allByCssSelector('.mapTocEntry')).length).to.be(4);
   }
 
-  describe('bwc short urls', () => {
+  describe.only('bwc short urls', () => {
     let baseUrl: string;
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -80,8 +80,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // 8.18 after the embeddable refactor and before Serialized state only
-    it('should load dashboard with 8.14 state', async () => {
+    it('should load dashboard with 8.18 state', async () => {
       await browser.navigateTo(baseUrl + '/goto/url_to_8_18_dashboard');
+      await assertDashboardRendered();
+    });
+
+    // 8.18 after the embeddable refactor and after Serialized state only
+    it('should load dashboard with 8.19 state', async () => {
+      await browser.navigateTo(baseUrl + '/goto/url_to_8_19_dashboard');
       await assertDashboardRendered();
     });
   });
