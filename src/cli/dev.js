@@ -26,7 +26,7 @@ if (collectExtendedStackTrace) {
 
 if (process.features.require_module) {
   console.warn(
-    'Experimental support for native ES modules is enabled.  This will not be enabled in production while the feature is experimental.  It is recommended to add `--no-experimental-require-module` to NODE_OPTIONS.'
+    "Node.js's experimental support for native ES modules is enabled.  This will not be enabled in production while the feature is experimental.  It is recommended to add `--no-experimental-require-module` to NODE_OPTIONS."
   );
 }
 
