@@ -15,10 +15,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
 import * as i18n from './translations';
@@ -69,7 +69,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   successfulGenerations,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { theme } = useKibana().services;
+  const isDarkMode = useKibanaIsDarkMode();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
@@ -122,8 +122,6 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     ]
   );
 
-  const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
-
   const backgroundColor = useMemo(() => {
     const defaultBackgroundColor = isDarkMode ? BACKGROUND_COLOR_DARK : BACKGROUND_COLOR_LIGHT;
     const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
@@ -169,19 +167,24 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
 
-  const [isDismissing, setIsDismissing] = React.useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   const dismissGeneration = useCallback(async () => {
     try {
       if (executionUuid != null) {
         setIsDismissing(true);
-        await dismissAttackDiscoveryGeneration({ executionUuid });
+        await dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid });
         refetchGenerations?.(); // force a refresh of the generations list
       }
-    } catch {
+    } finally {
       setIsDismissing(false);
     }
-  }, [dismissAttackDiscoveryGeneration, executionUuid, refetchGenerations]);
+  }, [
+    attackDiscoveryAlertsEnabled,
+    dismissAttackDiscoveryGeneration,
+    executionUuid,
+    refetchGenerations,
+  ]);
 
   return (
     <div

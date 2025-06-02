@@ -41,11 +41,12 @@ export function createMonitorsOverviewPanelAction(
             defaultMessage: 'Create monitors overview',
           }
         ),
+        type: SYNTHETICS_MONITORS_EMBEDDABLE,
       });
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
       } catch (e) {
         return Promise.reject();

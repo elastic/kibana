@@ -15,6 +15,11 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
@@ -57,6 +62,13 @@ export const getMetricVisRenderer = (
     displayName: 'metric visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
+      const performanceTracker = createPerformanceTracker({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        subType: EXPRESSION_METRIC_NAME,
+      });
+
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
       const { core, plugins } = deps.getStartDeps();
 
       handlers.onDestroy(() => {
@@ -70,7 +82,10 @@ export const getMetricVisRenderer = (
             handlers.hasCompatibleActions?.bind(handlers)
           )
         : false;
+
       const renderComplete = () => {
+        performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
         const visualizationType = extractVisualizationType(executionContext);
@@ -85,6 +100,9 @@ export const getMetricVisRenderer = (
       };
 
       const { MetricVis } = await import('../components/metric_vis');
+
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
       render(
         <KibanaRenderContextProvider {...core}>
           <div

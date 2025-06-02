@@ -28,19 +28,19 @@ describe('getDefaultGraphState', () => {
   it('returns the expected default attackDiscoveries', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(graphAnnotation.spec.attackDiscoveries.value).toBeNull();
+    expect(graphAnnotation.spec.insights.value).toBeNull();
   });
 
   it('returns the expected default attackDiscoveryPrompt', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(graphAnnotation.spec.attackDiscoveryPrompt.value).toEqual(defaultAttackDiscoveryPrompt);
+    expect(graphAnnotation.spec.prompt.value).toEqual(defaultAttackDiscoveryPrompt);
   });
 
   it('returns the expected default empty collection of anonymizedAlerts', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(graphAnnotation.spec.anonymizedAlerts.value).toHaveLength(0);
+    expect(graphAnnotation.spec.anonymizedDocuments.value).toHaveLength(0);
   });
 
   it('returns the expected default combinedGenerations state', () => {

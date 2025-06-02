@@ -94,6 +94,13 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
             false
           );
 
+          if (!attackDiscoveryAlertsEnabled) {
+            return resp.error({
+              body: `Attack discovery alerts feature is disabled`,
+              statusCode: 403,
+            });
+          }
+
           const previousGeneration = await dataClient.getAttackDiscoveryGenerationById({
             authenticatedUser: currentUser,
             eventLogIndex,
@@ -105,12 +112,14 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
           // event log details:
           const connectorId = previousGeneration.connector_id;
 
-          writeAttackDiscoveryEvent({
+          await writeAttackDiscoveryEvent({
             action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
             attackDiscoveryAlertsEnabled,
             authenticatedUser: currentUser,
             connectorId,
+            dataClient,
             eventLogger,
+            eventLogIndex,
             executionUuid,
             loadingMessage: undefined,
             message: `Attack discovery generation ${executionUuid} for user ${currentUser.username} started`,

@@ -8,6 +8,8 @@
 import { screen, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TestProviders } from '../../../../common/mock';
 import { hostsModel } from '../../store';

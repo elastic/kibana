@@ -11,9 +11,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
+import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
+import type { TabState } from './types';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -22,6 +24,7 @@ interface DiscoverRuntimeState {
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
+  unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
   currentDataView: DataView;
 }
 
@@ -45,6 +48,9 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
 export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
   stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
   customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
+  unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
+    undefined
+  ),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
 
@@ -53,6 +59,33 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+export const selectTabRuntimeAppState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
+};
+
+export const selectTabRuntimeGlobalState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): TabState['lastPersistedGlobalState'] | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
+
+  if (!globalState) {
+    return undefined;
+  }
+
+  const { time: timeRange, refreshInterval, filters } = globalState;
+  return {
+    timeRange,
+    refreshInterval,
+    filters,
+  };
+};
 
 export const useCurrentTabRuntimeState = <T,>(
   runtimeStateManager: RuntimeStateManager,

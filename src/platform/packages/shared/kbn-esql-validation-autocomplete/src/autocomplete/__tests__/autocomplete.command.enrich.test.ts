@@ -77,7 +77,7 @@ describe('autocomplete.suggest', () => {
 
       it('suggests fields for new WITH clauses', async () => {
         await assertSuggestions(`from a | enrich policy on field with /`, [
-          'var0 = ',
+          'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
             // Makes sure the suggestion menu isn't opened when a field is accepted
@@ -85,55 +85,55 @@ describe('autocomplete.suggest', () => {
           })),
         ]);
         await assertSuggestions(`from a | enrich policy on field with fi/`, [
-          'var0 = ',
+          'col0 = ',
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, /`, [
-          'var1 = ',
+        await assertSuggestions(`from a | enrich policy on b with col0 = otherField, /`, [
+          'col1 = ',
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, fi/`, [
-          'var1 = ',
+        await assertSuggestions(`from a | enrich policy on b with col0 = otherField, fi/`, [
+          'col1 = ',
           ...getPolicyFields('policy'),
         ]);
       });
 
       test('waits to suggest fields until space', async () => {
-        await assertSuggestions(`from a | enrich policy on b with var0 = otherField,/`, []);
+        await assertSuggestions(`from a | enrich policy on b with col0 = otherField,/`, []);
         await assertSuggestions(`from a | enrich policy on b with/`, []);
       });
 
       test('after first word', async () => {
         // not a recognized column name
-        await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0']);
+        await assertSuggestions(`from a | enrich policy on b with col0 /`, ['= $0']);
         // recognized column name
         await assertSuggestions(`from a | enrich policy on b with otherField /`, [',', '| ']);
       });
 
       test('suggests enrich fields after open assignment', async () => {
-        await assertSuggestions(`from a | enrich policy on b with var0 = /`, [
+        await assertSuggestions(`from a | enrich policy on b with col0 = /`, [
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = fi/`, [
+        await assertSuggestions(`from a | enrich policy on b with col0 = fi/`, [
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, var1 =  /`, [
+        await assertSuggestions(`from a | enrich policy on b with col0 = otherField, col1 =  /`, [
           ...getPolicyFields('policy'),
         ]);
       });
 
       test('after complete clause', async () => {
         // works with escaped field names
-        await assertSuggestions(`from a | enrich policy on b with var0 = \`otherField\` /`, [
+        await assertSuggestions(`from a | enrich policy on b with col0 = \`otherField\` /`, [
           ',',
           '| ',
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0=otherField /`, [',', '| ']);
+        await assertSuggestions(`from a | enrich policy on b with col0=otherField /`, [',', '| ']);
         await assertSuggestions(`from a | enrich policy on b with otherField /`, [',', '| ']);
       });
 
       test('after user-defined column name', async () => {
-        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, var1 /`, [
+        await assertSuggestions(`from a | enrich policy on b with col0 = otherField, col1 /`, [
           '= $0',
         ]);
       });

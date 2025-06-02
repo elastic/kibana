@@ -16,7 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { dashboard, header } = getPageObjects(['dashboard', 'header']);
+  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
+
+  const from = 'Sep 22, 2015 @ 00:00:00.000';
+  const to = 'Sep 23, 2015 @ 00:00:00.000';
 
   describe('discover/observability saved search embeddable', () => {
     before(async () => {
@@ -27,14 +30,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+
+      await common.setTime({
+        from,
+        to,
+      });
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
     });
 
     after(async () => {
+      await common.unsetTime();
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

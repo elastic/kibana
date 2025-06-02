@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
-import type {
-  FindingMisconfigurationFlyoutContentProps,
-  FindingMisconfigurationFlyoutProps,
-} from '@kbn/cloud-security-posture';
+import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
@@ -20,23 +16,20 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
-export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'findings-misconfiguration-panel';
-  params: FindingMisconfigurationFlyoutProps;
-}
 
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
-}: FindingMisconfigurationFlyoutProps) => {
+  isPreviewMode,
+}: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
-        {({ finding, createRuleFn }: FindingMisconfigurationFlyoutContentProps) => {
+        {({ finding, createRuleFn }) => {
           return (
             <>
               <FlyoutHeader>
@@ -57,7 +50,7 @@ export const FindingsMisconfigurationPanel = ({
                       </EuiText>
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem>
                     <FlyoutTitle title={finding.rule.name} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -66,9 +59,11 @@ export const FindingsMisconfigurationPanel = ({
               <FlyoutBody>
                 <CspFlyout.Body finding={finding} />
               </FlyoutBody>
-              <EuiFlyoutFooter>
-                <CspFlyout.Footer createRuleFn={createRuleFn} />
-              </EuiFlyoutFooter>
+              {!isPreviewMode && (
+                <EuiFlyoutFooter>
+                  <CspFlyout.Footer createRuleFn={createRuleFn} />
+                </EuiFlyoutFooter>
+              )}
             </>
           );
         }}

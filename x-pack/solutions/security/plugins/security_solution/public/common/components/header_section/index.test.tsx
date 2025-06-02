@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
+// Make sure expect().toHaveStyleRule is using emotion's matchers
+import { matchers as emotionMatchers } from '@emotion/jest';
+expect.extend(emotionMatchers);
 import { render, screen, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 import { TestProviders } from '../../mock';
 import type { HeaderSectionProps } from '.';

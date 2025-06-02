@@ -76,6 +76,7 @@ export interface AgentExecutorParams<T extends boolean> {
   telemetryParams?: TelemetryParams;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
+  timeout?: number;
 }
 
 export interface StaticReturnType {

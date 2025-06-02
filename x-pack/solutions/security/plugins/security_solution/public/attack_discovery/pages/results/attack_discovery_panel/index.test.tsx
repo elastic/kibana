@@ -15,6 +15,7 @@ import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 const defaultProps = {
   attackDiscovery: mockAttackDiscovery,
   isSelected: false,
+  setSelectedAttackDiscoveries: jest.fn(),
 };
 
 describe('AttackDiscoveryPanel', () => {

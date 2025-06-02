@@ -27,6 +27,7 @@ import { getErrorToastText } from '../helpers';
 import { getGenAiConfig, getRequestBody } from './helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import * as i18n from './translations';
+import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
@@ -180,6 +181,8 @@ export const useAttackDiscovery = ({
     }
   }, [attackDiscoveryAlertsEnabled, connectorId, pollData]);
 
+  const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
+
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
     async (options: FetchAttackDiscoveriesOptions | undefined) => {
@@ -239,6 +242,8 @@ export const useAttackDiscovery = ({
           title: ERROR_GENERATING_ATTACK_DISCOVERIES,
           text: getErrorToastText(error),
         });
+      } finally {
+        invalidateGetAttackDiscoveryGenerations();
       }
     },
     [
@@ -246,6 +251,7 @@ export const useAttackDiscovery = ({
       connectorId,
       connectorName,
       http,
+      invalidateGetAttackDiscoveryGenerations,
       requestBody,
       setLoadingConnectorId,
       setPollStatus,

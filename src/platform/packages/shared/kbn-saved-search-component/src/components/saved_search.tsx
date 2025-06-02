@@ -8,11 +8,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type {
   SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
@@ -200,11 +199,7 @@ const SavedSearchComponentTable: React.FC<
   );
 
   return (
-    <ReactEmbeddableRenderer<
-      SearchEmbeddableSerializedState,
-      SearchEmbeddableRuntimeState,
-      SearchEmbeddableApi
-    >
+    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

@@ -75,6 +75,7 @@ export const postAttackDiscoveryRoute = (
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const { featureFlags } = await context.core;
+        const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
 
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
@@ -157,12 +158,14 @@ export const postAttackDiscoveryRoute = (
             start: request.body.start,
           });
 
-          writeAttackDiscoveryEvent({
+          await writeAttackDiscoveryEvent({
             action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
             attackDiscoveryAlertsEnabled,
             authenticatedUser,
             connectorId,
+            dataClient,
             eventLogger,
+            eventLogIndex,
             executionUuid,
             loadingMessage,
             message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} started`,
@@ -183,7 +186,7 @@ export const postAttackDiscoveryRoute = (
             savedObjectsClient,
             telemetry,
           })
-            .then((result) => {
+            .then(async (result) => {
               const end = new Date();
               const durationNanoseconds = getDurationNanoseconds({
                 end,
@@ -192,15 +195,17 @@ export const postAttackDiscoveryRoute = (
 
               // NOTE: the (legacy) implementation of generateAttackDiscoveries returns an "error" object when failures occur (instead of rejecting):
               if (result.error == null) {
-                writeAttackDiscoveryEvent({
+                await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
                   alertsContextCount: result.anonymizedAlerts?.length,
                   attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
+                  dataClient,
                   duration: durationNanoseconds,
                   end,
                   eventLogger,
+                  eventLogIndex,
                   executionUuid,
                   message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} succeeded`,
                   newAlerts: result.attackDiscoveries?.length ?? 0,
@@ -208,15 +213,17 @@ export const postAttackDiscoveryRoute = (
                   spaceId,
                 });
               } else {
-                writeAttackDiscoveryEvent({
+                await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
                   alertsContextCount: result.anonymizedAlerts?.length,
                   attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
+                  dataClient,
                   duration: durationNanoseconds,
                   end,
                   eventLogger,
+                  eventLogIndex,
                   executionUuid,
                   message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${result.error?.message}`,
                   outcome: 'failure',
@@ -225,7 +232,7 @@ export const postAttackDiscoveryRoute = (
                 });
               }
             })
-            .catch((error) => {
+            .catch(async (error) => {
               // This is a fallback in case the promise is rejected (in a future implementation):
               const end = new Date();
               const durationNanoseconds = getDurationNanoseconds({
@@ -233,14 +240,16 @@ export const postAttackDiscoveryRoute = (
                 start: generatedStarted,
               });
 
-              writeAttackDiscoveryEvent({
+              await writeAttackDiscoveryEvent({
                 action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
                 attackDiscoveryAlertsEnabled,
                 authenticatedUser,
                 connectorId,
+                dataClient,
                 duration: durationNanoseconds,
                 end,
                 eventLogger,
+                eventLogIndex,
                 executionUuid,
                 message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${error.message}`,
                 outcome: 'failure',

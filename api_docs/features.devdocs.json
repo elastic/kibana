@@ -1884,7 +1884,7 @@
             "tags": [],
             "label": "requiredClusterPrivileges",
             "description": [
-              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
+              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/docs/reference/elasticsearch/security-privileges\n"
             ],
             "signature": [
               "string[]"
@@ -1900,7 +1900,7 @@
             "tags": [],
             "label": "requiredIndexPrivileges",
             "description": [
-              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
+              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices\n"
             ],
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"
@@ -4117,7 +4117,7 @@
             "tags": [],
             "label": "requiredClusterPrivileges",
             "description": [
-              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html\n"
+              "\nA set of Elasticsearch cluster privileges which are required for this feature to be enabled.\nSee https://www.elastic.co/docs/reference/elasticsearch/security-privileges\n"
             ],
             "signature": [
               "string[]"
@@ -4133,7 +4133,7 @@
             "tags": [],
             "label": "requiredIndexPrivileges",
             "description": [
-              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html#privileges-list-indices\n"
+              "\nA set of Elasticsearch index privileges which are required for this feature to be enabled, keyed on index name or pattern.\nSee https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices\n"
             ],
             "signature": [
               "{ [indexName: string]: string[]; } | undefined"

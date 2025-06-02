@@ -18,7 +18,6 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
@@ -53,14 +52,16 @@ export const accountManagementApp = Object.freeze({
         ]);
 
         render(
-          <Providers
-            services={coreStart}
-            history={history}
-            authc={authc}
-            securityApiClients={securityApiClients}
-          >
-            <AccountManagementPage />
-          </Providers>,
+          coreStart.rendering.addContext(
+            <Providers
+              services={coreStart}
+              history={history}
+              authc={authc}
+              securityApiClients={securityApiClients}
+            >
+              <AccountManagementPage />
+            </Providers>
+          ),
           element
         );
 
@@ -86,25 +87,23 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   onChange,
   children,
 }) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <SecurityApiClientsProvider {...securityApiClients}>
-          <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>
-              <UserProfilesKibanaProvider
-                core={services}
-                security={{
-                  userProfiles: securityApiClients.userProfiles,
-                }}
-                toMountPoint={toMountPoint}
-              >
-                {children}
-              </UserProfilesKibanaProvider>
-            </BreadcrumbsProvider>
-          </Router>
-        </SecurityApiClientsProvider>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  </KibanaRenderContextProvider>
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <SecurityApiClientsProvider {...securityApiClients}>
+        <Router history={history}>
+          <BreadcrumbsProvider onChange={onChange}>
+            <UserProfilesKibanaProvider
+              core={services}
+              security={{
+                userProfiles: securityApiClients.userProfiles,
+              }}
+              toMountPoint={toMountPoint}
+            >
+              {children}
+            </UserProfilesKibanaProvider>
+          </BreadcrumbsProvider>
+        </Router>
+      </SecurityApiClientsProvider>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
 );

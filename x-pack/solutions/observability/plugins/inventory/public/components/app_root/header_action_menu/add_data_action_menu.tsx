@@ -83,7 +83,7 @@ export function AddDataContextMenu() {
         {
           name: addDataItem,
           key: 'addData',
-          href: onboardingLocator?.getRedirectUrl({ category: '' }),
+          href: onboardingLocator?.getRedirectUrl({}),
           icon: 'plusInCircle',
           'data-test-subj': 'inventoryHeaderMenuAddData',
           onClick: () => {

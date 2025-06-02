@@ -23,6 +23,7 @@ interface Props {
   initialIsOpen?: boolean;
   isSelected: boolean;
   setIsSelected?: ({ id, selected }: { id: string; selected: boolean }) => void;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onToggle?: (newState: 'open' | 'closed') => void;
   replacements?: Replacements;
   showAnonymized?: boolean;
@@ -33,6 +34,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
   initialIsOpen,
   isSelected,
   setIsSelected,
+  setSelectedAttackDiscoveries,
   onToggle,
   replacements,
   showAnonymized = false,
@@ -54,6 +56,7 @@ const AttackDiscoveryPanelComponent: React.FC<Props> = ({
           onToggle={onToggle}
           replacements={replacements}
           setIsOpen={setIsOpen}
+          setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
           showAnonymized={showAnonymized}
         />
 

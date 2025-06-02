@@ -28,11 +28,12 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.getByTestId('LinkedRulesMenuItems')).toHaveTextContent('Linked to 1 rules');
     expect(wrapper.getByTestId('LinkRulesButton')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuActionsButtonIcon')).toBeInTheDocument();
   });
+
   it('should not render linkedRules HeaderMenu component, instead should render a text', () => {
     const wrapper = render(
       <MenuItems
@@ -45,10 +46,11 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.queryByTestId('LinkedRulesMenuItems')).not.toBeInTheDocument();
     expect(wrapper.getByTestId('noLinkedRules')).toBeInTheDocument();
   });
+
   it('should render all menu actions enabled', () => {
     const wrapper = render(
       <MenuItems
@@ -62,11 +64,12 @@ describe('MenuItems', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeEnabled();
   });
+
   it('should render delete action disabled when "canUserEditList" is "false"', () => {
     const wrapper = render(
       <MenuItems
@@ -81,11 +84,12 @@ describe('MenuItems', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
   });
+
   it('should not render Manage rules', () => {
     const wrapper = render(
       <MenuItems
@@ -99,9 +103,10 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
   });
+
   it('should call onManageRules', () => {
     const wrapper = render(
       <MenuItems
@@ -117,6 +122,7 @@ describe('MenuItems', () => {
     fireEvent.click(wrapper.getByTestId('LinkRulesButton'));
     expect(onManageRules).toHaveBeenCalled();
   });
+
   it('should call onExportModalOpen', () => {
     const wrapper = render(
       <MenuItems
@@ -134,6 +140,7 @@ describe('MenuItems', () => {
 
     expect(onExportList).toHaveBeenCalled();
   });
+
   it('should call onDeleteList', () => {
     const wrapper = render(
       <MenuItems

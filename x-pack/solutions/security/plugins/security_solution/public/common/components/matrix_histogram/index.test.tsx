@@ -8,11 +8,14 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
+import type { MatrixHistogramComponentProps } from '.';
 import { MatrixHistogram } from '.';
 import { TestProviders } from '../../mock';
-import { mockRuntimeMappings } from '../../containers/source/mock';
 import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
+import type { UseVisualizationResponseMock } from '../visualization_actions/use_visualization_response.mock';
+import { useVisualizationResponseMock } from '../visualization_actions/use_visualization_response.mock';
+import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 
 jest.mock('../../containers/query_toggle');
 
@@ -23,14 +26,14 @@ jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-const mockUseVisualizationResponse = jest.fn(() => ({
-  responses: [{ aggregations: [{ buckets: [{ key: '1234' }] }], hits: { total: 999 } }],
-  requests: [],
-  loading: false,
-}));
 jest.mock('../visualization_actions/use_visualization_response', () => ({
-  useVisualizationResponse: () => mockUseVisualizationResponse(),
+  ...jest.requireActual('../visualization_actions/use_visualization_response'),
+  useVisualizationResponse: jest
+    .requireActual('../visualization_actions/use_visualization_response.mock')
+    .useVisualizationResponseMock.create(),
 }));
+
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
 
@@ -44,26 +47,20 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('Matrix Histogram Component', () => {
-  const mockMatrixOverTimeHistogramProps = {
-    defaultIndex: ['defaultIndex'],
+  const mockMatrixOverTimeHistogramProps: MatrixHistogramComponentProps = {
     defaultStackByOption: {
       text: 'dns.question.registered_domain',
       value: 'dns.question.registered_domain',
     },
     endDate: '2019-07-18T20:00:00.000Z',
     id: 'mockId',
-    indexNames: [],
-    isInspected: false,
     isPtrIncluded: true,
-    setQuery: jest.fn(),
     stackByOptions: [
       { text: 'dns.question.registered_domain', value: 'dns.question.registered_domain' },
     ],
     startDate: '2019-07-18T19:00: 00.000Z',
     subtitle: jest.fn((totalCount) => `Showing: ${totalCount} events`),
-    totalCount: -1,
     title: 'mockTitle',
-    runtimeMappings: mockRuntimeMappings,
   };
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockSetToggle = jest.fn();
@@ -106,29 +103,21 @@ describe('Matrix Histogram Component', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 999 events');
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 1 events');
     });
 
-    test('it should render 0 as subtitle when buckets are empty', () => {
-      mockUseVisualizationResponse.mockReturnValue({
-        requests: [],
-        responses: [{ aggregations: [{ buckets: [] }], hits: { total: 999 } }],
-        loading: false,
-      });
+    test('it should not render subtitle when subtitle is function and no tables are present', () => {
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildLoadingResponse()
+      );
 
-      const { rerender } = render(
+      render(
         <TestProviders>
           <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
         </TestProviders>
       );
 
-      rerender(
-        <TestProviders>
-          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} endDate={'100'} />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 0 events');
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('');
     });
   });
 
