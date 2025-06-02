@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-05-23
+date: 2025-06-02
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -31,6 +31,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | graph, stackAlerts, inputControlVis, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dataVisualizer, stackAlerts, expressionPartitionVis | - |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
+| <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.parse" text="parse"/> | @kbn/esql-validation-autocomplete, @kbn/monaco, @kbn/esql-utils, inference, triggersActionsUi, discover, @kbn/securitysolution-utils, securitySolution, stackAlerts | - |
 | <DocLink id="kibAlertingPluginApi" section="def-common.MaintenanceWindow" text="MaintenanceWindow"/> | @kbn/response-ops-alerts-table, triggersActionsUi | - |
 | <DocLink id="kibManagementPluginApi" section="def-public.ManagementAppMountParams.theme$" text="theme$"/> | triggersActionsUi | - |
 | <DocLink id="kibAlertingPluginApi" section="def-server.RuleExecutorServices.alertFactory" text="alertFactory"/> | ruleRegistry, securitySolution, slo | - |
@@ -238,6 +239,8 @@ Safe to remove.
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | taskManager | 
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.numSkippedRuns" text="numSkippedRuns"/> | taskManager | 
 | <DocLink id="kibVisualizationsPluginApi" section="def-public.VisualizeEmbeddable" text="VisualizeEmbeddable"/> | visualizations | 
+| <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.createParser" text="createParser"/> | @kbn/esql-ast | 
+| <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.parseErrors" text="parseErrors"/> | @kbn/esql-ast | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.check.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.clear.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.click.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
