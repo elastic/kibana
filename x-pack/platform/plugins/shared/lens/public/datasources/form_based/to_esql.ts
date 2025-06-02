@@ -86,6 +86,10 @@ export function getESQLForLayer(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
+    if (wrapInTimeFilter) {
+      return undefined;
+    }
+
     const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
       ? `bucket_${index + 1}_${aggId}`
       : `bucket_${index}_${aggId}`;
@@ -152,9 +156,7 @@ export function getESQLForLayer(
         return;
       }
     }
-    if (wrapInTimeFilter) {
-      return undefined;
-    }
+  
 
     return metricESQL;
   });
