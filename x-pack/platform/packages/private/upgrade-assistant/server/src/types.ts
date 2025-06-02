@@ -58,3 +58,29 @@ export interface ResolveIndexResponseFromES {
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
+
+export interface FeatureSet {
+  migrateSystemIndices: boolean;
+  mlSnapshots: boolean;
+  reindexCorrectiveActions: boolean;
+  migrateDataStreams: boolean;
+}
+
+// ug, todo
+export interface ReindexStatusResponse {
+  meta: {
+    indexName: string;
+    reindexName: string;
+    // Array of aliases pointing to the index being reindexed
+    aliases: string[];
+    isReadonly: boolean;
+    isFrozen: boolean;
+    isInDataStream: boolean;
+    isFollowerIndex: boolean;
+  };
+  warnings?: IndexWarning[];
+  reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
+}

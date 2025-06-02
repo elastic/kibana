@@ -11,9 +11,9 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 
 const findMlOperation = async (
@@ -140,6 +140,7 @@ export function registerMlSnapshotRoutes({
   router,
   log,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   // Upgrade ML model snapshot
   router.post(
@@ -158,7 +159,7 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           savedObjects: { getClient },
@@ -214,7 +215,7 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           savedObjects: { getClient },
@@ -353,7 +354,7 @@ export function registerMlSnapshotRoutes({
         },
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         /**
          * Always return false if featureSet.mlSnapshots is set to false
@@ -406,7 +407,7 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },

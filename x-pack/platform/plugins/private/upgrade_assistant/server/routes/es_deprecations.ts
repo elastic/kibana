@@ -6,9 +6,9 @@
  */
 
 // import { reindexActionsFactory, reindexServiceFactory } from '@kbn/upgrade-assistant-server';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 // import { ReindexingService } from '../reindexing_service';
 // todo -perhaps this becomes api usage
@@ -19,6 +19,7 @@ export function registerESDeprecationRoutes({
   lib: { handleEsError },
   licensing,
   log,
+  current,
 }: RouteDependencies) {
   // reindexingService: ReindexingService
   router.get(
@@ -32,7 +33,7 @@ export function registerESDeprecationRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           // savedObjects: { client: savedObjectsClient },

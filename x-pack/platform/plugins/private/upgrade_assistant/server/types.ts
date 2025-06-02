@@ -10,6 +10,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import SemVer from 'semver/classes/semver';
 // import { CredentialStore } from './lib/reindexing/credential_store';
+import type { Version } from '@kbn/upgrade-assistant-server';
 import { handleEsError } from './shared_imports';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 
@@ -30,4 +31,5 @@ export interface RouteDependencies {
   };
   current: SemVer;
   defaultTarget: number;
+  version: Version;
 }

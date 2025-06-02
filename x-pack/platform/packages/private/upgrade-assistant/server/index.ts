@@ -10,9 +10,18 @@ export type {
   IndexWarning,
   IndexWarningType,
   ResolveIndexResponseFromES,
+  DataSourceExclusions, // probably doesn't need to be shared
+  FeatureSet, // probably doesn't need to be shared
 } from './src/types';
 export { getRollupJobByIndexName } from './src/rollup_job';
 export { getReindexWarnings } from './src/index_settings';
 export { Version } from './src/version';
 export { esIndicesStateCheck } from './src/es_indices_state_check';
 export { getIndexState } from './src/get_index_state';
+export {
+  reindexOperationSavedObjectType,
+  mlSavedObjectType,
+  hiddenTypes,
+  REINDEX_OP_TYPE,
+} from './src/saved_object_types';
+export { versionCheckHandlerWrapper } from './src/es_version_precheck';

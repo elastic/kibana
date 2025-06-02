@@ -20,19 +20,18 @@ import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { DataSourceExclusions, FeatureSet } from '@kbn/upgrade-assistant-server';
+import { reindexOperationSavedObjectType, mlSavedObjectType } from '@kbn/upgrade-assistant-server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 // import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerRoutes } from './routes/register_routes';
-import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
-import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { defaultExclusions } from './lib/data_source_exclusions';
-import { ReindexingService } from './reindexing_service';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -57,8 +56,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
 
-  private reindexingService?: ReindexingService;
-
   constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
     // used by worker and passed to routes
@@ -68,17 +65,15 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const { featureSet, dataSourceExclusions } = config.get();
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
-    this.reindexingService = new ReindexingService({ logger: this.logger, config });
   }
 
   setup(coreSetup: CoreSetup, pluginSetup: PluginsSetup) {
     const { http, getStartServices, savedObjects } = coreSetup;
     const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
 
+    // todo where should this live
     savedObjects.registerType(reindexOperationSavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
-
-    this.reindexingService?.setup(coreSetup, pluginSetup);
 
     features.registerElasticsearchFeature({
       id: 'upgrade_assistant',
@@ -134,6 +129,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       },
       current: versionService.getCurrentVersion(),
       defaultTarget: versionService.getNextMajorVersion(),
+      version: versionService,
     };
 
     registerRoutes(dependencies);
@@ -152,6 +148,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.savedObjectsServiceStart = savedObjects;
     this.securityPluginStart = security;
 
+    // todo move
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
     // want to expose these credentials to any unauthenticated users. We also want to avoid any need
@@ -160,10 +157,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // a paused state if no Kibana nodes have the required credentials.
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
-    this.reindexingService?.start({ savedObjects, elasticsearch }, { security });
+    // this.reindexingService?.start({ savedObjects, elasticsearch }, { security });
   }
 
-  stop(): void {
-    this.reindexingService?.stop();
-  }
+  stop(): void {}
 }
