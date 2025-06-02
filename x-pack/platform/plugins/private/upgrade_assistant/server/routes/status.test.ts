@@ -29,7 +29,7 @@ const defaultApiResponseProperties = {
   },
   kibanaApiDeprecations: undefined,
 };
-jest.mock('../lib/es_version_precheck', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 

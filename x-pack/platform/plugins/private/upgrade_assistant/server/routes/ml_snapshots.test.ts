@@ -18,7 +18,7 @@ import {
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
-jest.mock('../lib/es_version_precheck', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   versionCheckHandlerWrapper: <P, Q, B>(handler: RequestHandler<P, Q, B>) => handler,
 }));
 

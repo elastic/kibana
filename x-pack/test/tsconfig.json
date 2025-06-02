@@ -182,5 +182,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/reindex-service-plugin",
   ]
 }

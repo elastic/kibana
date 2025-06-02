@@ -8,6 +8,12 @@
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsAction } from './data_stream_types';
+export type {
+  ReindexStatusResponse,
+  IndexWarning,
+  IndexWarningType,
+} from '@kbn/upgrade-assistant-pkg-common';
+export { ReindexStep, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 
 export * from './data_stream_types';
 

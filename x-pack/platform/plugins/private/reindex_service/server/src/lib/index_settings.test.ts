@@ -6,7 +6,7 @@
  */
 
 import { versionService } from './version';
-import { getMockVersionInfo } from '../../lib/__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
