@@ -723,6 +723,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForSample,
   },
   {
+    hidden: true,
     preview: true,
     name: 'rrf',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
