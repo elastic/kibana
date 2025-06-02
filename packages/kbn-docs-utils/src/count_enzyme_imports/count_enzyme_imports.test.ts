@@ -12,18 +12,14 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { countEnzymeImports } from './count_enzyme_imports';
 
 describe('count', () => {
-  test('number of "enzyme" in a file', async () => {
+  test('number of "enzyme" imports in this file', async () => {
     const { enzymeImportCount } = await countEnzymeImports([Path.resolve(__dirname, __filename)]);
     expect(enzymeImportCount).toBe(0);
   });
 
-  test('number of "eslint-disable*" in this directory', async () => {
+  test('number of "enzyme" imports in this directory', async () => {
     const allFiles = await getRepoFiles([__dirname]);
-    const counts = await countEnzymeImports(Array.from(allFiles, (f) => f.abs));
-    expect(counts).toMatchInlineSnapshot(`
-      Object {
-        "enzymeImportCount": 1,
-      }
-    `);
+    const { enzymeImportCount } = await countEnzymeImports(Array.from(allFiles, (f) => f.abs));
+    expect(enzymeImportCount).toBe(1);
   });
 });
