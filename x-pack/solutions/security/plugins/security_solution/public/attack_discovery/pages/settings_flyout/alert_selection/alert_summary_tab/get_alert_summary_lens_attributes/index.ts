@@ -32,6 +32,7 @@ export const getAlertSummaryLensAttributes = ({
       textBased: {
         layers: {
           [LAYER_ID]: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'tableStackBy0',

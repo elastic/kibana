@@ -32,6 +32,7 @@ export const getAlertsPreviewLensAttributes = ({
       textBased: {
         layers: {
           [LAYER_ID]: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'tableStackBy0',
