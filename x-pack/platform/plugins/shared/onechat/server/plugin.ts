@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { z } from '@kbn/zod';
 import type { OnechatConfig } from './config';
 import type {
   OnechatPluginSetup,
@@ -16,7 +17,6 @@ import type {
 } from './types';
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
-import { z } from 'zod';
 
 export class OnechatPlugin
   implements
@@ -56,6 +56,28 @@ export class OnechatPlugin
       handler: (args) => {
         const { someNumber } = args as { someNumber: number };
         return 42 + someNumber;
+      },
+    });
+
+    serviceSetups.tools.register({
+      id: 'onechat_list_indices',
+      name: 'List Indices',
+      description: 'List indices',
+      schema: z.object({
+        indexPattern: z.string().describe('Index pattern to filter on').optional(),
+      }),
+      handler: async ({ indexPattern }, { esClient }) => {
+        const indicesResponse = await esClient.asCurrentUser.cat.indices({
+          index: indexPattern,
+          format: 'json',
+        });
+
+        return indicesResponse.map((index) => ({
+          index: index.index,
+          health: index.health,
+          status: index.status,
+          docsCount: index.docsCount,
+        }));
       },
     });
 

@@ -98,18 +98,17 @@ export class KibanaMCPTransport implements Transport {
     responseFactory: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     try {
-      this.logger.info('Starting to handle POST request');
+      this.logger.debug('Processing POST request');
 
       // Validate the Accept header
       const acceptHeader = request.headers.accept;
-      this.logger.info(`Received Accept header: ${acceptHeader}`);
 
       // The client MUST include an Accept header, listing both application/json and text/event-stream as supported content types.
       if (
         !acceptHeader?.includes('application/json') ||
         !acceptHeader.includes('text/event-stream')
       ) {
-        this.logger.warn('Invalid Accept header - missing required content types');
+        this.logger.warn('Request rejected: Invalid Accept header');
         return responseFactory.customError({
           statusCode: 406,
           body: JSON.stringify({
@@ -125,10 +124,9 @@ export class KibanaMCPTransport implements Transport {
       }
 
       const ct = request.headers['content-type'];
-      this.logger.info(`Received Content-Type header: ${ct}`);
 
       if (!ct || !ct.includes('application/json')) {
-        this.logger.warn('Invalid Content-Type header - must be application/json');
+        this.logger.warn('Request rejected: Invalid Content-Type');
         return responseFactory.customError({
           statusCode: 415,
           body: JSON.stringify({
@@ -143,28 +141,23 @@ export class KibanaMCPTransport implements Transport {
       }
 
       const rawMessage = request.body;
-
-      this.logger.info(`Received request body ${JSON.stringify(request)}`);
-      this.logger.info(`Received raw message: ${JSON.stringify(rawMessage)}`);
-
       let messages: JSONRPCMessage[];
 
       // handle batch and single messages
       if (Array.isArray(rawMessage)) {
-        this.logger.info(`Processing batch request with ${rawMessage.length} messages`);
+        this.logger.debug(`Processing batch request with ${rawMessage.length} messages`);
         messages = rawMessage.map((msg) => JSONRPCMessageSchema.parse(msg));
       } else {
-        this.logger.info('Processing single message request');
+        this.logger.debug('Processing single message request');
         messages = [JSONRPCMessageSchema.parse(rawMessage)];
       }
 
       // Check if this is an initialization request
       const isInitializationRequest = messages.some(isInitializeRequest);
-      this.logger.info(`Is initialization request: ${isInitializationRequest}`);
 
       if (isInitializationRequest) {
         if (this._initialized && this.sessionId !== undefined) {
-          this.logger.warn('Rejecting initialization request - server already initialized');
+          this.logger.warn('Initialization request rejected - server already initialized');
           return responseFactory.badRequest({
             body: JSON.stringify({
               jsonrpc: '2.0',
@@ -177,7 +170,7 @@ export class KibanaMCPTransport implements Transport {
           });
         }
         if (messages.length > 1) {
-          this.logger.warn('Rejecting initialization request - multiple messages not allowed');
+          this.logger.warn('Initialization request rejected - multiple messages not allowed');
           return responseFactory.badRequest({
             body: JSON.stringify({
               jsonrpc: '2.0',
@@ -191,15 +184,14 @@ export class KibanaMCPTransport implements Transport {
         }
         this.sessionId = this.sessionIdGenerator?.();
         this._initialized = true;
-        this.logger.info(`Initialized session with ID: ${this.sessionId}`);
+        this.logger.debug(`Session initialized: ${this.sessionId}`);
       }
 
       // check if it contains requests
       const hasRequests = messages.some(isJSONRPCRequest);
-      this.logger.info(`Request contains JSON-RPC requests: ${hasRequests}`);
 
       if (!hasRequests) {
-        this.logger.info('Processing notifications/responses only');
+        this.logger.debug('Processing notifications/responses');
         // if it only contains notifications or responses, return 202
         const response = responseFactory.accepted();
 
@@ -209,9 +201,8 @@ export class KibanaMCPTransport implements Transport {
         }
         return response;
       } else {
-        this.logger.info('Processing requests with potential streaming');
         const streamId = randomUUID();
-        this.logger.info(`Generated stream ID: ${streamId}`);
+        this.logger.debug(`Processing requests with stream ID: ${streamId}`);
 
         // Create a promise that will resolve when the response is ready
         const responsePromise = new Promise<IKibanaResponse>((resolve) => {
@@ -221,7 +212,7 @@ export class KibanaMCPTransport implements Transport {
         // Store the response factory for this request to send messages back through this connection
         for (const message of messages) {
           if (isJSONRPCRequest(message)) {
-            this.logger.info(`Mapping request ID ${message.id} to stream ${streamId}`);
+            this.logger.debug(`Mapping request ${message.id} to stream ${streamId}`);
             this._streamMapping.set(streamId, responseFactory);
             this._requestToStreamMapping.set(message.id, streamId);
           }
@@ -229,7 +220,7 @@ export class KibanaMCPTransport implements Transport {
 
         // Set up close handler for client disconnects
         request.events.aborted$.subscribe(() => {
-          this.logger.info(`Stream ${streamId} aborted by client`);
+          this.logger.debug(`Stream ${streamId} aborted by client`);
           this._streamMapping.delete(streamId);
           this._responseCallbacks.delete(streamId);
         });
@@ -238,15 +229,13 @@ export class KibanaMCPTransport implements Transport {
         for (const message of messages) {
           this.onmessage?.(message);
         }
-        this.logger.info('Finished processing all messages');
 
         // Wait for the response to be ready
         return await responsePromise;
       }
     } catch (error) {
-      this.logger.error(`Error processing request: ${error}`);
-      this.logger.info(`Error stack trace: ${error.stack}`);
-      // return JSON-RPC formatted error
+      this.logger.error(`Request processing error: ${error}`);
+      this.onerror?.(error as Error);
       return responseFactory.badRequest({
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -258,7 +247,6 @@ export class KibanaMCPTransport implements Transport {
           id: null,
         }),
       });
-      this.onerror?.(error as Error);
     }
   }
 
@@ -267,26 +255,23 @@ export class KibanaMCPTransport implements Transport {
    */
   async send(message: JSONRPCMessage, options?: { relatedRequestId?: RequestId }): Promise<void> {
     try {
-      this.logger.info(`Sending message: ${JSON.stringify(message)}`);
+      this.logger.debug('Processing outgoing message');
 
       let requestId = options?.relatedRequestId;
       if (isJSONRPCResponse(message) || isJSONRPCError(message)) {
-        // If the message is a response, use the request ID from the message
         requestId = message.id;
-        this.logger.info(`Using message ID as request ID: ${String(requestId)}`);
       }
 
       if (requestId === undefined) {
-        this.logger.info('No request ID found, treating as notification');
+        this.logger.debug('Processing notification message');
         // todo: handle notifications
         return;
       }
 
       // Get the response for this request
       const streamId = this._requestToStreamMapping.get(requestId);
-      this.logger.info(`Found stream ID for request ${String(requestId)}: ${streamId}`);
-
       const responseFactory = this._streamMapping.get(streamId!);
+
       if (!streamId) {
         const error = `No connection established for request ID: ${String(requestId)}`;
         this.logger.error(error);
@@ -294,17 +279,14 @@ export class KibanaMCPTransport implements Transport {
       }
 
       if (isJSONRPCResponse(message) || isJSONRPCError(message)) {
-        this.logger.info(`Processing response/error message for request ${String(requestId)}`);
+        this.logger.debug(`Processing response for request ${String(requestId)}`);
         this._requestResponseMap.set(requestId, message);
         const relatedIds = Array.from(this._requestToStreamMapping.entries())
           .filter(([_, sid]) => this._streamMapping.get(sid) === responseFactory)
           .map(([id]) => id);
 
-        this.logger.info(`Found related request IDs: ${relatedIds.join(', ')}`);
-
         // Check if we have responses for all requests using this connection
         const allResponsesReady = relatedIds.every((id) => this._requestResponseMap.has(id));
-        this.logger.info(`All responses ready: ${allResponsesReady}`);
 
         if (allResponsesReady) {
           if (!responseFactory) {
@@ -319,13 +301,11 @@ export class KibanaMCPTransport implements Transport {
           };
           if (this.sessionId !== undefined) {
             headers['mcp-session-id'] = this.sessionId;
-            this.logger.info(`Adding session ID to headers: ${this.sessionId}`);
           }
 
           const responses = relatedIds.map((id) => this._requestResponseMap.get(id)!);
           const responseBody =
             responses.length === 1 ? JSON.stringify(responses[0]) : JSON.stringify(responses);
-          this.logger.info(`Sending response body: ${responseBody}`);
 
           const response = responseFactory.ok({
             headers,
@@ -345,12 +325,11 @@ export class KibanaMCPTransport implements Transport {
             this._requestToStreamMapping.delete(id);
           }
           this._streamMapping.delete(streamId);
-          this.logger.info('Cleaned up request mappings');
+          this.logger.debug('Request mappings cleaned up');
         }
       }
     } catch (error) {
       this.logger.error(`Error sending message: ${error}`);
-      this.logger.info(`Error stack trace: ${error.stack}`);
       this.onerror?.(error as Error);
     }
   }

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { KibanaMCPTransport } from './kibana_mcp_transport';
-import { schema } from '@kbn/config-schema';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // POST handler for MCP
   router.post(
     {
       path: '/api/onechat/mcp',
@@ -23,27 +22,29 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           enabled: false,
           reason: 'todo',
         },
-        authc: {
-          enabled: false,
-          reason: 'todo',
-        },
       },
       options: {
-        summary: `MCP server`,
+        summary: `1Chat MCP server`,
         access: 'public',
-        description: 'MCP server',
+        description: '1Chat MCP server',
+        tags: ['1chat', 'mcp'],
+        xsrfRequired: false,
+        availability: {
+          stability: 'experimental',
+        },
       },
       validate: { body: schema.object({}, { unknowns: 'allow' }) },
     },
     wrapHandler(async (ctx, request, response) => {
-      const transport = new KibanaMCPTransport({ sessionIdGenerator: undefined, logger });
+      let transport: KibanaMCPTransport | undefined;
       let server: McpServer | undefined;
 
       try {
-        // Create and configure server first
+        transport = new KibanaMCPTransport({ sessionIdGenerator: undefined, logger });
+
         server = new McpServer({
-          name: 'kibana-mcp-server',
-          version: '1.0.0',
+          name: '1chat-mcp-server',
+          version: '0.0.1',
         });
 
         const { tools: toolService } = getInternalServices();
@@ -65,36 +66,23 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           );
         }
 
-        logger.info('MCP: Registered add tool');
-
-        // Handle client disconnect
         request.events.aborted$.subscribe(() => {
-          logger.debug('MCP: Request closed, cleaning up resources');
-          transport.close().catch((error) => {
+          transport?.close().catch((error) => {
             logger.error('MCP: Error closing transport', { error });
           });
           server?.close();
         });
 
-        logger.info('MCP: Starting transport and server');
-
-        // Then connect server to transport
         await server.connect(transport);
-        logger.info('MCP: Server connected to transport');
 
-        // Handle the request through the transport and return the response
-        const result = await transport.handleRequest(request, response);
-        logger.info('MCP: Request handled');
-        return result;
+        return await transport.handleRequest(request, response);
       } catch (error) {
         logger.error('MCP: Error handling request', { error });
-        // Clean up resources on error
         try {
-          await transport.close();
+          await transport?.close();
         } catch (closeError) {
           logger.error('MCP: Error closing transport during error handling', { error: closeError });
         }
-
         if (server) {
           try {
             server.close();
@@ -117,7 +105,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     })
   );
 
-  // GET handler for MCP
   router.get(
     {
       path: '/api/onechat/mcp',
@@ -127,10 +114,18 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           reason: 'todo',
         },
       },
+      options: {
+        summary: `1Chat MCP server`,
+        access: 'public',
+        description: '1Chat MCP server',
+        tags: ['1chat', 'mcp'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
       validate: false,
     },
     wrapHandler(async (_, request, response) => {
-      logger.debug('MCP: Received GET request - method not allowed');
       return response.customError({
         statusCode: 405,
         body: {
@@ -143,7 +138,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     })
   );
 
-  // DELETE handler for MCP
   router.delete(
     {
       path: '/api/onechat/mcp',
@@ -153,10 +147,19 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           reason: 'todo',
         },
       },
+      options: {
+        summary: `1Chat MCP server`,
+        access: 'public',
+        description: '1Chat MCP server',
+        tags: ['1chat', 'mcp'],
+        xsrfRequired: false,
+        availability: {
+          stability: 'experimental',
+        },
+      },
       validate: false,
     },
     wrapHandler(async (_, request, response) => {
-      logger.debug('MCP: Received DELETE request - method not allowed');
       return response.customError({
         statusCode: 405,
         body: {
