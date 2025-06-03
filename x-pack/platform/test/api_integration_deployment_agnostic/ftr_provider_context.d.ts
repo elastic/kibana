@@ -7,6 +7,9 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './services';
+import { DeploymentAgnosticCommonServices } from './services';
 
-export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<
+  DeploymentAgnosticCommonServices,
+  {}
+>;

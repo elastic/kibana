@@ -22,6 +22,7 @@ import {
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
@@ -64,15 +65,18 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
      */
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
-    const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
+    const xPackAPITestsConfig = await readConfigFile(
+      require.resolve('../../api_integration/config.ts')
+    );
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
     const idpPath = require.resolve(
       '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
     );
+
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
+      '../../security_api_integration/plugins/saml_provider'
     );
 
     const servers = {

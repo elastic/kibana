@@ -29,7 +29,8 @@
     "target/**/*",
     "*/plugins/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*"
+    "*/*/packages/**/*",
+    "../../../src/platform/packages/shared/kbn-repo-info/**/*",
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
@@ -72,5 +73,9 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/es",
+    "@kbn/mock-idp-utils",
+    "@kbn/repo-info",
   ]
 }

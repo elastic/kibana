@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../../default_configs/stateful.config.base';
+import { createStatefulTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
 
 export default createStatefulTestConfig({
   testFiles: [require.resolve('./oblt.index.ts')],
