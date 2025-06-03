@@ -37,6 +37,9 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
 import { RuntimeStateProvider } from '../../state_management/redux';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import type { DataView } from '@kbn/data-views-plugin/common';
+
+type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -146,7 +149,7 @@ jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
-function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarResponsiveProps {
+function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
 
@@ -189,16 +192,16 @@ function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
   return stateContainer;
 }
 
-type EnzymeReturnType = ReactWrapper<DiscoverSidebarResponsiveProps>;
+type EnzymeReturnType = ReactWrapper<TestWrapperProps>;
 type MountReturn<WithRTL extends boolean> = WithRTL extends true ? undefined : EnzymeReturnType;
 
 async function mountComponent<WithReactTestingLibrary extends boolean = false>(
-  props: DiscoverSidebarResponsiveProps,
+  props: TestWrapperProps,
   appStateParams: { query?: Query | AggregateQuery } = {},
   services?: DiscoverServices,
   withReactTestingLibrary?: WithReactTestingLibrary
 ): Promise<MountReturn<WithReactTestingLibrary>> {
-  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
+  let comp: ReactWrapper<TestWrapperProps>;
   const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
@@ -217,8 +220,8 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
     <EuiProvider>
       <KibanaContextProvider services={mockedServices}>
         <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
-            <DiscoverSidebarResponsive {...props} />{' '}
+          <RuntimeStateProvider currentDataView={props.selectedDataView} adHocDataViews={[]}>
+            <DiscoverSidebarResponsive {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </KibanaContextProvider>
@@ -243,7 +246,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
 }
 
 describe('discover responsive sidebar', function () {
-  let props: DiscoverSidebarResponsiveProps;
+  let props: TestWrapperProps;
 
   beforeEach(async () => {
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
@@ -424,7 +427,7 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should not calculate counts if documents are not fetched yet', async function () {
-    const propsWithoutDocuments: DiscoverSidebarResponsiveProps = {
+    const propsWithoutDocuments: TestWrapperProps = {
       ...props,
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.UNINITIALIZED,
@@ -701,7 +704,7 @@ describe('discover responsive sidebar', function () {
 
   it('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
     };
@@ -733,7 +736,7 @@ describe('discover responsive sidebar', function () {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
     };
