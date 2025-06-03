@@ -96,7 +96,7 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.StylesheetJson => {
+const getStyle = (theme: EuiTheme): cytoscape.StylesheetJson => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -160,7 +160,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // The DefinitelyTyped definitions don't specify this property since it's
         // fairly new.
-        //
         // @ts-expect-error
         'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
@@ -192,20 +191,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'target-arrow-color': theme.eui.euiColorDarkShade,
       },
     },
-    ...(isTraceExplorerEnabled
-      ? [
-          {
-            selector: 'edge.hover',
-            style: {
-              width: 4,
-              'z-index': zIndexEdgeHover,
-              'line-color': theme.eui.euiColorDarkShade,
-              'source-arrow-color': theme.eui.euiColorDarkShade,
-              'target-arrow-color': theme.eui.euiColorDarkShade,
-            },
-          },
-        ]
-      : []),
     {
       selector: 'node.hover',
       style: {
@@ -247,12 +232,9 @@ ${theme.eui.euiColorLightShade}`,
   marginTop: 0,
 });
 
-export const getCytoscapeOptions = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
-): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = (theme: EuiTheme): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(theme, isTraceExplorerEnabled),
+  style: getStyle(theme),
 });

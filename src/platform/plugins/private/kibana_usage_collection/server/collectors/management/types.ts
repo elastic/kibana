@@ -156,7 +156,6 @@ export interface UsageStats {
   'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
   'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
