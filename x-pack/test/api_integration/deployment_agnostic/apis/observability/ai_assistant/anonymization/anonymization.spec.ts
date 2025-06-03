@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': JSON.stringify([
+        'observability:aiAssistantAnonymizationRules': [
           {
             id: 'email_regex',
             entityClass: 'EMAIL',
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             description: 'Anonymize URLs',
             normalize: true,
           },
-        ]),
+        ],
       });
     });
 
@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': '[]',
+        'observability:aiAssistantAnonymizationRules': [],
       });
     });
 

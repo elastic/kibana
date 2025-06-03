@@ -193,7 +193,7 @@ describe('Observability AI Assistant client', () => {
         esClient: {
           asCurrentUser: currentUserEsClientMock,
         },
-        anonymizationRules: '[]',
+        anonymizationRules: [],
         logger: loggerMock,
       }),
       logger: loggerMock,
