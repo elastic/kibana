@@ -32,7 +32,7 @@ export interface CommonFieldSchema {
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
   defaultValue?: string | string[];
-  customValidator?: (
+  customUrlFieldValidator?: (
     message: string
   ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }
@@ -61,14 +61,14 @@ const getFieldConfig = ({
   isUrlField = false,
   defaultValue,
   type,
-  customValidator,
+  customUrlFieldValidator,
 }: {
   label: string;
   isRequired?: boolean;
   isUrlField?: boolean;
   defaultValue?: string | string[];
   type?: keyof typeof FIELD_TYPES;
-  customValidator?: (
+  customUrlFieldValidator?: (
     message: string
   ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }) => ({
@@ -89,7 +89,7 @@ const getFieldConfig = ({
           },
         ]
       : []),
-    ...(isUrlField && !customValidator
+    ...(isUrlField && !customUrlFieldValidator
       ? [
           {
             validator: urlField(
@@ -103,10 +103,10 @@ const getFieldConfig = ({
           },
         ]
       : []),
-    ...(isUrlField && customValidator
+    ...(isUrlField && customUrlFieldValidator
       ? [
           {
-            validator: customValidator(
+            validator: customUrlFieldValidator(
               i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
                 {
@@ -143,7 +143,7 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
-  customValidator,
+  customUrlFieldValidator,
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -160,7 +160,7 @@ const FormRow: React.FC<FormRowProps> = ({
                 defaultValue,
                 type,
                 isRequired,
-                customValidator,
+                customUrlFieldValidator,
               })}
               helpText={helpText}
               componentProps={{
@@ -179,7 +179,7 @@ const FormRow: React.FC<FormRowProps> = ({
                 label,
                 type,
                 isRequired,
-                customValidator,
+                customUrlFieldValidator,
               })}
               helpText={helpText}
               component={PasswordField}

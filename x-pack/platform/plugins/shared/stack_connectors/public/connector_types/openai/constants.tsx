@@ -61,7 +61,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.API_URL_LABEL,
     isUrlField: true,
     defaultValue: DEFAULT_URL,
-    customValidator: validateURL,
+    customUrlFieldValidator: validateURL,
     helpText: (
       <FormattedMessage
         defaultMessage="The OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -140,7 +140,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
     label: i18n.API_URL_LABEL,
     isUrlField: true,
     defaultValue: DEFAULT_URL_AZURE,
-    customValidator: validateURL,
+    customUrlFieldValidator: validateURL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Azure OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -166,7 +166,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
-    customValidator: validateURL,
+    customUrlFieldValidator: validateURL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
