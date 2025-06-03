@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 18000
   alerting: 106936
   apm: 64385
+  apmSourcesAccess: 16765
   banners: 17946
   bfetch: 22837
   canvas: 29355
