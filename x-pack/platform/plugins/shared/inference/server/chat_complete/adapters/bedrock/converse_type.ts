@@ -13,6 +13,7 @@ import type {
   MessageStartEvent,
   MessageStopEvent,
 } from '@aws-sdk/client-bedrock-runtime';
+import type { MessageHeaders } from '@smithy/types';
 
 export interface ConverseCompletionChunk {
   type:
@@ -33,4 +34,7 @@ export type ConverseResponse =
   | MessageStopEvent
   | ConverseStreamMetadataEvent;
 
-export type ConverseBedrockChunkMember = Record<string, { body: ConverseResponse }>;
+export interface ConverseBedrockChunkMember {
+  headers: MessageHeaders;
+  body: ConverseResponse;
+}

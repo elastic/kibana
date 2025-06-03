@@ -22,8 +22,11 @@ interface ModelStreamErrorException {
 export interface ModelStreamErrorExceptionMember {
   modelStreamErrorException: ModelStreamErrorException;
 }
+export interface BedrockStreamChunkMember {
+  chunk: ConverseBedrockChunkMember;
+}
 
-export type BedrockStreamMember = ConverseBedrockChunkMember | ModelStreamErrorExceptionMember;
+export type BedrockStreamMember = BedrockStreamChunkMember | ModelStreamErrorExceptionMember;
 
 // AWS uses SerDe to send over serialized data, so we use their
 // @smithy library to parse the stream data

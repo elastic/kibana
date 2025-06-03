@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
+import type { ToolResultBlock, ToolUseBlock, ImageBlock } from '@aws-sdk/client-bedrock-runtime';
 /**
  * BedRock message as expected by the bedrock connector
  */
@@ -20,30 +20,18 @@ export interface BedRockMessage {
  * Bedrock message parts
  */
 export interface BedRockTextPart {
-  type: 'text';
   text: string;
 }
 
 export interface BedRockToolUsePart {
-  type: 'tool_use';
-  id: string;
-  name: string;
-  input: Record<string, unknown>;
+  toolUse: ToolUseBlock;
 }
 
 export interface BedRockToolResultPart {
-  type: 'tool_result';
-  tool_use_id: string;
-  content: string;
+  toolResult: ToolResultBlock;
 }
-
 export interface BedRockImagePart {
-  type: 'image';
-  source: {
-    type: 'base64';
-    mediaType: string;
-    data: string;
-  };
+  image: ImageBlock;
 }
 
 export type BedRockMessagePart =

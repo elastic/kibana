@@ -38,6 +38,7 @@
     "@kbn/expressions-plugin",
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
-    "@kbn/ml-is-populated-object"
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-is-defined"
   ]
 }

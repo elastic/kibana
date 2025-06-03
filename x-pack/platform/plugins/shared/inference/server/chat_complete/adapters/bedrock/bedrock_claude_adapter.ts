@@ -19,9 +19,12 @@ import type {
   ModelStreamErrorException,
 } from '@aws-sdk/client-bedrock-runtime';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ImageBlock } from '@aws-sdk/client-bedrock-runtime';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { DocumentType as JsonMember } from '@smithy/types';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
-import type { BedRockMessage, BedRockTextPart } from './types';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import {
   ConverseCompletionChunk,
@@ -29,6 +32,7 @@ import {
 } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToBedrock } from './convert_tools';
+
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
@@ -117,26 +121,30 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          rawContent: (typeof message.content === 'string'
-            ? [message.content]
-            : message.content
-          ).map((contentPart) => {
-            if (typeof contentPart === 'string') {
-              return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
-            } else if (contentPart.type === 'text') {
-              return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
-            }
-            return {
-              image: {
-                // Convert mimetype = 'image/png' to 'png'
-                // https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
-                format: contentPart.source.mimeType.split('/')[1],
-                source: {
-                  bytes: contentPart.source.data,
-                },
-              },
-            };
-          }),
+          rawContent: (typeof message.content === 'string' ? [message.content] : message.content)
+            .map((contentPart) => {
+              if (typeof contentPart === 'string') {
+                return { text: contentPart } satisfies BedRockTextPart;
+              } else if (contentPart.type === 'text') {
+                return { text: contentPart.text } satisfies BedRockTextPart;
+              }
+              if (contentPart.source?.data) {
+                const imageBlock: ImageBlock = {
+                  // Convert mimetype = 'image/png' to 'png'
+                  // https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                  format: contentPart.source.mimeType.split(
+                    '/'
+                  )[1] as BedRockImagePart['image']['format'],
+                  source: {
+                    bytes: new TextEncoder().encode(contentPart.source.data),
+                  },
+                };
+                return {
+                  image: imageBlock,
+                };
+              }
+            })
+            .filter<BedRockTextPart | BedRockImagePart>(isDefined),
         };
       case MessageRole.Assistant:
         return {
@@ -149,9 +157,7 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
                     toolUse: {
                       toolUseId: toolCall.toolCallId,
                       name: toolCall.function.name,
-                      input: ('arguments' in toolCall.function
-                        ? toolCall.function.arguments
-                        : {}) as Record<string, unknown>,
+                      input: 'arguments' in toolCall.function ? toolCall.function.arguments : {},
                     },
                   };
                 })
@@ -166,13 +172,13 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
               toolResult: {
                 toolUseId: message.toolCallId,
                 content: [
-                  typeof message.response === 'string'
-                    ? {
+                  (typeof message.response === 'string'
+                    ? ({
                         text: message.response,
-                      }
+                      } as { text: string })
                     : {
                         json: message.response,
-                      },
+                      }) as { json: JsonMember },
                 ],
               },
             },
