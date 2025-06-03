@@ -11,7 +11,10 @@ import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { getRegistryItem } from './panel_placement_registry';
 import { PanelPlacementSettings } from './types';
 
-export async function getPanelPlacementSetting(embeddableType: string, serializedState?: SerializedPanelState<object>): Promise<undefined | PanelPlacementSettings> {
+export async function getPanelPlacementSetting(
+  embeddableType: string,
+  serializedState?: SerializedPanelState<object>
+): Promise<undefined | PanelPlacementSettings> {
   const registryItem = getRegistryItem(embeddableType);
   if (!registryItem) return;
 
