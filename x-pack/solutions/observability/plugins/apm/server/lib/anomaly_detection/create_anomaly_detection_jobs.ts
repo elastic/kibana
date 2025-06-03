@@ -11,7 +11,7 @@ import { snakeCase } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';

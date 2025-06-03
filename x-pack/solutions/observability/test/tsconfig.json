@@ -48,6 +48,6 @@
     "@kbn/profiling-plugin",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/apm-data-access-plugin",
+    "@kbn/apm-sources-access-plugin",
   ]
 }

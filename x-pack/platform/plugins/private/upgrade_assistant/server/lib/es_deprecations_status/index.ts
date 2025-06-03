@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   EnrichedDeprecationInfo,
   ESUpgradeStatus,
@@ -23,11 +24,12 @@ export async function getESUpgradeStatus(
   {
     featureSet,
     dataSourceExclusions,
-  }: { featureSet: FeatureSet; dataSourceExclusions: DataSourceExclusions }
+  }: { featureSet: FeatureSet; dataSourceExclusions: DataSourceExclusions },
+  log: Logger
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
-    const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
+    const enrichedDeprecations = await getEnrichedDeprecations(dataClient, log);
 
     // Get all indices with reindex actions to fetch their sizes
     const indicesNeedingSize = enrichedDeprecations

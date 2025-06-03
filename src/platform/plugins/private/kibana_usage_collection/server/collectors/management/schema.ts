@@ -464,14 +464,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAgentExplorerView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableTableSearchBar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -590,20 +582,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableAwsLambdaMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmTraceExplorerTab': {

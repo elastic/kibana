@@ -8,14 +8,14 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 interface Props {
   actions: React.ReactNode;
 }
 
 export function EmptyDashboards({ actions }: Props) {
-  const isDarkMode = useIsDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiEmptyPrompt
