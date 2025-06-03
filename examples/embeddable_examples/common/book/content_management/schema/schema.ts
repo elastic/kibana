@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
 import type { SavedBookAttributes } from '../../../../server/types';
-import type { BookAttributes } from '../../../../server/book/content_management/v1';
 import { itemToSavedObject, savedObjectToItem } from './transforms';
 
-export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributes,
-  BookAttributes
-> = {
-  itemToSavedObject,
-  savedObjectToItem,
-};
+export const bookItemSchema = schema.object({
+  bookTitle: schema.string(),
+  author: schema.string(),
+  pages: schema.number(),
+  synopsis: schema.maybe(schema.string()),
+  published: schema.maybe(schema.number()),
+  sequelTo: schema.maybe(schema.string()),
+});
+
+export type BookItem = TypeOf<typeof bookItemSchema>;
+
+export const bookAttributesDefinition: VersionableEmbeddableObject<SavedBookAttributes, BookItem> =
+  {
+    itemToSavedObject,
+    savedObjectToItem,
+  };

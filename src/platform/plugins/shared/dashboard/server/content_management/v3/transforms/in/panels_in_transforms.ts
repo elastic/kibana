@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import { ItemAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes, DashboardPanel } from '../../types';
 import { prefixReferencesFromPanel } from '../../../../../common';
@@ -114,9 +113,7 @@ function panelToSavedObject(
   if (!embeddableCmDefintions) return panelConfig;
   const { itemToSavedObject } =
     embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
-  return (
-    itemToSavedObject?.(panelConfig as unknown as ItemAttributesWithReferences<any>) ?? panelConfig
-  );
+  return itemToSavedObject?.(panelConfig.attributes) ?? panelConfig;
 }
 
 function transformPanelsProperties(panels: DashboardPanel[], embeddable: EmbeddableStart) {

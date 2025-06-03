@@ -14,10 +14,7 @@ import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import {
-  ItemAttributesWithReferences,
-  SavedObjectAttributesWithReferences,
-} from '@kbn/embeddable-plugin/common/types';
+import { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import { omit } from 'lodash';
 import type { BookAttributes, BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
@@ -76,14 +73,14 @@ export class SavedBookStorage implements ContentStorage {
       }
 
       const response = {
-        ...item,
         id: savedObject.id,
         attributes: {
-          ...item.attributes,
-          name: item.attributes.bookTitle,
-          title: item.attributes.bookTitle,
+          ...item,
+          name: item.bookTitle,
+          title: item.bookTitle,
         },
         type: BOOK_CONTENT_ID,
+        references: [],
       };
 
       const { value, error: resultError } = transforms.mSearch.out.result.down(
@@ -121,7 +118,7 @@ export class SavedBookStorage implements ContentStorage {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
 
-    const response = { item: item.attributes };
+    const response = { item };
 
     const { value, error: resultError } = transforms.get.out.result.down(response, undefined, {
       validate: false,
@@ -155,10 +152,7 @@ export class SavedBookStorage implements ContentStorage {
     let soAttributes: SavedBookAttributes;
     let soReferences: SavedObjectReference[];
     try {
-      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject({
-        attributes: dataToLatest,
-        references: [],
-      }));
+      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject(dataToLatest));
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }
@@ -172,7 +166,7 @@ export class SavedBookStorage implements ContentStorage {
       }
     );
 
-    let item: ItemAttributesWithReferences<BookAttributes>;
+    let item: BookAttributes;
 
     try {
       item = savedObjectToItem(savedObject);
@@ -216,10 +210,7 @@ export class SavedBookStorage implements ContentStorage {
     let soReferences: SavedObjectReference[];
 
     try {
-      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject({
-        attributes: dataToLatest,
-        references: [],
-      }));
+      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject(dataToLatest));
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }
@@ -234,7 +225,7 @@ export class SavedBookStorage implements ContentStorage {
       }
     );
 
-    let item: ItemAttributesWithReferences<BookAttributes>;
+    let item: BookAttributes;
 
     try {
       // TODO fix partial types

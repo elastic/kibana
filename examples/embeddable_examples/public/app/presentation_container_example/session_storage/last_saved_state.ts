@@ -63,7 +63,7 @@ export const lastSavedStateSessionStorage = {
       return {
         ...panel,
         serializedState: {
-          rawState: newState,
+          rawState: { attributes: newState },
         },
       };
     });
@@ -80,7 +80,7 @@ export const lastSavedStateSessionStorage = {
       );
       const { itemToSavedObject } = getLatestVersionOfDefinition(embeddableCmDefinitions);
       if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(rawState);
+      const savedState = itemToSavedObject(rawState.attributes);
       return {
         ...panel,
         serializedState: { rawState: savedState },

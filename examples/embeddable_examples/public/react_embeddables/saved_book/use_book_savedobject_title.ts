@@ -10,7 +10,7 @@
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { useState, useLayoutEffect, useCallback } from 'react';
 import { BOOK_CONTENT_ID } from '../../../common/book/content_management/schema';
-import { BookAttributes } from './types';
+import { BookItem } from './types';
 
 export const useBookSavedObjectTitle = (
   id: string | null,
@@ -21,7 +21,7 @@ export const useBookSavedObjectTitle = (
   const getTitleFromId = useCallback(async () => {
     if (!id) return null;
     try {
-      const so: { item: BookAttributes } = await contentClient.get({
+      const so: { item: BookItem } = await contentClient.get({
         id,
         contentTypeId: BOOK_CONTENT_ID,
       });

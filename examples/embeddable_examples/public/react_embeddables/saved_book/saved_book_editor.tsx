@@ -35,7 +35,7 @@ import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { BookApi, BookAttributes } from './types';
+import { BookApi, BookItem } from './types';
 import { saveBookAttributes } from './saved_book_library';
 import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
 import { useBookSavedObjectTitle } from './use_book_savedobject_title';
@@ -48,7 +48,7 @@ export const openSavedBookEditor = ({
   api,
   contentManagement,
 }: {
-  attributesManager: StateManager<BookAttributes>;
+  attributesManager: StateManager<BookItem>;
   isCreate: boolean;
   core: CoreStart;
   parent?: unknown;
@@ -115,7 +115,7 @@ export const SavedBookEditor = ({
   api,
   savedObjectServices,
 }: {
-  attributesManager: StateManager<BookAttributes>;
+  attributesManager: StateManager<BookItem>;
   isCreate: boolean;
   onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;

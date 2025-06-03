@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ItemAttributesWithReferences,
-  SavedObjectAttributesWithReferences,
-} from '@kbn/embeddable-plugin/common/types';
+import type { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { Mutable } from 'utility-types';
 import type { SavedBookAttributes } from '../../../../../server/book/saved_object';
@@ -28,14 +25,11 @@ const injectReferences = (attributes: SavedBookAttributes, references: SavedObje
 export const savedObjectToItem = ({
   attributes,
   references,
-}: SavedObjectAttributesWithReferences<SavedBookAttributes>): ItemAttributesWithReferences<BookAttributes> => ({
-  attributes: {
-    bookTitle: attributes.bookTitleAsArray.join(''),
-    author: attributes.metadata.text.authorName,
-    pages: attributes.metadata.numbers.numberOfPages,
-    synopsis: attributes.metadata.text.bookSynopsis,
-    published: attributes.metadata.numbers.publicationYear ?? null,
-    ...injectReferences(attributes, references),
-  },
-  references: [],
+}: SavedObjectAttributesWithReferences<SavedBookAttributes>): BookAttributes => ({
+  bookTitle: attributes.bookTitleAsArray.join(''),
+  author: attributes.metadata.text.authorName,
+  pages: attributes.metadata.numbers.numberOfPages,
+  synopsis: attributes.metadata.text.bookSynopsis,
+  published: attributes.metadata.numbers.publicationYear ?? null,
+  ...injectReferences(attributes, references),
 });
