@@ -705,7 +705,7 @@ export class ManifestManager {
             const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
               savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
               this.esClient,
-              currentBatch
+              spaceUpdates
             );
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -742,7 +742,13 @@ export class ManifestManager {
 
     for await (const policies of await this.fetchAllPolicies()) {
       for (const packagePolicy of policies) {
-        const { id, name } = packagePolicy;
+        const { id, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
+
+        this.logger.debug(
+          `Checking if policy [${id}][${name}] in space(s) [${spaceIds.join(
+            ', '
+          )}] needs to be updated with new artifact manifest`
+        );
 
         if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
           const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
