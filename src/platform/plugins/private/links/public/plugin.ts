@@ -32,7 +32,6 @@ import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
-import { createLinksSavedObjectRef } from './lib/saved_object_ref_utils';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -66,6 +65,7 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
+          const { createLinksSavedObjectRef } = await import('./lib/saved_object_ref_utils');
           container.addNewPanel<LinksSerializedState>(
             {
               panelType: CONTENT_ID,
