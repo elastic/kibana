@@ -625,13 +625,13 @@ export default function ({ getService }: FtrProviderContext) {
           // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
           await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
           await esArchiver.load(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
           );
         });
 
@@ -688,13 +688,13 @@ export default function ({ getService }: FtrProviderContext) {
           // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
           await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
           await esArchiver.load(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
           );
         });
 
@@ -747,18 +747,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       // In these test cases, we simulate a scenario where some existing model version objects need to be migrated. This happens because
       // they have an outdated model version number. This also means that the encryptedSavedObjects.createModelVersion wrapper is used to
-      // facilitate the migration (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      // facilitate the migration (see x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       describe('handles model version transforms correctly', () => {
         before(async () => {
           await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
           await esArchiver.load(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
+            'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_model_version'
           );
         });
 
@@ -823,13 +823,13 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana admin',
         });
         await esArchiver.load(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
         );
         await security.user.delete('admin');
       });
