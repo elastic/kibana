@@ -264,6 +264,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -298,6 +299,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
