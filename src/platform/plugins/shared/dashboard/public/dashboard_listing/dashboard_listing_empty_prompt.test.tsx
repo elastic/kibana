@@ -28,16 +28,19 @@ jest.mock('./confirm_overlays', () => {
   };
 });
 
-const renderDashboardListingEmptyPrompt = (
-  props: Partial<DashboardListingEmptyPromptProps> = {}
-) => render(<DashboardListingEmptyPrompt 
-  createItem={jest.fn()}
-  goToDashboard={jest.fn()}
-  setUnsavedDashboardIds={jest.fn()}
-  unsavedDashboardIds={[]}
-  useSessionStorageIntegration={true}
-  disableCreateDashboardButton={false}
-  {...props} />, {wrapper: I18nProvider});
+const renderDashboardListingEmptyPrompt = (props: Partial<DashboardListingEmptyPromptProps> = {}) =>
+  render(
+    <DashboardListingEmptyPrompt
+      createItem={jest.fn()}
+      goToDashboard={jest.fn()}
+      setUnsavedDashboardIds={jest.fn()}
+      unsavedDashboardIds={[]}
+      useSessionStorageIntegration={true}
+      disableCreateDashboardButton={false}
+      {...props}
+    />,
+    { wrapper: I18nProvider }
+  );
 
 test.each([
   [false, false],
@@ -45,7 +48,8 @@ test.each([
 ])(
   'renders sample data link empty prompt with link when showWriteControls is true only',
   async (showWriteControls, shouldBeInDocument) => {
-    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = showWriteControls;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls =
+      showWriteControls;
     renderDashboardListingEmptyPrompt();
     const button = screen.queryByRole('button', { name: /add some sample data/i });
     if (shouldBeInDocument) {

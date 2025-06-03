@@ -41,12 +41,15 @@ jest.mock('../no_data/dashboard_app_no_data', () => {
   };
 });
 
-const renderDashboardListingPage =(
-  props: Partial<DashboardListingPageProps> = {}
-) => render(<DashboardListingPage
-    redirectTo={jest.fn()}
-    kbnUrlStateStorage={createKbnUrlStateStorage()}
-   {...props} />, {wrapper: I18nProvider});
+const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
+  render(
+    <DashboardListingPage
+      redirectTo={jest.fn()}
+      kbnUrlStateStorage={createKbnUrlStateStorage()}
+      {...props}
+    />,
+    { wrapper: I18nProvider }
+  );
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
@@ -62,7 +65,7 @@ test('renders analytics no data page when the user has no data view', async () =
 test('initialFilter is passed through if title is not provided', async () => {
   const initialFilter = faker.lorem.word();
 
-  renderDashboardListingPage({initialFilter});
+  renderDashboardListingPage({ initialFilter });
 
   await waitFor(() => {
     expect(DashboardListing).toHaveBeenCalledWith(
@@ -79,7 +82,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
 
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({title: 'search by title', redirectTo});
+  renderDashboardListingPage({ title: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).not.toHaveBeenCalled();
@@ -90,14 +93,13 @@ test('When given a title that matches multiple dashboards, filter on the title',
   });
 });
 
-
 test('When given a title that matches one dashboard, redirect to dashboard', async () => {
   (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue({
     id: 'you_found_me',
   });
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({title: 'search by title', redirectTo});
+  renderDashboardListingPage({ title: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).toHaveBeenCalledWith({
