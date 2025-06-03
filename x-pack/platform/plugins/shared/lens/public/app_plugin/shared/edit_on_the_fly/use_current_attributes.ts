@@ -22,7 +22,9 @@ export const useCurrentAttributes = ({
   visualizationMap: VisualizationMap;
   textBasedMode?: boolean;
 }) => {
-  const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, activeDatasourceId } = useLensSelector(
+    (state) => state.lens
+  );
 
   // use the latest activeId, but fallback to attributes
   const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
@@ -42,6 +44,7 @@ export const useCurrentAttributes = ({
     const references =
       !textBasedMode && visualization.state
         ? extractReferencesFromState({
+            activeDatasourceId,
             activeDatasources: Object.keys(datasourceStates).reduce(
               (acc, id) => ({
                 ...acc,
@@ -67,6 +70,7 @@ export const useCurrentAttributes = ({
     };
     return attrs;
   }, [
+    activeDatasourceId,
     activeVisualization,
     datasourceMap,
     datasourceStates,

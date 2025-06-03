@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getThemeService = () => {
-  return {
-    useChartsBaseTheme: () => ({ metric: { minHeight: 64 } }),
-  };
-};
+import { i18n } from '@kbn/i18n';
+import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnPalette } from '../../constants';
+
+export const compareToPalette = new KbnColorFnPalette({
+  id: KbnPalette.CompareTo,
+  name: i18n.translate('palettes.compareTo.name', {
+    defaultMessage: 'Trend',
+  }),
+  colorFn: () => ['#F6726A', '#ECF1F9', '#24C292'],
+  standalone: true,
+  type: 'gradient',
+});

@@ -386,6 +386,7 @@ export const LensTopNavMenu = ({
     }
     const indexPatternIds = new Set(
       getIndexPatternsIds({
+        activeDatasourceId,
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
             ...acc,
