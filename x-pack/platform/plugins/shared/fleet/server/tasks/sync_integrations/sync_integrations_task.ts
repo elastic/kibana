@@ -161,15 +161,6 @@ export class SyncIntegrationsTask {
     }
   };
 
-  private syncedIntegrationsIndexExists = async (esClient: ElasticsearchClient) => {
-    return await esClient.indices.exists(
-      {
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-      },
-      { signal: this.abortController.signal }
-    );
-  };
-
   private getSyncedIntegrationDoc = async (
     esClient: ElasticsearchClient
   ): Promise<SyncIntegrationsData | undefined> => {
@@ -197,14 +188,7 @@ export class SyncIntegrationsTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
   ) => {
-    const indexExists = await this.syncedIntegrationsIndexExists(esClient);
-
-    if (!indexExists) {
-      this.logger.info(
-        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
-      );
-      return;
-    }
+    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
@@ -224,8 +208,6 @@ export class SyncIntegrationsTask {
         return;
       }
     }
-
-    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
     const newDoc: SyncIntegrationsData = {
       remote_es_hosts: remoteESOutputs.map((output) => {
