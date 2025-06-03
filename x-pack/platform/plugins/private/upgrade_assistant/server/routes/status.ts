@@ -59,7 +59,11 @@ export function registerUpgradeStatusRoute({
         const {
           totalCriticalDeprecations, // critical deprecations
           totalCriticalHealthIssues, // critical health issues
-        } = await getESUpgradeStatus(esClient.asCurrentUser, { featureSet, dataSourceExclusions });
+        } = await getESUpgradeStatus(
+          esClient.asCurrentUser,
+          { featureSet, dataSourceExclusions },
+          log
+        );
 
         // Fetch recent ES deprecation logs (last 24 hours)
         const recentEsDeprecationLogs = await getRecentEsDeprecationLogs(

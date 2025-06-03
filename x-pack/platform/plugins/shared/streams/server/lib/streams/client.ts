@@ -26,7 +26,6 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { migrateOnRead } from './helpers/migrate_on_read';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -325,6 +324,13 @@ export class StreamsClient {
     throw streamDefinition;
   }
 
+  private getStreamDefinitionFromSource(source: Streams.all.Definition | undefined) {
+    if (!source) {
+      throw new DefinitionNotFoundError(`Cannot find stream definition`);
+    }
+    return source;
+  }
+
   /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
@@ -340,9 +346,7 @@ export class StreamsClient {
     try {
       const response = await this.dependencies.storageClient.get({ id: name });
 
-      const streamDefinition = migrateOnRead(response._source!);
-
-      Streams.all.Definition.asserts(streamDefinition);
+      const streamDefinition = this.getStreamDefinitionFromSource(response._source);
 
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
@@ -373,9 +377,7 @@ export class StreamsClient {
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
     return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
-        const source = response._source!;
-        Streams.all.Definition.asserts(source);
-        return source;
+        return this.getStreamDefinitionFromSource(response._source);
       }),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
@@ -566,11 +568,9 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) => {
-      const source = hit._source!;
-      Streams.all.Definition.asserts(source);
-      return source;
-    });
+    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
+      this.getStreamDefinitionFromSource(hit._source)
+    );
 
     const privileges = await checkAccessBulk({
       names: streams

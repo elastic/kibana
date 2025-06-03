@@ -14,6 +14,7 @@ import { ESQL_LANG_ID } from './lib/constants';
 
 import type { CustomLangModuleType } from '../types';
 
+import { buildESQLTheme } from './lib/esql_theme';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { getHoverItem } from './lib/hover/hover';
@@ -30,6 +31,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
   },
+  languageThemeResolver: buildESQLTheme,
   languageConfiguration: {
     brackets: [
       ['(', ')'],

@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
@@ -673,6 +674,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'docLinks'
   >;
   dateRange: DateRange;
+  esqlVariables?: ESQLControlVariable[] | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;

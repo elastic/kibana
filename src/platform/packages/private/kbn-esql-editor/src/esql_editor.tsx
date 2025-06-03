@@ -27,15 +27,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ESQLLang,
-  ESQL_LANG_ID,
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
-  monaco,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
@@ -133,7 +126,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiActions,
     data,
   } = kibana.services;
-  const darkMode = core.theme?.getTheme().darkMode;
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -520,12 +512,14 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
     };
     return callbacks;
   }, [
     fieldsMetadata,
     license,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
+    kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
@@ -743,12 +737,12 @@ export const ESQLEditor = memo(function ESQLEditor({
         verticalScrollbarSize: 6,
       },
       scrollBeyondLastLine: false,
-      theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
+      theme: ESQL_LANG_ID,
       tabSize: 2,
       wordWrap: 'on',
       wrappingIndent: 'none',
     }),
-    [isDisabled, darkMode]
+    [isDisabled]
   );
 
   const editorPanel = (

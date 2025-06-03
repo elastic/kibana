@@ -12,9 +12,11 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { PieVisualizationState } from '../../../common/types';
 import { DimensionEditor, DimensionEditorProps } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { getKbnPalettes } from '@kbn/palettes';
 
 const darkMode = false;
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
+const palettes = getKbnPalettes({ darkMode });
 
 describe('DimensionEditor', () => {
   let defaultState: PieVisualizationState;
@@ -63,6 +65,7 @@ describe('DimensionEditor', () => {
       removeLayer: jest.fn(),
       panelRef: { current: null },
       isDarkMode: darkMode,
+      palettes,
       paletteService: paletteServiceMock,
     };
 

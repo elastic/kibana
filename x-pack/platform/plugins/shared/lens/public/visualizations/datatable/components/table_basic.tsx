@@ -29,10 +29,13 @@ import {
 import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import useObservable from 'react-use/lib/useObservable';
-import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId } from '@kbn/transpose-utils';
+import { useKbnPalettes } from '@kbn/palettes';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
+import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
+import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
@@ -67,7 +70,7 @@ import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
-const gridStyle: EuiDataGridStyle = {
+const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'shade',
   footer: 'shade',
@@ -80,7 +83,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const isDarkMode = useKibanaIsDarkMode();
+  const palettes = useKbnPalettes();
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -412,6 +416,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           };
       const colorFn = getCellColorFn(
         props.paletteService,
+        palettes,
         data,
         colorByTerms,
         isDarkMode,
@@ -438,6 +443,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     isDarkMode,
     props.args.fitRowToContent,
     props.paletteService,
+    palettes,
     firstLocalTable,
     bucketedColumns,
     minMaxByColumnId,
@@ -495,6 +501,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       };
     }
   }, [columnConfig.columns, alignments, props.data, columns]);
+
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...DATA_GRID_STYLE_DEFAULT,
+      ...(props.args.density
+        ? DATA_GRID_DENSITY_STYLE_MAP[props.args.density]
+        : DATA_GRID_STYLE_NORMAL),
+    }),
+    [props.args.density]
+  );
 
   if (isEmpty) {
     return (

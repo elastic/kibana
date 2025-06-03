@@ -8,7 +8,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { RenderOptions, render } from '@testing-library/react';
 import { DragContextState, RootDragDropProvider } from './providers';
 
@@ -22,7 +22,7 @@ export const dataTransfer = {
 };
 
 export const generateDragDropValue = (label = faker.lorem.word()) => ({
-  id: faker.random.uuid(),
+  id: faker.string.uuid(),
   humanData: {
     label,
     groupLabel: faker.lorem.word(),
