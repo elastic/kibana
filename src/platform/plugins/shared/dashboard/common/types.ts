@@ -17,11 +17,12 @@ import type {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/common';
 
-import type { DashboardPanelMap } from './dashboard_container/types';
+import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
   DashboardPanel,
+  DashboardSection,
 } from '../server/content_management';
 
 export interface DashboardCapabilities {
@@ -38,6 +39,7 @@ export interface DashboardCapabilities {
 export interface ParsedDashboardAttributesWithType {
   id: string;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
   type: 'dashboard';
 }
 
@@ -60,6 +62,7 @@ export interface DashboardState extends DashboardSettings {
   refreshInterval?: RefreshInterval;
   viewMode: ViewMode;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -79,7 +82,7 @@ export interface DashboardState extends DashboardSettings {
  * Do not change type without considering BWC of stored URLs
  */
 export type SharedDashboardState = Partial<
-  Omit<DashboardState, 'panels'> & {
+  Omit<DashboardState, 'panels' | 'sections'> & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     /**
@@ -88,7 +91,7 @@ export type SharedDashboardState = Partial<
      */
     controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
 
-    panels: DashboardPanel[];
+    panels: Array<DashboardPanel | DashboardSection>;
 
     references?: DashboardState['references'] & SerializableRecord;
   }
