@@ -31,14 +31,10 @@ import {
   LensInternalApi,
   LensRuntimeState,
 } from '../types';
-import {
-  buildObservableVariable,
-  emptySerializer,
-  extractInheritedViewModeObservable,
-} from '../helper';
+import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlineEditPanel } from '../inline_editing/mount';
+import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
@@ -88,9 +84,6 @@ export function initializeEditApi(
     HasEditCapabilities &
     HasReadOnlyCapabilities &
     PublishesViewMode & { uuid: string };
-  comparators: {};
-  serialize: () => {};
-  cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
@@ -99,9 +92,7 @@ export function initializeEditApi(
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
-  const [viewMode$] = buildObservableVariable<ViewMode>(
-    extractInheritedViewModeObservable(parentApi)
-  );
+  const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
@@ -255,14 +246,11 @@ export function initializeEditApi(
             updateState({ ...getState(), attributes }),
     });
     if (ConfigPanel) {
-      mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+      mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
     }
   };
 
   return {
-    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
-    serialize: emptySerializer,
-    cleanup: noop,
     api: {
       uuid,
       viewMode$,

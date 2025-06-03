@@ -9,7 +9,6 @@
 
 import {
   ESQLAst,
-  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -46,7 +45,7 @@ import {
   retrieveSources,
 } from './resources';
 import type {
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
   ErrorTypes,
   ReferenceMaps,
@@ -55,7 +54,6 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -118,6 +116,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
+  getTimeseriesIndices: [],
 };
 
 /**
@@ -217,16 +216,10 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {
-    case 'ts': {
-      const metrics = command as ESQLAstTimeseriesCommand;
-      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
-      messages.push(...metricsCommandErrors);
-      break;
-    }
     case 'join': {
       const join = command as ESQLAstJoinCommand;
       const joinCommandErrors = validateJoinCommand(join, references);
@@ -335,7 +328,7 @@ function validateOption(
 }
 
 function validateFieldsShadowing(
-  fields: Map<string, ESQLRealField>,
+  fields: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
   const messages: ESQLMessage[] = [];
@@ -370,7 +363,7 @@ function validateFieldsShadowing(
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: ESQLAst) {
+function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata>, ast: ESQLAst) {
   const usedColumnsInQuery: string[] = [];
 
   walk(ast, {

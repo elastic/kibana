@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { render } from '../../helpers/test_helper';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
@@ -14,13 +15,18 @@ import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_ba
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 
 jest.mock('../../hooks/use_get_knowledge_base_entries');
 jest.mock('../../hooks/use_create_knowledge_base_entry');
 jest.mock('../../hooks/use_import_knowledge_base_entries');
 jest.mock('../../hooks/use_delete_knowledge_base_entry');
 jest.mock('@kbn/ai-assistant/src/hooks');
+jest.mock('@kbn/ai-assistant/src/hooks/use_inference_endpoints', () => ({
+  useInferenceEndpoints: () => ({
+    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+    isLoading: false,
+  }),
+}));
 
 const useGetKnowledgeBaseEntriesMock = useGetKnowledgeBaseEntries as jest.Mock;
 const useCreateKnowledgeBaseEntryMock = useCreateKnowledgeBaseEntry as jest.Mock;
@@ -111,6 +117,7 @@ describe('KnowledgeBaseTab', () => {
         install: jest.fn(),
       });
     });
+
     it('should render a table', () => {
       const { getByTestId } = render(<KnowledgeBaseTab />);
       expect(getByTestId('knowledgeBaseTable')).toBeInTheDocument();

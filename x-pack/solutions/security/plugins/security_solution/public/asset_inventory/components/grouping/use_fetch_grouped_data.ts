@@ -43,9 +43,6 @@ export interface AssetsGroupingAggregation {
   cloudProvider?: {
     buckets?: GenericBuckets[];
   };
-  source?: {
-    buckets?: GenericBuckets[];
-  };
 }
 
 export type AssetsRootGroupingAggregation = RootAggregation<AssetsGroupingAggregation>;

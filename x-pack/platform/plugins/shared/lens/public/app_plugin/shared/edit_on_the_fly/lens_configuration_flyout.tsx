@@ -119,14 +119,14 @@ export function LensEditConfigurationFlyout({
 
     return !visualizationStateIsEqual;
   }, [
-    attributes.references,
+    datasourceStates,
     datasourceId,
     datasourceMap,
+    attributes.references,
+    visualization.state,
     isNewPanel,
-    datasourceStates,
     visualizationMap,
     annotationGroups,
-    visualization.state,
   ]);
 
   const onCancel = useCallback(() => {

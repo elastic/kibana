@@ -163,6 +163,7 @@ describe('bulkEdit()', () => {
       actions: [],
       artifacts: {
         dashboards: [],
+        investigation_guide: { blob: '' },
       },
       name: 'my rule name',
       revision: 0,
@@ -1251,6 +1252,7 @@ describe('bulkEdit()', () => {
                     refId: 'dashboard_0',
                   },
                 ],
+                investigation_guide: { blob: '' },
               },
               apiKey: null,
               apiKeyOwner: null,
@@ -1288,6 +1290,7 @@ describe('bulkEdit()', () => {
               id: 'dashboard-1',
             },
           ],
+          investigation_guide: { blob: '' },
         },
         id: existingRule.id,
         snoozeSchedule: [],

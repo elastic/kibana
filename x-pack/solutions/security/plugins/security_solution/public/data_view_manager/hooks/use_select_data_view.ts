@@ -10,6 +10,11 @@ import { useCallback } from 'react';
 import type { DataViewManagerScopeName } from '../constants';
 import { selectDataViewAsync } from '../redux/actions';
 
+/**
+ * This hook wraps the dispatch call that updates the redux store with new data view selection.
+ * It is the recommended entry point for altering the data view selection.
+ * Manual action dispatches are not required and should be avoided outside of the data view manager scope.
+ */
 export const useSelectDataView = () => {
   const dispatch = useDispatch();
 
@@ -24,7 +29,7 @@ export const useSelectDataView = () => {
       /**
        * Data view selection will be applied to the scopes listed here
        */
-      scope: DataViewManagerScopeName[];
+      scope: DataViewManagerScopeName;
     }) => {
       dispatch(selectDataViewAsync(params));
     },

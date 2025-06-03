@@ -24,3 +24,4 @@ export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
 export { findReferenceLink } from './src/utils/find_reference_link.util';
+export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';

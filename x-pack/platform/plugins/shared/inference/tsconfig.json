@@ -39,6 +39,9 @@
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
     "@kbn/ml-is-populated-object",
-    "@kbn/ml-is-defined"
+    "@kbn/ml-is-defined",
+    "@kbn/tracing",
+    "@kbn/safer-lodash-set",
+    "@kbn/std"
   ]
 }

@@ -265,6 +265,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    telemetry,
+    telemetryParams,
     contentReferencesStore,
   });
   const inputs: GraphInputs = {
@@ -283,10 +285,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+<<<<<<< HEAD
       inferenceChatModelEnabled,
+=======
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+>>>>>>> upstream/main
       logger,
       onLlmResponse,
       request,
+      telemetry,
       telemetryTracer,
       traceOptions,
     });

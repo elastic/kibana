@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import type { TimelineId } from '../../../../../common/types';
@@ -15,7 +15,6 @@ import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 export interface LazyTimelineTabRendererProps {
   children: React.ReactElement | null;
   dataTestSubj: string;
-  isOverflowYScroll?: boolean;
   shouldShowTab: boolean;
   timelineId: TimelineId;
 }
@@ -31,13 +30,7 @@ export interface LazyTimelineTabRendererProps {
  * every time timeline is closed and re-opened after the first interaction.
  */
 export const LazyTimelineTabRenderer = React.memo(
-  ({
-    children,
-    dataTestSubj,
-    shouldShowTab,
-    isOverflowYScroll,
-    timelineId,
-  }: LazyTimelineTabRendererProps) => {
+  ({ children, dataTestSubj, shouldShowTab, timelineId }: LazyTimelineTabRendererProps) => {
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
@@ -54,7 +47,7 @@ export const LazyTimelineTabRenderer = React.memo(
         // The shouldShowTab check here is necessary for the flex container to accurately size to the modal window when it's opened
         css={css`
           display: ${shouldShowTab ? 'flex' : 'none'};
-          overflow: ${isOverflowYScroll ? 'hidden scroll' : 'hidden'};
+          overflow: hidden;
           flex: 1;
         `}
         data-test-subj={dataTestSubj}

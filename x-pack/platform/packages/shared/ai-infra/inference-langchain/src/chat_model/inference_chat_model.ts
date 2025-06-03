@@ -42,6 +42,7 @@ import {
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
+  ConnectorTelemetryMetadata,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -63,6 +64,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -94,6 +96,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   private readonly connector: InferenceConnector;
   // @ts-ignore unused for now
   private readonly logger: Logger;
+  private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -105,6 +108,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     super(args);
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
+    this.telemetryMetadata = args.telemetryMetadata;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;

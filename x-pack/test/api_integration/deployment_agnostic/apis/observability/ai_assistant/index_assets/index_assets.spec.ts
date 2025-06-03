@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('index assets: creating mappings, templates, aliases and write indices', () => {
     before(async () => {
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     for (const componentTemplateName of Object.values(resourceNames.componentTemplate)) {
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     }
 
-    for (const writeIndexName of Object.values(resourceNames.concreteIndexName)) {
+    for (const writeIndexName of Object.values(resourceNames.concreteWriteIndexName)) {
       it(`should create write index: "${writeIndexName}"`, async () => {
         const exists = await es.indices.exists({ index: writeIndexName });
         expect(exists).to.be(true);
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(indices).to.have.length(2);
 
       expect(indices.map(({ index }) => index).sort()).to.eql(
-        Object.values(resourceNames.concreteIndexName).sort()
+        Object.values(resourceNames.concreteWriteIndexName).sort()
       );
     });
   });

@@ -15,6 +15,8 @@ import { ContentReferencesStore, Replacements } from '@kbn/elastic-assistant-com
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
@@ -43,6 +45,8 @@ export interface GetDefaultAssistantGraphParams {
   replacements: Replacements;
   getFormattedTime?: () => string;
   contentReferencesStore: ContentReferencesStore;
+  telemetryParams?: TelemetryParams;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -57,6 +61,8 @@ export const getDefaultAssistantGraph = ({
   savedObjectsClient,
   // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
   signal,
+  telemetryParams,
+  telemetry,
   tools,
   replacements,
   getFormattedTime,
@@ -81,10 +87,22 @@ export const getDefaultAssistantGraph = ({
           conversationsDataClient: dataClients?.conversationsDataClient,
         })
       )
+<<<<<<< HEAD
       .addNode(NodeType.GENERATE_CHAT_TITLE, async (state: AgentState) => {
         const model = await createLlmInstance();
         return generateChatTitle({ ...nodeParams, state, model });
       })
+=======
+      .addNode(NodeType.GENERATE_CHAT_TITLE, (state: AgentState) =>
+        generateChatTitle({
+          ...nodeParams,
+          state,
+          model: createLlmInstance(),
+          telemetryParams,
+          telemetry,
+        })
+      )
+>>>>>>> upstream/main
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
           ...nodeParams,
@@ -103,7 +121,14 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools })
+        executeTools({
+          ...nodeParams,
+          config: { signal },
+          state,
+          tools,
+          telemetryParams,
+          telemetry,
+        })
       )
       .addNode(NodeType.RESPOND, async (state: AgentState) => {
         const model = await createLlmInstance();
