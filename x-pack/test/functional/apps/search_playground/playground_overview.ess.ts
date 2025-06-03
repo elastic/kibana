@@ -42,7 +42,7 @@ export default function (ftrContext: FtrProviderContext) {
   describe('Playground', () => {
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
+      await pageObjects.common.navigateToApp('searchPlayground');
     });
 
     after(async () => {

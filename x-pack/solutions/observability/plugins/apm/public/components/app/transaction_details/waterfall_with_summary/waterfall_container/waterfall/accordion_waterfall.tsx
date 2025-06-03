@@ -184,8 +184,13 @@ const VirtualRow = React.memo(
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const theme = useTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
-  const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
-    useWaterfallContext();
+  const {
+    criticalPathSegmentsById,
+    getErrorCount,
+    updateTreeNode,
+    showCriticalPath,
+    isEmbeddable,
+  } = useWaterfallContext();
 
   const displayedColor = showCriticalPath ? transparentize(0.5, node.item.color) : node.item.color;
   const marginLeftLevel = 8 * node.level;
@@ -243,6 +248,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               marginLeftLevel={marginLeftLevel}
               onClick={onWaterfallItemClick}
               segments={segments}
+              isEmbeddable={isEmbeddable}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -289,7 +295,7 @@ function ToggleAccordionButton({
             <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+        <EuiFlexItem grow={false} css={{ position: 'relative' }}>
           <div
             style={{
               position: 'absolute',

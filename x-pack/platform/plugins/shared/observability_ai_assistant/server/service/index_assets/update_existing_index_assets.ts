@@ -6,14 +6,13 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { ELSER_ON_ML_NODE_INFERENCE_ID } from '../../../common';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { createOrUpdateConversationIndexAssets } from './create_or_update_conversation_index_assets';
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 import { resourceNames } from '..';
-
-export const DEFAULT_INFERENCE_ENDPOINT = '.elser-2-elasticsearch';
 
 export async function updateExistingIndexAssets({
   logger,
@@ -48,7 +47,7 @@ export async function updateExistingIndexAssets({
       logger.debug(
         `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
       );
-      return DEFAULT_INFERENCE_ENDPOINT;
+      return ELSER_ON_ML_NODE_INFERENCE_ID;
     });
 
     await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId: currentInferenceId });

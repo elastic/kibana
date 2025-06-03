@@ -57,12 +57,12 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
-  hideTimeFilterInfo,
   parentApi,
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -70,7 +70,7 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
+
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
@@ -82,9 +82,10 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
-  const attributesChanged: boolean = useMemo(() => {
-    const previousAttrs = previousAttributes.current;
+  const attributesChanged = useMemo<boolean>(() => {
+    if (isNewPanel) return true;
 
+    const previousAttrs = previousAttributes.current;
     const datasourceStatesAreSame =
       datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
         ? datasourceMap[datasourceId].isEqual(
@@ -94,6 +95,8 @@ export function LensEditConfigurationFlyout({
             attributes.references
           )
         : false;
+
+    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -113,11 +116,12 @@ export function LensEditConfigurationFlyout({
         })()
       : isEqual(visualizationState, previousAttrs.state.visualization);
 
-    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+    return !visualizationStateIsEqual;
   }, [
     attributes.references,
     datasourceId,
     datasourceMap,
+    isNewPanel,
     datasourceStates,
     visualizationMap,
     annotationGroups,

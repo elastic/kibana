@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
@@ -14,7 +15,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
@@ -186,8 +186,10 @@ export const FleetAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
 
     return (
       <KibanaRenderContextProvider

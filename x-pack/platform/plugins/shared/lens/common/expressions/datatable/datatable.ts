@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { FormatFactory, RowHeightMode } from '../../types';
 import type { DatatableColumnResult } from './datatable_column';
 import type { DatatableExpressionFunction } from './types';
@@ -32,6 +33,7 @@ export interface DatatableArgs {
   headerRowHeight?: RowHeightMode;
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
+  density?: DataGridDensity;
 }
 
 export const getDatatable = (
@@ -85,6 +87,10 @@ export const getDatatable = (
     },
     pageSize: {
       types: ['number'],
+      help: '',
+    },
+    density: {
+      types: ['string'],
       help: '',
     },
   },

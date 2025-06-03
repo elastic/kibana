@@ -12,7 +12,6 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
@@ -89,7 +88,8 @@ describe('tlsRuleExecutor', () => {
 
   it('should only query enabled monitors', async () => {
     const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams());
-    const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+    const configRepo = tlsRule.monitorConfigRepository;
+    const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
     const { certs } = await tlsRule.getExpiredCertificates();
 
@@ -97,7 +97,6 @@ describe('tlsRuleExecutor', () => {
 
     expect(spy).toHaveBeenCalledWith({
       filter: commonFilter,
-      soClient,
     });
   });
 
@@ -105,26 +104,26 @@ describe('tlsRuleExecutor', () => {
     it('should filter monitors based on monitor ids', async () => {
       const monitorId = randomUUID();
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ monitorIds: [monitorId] }));
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const configRepo = tlsRule.monitorConfigRepository;
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
       expect(spy).toHaveBeenCalledWith({
         filter: `${commonFilter} AND synthetics-monitor.attributes.id:(\"${monitorId}\")`,
-        soClient,
       });
     });
 
     it('should filter monitors based on tags', async () => {
       const tag = 'myMonitor';
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ tags: [tag] }));
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const configRepo = tlsRule.monitorConfigRepository;
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
       expect(spy).toHaveBeenCalledWith({
         filter: `${commonFilter} AND synthetics-monitor.attributes.tags:(\"${tag}\")`,
-        soClient,
       });
     });
 
@@ -133,13 +132,13 @@ describe('tlsRuleExecutor', () => {
       const tlsRule = new TLSRuleExecutor(
         ...getTLSRuleExecutorParams({ monitorTypes: [monitorType] })
       );
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const configRepo = tlsRule.monitorConfigRepository;
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
       expect(spy).toHaveBeenCalledWith({
         filter: `${commonFilter} AND synthetics-monitor.attributes.type:(\"${monitorType}\")`,
-        soClient,
       });
     });
 

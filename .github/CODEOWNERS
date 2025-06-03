@@ -704,6 +704,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-man
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
+src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
@@ -951,6 +952,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/kibana-management
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
@@ -977,8 +979,10 @@ x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
+src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
 x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
+src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/telemetry @elastic/kibana-core
@@ -991,6 +995,7 @@ src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @
 x-pack/test_serverless
 src/platform/test
 x-pack/test
+x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
@@ -1003,6 +1008,7 @@ src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
+src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
@@ -1033,6 +1039,7 @@ src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-visualizations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+x-pack/platform/packages/private/upgrade-assistant @elastic/kibana-management
 x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -1374,7 +1381,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 ^/src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
-/x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
@@ -1389,8 +1396,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/apps/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/es_archives/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/services/uptime @elastic/obs-ux-management-team
-/x-pack/test/api_integration/apis/uptime @elastic/obs-ux-management-team
-/x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
@@ -1414,7 +1421,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ^/src/platform/test/functional/services/selectable.ts @elastic/obs-ux-logs-team
 /x-pack/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/index.feature_flags.ts @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
@@ -1423,7 +1430,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 ^/src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
 ^/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
@@ -1818,6 +1825,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
 ^/src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
@@ -1972,6 +1982,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
@@ -2169,6 +2180,12 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-explore
+
+
+# AI4DSOC in Security Solution
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -2398,8 +2415,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
@@ -2603,7 +2618,7 @@ x-pack/platform/plugins/private/translations/translations
 x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
-x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
 x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team

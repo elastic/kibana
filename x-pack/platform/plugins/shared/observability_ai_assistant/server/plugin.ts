@@ -29,7 +29,6 @@ import {
 } from './types';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
 export class ObservabilityAIAssistantPlugin
@@ -48,7 +47,6 @@ export class ObservabilityAIAssistantPlugin
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
-    initLangtrace();
   }
   public setup(
     core: CoreSetup<

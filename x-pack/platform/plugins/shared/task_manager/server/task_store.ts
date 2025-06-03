@@ -63,6 +63,7 @@ import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { getFirstRunAt } from './lib/get_first_run_at';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -150,6 +151,7 @@ export class TaskStore {
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private spaces?: SpacesPluginStart;
+  private logger: Logger;
 
   /**
    * Constructs a new TaskStore.
@@ -184,6 +186,7 @@ export class TaskStore {
     this.security = opts.security;
     this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.logger = opts.logger;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -330,16 +333,21 @@ export class TaskStore {
       const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
       savedObject = await soClient.create<SerializedConcreteTaskInstance>(
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
       );
-      if (get(taskInstance, 'schedule.interval', null) == null) {
+      if (
+        get(taskInstance, 'schedule.interval', null) == null &&
+        get(taskInstance, 'schedule.rrule', null) == null
+      ) {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
@@ -377,12 +385,14 @@ export class TaskStore {
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
       return {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
           ...(userScope ? { userScope } : {}),
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         id,
       };

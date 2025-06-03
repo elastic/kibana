@@ -8,10 +8,10 @@
 import type { Services } from '../common/services';
 
 export const setOnboardingSettings = (services: Services) => {
-  const { securitySolution, application } = services;
-
+  const { securitySolution, application, cloud } = services;
   securitySolution.setOnboardingSettings({
     userUrl: application.getUrlForApp('management', { path: 'security/users/create' }),
     isAgentlessAvailable: false,
+    deploymentUrl: cloud.deploymentUrl,
   });
 };

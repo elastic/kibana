@@ -3392,7 +3392,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: ['FROM books \n| WHERE MATCH(author, "Faulkner")'],
 };

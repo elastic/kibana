@@ -360,6 +360,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'ml-module',
           },
           {
+            id: 'sample_security_ai_prompt',
+            type: 'security-ai-prompt',
+          },
+          {
             id: 'sample_security_rule',
             type: 'security-rule',
           },
@@ -482,6 +486,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
           { id: '6a87d1a5-adf8-5a30-82c4-4c3b8298272b', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
+          { id: '848d7b69-26d1-52c1-8afc-65e627b34812', type: 'epm-packages-assets' },
           { id: '4035007b-9c33-5227-9803-2de8a17523b5', type: 'epm-packages-assets' },
           { id: 'e6ae7d31-6920-5408-9219-91ef1662044b', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
