@@ -1343,7 +1343,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
-        isLegacy ? 'uncheck' : 'check'
+        isLegacy ? 'check' : 'uncheck'
       );
 
       await common.sleep(200);

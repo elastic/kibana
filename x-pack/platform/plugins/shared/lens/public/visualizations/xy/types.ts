@@ -96,6 +96,9 @@ export interface XYDataLayerConfig {
   simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput;
   collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
