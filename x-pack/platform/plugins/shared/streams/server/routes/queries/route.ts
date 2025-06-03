@@ -96,7 +96,6 @@ const upsertQueryRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-
     await streamsClient.upsertQuery(streamName, {
       id: queryId,
       title: body.title,
@@ -140,7 +139,6 @@ const deleteQueryRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-
     await streamsClient.deleteQuery(streamName, queryId);
 
     return {
@@ -190,7 +188,6 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-
     await streamsClient.bulkQueryOperations(streamName, operations);
 
     return { acknowledged: true };

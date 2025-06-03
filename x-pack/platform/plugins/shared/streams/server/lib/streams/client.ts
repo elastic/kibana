@@ -219,7 +219,8 @@ export class StreamsClient {
       dashboards.map((dashboard) => ({
         [ASSET_ID]: dashboard,
         [ASSET_TYPE]: 'dashboard' as const,
-      }))
+      })),
+      'dashboard'
     );
 
     // sync rules with asset links

@@ -49,7 +49,8 @@ export class QueryClient {
           [ASSET_ID]: query.id,
           [ASSET_TYPE]: 'query' as const,
           query,
-        }))
+        })),
+        'query'
       );
     }
 
@@ -68,7 +69,7 @@ export class QueryClient {
     );
 
     // Find current queries to delete before creating the new ones
-    // because the KQL query has changed and require a new rule
+    // because the KQL query has changed and a new rule is required
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
       queries.some((query) => query.id === link['asset.id'] && hasBreakingChange(link.query, query))
     );
@@ -146,7 +147,8 @@ export class QueryClient {
         [ASSET_ID]: query.id,
         [ASSET_TYPE]: 'query',
         query,
-      }))
+      })),
+      'query'
     );
   }
 

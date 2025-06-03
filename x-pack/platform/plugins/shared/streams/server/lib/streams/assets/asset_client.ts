@@ -197,14 +197,15 @@ export class AssetClient {
 
   async syncAssetList(
     name: string,
-    links: AssetLinkRequest[]
+    links: AssetLinkRequest[],
+    assetType?: AssetType
   ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[] }> {
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name)],
+          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, assetType)],
         },
       },
     });
