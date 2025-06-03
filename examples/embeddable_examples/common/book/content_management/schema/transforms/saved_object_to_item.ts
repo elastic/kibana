@@ -11,8 +11,19 @@ import type {
   ItemAttributesWithReferences,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { Mutable } from 'utility-types';
 import type { SavedBookAttributes } from '../../../../../server/book/saved_object';
 import type { BookAttributes } from '../../../../../server/book/content_management/latest';
+
+const injectReferences = (attributes: SavedBookAttributes, references: SavedObjectReference[]) => {
+  const injectedParams: Mutable<Partial<BookAttributes>> = {};
+  if (attributes.metadata.sequelToBookRefName) {
+    const sequelId = references.find((r) => r.name === attributes.metadata.sequelToBookRefName)?.id;
+    if (sequelId) injectedParams.sequelTo = sequelId;
+  }
+  return injectedParams;
+};
 
 export const savedObjectToItem = ({
   attributes,
@@ -24,6 +35,7 @@ export const savedObjectToItem = ({
     pages: attributes.metadata.numbers.numberOfPages,
     synopsis: attributes.metadata.text.bookSynopsis,
     published: attributes.metadata.numbers.publicationYear ?? null,
+    ...injectReferences(attributes, references),
   },
-  references,
+  references: [],
 });

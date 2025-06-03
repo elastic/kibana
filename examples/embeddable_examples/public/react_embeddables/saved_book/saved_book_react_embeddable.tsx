@@ -48,6 +48,7 @@ import {
   BookSerializedState,
 } from './types';
 import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
+import { useBookSavedObjectTitle } from './use_book_savedobject_title';
 
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
@@ -93,7 +94,7 @@ const deserializeState = async (
 
 export const getSavedBookEmbeddableFactory = (
   core: CoreStart,
-  { embeddable, contentManagement }: Dependencies
+  { contentManagement }: Dependencies
 ) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookSerializedState, BookApi> = {
     type: SAVED_BOOK_ID,
@@ -108,7 +109,6 @@ export const getSavedBookEmbeddableFactory = (
       const isByReference = Boolean(state.savedObjectId);
 
       const serializeBook = (byReference: boolean, newId?: string) => {
-        console.trace();
         if (byReference) {
           // if this book is currently by reference, we serialize the reference only.
           const bookByReferenceState: BookByReferenceSerializedState = {
@@ -206,8 +206,17 @@ export const getSavedBookEmbeddableFactory = (
         api,
         Component: () => {
           const bookAttributes = useBookAttributePublishingSubjects(bookAttributesManager);
-          const { author, pages, title, synopsis, published = null } = bookAttributes;
+          const {
+            author,
+            pages,
+            title,
+            synopsis,
+            published = null,
+            sequelTo = null,
+          } = bookAttributes;
           const { euiTheme } = useEuiTheme();
+
+          const prequelTitle = useBookSavedObjectTitle(sequelTo, contentManagement.client);
 
           return (
             <div
@@ -268,6 +277,16 @@ export const getSavedBookEmbeddableFactory = (
                             {i18n.translate('embeddableExamples.savedBook.publicationYear', {
                               defaultMessage: 'Published {published}',
                               values: { published },
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {prequelTitle !== null && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge iconType="article" color="hollow">
+                            {i18n.translate('embeddableExamples.savedBook.sequelTo', {
+                              defaultMessage: 'Sequel to {prequelTitle}',
+                              values: { prequelTitle },
                             })}
                           </EuiBadge>
                         </EuiFlexItem>

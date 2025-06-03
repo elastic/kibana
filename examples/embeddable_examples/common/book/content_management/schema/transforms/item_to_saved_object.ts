@@ -11,27 +11,50 @@ import type {
   ItemAttributesWithReferences,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { Mutable } from 'utility-types';
 import type { BookAttributes } from '../../../../../server/book/content_management/latest';
-import type { SavedBookAttributes } from '../../../../../server/book/saved_object';
+import {
+  BOOK_SAVED_OBJECT_TYPE,
+  type SavedBookAttributes,
+} from '../../../../../server/book/saved_object';
+import { SEQUEL_TO_REF_NAME } from '../constants';
+
+const extractReferences = (attributes: BookAttributes) => {
+  const references: SavedObjectReference[] = [];
+  const extractedRefNames: Mutable<Partial<SavedBookAttributes['metadata']>> = {};
+  if (attributes.sequelTo) {
+    extractedRefNames.sequelToBookRefName = SEQUEL_TO_REF_NAME;
+    references.push({
+      name: SEQUEL_TO_REF_NAME,
+      type: BOOK_SAVED_OBJECT_TYPE,
+      id: attributes.sequelTo,
+    });
+  }
+  return { references, extractedRefNames };
+};
 
 export const itemToSavedObject = ({
   attributes,
-  references,
-}: ItemAttributesWithReferences<BookAttributes>): SavedObjectAttributesWithReferences<SavedBookAttributes> => ({
-  attributes: {
-    bookTitleAsArray: [...attributes.bookTitle],
-    metadata: {
-      numbers: {
-        numberOfPages: attributes.pages,
-        publicationYear: attributes.published ?? undefined,
+}: ItemAttributesWithReferences<BookAttributes>): SavedObjectAttributesWithReferences<SavedBookAttributes> => {
+  const { references, extractedRefNames } = extractReferences(attributes);
+  return {
+    attributes: {
+      bookTitleAsArray: [...attributes.bookTitle],
+      metadata: {
+        numbers: {
+          numberOfPages: attributes.pages,
+          publicationYear: attributes.published ?? undefined,
+        },
+        text: {
+          authorName: attributes.author,
+          bookSynopsis: attributes.synopsis,
+        },
+        ...extractedRefNames,
       },
-      text: {
-        authorName: attributes.author,
-        bookSynopsis: attributes.synopsis,
-      },
+      // Generate a string of random letters and numbers to demonstrate simplifying a savedObject
+      uselessGarbage: Array.from(Array(10), () => Math.random().toString(36).substring(2)).join(''),
     },
-    // Generate a string of random letters and numbers to demonstrate simplifying a savedObject
-    uselessGarbage: Array.from(Array(10), () => Math.random().toString(36).substring(2)).join(''),
-  },
-  references,
-});
+    references,
+  };
+};

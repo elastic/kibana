@@ -52,6 +52,7 @@ export const createBookSavedObjectType = (): SavedObjectsType => ({
               publicationYear: { type: 'integer' },
             },
           },
+          sequelToBookRefName: { type: 'text', index: false },
         },
       },
       uselessGarbage: { type: 'text', index: false },

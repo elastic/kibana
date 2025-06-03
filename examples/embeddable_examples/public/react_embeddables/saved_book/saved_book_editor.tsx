@@ -21,6 +21,8 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiTitle,
+  EuiPopover,
+  EuiPanel,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -31,9 +33,12 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useState } from 'react';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { BookApi, BookAttributes } from './types';
 import { saveBookAttributes } from './saved_book_library';
 import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
+import { useBookSavedObjectTitle } from './use_book_savedobject_title';
 
 export const openSavedBookEditor = ({
   attributesManager,
@@ -63,6 +68,10 @@ export const openSavedBookEditor = ({
           api={api}
           isCreate={isCreate}
           attributesManager={attributesManager}
+          savedObjectServices={{
+            contentClient: contentManagement.client,
+            uiSettings: core.uiSettings,
+          }}
           onCancel={() => {
             // set the state back to the initial state and reject
             attributesManager.reinitializeState(initialState);
@@ -104,12 +113,17 @@ export const SavedBookEditor = ({
   onSubmit,
   onCancel,
   api,
+  savedObjectServices,
 }: {
   attributesManager: StateManager<BookAttributes>;
   isCreate: boolean;
   onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;
   api?: BookApi;
+  savedObjectServices: {
+    contentClient: ContentManagementPublicStart['client'];
+    uiSettings: IUiSettingsClient;
+  };
 }) => {
   const {
     author,
@@ -117,10 +131,14 @@ export const SavedBookEditor = ({
     title,
     pages,
     published = null,
+    sequelTo = null,
   } = useBookAttributePublishingSubjects(attributesManager);
 
   const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
   const [saving, setSaving] = useState(false);
+  const [isSavedObjectFinderOpen, setIsSavedObjectFinderOpen] = useState(false);
+
+  const sequelToTitle = useBookSavedObjectTitle(sequelTo, savedObjectServices.contentClient);
 
   const attributesManagerApi = attributesManager.api;
 
@@ -194,6 +212,55 @@ export const SavedBookEditor = ({
             value={published ?? ''}
             onChange={(e) => attributesManagerApi.setPublished(+e.target.value)}
           />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.sequelLabel', {
+            defaultMessage: 'Sequel to',
+          })}
+        >
+          <EuiPopover
+            anchorPosition="leftCenter"
+            isOpen={isSavedObjectFinderOpen}
+            closePopover={() => setIsSavedObjectFinderOpen(false)}
+            button={
+              <EuiButton iconType="article" onClick={() => setIsSavedObjectFinderOpen(true)}>
+                {sequelToTitle ??
+                  i18n.translate('embeddableExamples.savedBook.editor.selectSequel', {
+                    defaultMessage: 'Select book',
+                  })}
+              </EuiButton>
+            }
+          >
+            <EuiPanel css={{ width: 400 }}>
+              <SavedObjectFinder
+                id="bookSequelFinder"
+                onChoose={(id, _, __, { attributes }) => {
+                  setIsSavedObjectFinderOpen(false);
+                  attributesManagerApi.setSequelTo(id);
+                }}
+                showFilter={false}
+                services={savedObjectServices}
+                noItemsMessage={i18n.translate(
+                  'embeddableExamples.savedBook.editor.savedObjectFinder.noMatchingObjectsMessage',
+                  {
+                    defaultMessage: 'No other books found.',
+                  }
+                )}
+                savedObjectMetaData={[
+                  {
+                    type: 'book',
+                    getIconForSavedObject: () => 'article',
+                    name: i18n.translate(
+                      'embeddableExamples.savedBook.editor.savedObjectFinder.bookSavedObjectTypeName',
+                      {
+                        defaultMessage: 'Book',
+                      }
+                    ),
+                  },
+                ]}
+              />
+            </EuiPanel>
+          </EuiPopover>
         </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

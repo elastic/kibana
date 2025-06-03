@@ -20,6 +20,7 @@ export const savedBookAttributesSchema = schema.object({
       numberOfPages: schema.number(),
       publicationYear: schema.maybe(schema.number()),
     }),
+    sequelToBookRefName: schema.maybe(schema.string()),
   }),
   // Used for demonstrating simplifying the SavedObject through itemToSavedObject transforms
   uselessGarbage: schema.string(),

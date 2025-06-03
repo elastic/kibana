@@ -21,6 +21,7 @@ export interface BookAttributes {
   pages: number;
   synopsis?: string;
   published?: number;
+  sequelTo?: string;
 }
 
 export interface BookSavedObject {

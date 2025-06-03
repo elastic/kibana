@@ -26,6 +26,7 @@ export const bookAttributesSchema = schema.object({
   pages: schema.number(),
   synopsis: schema.maybe(schema.string()),
   published: schema.nullable(schema.number()),
+  sequelTo: schema.maybe(schema.string()),
 });
 
 export const bookSearchOptionsSchema = schema.maybe(
