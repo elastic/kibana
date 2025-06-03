@@ -601,7 +601,7 @@
         }
       },
       "incremental_id": {
-        "type": "integer"
+        "type": "unsigned_long"
       },
       "observables": {
         "properties": {

@@ -89,7 +89,7 @@ describe('Model versions', () => {
           Object {
             "addedMappings": Object {
               "incremental_id": Object {
-                "type": "integer",
+                "type": "unsigned_long",
               },
             },
             "type": "mappings_addition",
