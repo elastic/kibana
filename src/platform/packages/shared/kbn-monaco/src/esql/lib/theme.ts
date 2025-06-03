@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from '../../../monaco_imports';
+import { monaco } from '../../monaco_imports';
 
 export const buildEsqlTheme = ({
   euiTheme,
