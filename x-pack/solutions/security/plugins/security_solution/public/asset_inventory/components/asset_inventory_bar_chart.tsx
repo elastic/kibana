@@ -10,7 +10,9 @@ import {
   EuiFlexGroup,
   EuiLoadingChart,
   useEuiTheme,
+  useEuiFontSize,
   type EuiThemeComputed,
+  type EuiThemeFontSize,
 } from '@elastic/eui';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { Axis, BarSeries, Chart, Position, Settings, ScaleType } from '@elastic/charts';
@@ -34,16 +36,25 @@ const yAxisTitle = i18n.translate(
   }
 );
 
-const getChartStyles = (euiTheme: EuiThemeComputed) => {
+const getChartStyles = (euiTheme: EuiThemeComputed, xsFontSize: EuiThemeFontSize) => {
   return css({
-    height: '276px',
+    height: '260px',
     border: euiTheme.border.thin,
     borderRadius: euiTheme.border.radius.medium,
     padding: euiTheme.size.l,
+    '.echLegendItem__label': {
+      fontSize: xsFontSize.fontSize,
+    },
     '.echLegendItem__action': {
-      fontSize: '12px',
+      fontSize: xsFontSize.fontSize,
     },
   });
+};
+
+const getProgressStyle = (isFetching: boolean) => {
+  return {
+    opacity: isFetching ? 1 : 0,
+  };
 };
 
 export interface AssetInventoryBarChartProps {
@@ -58,16 +69,12 @@ export const AssetInventoryBarChart = ({
   assetInventoryChartData,
 }: AssetInventoryBarChartProps) => {
   const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs');
   const baseTheme = useElasticChartsTheme();
   return (
-    <div css={getChartStyles(euiTheme)}>
-      <EuiProgress
-        size="xs"
-        color="accent"
-        css={css`
-          opacity: ${isFetching ? 1 : 0};
-        `}
-      />
+    <div css={getChartStyles(euiTheme, xsFontSize)}>
+      {/* eslint-disable-next-line @elastic/eui/prefer-css-prop-for-static-styles */}
+      <EuiProgress size="xs" color="accent" style={getProgressStyle(isFetching)} />
       {isLoading ? (
         <EuiFlexGroup
           justifyContent="center"
@@ -95,7 +102,7 @@ export const AssetInventoryBarChart = ({
               },
               axes: {
                 axisTitle: {
-                  fontSize: 11,
+                  fontSize: euiTheme.font.scale.xs * euiTheme.base, // convert rem -> px
                 },
               },
             }}
