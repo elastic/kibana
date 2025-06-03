@@ -33,6 +33,7 @@ export const syncSpaceGlobalParams = async ({
       await syntheticsMonitorClient.syncGlobalParams({
         spaceId,
         allPrivateLocations,
+        soClient: savedObjectsClient,
         encryptedSavedObjects,
       });
       logger.debug(`Sync of global parameters for space with id ${spaceId} succeeded`);

@@ -40,7 +40,7 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(
-  'Machine Learning Detection Rules - Creation',
+  'Machine Learning Detection Rules - Alert suppression',
   {
     tags: ['@ess', '@serverless'],
   },

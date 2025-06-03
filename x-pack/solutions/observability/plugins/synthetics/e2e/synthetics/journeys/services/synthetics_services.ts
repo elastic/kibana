@@ -190,20 +190,20 @@ export class SyntheticsServices {
     });
   }
 
-  async cleaUp() {
+  async cleanUp() {
     try {
       const getService = this.params.getService;
       const server = getService('kibanaServer');
 
       await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
-      await this.cleaUpAlerts();
+      await this.cleanUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
     }
   }
 
-  async cleaUpAlerts() {
+  async cleanUpAlerts() {
     try {
       const getService = this.params.getService;
       const es: Client = getService('es');
