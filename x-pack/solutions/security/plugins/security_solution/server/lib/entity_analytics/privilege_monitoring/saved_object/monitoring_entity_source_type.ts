@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
@@ -56,7 +55,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
   },
 };
-
 
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
