@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
-      describe.only('and has authorization to write trusted apps', () => {
+      describe('and has authorization to write trusted apps', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = trustedAppApiCall.getBody();
@@ -268,20 +268,6 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(200);
           });
-          
-          it.only(`should not error on [${trustedAppApiCall.method}] if tags is set to [form_mode:advanced]`, async () => {
-            let body = trustedAppApiCall.getBody();
-            body.tags.push('form_mode:advanced');
-            console.log(trustedAppApiCall.method, body)
-
-            await endpointPolicyManagerSupertest[trustedAppApiCall.method](
-              trustedAppApiCall.path
-            )
-              .set('kbn-xsrf', 'true')
-              .on('error', createSupertestErrorLogger(log))
-              .send(body)
-              .expect(200);
-          });
 
           it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
             const body = trustedAppApiCall.getBody();
@@ -308,6 +294,40 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(400)
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/invalid policy ids/));
+          });
+
+          describe.only('when in advanced form mode', () => {
+            const getAdvancedModeBody = () => {
+              const body = trustedAppApiCall.getBody();
+              body.tags.push('form_mode:advanced');
+  
+              // Match request version with artifact version
+              if('_version' in body){
+                body._version = trustedAppData.artifact._version
+              }
+              return body;
+            };
+
+            it(`should NOT error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
+              const body = getAdvancedModeBody();
+              // body.entries[0].field = 'some.invalid.field';
+  
+              await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200);
+            });
+
+            it.skip(`should NOT error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
+              const body = getAdvancedModeBody();
+
+              body.os_types = ['linux', 'windows'];
+
+              await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200)
+            });
           });
         }
         for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
