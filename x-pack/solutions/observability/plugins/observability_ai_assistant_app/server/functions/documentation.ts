@@ -43,6 +43,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,
