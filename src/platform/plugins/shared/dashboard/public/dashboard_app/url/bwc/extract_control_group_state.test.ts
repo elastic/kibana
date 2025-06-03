@@ -83,11 +83,13 @@ describe('extractDashboardState', () => {
       expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
       expect(dashboardState.controlGroupInput?.controls).toEqual([
         {
-          dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-          fieldName: 'machine.os.keyword',
+          controlConfig: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            selectedOptions: ['win 7'],
+          },
           grow: false,
           id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
-          selectedOptions: ['win 7'],
         },
       ]);
     });
