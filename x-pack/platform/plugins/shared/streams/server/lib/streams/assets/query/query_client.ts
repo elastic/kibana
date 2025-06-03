@@ -227,44 +227,91 @@ export class QueryClient {
     await Promise.all([
       ...queriesToCreate.map((query) => {
         const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.create<EsqlRuleParams>({
-          data: {
-            name: query.query.title,
-            consumer: 'streams',
-            alertTypeId: 'streams.rules.esql',
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+        return rulesClient
+          .create<EsqlRuleParams>({
+            data: {
+              name: query.query.title,
+              consumer: 'streams',
+              alertTypeId: 'streams.rules.esql',
+              actions: [],
+              params: {
+                timestampField: '@timestamp',
+                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+              },
+              enabled: true,
+              tags: ['streams'],
+              schedule: {
+                interval: '1m',
+              },
             },
-            enabled: true,
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
+            options: {
+              id: ruleId,
             },
-          },
-          options: {
-            id: ruleId,
-          },
-        });
+          })
+          .catch((error) => {
+            if (isBoom(error) && error.output.statusCode === 409) {
+              // If the rule already exists, we should update it instead
+              return rulesClient.update<EsqlRuleParams>({
+                id: ruleId,
+                data: {
+                  name: query.query.title,
+                  actions: [],
+                  params: {
+                    timestampField: '@timestamp',
+                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+                  },
+                  tags: ['streams'],
+                  schedule: {
+                    interval: '1m',
+                  },
+                },
+              });
+            }
+          });
       }),
       ...queriesToUpdate.map((query) => {
         const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.update<EsqlRuleParams>({
-          id: ruleId,
-          data: {
-            name: query.query.title,
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+        return rulesClient
+          .update<EsqlRuleParams>({
+            id: ruleId,
+            data: {
+              name: query.query.title,
+              actions: [],
+              params: {
+                timestampField: '@timestamp',
+                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+              },
+              tags: ['streams'],
+              schedule: {
+                interval: '1m',
+              },
             },
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
-            },
-          },
-        });
+          })
+          .catch((error) => {
+            if (isBoom(error) && error.output.statusCode === 404) {
+              // If the rule does not exist, we should create it instead
+              return rulesClient.create<EsqlRuleParams>({
+                data: {
+                  name: query.query.title,
+                  consumer: 'streams',
+                  alertTypeId: 'streams.rules.esql',
+                  actions: [],
+                  params: {
+                    timestampField: '@timestamp',
+                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+                  },
+                  enabled: true,
+                  tags: ['streams'],
+                  schedule: {
+                    interval: '1m',
+                  },
+                },
+                options: {
+                  id: ruleId,
+                },
+              });
+            }
+          });
       }),
     ]);
   }
