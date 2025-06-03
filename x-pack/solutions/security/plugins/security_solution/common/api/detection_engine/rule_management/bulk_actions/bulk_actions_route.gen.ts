@@ -355,14 +355,6 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-export type BulkActionEditPayloadAlertSuppressionConfig = z.infer<
-  typeof BulkActionEditPayloadAlertSuppressionConfig
->;
-export const BulkActionEditPayloadAlertSuppressionConfig = z.object({
-  duration: AlertSuppressionDuration.optional(),
-  missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
-});
-
 export type BulkActionEditPayloadAddSetAlertSuppression = z.infer<
   typeof BulkActionEditPayloadAddSetAlertSuppression
 >;
@@ -370,7 +362,8 @@ export const BulkActionEditPayloadAddSetAlertSuppression = z.object({
   type: z.enum(['add_alert_suppression', 'set_alert_suppression']),
   value: z.object({
     group_by: z.array(z.string()).max(3),
-    suppression_config: BulkActionEditPayloadAlertSuppressionConfig.optional(),
+    duration: AlertSuppressionDuration.nullable().optional(),
+    missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
   }),
 });
 
@@ -381,7 +374,8 @@ export const BulkActionEditPayloadDeleteAlertSuppression = z.object({
   type: z.literal('delete_alert_suppression'),
   value: z.object({
     group_by: z.array(z.string()),
-    suppression_config: BulkActionEditPayloadAlertSuppressionConfig.optional(),
+    duration: AlertSuppressionDuration.nullable().optional(),
+    missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
   }),
 });
 

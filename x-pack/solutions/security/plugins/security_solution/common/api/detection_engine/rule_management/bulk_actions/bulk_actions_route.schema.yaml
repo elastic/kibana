@@ -1456,14 +1456,6 @@ components:
         - type
         - value
 
-    BulkActionEditPayloadAlertSuppressionConfig:
-      type: object
-      properties:
-        duration:
-          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
-        missing_fields_strategy:
-          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-
     BulkActionEditPayloadAddSetAlertSuppression:
       type: object
       properties:
@@ -1480,8 +1472,11 @@ components:
                 items:
                   type: string
                 maxItems: 3
-            suppression_config:
-              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+            duration:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
+              nullable: true
+            missing_fields_strategy:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:
@@ -1501,9 +1496,12 @@ components:
             group_by:
                 type: array
                 items:
-                  type: string
-            suppression_config:
-              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+                  type: string        
+            duration:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
+              nullable: true
+            missing_fields_strategy:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:

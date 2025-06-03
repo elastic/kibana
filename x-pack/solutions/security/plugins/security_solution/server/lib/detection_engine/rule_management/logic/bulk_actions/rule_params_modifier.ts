@@ -21,6 +21,7 @@ import type {
   AlertSuppressionDuration,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
+import type { ThresholdAlertSuppression } from '../../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes.gen';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -126,9 +127,9 @@ const hasMatchingDuration = (
   duration: AlertSuppressionDuration | undefined,
   action: BulkActionEditPayloadAlertSuppression
 ) =>
-  action.value.suppression_config &&
-  duration?.value === action.value.suppression_config.duration?.value &&
-  duration?.unit === action.value.suppression_config.duration?.unit;
+  (duration?.value === action.value.duration?.value &&
+    duration?.unit === action.value.duration?.unit) ||
+  (duration === undefined && action.value.duration === null);
 
 const shouldSkipAlertSuppressionFieldsBulkAction = (
   alertSuppression: AlertSuppressionCamel | undefined,
@@ -139,22 +140,20 @@ const shouldSkipAlertSuppressionFieldsBulkAction = (
     return true;
   }
 
-  const suppressionConfig = action.value.suppression_config;
-
-  if (suppressionConfig && !hasMatchingDuration(alertSuppression?.duration, action)) {
+  if (!hasMatchingDuration(alertSuppression?.duration, action)) {
     return false;
   }
 
   if (
-    suppressionConfig &&
-    alertSuppression?.missingFieldsStrategy !== suppressionConfig.missing_fields_strategy
+    action.value.missing_fields_strategy &&
+    alertSuppression?.missingFieldsStrategy !== action.value.missing_fields_strategy
   ) {
     return false;
   }
 
   if (action.type === BulkActionEditTypeEnum.add_alert_suppression) {
     return (
-      alertSuppression?.groupBy?.length === 3 &&
+      alertSuppression?.groupBy?.length === 3 ||
       hasAlertSuppressionGroupByFields(alertSuppression?.groupBy, action)
     );
   }
@@ -169,33 +168,37 @@ const shouldSkipAlertSuppressionFieldsBulkAction = (
 const updateAlertSuppression = ({
   alertSuppression,
   action,
-  groupBy,
+  resultingGroupBy,
 }: {
   alertSuppression: AlertSuppressionCamel | undefined;
   action: BulkActionEditPayloadAlertSuppression;
-  groupBy: string[];
-}): RuleAlertType['params'] => ({
+  resultingGroupBy: string[];
+}): AlertSuppressionCamel => ({
   ...alertSuppression,
-  groupBy,
-  ...(action.value.suppression_config
+  groupBy: resultingGroupBy,
+  ...(action.value.missing_fields_strategy
     ? {
-        duration: action.value.suppression_config.duration,
-        missingFieldsStrategy: action.value.suppression_config.missing_fields_strategy,
+        missingFieldsStrategy: action.value.missing_fields_strategy,
       }
     : {
         missingFieldsStrategy:
           alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
       }),
+  ...(action.value.duration !== undefined
+    ? {
+        duration: action.value.duration ?? undefined,
+      }
+    : {}),
 });
 
 const updateAlertSuppressionForThresholdRule = ({
   alertSuppression,
   action,
 }: {
-  alertSuppression: AlertSuppressionCamel | undefined;
+  alertSuppression: ThresholdAlertSuppression | undefined;
   action: BulkActionEditPayloadAlertSuppression;
 }) => {
-  const duration = action.value?.suppression_config?.duration;
+  const duration = action.value?.duration;
   if (duration && !hasMatchingDuration(alertSuppression?.duration, action)) {
     return { alertSuppression: { duration }, isActionSkipped: false };
   }
@@ -367,7 +370,7 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.alertSuppression = updateAlertSuppression({
         alertSuppression: ruleParams.alertSuppression,
         action,
-        groupBy: resultingGroupBy,
+        resultingGroupBy,
       });
       break;
     }
@@ -402,7 +405,7 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.alertSuppression = updateAlertSuppression({
         alertSuppression: ruleParams.alertSuppression,
         action,
-        groupBy: resultingGroupBy,
+        resultingGroupBy,
       });
 
       break;
@@ -433,7 +436,7 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.alertSuppression = updateAlertSuppression({
         alertSuppression: ruleParams.alertSuppression,
         action,
-        groupBy: action.value.group_by,
+        resultingGroupBy: action.value.group_by,
       });
 
       break;

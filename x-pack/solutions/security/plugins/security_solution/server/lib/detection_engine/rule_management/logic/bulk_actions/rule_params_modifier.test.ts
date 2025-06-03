@@ -705,7 +705,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing groupBy fields + 2 other groupBy fields (none of them) = 3 groupBy fields',
+          '3 existing groupBy fields + 2 other groupBy fields (none of them) = 3 groupBy fields + skip update',
           {
             existingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -713,7 +713,7 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToAdd: {
               group_by: ['field-4', 'field-5'],
-              suppression_config: { missing_fields_strategy: 'suppress' as const },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -742,7 +742,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToAdd: {
               group_by: [],
-              suppression_config: { duration: { value: 5, unit: 'm' as const } },
+              duration: { value: 5, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             isParamsUpdateSkipped: true,
@@ -755,7 +755,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToAdd: {
               group_by: [],
-              suppression_config: { duration: { value: 10, unit: 'm' as const } },
+              duration: { value: 10, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 10, unit: 'm' } },
             isParamsUpdateSkipped: false,
@@ -770,9 +770,7 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToAdd: {
               group_by: ['field-1', 'field-2', 'field-3'],
-              suppression_config: {
-                missing_fields_strategy: 'suppress' as const,
-              },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -787,9 +785,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: undefined,
             alertSuppressionToAdd: {
               group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-              },
+              duration: { value: 5, unit: 'h' as const },
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -799,7 +795,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          'existing missing_fields_strategy matches = skip update',
+          'all update actions match = skip update',
           {
             existingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -808,10 +804,8 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToAdd: {
               group_by: [],
-              suppression_config: {
-                missing_fields_strategy: 'suppress' as const,
-                duration: { value: 5, unit: 'h' as const },
-              },
+              missing_fields_strategy: 'suppress' as const,
+              duration: { value: 5, unit: 'h' as const },
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -823,7 +817,7 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          'existing missing_fields_strategy does not match = update', // / TODO: fix this test
+          'existing missing_fields_strategy does not match = update',
           {
             existingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -832,10 +826,8 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToAdd: {
               group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-                missing_fields_strategy: 'suppress' as const,
-              },
+              duration: { value: 5, unit: 'h' as const },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -843,56 +835,6 @@ describe('ruleParamsModifier', () => {
               missingFieldsStrategy: 'suppress',
             },
             isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update duration when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            alertSuppressionToAdd: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-1', 'field-2'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update missing_fields_strategy when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1'],
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            alertSuppressionToAdd: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-1', 'field-2'],
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update suppression config when action group_by is empty and alert suppression is not defined',
-          {
-            existingAlertSuppression: undefined,
-            alertSuppressionToAdd: {
-              group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-                missing_fields_strategy: 'suppress' as const,
-              },
-            },
-            resultingAlertSuppression: undefined,
-            isParamsUpdateSkipped: true,
             ruleType: 'query',
           },
         ],
@@ -982,7 +924,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToDelete: {
               group_by: [],
-              suppression_config: { duration: { value: 5, unit: 'm' as const } },
+              duration: { value: 5, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             isParamsUpdateSkipped: true,
@@ -995,7 +937,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToDelete: {
               group_by: [],
-              suppression_config: { duration: { value: 10, unit: 'm' as const } },
+              duration: { value: 10, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 10, unit: 'm' } },
             isParamsUpdateSkipped: false,
@@ -1010,9 +952,7 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToDelete: {
               group_by: ['field-1', 'field-2', 'field-3'],
-              suppression_config: {
-                missing_fields_strategy: 'suppress' as const,
-              },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -1027,9 +967,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: undefined,
             alertSuppressionToDelete: {
               group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-              },
+              duration: { value: 5, unit: 'h' as const },
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -1048,10 +986,8 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToDelete: {
               group_by: [],
-              suppression_config: {
-                missing_fields_strategy: 'suppress' as const,
-                duration: { value: 5, unit: 'h' as const },
-              },
+              missing_fields_strategy: 'suppress' as const,
+              duration: { value: 5, unit: 'h' as const },
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -1072,10 +1008,8 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToDelete: {
               group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-                missing_fields_strategy: 'suppress' as const,
-              },
+              duration: { value: 5, unit: 'h' as const },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
@@ -1083,56 +1017,6 @@ describe('ruleParamsModifier', () => {
               missingFieldsStrategy: 'suppress',
             },
             isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update duration when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1', 'field-2'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            alertSuppressionToDelete: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-1'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update missing_fields_strategy when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1', 'field-2'],
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            alertSuppressionToDelete: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-1'],
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update suppression config when action group_by is empty and alert suppression is not defined',
-          {
-            existingAlertSuppression: undefined,
-            alertSuppressionToDelete: {
-              group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-                missing_fields_strategy: 'suppress' as const,
-              },
-            },
-            resultingAlertSuppression: undefined,
-            isParamsUpdateSkipped: true,
             ruleType: 'query',
           },
         ],
@@ -1218,7 +1102,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToSet: {
               group_by: [],
-              suppression_config: { duration: { value: 5, unit: 'm' as const } },
+              duration: { value: 5, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             isParamsUpdateSkipped: true,
@@ -1231,7 +1115,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: { duration: { value: 5, unit: 'm' } },
             alertSuppressionToSet: {
               group_by: [],
-              suppression_config: { duration: { value: 10, unit: 'm' as const } },
+              duration: { value: 10, unit: 'm' as const },
             },
             resultingAlertSuppression: { duration: { value: 10, unit: 'm' } },
             isParamsUpdateSkipped: false,
@@ -1246,9 +1130,7 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToSet: {
               group_by: ['field-1', 'field-2', 'field-3'],
-              suppression_config: {
-                missing_fields_strategy: 'suppress' as const,
-              },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -1263,9 +1145,7 @@ describe('ruleParamsModifier', () => {
             existingAlertSuppression: undefined,
             alertSuppressionToSet: {
               group_by: [],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-              },
+              duration: { value: 5, unit: 'h' as const },
             },
             resultingAlertSuppression: {
               duration: { value: 5, unit: 'h' },
@@ -1274,30 +1154,30 @@ describe('ruleParamsModifier', () => {
             ruleType: 'threshold',
           },
         ],
-        // [
-        //   'existing missing_fields_strategy matches = skip update',
-        //   {
-        //     existingAlertSuppression: {
-        //       groupBy: ['field-1', 'field-2', 'field-3'],
-        //       duration: { value: 5, unit: 'h' },
-        //       missingFieldsStrategy: 'suppress',
-        //     },
-        //     alertSuppressionToSet: {
-        //       group_by: ['field-1', 'field-2', 'field-3'],
-        //       suppression_config: {
-        //         missing_fields_strategy: 'suppress' as const,
-        //         duration: { value: 5, unit: 'h' as const },
-        //       },
-        //     },
-        //     resultingAlertSuppression: {
-        //       groupBy: ['field-1', 'field-2', 'field-3'],
-        //       duration: { value: 5, unit: 'h' },
-        //       missingFieldsStrategy: 'suppress',
-        //     },
-        //     isParamsUpdateSkipped: true,
-        //     ruleType: 'query',
-        //   },
-        // ],
+        [
+          'all update action value match = skip update', // fix this test case
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: 'suppress',
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2', 'field-3'],
+              suppression_config: {
+                missing_fields_strategy: 'suppress' as const,
+                duration: { value: 5, unit: 'h' as const },
+              },
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: 'suppress',
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
         [
           'existing missing_fields_strategy does not match = update',
           {
@@ -1308,49 +1188,13 @@ describe('ruleParamsModifier', () => {
             },
             alertSuppressionToSet: {
               group_by: ['field-1', 'field-2', 'field-3'],
-              suppression_config: {
-                duration: { value: 5, unit: 'h' as const },
-                missing_fields_strategy: 'suppress' as const,
-              },
+              duration: { value: 5, unit: 'h' as const },
+              missing_fields_strategy: 'suppress' as const,
             },
             resultingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
               duration: { value: 5, unit: 'h' },
               missingFieldsStrategy: 'suppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update duration when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'suppress',
-            },
-            alertSuppressionToSet: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-2'],
-              duration: { value: 5, unit: 'h' },
-              missingFieldsStrategy: 'suppress',
-            },
-            isParamsUpdateSkipped: false,
-            ruleType: 'query',
-          },
-        ],
-        [
-          'does not update missing_fields_strategy when suppression_config is undefined',
-          {
-            existingAlertSuppression: {
-              groupBy: ['field-1'],
-              missingFieldsStrategy: 'doNotSuppress',
-            },
-            alertSuppressionToSet: { group_by: ['field-2'] },
-            resultingAlertSuppression: {
-              groupBy: ['field-2'],
-              missingFieldsStrategy: 'doNotSuppress',
             },
             isParamsUpdateSkipped: false,
             ruleType: 'query',
