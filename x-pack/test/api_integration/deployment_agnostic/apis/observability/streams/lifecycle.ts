@@ -460,15 +460,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               ...unwiredPutBody.stream.ingest,
-              lifecycle: { ilm: { policy: 'my-policy' } },
+              lifecycle: { dsl: { data_retention: '2d' } },
             },
           },
         });
-        await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+        await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
         // lifecycle remains unchanged after going back to inherit
         await putStream(apiClient, indexName, unwiredPutBody);
-        await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+        await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
       });
 
       it('overrides dsl retention', async () => {
