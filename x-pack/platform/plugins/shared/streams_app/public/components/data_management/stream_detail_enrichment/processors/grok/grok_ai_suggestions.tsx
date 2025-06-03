@@ -34,6 +34,11 @@ import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import {
+  ElasticLlmTourCallout,
+  useElasticLlmTourCalloutDismissed,
+  getElasticManagedLlmConnector,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
@@ -64,6 +69,45 @@ const RefreshButton = ({
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
+  const processorRef = useStreamsEnrichmentSelector((state) =>
+    state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))
+  );
+
+  const isRendered = Boolean(processorRef);
+
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmTourCalloutDismissed(false);
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors);
+  const isDisabled = currentConnector === undefined || !hasValidField;
+
+  let button = (
+    <EuiButton
+      size="s"
+      iconType="sparkles"
+      data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
+      onClick={generatePatterns}
+      isLoading={isLoading}
+      disabled={isDisabled}
+    >
+      {i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+        {
+          defaultMessage: 'Generate patterns',
+        }
+      )}
+    </EuiButton>
+  );
+
+  if (elasticManagedLlm && isRendered && !isDisabled) {
+    button = (
+      <ElasticLlmTourCallout
+        isOpen={!tourCalloutDismissed}
+        zIndex={999}
+        dismissTour={() => setTourCalloutDismissed(true)}
+      >
+        {button}
+      </ElasticLlmTourCallout>
+    );
+  }
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
@@ -80,21 +124,7 @@ const RefreshButton = ({
             )
           }
         >
-          <EuiButton
-            size="s"
-            iconType="sparkles"
-            data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
-            onClick={generatePatterns}
-            isLoading={isLoading}
-            disabled={currentConnector === undefined || !hasValidField}
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
-              {
-                defaultMessage: 'Generate patterns',
-              }
-            )}
-          </EuiButton>
+          {button}
         </EuiToolTip>
       </EuiFlexItem>
       {connectors && connectors.length > 1 && (
