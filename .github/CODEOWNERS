@@ -952,6 +952,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/kibana-management
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
