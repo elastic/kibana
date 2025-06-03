@@ -26,10 +26,7 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
-<<<<<<< HEAD
   inferenceChatModelEnabled?: boolean;
-=======
->>>>>>> upstream/main
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -57,10 +54,7 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-<<<<<<< HEAD
   inferenceChatModelEnabled = false,
-=======
->>>>>>> upstream/main
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,

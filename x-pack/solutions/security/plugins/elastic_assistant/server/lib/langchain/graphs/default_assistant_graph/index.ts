@@ -285,11 +285,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
-<<<<<<< HEAD
       inferenceChatModelEnabled,
-=======
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
->>>>>>> upstream/main
+
       logger,
       onLlmResponse,
       request,
