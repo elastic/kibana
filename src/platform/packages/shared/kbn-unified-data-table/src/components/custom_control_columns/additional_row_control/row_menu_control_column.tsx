@@ -13,14 +13,11 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
   EuiPopover,
-  EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
-import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**
@@ -68,7 +65,7 @@ export const RowMenuControlCell = ({
         const Control = getControlComponent(rowControlColumn.id);
         return (
           <Fragment key={rowControlColumn.id}>
-            {record ? rowControlColumn.renderControl(Control, { record, rowIndex }) : null}
+            {record ? rowControlColumn.render(Control, { record, rowIndex }) : null}
           </Fragment>
         );
       }),
@@ -82,7 +79,7 @@ export const RowMenuControlCell = ({
       button={
         <EuiToolTip content={buttonLabel} delay="long">
           <EuiButtonIcon
-            data-test-subj={`unifiedDataTable_${props.columnId}`}
+            data-test-subj={`unifiedDataTable_additionalRowControl_${props.columnId}Menu`}
             iconSize="s"
             iconType="boxesVertical"
             color="text"
@@ -103,23 +100,8 @@ export const RowMenuControlCell = ({
   );
 };
 
-export const getRowMenuControlColumn = (
-  rowControlColumns: RowControlColumn[]
-): EuiDataGridControlColumn => {
-  return {
-    id: 'additionalRowControl_menuControl',
-    width: DEFAULT_CONTROL_COLUMN_WIDTH,
-    headerCellRender: () => (
-      <EuiScreenReaderOnly>
-        <span>
-          {i18n.translate('unifiedDataTable.additionalActionsColumnHeader', {
-            defaultMessage: 'Additional actions column',
-          })}
-        </span>
-      </EuiScreenReaderOnly>
-    ),
-    rowCellRender: (props) => {
-      return <RowMenuControlCell {...props} rowControlColumns={rowControlColumns} />;
-    },
+export const getRowMenuControlColumn = (rowControlColumns: RowControlColumn[]) => {
+  return (props: EuiDataGridCellValueElementProps) => {
+    return <RowMenuControlCell {...props} rowControlColumns={rowControlColumns} />;
   };
 };
