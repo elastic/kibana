@@ -5431,7 +5431,7 @@
         "tags": [
           "alerting"
         ],
-        "x-state": "Generally available; added in 8.19.0"
+        "x-state": "Generally available"
       }
     },
     "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
@@ -5485,7 +5485,7 @@
         "tags": [
           "alerting"
         ],
-        "x-state": "Generally available; added in 8.19.0"
+        "x-state": "Generally available"
       }
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
