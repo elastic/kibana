@@ -395,9 +395,14 @@ describe('Fleet integrations', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       endpointAppContextServiceMock = createMockEndpointAppContextService();
+      jest.clearAllMocks();
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
       policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+      // By default, simulate that the event filter list does not exist
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue(null);
+      (exceptionListClient.createExceptionList as jest.Mock).mockResolvedValue({});
+      (exceptionListClient.createExceptionListItem as jest.Mock).mockResolvedValue({});
     });
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
@@ -419,6 +424,9 @@ describe('Fleet integrations', () => {
         req
       );
 
+      // Wait for all async code in createEventFilters to complete
+      await new Promise(process.nextTick);
+
       expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
@@ -426,6 +434,55 @@ describe('Fleet integrations', () => {
         })
       );
 
+      expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          tags: [`policy:${postCreatedPolicyConfig.id}`],
+          osTypes: ['linux'],
+          entries: [
+            {
+              field: 'process.entry_leader.interactive',
+              operator: 'included',
+              type: 'match',
+              value: 'false',
+            },
+          ],
+          itemId: 'NEW_UUID',
+          namespaceType: 'agnostic',
+          meta: undefined,
+        })
+      );
+    });
+
+    it('should NOT create the Event Filters List if it already exists, but should add the Event Filters List Item', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+        eventFilters: {
+          nonInteractiveSession: true,
+        },
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+
+      // Mock getExceptionList to return a non-null value (list already exists)
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue({
+        id: 'existing-list-id',
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      });
+
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      // Should NOT attempt to create the list
+      expect(exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+      // Should still create the event filter item
       expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
@@ -1112,19 +1169,22 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy delete callback', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-    const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
-      await callback(deletePackagePolicyMock(), soClient, esClient);
-    };
-
+    let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
     let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
+      await callback(
+        deletePackagePolicyMock(),
+        endpointServicesMock.savedObjects.createInternalScopedSoClient(),
+        endpointServicesMock.getInternalEsClient()
+      );
+    };
 
     beforeEach(() => {
+      endpointServicesMock = createMockEndpointAppContextService();
+      endpointServicesMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
       fakeArtifact = {
@@ -1141,7 +1201,9 @@ describe('Fleet integrations', () => {
     });
 
     it('removes policy from artifact', async () => {
-      soClient.find.mockResolvedValueOnce({
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1183,7 +1245,9 @@ describe('Fleet integrations', () => {
         tags: [],
       });
 
-      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
+      expect(
+        endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
+      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
   });
 });
