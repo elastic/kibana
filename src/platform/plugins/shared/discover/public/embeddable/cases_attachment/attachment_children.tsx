@@ -33,9 +33,12 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
       search: { searchSource },
       dataViews,
     },
+    unifiedSearch,
   } = useDiscoverServices();
   const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
-  const isESQLQuery = Boolean(query?.esql);
+  const hasESQLQuery = Boolean(query?.esql);
+  const hasNonESQLQuery = Boolean(query?.query);
+  const hasQuery = hasESQLQuery || hasNonESQLQuery;
 
   return (
     <>
@@ -69,40 +72,31 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
             </EuiFlexGroup>
           </EuiBadge>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{'Query:'}</EuiText>
-              </EuiFlexItem>
-              {/* <EuiFlexItem grow={false}>
-                {isESQL ? (
-                  <EuiCodeBlock language="esql" paddingSize="none">
-                    {query.esql}
-                  </EuiCodeBlock>
-                ) : (
-                  <EuiText size="xs" color="success">
-                    {query ? JSON.stringify(query) : 'No query set'}
-                  </EuiText>
+        {hasQuery && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{'Query:'}</EuiText>
+                </EuiFlexItem>
+                {hasESQLQuery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCodeBlock language="esql" paddingSize="none">
+                      {query?.esql}
+                    </EuiCodeBlock>
+                  </EuiFlexItem>
                 )}
-              </EuiFlexItem> */}
-              {isESQLQuery && (
-                <EuiFlexItem grow={false}>
-                  <EuiCodeBlock language="esql" paddingSize="none">
-                    {query.esql}
-                  </EuiCodeBlock>
-                </EuiFlexItem>
-              )}
-              {query && !isESQLQuery && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="success">
-                    {query.query}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiBadge>
-        </EuiFlexItem>
+                {!hasNonESQLQuery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="success">
+                      {query?.query}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <LazySavedSearchComponent
