@@ -636,7 +636,7 @@ describe('case transforms', () => {
 
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
-      ).toMatchInlineSnapshot(`100`);
+      ).toBe(100);
     });
 
     it('returns undefined for `inceremental_id` when it is not defined', () => {
@@ -648,7 +648,7 @@ describe('case transforms', () => {
 
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
-      ).toMatchInlineSnapshot(`undefined`);
+      ).not.toBeDefined();
     });
   });
 });
