@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getSecuritySolutionLink } from '@kbn/threat-intelligence-plugin/public';
 import type { SecurityPageName } from '../../common/constants';
 import { SECURITY_FEATURE_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links';
+import { getSecuritySolutionLink } from './utils/security_solution_links';
 
 /**
  * Adds the Threat Intelligence entry to Kibana global sidenav as well as the Security sidenav.
