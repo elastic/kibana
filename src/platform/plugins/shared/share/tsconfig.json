@@ -24,9 +24,6 @@
     "@kbn/datemath",
     "@kbn/licensing-plugin",
     "@kbn/core-rendering-browser",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-notifications-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
