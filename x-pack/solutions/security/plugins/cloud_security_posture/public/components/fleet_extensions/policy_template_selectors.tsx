@@ -130,7 +130,7 @@ interface PolicyTemplateInfoProps {
 }
 
 export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => (
-  <EuiText color="subdued" size="s" aria-label={`policy-template tab ${postureType}`}>
+  <EuiText color="subdued" size="s">
     {postureType === KSPM_POLICY_TEMPLATE && (
       <FormattedMessage
         id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"

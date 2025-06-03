@@ -56,7 +56,6 @@ export const RadioGroup = ({
           <EuiToolTip
             key={option.id}
             content={option.tooltip}
-            aria-label={option.tooltip}
             anchorProps={{
               style: {
                 flex: '1 1 0',
