@@ -18,6 +18,8 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   type ESQLAstCommand,
+  lastItem,
+  firstItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -916,8 +918,15 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
+
+    const lastArg = lastItem(root.args);
+    const firstArg = firstItem(root.args);
+    if (isParam(lastArg) && firstArg && isColumnItem(firstArg)) {
+      // If the last argument is a param, we don't know the type of the function
+      // we will get the type from the firstArg.
+      argTypes[argTypes.length - 1] = getExpressionType(firstArg, fields, userDefinedColumns);
+    }
 
     // When functions are passed null for any argument, they generally return null
     // This is a special case that is not reflected in our function definitions

@@ -18,6 +18,7 @@ import {
   type ESQLSource,
   ESQLAstQueryExpression,
   BasicPrettyPrinter,
+  lastItem,
 } from '@kbn/esql-ast';
 import { ESQLVariableType, IndexAutocompleteItem } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
@@ -49,6 +50,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
   sourceExists,
+  isParam,
 } from '../shared/helpers';
 import type { ESQLSourceResult } from '../shared/types';
 import { listCompleteItem, commaCompleteItem, pipeCompleteItem } from './complete_items';
@@ -570,7 +572,8 @@ function removeFinalUnknownIdentiferArg(
   args: ESQLAstItem[],
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
 ) {
-  return getExpressionType(args[args.length - 1]) === 'unknown'
+  const lastArg = lastItem(args);
+  return !lastArg || (getExpressionType(lastArg) === 'unknown' && !isParam(lastArg))
     ? args.slice(0, args.length - 1)
     : args;
 }
@@ -605,12 +608,15 @@ export function checkFunctionInvocationComplete(
   if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
     return { complete: false, reason: 'tooFewArgs' };
   }
+
+  const lastArg = lastItem(cleanedArgs);
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
         fnDefinition.name.endsWith('null') ||
         def.params[index].type === 'any' ||
-        def.params[index].type === getExpressionType(a)
+        def.params[index].type === getExpressionType(a) ||
+        isParam(lastArg)
       );
     });
   });
