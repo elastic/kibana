@@ -4,6 +4,18 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
+::::{dropdown} Errors in rule executions occur when maintenance windows have filters
+
+Applies to: {{stack}} 9.0.0, 9.0.1
+
+**Details** 
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+
+**Workaround** 
+Remove any filters added to the active maintenance window.
+
+::::
+
 ::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function
 :name:known-issue-1508
 
