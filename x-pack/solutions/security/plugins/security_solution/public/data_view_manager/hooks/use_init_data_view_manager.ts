@@ -19,6 +19,8 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { useUserInfo } from '../../detections/components/user_info';
+import { type SelectDataViewAsyncPayload } from '../redux/actions';
+import { DataViewManagerScopeName } from '../constants';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -77,19 +79,32 @@ export const useInitDataViewManager = () => {
       spaces: services.spaces,
     });
 
-    const dataViewSelectedListener = createDataViewSelectedListener({
-      dataViews: services.dataViews,
+    dispatch(addListener(dataViewsLoadingListener));
+
+    // NOTE: Every scope has its own listener instance; this allows for cancellation
+    const listeners = [
+      DataViewManagerScopeName.default,
+      DataViewManagerScopeName.timeline,
+      DataViewManagerScopeName.detections,
+      DataViewManagerScopeName.analyzer,
+    ].map((scope) =>
+      createDataViewSelectedListener({
+        scope,
+        dataViews: services.dataViews,
+      })
+    );
+
+    listeners.forEach((dataViewSelectedListener) => {
+      dispatch(addListener(dataViewSelectedListener));
     });
 
-    dispatch(addListener(dataViewsLoadingListener));
-    dispatch(addListener(dataViewSelectedListener));
-
     // NOTE: this kicks off the data loading in the Data View Picker
-    dispatch(sharedDataViewManagerSlice.actions.init());
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));
-      dispatch(removeListener(dataViewSelectedListener));
+      listeners.forEach((dataViewSelectedListener) => {
+        dispatch(removeListener(dataViewSelectedListener));
+      });
     };
   }, [
     dispatch,
@@ -100,4 +115,11 @@ export const useInitDataViewManager = () => {
     services.spaces,
     services.uiSettings,
   ]);
+
+  return useCallback(
+    (initialSelection: SelectDataViewAsyncPayload[]) => {
+      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection));
+    },
+    [dispatch]
+  );
 };

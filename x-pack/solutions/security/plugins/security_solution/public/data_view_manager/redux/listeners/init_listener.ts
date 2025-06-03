@@ -25,7 +25,7 @@ export const createInitListener = (dependencies: {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
-      _action: AnyAction,
+      action: ReturnType<typeof sharedDataViewManagerSlice.actions.init>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
@@ -48,19 +48,27 @@ export const createInitListener = (dependencies: {
 
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
-        // Preload the default data view for related scopes
-        // NOTE: we will remove this ideally and load only when particular dataview is necessary
-        listenerApi.dispatch(
-          selectDataViewAsync({
-            id: defaultDataView.id,
-            scope: [
-              DataViewManagerScopeName.default,
-              DataViewManagerScopeName.detections,
-              DataViewManagerScopeName.timeline,
-              DataViewManagerScopeName.analyzer,
-            ],
-          })
-        );
+        // Preload the default data view for all the scopes
+        // Immediate calls that would dispatch this call from other places will cancel this action,
+        // preventing race conditions
+        [
+          DataViewManagerScopeName.detections,
+          DataViewManagerScopeName.analyzer,
+          DataViewManagerScopeName.timeline,
+          DataViewManagerScopeName.default,
+        ].forEach((scope) => {
+          listenerApi.dispatch(
+            selectDataViewAsync({
+              id: defaultDataView.id,
+              scope,
+            })
+          );
+        });
+
+        // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)
+        action.payload.forEach((defaultSelection) => {
+          listenerApi.dispatch(selectDataViewAsync(defaultSelection));
+        });
       } catch (error: unknown) {
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.error());
       }
