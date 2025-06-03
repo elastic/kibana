@@ -194,7 +194,7 @@ export function HeaderActions({
             closePopover={togglePopover}
             button={
               <EuiButton
-                data-test-subj="actions"
+                data-test-subj={`ruleActions_ruleType_${rule.ruleTypeId}`}
                 disabled={isLoading}
                 fill
                 iconSide="right"
@@ -207,16 +207,14 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <div data-test-subj={`ruleDetails_ruleType_${rule.ruleTypeId}`}>
-              <EuiContextMenu
-                initialPanelId={0}
-                panels={panels}
-                className="actDetailsCollapsedItemActions"
-                data-test-subj="detailsCollapsedActionPanel"
-                data-testid="detailsCollapsedActionPanel"
-                css={collapsedItemActionsCss}
-              />
-            </div>
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={panels}
+              className="actDetailsCollapsedItemActions"
+              data-test-subj="detailsCollapsedActionPanel"
+              data-testid="detailsCollapsedActionPanel"
+              css={collapsedItemActionsCss}
+            />
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
