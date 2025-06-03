@@ -25,9 +25,7 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
   apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -407,21 +405,6 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.number({ min: 0 }),
     solution: 'oblt',
   },
-  [apmEnableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service transaction metrics',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
-      defaultMessage:
-        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
   [apmEnableContinuousRollups]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
@@ -435,24 +418,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [enableCriticalPath]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableCriticalPath', {
-      defaultMessage: 'Critical path',
-    }),
-    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
-      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {

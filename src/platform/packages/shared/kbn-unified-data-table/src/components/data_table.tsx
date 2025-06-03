@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -100,7 +98,6 @@ import {
 import { useSorting } from '../hooks/use_sorting';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
-const THEME_DEFAULT = { darkMode: false };
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   // Allowing some additional rows to be rendered outside
   // the view minimizes pop-in when scrolling quickly
@@ -521,7 +518,6 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
@@ -687,7 +683,6 @@ export const UnifiedDataTable = ({
       getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
-      isDarkMode: darkMode,
       selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
@@ -697,7 +692,6 @@ export const UnifiedDataTable = ({
     }),
     [
       componentsTourSteps,
-      darkMode,
       dataView,
       isPlainRecord,
       isPaginationEnabled,

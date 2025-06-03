@@ -40,7 +40,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
-    "@kbn/palettes"
+    "@kbn/palettes",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*",

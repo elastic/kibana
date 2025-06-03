@@ -109,7 +109,6 @@ export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
 export const OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID = 'observability:apmAgentExplorerView';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
-export const OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID = 'observability:apmEnableCriticalPath';
 export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =
@@ -126,7 +125,6 @@ export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableI
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
   'observability:profilingElasticsearchPlugin';
-export const OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID = 'observability:apmEnableServiceMetrics';
 export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =

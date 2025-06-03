@@ -58,6 +58,42 @@ describe('createAlertRoute', () => {
       },
     ],
   };
+  const alertingConfigMock = {
+    healthCheck: {
+      interval: '60m',
+    },
+    invalidateApiKeysTask: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
+    enableFrameworkAlerts: true,
+    cancelAlertsOnRuleTimeout: true,
+    disabledRuleTypes: [],
+    maxEphemeralActionsPerAlert: 10,
+    rules: {
+      overwriteProducer: undefined,
+      minimumScheduleInterval: {
+        value: '1m',
+        enforce: false,
+      },
+      maxScheduledPerMinute: 32000,
+      run: {
+        actions: {
+          max: 100000,
+        },
+        alerts: {
+          max: 1000,
+        },
+      },
+    },
+    rulesSettings: {
+      enabled: true,
+      cacheInterval: 60000,
+    },
+    maintenanceWindow: {
+      enabled: true,
+    },
+  };
 
   const systemAction: RuleSystemAction = {
     actionTypeId: 'test-2',
@@ -107,6 +143,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -183,6 +220,7 @@ describe('createAlertRoute', () => {
       usageCounter: mockUsageCounter,
       isServerless: true,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config] = router.post.mock.calls[0];
@@ -209,6 +247,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -287,6 +326,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -366,6 +406,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -433,7 +474,13 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -455,7 +502,13 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -473,7 +526,13 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -499,6 +558,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
     const [, handler] = router.post.mock.calls[0];
     rulesClient.create.mockResolvedValueOnce(createResult);
@@ -520,6 +580,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -593,6 +654,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config] = router.post.mock.calls[0];
