@@ -151,18 +151,10 @@ export const Actions = ({
                 iconType="search"
                 color={searchToggled ? 'primary' : 'text'}
                 fill={searchToggled}
-                css={[
-                  css`
-                    position: relative;
-                    width: 40px;
-                  `,
-                  !searchToggled
-                    ? css`
-                        border: ${euiTheme.border.thin};
-                        background-color: ${euiTheme.colors.backgroundBasePlain};
-                      `
-                    : undefined,
-                ]}
+                css={css`
+                  position: relative;
+                  width: 40px;
+                `}
                 minWidth={false}
                 size="m"
                 aria-label={toggleSearchBarTooltip}

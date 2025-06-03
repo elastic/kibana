@@ -66,7 +66,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
           setPressed(Boolean(nextHit));
           setExpanded?.(nextHit);
         }}
-        color={isCurrentRowExpanded ? 'primary' : 'text'}
+        color="primary"
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
         isSelected={isCurrentRowExpanded}
       />

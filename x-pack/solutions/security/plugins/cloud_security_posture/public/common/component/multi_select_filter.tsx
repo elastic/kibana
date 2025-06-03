@@ -108,11 +108,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   };
 
   return (
-    <EuiFilterGroup
-      css={css`
-        ${transparentBackground && 'background-color: transparent;'};
-      `}
-    >
+    <EuiFilterGroup>
       <EuiPopover
         ownFocus
         button={

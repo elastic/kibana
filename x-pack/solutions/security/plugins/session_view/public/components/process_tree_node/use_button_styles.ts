@@ -13,43 +13,24 @@ export const useButtonStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border, colors, size, font } = euiTheme;
+    const { size } = euiTheme;
 
     const button: CSSObject = {
       lineHeight: '18px',
       height: '20px',
-      fontSize: size.m,
-      fontFamily: font.family,
-      fontWeight: font.weight.medium,
-      borderRadius: border.radius.small,
+
       marginLeft: size.xs,
       marginRight: size.xs,
       minWidth: 0,
-      padding: `${size.s} ${size.xxs}`,
-      color: colors.textPrimary,
-      background: colors.backgroundBasePrimary,
-      border: `${border.width.thin} solid ${colors.borderBasePrimary}`,
+
       '&& > span': {
         padding: `0px ${size.xxs}`,
         svg: {
           transition: `transform ${euiTheme.animation.extraFast}`,
         },
       },
-      '&&:hover, &&:focus': {
-        background: colors.backgroundLightPrimary,
-        textDecoration: 'none',
-      },
       '&.isExpanded > span svg:not(.alertIcon)': {
         transform: `rotate(180deg)`,
-      },
-      '&.isExpanded': {
-        color: colors.textInverse,
-        background: colors.backgroundFilledPrimary,
-        borderColor: colors.borderStrongPrimary,
-        '&:hover, &:focus': {
-          background: colors.backgroundFilledPrimary,
-          borderColor: colors.borderStrongPrimary,
-        },
       },
     };
 
@@ -58,22 +39,6 @@ export const useButtonStyles = () => {
     };
     const alertButton: CSSObject = {
       ...button,
-      color: colors.textDanger,
-      background: colors.backgroundBaseDanger,
-      border: `${border.width.thin} solid ${colors.borderBaseDanger}`,
-      '&&:hover, &&:focus': {
-        background: colors.backgroundLightDanger,
-        textDecoration: 'none',
-      },
-      '&.isExpanded': {
-        color: colors.textInverse,
-        background: colors.backgroundFilledDanger,
-        borderColor: colors.borderStrongDanger,
-        '&:hover, &:focus': {
-          background: `${colors.backgroundFilledDanger}`,
-          borderColor: colors.borderStrongDanger,
-        },
-      },
 
       '& .euiButton__text': {
         display: 'flex',
@@ -86,35 +51,10 @@ export const useButtonStyles = () => {
 
     const outputButton: CSSObject = {
       ...button,
-      color: colors.textAccentSecondary,
-      background: colors.backgroundBaseAccentSecondary,
-      border: `${border.width.thin} solid ${colors.borderBaseAccentSecondary}`,
-      '&&:hover, &&:focus': {
-        background: colors.backgroundLightAccentSecondary,
-        textDecoration: 'none',
-      },
-      '&.isExpanded': {
-        color: colors.ghost,
-        background: colors.backgroundFilledAccentSecondary,
-        '&:hover, &:focus': {
-          background: `${colors.backgroundFilledAccentSecondary}`,
-        },
-      },
     };
 
     const userChangedButton: CSSObject = {
       ...button,
-      cursor: 'default',
-      color: colors.textAccent,
-      background: colors.backgroundBaseAccent,
-      border: `${border.width.thin} solid ${colors.borderBaseAccent}`,
-      '&&:hover, &&:focus': {
-        color: colors.textAccent,
-        background: colors.backgroundBaseAccent,
-        textDecoration: 'none',
-        transform: 'none',
-        animation: 'none',
-      },
     };
 
     const buttonSize: CSSObject = {
