@@ -11,4 +11,9 @@ export {
   createDashboardSavedObjectType,
   DASHBOARD_SAVED_OBJECT_TYPE,
 } from './dashboard_saved_object';
-export type { DashboardSavedObjectAttributes, GridData, SavedDashboardPanel } from './schema';
+export type {
+  DashboardSavedObjectAttributes,
+  GridData,
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from './schema';
