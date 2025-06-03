@@ -9,4 +9,3 @@
 
 export { linkTab } from './link';
 export { embedTab } from './embed';
-export { exportTab } from './export';

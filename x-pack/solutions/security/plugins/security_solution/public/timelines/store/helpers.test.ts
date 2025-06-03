@@ -7,11 +7,11 @@
 
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
   DataProviderTypeEnum,
-  TimelineTypeEnum,
   TimelineStatusEnum,
+  TimelineTypeEnum,
 } from '../../../common/api/timeline';
 import type {
   DataProvider,
@@ -19,8 +19,8 @@ import type {
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
-  defaultUdtHeaders,
   defaultColumnHeaderType,
+  defaultUdtHeaders,
 } from '../components/timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../components/timeline/body/constants';
 import { defaultHeaders } from '../../common/mock';
@@ -31,18 +31,18 @@ import {
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
+  updateTimelineColumnWidth,
+  updateTimelineGraphEventId,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
-  updateTimelineProviderType,
   updateTimelineProviders,
+  updateTimelineProviderType,
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
   updateTimelineTitleAndDescription,
-  updateTimelineGraphEventId,
-  updateTimelineColumnWidth,
   upsertTimelineColumn,
 } from './helpers';
 import type { TimelineModel } from './model';
@@ -118,7 +118,6 @@ const basicTimeline: TimelineModel = {
   savedObjectId: null,
   selectAll: false,
   selectedEventIds: {},
-  sessionViewConfig: null,
   show: true,
   sort: [
     {
