@@ -59,12 +59,26 @@ export const useShareTabsContext = <
     shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
   ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
 
+  type ObjectTypeMetaConfig = IShareContext['objectTypeMeta']['config'];
+
+  const shareTypeObjectMeta: Omit<ObjectTypeMetaConfig, 'config'> & {
+    config: T extends 'integration'
+      ? NonNullable<NonNullable<ObjectTypeMetaConfig>['integration']>[G] | undefined
+      : Exclude<NonNullable<ObjectTypeMetaConfig>, 'integration'>[T];
+  } = {
+    ...objectTypeMeta,
+    // @ts-expect-error -- this is a workaround for the type system
+    config:
+      shareType === 'integration'
+        ? groupId
+          ? objectTypeMeta.config?.integration?.[groupId]
+          : {}
+        : objectTypeMeta.config?.[shareType],
+  };
+
   return {
     ...rest,
-    objectTypeMeta: {
-      ...objectTypeMeta,
-      config: objectTypeMeta.config[shareType],
-    },
+    objectTypeMeta: shareTypeObjectMeta,
     shareMenuItems: shareTypeImplementations,
   };
 };
