@@ -49,7 +49,7 @@ export const sharedDataViewManagerSlice = createSlice({
         state.adhocDataViews.push(dataViewSpec);
       }
     },
-    init: (state, _action: PayloadAction<SelectDataViewAsyncPayload[]>) => {
+    init: (state, _: PayloadAction<SelectDataViewAsyncPayload[]>) => {
       state.status = 'loading';
     },
     error: (state) => {
