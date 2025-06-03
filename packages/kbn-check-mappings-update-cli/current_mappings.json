@@ -1065,8 +1065,18 @@
       "managed": {
         "type": "boolean"
       },
-      "matchers": {
+        "matchers": {
         "dynamic": false,
+        "properties": {
+          "fields": {
+            "index": false,
+            "type": "keyword"
+          },
+          "values": {
+            "index": false,
+            "type": "keyword"
+          }
+        },
         "type": "object"
       },
       "name": {
