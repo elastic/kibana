@@ -40,8 +40,6 @@ export class QueryClient {
     queries: StreamQuery[],
     significantEventsEnabled: boolean
   ) {
-    const { rulesClient } = this.clients;
-
     if (!significantEventsEnabled) {
       return await this.clients.assetClient.syncAssetList(
         stream,
@@ -54,28 +52,30 @@ export class QueryClient {
       );
     }
 
-    // step 1: find the existing queries for the stream
+    /**
+     * This method is used to synchronize queries for a stream.
+     * It handles the creation, update, and deletion of queries based on the provided list.
+     * It also manages the rules associated with these queries, ensuring that any query breaking changes
+     * are handled appropriately:
+     * - If a query is new, it creates a new rule.
+     * - If a query is updated with a breaking change, it removes the old rule and creates a new one.
+     * - If a query is updated without a breaking change, it updates the existing rule.
+     * - If a query is deleted, it removes the associated rule.
+     */
     const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
-
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
-    // step 2: prepare the queries to create, update or delete
-    // Find next queries to create
     const nextQueriesToCreate = queries
       .filter((query) => !currentIds.has(query.id))
       .map((query) => toQueryLink(query, stream));
 
-    // Find current queries to delete
     const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
 
-    // Find current queries to delete before creating the new ones
-    // because the KQL query has changed and a new rule is required
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
       queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
     );
 
-    // Find the next queries to create because they have been updated with a breaking change in KQL
     const nextQueriesUpdatedWithBreakingChange = queries
       .filter((query) =>
         currentQueryLinks.some(
@@ -84,7 +84,6 @@ export class QueryClient {
       )
       .map((query) => toQueryLink(query, stream));
 
-    // Find the next queries to update directly because the change is not on the KQL query
     const nextQueriesUpdatedWithoutBreakingChange = queries
       .filter((query) =>
         currentQueryLinks.some(
@@ -93,55 +92,13 @@ export class QueryClient {
       )
       .map((query) => toQueryLink(query, stream));
 
-    // step 3: uninstall the queries that need to be deleted or updated because updated KQL
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
+    await this.installQueries(
+      [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange],
+      nextQueriesUpdatedWithoutBreakingChange,
+      stream
+    );
 
-    // step 4: install the new queries, update the existing queries without breaking changes, and create the updated queries with breaking changes (that have been deleted)
-    await Promise.all([
-      ...nextQueriesUpdatedWithoutBreakingChange.map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.update<EsqlRuleParams>({
-          id: ruleId,
-          data: {
-            name: query.query.title,
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
-            },
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
-            },
-          },
-        });
-      }),
-      ...[...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange].map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.create<EsqlRuleParams>({
-          data: {
-            name: query.query.title,
-            consumer: 'streams',
-            alertTypeId: 'streams.rules.esql',
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
-            },
-            enabled: true,
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
-            },
-          },
-          options: {
-            id: ruleId,
-          },
-        });
-      }),
-    ]);
-
-    // step 5: finally sync the asset links
     await this.clients.assetClient.syncAssetList(
       stream,
       queries.map((query) => ({
@@ -258,6 +215,58 @@ export class QueryClient {
       nextQueries.map((link) => link.query),
       significantEventsEnabled
     );
+  }
+
+  private async installQueries(
+    queriesToCreate: QueryLink[],
+    queriesToUpdate: QueryLink[],
+    stream: string
+  ) {
+    const { rulesClient } = this.clients;
+
+    await Promise.all([
+      ...queriesToCreate.map((query) => {
+        const ruleId = getRuleIdFromQueryLink(query);
+        return rulesClient.create<EsqlRuleParams>({
+          data: {
+            name: query.query.title,
+            consumer: 'streams',
+            alertTypeId: 'streams.rules.esql',
+            actions: [],
+            params: {
+              timestampField: '@timestamp',
+              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+            },
+            enabled: true,
+            tags: ['streams'],
+            schedule: {
+              interval: '1m',
+            },
+          },
+          options: {
+            id: ruleId,
+          },
+        });
+      }),
+      ...queriesToUpdate.map((query) => {
+        const ruleId = getRuleIdFromQueryLink(query);
+        return rulesClient.update<EsqlRuleParams>({
+          id: ruleId,
+          data: {
+            name: query.query.title,
+            actions: [],
+            params: {
+              timestampField: '@timestamp',
+              query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+            },
+            tags: ['streams'],
+            schedule: {
+              interval: '1m',
+            },
+          },
+        });
+      }),
+    ]);
   }
 
   private async uninstallQueries(queries: QueryLink[]) {
