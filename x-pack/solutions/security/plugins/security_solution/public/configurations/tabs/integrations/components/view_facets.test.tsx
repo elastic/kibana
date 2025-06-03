@@ -70,14 +70,9 @@ describe('IntegrationViewFacets', () => {
   it('highlights the correct button based on the selectedFacet prop', () => {
     const { rerender } = render(<IntegrationViewFacets {...defaultProps} />);
 
-    const allButton = screen.getByText('All integrations');
-    const installedButton = screen.getByText('Installed integrations');
-
-    const selectedFacetClass = 'euiFacetButton__text css-kw0vmr-euiFacetButton__text-isSelected';
-
     // Check if the "All integrations" button is selected
-    expect(allButton).toHaveClass(selectedFacetClass);
-    expect(installedButton).not.toHaveClass(selectedFacetClass);
+    expect(screen.getByText('All integrations').className).toContain('isSelected');
+    expect(screen.getByText('Installed integrations').className).not.toContain('isSelected');
 
     // Rerender with the "Installed integrations" selected
     rerender(
@@ -85,7 +80,7 @@ describe('IntegrationViewFacets', () => {
     );
 
     // Check if the "Installed integrations" button is selected
-    expect(allButton).not.toHaveClass(selectedFacetClass);
-    expect(installedButton).toHaveClass(selectedFacetClass);
+    expect(screen.getByText('All integrations').className).not.toContain('isSelected');
+    expect(screen.getByText('Installed integrations').className).toContain('isSelected');
   });
 });
