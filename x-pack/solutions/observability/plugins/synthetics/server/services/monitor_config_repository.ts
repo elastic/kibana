@@ -88,11 +88,12 @@ export class MonitorConfigRepository {
       id: string;
     }>;
   }) {
-    return await this.soClient.bulkUpdate<MonitorFields>(
+    return this.soClient.bulkUpdate<MonitorFields>(
       monitors.map(({ attributes, id }) => ({
         type: syntheticsMonitorType,
         id,
         attributes,
+        namespace: attributes.namespace,
       }))
     );
   }
