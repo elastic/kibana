@@ -11,7 +11,7 @@ import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import {
   CancellationToken,
   KibanaShuttingDownError,
@@ -44,10 +44,11 @@ import { ReportTaskParams, ReportingTask, ReportingTaskStatus, TIME_BETWEEN_ATTE
 import type { ReportingCore } from '../..';
 import { EventTracker } from '../../usage';
 import { Report, SavedReport } from '../store';
-import type { ReportFailedFields } from '../store/store';
+import type { ReportFailedFields, ReportWarningFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import { finishedWithNoPendingCallbacks, getContentStream } from '../content_stream';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
+import { ScheduledReportType } from '../../types';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -92,6 +93,7 @@ export interface PrepareJobResults {
   jobId: string;
   report?: SavedReport;
   task?: ReportTaskParams;
+  reportSO?: SavedObject<ScheduledReportType>;
 }
 
 type ReportTaskParamsType = Record<string, any>;
@@ -131,9 +133,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected abstract notify(
     report: SavedReport,
-    taskInstance: ConcreteTaskInstance,
+    output: TaskRunResult,
+    runAt: Date,
     byteSize: number,
-    contentType?: string | null,
+    reportSO?: SavedObject<ScheduledReportType>,
     spaceId?: string
   ): Promise<void>;
 
@@ -240,6 +243,24 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     };
 
     return await store.setReportError(report, doc);
+  }
+
+  protected async saveExecutionWarning(
+    report: SavedReport,
+    output: CompletedReportOutput,
+    message: string
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const logger = this.logger.get(report._id);
+    logger.warn(message);
+
+    // update the report in the store
+    const store = await this.opts.reporting.getStore();
+    const doc: ReportWarningFields = {
+      output,
+      warning: message,
+    };
+
+    return await store.setReportWarning(report, doc);
   }
 
   protected formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
@@ -455,6 +476,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             jobId: jId,
             report: preparedReport,
             task,
+            reportSO,
           } = await this.prepareJob(taskInstance);
           jobId = jId;
           report = preparedReport;
@@ -548,9 +570,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
               await this.notify(
                 report,
-                taskInstance,
+                output,
+                taskInstance.runAt,
                 byteSize,
-                output.content_type,
+                reportSO,
                 task.payload.spaceId
               );
             }

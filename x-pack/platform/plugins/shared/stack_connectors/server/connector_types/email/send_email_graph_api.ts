@@ -30,7 +30,7 @@ export async function sendEmailGraphApi(
   axiosInstance = axiosInstance ?? axios.create();
 
   const { attachments } = sendEmailOptions;
-  if (attachments) {
+  if (attachments.length > 0) {
     return sendEmailWithAttachments({
       sendEmailOptions,
       logger,
@@ -53,7 +53,7 @@ interface SendEmailGraphApiOptions {
   options: SendEmailOptions;
   headers: Record<string, string>;
   messageHTML: string;
-  attachments?: Attachment[];
+  attachments: Attachment[];
 }
 
 interface SendEmailParams {
@@ -103,7 +103,7 @@ export async function sendEmailWithAttachments(
   attachmentChunkSize: number = ATTACHMENT_CHUNK_SIZE
 ): Promise<AxiosResponse> {
   const emailId = await createDraft(params);
-  const attachments = params.sendEmailOptions.attachments ?? [];
+  const attachments = params.sendEmailOptions.attachments;
   for (const attachment of attachments) {
     const size = Buffer.byteLength(attachment.content);
     if (size < smallAttachmentLimit) {

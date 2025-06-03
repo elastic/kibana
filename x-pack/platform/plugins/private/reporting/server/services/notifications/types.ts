@@ -13,10 +13,10 @@ export interface NotifyArgs {
   contentType?: string | null;
   jobType: string;
   emailParams: {
-    to: string[];
+    to?: string[];
     bcc?: string[];
     cc?: string[];
-    runAt: string;
+    subject: string;
     spaceId?: string;
   };
 }

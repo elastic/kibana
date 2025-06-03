@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import { numberToDuration } from '@kbn/reporting-common';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
@@ -37,6 +38,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
     let report: SavedReport | undefined;
     let jobId: string;
+    let reportSO: SavedObject<ScheduledReportType> | undefined;
     const task = scheduledReportTaskParams as ScheduledReportTaskParams;
     const reportSoId = task.id;
     const reportSpaceId = task.spaceId || DEFAULT_SPACE_ID;
@@ -49,7 +51,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       }
 
       const internalSoClient = await this.opts.reporting.getInternalSoClient();
-      const reportSO = await internalSoClient.get<ScheduledReportType>(
+      reportSO = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         reportSoId,
         { namespace: reportSpaceId }
@@ -77,7 +79,13 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       errorLogger(this.logger, `Error in running scheduled report ${reportSoId}`, failedToClaim);
     }
 
-    return { isLastAttempt: false, jobId: jobId!, report, task: report?.toReportTaskJSON() };
+    return {
+      isLastAttempt: false,
+      jobId: jobId!,
+      report,
+      task: report?.toReportTaskJSON(),
+      reportSO,
+    };
   }
 
   protected getMaxAttempts() {
@@ -86,44 +94,54 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
   protected async notify(
     report: SavedReport,
-    taskInstance: ConcreteTaskInstance,
+    output: TaskRunResult,
+    runAt: Date,
     byteSize: number,
-    contentType?: string | null,
+    reportSO?: SavedObject<ScheduledReportType>,
     spaceId?: string
   ): Promise<void> {
-    if (byteSize > MAX_ATTACHMENT_SIZE) {
-      throw new Error('Error sending scheduled report: the report is larger than the 10MB limit.');
-    }
-    if (!this.emailNotificationService) {
-      throw new Error(
-        'Error sending scheduled report: reporting notification service has not been initialized.'
-      );
-    }
+    try {
+      if (byteSize > MAX_ATTACHMENT_SIZE) {
+        throw new Error('The report is larger than the 10MB limit.');
+      }
+      if (!this.emailNotificationService) {
+        throw new Error('Reporting notification service has not been initialized.');
+      }
 
-    const { runAt, params } = taskInstance;
-    const task = params as ScheduledReportTaskParams;
-    const internalSoClient = await this.opts.reporting.getInternalSoClient();
-    const reportSO = await internalSoClient.get<ScheduledReportType>(
-      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-      task.id,
-      { namespace: spaceId }
-    );
+      if (reportSO && reportSO.attributes.notification && reportSO.attributes.notification.email) {
+        const { email } = reportSO.attributes.notification;
+        const title = reportSO.attributes.title;
 
-    const { notification } = reportSO.attributes;
-    if (notification && notification.email && notification.email.to) {
-      await this.emailNotificationService.notify({
-        reporting: this.opts.reporting,
-        index: report._index,
-        id: report._id,
-        jobType: report.jobtype,
-        contentType,
-        emailParams: {
-          to: notification.email.to,
-          cc: notification.email.cc,
-          bcc: notification.email.bcc,
-          runAt: runAt.toISOString(),
-          spaceId,
+        await this.emailNotificationService.notify({
+          reporting: this.opts.reporting,
+          index: report._index,
+          id: report._id,
+          jobType: report.jobtype,
+          contentType: output.content_type,
+          emailParams: {
+            to: email.to,
+            cc: email.cc,
+            bcc: email.bcc,
+            subject: `${title} [${runAt.toISOString()}] scheduled report`,
+            spaceId,
+          },
+        });
+      }
+    } catch (error) {
+      const message = `Error sending scheduled report: ${error.message}`;
+      await this.saveExecutionWarning(
+        report,
+        {
+          ...output,
+          size: byteSize,
         },
+        message
+      ).catch((failedToSaveWarning) => {
+        errorLogger(
+          this.logger,
+          `Error in saving execution warning ${report._id}`,
+          failedToSaveWarning
+        );
       });
     }
   }

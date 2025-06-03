@@ -53,7 +53,7 @@ describe('EmailNotificationService', () => {
       contentType: 'test-content-type',
       emailParams: {
         to: ['test@test.com'],
-        runAt: '04/18/2025',
+        subject: 'Scheduled report for 04/18/2025',
         spaceId: 'space1',
       },
     });
@@ -71,28 +71,5 @@ describe('EmailNotificationService', () => {
       subject: 'Scheduled report for 04/18/2025',
       to: ['test@test.com'],
     });
-  });
-
-  it('throws an error when the email service is not available', async () => {
-    notifications.isEmailServiceAvailable.mockReturnValue(false);
-
-    await expect(
-      emailNotificationService.notify({
-        reporting: mockCore,
-        index: '.reporting-test-1234',
-        id: '1234',
-        jobType: 'pdf',
-        contentType: 'test-content-type',
-        emailParams: {
-          to: ['test@test.com'],
-          runAt: '04/18/2025',
-          spaceId: 'space1',
-        },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error sending scheduled report: email service is not available."`
-    );
-
-    expect(notifications.getEmailService().sendAttachmentEmail).not.toHaveBeenCalled();
   });
 });

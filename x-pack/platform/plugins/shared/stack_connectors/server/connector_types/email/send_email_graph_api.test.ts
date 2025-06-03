@@ -43,6 +43,7 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test1',
         headers: {},
+        attachments: [],
       },
       logger,
       configurationUtilities,
@@ -138,6 +139,7 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test2',
         headers: { Authorization: 'Bearer 1234567' },
+        attachments: [],
       },
       logger,
       configurationUtilities,
@@ -236,6 +238,7 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test3',
         headers: {},
+        attachments: [],
       },
       logger,
       configurationUtilities,
@@ -335,7 +338,7 @@ describe('sendEmailGraphApi', () => {
 
     await expect(
       sendEmailGraphApi(
-        { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+        { options: getSendEmailOptions(), messageHTML: 'test1', headers: {}, attachments: [] },
         logger,
         configurationUtilities,
         connectorUsageCollector

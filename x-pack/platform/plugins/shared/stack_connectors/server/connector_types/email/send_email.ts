@@ -76,8 +76,9 @@ export async function sendEmail(
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
-  const { transport, content, attachments } = options;
+  const { transport, content } = options;
   const { message, messageHTML } = content;
+  const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
@@ -108,7 +109,7 @@ export async function sendEmailWithExchange(
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector,
-  attachments?: Attachment[]
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -190,7 +191,7 @@ async function sendEmailWithNodemailer(
   options: SendEmailOptions,
   messageHTML: string,
   connectorUsageCollector: ConnectorUsageCollector,
-  attachments?: Attachment[]
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;

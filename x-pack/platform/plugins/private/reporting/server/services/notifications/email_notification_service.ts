@@ -55,25 +55,17 @@ export class EmailNotificationService implements NotificationService {
   }
 
   public async notify({ reporting, index, id, contentType, jobType, emailParams }: NotifyArgs) {
-    if (!this.notifications.isEmailServiceAvailable()) {
-      throw new Error('Error sending scheduled report: email service is not available.');
-    }
-    try {
-      const attachments = await this.getAttachments(reporting, index, id, jobType, contentType);
-      const { to, bcc, cc, runAt, spaceId } = emailParams;
-      const subject = `Scheduled report for ${runAt}`;
-      const message = "Here's your report!";
-      await this.notifications.getEmailService().sendAttachmentEmail({
-        to,
-        bcc,
-        cc,
-        subject,
-        message,
-        attachments,
-        spaceId: spaceId ?? DEFAULT_SPACE_ID,
-      });
-    } catch (error) {
-      throw new Error(`Error sending scheduled report: ${error.message}`);
-    }
+    const attachments = await this.getAttachments(reporting, index, id, jobType, contentType);
+    const { to, bcc, cc, subject, spaceId } = emailParams;
+    const message = "Here's your report!";
+    await this.notifications.getEmailService().sendAttachmentEmail({
+      to,
+      bcc,
+      cc,
+      subject,
+      message,
+      attachments,
+      spaceId: spaceId ?? DEFAULT_SPACE_ID,
+    });
   }
 }
