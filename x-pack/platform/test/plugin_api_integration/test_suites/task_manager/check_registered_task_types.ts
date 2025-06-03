@@ -182,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',
+        'security:telemetry-response-actions-rules',
         'security:telemetry-timelines',
         'session_cleanup',
         'slo:bulk-delete-task',
