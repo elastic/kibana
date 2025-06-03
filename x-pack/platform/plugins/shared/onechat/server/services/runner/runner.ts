@@ -17,6 +17,7 @@ import type {
   RunContext,
   Runner,
   RunToolReturn,
+  RunAgentReturn,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
@@ -67,7 +68,7 @@ export class RunnerManager {
       },
       runAgent: <TParams = Record<string, unknown>, TResult = unknown>(
         agentExecutionParams: ScopedRunnerRunAgentParams<TParams>
-      ): Promise<RunToolReturn<TResult>> => {
+      ): Promise<RunAgentReturn<TResult>> => {
         try {
           return runAgent<TParams, TResult>({ agentExecutionParams, parentManager: this });
         } catch (e) {

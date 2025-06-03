@@ -13,7 +13,7 @@ import {
   isToolNotFoundError,
   OnechatErrorCode,
 } from './errors';
-import { toSerializedToolIdentifier } from './tools';
+import { toSerializedToolIdentifier } from '../tools';
 
 describe('Onechat errors', () => {
   describe('isOnechatError', () => {

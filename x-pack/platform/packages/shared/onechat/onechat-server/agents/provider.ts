@@ -6,13 +6,14 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { AgentType, AgentIdentifier } from '@kbn/onechat-common/agents';
-import type {
-  ConversationRound,
-  RoundInput,
-  ChatAgentEvent,
-  PlainIdAgentIdentifier,
-} from '@kbn/onechat-common/agents';
+import {
+  AgentType,
+  type ConversationRound,
+  type RoundInput,
+  type ChatAgentEvent,
+  type AgentIdentifier,
+  type PlainIdAgentIdentifier,
+} from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '../src/model_provider';

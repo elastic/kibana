@@ -6,4 +6,4 @@
  */
 
 export { AgentsService } from './agents_service';
-export type { AgentsServiceSetup, AgentsServiceStart, AgentRegistry } from './types';
+export type { AgentsServiceSetup, AgentsServiceStart, InternalAgentRegistry } from './types';

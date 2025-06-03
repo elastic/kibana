@@ -8,6 +8,7 @@
 import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
+  ConversationalAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
@@ -51,12 +52,13 @@ export const runAgent = async <TParams = Record<string, unknown>, TResult = unkn
   const agentResult = await agent.handler(
     {
       runId: 'foo',
-      agentParams: agentParams as TParams,
+      agentParams: agentParams as ConversationalAgentParams,
     },
     agentHandlerContext
   );
 
   return {
+    runId: manager.context.runId,
     result: agentResult.result as TResult,
   };
 };

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, RoundInput, ToolCallWithResult } from '@kbn/onechat-common/agents';
+import {
+  ConversationRound,
+  RoundInput,
+  ToolCallWithResult,
+  toSerializedToolIdentifier,
+} from '@kbn/onechat-common';
 import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 
 /**
@@ -60,7 +65,7 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
     tool_calls: [
       {
         id: toolCall.toolCallId,
-        name: toolCall.toolId,
+        name: toSerializedToolIdentifier(toolCall.toolId),
         args: toolCall.args,
         type: 'tool_call',
       },
