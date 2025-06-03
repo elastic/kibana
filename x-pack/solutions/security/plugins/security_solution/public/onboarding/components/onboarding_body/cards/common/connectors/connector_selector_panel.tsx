@@ -73,7 +73,7 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
     );
 
     return (
-      <EuiPanel hasShadow={false} hasBorder>
+      <EuiPanel hasShadow={false} hasBorder css={{ height: '160px' }}>
         <EuiFlexGroup
           css={css`
             height: 100%;

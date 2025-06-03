@@ -30,7 +30,7 @@ import {
   type MissingCapability,
   type CapabilitiesLevel,
 } from './capabilities';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -169,7 +169,8 @@ export class SiemRulesMigrationsService {
 
   public async startRuleMigration(
     migrationId: string,
-    retry?: SiemMigrationRetryFilter
+    retry?: SiemMigrationRetryFilter,
+    settings?: RuleMigrationSettings
   ): Promise<StartRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -178,7 +179,7 @@ export class SiemRulesMigrationsService {
       );
       return { started: false };
     }
-    const connectorId = this.connectorIdStorage.get();
+    const connectorId = settings?.connectorId ?? this.connectorIdStorage.get();
     if (!connectorId) {
       this.core.notifications.toasts.add(getNoConnectorToast(this.core));
       return { started: false };

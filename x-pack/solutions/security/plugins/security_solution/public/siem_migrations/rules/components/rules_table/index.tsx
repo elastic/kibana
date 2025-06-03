@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiSuperSelectOption,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
   EuiSkeletonLoading,
   EuiSkeletonTitle,
@@ -15,13 +19,32 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiButton,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  useGeneratedHtmlId,
+  EuiSuperSelect,
+  EuiFormRow,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { fetchConnectors } from '@kbn/alerts-ui-shared/src/common/apis';
+import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import {
+  getActionTypeTitle,
+  getGenAiConfig,
+} from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
@@ -39,14 +62,16 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import type { FilterOptions } from '../../types';
+import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
+import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
 const DEFAULT_SORT_DIRECTION = 'desc';
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
 export interface MigrationRulesTableProps {
   /**
@@ -68,20 +93,30 @@ export interface MigrationRulesTableProps {
    * Indicates whether the integrations loading is in progress.
    */
   isIntegrationsLoading?: boolean;
+
+  /**
+   * migration stats
+   */
+  stats: RuleMigrationStats;
 }
 
 /**
  * Table Component for displaying SIEM rules migrations
  */
 export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
-  ({ migrationId, refetchData, integrations, isIntegrationsLoading }) => {
+  ({ migrationId, refetchData, integrations, isIntegrationsLoading, stats: migrationStats }) => {
     const { addError } = useAppToasts();
+
+    const {
+      services: { http },
+    } = useKibana();
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
+    const [aiConnectors, setAiConnectors] = useState<ActionConnector[]>([]);
 
     // Filters
     const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
@@ -98,7 +133,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     } = useGetMigrationRules({
       migrationId,
       page: pageIndex,
-      perPage: pageSize,
+      perPage: 100,
       sortField,
       sortDirection,
       filters: {
@@ -126,6 +161,25 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       }),
       [selectedMigrationRules]
     );
+
+    useEffect(() => {
+      if (aiConnectors.length > 0) return;
+      (async function () {
+        const connectors = await fetchConnectors({ http });
+
+        const savedAiConnectors = connectors.reduce((acc: AIConnector[], connector) => {
+          if (
+            !connector.isMissingSecrets &&
+            AllowedActionTypeIds.includes(connector.actionTypeId)
+          ) {
+            acc.push(connector);
+          }
+          return acc;
+        }, []);
+
+        setAiConnectors(savedAiConnectors);
+      })();
+    }, [aiConnectors, http]);
 
     const pagination = useMemo(() => {
       return {
@@ -217,9 +271,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const reprocessFailedRules = useCallback(async () => {
-      startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
-    }, [migrationId, startMigration]);
+    const [isReprocessFailedRulesModalVisible, setIsReprocessFailedRulesModalVisible] =
+      useState(false);
+
+    const reprocessFailedRulesInitiate = useCallback(async () => {
+      setIsReprocessFailedRulesModalVisible(true);
+      // startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
+    }, []);
+
+    const reprocessFailedRules = useCallback(
+      (settings?: RuleMigrationSettings) => {
+        setIsReprocessFailedRulesModalVisible(false);
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationId, startMigration]
+    );
 
     const isRulesLoading =
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -313,6 +379,14 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
+        <ReprocessFailedRulesDialog
+          isModalVisible={isReprocessFailedRulesModalVisible}
+          closeModal={() => setIsReprocessFailedRulesModalVisible(false)}
+          lastExecution={migrationStats?.last_execution}
+          startMigration={reprocessFailedRules}
+          connectors={aiConnectors}
+          numberOfFailedRules={translationStats?.rules.failed}
+        />
         {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
 
         <EuiSkeletonLoading
@@ -351,7 +425,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       numberOfSelectedRules={selectedMigrationRules.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
-                      reprocessFailedRules={reprocessFailedRules}
+                      reprocessFailedRules={reprocessFailedRulesInitiate}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -377,3 +451,106 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
   }
 );
 MigrationRulesTable.displayName = 'MigrationRulesTable';
+
+interface ReprocessFailedRulesDialogProps {
+  isModalVisible: boolean;
+  closeModal: () => void;
+  lastExecution?: RuleMigrationSettings;
+  startMigration: (settings: RuleMigrationSettings) => void;
+  connectors: ActionConnector[];
+  numberOfFailedRules?: number;
+}
+
+const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = React.memo(
+  function ReprocessFailedRulesDialog({
+    isModalVisible,
+    closeModal,
+    lastExecution,
+    startMigration,
+    numberOfFailedRules = 0,
+    connectors = [],
+  }) {
+    const spaceId = useSpaceId() ?? 'default';
+    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+    const [siemMigrationsDefaultConnectorId] = useStoredAssistantConnectorId(spaceId);
+    const [selectedConnectorId, setSelectedConnectorId] = useState<string>(
+      lastExecution?.connectorId || siemMigrationsDefaultConnectorId || ''
+    );
+    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
+      lastExecution?.shouldMatchPrebuiltRules ?? true
+    );
+
+    const modalTitleId = useGeneratedHtmlId();
+
+    const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
+      return connectors.map((connector) => {
+        // TODO : dedup from x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/common/connectors/connector_selector_panel.tsx
+        let description: string;
+        if (connector.isPreconfigured) {
+          description = 'Pre-configured Connector';
+        } else {
+          description =
+            getGenAiConfig(connector)?.apiProvider ??
+            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+        }
+
+        return {
+          value: connector.id,
+          inputDisplay: connector.name,
+          dropdownDisplay: (
+            <>
+              <strong>{connector.name}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{description}</p>
+              </EuiText>
+            </>
+          ),
+          'data-test-subj': `reprocessFailedRulesConnectorSelector-${connector.id}`,
+        };
+      });
+    }, [actionTypeRegistry, connectors]);
+
+    if (isModalVisible) {
+      return (
+        <EuiModal onClose={closeModal} data-test-subj="reprocessFailedRulesDialog">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              {i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiFormRow>
+              <EuiSuperSelect
+                options={selectOptions}
+                valueOfSelected={selectedConnectorId}
+                onChange={setSelectedConnectorId}
+                data-test-subj="reprocessFailedRulesConnectorSelector"
+                aria-label={'Selector for AI connector to reprocess failed rules'}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={'Enable Prebuilt rules Matching'}
+                checked={enablePrebuiltRulesMatching}
+                onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiButton
+              color="primary"
+              fill
+              onClick={() =>
+                startMigration({
+                  connectorId: selectedConnectorId,
+                  shouldMatchPrebuiltRules: enablePrebuiltRulesMatching,
+                })
+              }
+            >
+              {'Reprocess Rules'}
+            </EuiButton>
+          </EuiModalBody>
+        </EuiModal>
+      );
+    }
+  }
+);
