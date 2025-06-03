@@ -48,7 +48,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
               __scope_link: '.',
             },
             weight: 2,
-            normalizer: 'minmax',
+            normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
           },
         ],
       },
