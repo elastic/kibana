@@ -12,7 +12,7 @@ import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DataViewManagerScopeName } from '../../constants';
+import type { DataViewManagerScopeName } from '../../constants';
 
 export const createDataViewSelectedListener = (dependencies: {
   scope: DataViewManagerScopeName;
@@ -26,10 +26,6 @@ export const createDataViewSelectedListener = (dependencies: {
     ) => {
       if (dependencies.scope !== action.payload.scope) {
         return;
-      }
-
-      if (dependencies.scope === DataViewManagerScopeName.timeline) {
-        console.log('createDataViewSelectedListener', action);
       }
 
       // Cancel effects running for the current scope to prevent race conditions

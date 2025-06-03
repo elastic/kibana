@@ -65,6 +65,12 @@ export const createInitListener = (dependencies: {
 
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
+        // NOTE: save default data id for the given space in the store.
+        // this is used to identify the default selection in pickers across Kibana Space
+        listenerApi.dispatch(
+          sharedDataViewManagerSlice.actions.setDefaultDataViewId(defaultDataView.id)
+        );
+
         // Preload the default data view for all the scopes
         // Immediate calls that would dispatch this call from other places will cancel this action,
         // preventing race conditions
