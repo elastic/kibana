@@ -4218,7 +4218,7 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
-      x-state: Generally available; added in 8.19.0
+      x-state: Generally available
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -4324,7 +4324,7 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
-      x-state: Generally available; added in 8.19.0
+      x-state: Generally available
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
