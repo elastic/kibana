@@ -313,8 +313,19 @@ export const AwsCredentialsFormAgentless = ({
   const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
   const fields = getInputVarsFields(input, group.fields);
 
+  const selectorOptions = () => {
+    if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
+      return getAwsCredentialsFormAgentlessOptions();
+    }
+    if (showCloudConnectors) {
+      return getAwsCloudConnectorsFormAgentlessOptions();
+    }
+
+    return getAwsCredentialsFormAgentlessOptions();
+  };
+
   const disabledFields =
-    !!isEditPage &&
+    isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     showCloudConnectors;
 
@@ -347,11 +358,7 @@ export const AwsCredentialsFormAgentless = ({
           defaultMessage: 'Preferred method',
         })}
         type={awsCredentialsType}
-        options={
-          showCloudConnectors
-            ? getAwsCloudConnectorsFormAgentlessOptions()
-            : getAwsCredentialsFormAgentlessOptions()
-        }
+        options={selectorOptions()}
         disabled={disabledFields}
         onChange={(optionId) => {
           updatePolicy(
@@ -380,36 +387,37 @@ export const AwsCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {showCloudFormationAccordion && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="cloudFormationAccordianInstructions"
-            data-test-subj={AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ}
-            buttonContent={cloudFormationSettings[awsCredentialsType].accordianTitleLink}
-            paddingSize="l"
-          >
-            <CloudFormationCloudCredentialsGuide
-              isOrganization={isOrganization}
-              credentialType={awsCredentialsType as 'cloud_connectors' | 'direct_access_keys'}
-            />
-          </EuiAccordion>
-          <EuiSpacer size="l" />
-          <EuiButton
-            data-test-subj="launchCloudFormationAgentlessButton"
-            target="_blank"
-            iconSide="left"
-            iconType="launch"
-            href={cloudFormationSettings[awsCredentialsType].templateUrl}
-          >
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
-              defaultMessage="Launch CloudFormation"
-            />
-          </EuiButton>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      {showCloudFormationAccordion &&
+        awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id="cloudFormationAccordianInstructions"
+              data-test-subj={AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ}
+              buttonContent={cloudFormationSettings[awsCredentialsType].accordianTitleLink}
+              paddingSize="l"
+            >
+              <CloudFormationCloudCredentialsGuide
+                isOrganization={isOrganization}
+                credentialType={awsCredentialsType as 'cloud_connectors' | 'direct_access_keys'}
+              />
+            </EuiAccordion>
+            <EuiSpacer size="l" />
+            <EuiButton
+              data-test-subj="launchCloudFormationAgentlessButton"
+              target="_blank"
+              iconSide="left"
+              iconType="launch"
+              href={cloudFormationSettings[awsCredentialsType].templateUrl}
+            >
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+                defaultMessage="Launch CloudFormation"
+              />
+            </EuiButton>
+            <EuiSpacer size="m" />
+          </>
+        )}
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}

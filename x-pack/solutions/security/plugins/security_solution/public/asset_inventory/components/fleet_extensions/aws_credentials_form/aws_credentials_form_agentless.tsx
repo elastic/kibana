@@ -323,13 +323,24 @@ export const AwsCredentialsFormAgentless = ({
     ? semverCompare(packageInfo.version, ASSET_INVENTORY_CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
     : false;
 
-  const disabledFields =
-    !!isEditPage &&
+  const disabledForm =
+    isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     showCloudConnectors;
 
   const showCloudFormationAccordion =
-    isCloudFormationSupported && showCloudCredentialsButton && !disabledFields;
+    isCloudFormationSupported && showCloudCredentialsButton && !disabledForm;
+
+  const selectorOptions = () => {
+    if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
+      return getAwsCredentialsFormAgentlessOptions();
+    }
+    if (showCloudConnectors) {
+      return getAwsCloudConnectorsFormAgentlessOptions();
+    }
+
+    return getAwsCredentialsFormAgentlessOptions();
+  };
 
   return (
     <>
@@ -360,12 +371,8 @@ export const AwsCredentialsFormAgentless = ({
           }
         )}
         type={awsCredentialsType}
-        options={
-          showCloudConnectors
-            ? getAwsCloudConnectorsFormAgentlessOptions()
-            : getAwsCredentialsFormAgentlessOptions()
-        }
-        disabled={disabledFields}
+        options={selectorOptions()}
+        disabled={disabledForm}
         onChange={(optionId) => {
           updatePolicy(
             getAssetPolicy(
@@ -426,7 +433,7 @@ export const AwsCredentialsFormAgentless = ({
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}
-        disabled={disabledFields}
+        disabled={disabledForm}
         onChange={(key, value) => {
           updatePolicy(getAssetPolicy(newPolicy, input.type, { [key]: { value } }));
         }}
