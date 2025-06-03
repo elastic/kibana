@@ -81,6 +81,7 @@ const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export const getAnimationOptions = (theme: EuiTheme): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
+  // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.eui.euiAnimSlightBounce,
 });
 
@@ -100,6 +101,7 @@ const getStyle = (theme: EuiTheme): cytoscape.StylesheetJson => {
   return [
     {
       selector: 'core',
+      // @ts-expect-error DefinitelyTyped does not recognize 'active-bg-opacity'
       style: { 'active-bg-opacity': 0 },
     },
     {
@@ -158,6 +160,7 @@ const getStyle = (theme: EuiTheme): cytoscape.StylesheetJson => {
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // The DefinitelyTyped definitions don't specify this property since it's
         // fairly new.
+        // @ts-expect-error
         'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
