@@ -8,7 +8,8 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';

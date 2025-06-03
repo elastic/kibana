@@ -17,11 +17,10 @@ import {
   Settings,
   Tooltip,
   niceTimeFormatter,
-  LIGHT_THEME,
-  DARK_THEME,
   DomainRange,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AbortableAsyncState } from '@kbn/react-hooks';
@@ -75,7 +74,7 @@ export function ControlledEsqlChart<T extends string>({
   const {
     core: { uiSettings },
   } = useKibana();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const allTimeseries = useMemo(
     () =>
@@ -158,7 +157,7 @@ export function ControlledEsqlChart<T extends string>({
         legendPosition={Position.Bottom}
         xDomain={xDomain}
         locale={i18n.getLocale()}
-        baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME}
+        baseTheme={chartBaseTheme}
       />
       <Axis
         id="x-axis"

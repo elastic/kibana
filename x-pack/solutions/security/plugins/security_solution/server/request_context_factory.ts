@@ -140,6 +140,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return endpointAuthz;
       },
 
+      getEndpointService: () => endpointAppContextService,
+
       getConfig: () => config,
 
       getFrameworkRequest: () => frameworkRequest,
@@ -157,6 +159,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,
+
+      getProductFeatureService: () => productFeaturesService,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -289,6 +293,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
       }),
       getAssetInventoryClient: memoize(

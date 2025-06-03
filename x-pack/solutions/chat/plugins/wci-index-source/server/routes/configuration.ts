@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
 import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
-import type { GenerateConfigurationResponse } from '../../common/http_api/configuration';
+import type {
+  GenerateConfigurationResponse,
+  SearchIndicesResponse,
+} from '../../common/http_api/configuration';
 import type { RouteDependencies } from './types';
 
 export const registerConfigurationRoutes = ({ router, core, logger }: RouteDependencies) => {
@@ -57,6 +60,59 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
         });
       } catch (e) {
         logger.error(e);
+        throw e;
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/wci-index-source/indices-autocomplete',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
+      validate: {
+        query: schema.object({
+          index: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (ctx, request, res) => {
+      const { elasticsearch } = await ctx.core;
+      let pattern = request.query.index || '';
+
+      if (pattern.length >= 3) {
+        pattern = `${pattern}*`;
+      }
+
+      const esClient = elasticsearch.client.asCurrentUser;
+
+      try {
+        const response = await esClient.cat.indices({
+          index: [pattern],
+          h: 'index',
+          expand_wildcards: 'open',
+          format: 'json',
+        });
+
+        return res.ok<SearchIndicesResponse>({
+          body: {
+            indexNames: response
+              .map((indexRecord) => indexRecord.index)
+              .filter((index) => !!index) as string[],
+          },
+        });
+      } catch (e) {
+        // TODO: sigh, is there a better way?
+        if (e?.meta?.body?.error?.type === 'index_not_found_exception') {
+          return res.ok<SearchIndicesResponse>({
+            body: {
+              indexNames: [],
+            },
+          });
+        }
         throw e;
       }
     }

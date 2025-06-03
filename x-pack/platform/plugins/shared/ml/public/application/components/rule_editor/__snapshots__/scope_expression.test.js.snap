@@ -18,11 +18,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
     grow={false}
   >
     <EuiExpression
-      css={
-        Object {
-          "pointerEvents": "none",
-        }
-      }
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -55,11 +51,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     grow={false}
   >
     <EuiExpression
-      css={
-        Object {
-          "pointerEvents": "none",
-        }
-      }
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -200,11 +192,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     grow={false}
   >
     <EuiExpression
-      css={
-        Object {
-          "pointerEvents": "none",
-        }
-      }
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -345,11 +333,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     grow={false}
   >
     <EuiExpression
-      css={
-        Object {
-          "pointerEvents": "none",
-        }
-      }
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"

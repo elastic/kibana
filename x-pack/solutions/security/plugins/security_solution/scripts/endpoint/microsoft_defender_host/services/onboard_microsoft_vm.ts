@@ -9,6 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import pRetry, { AbortError } from 'p-retry';
 import { userInfo } from 'os';
+import { fetchActiveSpace } from '../../common/spaces';
 import {
   createMultipassHostVmClient,
   createVm,
@@ -37,7 +38,8 @@ export const onboardVmHostWithMicrosoftDefender = async ({
   forceNewHost,
   onboardingPackage,
 }: OnboardVmHostWithMicrosoftDefenderOptions): Promise<HostVm> => {
-  const vmName = _vmName || generateVmName('msdefender');
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+  const vmName = _vmName || generateVmName(`msdefender-${activeSpaceId}`);
   const hostVmNameAlreadyRunning = (
     await findVm(
       'multipass',

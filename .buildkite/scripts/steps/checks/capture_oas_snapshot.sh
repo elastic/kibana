@@ -19,7 +19,8 @@ cmd="node scripts/capture_oas_snapshot \
   --include-path /api/fleet \
   --include-path /api/dashboards \
   --include-path /api/saved_objects/_import \
-  --include-path /api/saved_objects/_export"
+  --include-path /api/saved_objects/_export \
+  --include-path /api/alerting/maintenance_window"
 if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --update"
 fi

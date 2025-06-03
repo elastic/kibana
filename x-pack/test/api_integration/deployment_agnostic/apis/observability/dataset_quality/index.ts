@@ -19,6 +19,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./degraded_field_analyze'));
     loadTestFile(require.resolve('./degraded_field_values'));
     loadTestFile(require.resolve('./degraded_fields'));
+    loadTestFile(require.resolve('./failed_docs_errors'));
+    loadTestFile(require.resolve('./failed_docs_stats'));
+    loadTestFile(require.resolve('./failed_docs'));
     loadTestFile(require.resolve('./integration_dashboards'));
     loadTestFile(require.resolve('./integrations'));
     loadTestFile(require.resolve('./update_field_limit'));

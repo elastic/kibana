@@ -2,17 +2,7 @@
 
 exports[`it renders with custom logo 1`] = `
 <_KibanaPageTemplate
-  css={
-    Object {
-      "map": undefined,
-      "name": "1si5isr",
-      "next": undefined,
-      "styles": "
-          background-color: transparent;
-        ",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -44,20 +34,7 @@ exports[`it renders with custom logo 1`] = `
         color="subdued"
       >
         <h1
-          css={
-            Object {
-              "map": undefined,
-              "name": "1tq4o89",
-              "next": undefined,
-              "styles": "
-                  &:focus {
-                    outline: none;
-                    text-decoration: underline;
-                  }
-                ",
-              "toString": [Function],
-            }
-          }
+          css="unknown styles"
           tabIndex={-1}
         >
           <MemoizedFormattedMessage
@@ -85,17 +62,7 @@ exports[`it renders with custom logo 1`] = `
 
 exports[`it renders without crashing 1`] = `
 <_KibanaPageTemplate
-  css={
-    Object {
-      "map": undefined,
-      "name": "1si5isr",
-      "next": undefined,
-      "styles": "
-          background-color: transparent;
-        ",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -126,20 +93,7 @@ exports[`it renders without crashing 1`] = `
         color="subdued"
       >
         <h1
-          css={
-            Object {
-              "map": undefined,
-              "name": "1tq4o89",
-              "next": undefined,
-              "styles": "
-                  &:focus {
-                    outline: none;
-                    text-decoration: underline;
-                  }
-                ",
-              "toString": [Function],
-            }
-          }
+          css="unknown styles"
           tabIndex={-1}
         >
           <MemoizedFormattedMessage

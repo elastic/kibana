@@ -107,6 +107,42 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleRecurringTask: {
+        timeout: '1m',
+        title: 'Sample Recurring Task',
+        description: 'A sample recurring task for testing the task_manager.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { params, state, schedule } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                params: JSON.stringify(params),
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {},
+              schedule,
+            };
+          },
+        }),
+      },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
         title: 'Failing Sample Task',
@@ -129,6 +165,36 @@ export class SampleTaskManagerFixturePlugin
         maxConcurrency: 1,
         timeout: '60s',
         description: 'A sample task that can only have one concurrent instance.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskSharedConcurrencyType1: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 1',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskSharedConcurrencyType2: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 2',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
         stateSchemaByVersion: {
           1: {
             up: (state: Record<string, unknown>) => ({ count: state.count }),

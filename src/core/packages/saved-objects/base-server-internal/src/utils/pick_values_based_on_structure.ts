@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPlainObject, get } from 'lodash';
+import { isPlainObject, get, has } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 export function getFlattenedKeys(obj: object): string[] {
@@ -62,6 +62,7 @@ export function pickValuesBasedOnStructure(structuralSource: object, target: obj
   const paths = getFlattenedKeys(structuralSource);
   const result: object = {};
   for (const path of paths) {
+    if (!has(target, path)) continue;
     const value = get(target, path);
     if (Array.isArray(value)) {
       set(result, path, []);

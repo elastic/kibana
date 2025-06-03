@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
@@ -13,7 +13,7 @@ import { ClassicStreamDetailManagement } from './classic';
 export function StreamDetailManagement() {
   const { definition, refresh } = useStreamDetail();
 
-  if (isWiredStreamGetResponse(definition)) {
+  if (Streams.WiredStream.GetResponse.is(definition)) {
     return <WiredStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
   }
 

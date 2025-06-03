@@ -42,14 +42,14 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
 
       if (options.useCookieHeader) {
         const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(
-          isBuiltIn ? user.role : 'customRole'
+          isBuiltIn ? user.role : samlAuth.CUSTOM_ROLE
         );
         return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
       }
 
       // HTTP requests will be called with API key in header by default
       const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(
-        isBuiltIn ? user.role : 'customRole'
+        isBuiltIn ? user.role : samlAuth.CUSTOM_ROLE
       );
       return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
     },

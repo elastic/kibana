@@ -11,10 +11,10 @@ import { ChatContextMenu } from './chat_context_menu';
 import { useConfirmModal } from '../hooks';
 
 jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn().mockReturnValue({
+  useConfirmModal: jest.fn(() => ({
     element: <div data-test-subj="confirmModal" />,
     confirm: jest.fn(() => Promise.resolve(true)),
-  }),
+  })),
 }));
 
 describe('ChatContextMenu', () => {

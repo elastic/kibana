@@ -26,10 +26,12 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
+  ESQLAstRenameExpression,
+  ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
 } from './src/types';
 
 export {
@@ -50,14 +52,11 @@ export {
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
-  getParser,
   createParser,
-  getLexer,
   parse,
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 

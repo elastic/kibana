@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
@@ -47,7 +46,7 @@ import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpo
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
 import type { IRequestContextFactory } from '../request_context_factory';
-import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
+import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
@@ -75,7 +74,7 @@ const getEndpointPolicyForAgentPolicy = async (
 
   if (!agentPolicyIntegrations) {
     const fullAgentPolicy = await fleetServices.agentPolicy.get(
-      fleetServices.savedObjects.createInternalScopedSoClient(),
+      fleetServices.savedObjects.createInternalUnscopedSoClient(),
       agentPolicy.id,
       true
     );
@@ -121,7 +120,6 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertingServerStart,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
   telemetryConfigProvider: TelemetryConfigProvider
@@ -146,7 +144,7 @@ export const getPackagePolicyCreateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking create of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     if (newPackagePolicy?.inputs) {
@@ -180,15 +178,13 @@ export const getPackagePolicyCreateCallback = (
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      // Install Detection Engine prepackaged rules
-      exceptionsClient &&
-        installPrepackagedRules({
-          logger,
-          context: securitySolutionContext,
-          request,
-          alerts,
-          exceptionsClient,
-        }),
+      installEndpointSecurityPrebuiltRule({
+        logger,
+        context: securitySolutionContext,
+        request,
+        alerts,
+        soClient,
+      }),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
@@ -252,7 +248,7 @@ export const getPackagePolicyUpdateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking update of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
@@ -347,7 +343,12 @@ export const getPackagePolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for endpoint integration policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return packagePolicy;
   };
@@ -370,7 +371,12 @@ export const getPackagePolicyPostCreateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
@@ -455,30 +461,41 @@ export const getAgentPolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [endpointPolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${endpointPolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return agentPolicy;
   };
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: SavedObjectsClientContract | undefined
+  endpointServices: EndpointAppContextService
 ): PostPackagePolicyPostDeleteCallback => {
+  const exceptionsClient = endpointServices.getExceptionListsClient();
+  const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
+
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
       return;
     }
+
     const policiesToRemove: Array<Promise<void>> = [];
+
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
-        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
-        if (savedObjectsClient) {
-          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
-        }
+        logger.debug(`Processing deleted endpoint policy [${policy.id}]`);
+
+        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy, logger));
+        policiesToRemove.push(removeProtectionUpdatesNote(endpointServices, policy));
       }
     }
 
     await Promise.all(policiesToRemove);
+
+    logger.debug(`Done processing deleted policies`);
   };
 };

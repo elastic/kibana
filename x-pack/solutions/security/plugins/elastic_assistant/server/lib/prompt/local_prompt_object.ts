@@ -20,11 +20,12 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
   GEMINI_USER_PROMPT,
-  STRUCTURED_SYSTEM_PROMPT,
   BEDROCK_CHAT_TITLE,
   GEMINI_CHAT_TITLE,
   DEFAULT_CHAT_TITLE,
   DEFEND_INSIGHTS,
+  ALERT_SUMMARY_500,
+  ALERT_SUMMARY_SYSTEM_PROMPT,
 } from './prompts';
 
 export const promptGroupId = {
@@ -33,9 +34,12 @@ export const promptGroupId = {
   defendInsights: {
     incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
   },
+  aiForSoc: 'aiForSoc',
 };
 
 export const promptDictionary = {
+  alertSummary: `alertSummary`,
+  alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -89,15 +93,6 @@ export const localPrompts: Prompt[] = [
     provider: 'gemini',
     prompt: {
       default: GEMINI_SYSTEM_PROMPT,
-    },
-  },
-  {
-    promptId: promptDictionary.systemPrompt,
-    promptGroupId: promptGroupId.aiAssistant,
-    provider: 'openai',
-    model: 'oss',
-    prompt: {
-      default: STRUCTURED_SYSTEM_PROMPT,
     },
   },
   {
@@ -248,6 +243,20 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
     prompt: {
       default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummary,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
     },
   },
 ];

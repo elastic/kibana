@@ -11,6 +11,7 @@ import {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import {
   createCrowdstrikeAgentDetailsMock,
   createCrowdstrikeGetAgentOnlineStatusDetailsMock,
@@ -19,6 +20,8 @@ import {
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClient } from '../../..';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
@@ -61,12 +64,38 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 };
 
 const createConstructorOptionsMock = (): CrowdstrikeActionsClientOptionsMock => {
-  return {
+  const options = {
     ...responseActionsClientMock.createConstructorOptions(),
     connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
       createConnectorActionsClientMock()
     ),
   };
+
+  const crowdstrikeIndexDoc = BaseDataGenerator.toEsSearchHit({
+    device: { id: '1-2-3' },
+  });
+  crowdstrikeIndexDoc.inner_hits = {
+    most_recent: {
+      hits: {
+        hits: [
+          {
+            _index: '',
+            _source: {
+              agent: { id: 'fleet-agent-id-123' },
+              device: { id: '1-2-3' },
+            },
+          },
+        ],
+      },
+    },
+  };
+  applyEsClientSearchMock({
+    esClientMock: options.esClient,
+    index: CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION.crowdstrike[0],
+    response: BaseDataGenerator.toEsSearchResponse([crowdstrikeIndexDoc]),
+  });
+
+  return options;
 };
 
 interface CrowdstrikeEventSearchResponseMock {

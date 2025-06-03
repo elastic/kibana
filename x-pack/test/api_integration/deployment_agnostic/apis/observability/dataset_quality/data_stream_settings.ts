@@ -37,7 +37,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const syntheticsDataStreamName = `${type}-${syntheticsDataset}-${namespace}`;
 
   const defaultDataStreamPrivileges = {
-    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
+    datasetUserPrivileges: {
+      canRead: true,
+      canMonitor: true,
+      canViewIntegrations: true,
+      canReadFailureStore: true,
+    },
   };
 
   async function callApiAs({

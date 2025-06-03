@@ -414,6 +414,14 @@ Object {
             },
           },
         },
+        "groupings": Object {
+          "top_hits": Object {
+            "_source": Array [
+              "slo.groupings",
+            ],
+            "size": 1,
+          },
+        },
       },
       "composite": Object {
         "size": 1000,
@@ -879,6 +887,14 @@ Object {
             },
           },
         },
+        "groupings": Object {
+          "top_hits": Object {
+            "_source": Array [
+              "slo.groupings",
+            ],
+            "size": 1,
+          },
+        },
       },
       "composite": Object {
         "size": 1000,
@@ -1334,6 +1350,14 @@ Object {
             "script": Object {
               "source": "(params.WINDOW_0_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_0_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_1_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_1_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_2_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_2_LONG_ABOVE_THRESHOLD == 1) || (params.WINDOW_3_SHORT_ABOVE_THRESHOLD == 1 && params.WINDOW_3_LONG_ABOVE_THRESHOLD == 1)",
             },
+          },
+        },
+        "groupings": Object {
+          "top_hits": Object {
+            "_source": Array [
+              "slo.groupings",
+            ],
+            "size": 1,
           },
         },
       },

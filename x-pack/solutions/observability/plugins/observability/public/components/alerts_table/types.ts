@@ -7,11 +7,12 @@
 
 import { SetOptional } from 'type-fest';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
-import type { ConfigSchema, ObservabilityRuleTypeRegistry } from '../..';
+import type { ConfigSchema, ObservabilityRuleTypeRegistry, TopAlert } from '../..';
 
 export interface ObservabilityAlertsTableContext {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   config: ConfigSchema;
+  parentAlert?: TopAlert;
 }
 
 export type ObservabilityAlertsTableProps = SetOptional<

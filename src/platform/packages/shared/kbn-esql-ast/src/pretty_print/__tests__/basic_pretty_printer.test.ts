@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
@@ -180,6 +180,38 @@ describe('single line query', () => {
       });
     });
 
+    describe('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
     describe('FORK', () => {
       test('from single line', () => {
         const { text } =
@@ -200,6 +232,48 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
+
+    describe('SAMPLE', () => {
+      test('from single line', () => {
+        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| SAMPLE 0.1 123
+          `);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+    });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
         );
       });
     });
@@ -451,6 +525,32 @@ describe('single line query', () => {
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
         });
+      });
+    });
+
+    describe('map expressions', () => {
+      test('empty map', () => {
+        const src = 'ROW fn(1, {"foo": "bar"})';
+        const { root } = parse(src);
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
+
+        node.entries = [];
+
+        const text = BasicPrettyPrinter.print(root);
+
+        expect(text).toBe('ROW FN(1, {})');
+      });
+
+      test('one entry in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"booyaka": [1, 2, 42]})');
+
+        expect(text).toBe('ROW FN(1, {"booyaka": [1, 2, 42]})');
+      });
+
+      test('two entries in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
     });
 

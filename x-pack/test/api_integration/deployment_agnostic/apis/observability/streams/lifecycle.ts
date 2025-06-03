@@ -10,9 +10,7 @@ import expect from '@kbn/expect';
 import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
-  IngestStreamUpsertRequest,
-  WiredStreamGetResponse,
-  asIngestStreamGetResponse,
+  Streams,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
@@ -42,7 +40,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   ) {
     const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
     for (const definition of definitions) {
-      expect(asIngestStreamGetResponse(definition).effective_lifecycle).to.eql(expectedLifecycle);
+      expect(Streams.ingest.all.GetResponse.parse(definition).effective_lifecycle).to.eql(
+        expectedLifecycle
+      );
     }
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
@@ -88,8 +88,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    const wiredPutBody: IngestStreamUpsertRequest = {
+    const wiredPutBody: Streams.WiredStream.UpsertRequest = {
       stream: {
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -108,8 +109,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
-              ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '999d' } },
             },
           },
@@ -117,10 +119,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
 
         const updatedRootDefinition = await getStream(apiClient, 'logs');
-        expect((updatedRootDefinition as WiredStreamGetResponse).stream.ingest.lifecycle).to.eql({
+        expect(
+          (updatedRootDefinition as Streams.WiredStream.GetResponse).stream.ingest.lifecycle
+        ).to.eql({
           dsl: { data_retention: '999d' },
         });
-        expect((updatedRootDefinition as WiredStreamGetResponse).effective_lifecycle).to.eql({
+        expect(
+          (updatedRootDefinition as Streams.WiredStream.GetResponse).effective_lifecycle
+        ).to.eql({
           dsl: { data_retention: '999d' },
           from: 'logs',
         });
@@ -136,8 +142,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
-                ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
+                ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
                 lifecycle: { inherit: {} },
               },
             },
@@ -157,8 +164,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
-              ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '10m' } },
             },
           },
@@ -167,6 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -194,6 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '10d' } },
@@ -204,6 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '20d' } },
@@ -217,6 +228,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -238,6 +250,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
@@ -249,6 +262,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: {} },
@@ -271,6 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               dashboards: [],
               queries: [],
               stream: {
+                description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
@@ -287,6 +302,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -310,6 +326,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -324,6 +341,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -344,6 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -362,6 +381,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -379,8 +399,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Unwired streams update', () => {
-      const unwiredPutBody: IngestStreamUpsertRequest = {
+      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
         stream: {
+          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
@@ -443,6 +464,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...unwiredPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '11d' } },
@@ -469,6 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 dashboards: [],
                 queries: [],
                 stream: {
+                  description: '',
                   ingest: {
                     ...unwiredPutBody.stream.ingest,
                     lifecycle: { dsl: { data_retention: '1d' } },
@@ -491,6 +514,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -511,6 +535,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -542,6 +567,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {

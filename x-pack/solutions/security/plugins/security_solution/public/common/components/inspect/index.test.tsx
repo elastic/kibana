@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { TestProviders, mockGlobalState, createMockStore } from '../../mock';
 import type { State } from '../../store';
@@ -41,19 +41,18 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(newQuery);
       store = createMockStore(myState);
     });
+
     test('Eui Empty Button', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} inputId={InputsModelId.timeline} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('inspect-empty-button')).toBeInTheDocument();
     });
 
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton
             compact={true}
@@ -63,13 +62,11 @@ describe('Inspect Button', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
-        false
-      );
+      expect(screen.queryByTestId('inspect-empty-button')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the Empty Button when showInspectButton is false', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton
             queryId={newQuery.id}
@@ -79,24 +76,20 @@ describe('Inspect Button', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
-        false
-      );
+      expect(screen.queryByTestId('inspect-empty-button')).not.toBeInTheDocument();
     });
 
     test('Eui Icon Button', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('inspect-icon-button')).toBeInTheDocument();
     });
 
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton
             compact={true}
@@ -106,38 +99,34 @@ describe('Inspect Button', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('inspect-icon-button')).toBeInTheDocument();
     });
 
     test('it does NOT render the Icon Button when showInspectButton is false', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} showInspectButton={false} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
-        false
-      );
+      expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
     });
 
     test('Eui Empty Button disabled', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
     });
 
     test('Eui Icon Button disabled', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
     });
 
     test('Button disabled when inspect == null', () => {
@@ -146,12 +135,13 @@ describe('Inspect Button', () => {
       myQuery.inspect = null;
       myState.inputs = upsertQuery(myQuery);
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      const { container } = render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
     });
 
     test('Button disabled when inspect.dsl.length == 0', () => {
@@ -163,12 +153,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      const { container } = render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
     });
 
     test('Button disabled when inspect.response.length == 0', () => {
@@ -180,12 +171,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      const { container } = render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
     });
   });
 
@@ -200,36 +192,38 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(myQuery);
       store = createMockStore(myState);
     });
-    test('Open Inspect Modal', () => {
-      const wrapper = mount(
+
+    test('Open Inspect Modal', async () => {
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('inspect-icon-button'));
 
-      expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
-      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toBe(true);
+      await waitFor(() => {
+        expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
+        expect(screen.getByTestId('mocker-modal')).toBeInTheDocument();
+      });
     });
 
-    test('Do not Open Inspect Modal if it is loading', () => {
-      const wrapper = mount(
+    test('Do not Open Inspect Modal if it is loading', async () => {
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
+
       expect(store.getState().inputs.global.queries[0].isInspected).toBe(false);
       store.getState().inputs.global.queries[0].loading = true;
-      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('inspect-icon-button'));
 
-      expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
-      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
-        false
-      );
+      await waitFor(() => {
+        expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
+        expect(screen.queryByTestId('modal-inspect-close')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -244,13 +238,14 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(true);
+      expect(screen.getByTestId('mocker-modal')).toBeInTheDocument();
     });
 
     test('hides when request/response are complete and isInspected=false', () => {
@@ -263,13 +258,14 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = false;
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
+      expect(screen.queryByTestId('mocker-modal')).not.toBeInTheDocument();
     });
 
     test('hides when request is empty and isInspected=true', () => {
@@ -282,13 +278,14 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
+      expect(screen.queryByTestId('mocker-modal')).not.toBeInTheDocument();
     });
 
     test('hides when response is empty and isInspected=true', () => {
@@ -301,13 +298,14 @@ describe('Inspect Button', () => {
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
       store = createMockStore(myState);
-      const wrapper = mount(
+
+      render(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
+      expect(screen.queryByTestId('mocker-modal')).not.toBeInTheDocument();
     });
   });
 });

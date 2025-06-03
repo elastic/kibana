@@ -29,7 +29,7 @@ import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
-
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
   open: () => {
@@ -73,6 +73,15 @@ export const createObservabilityRuleTypeRegistryMock = () =>
   createRuleTypeRegistryMock() as ObservabilityRuleTypeRegistry &
     ReturnType<typeof createRuleTypeRegistryMock>;
 
+jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+  appMountParameters: {} as AppMountParameters,
+  core: {} as CoreStart,
+  config,
+  plugins: {} as ObservabilityPublicPluginsStart,
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  ObservabilityPageTemplate: KibanaPageTemplate,
+  ObservabilityAIAssistantContextualInsight,
+}));
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
   core: {} as CoreStart,
@@ -145,15 +154,17 @@ describe('ObservabilityActions component', () => {
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <AlertsTableContextProvider value={context}>
-          <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-            <AlertActions
-              {...(props as unknown as ComponentProps<
-                GetObservabilityAlertsTableProp<'renderActionsCell'>
-              >)}
-            />
-          </QueryClientProvider>
-        </AlertsTableContextProvider>
+        <KibanaContextProvider services={mockKibana.services}>
+          <AlertsTableContextProvider value={context}>
+            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+              <AlertActions
+                {...(props as unknown as ComponentProps<
+                  GetObservabilityAlertsTableProp<'renderActionsCell'>
+                >)}
+              />
+            </QueryClientProvider>
+          </AlertsTableContextProvider>
+        </KibanaContextProvider>
       </Router>
     );
     await act(async () => {

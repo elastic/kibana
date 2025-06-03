@@ -316,7 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; headers?: string | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, record: ",
               {
@@ -326,9 +326,9 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; height?: string | number | undefined; align?: ",
+              ") => React.ReactNode) | undefined; align?: ",
               "HorizontalAlignment",
-              " | undefined; readOnly?: boolean | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; nameTooltip?: ",
+              " | undefined; height?: string | number | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",

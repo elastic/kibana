@@ -23,7 +23,7 @@ import {
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
@@ -46,11 +46,13 @@ import {
   useStreamsEnrichmentSelector,
   useSimulatorSelector,
   StreamEnrichmentContextType,
+  useGetStreamEnrichmentState,
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
+import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -63,26 +65,46 @@ export function AddProcessorPanel() {
   const processorMetrics = useSimulatorSelector(
     (state) => processorRef && state.context.simulation?.processors_metrics[processorRef.id]
   );
+  const getEnrichmentState = useGetStreamEnrichmentState();
+
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
 
   const isOpen = Boolean(processorRef);
+  const defaultValuesGetter = useCallback(
+    () =>
+      getDefaultFormStateByType(
+        'grok',
+        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection }
+      ),
+    [getEnrichmentState, grokCollection]
+  );
+  const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
 
-  const defaultValues = useMemo(() => getDefaultFormStateByType('grok'), []);
-
-  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
+  const methods = useForm<ProcessorFormState>({
+    defaultValues: initialDefaultValues,
+    mode: 'onChange',
+  });
 
   const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
     if (!processorRef) {
-      methods.reset(defaultValues);
+      methods.reset(defaultValuesGetter());
     }
-  }, [defaultValues, methods, processorRef]);
+  }, [defaultValuesGetter, methods, processorRef]);
 
   useEffect(() => {
     if (processorRef) {
       const { unsubscribe } = methods.watch((value) => {
-        const processor = convertFormStateToProcessor(value as ProcessorFormState);
-        processorRef.send({ type: 'processor.change', processor });
+        const { processorDefinition, processorResources } = convertFormStateToProcessor(
+          value as ProcessorFormState
+        );
+        processorRef.send({
+          type: 'processor.change',
+          processor: processorDefinition,
+          resources: processorResources,
+        });
       });
 
       return () => unsubscribe();
@@ -99,6 +121,8 @@ export function AddProcessorPanel() {
   };
 
   const handleOpen = () => {
+    const defaultValues = defaultValuesGetter();
+    methods.reset(defaultValues);
     const draftProcessor = createDraftProcessorFromForm(defaultValues);
     addProcessor(draftProcessor);
   };
@@ -190,12 +214,12 @@ export function AddProcessorPanel() {
 const createDraftProcessorFromForm = (
   formState: ProcessorFormState
 ): ProcessorDefinitionWithUIAttributes => {
-  const processingDefinition = convertFormStateToProcessor(formState);
+  const { processorDefinition } = convertFormStateToProcessor(formState);
 
   return {
     id: 'draft',
     type: formState.type,
-    ...processingDefinition,
+    ...processorDefinition,
   };
 };
 
@@ -207,6 +231,8 @@ export interface EditProcessorPanelProps {
 export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
+  const getEnrichmentState = useGetStreamEnrichmentState();
+  const grokCollection = useStreamsEnrichmentSelector((_state) => _state.context.grokCollection);
   const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
@@ -217,7 +243,15 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   const isNew = state.context.isNew;
   const isUnsaved = isNew || state.context.isUpdated;
 
-  const defaultValues = useMemo(() => getFormStateFrom(processor), [processor]);
+  const defaultValues = useMemo(
+    () =>
+      getFormStateFrom(
+        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection },
+        processor
+      ),
+    [getEnrichmentState, grokCollection, processor]
+  );
 
   const methods = useForm<ProcessorFormState>({
     defaultValues,
@@ -228,10 +262,13 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
+      const { processorDefinition, processorResources } = convertFormStateToProcessor(
+        value as ProcessorFormState
+      );
       processorRef.send({
         type: 'processor.change',
-        processor: processingDefinition,
+        processor: processorDefinition,
+        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -239,11 +276,17 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const subscription = processorRef.on('processor.changesDiscarded', () => {
-      methods.reset(getFormStateFrom(previousProcessor));
+      methods.reset(
+        getFormStateFrom(
+          selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+          { grokCollection },
+          previousProcessor
+        )
+      );
     });
 
     return () => subscription.unsubscribe();
-  }, [methods, previousProcessor, processorRef]);
+  }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
 
   const handleCancel = useDiscardConfirm(
     () => processorRef?.send({ type: 'processor.cancel' }),

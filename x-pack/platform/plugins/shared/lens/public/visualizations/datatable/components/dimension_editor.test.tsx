@@ -10,6 +10,7 @@ import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { act, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor, DataType } from '../../../types';
@@ -20,6 +21,8 @@ import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
+
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -94,6 +97,7 @@ describe('data table dimension editor', () => {
       addLayer: jest.fn(),
       removeLayer: jest.fn(),
       datasource: {} as DatasourcePublicAPI,
+      formatFactory: fieldFormatsMock.deserialize,
     };
 
     mockOperationForFirstColumn = (overrides: Partial<OperationDescriptor> = {}) => {

@@ -15,6 +15,9 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
 import { configDrivenProcessors } from './config_driven';
+import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
+import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { useStreamsEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
@@ -29,6 +32,7 @@ export const ProcessorTypeSelector = ({
 }: Pick<EuiSuperSelectProps, 'disabled'>) => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
+  const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
   const { field, fieldState } = useController<ProcessorFormState, 'type'>({
@@ -38,8 +42,14 @@ export const ProcessorTypeSelector = ({
 
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+
   const handleChange = (type: ProcessorType) => {
-    const formState = getDefaultFormStateByType(type);
+    const formState = getDefaultFormStateByType(
+      type,
+      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      { grokCollection }
+    );
     reset(formState);
   };
 

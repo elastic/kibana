@@ -8,7 +8,7 @@
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
-const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
+const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow';
 
 export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');

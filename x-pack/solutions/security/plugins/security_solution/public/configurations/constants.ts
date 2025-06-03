@@ -10,3 +10,8 @@ export enum ConfigurationTabs {
   basicRules = 'basic_rules',
   aiSettings = 'ai_settings',
 }
+
+export enum IntegrationsFacets {
+  available = 'browse',
+  installed = 'installed',
+}

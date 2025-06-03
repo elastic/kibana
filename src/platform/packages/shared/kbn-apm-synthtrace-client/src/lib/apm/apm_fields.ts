@@ -90,7 +90,6 @@ export type ApmFields = Fields<{
 }> &
   Partial<{
     'timestamp.us'?: number;
-
     'agent.name': string;
     'agent.version': string;
     'client.geo.city_name': string;

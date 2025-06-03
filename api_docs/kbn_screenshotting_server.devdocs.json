@@ -29,7 +29,7 @@
             "label": "packages",
             "description": [],
             "signature": [
-              "(CustomPackageInfo | CommonPackageInfo)[]"
+              "(CustomPackageInfo | ChromeForTestingPackageInfo)[]"
             ],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
             "deprecated": false,
@@ -563,19 +563,8 @@
             "label": "location",
             "description": [],
             "signature": [
-              "\"custom\" | \"common\""
+              "\"custom\" | \"chromeForTesting\""
             ],
-            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/screenshotting-server",
-            "id": "def-server.PackageInfo.revision",
-            "type": "number",
-            "tags": [],
-            "label": "revision",
-            "description": [],
             "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -19,16 +19,19 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../../services';
+import { outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
-import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../../services/setup/fleet_synced_integrations';
+import {
+  FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+  canEnableSyncIntegrations,
+} from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.4';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -123,9 +126,7 @@ export class SyncIntegrationsTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
-    const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-
-    if (!enableSyncIntegrationsOnRemote) {
+    if (!canEnableSyncIntegrations()) {
       return;
     }
 
@@ -225,6 +226,7 @@ export class SyncIntegrationsTask {
           name: remoteOutput.name,
           hosts: remoteOutput.hosts ?? [],
           sync_integrations: remoteOutput.sync_integrations ?? false,
+          sync_uninstalled_integrations: remoteOutput.sync_uninstalled_integrations ?? false,
         };
       }),
       integrations: [],
@@ -262,6 +264,7 @@ export class SyncIntegrationsTask {
     try {
       const customAssets = await getCustomAssets(
         esClient,
+        soClient,
         newDoc.integrations,
         this.abortController,
         previousSyncIntegrationsData

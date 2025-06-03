@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { lightenColor } from '@kbn/charts-plugin/public';
+import { SerializedValue } from '@kbn/data-plugin/common';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries } from '../get_distinct_series';
 
@@ -123,7 +124,7 @@ const createSeriesLayers = (
   arrayNode: SimplifiedArrayNode,
   parentSeries: DistinctSeries['parentSeries'],
   isSplitChart: boolean,
-  colorIndexMap: Map<string, number>
+  colorIndexMap: Map<SerializedValue, number>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
@@ -193,7 +194,7 @@ export const getColor = (
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
   column: Partial<BucketColumns>,
-  colorIndexMap: Map<string, number>
+  colorIndexMap: Map<SerializedValue, number>
 ) => {
   // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
   // therefore change it for dark mode

@@ -16,14 +16,15 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from '@xstate5/react';
 import { isEmpty, isEqual } from 'lodash';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
+import { Sample } from '@kbn/grok-ui';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -31,6 +32,8 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
+import { isGrokProcessor } from './utils';
+import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -75,23 +78,6 @@ const OutcomeControls = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
-
-  const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
-  const timeRange = useSelector(dateRangeRef, (state) => state.context.timeRange);
-  const handleRefresh = () => dateRangeRef.send({ type: 'dateRange.refresh' });
-
-  const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
-    { dateRange },
-    isUpdate
-  ) => {
-    if (!isUpdate) {
-      return handleRefresh();
-    }
-
-    if (dateRange) {
-      dateRangeRef.send({ type: 'dateRange.update', range: dateRange });
-    }
-  };
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     hasActiveFilters: previewDocsFilter === filter,
@@ -144,12 +130,7 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-      <StreamsAppSearchBar
-        onQuerySubmit={handleQuerySubmit}
-        onRefresh={handleRefresh}
-        dateRangeFrom={timeRange?.from}
-        dateRangeTo={timeRange?.to}
-      />
+      <StreamsAppSearchBar showDatePicker />
     </EuiFlexGroup>
   );
 };
@@ -168,6 +149,14 @@ const OutcomePreviewTable = () => {
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
+  );
+
+  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+    selectDraftProcessor(snapshot.context)
+  );
+
+  const grokCollection = useStreamsEnrichmentSelector(
+    (machineState) => machineState.context.grokCollection
   );
 
   const previewColumns = useMemo(
@@ -203,5 +192,37 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
+  return draftProcessor?.processor &&
+    isGrokProcessor(draftProcessor.processor) &&
+    !isEmpty(draftProcessor.processor.grok.field) &&
+    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
+      const fieldName = draftProcessor.processor?.grok.field;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    }) ? (
+    <PreviewTable
+      documents={previewDocuments}
+      displayColumns={[draftProcessor.processor.grok.field]}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      renderCellValue={(document, columnId) => {
+        const value = document[columnId];
+        if (typeof value === 'string') {
+          return (
+            <Sample
+              grokCollection={grokCollection}
+              draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+              sample={value}
+            />
+          );
+        } else {
+          return undefined;
+        }
+      }}
+    />
+  ) : (
+    <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />
+  );
 };

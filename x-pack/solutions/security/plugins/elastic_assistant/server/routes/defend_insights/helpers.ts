@@ -13,6 +13,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   ApiConfig,
@@ -25,9 +26,8 @@ import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
-  DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import moment, { Moment } from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -35,10 +35,10 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
-import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
-import type { GetRegisteredTools } from '../../services/app_context';
+import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
+import { CallbackIds, GetRegisteredTools, appContextService } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
@@ -363,18 +363,14 @@ export async function updateDefendInsights({
 }
 
 export async function updateDefendInsightsLastViewedAt({
-  params,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  params: DefendInsightsGetRequestQuery;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse[]> {
-  const defendInsights = await dataClient.findDefendInsightsByParams({
-    params,
-    authenticatedUser,
-  });
   if (!defendInsights.length) {
     return [];
   }
@@ -394,16 +390,20 @@ export async function updateDefendInsightsLastViewedAt({
 }
 
 export async function updateDefendInsightLastViewedAt({
-  id,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  id: string;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse | undefined> {
   return (
-    await updateDefendInsightsLastViewedAt({ params: { ids: [id] }, authenticatedUser, dataClient })
+    await updateDefendInsightsLastViewedAt({
+      defendInsights,
+      authenticatedUser,
+      dataClient,
+    })
   )[0];
 }
 
@@ -503,17 +503,17 @@ export const invokeDefendInsightsGraph = async ({
 
   logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
 
-  const result: GraphState = (await graph.invoke(
+  const result: DefendInsightsGraphState = (await graph.invoke(
     {},
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  )) as GraphState;
+  )) as DefendInsightsGraphState;
   const {
     insights,
-    anonymizedEvents,
+    anonymizedDocuments: anonymizedEvents,
     errors,
     generationAttempts,
     hallucinationFailures,
@@ -590,6 +590,14 @@ export const handleGraphError = async ({
       provider: apiConfig.provider,
     });
   }
+};
+
+export const runExternalCallbacks = async (
+  callback: CallbackIds,
+  ...args: [KibanaRequest] | [KibanaRequest, unknown]
+) => {
+  const callbacks = appContextService.getRegisteredCallbacks(callback);
+  await Promise.all(callbacks.map((cb) => Promise.resolve(cb(...args))));
 };
 
 export const throwIfErrorCountsExceeded = ({
