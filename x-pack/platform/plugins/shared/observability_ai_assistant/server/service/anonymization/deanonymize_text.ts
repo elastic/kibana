@@ -27,16 +27,15 @@ export function deanonymizeText(
   let unhashedText = '';
   let cursor = 0;
 
-  let match: RegExpExecArray | null;
-  while ((match = HASH_REGEX.exec(contentWithHashes)) !== null) {
-    const [hash] = match;
+  for (const match of contentWithHashes.matchAll(HASH_REGEX)) {
+    const hash = match[0];
     const rep = hashMap.get(hash);
     if (!rep) {
       continue; // keep unknown hash as‑is
     }
 
     // copy segment before the hash
-    unhashedText += contentWithHashes.slice(cursor, match.index);
+    unhashedText += contentWithHashes.slice(cursor, match.index!);
 
     // insert real value & capture span
     const start = unhashedText.length;
@@ -52,7 +51,7 @@ export function deanonymizeText(
       hash,
     });
 
-    cursor = match.index + hash.length;
+    cursor = match.index! + hash.length;
   }
 
   unhashedText += contentWithHashes.slice(cursor);
