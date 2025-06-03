@@ -93,6 +93,7 @@ export async function loadDashboardFile(filename: string) {
         './otel_native-edot-nodejs.json'
       );
     }
+    case 'otel_native-otel_other-go':
     case 'classic_apm-otel_other-go': {
       return import(
         /* webpackChunkName: "lazyGoOtelNativeDashboard" */
