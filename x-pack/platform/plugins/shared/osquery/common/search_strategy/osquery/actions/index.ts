@@ -47,8 +47,8 @@ export interface ActionDetails {
 }
 
 export interface ActionsRequestOptions extends RequestOptionsPaginated {
-  policyIds?: string[];
-  spaceId?: string;
+  policyIds: string[];
+  spaceId: string;
 }
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
@@ -58,8 +58,8 @@ export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
 
 export interface ActionDetailsRequestOptions extends RequestOptions {
   actionId: string;
-  policyIds?: string[];
-  spaceId?: string;
+  policyIds: string[];
+  spaceId: string;
 }
 
 export interface ActionResultsStrategyResponse

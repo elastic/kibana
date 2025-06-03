@@ -31,7 +31,7 @@ export const buildActionDetailsQuery = ({
 
   let extendedFilter = baseFilter;
 
-  if (Array.isArray(policyIds) && policyIds.length > 0) {
+  if (policyIds.length > 0) {
     if (spaceId === 'default') {
       extendedFilter = [
         {

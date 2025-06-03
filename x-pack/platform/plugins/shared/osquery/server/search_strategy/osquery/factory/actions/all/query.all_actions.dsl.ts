@@ -29,7 +29,7 @@ export const buildActionsQuery = ({
 
   let extendedFilter = filter;
 
-  if (Array.isArray(policyIds) && policyIds.length > 0) {
+  if (policyIds.length > 0) {
     if (spaceId === 'default') {
       // For default space, include docs with matching policyIds OR where policy_ids does not exist
       extendedFilter = [

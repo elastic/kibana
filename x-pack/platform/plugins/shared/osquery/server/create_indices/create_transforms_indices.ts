@@ -58,8 +58,6 @@ export const createIndexIfNotExists = async (
       index: indexPattern,
     });
 
-    subLogger.debug(`Index ${indexTemplateName} exists: ${isLatestIndexExists}`);
-
     if (!isLatestIndexExists) {
       subLogger.debug(`Index ${indexTemplateName} does not exist, creating...`);
 

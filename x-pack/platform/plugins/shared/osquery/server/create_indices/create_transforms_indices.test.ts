@@ -70,6 +70,7 @@ const logger: Logger = {
   debug: jest.fn(),
   info: jest.fn(),
   error: jest.fn(),
+  get: jest.fn(() => logger),
 } as Partial<Logger> as Logger;
 
 let mockEsClient: ReturnType<typeof createMockEsClient>;
@@ -87,7 +88,7 @@ function makeEsIndexMappings(
         },
       },
       pack_id: { ignore_above: 1024, type: 'keyword' },
-      policy_id: { type: 'keyword' },
+      policy_ids: { type: 'keyword' },
       input_type: { ignore_above: 1024, type: 'keyword' },
       pack_prebuilt: { type: 'boolean' },
       type: { ignore_above: 1024, type: 'keyword' },
@@ -210,7 +211,7 @@ describe('createTransformIndices', () => {
 
       it('returns false if a required field is missing in ES mapping', () => {
         const esIndexMappings = makeEsIndexMappings();
-        delete esIndexMappings.properties.policy_id;
+        delete esIndexMappings.properties.policy_ids;
         expect(
           isSubsetMapping(
             actionsMapping as Record<string, unknown>,
@@ -310,8 +311,7 @@ describe('createTransformIndices', () => {
         index: '.logs-test-index-default',
         mappings: actionsMapping,
       });
-      expect(logger.info).toHaveBeenCalledWith('Index test-index: false');
-      expect(logger.info).toHaveBeenCalledWith('Index test-index does not exist, creating...');
+      expect(logger.debug).toHaveBeenCalledWith('Index test-index does not exist, creating...');
     });
 
     it('should update index template if mappings are outdated', async () => {
@@ -357,10 +357,10 @@ describe('createTransformIndices', () => {
         index: '.logs-test-index-default',
         body: { properties: actionsMapping.properties },
       });
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Index test-index already exists, checking template...'
       );
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Mappings for "test-index" are outdated. Updating mappings...'
       );
     });
