@@ -271,16 +271,17 @@ export interface EnrichedDeprecationInfo
     'level' | 'resolve_during_rolling_upgrade'
   > {
   type:
-    | keyof estypes.MigrationDeprecationsResponse
-    | 'data_streams'
-    | 'health_indicator'
-    | 'ilm_policies'
-    | 'templates';
+  | keyof estypes.MigrationDeprecationsResponse
+  | 'data_streams'
+  | 'health_indicator'
+  | 'ilm_policies'
+  | 'templates';
   level: MIGRATION_DEPRECATION_LEVEL;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
+  actions?: CorrectiveAction;
 }
 
 export interface CloudBackupStatus {

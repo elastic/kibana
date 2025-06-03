@@ -69,36 +69,62 @@ const i18nTexts = {
   ),
 };
 
-const cellToLabelMap = {
+const cellToLabelMap: Record<
+  DeprecationTableColumns,
+  {
+    label: string;
+    width: string;
+    sortable: boolean;
+    align: 'left' | 'right';
+  }
+> = {
   level: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
     width: '8px',
+    sortable: true,
+    align: 'left',
   },
   message: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
       defaultMessage: 'Issue',
     }),
-    width: '36px',
+    width: '30px',
+    sortable: true,
+    align: 'left',
   },
   type: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeColumnTitle', {
       defaultMessage: 'Type',
     }),
     width: '10px',
+    sortable: true,
+    align: 'left',
   },
   index: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
     width: '24px',
+    sortable: true,
+    align: 'left',
   },
   correctiveAction: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.resolutionColumnTitle', {
       defaultMessage: 'Resolution',
     }),
     width: '24px',
+    sortable: true,
+    align: 'left',
+  },
+  actions: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.actionsColumnTitle', {
+      defaultMessage: 'Actions',
+    }),
+    width: '30px',
+    sortable: false,
+    align: 'right',
   },
 };
 
@@ -335,6 +361,8 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
                 onSort={() => handleSort(fieldName as DeprecationTableColumns)}
                 isSorted={sortConfig.sortField === fieldName}
                 isSortAscending={sortConfig.isSortAscending}
+                readOnly={!cell.sortable}
+                align={cell.align}
               >
                 {cell.label}
               </EuiTableHeaderCell>
@@ -356,9 +384,13 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           </EuiTableBody>
         ) : (
           <EuiTableBody>
-            {visibleDeprecations.map((deprecation, index) =>
-              renderTableRow(deprecation, mlUpgradeModeEnabled, index)
-            )}
+            {visibleDeprecations.map((deprecation, index) => {
+              return (
+                <React.Fragment key={`deprecation-row-${index}`}>
+                  {renderTableRow(deprecation, mlUpgradeModeEnabled, index)}
+                </React.Fragment>
+              );
+            })}
           </EuiTableBody>
         )}
       </EuiTable>

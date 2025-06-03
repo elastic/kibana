@@ -21,6 +21,7 @@ import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { DataStreamReindexFlyout } from './flyout';
 import { DataStreamMigrationStatusProvider, useDataStreamMigrationContext } from './context';
+import { DataStreamReindexActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -73,17 +74,14 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [showFlyout]);
 
   return (
-    <EuiTableRow
-      data-test-subj="deprecationTableRow"
-      key={`deprecation-row-${index}`}
-      onClick={() => setShowFlyout(true)}
-    >
+    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
             key={field}
             truncateText={false}
             data-test-subj={`dataStreamReindexTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
@@ -91,6 +89,12 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
               resolutionTableCell={
                 <DataStreamReindexResolutionCell
                   correctiveAction={deprecation.correctiveAction as DataStreamsAction}
+                />
+              }
+              actionsTableCell={
+                <DataStreamReindexActionsCell
+                  correctiveAction={deprecation.correctiveAction as DataStreamsAction}
+                  openFlyout={() => setShowFlyout(true)}
                 />
               }
             />

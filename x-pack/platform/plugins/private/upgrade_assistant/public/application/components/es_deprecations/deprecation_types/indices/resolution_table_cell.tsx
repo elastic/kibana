@@ -6,16 +6,10 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
@@ -52,68 +46,22 @@ const i18nTexts = {
       defaultMessage: 'Reindex status not available',
     }
   ),
-  reindexCanceledText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexCanceledText',
-    {
-      defaultMessage: 'Reindex cancelled',
-    }
-  ),
   reindexPausedText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.reindexPausedText',
     {
       defaultMessage: 'Reindex paused',
     }
   ),
-  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.reindexLabel', {
-    defaultMessage: 'Reindex',
-  }),
-  reindexFollowerIndexText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexLabel',
-    {
-      defaultMessage: 'Unfollow leader index',
-    }
-  ),
-  reindexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexTooltipLabel',
-    {
-      defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
-    }
-  ),
-  reindexFollowerIndexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexTooltipLabel',
-    {
-      defaultMessage: 'Resolve this issue by terminating replication.',
-    }
-  ),
-  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
-    defaultMessage: 'Update',
-  }),
   updateCompleteText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.updateCompleteText',
     {
       defaultMessage: 'Update complete',
     }
   ),
-  updateTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.updateTooltipLabel',
-    {
-      defaultMessage:
-        'Resolve this issue by updating this index. This issue can be resolved automatically either by marking the index as read-only (recommended for large indices) or by reindexing into a new, compatible index.',
-    }
-  ),
-  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.unfreezeLabel', {
-    defaultMessage: 'Unfreeze',
-  }),
-  unfreezeTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeTooltipLabel',
-    {
-      defaultMessage: 'Resolve this issue by unfreezing this index.',
-    }
-  ),
 };
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
-  const { reindexState, deprecation, updateIndexState } = useIndexContext();
+  const { reindexState, updateIndexState } = useIndexContext();
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
 
   if (reindexState.loadingState === LoadingState.Loading) {
@@ -211,54 +159,5 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       );
   }
 
-  // reindex status "not started"
-  return deprecation.correctiveAction?.type === 'unfreeze' ? (
-    <EuiToolTip position="top" content={i18nTexts.unfreezeTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.unfreezeText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  ) : reindexState.meta.isReadonly ? (
-    <>
-      {reindexState.meta.isFollowerIndex ? (
-        <EuiToolTip position="top" content={i18nTexts.reindexFollowerIndexTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.reindexFollowerIndexText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      ) : (
-        <EuiToolTip position="top" content={i18nTexts.reindexTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.reindexText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      )}
-    </>
-  ) : (
-    <EuiToolTip position="top" content={i18nTexts.updateTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.updateText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  return <></>;
 };
