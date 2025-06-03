@@ -13,8 +13,11 @@ import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
 import { BehaviorSubject } from 'rxjs';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
-const mockSolutionNavId$ = new BehaviorSubject('solutionNavId');
+const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(
+  'solutionNavId' as unknown as SolutionId
+);
 
 jest
   .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
@@ -30,7 +33,7 @@ const render = () => {
 
 describe('useRootProfile', () => {
   beforeEach(() => {
-    mockSolutionNavId$.next('solutionNavId');
+    mockSolutionNavId$.next('solutionNavId' as unknown as SolutionId);
   });
 
   it('should return rootProfileLoading as true', async () => {
@@ -58,7 +61,7 @@ describe('useRootProfile', () => {
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
     });
-    act(() => mockSolutionNavId$.next('newSolutionNavId'));
+    act(() => mockSolutionNavId$.next('newSolutionNavId' as unknown as SolutionId));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
