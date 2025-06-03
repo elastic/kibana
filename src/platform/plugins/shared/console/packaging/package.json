@@ -2,9 +2,9 @@
   "name": "@kbn/one-console",
   "version": "9.0.0",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "main": "public/application/containers/main/main.tsx",
+  "main": "./index.tsx",
   "peerDependencies": {
-    "@elastic/eui": "^9.0.0",
+    "@elastic/eui": "102.2.0",
     "@emotion/css": "^11.11.0",
     "@emotion/react": "^11.0.0",
     "classnames": "2.2.6",

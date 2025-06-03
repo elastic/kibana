@@ -20,7 +20,7 @@ const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
-  entry: require.resolve('../public/application/containers/main/main.tsx'),
+  entry: require.resolve('./index.tsx'),
   context: __dirname,
   devtool: 'cheap-source-map',
   output: {
@@ -36,15 +36,16 @@ module.exports = {
       '@emotion/react': 'commonjs @emotion/react',
       classnames: 'commonjs classnames',
       react: 'commonjs react',
-      lodash: 'commonjs lodash',
-      'react-dom': 'commonjs react-dom',
-      'react-markdown': 'commonjs react-markdown',
-      'monaco-editor': 'commonjs monaco-editor',
-      moment: 'commonjs moment',
-      rxjs: 'commonjs rxjs',
-      'moment-duration-format': 'commonjs moment-duration-format',
-      'moment-timezone': 'commonjs moment-timezone',
-      '@elastic/datemath': 'commonjs @elastic/datemath',
+      "lodash": 'commonjs lodash',
+      "react-dom": 'commonjs react-dom',
+      "react-markdown": "commonjs react-markdown",
+      "monaco-editor": 'commonjs monaco-editor',
+      "moment": 'commonjs moment',
+      "@elastic/eui": 'commonjs @elastic/eui',
+      "rxjs": "commonjs rxjs",
+      "moment-duration-format": 'commonjs moment-duration-format',
+      "moment-timezone": 'commonjs moment-timezone',
+      "@elastic/datemath": 'commonjs @elastic/datemath',
     },
     // Handle monaco and react-dom internal imports
     function (context, request, callback) {
@@ -204,5 +205,5 @@ module.exports = {
     noEmitOnErrors: true,
   },
 
-  plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin(), new BundleAnalyzerPlugin()],
+  plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin(), /* new BundleAnalyzerPlugin() */],
 };
