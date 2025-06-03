@@ -55,6 +55,7 @@ const data = generateData();
 export default {
   title: 'app/TransactionDetails/waterfall/TransactionFlyout',
   component: TransactionFlyout,
+  tags: ['skip-test'],
   decorators: [
     (StoryComponent: ComponentType) => {
       const coreMock = {

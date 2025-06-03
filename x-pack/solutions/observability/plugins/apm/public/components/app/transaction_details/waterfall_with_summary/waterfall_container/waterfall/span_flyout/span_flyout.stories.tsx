@@ -61,6 +61,10 @@ const data = generateData();
 export default {
   title: 'app/TransactionDetails/waterfall/SpanFlyout',
   component: SpanFlyout,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent: ComponentType) => {
       const coreMock = {

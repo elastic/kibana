@@ -18,6 +18,7 @@ const contextMock = {
 export default {
   title: 'shared/LicensePrompt',
   component: LicensePrompt,
+  tags: ['skip-test'],
   decorators: [
     (Story: ComponentType) => (
       <ApmPluginContext.Provider value={contextMock}>

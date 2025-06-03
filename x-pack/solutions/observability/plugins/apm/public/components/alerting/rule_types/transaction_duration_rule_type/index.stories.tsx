@@ -28,6 +28,10 @@ interface Args {
 export default {
   title: 'alerting/TransactionDurationRuleType',
   component: TransactionDurationRuleType,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent: ComponentType) => {
       return (

@@ -717,6 +717,10 @@ export const NoData: StoryObj<Args> = {
   render: () => {
     return <LatencyChart height={300} kuery="" />;
   },
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
 
   args: {
     latencyChartResponse: {

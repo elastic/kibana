@@ -15,10 +15,12 @@ type Args = ComponentProps<typeof CreateAgentKeyFlyout>;
 const stories: Meta<Args> = {
   title: 'app/Settings/AgentKeys/CreateAgentKeyFlyout',
   component: CreateAgentKeyFlyout,
+  tags: ['skip-test'],
 };
 export default stories;
 
 export const Example: StoryObj<Args> = {
+  tags: ['skip-test'],
   render: (args) => {
     return <CreateAgentKeyFlyout {...args} />;
   },

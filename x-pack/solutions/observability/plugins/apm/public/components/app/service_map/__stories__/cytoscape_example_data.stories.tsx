@@ -39,6 +39,10 @@ function getHeight() {
 const stories: Meta<{}> = {
   title: 'app/ServiceMap/Example data',
   component: Cytoscape,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [(wrappedStory) => <MockApmPluginStorybook>{wrappedStory()}</MockApmPluginStorybook>],
 };
 

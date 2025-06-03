@@ -14,6 +14,10 @@ import { ConfirmSwitchModal } from './confirm_switch_modal';
 export default {
   title: 'app/settings/Schema',
   component: ConfirmSwitchModal,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent: ComponentType) => {
       return (

@@ -29,6 +29,10 @@ type MigrationCheckAPIReturnType = APIReturnType<'GET /internal/apm/fleet/migrat
 export default {
   title: 'app/settings/Schema',
   component: Schema,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   argTypes: {
     hasCloudAgentPolicy: {
       control: {

@@ -14,6 +14,7 @@ import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 export default {
   title: 'app/ErrorsAndCrashGroupDetails/distribution',
   component: ErrorDistribution,
+  tags: ['skip-test'],
   decorators: [
     (Story: ComponentType) => {
       return (

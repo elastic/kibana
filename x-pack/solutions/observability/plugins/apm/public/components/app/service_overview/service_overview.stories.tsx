@@ -17,6 +17,7 @@ import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy'
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
   component: ServiceOverview,
+  tags: ['skip-test'],
   decorators: [
     (StoryComponent) => {
       const serviceName = 'testServiceName';

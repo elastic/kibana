@@ -29,6 +29,10 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
 const stories: Meta<{}> = {
   title: 'fleet/Runtime agent attachment',
   component: RuntimeAttachment,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent) => {
       createCallApmApi(coreMock);

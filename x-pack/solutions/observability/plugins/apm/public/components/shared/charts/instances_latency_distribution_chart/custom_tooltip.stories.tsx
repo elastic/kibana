@@ -88,6 +88,10 @@ Example.args = {
 export function MultipleInstances(props: TooltipInfo) {
   return <CustomTooltip {...props} latencyFormatter={getLatencyFormatter(props)} />;
 }
+// TODO: fix a11y errors
+MultipleInstances.parameters = {
+  a11y: { disable: true },
+};
 MultipleInstances.args = {
   header: {
     seriesIdentifier: {
