@@ -32,11 +32,34 @@ const METRIC_EXPLORER_AGGREGATIONS = [
 const comparator = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 
 const baseCriterion = {
-  threshold: schema.arrayOf(schema.number()),
+  threshold: schema.arrayOf(schema.number(), {
+    meta: {
+      description:
+        'The threshold value that is used with the `comparator`. If the `comparator` is `between`, you must specify the boundary values.',
+    },
+  }),
   comparator: oneOfLiterals(comparator),
-  timeUnit: schema.string(),
-  timeSize: schema.number(),
-  warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
+  timeUnit: schema.string({
+    meta: {
+      description: 'The type of units for the time window: seconds, minutes, hours, or days.',
+    },
+  }),
+  timeSize: schema.number({
+    meta: {
+      description:
+        'The size of the time window (in `timeUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.',
+    },
+  }),
+  warningThreshold: schema.maybe(
+    schema.arrayOf(
+      schema.number({
+        meta: {
+          description:
+            'The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.',
+        },
+      })
+    )
+  ),
   warningComparator: schema.maybe(oneOfLiterals(comparator)),
 };
 
@@ -85,15 +108,40 @@ const customCriterion = schema.object({
 export const metricThresholdRuleParamsSchema = schema.object(
   {
     criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion, customCriterion])),
-    groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+    groupBy: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+        meta: {
+          description:
+            'Create an alert for every unique value of the specified fields. For example, you can create a rule per host or every mount point of each host. IMPORTANT: If you include the same field in both the `filterQuery` and `groupBy`, you might receive fewer results than you expect. For example, if you filter by `cloud.region: us-east`, grouping by `cloud.region` will have no effect because the filter query can match only one region.',
+        },
+      })
+    ),
     filterQuery: schema.maybe(
       schema.string({
         validate: validateIsStringElasticsearchJSONFilter,
+        meta: {
+          description:
+            'A query that limits the scope of the rule. The rule evaluates only metric data that matches the query.',
+        },
       })
     ),
     sourceId: schema.string(),
-    alertOnNoData: schema.maybe(schema.boolean()),
-    alertOnGroupDisappear: schema.maybe(schema.boolean()),
+    alertOnNoData: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'If true, an alert occurs if the metrics do not report any data over the expected period or if the query fails.',
+        },
+      })
+    ),
+    alertOnGroupDisappear: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.',
+        },
+      })
+    ),
   },
   { unknowns: 'allow' }
 );
