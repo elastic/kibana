@@ -9,9 +9,10 @@
 
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
+import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
 import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
-import { isColumnItem, isFunctionItem, getExpressionType, isOptionItem } from './helpers';
+import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
 function addToUserDefinedColumnOccurrences(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
@@ -117,12 +118,10 @@ function addUserDefinedColumnFromExpression(
  * @param userDefinedColumns - The map of user defined columns to be updated.
  */
 function addUserDefinedColumnFromCompletionCommand(
-  command: ESQLCommand,
+  command: ESQLAstCompletionCommand,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
-  const asOption = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
-  const targetArgument = asOption && isOptionItem(asOption) ? asOption.args[0] : undefined;
-  const target = targetArgument && isColumnItem(targetArgument) ? targetArgument : undefined;
+  const target = command.targetField;
 
   addToUserDefinedColumnOccurrences(userDefinedColumns, {
     name: target?.name || 'completion',
@@ -192,7 +191,10 @@ export function collectUserDefinedColumns(
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
     .on('visitCompletionCommand', (ctx) =>
-      addUserDefinedColumnFromCompletionCommand(ctx.node, userDefinedColumns)
+      addUserDefinedColumnFromCompletionCommand(
+        ctx.node as ESQLAstCompletionCommand,
+        userDefinedColumns
+      )
     );
 
   visitor.visitQuery(ast);

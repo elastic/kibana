@@ -11,6 +11,7 @@ import * as contexts from './contexts';
 import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
+  ESQLAstCompletionCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
@@ -199,7 +200,11 @@ export class GlobalVisitorContext<
       }
       case 'completion': {
         if (!this.methods.visitCompletionCommand) break;
-        return this.visitCompletionCommand(parent, commandNode, input as any);
+        return this.visitCompletionCommand(
+          parent,
+          commandNode as ESQLAstCompletionCommand,
+          input as any
+        );
       }
       case 'sample': {
         if (!this.methods.visitSampleCommand) break;
@@ -431,7 +436,7 @@ export class GlobalVisitorContext<
 
   public visitCompletionCommand(
     parent: contexts.VisitorContext | null,
-    node: ESQLAstCommand,
+    node: ESQLAstCompletionCommand,
     input: types.VisitorInput<Methods, 'visitCompletionCommand'>
   ): types.VisitorOutput<Methods, 'visitCompletionCommand'> {
     const context = new contexts.CompletionCommandVisitorContext(this, node, parent);

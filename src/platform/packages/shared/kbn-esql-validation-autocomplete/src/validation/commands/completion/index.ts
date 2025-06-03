@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
+import { ESQLMessage } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { ESQLAstCommand, ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
 import { getExpressionType } from '../../../shared/helpers';
 import { ReferenceMaps } from '../../types';
 
@@ -19,10 +20,10 @@ const supportedPromptTypes = ['text', 'keyword', 'unknown'];
  *
  * COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)
  */
-export const validate = (command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] => {
+export const validate = (command: ESQLAstCommand, references: ReferenceMaps): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const prompt = command.args[0];
+  const { prompt, location } = command as ESQLAstCompletionCommand;
 
   const promptExpressionType = getExpressionType(
     prompt,
@@ -32,7 +33,7 @@ export const validate = (command: ESQLCommand, references: ReferenceMaps): ESQLM
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push({
-      location: 'location' in prompt ? prompt?.location : command.location,
+      location: 'location' in prompt ? prompt?.location : location,
       text: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.validation.completionUnsupportedFieldType',
         {

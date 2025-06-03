@@ -8,31 +8,52 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLSingleAstItem } from '@kbn/esql-ast';
+import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
+import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
-import { isExpressionComplete, suggestForExpression } from '../../helper';
+import { suggestForExpression } from '../../helper';
 
 export async function suggest(
-  params: CommandSuggestParams<'rename'>
+  params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
+  const command = params.command as ESQLAstCompletionCommand;
+  const { prompt, inferenceId, targetField } = command;
+
+  // COMPLETION <prompt> WITH <inferenceId> AS <targetField> ^
+  if (targetField && !targetField.incomplete) {
+    return [pipeCompleteItem];
+  }
+
+  // COMPLETION <prompt> WITH <inferenceId> AS ^
+  if (targetField && targetField.incomplete) {
+    return [];
+  }
+
+  // COMPLETION <prompt> WITH <inferenceId> ^
+  if (inferenceId && !inferenceId?.incomplete) {
+    return [asCompletionItem, pipeCompleteItem];
+  }
+
+  // COMPLETION <prompt> WITH ^
+  if (inferenceId && inferenceId.incomplete) {
+    // Must fetch inference endpoints from API.
+    return [];
+  }
+
+  // COMPLETION ^
   const suggestions = await suggestForExpression({
     ...params,
-    expressionRoot,
+    expressionRoot: prompt,
     location: Location.COMPLETION,
     preferredExpressionType: 'text',
   });
 
-  // Is this a complete text expression?
-  // If so, we can call it done and suggest the WITH option
-  const expressionType = params.getExpressionType(expressionRoot);
-  if (
-    ['keyword', 'text'].includes(expressionType) &&
-    isExpressionComplete(expressionType, params.innerText)
-  ) {
-    suggestions.push(withCompletionItem);
+  // COMPLETION <prompt> ^
+  const expressionType = params.getExpressionType(prompt);
+  if (['keyword', 'text'].includes(expressionType)) {
+    return [withCompletionItem];
   }
 
   return suggestions;
