@@ -48,10 +48,7 @@ export function HeaderMenu(): React.ReactElement | null {
                 })}
               </EuiHeaderLink>
             )}
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/slos/management')}
-            >
+            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
               {i18n.translate('xpack.slo.home.manage', {
                 defaultMessage: 'Manage SLOs',
               })}
