@@ -32,7 +32,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import {
   ElasticLlmTourCallout,
@@ -47,8 +46,6 @@ import {
   useStreamsEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
-
-const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
 
 const RefreshButton = ({
   generatePatterns,
@@ -319,14 +316,6 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
-  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
-  const [isManagedAiConnectorCalloutDismissed, setManagedAiConnectorCalloutDismissed] =
-    useLocalStorage('streams:managedAiConnectorCalloutDismissed', false);
-
-  const onDismissManagedAiConnectorCallout = useCallback(() => {
-    setManagedAiConnectorCalloutDismissed(true);
-  }, [setManagedAiConnectorCalloutDismissed]);
-
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -439,17 +428,6 @@ function InnerGrokAiSuggestions({
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!isManagedAiConnectorCalloutDismissed && isManagedAIConnector && (
-        <EuiCallOut onDismiss={onDismissManagedAiConnectorCallout}>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
-            {
-              defaultMessage:
-                'Generating patterns is powered by a preconfigured LLM. Additional charges apply',
-            }
-          )}
-        </EuiCallOut>
-      )}
     </>
   );
 }
