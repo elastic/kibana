@@ -16,6 +16,7 @@ import {
   EuiSkeletonText,
   EuiTab,
   EuiTabs,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
 import { DataTableRecord, PARENT_ID_FIELD } from '@kbn/discover-utils';
 import { flattenObject } from '@kbn/object-utils';
@@ -112,16 +113,18 @@ export const SpanFlyout = ({
       aria-labelledby={flyoutId}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={flyoutId}>
-            {i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.title', {
-              defaultMessage: '{docType} document',
-              values: {
-                docType: isSpan ? 'Span' : 'Transaction',
-              },
-            })}
-          </h2>
-        </EuiTitle>
+        <EuiSkeletonTitle isLoading={loading}>
+          <EuiTitle size="m">
+            <h2 id={flyoutId}>
+              {i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.title', {
+                defaultMessage: '{docType} document',
+                values: {
+                  docType: isSpan ? 'Span' : 'Transaction',
+                },
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiSkeletonTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {loading || !documentAsHit ? (
@@ -131,7 +134,7 @@ export const SpanFlyout = ({
             <EuiTabs size="s">{renderTabs()}</EuiTabs>
             <EuiSkeletonText isLoading={loading}>
               {selectedTabId === tabIds.OVERVIEW ? (
-                documentAsHit.flattened[PARENT_ID_FIELD] ? (
+                isSpan ? (
                   <SpanOverview
                     hit={documentAsHit}
                     tracesIndexPattern={tracesIndexPattern}
