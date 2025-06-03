@@ -6,13 +6,17 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
+import { BaseStream } from '@kbn/streams-schema/src/models/base';
 
-export function migrateOnRead(definition: Streams.all.Definition): Streams.all.Definition {
+export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
+  let migratedDefinition = definition;
   if (typeof definition.description !== 'string') {
-    return {
+    migratedDefinition = {
       ...definition,
       description: '',
     };
   }
-  return definition;
+  Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
+
+  return migratedDefinition as unknown as Streams.all.Definition;
 }

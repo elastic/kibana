@@ -39,8 +39,12 @@ export const createCompletionCommand = (
         ? {
             location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
           }
-        : { incomplete: true }
+        : undefined
     );
+    if (inferenceId.incomplete || !withCtx) {
+      optionWith.incomplete = true;
+    }
+
     command.args.push(optionWith);
     command.inferenceId = inferenceId;
   }
