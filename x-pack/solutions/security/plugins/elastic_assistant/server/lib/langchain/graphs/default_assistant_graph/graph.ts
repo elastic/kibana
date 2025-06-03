@@ -61,6 +61,8 @@ export const getDefaultAssistantGraph = ({
   savedObjectsClient,
   // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
   signal,
+  telemetryParams,
+  telemetry,
   tools,
   replacements,
   getFormattedTime,
@@ -87,7 +89,7 @@ export const getDefaultAssistantGraph = ({
       )
       .addNode(NodeType.GENERATE_CHAT_TITLE, async (state: AgentState) => {
         const model = await createLlmInstance();
-        return generateChatTitle({ ...nodeParams, state, model });
+        return generateChatTitle({ ...nodeParams, state, model, telemetry });
       })
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
@@ -107,7 +109,7 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools })
+        executeTools({ ...nodeParams, config: { signal }, state, tools, telemetry })
       )
       .addNode(NodeType.RESPOND, async (state: AgentState) => {
         const model = await createLlmInstance();

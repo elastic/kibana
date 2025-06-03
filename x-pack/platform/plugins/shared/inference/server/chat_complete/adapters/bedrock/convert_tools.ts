@@ -29,19 +29,22 @@ export const toolChoiceToConverse = (
   return undefined;
 };
 
-// @TODO: Reformat to converse schema
-export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
+export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
   if (tools) {
     return Object.entries(tools).map(([toolName, toolDef]) => {
       return {
-        name: toolName,
-        description: toolDef.description,
-        input_schema: fixSchemaArrayProperties(
-          toolDef.schema ?? {
-            type: 'object' as const,
-            properties: {},
-          }
-        ),
+        toolSpec: {
+          name: toolName,
+          description: toolDef.description,
+          inputSchema: {
+            json: fixSchemaArrayProperties(
+              toolDef.schema ?? {
+                type: 'object' as const,
+                properties: {},
+              }
+            ),
+          },
+        },
       };
     });
   }
@@ -55,11 +58,15 @@ export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[])
   if (hasToolUse) {
     return [
       {
-        name: 'do_not_call_this_tool',
-        description: 'Do not call this tool, it is strictly forbidden',
-        input_schema: {
-          type: 'object',
-          properties: {},
+        toolSpec: {
+          name: 'do_not_call_this_tool',
+          description: 'Do not call this tool, it is strictly forbidden',
+          inputSchema: {
+            json: {
+              type: 'object',
+              properties: {},
+            },
+          },
         },
       },
     ];

@@ -40,7 +40,13 @@ import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type {
+  ActionsClientChatVertexAI,
+  ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
+  ActionsClientChatBedrockConverse,
+  ActionsClientLlm,
+} from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';

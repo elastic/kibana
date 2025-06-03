@@ -14,7 +14,6 @@ import {
 } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
 import type {
-  ConverseRequest,
   Message as BedRockConverseMessage,
   ModelStreamErrorException,
 } from '@aws-sdk/client-bedrock-runtime';
@@ -31,7 +30,7 @@ import {
   processConverseCompletionChunks,
 } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
-import { toolChoiceToConverse, toolsToBedrock } from './convert_tools';
+import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -57,18 +56,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
-    const _tools = noToolUsage ? [] : toolsToBedrock(tools, messages);
-    const bedRockTools: NonNullable<ConverseRequest['toolConfig']>['tools'] = (_tools ?? []).map(
-      (toolSpec) => {
-        return {
-          toolSpec: {
-            name: toolSpec.name,
-            description: toolSpec.description,
-            inputSchema: { json: toolSpec.input_schema },
-          },
-        };
-      }
-    );
+    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
 
     const subActionParams = {
       system: systemMessage,
