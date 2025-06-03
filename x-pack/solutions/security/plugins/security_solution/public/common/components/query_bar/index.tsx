@@ -160,6 +160,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         createDataView();
       }
       return () => {
+        // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
         if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
