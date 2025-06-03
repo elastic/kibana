@@ -108,6 +108,5 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getPointVisibilityHelp(),
     options: [...Object.values(PointVisibilityOptions)],
-    default: PointVisibilityOptions.AUTO,
   },
 };
