@@ -9,7 +9,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
-  // useSpaceAwareness: true,
   useSpaceAwareness: false,
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: false,

@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { getPolicyIdsSubsetScriptFilter } from '../utils';
 
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
@@ -31,12 +32,12 @@ export const buildActionsQuery = ({
 
   if (policyIds.length > 0) {
     if (spaceId === 'default') {
-      // For default space, include docs with matching policyIds OR where policy_ids does not exist
+      // For default space, include docs where all policy_ids are in policyIds OR where policy_ids does not exist
       extendedFilter = [
         {
           bool: {
             should: [
-              { terms: { policy_ids: policyIds } },
+              getPolicyIdsSubsetScriptFilter(policyIds),
               { bool: { must_not: { exists: { field: 'policy_ids' } } } },
             ],
           },
@@ -44,8 +45,8 @@ export const buildActionsQuery = ({
         ...filter,
       ];
     } else {
-      // For other spaces, only include docs matching policyIds
-      extendedFilter = [...filter, { terms: { policy_ids: policyIds } }];
+      // For other spaces, only include docs where all policy_ids are in policyIds
+      extendedFilter = [...filter, getPolicyIdsSubsetScriptFilter(policyIds)];
     }
   }
 

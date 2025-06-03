@@ -12,6 +12,8 @@ import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 
+import { getPolicyIdsSubsetScriptFilter } from '../utils';
+
 export const buildActionDetailsQuery = ({
   actionId,
   kuery,
@@ -37,7 +39,7 @@ export const buildActionDetailsQuery = ({
         {
           bool: {
             should: [
-              { terms: { policy_ids: policyIds } },
+              getPolicyIdsSubsetScriptFilter(policyIds),
               { bool: { must_not: { exists: { field: 'policy_ids' } } } },
             ],
           },
@@ -45,7 +47,7 @@ export const buildActionDetailsQuery = ({
         ...baseFilter,
       ];
     } else {
-      extendedFilter = [...baseFilter, { terms: { policy_ids: policyIds } }];
+      extendedFilter = [...baseFilter, getPolicyIdsSubsetScriptFilter(policyIds)];
     }
   }
 

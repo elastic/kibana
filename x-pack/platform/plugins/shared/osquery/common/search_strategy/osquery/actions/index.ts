@@ -31,6 +31,7 @@ export interface ActionDetails {
   user_id?: string;
   pack_id?: string;
   pack_name?: string;
+  policy_ids?: string[];
   pack_prebuilt?: boolean;
   status?: string;
   queries?: Array<{
