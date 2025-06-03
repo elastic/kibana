@@ -20,9 +20,6 @@ const RETURNED_INTEGRATIONS = 5 as const;
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
-    // return this.dependencies.packageService?.asInternalUser.getPackages({
-    //   prerelease: true,
-    // });
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
       prerelease: true,
       category: 'security',
