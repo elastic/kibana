@@ -31,7 +31,7 @@ describe('IntegrationRetriever', () => {
   });
 
   it('should retrieve integrations', async () => {
-    const result = await integrationRetriever.getIntegrations('test');
+    const result = await integrationRetriever.search('test');
 
     expect(mockRuleMigrationsDataClient.integrations.retrieveIntegrations).toHaveBeenCalledWith(
       'test'

@@ -18,54 +18,51 @@ const RETURNED_INTEGRATIONS = 5 as const;
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
-  async getIntegrationPackages(): Promise<PackageList | undefined> {
-    return this.dependencies.packageService?.asInternalUser.getPackages({
+  /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
+  public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
+    const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
       prerelease: true,
+      category: 'security',
     });
+    return packages?.filter((pkg) => pkg.data_streams?.some(({ type }) => type === 'logs'));
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
-  async populate(): Promise<void> {
+  public async populate(): Promise<void> {
     const index = await this.getIndexName();
-    const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
-      prerelease: true,
-    });
+    const packages = await this.getSecurityLogsPackages();
     if (packages) {
-      const ragIntegrations = packages.map<RuleMigrationIntegration>((pkg) => ({
-        title: pkg.title,
-        id: pkg.name,
-        description: pkg?.description || '',
-        data_streams:
-          pkg.data_streams
-            ?.filter((stream) => stream.type === 'logs')
-            .map((stream) => ({
+      const ragIntegrations = packages.reduce<RuleMigrationIntegration[]>((acc, pkg) => {
+        // Index only the "logs" data streams
+        const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
+        // All packages returned by getSecurityLogsPackages should have some logs data stream, but just in case
+        if (logsDataStreams?.length) {
+          acc.push({
+            title: pkg.title,
+            id: pkg.name,
+            description: pkg?.description || '',
+            data_streams: logsDataStreams.map((stream) => ({
               dataset: stream.dataset,
               index_pattern: `${stream.type}-${stream.dataset}-*`,
               title: stream.title,
-            })) || [],
-        elser_embedding: [
-          pkg.title,
-          pkg.description,
-          ...(pkg.data_streams
-            ?.filter((stream) => stream.type === 'logs')
-            .map((stream) => stream.title) || []),
-        ].join(' - '),
-      }));
+            })),
+            elser_embedding: [
+              pkg.title,
+              pkg.description,
+              ...logsDataStreams.map((stream) => stream.title),
+            ].join(' - '),
+          });
+        }
+        return acc;
+      }, []);
+
       await this.esClient
         .bulk(
           {
             refresh: 'wait_for',
-            operations: ragIntegrations.flatMap((integration) => [
-              { update: { _index: index, _id: integration.id } },
-              {
-                doc: {
-                  title: integration.title,
-                  description: integration.description,
-                  data_streams: integration.data_streams,
-                  elser_embedding: integration.elser_embedding,
-                },
-                doc_as_upsert: true,
-              },
+            operations: ragIntegrations.flatMap(({ id, ...doc }) => [
+              { update: { _index: index, _id: id } },
+              { doc, doc_as_upsert: true },
             ]),
           },
           { requestTimeout: 10 * 60 * 1000 } // 10 minutes
@@ -86,14 +83,14 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
     }
   }
 
-  /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */
-  async retrieveIntegrations(semanticString: string): Promise<RuleMigrationIntegration[]> {
+  /** Retrieves the integration details for a given semantic query */
+  public async semanticSearch(semanticQuery: string): Promise<RuleMigrationIntegration[]> {
     const index = await this.getIndexName();
     const query = {
       bool: {
         should: [
-          { semantic: { query: semanticString, field: 'elser_embedding', boost: 1.5 } },
-          { multi_match: { query: semanticString, fields: ['title^2', 'description'], boost: 3 } },
+          { semantic: { query: semanticQuery, field: 'elser_embedding', boost: 1.5 } },
+          { multi_match: { query: semanticQuery, fields: ['title^2', 'description'], boost: 3 } },
         ],
       },
     };
@@ -104,7 +101,10 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
         size: RETURNED_INTEGRATIONS,
         min_score: MIN_SCORE,
       })
-      .then(this.processResponseHits.bind(this))
+      .then((response) => {
+        const hits = this.processResponseHits(response);
+        return hits.filter((hit) => Boolean(hit.data_streams?.length)); // Ensure we only return integrations with data streams
+      })
       .catch((error) => {
         this.logger.error(`Error querying integration details for ELSER: ${error.message}`);
         throw error;
