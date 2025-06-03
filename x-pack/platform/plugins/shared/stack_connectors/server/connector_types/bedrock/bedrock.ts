@@ -509,7 +509,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: ConverseParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const modelId = reqModel ?? this.model;
+    const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse`;
 
     const request: ConverseRequest = {
@@ -524,6 +525,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         toolChoice: { auto: toolChoice },
       },
       system,
+      modelId,
     };
     const requestBody = JSON.stringify(request);
 
@@ -531,7 +533,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const requestArgs = {
       ...signed,
       url: `${this.url}${path}`,
-      method: 'post',
+      method: 'post' as const,
       data: requestBody,
       signal,
       timeout,
@@ -554,7 +556,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     timeout = DEFAULT_TIMEOUT_MS,
     connectorUsageCollector,
   }: ConverseStreamParams) {
-    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const modelId = reqModel ?? this.model;
+    const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse-stream`;
 
     const request: ConverseStreamRequest = {
@@ -569,6 +572,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         toolChoice,
       },
       system,
+      modelId,
     };
     const requestBody = JSON.stringify(request);
 
@@ -578,7 +582,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       {
         ...signed,
         url: `${this.url}${path}`,
-        method: 'post',
+        method: 'post' as const,
         responseSchema: StreamingResponseSchema,
         data: requestBody,
         responseType: 'stream',

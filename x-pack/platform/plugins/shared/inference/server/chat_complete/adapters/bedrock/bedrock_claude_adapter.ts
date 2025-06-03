@@ -124,9 +124,9 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           rawContent: (typeof message.content === 'string' ? [message.content] : message.content)
             .map((contentPart) => {
               if (typeof contentPart === 'string') {
-                return { text: contentPart } satisfies BedRockTextPart;
+                return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
               } else if (contentPart.type === 'text') {
-                return { text: contentPart.text } satisfies BedRockTextPart;
+                return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
               }
               if (contentPart.source?.data) {
                 const imageBlock: ImageBlock = {

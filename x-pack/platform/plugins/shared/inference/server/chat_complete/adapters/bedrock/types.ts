@@ -21,6 +21,7 @@ export interface BedRockMessage {
  */
 export interface BedRockTextPart {
   text: string;
+  type: 'text';
 }
 
 export interface BedRockToolUsePart {

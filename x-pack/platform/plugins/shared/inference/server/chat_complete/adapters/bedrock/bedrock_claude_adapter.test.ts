@@ -265,8 +265,8 @@ Human:`,
               role: MessageRole.User,
               content: [
                 {
-                  type: 'text',
                   text: 'question',
+                  type: 'text',
                 },
               ],
             },
@@ -306,8 +306,18 @@ Human:`,
         {
           role: 'user',
           content: [
-            { image: { format: 'png', source: { bytes: 'aaaaaa' } } },
-            { image: { format: 'png', source: { bytes: 'bbbbbb' } } },
+            {
+              image: {
+                format: 'png',
+                source: { bytes: new Uint8Array(Buffer.from('aaaaaa', 'utf-8')) },
+              },
+            },
+            {
+              image: {
+                format: 'png',
+                source: { bytes: new Uint8Array(Buffer.from('bbbbbb', 'utf-8')) },
+              },
+            },
           ],
         },
       ]);
