@@ -6,9 +6,10 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, IClusterClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
@@ -36,6 +37,9 @@ export async function runStartupMigrations({
 
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client;
+
+  // allow inference endpoint to scale to zero
+  await allowInferenceEndpointScaleToZero({ esClient, logger });
 
   const lmService = new LockManagerService(core, logger);
   await lmService
@@ -114,4 +118,56 @@ export function isSemanticTextUnsupportedError(error: Error) {
       error.meta?.body?.error?.caused_by?.reason.includes(semanticTextUnsupportedError));
 
   return isSemanticTextUnspported;
+}
+
+async function allowInferenceEndpointScaleToZero({
+  esClient,
+  logger,
+}: {
+  esClient: IClusterClient;
+  logger: Logger;
+}) {
+  try {
+    const response = await esClient.asInternalUser.ml.getTrainedModelsStats({
+      model_id: 'obs_ai_assistant_kb_inference',
+    });
+
+    if (response.count === 0) {
+      logger.debug(`Inference endpoint ${LEGACY_CUSTOM_INFERENCE_ID} not found. Skipping.`);
+      return;
+    }
+
+    if (
+      response.trained_model_stats[0].deployment_stats?.adaptive_allocations
+        ?.min_number_of_allocations === 0
+    ) {
+      logger.debug(
+        `Inference endpoint ${LEGACY_CUSTOM_INFERENCE_ID} already allows scaling to zero. Skipping.`
+      );
+      return;
+    }
+
+    logger.info(
+      `${LEGACY_CUSTOM_INFERENCE_ID} is not configured to scale to zero. Updating it now.`
+    );
+
+    const res = await esClient.asInternalUser.ml.updateTrainedModelDeployment({
+      model_id: LEGACY_CUSTOM_INFERENCE_ID,
+      adaptive_allocations: {
+        enabled: true,
+        min_number_of_allocations: 0,
+        max_number_of_allocations: 8,
+      },
+    });
+
+    logger.debug(
+      `Inference endpoint ${LEGACY_CUSTOM_INFERENCE_ID} was updated to scale to zero: ${JSON.stringify(
+        res
+      )}`
+    );
+  } catch (err) {
+    logger.error(
+      `Error updating inference endpoint ${LEGACY_CUSTOM_INFERENCE_ID} to scale to zero: ${err}`
+    );
+  }
 }
