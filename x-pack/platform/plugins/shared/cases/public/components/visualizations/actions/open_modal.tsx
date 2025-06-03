@@ -47,11 +47,11 @@ const getAttachments = ({
       : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
   }
   if (isSavedSearchApi(api)) {
-    const dataView = api.parentApi?.dataViews$.getValue()?.[0] || {};
+    const dataView = api.dataViews$.getValue()?.[0] || {};
     const indexPattern = dataView.getIndexPattern();
     const timestampField = dataView.timeFieldName;
-    const query = api.query$.getValue() as Query | '';
-    const parentQuery = api.parentApi?.query$.getValue() as Query | '';
+    const query = api.query$.getValue() as Query | undefined;
+    const parentQuery = api.parentApi?.query$.getValue() as Query | undefined;
     const filters = api.filters$.getValue() || [];
     const parentFilters = api.parentApi?.filters$.getValue() || [];
     const combinedFilters = [...filters, ...parentFilters];
