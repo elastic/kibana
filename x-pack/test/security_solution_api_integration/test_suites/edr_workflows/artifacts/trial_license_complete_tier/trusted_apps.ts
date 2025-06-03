@@ -18,7 +18,6 @@ import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoin
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
-import { createSupertestErrorLogger } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
@@ -300,10 +299,10 @@ export default function ({ getService }: FtrProviderContext) {
             const getAdvancedModeBody = () => {
               const body = trustedAppApiCall.getBody();
               body.tags.push('form_mode:advanced');
-  
+
               // Match request version with artifact version
-              if('_version' in body){
-                body._version = trustedAppData.artifact._version
+              if ('_version' in body) {
+                body._version = trustedAppData.artifact._version;
               }
               return body;
             };
@@ -311,7 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
             it(`should NOT error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
               const body = getAdvancedModeBody();
               // body.entries[0].field = 'some.invalid.field';
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -326,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
-                .expect(200)
+                .expect(200);
             });
           });
         }
