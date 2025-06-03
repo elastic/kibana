@@ -79,27 +79,3 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
   };
 };
-
-/*
-export interface ConversationProperties {
-  user_id: string;
-  user_name: string;
-  agent_id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-  rounds: ConversationRound;
-}
- */
-
-/*
-export interface Conversation {
-  id: string;
-  agentId: string;
-  user: UserIdAndName;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  rounds: ConversationRound;
-}
- */

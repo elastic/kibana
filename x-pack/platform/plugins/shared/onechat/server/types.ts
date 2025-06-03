@@ -57,7 +57,7 @@ export interface ToolsStart {
   /**
    * Return a version of the tool APIs scoped to the provided request.
    */
-  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart; // TODO: remove, useless in the end
+  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart;
 }
 
 /**

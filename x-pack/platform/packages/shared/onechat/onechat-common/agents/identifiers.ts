@@ -15,7 +15,7 @@ export type AgentIdentifier =
 export type PlainIdAgentIdentifier = string;
 
 /**
- * Structured representation of a tool identifier.
+ * Structured representation of an agent identifier.
  */
 export interface StructuredAgentIdentifier {
   /** The unique ID of this agent, within its provider **/
@@ -26,7 +26,7 @@ export interface StructuredAgentIdentifier {
 
 /**
  * String representation of {@link StructuredAgentIdentifier}
- * Follow a `{toolId}||{sourceType}||{sourceId}` format.
+ * Follow a `{agentId}||{providerId}` format.
  */
 export type SerializedAgentIdentifier = `${PlainIdAgentIdentifier}||${string}`;
 

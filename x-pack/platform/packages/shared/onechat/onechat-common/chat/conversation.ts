@@ -9,7 +9,7 @@ import type { StructuredToolIdentifier } from '../tools/tools';
 import type { UserIdAndName } from '../base/users';
 
 /**
- * Represents a user input that initiated a conversation round
+ * Represents a user input that initiated a conversation round.
  */
 export interface RoundInput {
   /**
@@ -22,6 +22,9 @@ export interface RoundInput {
  * Represents the final answer from the agent in a conversation round.
  */
 export interface AssistantResponse {
+  /**
+   * The text message from the assistant.
+   */
   message: string;
 }
 
@@ -29,9 +32,21 @@ export interface AssistantResponse {
  * Represents a tool call with the corresponding result.
  */
 export interface ToolCallWithResult {
+  /**
+   * Id of the tool call, as returned by the LLM
+   */
   toolCallId: string;
+  /**
+   * Structured identifier of the tool.
+   */
   toolId: StructuredToolIdentifier;
+  /**
+   * Arguments the tool was called with.
+   */
   args: Record<string, any>;
+  /**
+   * Result of the tool, serialized as string.
+   */
   result: string;
 }
 

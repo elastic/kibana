@@ -15,7 +15,12 @@ export enum AgentType {
  * ID of the onechat default conversational agent
  */
 export const OneChatDefaultAgentId: PlainIdAgentIdentifier = 'onechat_default';
-export const OneChatDefaultAgentProviderId: PlainIdAgentIdentifier = 'onechat_default_provider';
+
+/**
+ * ID of the onechat default agent's provider
+ */
+export const OneChatDefaultAgentProviderId = 'onechat_default_provider';
+
 /**
  * Base descriptor for an agent.
  */

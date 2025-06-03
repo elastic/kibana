@@ -38,7 +38,6 @@ export interface RunAgentParams<TParams = Record<string, unknown>> {
   /**
    * Optional genAI connector id to use as default.
    * If unspecified, will use internal logic to use the default connector
-   * (EIS if there, otherwise openAI, otherwise any GenAI)
    */
   defaultConnectorId?: string;
 }

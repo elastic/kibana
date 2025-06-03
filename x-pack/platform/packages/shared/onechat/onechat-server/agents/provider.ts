@@ -56,7 +56,7 @@ export interface AgentHandlerContext {
   /**
    * Tool provider that should be used to list of execute tools.
    */
-  toolProvider: ToolProvider; // TODO: maybe make it non-executable so that we need it use the runner
+  toolProvider: ToolProvider;
   /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
