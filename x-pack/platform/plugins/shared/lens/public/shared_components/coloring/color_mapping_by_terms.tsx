@@ -130,7 +130,7 @@ export function ColorMappingByTerms({
                         content={
                           <FormattedMessage
                             id="xpack.lens.colorMapping.legacyPalettes"
-                            defaultMessage="Legacy palettes will be replaced by the new Color Mapping feature in a future version."
+                            defaultMessage="Legacy palettes will be replaced by the new color assignment experience in a future version."
                           />
                         }
                         iconProps={{
