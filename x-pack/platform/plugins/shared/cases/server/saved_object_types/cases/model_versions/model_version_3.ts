@@ -9,7 +9,7 @@ import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { casesSchemaV3 } from '../schemas';
 
 /**
- * Adds custom fields to the cases SO.
+ * Adds the incremental id to the cases SO.
  */
 export const modelVersion3: SavedObjectsModelVersion = {
   changes: [
