@@ -33,7 +33,7 @@ interface MisconfigurationPreviewDistributionBarProps {
   color: string;
 }
 
-const useGetFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+export const useGetFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return useMemo(() => {
