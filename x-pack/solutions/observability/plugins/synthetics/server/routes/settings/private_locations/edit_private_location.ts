@@ -71,9 +71,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
       const monitorsSpaces = monitorsInLocation.map(({ attributes: { namespace } }) => namespace);
 
-      // TODO: this will be changed with a check to know if the user is part of all the spaces the monitors are part of
-      // Right now it's not possible to update monitors of other spaces so we're allowing changing the label only if all the monitors are part
-      // of the space the user is currently logged in
+      // TODO: this should just check if the user has the right auth to modify the monitors of all the different monitorsSpaces spaces
       if (
         monitorsSpaces.length &&
         ((monitorsSpaces.length === 1 && monitorsSpaces[0] !== spaceId) ||
@@ -82,7 +80,8 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         return response.conflict({
           body: {
             message: i18n.translate('xpack.synthetics.editPrivateLocation.monitorsInOtherSpaces', {
-              defaultMessage: 'Monitors in other spaces cannot be updated',
+              defaultMessage:
+                'There are monitors deployed to the same private location in other spaces and they cannot be updated',
             }),
           },
         });
