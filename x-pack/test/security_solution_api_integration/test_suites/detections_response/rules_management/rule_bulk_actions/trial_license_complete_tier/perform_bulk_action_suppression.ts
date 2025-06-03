@@ -23,7 +23,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
 
   const postBulkAction = () =>
     supertest
@@ -37,14 +36,10 @@ export default ({ getService }: FtrProviderContext): void => {
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '2023-10-31');
 
-  describe('@ess @serverless @skipInServerless perform_bulk_action suppression', () => {
+  // skips serverless MKI due to feature flag
+  describe('@ess @serverless @skipInServerlessMKI perform_bulk_action suppression', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
-
-    afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     describe('add_alert_suppression action', () => {
@@ -57,10 +52,8 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         const suppressionToAdd = {
           group_by: ['field2'],
-          suppression_config: {
-            duration: { value: 10, unit: 'm' },
-            missing_fields_strategy: 'suppress',
-          },
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'suppress',
         };
         const resultingSuppression = {
           group_by: ['field1', 'field2'],
@@ -193,7 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
         const suppressionToAdd = {
           group_by: ['field2'],
-          suppression_config: { duration: { value: 1, unit: 'h' as const } },
+          duration: { value: 1, unit: 'h' as const },
           missing_fields_strategy: 'suppress' as const,
         };
         const resultingSuppression = {
@@ -247,10 +240,8 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         const suppressionToDelete = {
           group_by: ['field2'],
-          suppression_config: {
-            duration: { value: 5, unit: 'm' },
-            missing_fields_strategy: 'suppress',
-          },
+          duration: { value: 5, unit: 'm' },
+          missing_fields_strategy: 'suppress',
         };
         const resultingSuppression = {
           group_by: ['field1'],
@@ -293,6 +284,44 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
+
+      it('should remove suppression from threshold rule if duration is set to null in action', async () => {
+        const ruleId = 'thresholdRuleId';
+        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
+        const suppressionToSet = { group_by: ['field2'], duration: null };
+
+        await createRule(supertest, log, {
+          ...getThresholdRuleForAlertTesting(['*'], ruleId),
+          alert_suppression: existingSuppression,
+        });
+
+        const { body: bulkEditResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.delete_alert_suppression,
+                value: suppressionToSet,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(bulkEditResponse.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
+
+        expect(bulkEditResponse.attributes.results.updated).toHaveLength(1);
+
+        // Check that the updates did not apply to the rule
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.alert_suppression).toEqual(undefined);
+      });
     });
 
     describe('set_alert_suppression action', () => {
@@ -305,10 +334,8 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         const suppressionToSet = {
           group_by: ['field2'],
-          suppression_config: {
-            duration: { value: 10, unit: 'm' },
-            missing_fields_strategy: 'doNotSuppress',
-          },
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'doNotSuppress',
         };
         const resultingSuppression = {
           group_by: ['field2'],

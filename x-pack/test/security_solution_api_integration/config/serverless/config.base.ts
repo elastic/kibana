@@ -42,6 +42,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             __dirname,
             '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
           )}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'bulkEditAlertSuppressionEnabled',
+          ])}`,
         ],
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),

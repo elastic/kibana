@@ -395,10 +395,8 @@ describe('Perform bulk action request schema', () => {
               type: BulkActionEditTypeEnum.add_alert_suppression,
               value: {
                 group_by: ['field-1', 'field-2'],
-                suppression_config: {
-                  duration: { value: 5, unit: 'm' },
-                  missing_fields_strategy: 'suppress',
-                },
+                duration: { value: 5, unit: 'm' },
+                missing_fields_strategy: 'suppress',
               },
             },
           ],
@@ -439,10 +437,8 @@ describe('Perform bulk action request schema', () => {
               type: BulkActionEditTypeEnum.set_alert_suppression,
               value: {
                 group_by: ['field-1', 'field-2', 'field-3'],
-                suppression_config: {
-                  duration: { value: 10, unit: 'h' },
-                  missing_fields_strategy: 'doNotSuppress',
-                },
+                duration: { value: 10, unit: 'h' },
+                missing_fields_strategy: 'doNotSuppress',
               },
             },
           ],
@@ -485,9 +481,7 @@ describe('Perform bulk action request schema', () => {
               type: BulkActionEditTypeEnum.set_alert_suppression,
               value: {
                 group_by: ['field-1'],
-                suppression_config: {
-                  duration: { value: -5, unit: 'm' },
-                },
+                duration: { value: -5, unit: 'm' },
               },
             },
           ],
@@ -497,7 +491,7 @@ describe('Perform bulk action request schema', () => {
 
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"edit.0.value.suppression_config.duration.value: Number must be greater than or equal to 1"`
+          `"edit.0.value.duration.value: Number must be greater than or equal to 1"`
         );
       });
 

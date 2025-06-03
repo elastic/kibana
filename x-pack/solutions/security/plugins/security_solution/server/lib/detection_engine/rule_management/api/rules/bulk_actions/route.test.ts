@@ -23,6 +23,7 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
@@ -45,7 +46,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, ml);
+    performBulkActionRoute(server.router, ml, {} as ConfigType);
   });
 
   describe('status codes', () => {
