@@ -33,6 +33,7 @@
     "@kbn/storage-adapter",
     "@kbn/sse-utils",
     "@kbn/sse-utils-client",
-    "@kbn/sse-utils-server"
+    "@kbn/sse-utils-server",
+    "@kbn/core-http-browser"
   ]
 }
