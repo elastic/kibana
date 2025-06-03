@@ -53,9 +53,8 @@ export class QueryClient {
     }
 
     /**
-     * This method is used to synchronize queries for a stream.
-     * It handles the creation, update, and deletion of queries based on the provided list.
-     * It also manages the rules associated with these queries, ensuring that any query breaking changes
+     * This method is used to synchronize queries/rules for a stream.
+     * It manages the rules associated with these queries, ensuring that any query breaking changes
      * are handled appropriately:
      * - If a query is new, it creates a new rule.
      * - If a query is updated with a breaking change, it removes the old rule and creates a new one.
