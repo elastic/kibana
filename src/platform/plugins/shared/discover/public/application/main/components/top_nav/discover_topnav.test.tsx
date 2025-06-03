@@ -171,13 +171,8 @@ describe('Discover topnav component', () => {
 
       it('will include share menu item if the share service is available', () => {
         const props = getProps();
-        const component = mountWithIntl(
-          <DiscoverMainProvider value={props.stateContainer}>
-            <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-              <DiscoverTopNav {...props} />
-            </RuntimeStateProvider>
-          </DiscoverMainProvider>
-        );
+        const component = getTestComponent(props);
+
         const topNavMenu = component.find(TopNavMenu);
         const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
         expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
@@ -205,14 +200,8 @@ describe('Discover topnav component', () => {
         });
 
         const props = getProps();
+        const component = getTestComponent(props);
 
-        const component = mountWithIntl(
-          <DiscoverMainProvider value={props.stateContainer}>
-            <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-              <DiscoverTopNav {...props} />
-            </RuntimeStateProvider>
-          </DiscoverMainProvider>
-        );
         const topNavMenu = component.find(TopNavMenu).props();
         const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
         expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'export', 'share', 'save']);
