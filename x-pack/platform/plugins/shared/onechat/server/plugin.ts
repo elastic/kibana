@@ -40,7 +40,9 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const serviceSetups = this.serviceManager.setupServices({ logger: this.logger });
+    const serviceSetups = this.serviceManager.setupServices({
+      logger: this.logger.get('services'),
+    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({

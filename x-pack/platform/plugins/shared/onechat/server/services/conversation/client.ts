@@ -11,14 +11,14 @@ import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
 } from '../../../common/conversations';
-import { ConversationStorage, createStorage, ConversationProperties } from './storage';
-import { fromEs, createRequestToEs } from './converters';
+import { ConversationStorage } from './storage';
+import { fromEs, toEs, createRequestToEs, updateConversation } from './converters';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
+  update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   // TODO: list
-  // TODO: update
   // TODO: delete
 }
 
@@ -43,6 +43,9 @@ class ConversationClientImpl implements ConversationClient {
 
   async get(conversationId: string): Promise<Conversation> {
     const document = await this.storage.getClient().get({ id: conversationId });
+
+    // TODO: access check
+
     return fromEs(document);
   }
 
@@ -62,5 +65,22 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return this.get(id);
+  }
+
+  async update(conversation: ConversationUpdateRequest): Promise<Conversation> {
+    const document = await this.storage.getClient().get({ id: conversation.id });
+
+    // TODO: access check
+
+    const storedConversation = fromEs(document);
+    const updatedConversation = updateConversation(storedConversation, conversation);
+    const attributes = toEs(updatedConversation);
+
+    await this.storage.getClient().index({
+      id: conversation.id,
+      document: attributes,
+    });
+
+    return this.get(conversation.id);
   }
 }

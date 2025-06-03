@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-// import { ConversationalAgentParams } from '@kbn/onechat-server';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -15,7 +14,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { AgentService, OnechatInternalService } from './services';
+import { AgentService, ChatService, OnechatInternalService } from './services';
 
 export class OnechatPlugin
   implements
@@ -42,26 +41,25 @@ export class OnechatPlugin
 
   start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
     const agentService = new AgentService({ http });
+    const chatService = new ChatService({ http });
 
     this.internalServices = {
       agentService,
+      chatService,
     };
 
-    // TODO: remove
+
     /*
-    const agentParams: ConversationalAgentParams = {
-      nextInput: { message: 'Hello ?' },
-    };
-    agentService
-      .stream({
-        agentId: 'onechat_default',
-        agentParams: agentParams as Record<string, any>,
+    // TODO: remove
+    chatService
+      .chat({
+        conversationId: '4389bbb8-441e-4d08-9c7a-af4d0d7d63a2',
+        nextMessage: 'What was my first message?',
       })
       .subscribe((event) => {
         console.log('**** event', event);
       });
-    */
-    // TODO: end
+     */
 
     return {};
   }

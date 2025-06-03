@@ -16,6 +16,7 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
+import { createChatService } from './chat';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -86,11 +87,20 @@ export class ServiceManager {
       elasticsearch,
     });
 
+    const chat = createChatService({
+      logger: logger.get('chat'),
+      actions,
+      inference,
+      conversationService: conversations,
+      agentService: agents,
+    });
+
     this.internalStart = {
       tools,
       agents,
       conversations,
       runnerFactory,
+      chat,
     };
 
     return this.internalStart;

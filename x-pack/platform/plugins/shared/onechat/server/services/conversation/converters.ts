@@ -32,6 +32,30 @@ export const fromEs = (document: GetResponse<ConversationProperties>): Conversat
   };
 };
 
+export const toEs = (conversation: Conversation): ConversationProperties => {
+  return {
+    agent_id: conversation.agentId,
+    user_id: conversation.user.id,
+    user_name: conversation.user.username,
+    title: conversation.title,
+    created_at: conversation.createdAt,
+    updated_at: conversation.updatedAt,
+    rounds: conversation.rounds,
+  };
+};
+
+export const updateConversation = (
+  conversation: Conversation,
+  update: ConversationUpdateRequest
+) => {
+  const updated = {
+    ...conversation,
+    ...update,
+  };
+
+  return updated;
+};
+
 export const createRequestToEs = ({
   conversation,
   currentUser,

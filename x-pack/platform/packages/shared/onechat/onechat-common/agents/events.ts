@@ -6,7 +6,7 @@
  */
 
 import type { OnechatEvent } from '../base/events';
-import { ConversationRound } from './chat';
+import type { ConversationRound } from '../chat';
 import type { StructuredToolIdentifier } from '../tools/tools';
 
 // TODO: add prefix
@@ -103,6 +103,7 @@ export const isMessageCompleteEvent = (
 // Round complete
 
 export interface RoundCompleteEventData {
+  /** round that was completed */
   round: ConversationRound;
 }
 

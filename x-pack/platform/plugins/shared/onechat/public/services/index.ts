@@ -6,4 +6,5 @@
  */
 
 export { AgentService } from './agents';
+export { ChatService } from './chat';
 export type { OnechatInternalService } from './types';

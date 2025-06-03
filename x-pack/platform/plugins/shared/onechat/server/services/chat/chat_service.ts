@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/logging';
 import {
   filter,
-  map,
-  toArray,
   of,
-  mergeMap,
   defer,
   shareReplay,
   forkJoin,
@@ -24,7 +22,17 @@ import {
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ConversationService } from '../conversation';
+import {
+  type RoundInput,
+  type Conversation,
+  type ChatAgentEvent,
+  type RoundCompleteEvent,
+  OneChatDefaultAgentId,
+  isRoundCompleteEvent,
+} from '@kbn/onechat-common';
+import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
+import { getConnectorList, getDefaultConnector } from '../runner/utils';
+import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 
 interface ChatServiceOptions {
@@ -35,7 +43,23 @@ interface ChatServiceOptions {
   agentService: AgentsServiceStart;
 }
 
-export class ChatService {
+export interface ChatService {
+  converse(params: ChatConverseParams): Observable<ChatAgentEvent | string>; // TODO: fix signature
+}
+
+export interface ChatConverseParams {
+  agentId?: string;
+  connectorId?: string;
+  conversationId?: string;
+  nextInput: RoundInput;
+  request: KibanaRequest;
+}
+
+export const createChatService = (options: ChatServiceOptions): ChatService => {
+  return new ChatServiceImpl(options);
+};
+
+class ChatServiceImpl implements ChatService {
   private readonly inference: InferenceServerStart;
   private readonly actions: ActionsPluginStart;
   private readonly logger: Logger;
@@ -57,18 +81,208 @@ export class ChatService {
   }
 
   converse({
-    agentId,
+    agentId = OneChatDefaultAgentId,
     conversationId,
     connectorId,
     request,
-    nextUserMessage,
+    nextInput,
   }: {
-    agentId: string;
-    connectorId: string;
+    agentId?: string;
+    connectorId?: string;
     conversationId?: string;
-    nextUserMessage: string;
+    nextInput: RoundInput;
     request: KibanaRequest;
   }) {
-    // TODO
+    const isNewConversation = !conversationId;
+
+    return forkJoin({
+      conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
+      agent: defer(async () =>
+        this.agentService.registry.asPublicRegistry().get({ agentId, request })
+      ),
+      chatModel: defer(async () => {
+        if (connectorId) {
+          return connectorId;
+        }
+        const connectors = await getConnectorList({ actions: this.actions, request });
+        const defaultConnector = getDefaultConnector({ connectors });
+        return defaultConnector.connectorId;
+      }).pipe(
+        switchMap((selectedConnectorId) => {
+          return this.inference.getChatModel({
+            request,
+            connectorId: selectedConnectorId,
+            chatModelOptions: {},
+          });
+        })
+      ),
+    }).pipe(
+      switchMap(({ conversationClient, chatModel, agent }) => {
+        // TODO: generate title
+        const title$ = of('New conversation');
+
+        const conversation$ = getConversation$({ agentId, conversationId, conversationClient });
+        const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
+
+        const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+        const saveOrUpdateAndEmit$ = isNewConversation
+          ? createConversation$({
+              agentId,
+              conversationClient,
+              title$,
+              roundCompletedEvents$,
+            })
+          : updateConversation$({
+              conversationClient,
+              conversation$,
+              title$,
+              roundCompletedEvents$,
+            });
+
+        return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+          catchError((err) => {
+            // TODO: catch/rethrow non onechat errors.
+            this.logger.error(err);
+            return throwError(err);
+          })
+        );
+      })
+    );
   }
 }
+
+/**
+ * Persist a new conversation and emit the corresponding event
+ */
+const createConversation$ = ({
+  agentId,
+  conversationClient,
+  title$,
+  roundCompletedEvents$,
+}: {
+  agentId: string;
+  conversationClient: ConversationClient;
+  title$: Observable<string>;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+}) => {
+  return forkJoin({
+    title: title$,
+    roundCompletedEvent: roundCompletedEvents$,
+  }).pipe(
+    switchMap(({ title, roundCompletedEvent }) => {
+      return conversationClient.create({
+        title,
+        agentId,
+        rounds: [roundCompletedEvent.data.round],
+      });
+    }),
+    switchMap((createdConversation) => {
+      // TODO: emit conv created event
+      return of('TODO_created_event');
+    })
+  );
+};
+
+/**
+ * Update an existing conversation and emit the corresponding event
+ */
+const updateConversation$ = ({
+  conversationClient,
+  conversation$,
+  title$,
+  roundCompletedEvents$,
+}: {
+  title$: Observable<string>;
+  conversation$: Observable<Conversation>;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  conversationClient: ConversationClient;
+}) => {
+  return forkJoin({
+    conversation: conversation$,
+    title: title$,
+    roundCompletedEvent: roundCompletedEvents$,
+  }).pipe(
+    switchMap(({ conversation, title, roundCompletedEvent }) => {
+      return conversationClient.update({
+        id: conversation.id,
+        title,
+        rounds: [...conversation.rounds, roundCompletedEvent.data.round],
+      });
+    }),
+    switchMap((updatedConversation) => {
+      // TODO: emit conv updated event
+      return of('TODO_updated_event');
+    })
+  );
+};
+
+const getExecutionEvents$ = ({
+  conversation$,
+  nextInput,
+  agent,
+}: {
+  conversation$: Observable<Conversation>;
+  nextInput: RoundInput;
+  agent: ExecutableConversationalAgent;
+}): Observable<ChatAgentEvent> => {
+  return conversation$.pipe(
+    switchMap((conversation) => {
+      return new Observable<ChatAgentEvent>((observer) => {
+        agent
+          .execute({
+            agentParams: {
+              nextInput,
+              conversation: conversation.rounds,
+            },
+            onEvent: (event) => {
+              observer.next(event);
+            },
+          })
+          .then(
+            () => {
+              observer.complete();
+            },
+            (err) => {
+              observer.error(err);
+            }
+          );
+
+        return () => {};
+      }).pipe(shareReplay());
+    })
+  );
+};
+
+const getConversation$ = ({
+  agentId,
+  conversationId,
+  conversationClient,
+}: {
+  agentId: string;
+  conversationId: string | undefined;
+  conversationClient: ConversationClient;
+}): Observable<Conversation> => {
+  return defer(() => {
+    if (conversationId) {
+      return conversationClient.get(conversationId);
+    } else {
+      return of(placeholderConversation({ agentId }));
+    }
+  }).pipe(shareReplay());
+};
+
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+  return {
+    id: uuidv4(),
+    title: 'New conversation',
+    agentId,
+    rounds: [],
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    user: {
+      id: 'unknown',
+      username: 'unknown',
+    },
+  };
+};

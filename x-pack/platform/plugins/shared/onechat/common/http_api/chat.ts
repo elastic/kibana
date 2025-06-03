@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { type ConversationService, ConversationServiceImpl } from './conversation_service';
-export type { ConversationClient } from './client';
+/**
+ * body payload for request to the /internal/onechat/chat endpoint
+ */
+export interface ChatRequestBodyPayload {
+  agentId?: string;
+  connectorId?: string;
+  conversationId?: string;
+  nextMessage: string;
+}

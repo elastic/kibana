@@ -8,8 +8,10 @@
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerAgentRoutes } from './agents';
+import { registerChatRoutes } from './chat';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerAgentRoutes(dependencies);
+  registerChatRoutes(dependencies);
 };

@@ -33,7 +33,7 @@ export interface ConversationProperties {
   title: string;
   created_at: string;
   updated_at: string;
-  rounds: ConversationRound;
+  rounds: ConversationRound[];
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

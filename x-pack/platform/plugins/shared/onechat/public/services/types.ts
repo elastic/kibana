@@ -6,7 +6,9 @@
  */
 
 import type { AgentService } from './agents';
+import type { ChatService } from './chat';
 
 export interface OnechatInternalService {
   agentService: AgentService;
+  chatService: ChatService;
 }

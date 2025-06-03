@@ -57,5 +57,5 @@ export interface Conversation {
   title: string;
   createdAt: string;
   updatedAt: string;
-  rounds: ConversationRound;
+  rounds: ConversationRound[];
 }

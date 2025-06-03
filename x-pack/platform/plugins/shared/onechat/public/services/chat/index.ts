@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { type ConversationService, ConversationServiceImpl } from './conversation_service';
-export type { ConversationClient } from './client';
+export { ChatService } from './chat_service';
