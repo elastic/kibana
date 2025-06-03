@@ -695,64 +695,64 @@ You can also check out the dedicated app view, which enables easier search and f
 
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
-| [GET /internal/cloud_security_posture/benchmarks](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Verify cspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Verify kspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Calling Benchmark API as User with no read access to Security](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Calling Benchmark API as User with read access to Security](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe |  |  |
-| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [users without read privileges on cloud security should not be able to mute](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [users with all privileges on cloud security should be able to mute](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Tests get rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
-| [get rules states successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [get empty object when rules states not exists](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [GET rules states API with user with read access](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [GET rules states API API with user without read access](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [/internal/cloud_security_posture/detection_engine_rules/alerts/_status](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
-| [GET detection_engine_rules API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
-| [GET detection_engine_rules API with user with read access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
-| [GET detection_engine_rules API with user without read access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_api/routes/index.ts) | describe |  |  |
-| [GET /internal/cloud_security_posture/stats](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [CSPM Compliance Dashboard Stats API](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should return CSPM cluster V1 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return CSPM benchmarks V2 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [KSPM Compliance Dashboard Stats API](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should return KSPM clusters V1 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return KSPM benchmarks V2](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return KSPM benchmarks V2](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [Compliance dashboard based on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should calculate cspm benchmarks posture score based only on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should calculate kspm benchmarks posture score based only on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [GET stats API V1 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V1 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V2 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V2 with user without read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET /internal/cloud_security_posture/status](x-pack/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
-| [GET status API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
-| [GET stats API with user with read access](x-pack/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
-| [GET status API with user without read access](x-pack/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
-| [Vulnerability Dashboard API](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | describe |  |  |
-| [responds with a 200 status code and matching data mock](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [returns a 400 error when necessary indices are nonexistent](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [GET vulnerabilities dashboard API with users with read access to cloud security posture](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [GET vulnerabilities dashboard API with users without read access to cloud security posture](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [Verify cloud_security_posture telemetry payloads](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | describe |  |  |
-| [includes only KSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes only CSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes CSPM and KSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes KSPM findings without posture_type and CSPM findings as well](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/benchmarks](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | describe |  |  |
+| [Get Benchmark API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | describe |  |  |
+| [Verify cspm benchmark score is updated when muting rules](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | it |  |  |
+| [Verify kspm benchmark score is updated when muting rules](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | it |  |  |
+| [Get Benchmark API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | describe |  |  |
+| [Calling Benchmark API as User with no read access to Security](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | it |  |  |
+| [Calling Benchmark API as User with read access to Security](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify update csp rules states API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | describe |  |  |
+| [mute benchmark rules successfully](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [unmute rules successfully](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [verify new rules are added and existing rules are set.](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [mute detection rule successfully](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to mute two benchmark rules and one detection rule](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to save rules states when requesting to update empty object](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [set wrong action input](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [users without read privileges on cloud security should not be able to mute](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [users with all privileges on cloud security should be able to mute](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Tests get rules states API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts) | describe |  |  |
+| [get rules states successfully](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [get empty object when rules states not exists](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [GET rules states API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [GET rules states API API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [/internal/cloud_security_posture/detection_engine_rules/alerts/_status](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
+| [GET detection_engine_rules API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
+| [GET detection_engine_rules API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
+| [GET detection_engine_rules API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
+| [Cloud Security Posture](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/index.ts) | describe |  |  |
+| [GET /internal/cloud_security_posture/stats](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | describe |  |  |
+| [CSPM Compliance Dashboard Stats API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | describe |  |  |
+| [should return CSPM cluster V1 ](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [should return CSPM benchmarks V2 ](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [KSPM Compliance Dashboard Stats API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | describe |  |  |
+| [should return KSPM clusters V1 ](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [should return KSPM benchmarks V2](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [should return KSPM benchmarks V2](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [Compliance dashboard based on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | describe |  |  |
+| [should calculate cspm benchmarks posture score based only on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [should calculate kspm benchmarks posture score based only on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [GET stats API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | describe |  |  |
+| [GET stats API V1 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [GET stats API V1 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [GET stats API V2 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [GET stats API V2 with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/status](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/status.ts) | describe |  |  |
+| [GET status API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/status.ts) | describe |  |  |
+| [GET stats API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/status.ts) | it |  |  |
+| [GET status API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/status.ts) | it |  |  |
+| [Vulnerability Dashboard API](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts) | describe |  |  |
+| [responds with a 200 status code and matching data mock](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts) | it |  |  |
+| [returns a 400 error when necessary indices are nonexistent](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts) | it |  |  |
+| [GET vulnerabilities dashboard API with users with read access to cloud security posture](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts) | it |  |  |
+| [GET vulnerabilities dashboard API with users without read access to cloud security posture](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts) | it |  |  |
+| [Verify cloud_security_posture telemetry payloads](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | describe |  |  |
+| [includes only KSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | it |  |  |
+| [includes only CSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | it |  |  |
+| [includes CSPM and KSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | it |  |  |
+| [](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | it |  |  |
+| [includes KSPM findings without posture_type and CSPM findings as well](x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts) | it |  |  |
 </details>
 
 ## Directory: x-pack/solutions/security/test/cloud_security_posture_functional
