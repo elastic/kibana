@@ -4177,6 +4177,10 @@
                 "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
+              },
+              {
                 "plugin": "searchSynonyms",
                 "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
@@ -14302,6 +14306,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/integrations_stats.ts"
               },
               {
                 "plugin": "securitySolution",
