@@ -227,6 +227,7 @@ export abstract class ActionRunner {
 
       return getAgentsByKuery(this.esClient, this.soClient, {
         kuery,
+        showAgentless: this.actionParams.showAgentless,
         showInactive: this.actionParams.showInactive ?? false,
         page: 1,
         perPage,
