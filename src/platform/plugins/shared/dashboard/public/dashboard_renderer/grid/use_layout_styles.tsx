@@ -26,14 +26,14 @@ export const useLayoutStyles = () => {
 
     return css`
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
-        ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.colors.accentSecondary};
 
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
-        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+        ${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
-      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
+      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
+        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
+        0 -${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
@@ -45,7 +45,10 @@ export const useLayoutStyles = () => {
         background-origin: content-box;
       }
 
-      .kbnGridPanel--dragPreview {
+      // styles for the area where the panel and/or section header will be dropped
+      .kbnGridPanel--dragPreview,
+      .kbnGridSection--dragPreview {
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
         background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
       }
 
@@ -85,6 +88,50 @@ export const useLayoutStyles = () => {
         .embPanel__hoverActions {
           transition: none;
         }
+      }
+
+      // styling for what the grid section header looks like when being dragged
+      .kbnGridSectionHeader--active {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        outline: var(--dashboardActivePanelBorderStyle);
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        padding-left: 8px;
+        // hide accordian arrow + panel count text when row is being dragged
+        & .kbnGridSectionTitle--button svg,
+        & .kbnGridLayout--panelCount {
+          display: none;
+        }
+      }
+
+      // styling for the section footer
+      .kbnGridSectionFooter {
+        height: ${euiTheme.size.s};
+        display: block;
+        border-top: ${euiTheme.border.thin};
+        // highlight the footer of a targeted section to make it clear where the section ends
+        &--targeted {
+          border-top: ${euiTheme.border.width.thick} solid
+            ${transparentize(euiTheme.colors.accentSecondary, 0.5)};
+        }
+      }
+      // hide footer border when section is being dragged
+      &:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter {
+        border-top: none;
+      }
+
+      // apply a "fade out" effect when dragging a section header over another section, indicating that dropping is not allowed
+      .kbnGridSection--blocked {
+        z-index: 1;
+        background-color: ${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)};
+        // the oulines of panels extend past 100% by 1px on each side, so adjust for that
+        margin-left: -1px;
+        margin-top: -1px;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+      }
+
+      &:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle {
+        cursor: not-allowed !important;
       }
     `;
   }, [euiTheme]);

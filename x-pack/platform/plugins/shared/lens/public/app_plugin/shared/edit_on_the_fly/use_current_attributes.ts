@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
+import { useMemo } from 'react';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { useLensSelector } from '../../../state_management';
@@ -25,17 +24,13 @@ export const useCurrentAttributes = ({
 }) => {
   const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
 
-  const [currentAttributes, setCurrentAttributes] = useState<
-    TypedLensSerializedState['attributes'] | undefined
-  >(initialAttributes);
-
   // use the latest activeId, but fallback to attributes
   const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
   const activeVisualization = visualizationType ? visualizationMap[visualizationType] : undefined;
 
-  useEffect(() => {
+  const currentAttributes = useMemo(() => {
     if (!activeVisualization) {
-      return;
+      return initialAttributes;
     }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
@@ -70,17 +65,13 @@ export const useCurrentAttributes = ({
       references,
       visualizationType: activeVisualization.id,
     };
-    if (!isEqual(attrs, currentAttributes)) {
-      setCurrentAttributes(attrs);
-    }
+    return attrs;
   }, [
     activeVisualization,
-    initialAttributes,
     datasourceMap,
     datasourceStates,
-    currentAttributes,
+    initialAttributes,
     textBasedMode,
-    visualization.activeId,
     visualization.state,
   ]);
 

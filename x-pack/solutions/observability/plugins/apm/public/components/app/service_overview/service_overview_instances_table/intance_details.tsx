@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -36,7 +37,6 @@ import {
 } from '../../../../../common/es_fields/infra_metrics';
 
 import { isPending } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
@@ -90,7 +90,7 @@ const cloudDetailsKeys = [
 ];
 
 export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
-  const theme = useTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const history = useHistory();
 
   const { data, status } = useInstanceDetailsFetcher({
@@ -133,6 +133,7 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
   });
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
+
   return (
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
@@ -141,7 +142,7 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
           title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
             defaultMessage: 'Service',
           })}
-          icon={getAgentIcon(data.agent?.name, theme.darkMode)}
+          icon={getAgentIcon(data.agent?.name, isDarkMode)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

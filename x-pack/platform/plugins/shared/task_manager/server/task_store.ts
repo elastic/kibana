@@ -31,7 +31,6 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
@@ -80,7 +79,6 @@ export interface StoreOpts {
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
-  spaces?: SpacesPluginStart;
 }
 
 export interface SearchOpts {
@@ -150,7 +148,6 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
-  private spaces?: SpacesPluginStart;
   private logger: Logger;
 
   /**
@@ -184,7 +181,6 @@ export class TaskStore {
     });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
-    this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.logger = opts.logger;
   }
@@ -197,6 +193,17 @@ export class TaskStore {
     return !!(this.esoClient && this.canEncryptSavedObjects);
   }
 
+  private validateCanEncryptSavedObjects(request?: KibanaRequest) {
+    if (!request) {
+      return;
+    }
+    if (!this.canEncryptSo()) {
+      throw Error(
+        'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    }
+  }
+
   private getSoClientForCreate(options: ApiKeyOptions) {
     if (options.request) {
       return this.savedObjectsService.getScopedClient(options.request, {
@@ -207,20 +214,14 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
-  private async maybeGetApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
+  private async getApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
     if (!request) {
       return null;
     }
 
     let userScopeAndApiKey;
     try {
-      userScopeAndApiKey = await getApiKeyAndUserScope(
-        taskInstances,
-        request,
-        this.canEncryptSo(),
-        this.security,
-        this.spaces
-      );
+      userScopeAndApiKey = await getApiKeyAndUserScope(taskInstances, request, this.security);
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -304,10 +305,16 @@ export class TaskStore {
     taskInstance: TaskInstance,
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance> {
+    try {
+      this.validateCanEncryptSavedObjects(options?.request);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
     this.definitions.ensureHas(taskInstance.taskType);
 
     const apiKeyAndUserScopeMap =
-      (await this.maybeGetApiKeyFromRequest([taskInstance], options?.request)) || new Map();
+      (await this.getApiKeyFromRequest([taskInstance], options?.request)) || new Map();
     const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
@@ -352,8 +359,14 @@ export class TaskStore {
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
+    try {
+      this.validateCanEncryptSavedObjects(options?.request);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
     const apiKeyAndUserScopeMap =
-      (await this.maybeGetApiKeyFromRequest(taskInstances, options?.request)) || new Map();
+      (await this.getApiKeyFromRequest(taskInstances, options?.request)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 
