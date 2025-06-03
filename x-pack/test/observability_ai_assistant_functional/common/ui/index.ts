@@ -36,6 +36,13 @@ const pages = {
     entryMarkdownEditor: 'knowledgeBaseEditManualEntryFlyoutMarkdownEditor',
     editEntryCancelButton: 'knowledgeBaseEditManualEntryFlyoutCancelButton',
     saveEntryButton: 'knowledgeBaseEditManualEntryFlyoutSaveButton',
+    newEntryButton: 'knowledgeBaseNewEntryButton',
+    bulkImportEntryButton: 'knowledgeBaseBulkImportContextMenuItem',
+    bulkImportUploadNdjson: 'knowledgeBaseBulkImportFlyoutUploadNdjsonFileInput',
+    bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
+    bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
+    bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    toastTitle: 'euiToastHeader__title'
   },
   conversations: {
     setupGenAiConnectorsButtonSelector:

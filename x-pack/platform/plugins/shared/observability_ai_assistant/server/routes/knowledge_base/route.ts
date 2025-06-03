@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
@@ -21,6 +20,7 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseState,
 } from '../../../common/types';
+import { ConversationConfidenceEnum } from '@kbn/elastic-assistant-common';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -295,12 +295,12 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     }
 
     const entries = resources.params.body.entries.map(entry => ({
-      ...entry,
-      confidence: 'high',
+      confidence: ConversationConfidenceEnum.high,
       is_correction: false,
       public: true,
       labels: {},
       role: KnowledgeBaseEntryRole.UserEntry,
+      ...entry
     }));
 
     await pRetry(
