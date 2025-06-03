@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
+import { useIntegrations } from '../../../../detection_engine/common/components/related_integrations/use_integrations';
 import { UsersQueries } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
@@ -17,10 +17,10 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import {
   ENTRA_ID_PACKAGE_NAME,
-  OKTA_PACKAGE_NAME,
   getEntraUserIndex,
   getOktaUserIndex,
   MANAGED_USER_QUERY_ID,
+  OKTA_PACKAGE_NAME,
 } from '../constants';
 import * as i18n from '../translations';
 
