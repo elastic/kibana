@@ -138,6 +138,5 @@ export const useAggregatedIndicators = ({
     isLoading,
     isFetching,
     query,
-    timezone: userTimeZone,
   };
 };
