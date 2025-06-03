@@ -20,9 +20,9 @@ import {
 } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import type { RuleTypeWithDescription } from '@kbn/triggers-actions-ui-types';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
