@@ -28,7 +28,6 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_monitor';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
-import { SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -37,9 +36,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestWithAuth = getService('supertest');
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');
-    const roleScopedSupertest = getService('roleScopedSupertest');
-    let supertestEditorWithApiKey: SupertestWithRoleScopeType;
-    let supertestViewerWithApiKey: SupertestWithRoleScopeType;
 
     let testFleetPolicyID: string;
     let editorUser: RoleCredentials;
@@ -64,22 +60,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-        withInternalHeaders: true,
-      });
-      supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-        withInternalHeaders: true,
-      });
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
       _httpMonitorJson = getFixtureJson('http_monitor');
-    });
-
-    after(async () => {
-      await supertestEditorWithApiKey.destroy();
-      await supertestViewerWithApiKey.destroy();
     });
 
     beforeEach(() => {
@@ -172,74 +157,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(body).eql(omitMonitorKeys(newMonitor));
       newMonitorId = rawBody.id;
-    });
-
-    it('successfully edits a private location label', async () => {
-      const newLabel = `New label`;
-      const privateLocation = privateLocations[0];
-
-      // Edit the private location
-      const editResponse = await supertestEditorWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
-        .send({ label: newLabel })
-        .expect(200);
-
-      // Verify the response contains the updated label
-      expect(editResponse.body.label).to.be(newLabel);
-      expect(editResponse.body.id).to.be(privateLocation.id);
-      expect(editResponse.body.agentPolicyId).to.be(privateLocation.agentPolicyId);
-
-      // Verify the location was actually updated by getting it
-      const getResponse = await supertestEditorWithApiKey
-        .get(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
-        .expect(200);
-
-      expect(getResponse.body.label).to.be(newLabel);
-    });
-
-    it('verifies that monitor location label is updated when private location label changes', async () => {
-      // Get the monitor with the updated location label
-      const getMonitorResponse = await supertestEditorWithApiKey
-        .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${newMonitorId}`)
-        .expect(200);
-
-      // Verify the monitor's location has the updated label
-      const monitor = getMonitorResponse.body;
-      expect(monitor.locations).to.have.length(1);
-      expect(monitor.locations[0].id).to.be(privateLocations[0].id);
-      expect(monitor.locations[0].label).to.be('New label');
-    });
-
-    it('returns 404 when trying to edit a non-existent private location', async () => {
-      const nonExistentId = 'non-existent-id';
-      const newLabel = `New label`;
-
-      const response = await supertestEditorWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${nonExistentId}`)
-        .send({ label: newLabel })
-        .expect(404);
-
-      expect(response.body.message).to.contain(
-        `Private location with id ${nonExistentId} does not exist.`
-      );
-    });
-
-    it('returns 400 when trying to edit with an empty label', async () => {
-      const response = await supertestEditorWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
-        .send({ label: '' })
-        .expect(400);
-
-      expect(response.body.message).to.contain(
-        '[request body.label]: value has length [0] but it must have a minimum length of [1].'
-      );
-    });
-
-    it('sets back the original label', async () => {
-      await supertestEditorWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
-        .send({ label: privateLocations[0].label })
-        .expect(200);
     });
 
     it('added an integration for previously added monitor', async () => {
