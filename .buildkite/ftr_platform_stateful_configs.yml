@@ -161,7 +161,6 @@ enabled:
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
-  - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
@@ -271,7 +270,6 @@ enabled:
   - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
-  - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
@@ -390,7 +388,9 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
+  - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
