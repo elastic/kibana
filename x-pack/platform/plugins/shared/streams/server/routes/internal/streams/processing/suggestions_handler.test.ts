@@ -15,6 +15,7 @@ import { ProcessingSuggestionBody } from './route';
 jest.mock('./simulation_handler', () => ({
   simulateProcessing: jest.fn((params) =>
     Promise.resolve({
+      documents: [],
       is_non_additive_simulation: false,
       documents_metrics: {
         parsed_rate: 1,
@@ -677,7 +678,9 @@ describe('handleProcessingSuggestion', () => {
   let inferenceClientMock: jest.Mocked<InferenceClient>;
 
   const scopedClusterClientMock = {} as unknown as ScopedClusterClient;
-  const streamsClientMock = {} as unknown as StreamsClient;
+  const streamsClientMock = {
+    getStream: jest.fn().mockResolvedValue({ name: 'test' }),
+  } as unknown as StreamsClient;
 
   const body: ProcessingSuggestionBody = {
     connectorId: 'connector1',
@@ -718,6 +721,7 @@ describe('handleProcessingSuggestion', () => {
           patterns: ['Your Grok pattern here'],
         },
         simulationResult: {
+          documents: [],
           documents_metrics: {
             parsed_rate: 1,
           },
