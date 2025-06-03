@@ -324,14 +324,14 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         appContextService
           .getLogger()
           .info(
-            `Deleting agent policy ${agentPolicyId}, associated with not allowed agentless deployment`
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
           );
 
         await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
           appContextService
             .getLogger()
             .error(
-              `Failed to delete agent policy ${agentPolicyId}, associated with not allowed agentless deployment`
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
             );
         });
       }

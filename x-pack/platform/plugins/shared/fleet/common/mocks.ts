@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DeepPartial } from 'utility-types';
+import { type DeepPartial } from '@kbn/utility-types';
 
 import type {
   AgentPolicy,
