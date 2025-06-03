@@ -28,11 +28,11 @@ describe('useInitDataViewPicker', () => {
   it('should render and dispatch an init action', () => {
     renderHook(
       () => {
-        return useInitDataViewManager();
+        return useInitDataViewManager()([]);
       },
       { wrapper: TestProviders }
     );
 
-    expect(useDispatch()).toHaveBeenCalledWith(sharedDataViewManagerSlice.actions.init());
+    expect(useDispatch()).toHaveBeenCalledWith(sharedDataViewManagerSlice.actions.init([]));
   });
 });

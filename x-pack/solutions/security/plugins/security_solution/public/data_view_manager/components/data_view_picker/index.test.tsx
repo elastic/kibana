@@ -17,6 +17,12 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
+import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../common/hooks/constants';
+
+jest.mock('../../../common/utils/global_query_string', () => ({
+  useUpdateUrlParam: jest.fn(),
+}));
 
 jest.mock('../../hooks/use_data_view_spec', () => ({
   useDataViewSpec: jest.fn(),
@@ -66,6 +72,8 @@ describe('DataViewPicker', () => {
   let mockDispatch = jest.fn();
 
   beforeEach(() => {
+    jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
+
     jest.mocked(useDataViewSpec).mockReturnValue({
       dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
@@ -113,7 +121,24 @@ describe('DataViewPicker', () => {
 
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
+    });
+  });
+
+  it('calls useUpdateUrlParam when changing the data view', () => {
+    render(
+      <TestProviders>
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId('changeDataView'));
+
+    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+      default: {
+        id: 'new-data-view-id',
+        selectedPatterns: [],
+      },
     });
   });
 
@@ -144,7 +169,7 @@ describe('DataViewPicker', () => {
     );
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
     });
   });
 
