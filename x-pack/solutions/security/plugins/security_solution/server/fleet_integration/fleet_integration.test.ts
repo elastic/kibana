@@ -1112,19 +1112,22 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy delete callback', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-    const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
-      await callback(deletePackagePolicyMock(), soClient, esClient);
-    };
-
+    let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
     let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
+      await callback(
+        deletePackagePolicyMock(),
+        endpointServicesMock.savedObjects.createInternalScopedSoClient(),
+        endpointServicesMock.getInternalEsClient()
+      );
+    };
 
     beforeEach(() => {
+      endpointServicesMock = createMockEndpointAppContextService();
+      endpointServicesMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
       fakeArtifact = {
@@ -1141,7 +1144,9 @@ describe('Fleet integrations', () => {
     });
 
     it('removes policy from artifact', async () => {
-      soClient.find.mockResolvedValueOnce({
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1183,7 +1188,9 @@ describe('Fleet integrations', () => {
         tags: [],
       });
 
-      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
+      expect(
+        endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
+      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
   });
 });
