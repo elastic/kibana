@@ -9,6 +9,8 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { RedirectApp } from './redirect_app';
 import { EuiProvider } from '@elastic/eui';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 
 const mockApiClient = {
   getInfo: jest.fn(),
@@ -16,9 +18,8 @@ const mockApiClient = {
 const mockScreenshotMode = {
   getScreenshotContext: jest.fn(),
 };
-const mockShare = {
-  navigate: jest.fn(),
-};
+const mockShare = sharePluginMock.createSetupContract();
+const historyMock = scopedHistoryMock.create();
 function setLocationSearch(search: string) {
   window.history.pushState({}, '', search);
 }
@@ -37,14 +38,14 @@ describe('RedirectApp', () => {
     setLocationSearch('?jobId=happy');
     const locatorParams = { id: 'SOME_LOCATOR', params: { foo: 'bar' } };
     mockApiClient.getInfo.mockResolvedValue({ locatorParams: [locatorParams] });
-    mockShare.navigate.mockResolvedValue(undefined);
 
     render(
       <EuiProvider>
         <RedirectApp
           apiClient={mockApiClient as any}
           screenshotMode={mockScreenshotMode as any}
-          share={mockShare as any}
+          share={mockShare}
+          history={historyMock}
         />
       </EuiProvider>
     );
@@ -67,7 +68,8 @@ describe('RedirectApp', () => {
         <RedirectApp
           apiClient={mockApiClient as any}
           screenshotMode={mockScreenshotMode as any}
-          share={mockShare as any}
+          share={mockShare}
+          history={historyMock}
         />
       </EuiProvider>
     );
@@ -98,7 +100,8 @@ describe('RedirectApp', () => {
           <RedirectApp
             apiClient={mockApiClient as any}
             screenshotMode={mockScreenshotMode as any}
-            share={mockShare as any}
+            share={mockShare}
+            history={historyMock}
           />
         </EuiProvider>
       );
@@ -139,7 +142,8 @@ describe('RedirectApp', () => {
           <RedirectApp
             apiClient={mockApiClient as any}
             screenshotMode={mockScreenshotMode as any}
-            share={mockShare as any}
+            share={mockShare}
+            history={historyMock}
           />
         </EuiProvider>
       );
