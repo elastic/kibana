@@ -8,8 +8,6 @@
  */
 
 import React from 'react';
-// TODO: ignore rule until kibana wide migration to concurrent mode has started
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, pairwise, startWith } from 'rxjs';

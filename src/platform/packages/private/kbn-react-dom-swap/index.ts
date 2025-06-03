@@ -8,7 +8,6 @@
  */
 
 import ReactDOM, { Renderer } from 'react-dom';
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot, Root } from 'react-dom/client';
 
 /**
