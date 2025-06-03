@@ -180,7 +180,7 @@ function SecondaryMetricValue({
       </EuiBadge>
     );
   }
-  return formattedValue;
+  return formattedValue ?? null;
 }
 
 export interface SecondaryMetricProps {
