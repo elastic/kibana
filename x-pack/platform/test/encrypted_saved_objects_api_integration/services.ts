@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { services as commonServices } from '../common/services';
+import { commonFunctionalServices as commonServices } from '@kbn/ftr-common-functional-services';
 
 export const services = {
   ...commonServices,
