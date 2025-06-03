@@ -165,7 +165,8 @@ describe('Add Integration - Real API', () => {
       const packageComboBox = cy.getBySel(ADD_INTEGRATION_FLYOUT.SELECT_INTEGRATION_COMBOBOX);
       packageComboBox.click();
       cy.wait('@1passwordPackage');
-      packageComboBox.type('{downArrow}{enter}');
+      cy.wait(100);
+      cy.get('[title="1Password"]').click();
       cy.getBySel(ADD_INTEGRATION_FLYOUT.PASSWORD_INPUT).type('test');
       cy.getBySel(ADD_INTEGRATION_FLYOUT.SUBMIT_BTN).click();
       cy.get('.euiBasicTable-loading').should('not.exist');
