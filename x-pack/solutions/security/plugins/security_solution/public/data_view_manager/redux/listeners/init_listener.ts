@@ -15,6 +15,23 @@ import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 
+/**
+ * Creates a Redux listener for initializing the Data View Manager state.
+ *
+ * This listener is responsible for:
+ * - Creating and preloading the default security data view using the provided dependencies.
+ * - Fetching all available data views and dispatching them to the store for use in selectors.
+ * - Preloading the default data view for all defined scopes (detections, analyzer, timeline, default),
+ *   but only for those scopes that have not already been initialized.
+ * - Handling any additional data view selections provided in the action payload (e.g., from URL storage).
+ * - Dispatching an error action if initialization fails.
+ *
+ * The listener ensures that race conditions are avoided by only initializing scopes that are not already set,
+ * and that state is not reset for slices that already have selections.
+ *
+ * @param dependencies - Core and plugin services required for data view creation and retrieval.
+ * @returns An object with the actionCreator and effect for Redux listener middleware.
+ */
 export const createInitListener = (dependencies: {
   http: CoreStart['http'];
   application: CoreStart['application'];
@@ -51,19 +68,23 @@ export const createInitListener = (dependencies: {
         // Preload the default data view for all the scopes
         // Immediate calls that would dispatch this call from other places will cancel this action,
         // preventing race conditions
+        // Whats more, portions of the state that already have selections applied to them will not be reset in the init listener.
         [
           DataViewManagerScopeName.detections,
           DataViewManagerScopeName.analyzer,
           DataViewManagerScopeName.timeline,
           DataViewManagerScopeName.default,
-        ].forEach((scope) => {
-          listenerApi.dispatch(
-            selectDataViewAsync({
-              id: defaultDataView.id,
-              scope,
-            })
-          );
-        });
+        ]
+          // NOTE: only init default data view for slices that are not initialized yet
+          .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
+          .forEach((scope) => {
+            listenerApi.dispatch(
+              selectDataViewAsync({
+                id: defaultDataView.id,
+                scope,
+              })
+            );
+          });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)
         action.payload.forEach((defaultSelection) => {
