@@ -106,20 +106,19 @@ export class FeaturesTooltip extends Component<Props, State> {
 
     return this.state.currentFeature.actions.map((action) => {
       return (
-        <div css={componentStyles.actionLinksStyles}>
-          <EuiLink
-            onClick={() => {
-              if (action.onClick) {
-                action.onClick();
-              } else if (action.form) {
-                this.setState({ view: action.id });
-              }
-            }}
-            key={action.id}
-          >
-            {action.label}
-          </EuiLink>
-        </div>
+        <EuiLink
+          css={componentStyles.actionLinksStyles}
+          onClick={() => {
+            if (action.onClick) {
+              action.onClick();
+            } else if (action.form) {
+              this.setState({ view: action.id });
+            }
+          }}
+          key={action.id}
+        >
+          {action.label}
+        </EuiLink>
       );
     });
   }
