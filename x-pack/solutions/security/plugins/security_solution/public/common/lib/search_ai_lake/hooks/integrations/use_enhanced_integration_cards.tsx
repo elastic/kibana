@@ -30,7 +30,10 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
 ];
 const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
-const addPathParamToUrl = (url: string, path: string) => {
+const addPathParamToUrl = (url: string, path: string | undefined) => {
+  if (!path) {
+    return undefined;
+  }
   const encodedPath = encodeURIComponent(path);
   const paramsString = `${RETURN_APP_ID}=${SECURITY_UI_APP_ID}&${RETURN_PATH}=${encodedPath}`;
 
@@ -46,15 +49,13 @@ export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
 
 export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
-  callerView: IntegrationsFacets,
   options?: EnhancedCardOptions
 ): IntegrationCardItem => {
-  const returnPath = options?.returnPath ?? `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
-  const url = addPathParamToUrl(card.url, returnPath);
+  const url = addPathParamToUrl(card.url, options?.returnPath ?? undefined);
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
-    url,
+    url: url ?? card.url,
     showInstallationStatus: options?.showInstallationStatus,
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
@@ -94,7 +95,7 @@ export const useEnhancedIntegrationCards = (
   const available = useMemo(
     () =>
       sorted.map((card) =>
-        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, {
+        applyCategoryBadgeAndStyling(card, {
           ...options,
           hasDataStreams: activeIntegrations.some(({ name }) => name === card.name),
         })
@@ -105,13 +106,18 @@ export const useEnhancedIntegrationCards = (
   const installed = useMemo(
     () =>
       sorted
-        .map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.installed))
+        .map((card) =>
+          applyCategoryBadgeAndStyling(card, {
+            ...options,
+            returnPath: `${CONFIGURATIONS_PATH}/integrations/${IntegrationsFacets.installed}`,
+          })
+        )
         .filter(
           (card) =>
             card.installStatus === installationStatuses.Installed ||
             card.installStatus === installationStatuses.InstallFailed
         ),
-    [sorted]
+    [sorted, options]
   );
 
   return { available, installed };
