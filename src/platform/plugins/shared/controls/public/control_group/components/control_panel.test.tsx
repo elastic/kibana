@@ -53,8 +53,7 @@ describe('render', () => {
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
-        // TODO: fix this test one after solving https://github.com/elastic/kibana/issues/216459
-        // expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
+        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
         expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
       });
     });
@@ -67,6 +66,7 @@ describe('render', () => {
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
+        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
         expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
       });
     });

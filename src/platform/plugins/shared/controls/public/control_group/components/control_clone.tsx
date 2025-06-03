@@ -22,9 +22,10 @@ import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoizedStyles } from '@kbn/core/public';
 
+import classNames from 'classnames';
 import { DEFAULT_CONTROL_GROW } from '../../../common';
 import { DefaultControlApi } from '../../controls/types';
-import { responsiveControlWidthStyles, controlPanelWidthStyles } from './control_panel.styles';
+import { controlWidthStyles } from './control_panel.styles';
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
@@ -48,7 +49,14 @@ export const ControlClone = ({
   const styles = useMemoizedStyles(controlCloneStyles);
 
   return (
-    <EuiFlexItem css={[styles.container, controlPanelWidthStyles(width)]}>
+    <EuiFlexItem
+      css={styles.container}
+      className={classNames({
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--large': width === 'large',
+      })}
+    >
       {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
@@ -69,7 +77,7 @@ const controlCloneStyles = {
     css({
       width: 'max-content',
     }),
-    responsiveControlWidthStyles(context),
+    controlWidthStyles(context),
   ],
   grabIcon: css({ cursor: 'grabbing' }),
   dragContainer: (context: UseEuiTheme) =>

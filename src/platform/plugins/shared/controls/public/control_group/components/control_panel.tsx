@@ -33,7 +33,7 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 import { isCompressed } from '../utils/is_compressed';
-import { controlPanelWidthStyles, responsiveControlWidthStyles } from './control_panel.styles';
+import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
@@ -117,11 +117,12 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       data-control-id={uuid}
       data-test-subj="control-frame"
       data-render-complete="true"
-      css={css([
-        isDragging && styles.draggingItem,
-        styles.responsiveControlWidthStyles,
-        controlPanelWidthStyles(controlWidth),
-      ])}
+      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
+      className={classNames({
+        'controlFrameWrapper--medium': controlWidth === 'medium',
+        'controlFrameWrapper--small': controlWidth === 'small',
+        'controlFrameWrapper--large': controlWidth === 'large',
+      })}
     >
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
@@ -280,5 +281,5 @@ const controlPanelStyles = {
   draggingItem: css({
     opacity: 0,
   }),
-  responsiveControlWidthStyles,
+  controlWidthStyles,
 };

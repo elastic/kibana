@@ -8,47 +8,22 @@
  */
 
 import { UseEuiTheme, euiBreakpoint } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { ControlWidth } from '../../../common/types';
 
-const euiSize = parseInt(euiThemeVars.euiSize, 10);
-
-const smallControlWidth = euiSize * 14;
-const mediumControlWidth = euiSize * 25;
-const largeControlWidth = euiSize * 50;
-
-export const controlWidthStyles = {
-  small: css({
-    minWidth: `${smallControlWidth}px`,
-    width: `${smallControlWidth}px`,
-  }),
-  medium: css({
-    minWidth: `${mediumControlWidth}px`,
-    width: `${mediumControlWidth}px`,
-  }),
-  large: css({
-    minWidth: `${largeControlWidth}px`,
-    width: `${largeControlWidth}px`,
-  }),
-};
-
-export const controlPanelWidthStyles = (width: boolean | ControlWidth | undefined) => {
-  switch (width) {
-    case 'small':
-      return controlWidthStyles.small;
-    case 'medium':
-      return controlWidthStyles.medium;
-    case 'large':
-      return controlWidthStyles.large;
-    default:
-      return undefined;
-  }
-};
-
-export const responsiveControlWidthStyles = (euiThemeContext: UseEuiTheme) => css`
-  ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-    width: 100%;
-    min-width: unset;
-  }
-`;
+export const controlWidthStyles = (euiThemeContext: UseEuiTheme) => ({
+  '&.controlFrameWrapper--small': {
+    width: `${euiThemeContext.euiTheme.base * 14}px`,
+    minWidth: `${euiThemeContext.euiTheme.base * 14}px`,
+  },
+  '&.controlFrameWrapper--large': {
+    width: `${euiThemeContext.euiTheme.base * 50}px`,
+    minWidth: `${euiThemeContext.euiTheme.base * 50}px`,
+  },
+  '&.controlFrameWrapper--medium': {
+    width: `${euiThemeContext.euiTheme.base * 25}px`,
+    minWidth: `${euiThemeContext.euiTheme.base * 25}px`,
+  },
+  [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+    width: '100%',
+    minWidth: 'unset',
+  },
+});
