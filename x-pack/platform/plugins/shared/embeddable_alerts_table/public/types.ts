@@ -9,6 +9,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import type { DefaultEmbeddableApi, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
+  HasEditCapabilities,
+  HasParentApi,
   PublishesDataLoading,
   SerializedTimeRange,
   SerializedTitles,
@@ -18,6 +20,9 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
+import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePublicSetup {}
@@ -40,7 +45,26 @@ export interface EmbeddableAlertsTablePublicStartDependencies {
   cases: CasesPublicStart;
 }
 
-export type EmbeddableAlertsTableSerializedState = SerializedTitles & SerializedTimeRange;
+export type EmbeddableAlertsTableSerializedState = SerializedTitles &
+  SerializedTimeRange & {
+    tableConfig: EmbeddableAlertsTableConfig;
+  };
 
 export type EmbeddableAlertsTableApi = DefaultEmbeddableApi<EmbeddableAlertsTableSerializedState> &
-  PublishesDataLoading;
+  PublishesDataLoading &
+  HasEditCapabilities &
+  Partial<HasParentApi<PresentationContainer>>;
+
+/**
+ * The type of the filters expression used in the embeddable alerts table.
+ * This will allow us to add more query types in the future (e.g. `{ type: 'kql', kuery: string }`).
+ */
+export interface EmbeddableAlertsTableQuery {
+  type: 'alertsFilters';
+  filters: AlertsFiltersExpression;
+}
+
+export interface EmbeddableAlertsTableConfig {
+  solution: RuleTypeSolution;
+  query: EmbeddableAlertsTableQuery;
+}

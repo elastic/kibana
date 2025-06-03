@@ -160,6 +160,11 @@ export interface HealthOverviewStats {
    * N most frequent warning messages logged by rule(s) to Event Log.
    */
   top_warnings?: TopMessages;
+
+  /**
+   * Max count of frozen indices queried during rule execution
+   */
+  frozen_indices_queried_max_count: number;
 }
 
 /**

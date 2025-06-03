@@ -16,12 +16,14 @@ import { FleetAndAgentsProvider } from './fleet_and_agents';
 import { SpacesServiceProvider } from './spaces';
 import { SearchSecureProvider } from './search_secure';
 import { TransformProvider } from './transform';
+import { IndexManagementProvider } from './index_management';
 
 export const services = {
   ...kibanaApiIntegrationServices,
   aiops: AiopsProvider,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
+  indexManagement: IndexManagementProvider,
   ingestPipelines: IngestPipelinesProvider,
   fleetAndAgents: FleetAndAgentsProvider,
   secureSearch: SearchSecureProvider,

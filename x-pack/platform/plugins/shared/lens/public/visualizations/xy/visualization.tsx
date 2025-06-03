@@ -754,10 +754,7 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
     const palettes = getKbnPalettes(theme);
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
@@ -1360,6 +1357,7 @@ export const stackingTypes = [
       defaultMessage: 'Stacked',
     }),
     subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+    dataTestSubj: 'lnsStackingOptionsButtonStacked',
   },
   {
     type: 'unstacked',
@@ -1367,6 +1365,7 @@ export const stackingTypes = [
       defaultMessage: 'Unstacked',
     }),
     subtypes: ['bar', 'area', 'bar_horizontal'],
+    dataTestSubj: 'lnsStackingOptionsButtonUnstacked',
   },
   {
     type: 'percentage',
@@ -1378,6 +1377,7 @@ export const stackingTypes = [
       'area_percentage_stacked',
       'bar_horizontal_percentage_stacked',
     ],
+    dataTestSubj: 'lnsStackingOptionsButtonPercentage',
   },
 ];
 
@@ -1395,10 +1395,11 @@ const SubtypeSwitch = ({
     return null;
   }
   const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
-  const options = stackingTypes.map(({ label, subtypes }) => ({
+  const options = stackingTypes.map(({ label, subtypes, dataTestSubj }) => ({
     label,
     value: subtypes[subTypeIndex],
     checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+    'data-test-subj': dataTestSubj,
   }));
 
   return (
@@ -1415,6 +1416,7 @@ const SubtypeSwitch = ({
             fullWidth
             size="s"
             label={stackingType.label}
+            data-test-subj="lnsStackingOptionsButton"
           />
         }
         isOpen={flyoutOpen}

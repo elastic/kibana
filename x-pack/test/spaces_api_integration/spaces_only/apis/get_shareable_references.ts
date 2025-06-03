@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getTestScenarios } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
+import { getTestScenarios } from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/saved_object_test_utils';
+
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import type { GetShareableReferencesTestCase } from '../../common/suites/get_shareable_references';

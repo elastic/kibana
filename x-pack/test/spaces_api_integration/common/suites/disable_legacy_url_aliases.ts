@@ -11,13 +11,13 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
-
-import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
+import { getUrlPrefix } from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/saved_object_test_utils';
 import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
-} from '../../../saved_object_api_integration/common/lib/types';
+} from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/types';
+
 import { SPACES } from '../lib/spaces';
 
 export interface DisableLegacyUrlAliasesTestDefinition extends TestDefinition {

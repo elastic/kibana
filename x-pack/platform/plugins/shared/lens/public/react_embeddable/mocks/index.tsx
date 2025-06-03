@@ -19,6 +19,8 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
@@ -79,6 +81,7 @@ function getDefaultLensApiMock() {
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
+    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',
@@ -119,7 +122,7 @@ export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['att
   return deepMerge(getDefaultLensSerializedStateMock().attributes!, attributes ?? {});
 }
 
-export function getLensApiMock(overrides: Partial<LensApi> = {}) {
+export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
   return {
     ...getDefaultLensApiMock(),
     ...overrides,
@@ -207,6 +210,7 @@ export function makeEmbeddableServices(
           } as EmbeddableDynamicActionsManager)
       ),
     },
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
 }
 
@@ -315,5 +319,12 @@ export function createUnifiedSearchApi(
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+  };
+}
+
+export function createParentApiMock(overrides: object = {}) {
+  return {
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
+    ...overrides,
   };
 }

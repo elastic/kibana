@@ -35,6 +35,7 @@ import {
 import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -619,7 +620,7 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', () => {
+  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', async () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -647,7 +648,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
-    screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
+    await userEvent.click(screen.getByTestId(CLOUD_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -661,7 +662,7 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', () => {
+  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', async () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -689,7 +690,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+    await userEvent.click(screen.getByTestId(KUBERNETES_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],

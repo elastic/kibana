@@ -7,10 +7,8 @@
 import { useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
-import { securityLink } from '@kbn/security-solution-navigation/links';
 import type { LinkInfo, NormalizedLink, NormalizedLinks } from './types';
 import { applicationLinksUpdater } from '../../app/links/application_links_updater';
-import { useKibana } from '../lib/kibana/kibana_react';
 
 /**
  * Hook to get the normalized app links updated value
@@ -20,18 +18,6 @@ export const useNormalizedAppLinks = (): NormalizedLinks =>
     applicationLinksUpdater.normalizedLinks$,
     applicationLinksUpdater.getNormalizedLinksValue()
   );
-
-/**
- * Hook to check if a link is registered in the nav links (plugin deepLinks)
- * A link is only registered if authorized and exists in the navigationTree hierarchy.
- * Warning: this hook does not update the value when the navLinks change. It should not be a problem
- * since the deepLinks are only updated during the plugin lifecycle or license changes, which require a page reload.
- */
-export const useNavLinkExists = (id: SecurityPageName): boolean => {
-  const { navLinks } = useKibana().services.chrome;
-  const navLinkExists = useMemo(() => navLinks.has(securityLink(id)), [navLinks, id]);
-  return navLinkExists;
-};
 
 /**
  * Hook to get the link info from the application links.
