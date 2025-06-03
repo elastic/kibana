@@ -67,8 +67,6 @@ describe('render', () => {
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
-        // TODO: fix this test one after solving https://github.com/elastic/kibana/issues/216459
-        // expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
         expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
       });
     });
@@ -84,7 +82,7 @@ describe('render', () => {
       };
       await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
       const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
-      expect(floatingActions).toHaveStyleRule('box-shadow', '0 0 0 1px #CAD3E2');
+      expect(floatingActions).toHaveClass('controlFrameFloatingActions--oneLine');
     });
 
     test('should use two line layout class when using two line layout', async () => {
@@ -96,7 +94,7 @@ describe('render', () => {
       };
       await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
       const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
-      expect(floatingActions).toHaveStyleRule('top', '-4px!important');
+      expect(floatingActions).toHaveClass('controlFrameFloatingActions--twoLine');
     });
   });
 });
