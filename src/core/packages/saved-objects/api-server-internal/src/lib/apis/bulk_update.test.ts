@@ -620,6 +620,28 @@ describe('#bulkUpdate', () => {
           2
         );
       });
+
+      it('migrates using the object namespace', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespace: 'test',
+          },
+          true,
+          2
+        );
+      });
     });
 
     describe('returns', () => {

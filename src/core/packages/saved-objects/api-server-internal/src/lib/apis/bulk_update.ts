@@ -310,7 +310,7 @@ export const performBulkUpdate = async <T>(
         ...migrated!,
         id,
         type,
-        namespace,
+        namespace: getNamespaceId(objectNamespace),
         namespaces,
         attributes: updatedAttributes,
         updated_at: time,
