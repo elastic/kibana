@@ -112,13 +112,6 @@ export const fleetAgentsSchema: RootSchema<any> = {
               description: 'Number of agents enrolled whose output uses the latency preset',
             },
           },
-          sync_integrations: {
-            type: 'boolean',
-            _meta: {
-              description:
-                'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
-            },
-          },
         },
       },
       output_preset: {
@@ -138,6 +131,13 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agents enrolled that use this output type as monitoring output',
+        },
+      },
+      sync_integrations: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
         },
       },
     },
