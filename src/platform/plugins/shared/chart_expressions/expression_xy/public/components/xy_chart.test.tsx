@@ -891,7 +891,7 @@ describe('XYChart component', () => {
       expect(linePointStyle.visible).toBe('auto');
     });
 
-    test(`should be 'always' when showPoints is 'true'`, () => {
+    test(`should be 'always' when pointVisibility is undefined and showPoints is 'true'`, () => {
       const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
         showPoints: true,
       });
@@ -900,13 +900,13 @@ describe('XYChart component', () => {
       expect(linePointStyle.visible).toBe('always');
     });
 
-    test(`should be 'never' when showPoints is 'false'`, () => {
+    test(`should be 'auto' when pointVisibility is undefined and showPoints is 'false'`, () => {
       const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
         showPoints: false,
       });
 
-      expect(areaPointStyle.visible).toBe('never');
-      expect(linePointStyle.visible).toBe('never');
+      expect(areaPointStyle.visible).toBe('auto');
+      expect(linePointStyle.visible).toBe('auto');
     });
   });
 
