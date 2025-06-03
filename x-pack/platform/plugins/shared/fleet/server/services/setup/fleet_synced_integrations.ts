@@ -73,6 +73,7 @@ export const canEnableSyncIntegrations = () => {
 };
 
 export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+  appContextService.getLogger().debug('Create or update fleet-synced-integrations index');
   await createOrUpdateIndex(
     esClient,
     FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
