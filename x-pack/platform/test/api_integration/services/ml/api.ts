@@ -852,18 +852,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         log.debug('> no such AD job found, nothing to delete.');
         return;
       }
-
+      console.log('eee1');
       const datafeedId = `datafeed-${jobId}`;
       if ((await this.datafeedExist(datafeedId)) === true) {
         await this.deleteDatafeedES(datafeedId);
       }
-
+      console.log('eee');
       const { body, status } = await esSupertest
         .delete(`/_ml/anomaly_detectors/${jobId}`)
         .query({ force: true });
+      console.log('eee2');
       this.assertResponseStatusCode(200, status, body);
-
+      console.log('eee3');
       await this.waitForAnomalyDetectionJobNotToExist(jobId);
+      console.log('eee4');
       log.debug('> AD job deleted.');
     },
 
@@ -943,6 +945,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .delete(`/_ml/datafeeds/${datafeedId}`)
         .query({ force: true });
       this.assertResponseStatusCode(200, status, body);
+      console.log('acabao datafeed');
 
       await this.waitForDatafeedToNotExist(datafeedId);
       log.debug('> Datafeed deleted.');
