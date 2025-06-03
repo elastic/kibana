@@ -29,14 +29,13 @@ import {
 import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import useObservable from 'react-use/lib/useObservable';
-import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId } from '@kbn/transpose-utils';
+import { useKbnPalettes } from '@kbn/palettes';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import { CoreTheme } from '@kbn/core/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
 import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
-import { getKbnPalettes } from '@kbn/palettes';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
@@ -84,8 +83,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const theme = useObservable<CoreTheme>(props.theme.theme$, props.theme.getTheme());
-  const palettes = getKbnPalettes(theme);
+  const isDarkMode = useKibanaIsDarkMode();
+  const palettes = useKbnPalettes();
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -420,7 +419,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         palettes,
         data,
         colorByTerms,
-        theme.darkMode,
+        isDarkMode,
         syncColors,
         palette,
         colorMapping
@@ -434,14 +433,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       formatters,
       columnConfig,
       DataContext,
-      theme.darkMode,
+      isDarkMode,
       getCellColor,
       props.args.fitRowToContent
     );
   }, [
     formatters,
     columnConfig,
-    theme.darkMode,
+    isDarkMode,
     props.args.fitRowToContent,
     props.paletteService,
     palettes,

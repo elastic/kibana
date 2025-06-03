@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
-
-import { useDarkMode } from '../kibana';
-
-export const useEuiTheme = () => {
-  const darkMode = useDarkMode();
-  return darkMode ? darkTheme : lightTheme;
-};
+export enum ConfigurationTabs {
+  integrations = 'integrations',
+  basicRules = 'basic_rules',
+  aiSettings = 'ai_settings',
+}

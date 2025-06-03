@@ -55,7 +55,12 @@ export const command = {
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
     const reactVersion = process.env.REACT_18 ? '18' : '17';
-    const euiAmsterdam = process.env.EUI_AMSTERDAM === 'true';
+
+    // Default to true when EUI_AMSTERDAM is not set on 8.19
+    // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
+    // https://github.com/elastic/kibana/issues/221593
+    const euiAmsterdam = !process.env.EUI_AMSTERDAM || process.env.EUI_AMSTERDAM === 'true';
+
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
