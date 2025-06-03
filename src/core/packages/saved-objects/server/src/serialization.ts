@@ -93,7 +93,7 @@ export interface SavedObjectsRawDocSource {
   references?: SavedObjectReference[];
   originId?: string;
   managed?: boolean;
-  accessControlCapabilities?: SavedObjectAccessControl;
+  accessControl?: SavedObjectAccessControl;
   [typeMapping: string]: any;
 }
 
@@ -118,7 +118,7 @@ export interface SavedObjectDoc<T = unknown> {
   created_by?: string;
   originId?: string;
   managed?: boolean;
-  accessControlCapabilities?: SavedObjectAccessControl;
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**

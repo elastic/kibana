@@ -37,8 +37,16 @@ export type SavedObjectAttributeSingle =
  */
 export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
+/**
+ * Definition of the Saved Object access control interface
+ *
+ * @public
+ */
+
 export interface SavedObjectAccessControl {
+  /** The ID of the user who owns this object. */
   owner: string;
+  /** The access mode of the object. `read_only` is editable only by the owner and admin users */
   accessMode: 'read_only' | undefined;
 }
 
@@ -120,5 +128,5 @@ export interface SavedObject<T = unknown> {
    */
   managed?: boolean;
 
-  accessControlCapabilities?: SavedObjectAccessControl;
+  accessControl?: SavedObjectAccessControl;
 }
