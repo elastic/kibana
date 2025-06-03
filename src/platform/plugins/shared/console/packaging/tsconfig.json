@@ -45,6 +45,15 @@
     "@kbn/cloud-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-router-server-internal",
+    "@kbn/core-doc-links-browser-internal",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-execution-context-browser-internal",
+    "@kbn/core-fatal-errors-browser-internal",
+    "@kbn/core-analytics-browser-internal",
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-i18n-browser-internal",
   ],
   "exclude": [
     "target/**/*"
