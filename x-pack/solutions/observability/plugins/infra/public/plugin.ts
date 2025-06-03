@@ -71,10 +71,12 @@ export class Plugin implements InfraClientPluginClass {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private isKubernetesIntgegrationsInstalled: boolean;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+    this.isKubernetesIntgegrationsInstalled = false;
 
     this.inventoryViews = new InventoryViewsService();
     this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
@@ -175,6 +177,15 @@ export class Plugin implements InfraClientPluginClass {
                         app: 'metrics',
                         path: '/hosts',
                       },
+                      ...(this.isKubernetesIntgegrationsInstalled
+                        ? [
+                            {
+                              label: 'Kubernetes',
+                              app: 'metrics',
+                              path: '/kubernetes',
+                            },
+                          ]
+                        : []),
                     ],
                   },
                 ]
@@ -228,8 +239,10 @@ export class Plugin implements InfraClientPluginClass {
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
       metricsExplorerEnabled,
+      isKubernetesIntgegrationsInstalled,
     }: {
       metricsExplorerEnabled: boolean;
+      isKubernetesIntgegrationsInstalled: boolean;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
@@ -256,6 +269,16 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Metrics Explorer',
                 }),
                 path: '/explorer',
+              },
+            ]
+          : []),
+        ...(isKubernetesIntgegrationsInstalled
+          ? [
+              {
+                label: 'Kubernetes',
+                app: 'metrics',
+                path: '/kubernetes',
+                visibleIn,
               },
             ]
           : []),
@@ -287,11 +310,16 @@ export class Plugin implements InfraClientPluginClass {
       updater$: this.appUpdater$,
       deepLinks: getInfraDeepLinks({
         metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+        isKubernetesIntgegrationsInstalled: this.isKubernetesIntgegrationsInstalled,
       }),
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
+        this.isKubernetesIntgegrationsInstalled = await isIntegrationInstalled(
+          'kubernetes',
+          core.http
+        );
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
@@ -313,6 +341,7 @@ export class Plugin implements InfraClientPluginClass {
       this.appUpdater$.next(() => ({
         deepLinks: getInfraDeepLinks({
           metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+          isKubernetesIntgegrationsInstalled: this.isKubernetesIntgegrationsInstalled,
         }),
       }));
     });
@@ -385,3 +414,16 @@ const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry =>
   label: title,
   path,
 });
+
+const isIntegrationInstalled = async (packageName: string, http: CoreStart['http']) => {
+  try {
+    const { item: integration } = await http.get<{
+      item: { version: string; status: string };
+    }>(`/api/fleet/epm/packages/${packageName}`, {
+      headers: { 'Elastic-Api-Version': '2023-10-31' },
+    });
+    return integration.status === 'installed';
+  } catch (error) {
+    return false;
+  }
+};
