@@ -42,7 +42,7 @@ export const TableRowActions: React.FunctionComponent<{
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
-  const isFleetServerAgent = agent.local_metadata?.elastic?.agent?.type === 'fleet-server';
+  const isFleetServerAgent = agent.components?.some((c) => c.type === 'fleet-server') ?? false;
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [

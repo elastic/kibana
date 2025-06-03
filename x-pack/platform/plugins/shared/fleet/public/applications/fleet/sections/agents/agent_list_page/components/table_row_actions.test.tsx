@@ -119,7 +119,7 @@ describe('TableRowActions', () => {
         agent: {
           active: true,
           status: 'online',
-          local_metadata: { elastic: { agent: { version: '8.8.0', type: 'fleet-server' } } },
+          components: [{ type: 'fleet-server' }],
         } as any,
         agentPolicy: {
           is_managed: true,
