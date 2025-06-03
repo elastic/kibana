@@ -147,7 +147,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
         fieldsExistenceStatus: ExistenceFetchStatus.unknown,
       },
       hookParams: {
-        dataViewId: dataView.id!,
+        dataViewId: dataView.id ?? null,
         allFields,
       },
     });
