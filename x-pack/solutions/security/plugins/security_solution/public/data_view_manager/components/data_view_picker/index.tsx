@@ -10,17 +10,19 @@ import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { DataViewManagerScopeName } from '../../constants';
+import type { SourcererUrlState } from '../../../sourcerer/store/model';
+import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DATA_VIEW_PICKER_TEST_ID } from './constants';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
+import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 
 interface DataViewPickerProps {
   /**
@@ -49,24 +51,43 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
   const { dataViewSpec, status } = useDataViewSpec(scope);
 
+  const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
+
   const dataViewId = dataViewSpec?.id;
+
+  // NOTE: this function is called in response to user interaction with the picker,
+  // hence - it is the only place where we should update the url param for the data view selection.
+  const handleChangeDataView = useCallback(
+    (id: string, indexPattern: string = '') => {
+      selectDataView({ id, scope });
+
+      if (isDefaultSourcerer) {
+        updateUrlParam({
+          [DataViewManagerScopeName.default]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
+    },
+    [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
+  );
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
+        if (!newDataView.id) {
+          return;
+        }
+
         dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
-        selectDataView({ id: newDataView.id, scope: [scope] });
+        handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
       },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, dispatch, scope, selectDataView]);
-
-  const handleChangeDataView = useCallback(
-    (id: string) => {
-      selectDataView({ id, scope: [scope] });
-    },
-    [scope, selectDataView]
-  );
+  }, [dataViewEditor, dispatch, handleChangeDataView]);
 
   const editField = useCallback(
     async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
@@ -86,7 +107,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
             return;
           }
 
-          handleChangeDataView(dataViewInstance.id);
+          handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
         },
       });
     },
@@ -98,9 +119,12 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
    */
   const handleDataViewModified = useCallback(
     (updatedDataView: DataView) => {
-      selectDataView({ id: updatedDataView.id, scope: [scope] });
+      if (!updatedDataView.id) {
+        return;
+      }
+      handleChangeDataView(updatedDataView.id, updatedDataView.getIndexPattern());
     },
-    [scope, selectDataView]
+    [handleChangeDataView]
   );
 
   const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
