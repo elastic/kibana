@@ -135,8 +135,8 @@ export const strings = {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
   getPointVisibilityHelp: () =>
-    i18n.translate('expressionXY.xyVis.pointVisibility.help', {
-      defaultMessage: 'Define the line/area chart point visibility',
+    i18n.translate('expressionXY.layeredXyVis.pointVisibility.help', {
+      defaultMessage: 'Specifies the line/area chart point visibility',
     }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {

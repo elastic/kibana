@@ -255,7 +255,6 @@ export interface XYArgs extends DataLayerArgs {
   detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
-  pointVisibility?: PointVisibility;
 }
 
 export interface ExpressionAnnotationsLayers {
