@@ -29,6 +29,10 @@
     "@kbn/inference-common",
     "@kbn/logging-mocks",
     "@kbn/zod",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
+    "@kbn/storage-adapter",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils-server"
   ]
 }
