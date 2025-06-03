@@ -37,7 +37,7 @@ export async function getAppTarget(
   // an ad hoc data view to ensure the data view spec gets encoded in the URL
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
 
-  const urlWithoutLocationState = await discoverServices.locator.getUrl(locatorParams);
+  const urlWithoutLocationState = await discoverServices.locator.getUrl({});
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
     : urlWithoutLocationState;
