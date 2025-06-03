@@ -11,11 +11,7 @@
     "id": "share",
     "browser": true,
     "server": true,
-    "requiredBundles": [
-      "kibanaUtils"
-    ],
-    "optionalPlugins": [
-      "taskManager"
-    ],
+    "requiredBundles": ["kibanaUtils"],
+    "optionalPlugins": ["licensing", "taskManager"]
   }
 }
