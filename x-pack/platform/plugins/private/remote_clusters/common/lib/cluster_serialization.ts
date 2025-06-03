@@ -195,14 +195,14 @@ export function serializeCluster(
     mode: mode || null,
     ...(mode === PROXY_MODE
       ? {
-        proxy_address: proxyAddress || null,
-        proxy_socket_connections: proxySocketConnections || null,
-        server_name: serverName || null,
-      }
+          proxy_address: proxyAddress || null,
+          proxy_socket_connections: proxySocketConnections || null,
+          server_name: serverName || null,
+        }
       : {
-        seeds: seeds || null,
-        node_connections: nodeConnections || null,
-      }),
+          seeds: seeds || null,
+          node_connections: nodeConnections || null,
+        }),
   };
 
   // If the cluster is been deleted, we need to set all values to null
