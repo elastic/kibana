@@ -39,7 +39,7 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_
 import { prefixReferencesFromPanel } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
-import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
+import { getDashboardPanelPlacementSetting } from '../panel_placement/get_panel_placement_settings';
 import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { PanelPlacementStrategy } from '../plugin_constants';
@@ -48,7 +48,6 @@ import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { areLayoutsEqual } from './are_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
 import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from './types';
-import { PanelPlacementSettings } from '../panel_placement/types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -166,18 +165,7 @@ export function initializeLayoutManager(
         },
       };
     }
-    const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
-    let customPlacementSettings: undefined | PanelPlacementSettings;
-    if (getCustomPlacementSettingFunc) {
-      try {
-        customPlacementSettings = await getCustomPlacementSettingFunc(serializedState);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `Unable to get panel placement settings; serizliedState: ${serializedState}, error: ${e}`
-        );
-      }
-    }
+    const customPlacementSettings = await getDashboardPanelPlacementSetting(type, serializedState);
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
       customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
       {
