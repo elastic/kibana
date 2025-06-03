@@ -1,0 +1,79 @@
+---
+# This file is used to generate "Enterprise Search settings in Kibana" page in the product docs
+
+product: Kibana
+collection: Enterprise Search settings in Kibana
+page_description: |
+  On Elastic Cloud, you do not need to configure any settings to use Enterprise Search in {kib}. It is enabled by default. On self-managed installations, you must configure `enterpriseSearch.host`.
+
+groups:
+  - group: All settings
+    id: general-enterprise-search-settings
+    # description: |
+    #  - ""
+    # example: example-group-name.asciidoc
+    settings:
+
+      - setting: enterpriseSearch.host
+        # id:
+        description: |
+          The http(s) URL of your Enterprise Search instance. Authentication between {kib} and the Enterprise Search host URL, such as via OAuth, is not supported. You can also {enterprise-search-ref}/configure-ssl-tls.html#configure-ssl-tls-in-kibana[configure {kib} to trust your Enterprise Search TLS certificate authority].
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        example: |
+          In a local self-managed setup, set this to `http://localhost:3002`.
+
+      - setting: enterpriseSearch.accessCheckTimeout
+        # id:
+        description: |
+          When launching the Enterprise Search UI, the maximum number of milliseconds for {kib} to wait for a response from Enterprise Search before considering the attempt failed and logging a warning.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 5000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: enterpriseSearch.accessCheckTimeoutWarning
+        # id:
+        description: |
+          When launching the Enterprise Search UI, the maximum number of milliseconds for {kib} to wait for a response from Enterprise Search before logging a warning.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 300
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
