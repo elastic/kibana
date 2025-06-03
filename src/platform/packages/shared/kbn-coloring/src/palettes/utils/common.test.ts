@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPaletteRegistry } from './mocks/palettes_registry';
+import { getPaletteRegistry } from '../mocks/palettes_registry';
 import {
   applyPaletteParams,
   getDataMinMax,
@@ -15,7 +15,7 @@ import {
   getStepValue,
   remapStopsByNewInterval,
   reversePalette,
-} from './utils';
+} from './common';
 
 describe('remapStopsByNewInterval', () => {
   it('should correctly remap the current palette from 0..1 to 0...100', () => {

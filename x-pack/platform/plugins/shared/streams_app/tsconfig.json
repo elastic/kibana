@@ -52,7 +52,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/fields-metadata-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/actions-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/object-utils",
