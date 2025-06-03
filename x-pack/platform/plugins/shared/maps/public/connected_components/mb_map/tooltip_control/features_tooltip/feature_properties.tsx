@@ -55,14 +55,15 @@ interface State {
   prevHeight: number | null;
 }
 
-const mapFeatureTooltipTableWrapper = css({
-  overflow: 'auto',
-  maxHeight: 'calc(49vh - 64px)',
-});
-
-const mapFeatureTooltipTable = css({
-  width: '100%',
-});
+const mapFeatureStyles = {
+  wrapper: css({
+    overflow: 'auto',
+    maxHeight: 'calc(49vh - 64px)',
+  }),
+  table: css({
+    width: '100%',
+  }),
+};
 
 export class FeatureProperties extends Component<Props, State> {
   private _isMounted = false;
@@ -223,7 +224,7 @@ export class FeatureProperties extends Component<Props, State> {
 
     return (
       <div>
-        <table css={mapFeatureTooltipTable} className="eui-yScrollWithShadows" ref={this._tableRef}>
+        <table css={mapFeatureStyles.table} className="eui-yScrollWithShadows" ref={this._tableRef}>
           <tbody>
             <MapFeatureTooltipRow>
               <td className="mapFeatureTooltip__propertyLabel">
@@ -349,8 +350,8 @@ export class FeatureProperties extends Component<Props, State> {
     });
 
     return (
-      <div css={mapFeatureTooltipTableWrapper}>
-        <table css={mapFeatureTooltipTable} className="eui-yScrollWithShadows" ref={this._tableRef}>
+      <div css={mapFeatureStyles.wrapper}>
+        <table css={mapFeatureStyles.table} className="eui-yScrollWithShadows" ref={this._tableRef}>
           <tbody>{rows}</tbody>
         </table>
       </div>
@@ -362,12 +363,12 @@ const componentStyles = {
   mapFeatureTooltipRowStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
       '&.mapFeatureTooltip_row': { borderBottom: `1px solid ${euiTheme.colors.lightestShade}` },
-      '& .mapFeatureTooltip__propertyLabel': {
+      '.mapFeatureTooltip__propertyLabel': {
         minWidth: `${parseFloat(euiTheme.size.xl) * 2.5}px`,
         maxWidth: `${parseFloat(euiTheme.size.xl) * 4}px`,
         fontWeight: euiTheme.font.weight.bold,
       },
-      '& .mapFeatureTooltip_actionsRow > span': {
+      '.mapFeatureTooltip_actionsRow > span': {
         display: 'flex',
         justifyContent: 'flex-end',
       },
