@@ -6,6 +6,7 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
+import type { UserIdAndName } from '../base/users';
 
 /**
  * Represents a user input that initiated a conversation round
@@ -47,4 +48,14 @@ export interface ConversationRound {
   assistantResponse: AssistantResponse;
   // TODO: artifacts
   // TODO: additional stuff we might need?
+}
+
+export interface Conversation {
+  id: string;
+  agentId: string;
+  user: UserIdAndName;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  rounds: ConversationRound;
 }

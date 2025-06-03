@@ -15,6 +15,7 @@ import type {
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
+import { ConversationServiceImpl } from './conversation';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -79,9 +80,16 @@ export class ServiceManager {
     });
     runner = runnerFactory.getRunner();
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+    });
+
     this.internalStart = {
       tools,
       agents,
+      conversations,
       runnerFactory,
     };
 

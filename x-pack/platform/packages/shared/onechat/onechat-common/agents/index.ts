@@ -32,7 +32,6 @@ export {
   isMessageCompleteEvent,
   isRoundCompleteEvent,
 } from './events';
-export type { RoundInput, AssistantResponse, ToolCallWithResult, ConversationRound } from './chat';
 export {
   type AgentIdentifier,
   type PlainIdAgentIdentifier,

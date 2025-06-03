@@ -37,6 +37,7 @@ export {
   type OnechatInternalError,
   type OnechatToolNotFoundError,
 } from './base/errors';
+export { UserIdAndName } from './base/users';
 export {
   OneChatDefaultAgentId,
   OneChatDefaultAgentProviderId,
@@ -54,10 +55,6 @@ export {
   type ToolResultEventData,
   type ToolCallEvent,
   type ToolCallEventData,
-  type RoundInput,
-  type AssistantResponse,
-  type ToolCallWithResult,
-  type ConversationRound,
   type MessageChunkEventData,
   type MessageChunkEvent,
   type MessageCompleteEventData,
@@ -75,3 +72,10 @@ export {
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
 } from './agents';
+export {
+  RoundInput,
+  AssistantResponse,
+  ToolCallWithResult,
+  ConversationRound,
+  Conversation,
+} from './chat';

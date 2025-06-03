@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UserIdAndName, Conversation } from '@kbn/onechat-common';
+import type {
+  ConversationCreateRequest,
+  ConversationUpdateRequest,
+} from '../../../common/conversations';
+import { ConversationProperties } from './storage';
+
+export const fromEs = (document: GetResponse<ConversationProperties>): Conversation => {
+  if (!document._source) {
+    throw new Error('No source found on get conversation response');
+  }
+
+  return {
+    id: document._id,
+    agentId: document._source.agent_id,
+    user: {
+      id: document._source.user_id,
+      username: document._source.user_name,
+    },
+    title: document._source.title,
+    createdAt: document._source.created_at,
+    updatedAt: document._source.updated_at,
+    rounds: document._source.rounds,
+  };
+};
+
+export const createRequestToEs = ({
+  conversation,
+  currentUser,
+  creationDate,
+}: {
+  conversation: ConversationCreateRequest;
+  currentUser: UserIdAndName;
+  creationDate: Date;
+}): ConversationProperties => {
+  return {
+    agent_id: conversation.agentId,
+    user_id: currentUser.id,
+    user_name: currentUser.username,
+    title: conversation.title,
+    created_at: creationDate.toISOString(),
+    updated_at: creationDate.toISOString(),
+    rounds: conversation.rounds,
+  };
+};
+
+/*
+export interface ConversationProperties {
+  user_id: string;
+  user_name: string;
+  agent_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  rounds: ConversationRound;
+}
+ */
+
+/*
+export interface Conversation {
+  id: string;
+  agentId: string;
+  user: UserIdAndName;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  rounds: ConversationRound;
+}
+ */

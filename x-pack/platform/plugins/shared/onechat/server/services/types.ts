@@ -13,6 +13,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
+import type { ConversationService } from './conversation';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -22,6 +23,7 @@ export interface InternalSetupServices {
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
+  conversations: ConversationService;
   runnerFactory: RunnerFactory;
 }
 
