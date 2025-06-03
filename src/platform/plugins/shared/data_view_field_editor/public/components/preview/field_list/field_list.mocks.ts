@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ESQLTokensProvider } from './esql_tokens_provider';
+import { DocumentField } from './field_list';
+
+export const documentFieldMock = (params: Partial<DocumentField> = {}): DocumentField => {
+  return {
+    key: 'field',
+    value: 'value',
+    isPinned: false,
+    ...params,
+  };
+};

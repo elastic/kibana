@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as React from 'react';
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
-
-import { useDarkMode } from '../kibana';
-
-export const useEuiTheme = () => {
-  const darkMode = useDarkMode();
-  return darkMode ? darkTheme : lightTheme;
+export const AiSettings = () => {
+  return <h1>{'AI settings'}</h1>;
 };

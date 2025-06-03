@@ -15,14 +15,11 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
-  enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableContinuousRollups,
@@ -166,28 +163,6 @@ export const uiSettings: Record<string, UiSettings> = {
     showInLabs: true,
     solution: 'oblt',
   },
-  [apmServiceInventoryOptimizedSorting]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize services list load performance in APM',
-    }),
-    description: i18n.translate(
-      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
@@ -269,42 +244,6 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAwsLambdaMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
-      defaultMessage: 'AWS Lambda Metrics',
-    }),
-    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
-  [enableAgentExplorerView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAgentExplorer', {
-      defaultMessage: 'Agent explorer',
-    }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{betaLabel} Enables Agent explorer view.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
