@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EmptyViewerState,
@@ -17,12 +17,12 @@ import { useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { ListWithSearch, ManageRules, LinkToRuleDetails } from '../../components';
+import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
