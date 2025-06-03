@@ -25,5 +25,5 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
         './dashboards_card'
       )
   ),
-  capabilitiesRequired: [['dashboard_v2.show', `${SECURITY_FEATURE_ID}.detections`]],
+  capabilitiesRequired: 'dashboard_v2.show',
 };

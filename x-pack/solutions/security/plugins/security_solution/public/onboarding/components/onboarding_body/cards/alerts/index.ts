@@ -25,5 +25,4 @@ export const alertsCardConfig: OnboardingCardConfig = {
         './alerts_card'
       )
   ),
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.detections`],
 };

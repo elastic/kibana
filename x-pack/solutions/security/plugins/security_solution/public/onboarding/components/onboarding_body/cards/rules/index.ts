@@ -27,5 +27,4 @@ export const rulesCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkRulesComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.detections`],
 };

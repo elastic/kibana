@@ -30,5 +30,5 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: [['fleet.read', `${SECURITY_FEATURE_ID}.detections`]],
+  capabilitiesRequired: 'fleet.read',
 };
