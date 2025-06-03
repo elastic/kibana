@@ -8,7 +8,6 @@
 import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiContextMenuItem, EuiLink, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
 // @ts-ignore file exists, but ts def doesn't
 import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
@@ -51,8 +50,6 @@ interface State {
   prevFeatures: TooltipFeature[];
   view: string;
 }
-
-const mapFeatureTooltipBackButtonStyles = css({ paddingLeft: '0' });
 
 export class FeaturesTooltip extends Component<Props, State> {
   state: State = {
@@ -109,7 +106,7 @@ export class FeaturesTooltip extends Component<Props, State> {
 
     return this.state.currentFeature.actions.map((action) => {
       return (
-        <ActionLinksBox>
+        <div css={componentStyles.actionLinksStyles}>
           <EuiLink
             onClick={() => {
               if (action.onClick) {
@@ -122,7 +119,7 @@ export class FeaturesTooltip extends Component<Props, State> {
           >
             {action.label}
           </EuiLink>
-        </ActionLinksBox>
+        </div>
       );
     });
   }
@@ -131,7 +128,7 @@ export class FeaturesTooltip extends Component<Props, State> {
     return (
       <EuiContextMenuItem
         css={[
-          mapFeatureTooltipBackButtonStyles,
+          componentStyles.mapFeatureTooltipBackButtonStyles,
           (euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title,
         ]}
         onClick={this._showPropertiesView}
@@ -212,10 +209,5 @@ const componentStyles = {
     css({
       padding: euiTheme.size.xs,
     }),
-};
-
-const ActionLinksBox = ({ children }: { children: ReactNode }) => {
-  const styles = useMemoizedStyles(componentStyles);
-
-  return <div css={styles.actionLinksStyles}>{children}</div>;
+  mapFeatureTooltipBackButtonStyles: css({ paddingLeft: '0' }),
 };
