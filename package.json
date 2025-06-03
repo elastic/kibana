@@ -1744,7 +1744,7 @@
     "@types/webpack-env": "^1.18.5",
     "@types/webpack-sources": "^3.2.3",
     "@types/xml2js": "^0.4.11",
-    "@types/yargs": "^15.0.0",
+    "@types/yargs": "^17.0.33",
     "@types/yauzl": "^2.9.1",
     "@types/yazl": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -1934,7 +1934,7 @@
     "webpack-sources": "^3.2.3",
     "xml-crypto": "^6.0.1",
     "xmlbuilder": "15.1.1",
-    "yargs": "^15.4.1",
+    "yargs": "^18.0.0",
     "yarn-deduplicate": "^6.0.2"
   },
   "packageManager": "yarn@1.22.21"
