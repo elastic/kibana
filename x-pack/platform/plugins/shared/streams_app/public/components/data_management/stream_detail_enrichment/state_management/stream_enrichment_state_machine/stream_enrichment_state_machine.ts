@@ -41,7 +41,6 @@ import {
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
 import {
-  composeSamplingCondition,
   defaultEnrichmentUrlState,
   getConfiguredProcessors,
   getDataSourcesSamples,
@@ -123,7 +122,6 @@ export const streamEnrichmentMachine = setup({
             parentRef: self,
             streamName: context.definition.stream.name,
             dataSource: dataSourceWithUIAttributes,
-            condition: composeSamplingCondition(context),
           },
         });
       });
@@ -144,7 +142,6 @@ export const streamEnrichmentMachine = setup({
               parentRef: self,
               streamName: context.definition.stream.name,
               dataSource: dataSourceWithUIAttributes,
-              condition: composeSamplingCondition(context),
             },
           })
         );
@@ -196,14 +193,6 @@ export const streamEnrichmentMachine = setup({
         processors: getStagedProcessors(context),
       })
     ),
-    sendConditionChangeToDataSources: ({ context }) => {
-      context.dataSourcesRefs.forEach((dataSourceRef) =>
-        dataSourceRef.send({
-          type: 'dataSource.receive_condition',
-          condition: composeSamplingCondition(context),
-        })
-      );
-    },
     sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
       type: 'simulation.receive_samples',
       samples: getDataSourcesSamples(context),
@@ -354,6 +343,17 @@ export const streamEnrichmentMachine = setup({
         enrichment: {
           initial: 'displayingSimulation',
           on: {
+            'dataSource.change': {
+              actions: [
+                {
+                  type: 'storeUrlState',
+                  params: ({ context }) => ({
+                    urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
+                  }),
+                },
+                { type: 'updateUrlState' },
+              ],
+            },
             'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
@@ -368,7 +368,6 @@ export const streamEnrichmentMachine = setup({
                   actions: [
                     { type: 'addProcessor', params: ({ event }) => event },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                    { type: 'sendConditionChangeToDataSources' },
                   ],
                 },
                 'processors.reorder': {
@@ -382,7 +381,6 @@ export const streamEnrichmentMachine = setup({
                   guard: { type: 'isStagedProcessor', params: ({ event }) => event },
                   actions: [
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                    { type: 'sendConditionChangeToDataSources' },
                   ],
                 },
                 'processor.delete': {
@@ -390,21 +388,18 @@ export const streamEnrichmentMachine = setup({
                     { type: 'stopProcessor', params: ({ event }) => event },
                     { type: 'deleteProcessor', params: ({ event }) => event },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                    { type: 'sendConditionChangeToDataSources' },
                   ],
                 },
                 'processor.stage': {
                   actions: [
                     { type: 'reassignProcessors' },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                    { type: 'sendConditionChangeToDataSources' },
                   ],
                 },
                 'processor.update': {
                   actions: [
                     { type: 'reassignProcessors' },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                    { type: 'sendConditionChangeToDataSources' },
                   ],
                 },
                 'simulation.manageDataSources': 'managingDataSources',
@@ -434,17 +429,6 @@ export const streamEnrichmentMachine = setup({
                 'dataSources.add': {
                   actions: [
                     { type: 'addDataSource', params: ({ event }) => event },
-                    {
-                      type: 'storeUrlState',
-                      params: ({ context }) => ({
-                        urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
-                      }),
-                    },
-                    { type: 'updateUrlState' },
-                  ],
-                },
-                'dataSource.change': {
-                  actions: [
                     {
                       type: 'storeUrlState',
                       params: ({ context }) => ({

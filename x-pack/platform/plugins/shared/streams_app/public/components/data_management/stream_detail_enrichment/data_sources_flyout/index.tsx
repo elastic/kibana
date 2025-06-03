@@ -50,7 +50,6 @@ import {
 } from '../state_management/data_source_state_machine';
 import { AssetImage } from '../../../asset_image';
 import { PreviewTable } from '../../preview_table';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import {
   CustomSamplesDataSourceWithUIAttributes,
   KqlSamplesDataSourceWithUIAttributes,
@@ -276,7 +275,6 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
-      dataPreviewIsOpen
       title={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.defaultName',
         { defaultMessage: 'KQL search samples' }
@@ -325,10 +323,8 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
     snapshot.matches('disabled')
   );
 
-  const handleChange = ({
-    documents,
-  }: Pick<CustomSamplesDataSourceWithUIAttributes, 'documents'>) => {
-    dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, documents } });
+  const handleChange = (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
+    dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
   };
 
   return (
@@ -343,6 +339,20 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
         { defaultMessage: 'Manually defined sample documents.' }
       )}
     >
+      <EuiCallOut
+        iconType="iInCircle"
+        size="s"
+        title={i18n.translate('xpack.streams.enrichment.dataSources.customSamples.callout', {
+          defaultMessage:
+            'The custom samples data source cannot be persisted. It will be lost when you leave this page.',
+        })}
+      />
+      <EuiSpacer size="m" />
+      <NameField
+        onChange={(event) => handleChange({ name: event.target.value })}
+        value={dataSource.name}
+        disabled={isDisabled}
+      />
       <EuiFormRow
         label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
@@ -379,6 +389,7 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
           options={{
             tabSize: 2,
             automaticLayout: true,
+            readOnly: isDisabled,
           }}
           onChange={(value) => {
             try {
@@ -415,12 +426,10 @@ const NameField = (props: Omit<EuiFieldTextProps, 'name'>) => {
 const DataSourceCard = ({
   children,
   dataSourceRef,
-  dataPreviewIsOpen = false,
   title,
   subtitle,
 }: PropsWithChildren<{
   dataSourceRef: DataSourceActorRef;
-  dataPreviewIsOpen?: boolean;
   title?: string;
   subtitle?: string;
 }>) => {
@@ -512,7 +521,6 @@ const DataSourceCard = ({
           'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.label',
           { defaultMessage: 'Data preview' }
         )}
-        initialIsOpen={dataPreviewIsOpen}
       >
         <EuiSpacer size="s" />
         {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Condition, SampleDocument, conditionToQueryDsl } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
@@ -22,14 +22,12 @@ import {
 } from '../../types';
 
 export interface SamplesFetchInput {
-  condition?: Condition;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
 }
 
 interface CollectKqlDataParams {
   data: DataSourceMachineDeps['data'];
-  condition?: Condition;
   filters?: Filter[];
   query?: Query;
   time?: TimeRange;
@@ -38,7 +36,6 @@ interface CollectKqlDataParams {
 }
 
 interface SearchParamsOptions {
-  condition?: Condition;
   filters?: Filter[];
   index: string;
   query?: Query;
@@ -46,17 +43,16 @@ interface SearchParamsOptions {
   timeRange?: TimeRange;
 }
 
-type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'condition' | 'streamName'>;
+type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'streamName'>;
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
  */
 export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
-    const { dataSource, condition, streamName } = input;
+    const { dataSource, streamName } = input;
     return getDataCollectorForDataSource(dataSource)({
       data,
-      condition,
       streamName,
     });
   });
@@ -81,12 +77,8 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
 /**
  * Collects random samples from the specified stream
  */
-function collectRandomSamples({
-  data,
-  condition,
-  streamName,
-}: CollectorParams): Observable<SampleDocument[]> {
-  return collectKqlData({ data, condition, streamName });
+function collectRandomSamples({ data, streamName }: CollectorParams): Observable<SampleDocument[]> {
+  return collectKqlData({ data, streamName });
 }
 
 /**
@@ -94,7 +86,6 @@ function collectRandomSamples({
  */
 function collectKqlSamples({
   data,
-  condition,
   dataSource,
   streamName,
 }: CollectorParams & {
@@ -102,7 +93,6 @@ function collectKqlSamples({
 }): Observable<SampleDocument[]> {
   return collectKqlData({
     data,
-    condition,
     time: dataSource.time,
     query: dataSource.query,
     streamName,
@@ -125,7 +115,6 @@ function collectCustomSamples({
  */
 function collectKqlData({
   data,
-  condition,
   filters,
   query,
   time,
@@ -139,7 +128,6 @@ function collectKqlData({
       .search(
         {
           params: buildSamplesSearchParams({
-            condition,
             filters,
             index: streamName,
             query,
@@ -177,7 +165,6 @@ function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[]
  * Builds search parameters for Elasticsearch query
  */
 function buildSamplesSearchParams({
-  condition,
   filters,
   index,
   query,
@@ -185,7 +172,6 @@ function buildSamplesSearchParams({
   timeRange,
 }: SearchParamsOptions) {
   const queryDefinition = buildEsQuery({ title: index, fields: [] }, query ?? [], filters ?? []);
-  addConditionToQuery(queryDefinition, condition);
   addTimeRangeToQuery(queryDefinition, timeRange);
 
   return {
@@ -203,13 +189,6 @@ function buildSamplesSearchParams({
     terminate_after: size,
     track_total_hits: false,
   };
-}
-
-/**
- * Adds condition to the query definition
- */
-function addConditionToQuery(queryDefinition: any, condition?: Condition): void {
-  queryDefinition.bool.must.unshift(condition ? conditionToQueryDsl(condition) : { match_all: {} });
 }
 
 /**

@@ -36,10 +36,7 @@ import { selectDraftProcessor } from './state_management/stream_enrichment_state
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (state) =>
-      state.matches('debouncingChanges') ||
-      state.matches('loadingSamples') ||
-      state.matches('runningSimulation')
+    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
   );
 
   return (

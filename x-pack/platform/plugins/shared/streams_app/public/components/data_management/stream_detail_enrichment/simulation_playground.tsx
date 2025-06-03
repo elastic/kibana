@@ -8,7 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
@@ -26,14 +30,13 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesFlyout } from './data_sources_flyout';
+import {
+  DataSourceActorRef,
+  useDataSourceSelector,
+} from './state_management/data_source_state_machine';
 
 export const SimulationPlayground = () => {
-  const {
-    closeDataSourcesManagement,
-    manageDataSources,
-    viewSimulationPreviewData,
-    viewSimulationDetectedFields,
-  } = useStreamEnrichmentEvents();
+  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
 
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
@@ -47,16 +50,10 @@ export const SimulationPlayground = () => {
       ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
   );
-  const isManagingDataSources = useStreamEnrichmentSelector((state) =>
-    state.matches({ ready: { enrichment: 'managingDataSources' } })
-  );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isLoading = useSimulatorSelector(
-    (state) =>
-      state.matches('debouncingChanges') ||
-      state.matches('loadingSamples') ||
-      state.matches('runningSimulation')
+    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
   );
 
   const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
@@ -64,8 +61,8 @@ export const SimulationPlayground = () => {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
             <EuiTabs bottomBorder={false}>
               <EuiTab isSelected={isViewingDataPreview} onClick={viewSimulationPreviewData}>
                 {i18n.translate(
@@ -92,18 +89,8 @@ export const SimulationPlayground = () => {
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="advancedSettingsApp"
-              iconSide="right"
-              onClick={manageDataSources}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.manageDataSources.label',
-                { defaultMessage: 'Manage data sources' }
-              )}
-            </EuiButtonEmpty>
+            <DataSourcesList />
           </EuiFlexItem>
-          {isManagingDataSources && <DataSourcesFlyout onClose={closeDataSourcesManagement} />}
           {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -113,5 +100,72 @@ export const SimulationPlayground = () => {
         <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
       )}
     </>
+  );
+};
+
+const DataSourcesList = () => {
+  const { closeDataSourcesManagement, manageDataSources } = useStreamEnrichmentEvents();
+
+  const isManagingDataSources = useStreamEnrichmentSelector((state) =>
+    state.matches({ ready: { enrichment: 'managingDataSources' } })
+  );
+  const dataSourcesRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
+
+  return (
+    <EuiFlexGroup wrap={false} alignItems="center" gutterSize="s">
+      {dataSourcesRefs.map((dataSourceRef) => (
+        <EuiFlexItem key={dataSourceRef.id} grow={false}>
+          <DataSourceListItem dataSourceRef={dataSourceRef} />
+        </EuiFlexItem>
+      ))}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={manageDataSourcesLabel}>
+          <EuiButtonIcon
+            display="base"
+            size="m"
+            iconType="advancedSettingsApp"
+            aria-label={manageDataSourcesLabel}
+            onClick={manageDataSources}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      {isManagingDataSources && <DataSourcesFlyout onClose={closeDataSourcesManagement} />}
+    </EuiFlexGroup>
+  );
+};
+
+const manageDataSourcesLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.manageDataSources.label',
+  { defaultMessage: 'Manage data sources' }
+);
+
+const DataSourceListItem = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
+
+  const isEnabled = dataSourceState.matches('enabled');
+  const toggleActivity = () => {
+    dataSourceRef.send({ type: 'dataSource.toggleActivity' });
+  };
+
+  const content = (
+    <EuiFlexGroup gutterSize="s">
+      <strong>
+        {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
+      </strong>
+      <EuiText size="xs" color="subdued">
+        {dataSourceState.context.data.length}
+      </EuiText>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+      <EuiCheckbox
+        id={dataSourceRef.id}
+        label={content}
+        checked={isEnabled}
+        onChange={toggleActivity}
+      />
+    </EuiPanel>
   );
 };

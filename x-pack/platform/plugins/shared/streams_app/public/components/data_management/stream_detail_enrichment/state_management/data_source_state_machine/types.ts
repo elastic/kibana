@@ -8,7 +8,7 @@
 import { ActorRef, Snapshot } from 'xstate5';
 import { IToasts } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Condition, SampleDocument } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface DataSourceMachineDeps {
@@ -25,7 +25,6 @@ export interface DataSourceInput {
   parentRef: DataSourceParentActor;
   streamName: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
-  condition?: Condition;
 }
 
 export type DataSourceParentActor = ActorRef<Snapshot<unknown>, DataSourceToParentEvent>;
@@ -35,16 +34,9 @@ export interface DataSourceContext {
   streamName: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
-  condition?: Condition;
 }
 
 export type DataSourceEvent =
   | { type: 'dataSource.change'; dataSource: EnrichmentDataSourceWithUIAttributes }
   | { type: 'dataSource.delete' }
-  | { type: 'dataSource.receive_condition'; condition?: Condition }
-  | { type: 'dataSource.refresh' }
   | { type: 'dataSource.toggleActivity' };
-
-export interface DataSourceEmittedEvent {
-  type: 'dataSource.changesDiscarded';
-}

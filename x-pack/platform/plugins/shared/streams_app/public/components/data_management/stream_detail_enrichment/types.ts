@@ -12,8 +12,8 @@ import {
   ProcessorDefinition,
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {

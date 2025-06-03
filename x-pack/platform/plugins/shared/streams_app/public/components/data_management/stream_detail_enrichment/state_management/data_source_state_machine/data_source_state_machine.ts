@@ -12,7 +12,7 @@ import {
   sendTo,
   setup,
 } from 'xstate5';
-import { Condition, SampleDocument } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   DataSourceInput,
@@ -51,14 +51,8 @@ export const dataSourceMachine = setup({
         },
       })
     ),
-    storeCondition: assign((_, params: { condition?: Condition }) => ({
-      condition: params.condition,
-    })),
     storeData: assign((_, params: { data: SampleDocument[] }) => ({
       data: params.data,
-    })),
-    resetToPrevious: assign(({ context }) => ({
-      dataSource: context.previousDataSource,
     })),
     notifyChangeEventToParent: sendTo(
       ({ context }) => context.parentRef,
@@ -81,10 +75,8 @@ export const dataSourceMachine = setup({
   id: 'dataSource',
   context: ({ input }) => ({
     parentRef: input.parentRef,
-    previousDataSource: input.dataSource,
     dataSource: input.dataSource,
     streamName: input.streamName,
-    condition: input.condition,
     data: [],
   }),
   initial: 'unresolved',
@@ -92,9 +84,6 @@ export const dataSourceMachine = setup({
     'dataSource.delete': {
       guard: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
       target: '.deleted',
-    },
-    'dataSource.receive_condition': {
-      actions: [{ type: 'storeCondition', params: ({ event }) => event }],
     },
   },
   states: {
@@ -121,13 +110,8 @@ export const dataSourceMachine = setup({
             { type: 'notifyChangeEventToParent' },
           ],
         },
-        'dataSource.receive_condition': '.loadingData',
-        'dataSource.refresh': '.loadingData',
       },
-      exit: [
-        { type: 'storeData', params: () => ({ data: [] }) },
-        { type: 'notifyDataChangeToParent' },
-      ],
+      exit: [{ type: 'notifyDataChangeToParent' }],
       states: {
         idle: {
           on: {
@@ -163,7 +147,6 @@ export const dataSourceMachine = setup({
             id: 'dataCollectorActor',
             src: 'collectData',
             input: ({ context }) => ({
-              condition: context.condition,
               dataSource: context.dataSource,
               streamName: context.streamName,
             }),

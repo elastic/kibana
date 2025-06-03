@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { Condition, FieldDefinition, Streams, UnaryOperator } from '@kbn/streams-schema';
-import { isEmpty, uniq } from 'lodash';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
 import { StreamEnrichmentContextType } from './types';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
-  getSourceFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 import { EnrichmentUrlState, RandomSamplesDataSource } from '../../../../../../common/url_schema';
@@ -20,6 +18,9 @@ import { dataSourceConverter } from '../../utils';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
+  name: i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.defaultName', {
+    defaultMessage: 'Random samples',
+  }),
   enabled: true,
 };
 
@@ -29,17 +30,21 @@ export const defaultEnrichmentUrlState: EnrichmentUrlState = {
 };
 
 export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
-  return context.dataSourcesRefs.map((dataSourceRef) =>
-    dataSourceConverter.toUrlSchema(dataSourceRef.getSnapshot().context.dataSource)
+  const dataSources = context.dataSourcesRefs.map(
+    (dataSourceRef) => dataSourceRef.getSnapshot().context.dataSource
   );
+
+  return dataSources
+    .filter((dataSource) => dataSource.type !== 'custom-samples') // Custom samples are not stored in the URL
+    .map(dataSourceConverter.toUrlSchema);
 }
 
 export function getDataSourcesSamples(context: StreamEnrichmentContextType) {
-  const dataSources = context.dataSourcesRefs.map(
-    (dataSourceRef) => dataSourceRef.getSnapshot().context
-  );
-  const samples = dataSources.flatMap((dataSource) => dataSource.data);
-  return samples;
+  const dataSourcesSnapshots = context.dataSourcesRefs
+    .map((dataSourceRef) => dataSourceRef.getSnapshot())
+    .filter((snapshot) => snapshot.matches('enabled'));
+
+  return dataSourcesSnapshots.flatMap((snapshot) => snapshot.context.data);
 }
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {
@@ -80,27 +85,4 @@ export function getUpsertWiredFields(
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
-}
-
-export function composeSamplingCondition(
-  context: StreamEnrichmentContextType
-): Condition | undefined {
-  const stagedProcessors = getStagedProcessors(context);
-
-  if (isEmpty(stagedProcessors)) {
-    return undefined;
-  }
-
-  const uniqueFields = uniq(getSourceFields(stagedProcessors));
-
-  if (isEmpty(uniqueFields)) {
-    return ALWAYS_CONDITION;
-  }
-
-  const conditions = uniqueFields.map((field) => ({
-    field,
-    operator: 'exists' as UnaryOperator,
-  }));
-
-  return { or: conditions };
 }
