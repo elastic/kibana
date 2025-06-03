@@ -17,7 +17,7 @@ jest.mock('../../../../../hooks/use_onboarding_service', () => ({
 }));
 
 jest.mock('./agentless_available_callout');
-jest.mock('./installed_integrations_callout');
+jest.mock('./active_integrations_callout');
 jest.mock('./endpoint_callout');
 
 describe('IntegrationCardTopCallout', () => {
@@ -32,7 +32,7 @@ describe('IntegrationCardTopCallout', () => {
 
     const { getByTestId } = render(
       <IntegrationCardTopCallout
-        installedIntegrationsCount={0}
+        activeIntegrationsCount={0}
         isAgentRequired={false}
         selectedTabId={IntegrationTabId.endpoint}
       />
@@ -50,7 +50,7 @@ describe('IntegrationCardTopCallout', () => {
 
     const { getByTestId } = render(
       <IntegrationCardTopCallout
-        installedIntegrationsCount={0}
+        activeIntegrationsCount={0}
         isAgentRequired={false}
         selectedTabId={IntegrationTabId.cloud}
       />
@@ -61,21 +61,21 @@ describe('IntegrationCardTopCallout', () => {
     });
   });
 
-  test('renders InstalledIntegrationsCallout when there are installed integrations', async () => {
+  test('renders InstalledIntegrationsCallout when there are active integrations', async () => {
     (useOnboardingService as jest.Mock).mockReturnValue({
       isAgentlessAvailable$: of(false),
     });
 
     const { getByTestId } = render(
       <IntegrationCardTopCallout
-        installedIntegrationsCount={5}
+        activeIntegrationsCount={5}
         isAgentRequired={true}
         selectedTabId={IntegrationTabId.cloud}
       />
     );
 
     await waitFor(() => {
-      expect(getByTestId('installedIntegrationsCallout')).toBeInTheDocument();
+      expect(getByTestId('activeIntegrationsCallout')).toBeInTheDocument();
     });
   });
 });

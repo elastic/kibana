@@ -8,7 +8,13 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { BaseMessage } from '@langchain/core/messages';
-import { removeContentReferences } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  contentReferenceString,
+  DocumentEntry,
+  knowledgeBaseReference,
+  removeContentReferences,
+} from '@kbn/elastic-assistant-common';
 import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
@@ -49,7 +55,10 @@ export async function runAgent({
 }: RunAgentParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries();
+  const knowledgeHistory: DocumentEntry[] =
+    (await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries()) ?? [];
+  const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(contentReferencesStore));
+
   const userPrompt =
     state.llmType === 'gemini'
       ? await getPrompt({
@@ -67,8 +76,8 @@ export async function runAgent({
       {
         ...state,
         knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
-          knowledgeHistory?.length
-            ? JSON.stringify(knowledgeHistory.map((e) => e.text))
+          citedKnowledgeHistory.length
+            ? JSON.stringify(citedKnowledgeHistory.map((e) => e.text))
             : NO_KNOWLEDGE_HISTORY
         }`,
         citations_prompt: contentReferencesStore.options?.disabled ? '' : INCLUDE_CITATIONS,
@@ -91,8 +100,24 @@ export async function runAgent({
 const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
   return messages.map((message) => {
     if (!Array.isArray(message.content)) {
-      message.content = removeContentReferences(message.content);
+      message.content = removeContentReferences(message.content).trim();
     }
     return message;
   });
+};
+
+const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+  return (document: DocumentEntry): DocumentEntry => {
+    if (document.id == null) {
+      return document;
+    }
+    const documentId = document.id;
+    const reference = contentReferencesStore.add((p) =>
+      knowledgeBaseReference(p.id, document.name, documentId)
+    );
+    return {
+      ...document,
+      text: `${contentReferenceString(reference)}\n${document.text}`,
+    };
+  };
 };
