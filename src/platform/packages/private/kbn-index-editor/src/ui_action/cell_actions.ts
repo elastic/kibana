@@ -7,13 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  createEditLookupIndexContentAction,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-  ACTION_EDIT_LOOKUP_INDEX,
-  createEditCellValueActionFactory,
-  EDIT_CELL_VALUE_TRIGGER,
-} from './src/ui_action';
-export type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from './src/types';
-export { registerIndexEditorActions } from './src/ui_action';
+export const INDEX_EDITOR_CELL_ACTION_TRIGGER_ID = 'index-editor-cellActions';

@@ -14,7 +14,8 @@ import { monaco } from '@kbn/monaco';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { type ESQLSource, parse } from '@kbn/esql-ast';
+import { type ESQLSource } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast/src/parser/parser';
 import type { ESQLEditorDeps, JoinIndexAutocompleteItem } from '../types';
 
 /**
@@ -113,7 +114,7 @@ export const useLookupIndexCommand = (
       const indexNames: string[] = [];
 
       // parse esql query and find lookup indices in the query, traversing the AST
-      const { root } = parse(query.esql);
+      const { root } = Parser.parse(query.esql);
       // find all join commands
       root.commands.forEach((command) => {
         if (command.name === 'join') {

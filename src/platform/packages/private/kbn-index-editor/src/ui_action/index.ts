@@ -47,3 +47,13 @@ export function createEditLookupIndexContentAction(
     },
   };
 }
+
+export {
+  createEditCellValueActionFactory,
+  EDIT_CELL_VALUE_TRIGGER,
+  ACTION_EDIT_CELL_VALUE_INDEX,
+} from './edit_cell_value';
+
+export { INDEX_EDITOR_CELL_ACTION_TRIGGER_ID } from './cell_actions';
+
+export { registerIndexEditorActions } from './register_trigger_actions';

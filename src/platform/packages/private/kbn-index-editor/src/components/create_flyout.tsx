@@ -39,10 +39,15 @@ export function createFlyout(
     flyoutSession.close();
   };
 
+  const onSave = () => {
+    // TODO refresh lookup index list
+    onFlyoutClose();
+  };
+
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<LoadingContents />}>
-        <LazyFlyoutContent deps={deps} props={props} onClose={onFlyoutClose} />
+        <LazyFlyoutContent deps={deps} props={{ ...props, onClose: onFlyoutClose, onSave }} />
       </Suspense>,
       startServices
     ),

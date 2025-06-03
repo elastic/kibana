@@ -24,6 +24,7 @@ import {
   type SortOrder,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
+import { INDEX_EDITOR_CELL_ACTION_TRIGGER_ID } from '../ui_action';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
 
@@ -46,7 +47,17 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const {
-    services: { uiActions, fieldFormats, theme, uiSettings, share, data, notifications },
+    services: {
+      uiActions,
+      fieldFormats,
+      theme,
+      uiSettings,
+      share,
+      data,
+      notifications,
+      settings,
+      dataViewFieldEditor,
+    },
   } = useKibana<KibanaContextExtra>();
 
   const { rows } = props;
@@ -110,10 +121,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       theme,
       uiSettings,
       toastNotifications: notifications.toasts,
+      dataViewFieldEditor,
       fieldFormats,
       storage,
     };
-  }, [notifications.toasts, theme, uiSettings, data, fieldFormats]);
+  }, [data, theme, uiSettings, notifications.toasts, dataViewFieldEditor, fieldFormats]);
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -186,6 +198,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       showTimeCol
       enableComparisonMode
       isPaginationEnabled
+      showKeyboardShortcuts
       totalHits={props.totalHits}
       rowsPerPageState={rowsPerPage}
       rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
@@ -207,6 +220,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onUpdateRowHeight={setRowHeight}
       controlColumnIds={props.controlColumnIds}
       renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
+      cellActionsHandling={'append'}
+      cellActionsTriggerId={INDEX_EDITOR_CELL_ACTION_TRIGGER_ID}
+      visibleCellActions={4}
     />
   );
 };
