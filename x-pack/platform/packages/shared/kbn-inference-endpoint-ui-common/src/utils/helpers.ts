@@ -83,10 +83,8 @@ export const mapProviderFields = (
   fieldsToRemove?: string[]
 ): ConfigEntryView[] => {
   return Object.keys(newProvider.configurations ?? {})
-    .filter(
-      (pk) =>
-        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
-        (fieldsToRemove === undefined || fieldsToRemove.indexOf(pk) === -1)
+    .filter((pk) =>
+      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
     )
     .map(
       (k): ConfigEntryView => ({
@@ -102,6 +100,7 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
+        hidden: !!fieldsToRemove?.includes(k),
       })
     );
 };

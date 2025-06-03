@@ -43,8 +43,10 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
   return (
     <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
       {items.map((configEntry) => {
-        const { key, isValid, label, sensitive, description, validationErrors, required } =
+        const { hidden, key, isValid, label, sensitive, description, validationErrors, required } =
           configEntry;
+        // skip hidden fields
+        if (hidden) return null;
 
         // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel = description ? (
