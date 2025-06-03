@@ -29,6 +29,7 @@ interface Props {
   isDisabled: boolean;
   selectedConnectorId: string | undefined;
   zIndex?: number;
+  wrapper?: boolean;
 }
 
 const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
@@ -36,6 +37,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   isDisabled,
   selectedConnectorId,
   zIndex,
+  wrapper = true, // Whether to wrap the children in a div with padding
 }) => {
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
@@ -101,6 +103,9 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
 
   return (
     <EuiTourStep
+      css={css`
+        display: flex;
+      `}
       content={<EuiText size="m">{elasticLLMTourStep1.content}</EuiText>}
       // Open the tour step after flyout is open
       isStepOpen={isTimerExhausted}
@@ -136,14 +141,18 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
       }}
       zIndex={zIndex}
     >
-      <div
-        id={`elasticLLMTourStepContent`}
-        css={css`
-          padding-left: ${euiTheme.size.m};
-        `}
-      >
-        {children}
-      </div>
+      {wrapper ? (
+        <div
+          id={`elasticLLMTourStepContent`}
+          css={css`
+            padding-left: ${euiTheme.size.m};
+          `}
+        >
+          {children}
+        </div>
+      ) : (
+        children
+      )}
     </EuiTourStep>
   );
 };

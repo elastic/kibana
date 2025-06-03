@@ -176,7 +176,7 @@ describe('EditConnectorFlyout', () => {
       />
     );
 
-    expect(getByText('This connector is read-only.')).toBeInTheDocument();
+    expect(getByText(/This Elastic-managed connector is read-only./i)).toBeInTheDocument();
   });
 
   it('shows the buttons', async () => {

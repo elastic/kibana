@@ -250,5 +250,6 @@
     "@kbn/triggers-actions-ui-types",
     "@kbn/unified-histogram",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-doc-links-browser",
   ]
 }

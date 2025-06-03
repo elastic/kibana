@@ -11,6 +11,24 @@ import { render } from '@testing-library/react';
 import { ReadOnlyConnectorMessage } from './read_only';
 import { ActionTypeModel } from '../../../..';
 
+jest.mock('../../../..', () => {
+  const original = jest.requireActual('../../../..');
+  return {
+    ...original,
+    useKibana: jest.fn(() => ({
+      services: {
+        docLinks: {
+          links: {
+            alerting: {
+              elasticManagedLlmUsageCost: 'https://example.com/usage-cost',
+            },
+          },
+        },
+      },
+    })),
+  };
+});
+
 const ExtraComponent = jest.fn(() => (
   <div>Extra Component</div>
 )) as unknown as ActionTypeModel['actionReadOnlyExtraComponent'];
@@ -25,7 +43,7 @@ describe('ReadOnlyConnectorMessage', () => {
       { wrapper: I18nProvider }
     );
 
-    expect(getByText('This connector is read-only.')).toBeInTheDocument();
+    expect(getByText(/This Elastic-managed connector is read-only./)).toBeInTheDocument();
     expect(getByTestId('read-only-link')).toHaveProperty('href', 'https://example.com/');
     expect(queryByText('Extra Component')).toBeNull();
   });

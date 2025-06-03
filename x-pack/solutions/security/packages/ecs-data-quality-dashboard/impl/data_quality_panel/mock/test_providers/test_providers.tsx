@@ -14,7 +14,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UserProfileService } from '@kbn/core/public';
+import { DocLinksStart, UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -68,6 +68,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+  const ELASTIC_DOCS = 'https://www.elastic.co/docs/';
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
@@ -83,6 +84,17 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               basePath={'https://localhost:5601/kbn'}
               docLinks={{
                 ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+                links: {
+                  securitySolution: {
+                    elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
+                    thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
+                    llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+                  },
+                  alerting: {
+                    elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
+                    elasticManagedLlmUsageCost: `https://www.elastic.co/pricing`,
+                  },
+                } as DocLinksStart['links'],
                 DOC_LINK_VERSION: 'current',
               }}
               getComments={mockGetComments}
@@ -93,6 +105,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               }}
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
+              getUrlForApp={jest.fn()}
               chrome={chrome}
             >
               {children}
