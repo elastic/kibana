@@ -533,7 +533,7 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isReadOnly}
+            isReadOnly={isReadOnly || !canWriteEndpointExceptions}
             disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
