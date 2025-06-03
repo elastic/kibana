@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createToolEventEmitter, createNoopEventEmitter, convertInternalEvent } from './events';
+import { createToolEventEmitter, convertInternalEvent } from './events';
 import type { InternalRunEvent, RunContext } from '@kbn/onechat-server';
 
 describe('Event utilities', () => {
@@ -68,14 +68,6 @@ describe('Event utilities', () => {
           stack: [],
         },
       });
-    });
-  });
-
-  describe('createNoopEventEmitter', () => {
-    it('should create an emitter that does nothing', () => {
-      const emitter = createNoopEventEmitter();
-      // This should not throw
-      emitter.emit({ type: 'test-event', data: {} });
     });
   });
 

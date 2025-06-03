@@ -17,7 +17,8 @@ import {
   CreateScopedRunnerDepsMock,
   MockedTool,
 } from '../../test_utils';
-import { createScopedRunner, createRunner, runTool, RunnerManager } from './runner';
+import { createScopedRunner, createRunner, RunnerManager } from './runner';
+import { runTool } from './run_tool';
 
 describe('Onechat runner', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;

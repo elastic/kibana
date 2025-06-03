@@ -17,8 +17,6 @@ export interface AgentsServiceStart {
   registry: InternalAgentRegistry;
 }
 
-// TODO ->
-
 export type AgentProviderWithId = AgentProvider & {
   id: string;
 };
