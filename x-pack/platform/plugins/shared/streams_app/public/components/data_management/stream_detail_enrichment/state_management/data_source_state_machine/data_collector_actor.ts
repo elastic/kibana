@@ -12,9 +12,14 @@ import type { errors as esErrors } from '@elastic/elasticsearch';
 import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
 import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { IEsSearchResponse } from '@kbn/search-types';
 import { getFormattedError } from '../../../../../util/errors';
 import { DataSourceMachineDeps } from './types';
-import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import {
+  CustomSamplesDataSourceWithUIAttributes,
+  EnrichmentDataSourceWithUIAttributes,
+  KqlSamplesDataSourceWithUIAttributes,
+} from '../../types';
 
 export interface SamplesFetchInput {
   condition?: Condition;
@@ -22,34 +27,102 @@ export interface SamplesFetchInput {
   streamName: string;
 }
 
+interface CollectKqlDataParams {
+  data: DataSourceMachineDeps['data'];
+  condition?: Condition;
+  filters?: Filter[];
+  query?: Query;
+  time?: TimeRange;
+  streamName: string;
+  size?: number;
+}
+
+interface SearchParamsOptions {
+  condition?: Condition;
+  filters?: Filter[];
+  index: string;
+  query?: Query;
+  size?: number;
+  timeRange?: TimeRange;
+}
+
+type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'condition' | 'streamName'>;
+
+/**
+ * Creates a data collector actor that fetches sample documents based on the data source type
+ */
 export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
-    if (input.dataSource.type === 'random-samples') {
-      return collectKqlData({
-        data,
-        condition: input.condition,
-        streamName: input.streamName,
-      });
-    }
-
-    if (input.dataSource.type === 'kql-samples') {
-      return collectKqlData({
-        data,
-        condition: input.condition,
-        time: input.dataSource.time,
-        query: input.dataSource.query,
-        streamName: input.streamName,
-      });
-    }
-
-    if (input.dataSource.type === 'custom-samples') {
-      return of(input.dataSource.documents);
-    }
-
-    return of<SampleDocument[]>([]);
+    const { dataSource, condition, streamName } = input;
+    return getDataCollectorForDataSource(dataSource)({
+      data,
+      condition,
+      streamName,
+    });
   });
 }
 
+/**
+ * Returns the appropriate data collector function based on the data source type
+ */
+function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
+  if (dataSource.type === 'random-samples') {
+    return collectRandomSamples;
+  }
+  if (dataSource.type === 'kql-samples') {
+    return (args: CollectorParams) => collectKqlSamples({ ...args, dataSource });
+  }
+  if (dataSource.type === 'custom-samples') {
+    return () => collectCustomSamples({ dataSource });
+  }
+  return () => of<SampleDocument[]>([]);
+}
+
+/**
+ * Collects random samples from the specified stream
+ */
+function collectRandomSamples({
+  data,
+  condition,
+  streamName,
+}: CollectorParams): Observable<SampleDocument[]> {
+  return collectKqlData({ data, condition, streamName });
+}
+
+/**
+ * Collects samples based on KQL query
+ */
+function collectKqlSamples({
+  data,
+  condition,
+  dataSource,
+  streamName,
+}: CollectorParams & {
+  dataSource: KqlSamplesDataSourceWithUIAttributes;
+}): Observable<SampleDocument[]> {
+  return collectKqlData({
+    data,
+    condition,
+    time: dataSource.time,
+    query: dataSource.query,
+    streamName,
+  });
+}
+
+/**
+ * Returns custom sample documents directly
+ */
+function collectCustomSamples({
+  dataSource,
+}: {
+  dataSource: CustomSamplesDataSourceWithUIAttributes;
+}): Observable<SampleDocument[]> {
+  return of(dataSource.documents);
+}
+
+/**
+ * Core function to collect data using KQL
+ */
 function collectKqlData({
   data,
   condition,
@@ -58,15 +131,7 @@ function collectKqlData({
   time,
   streamName,
   size,
-}: {
-  data: DataSourceMachineDeps['data'];
-  condition?: Condition;
-  filters?: Filter[];
-  query?: Query;
-  time?: TimeRange;
-  streamName: string;
-  size?: number;
-}): Observable<SampleDocument[]> {
+}: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
 
   return new Observable((observer) => {
@@ -82,57 +147,48 @@ function collectKqlData({
             size,
           }),
         },
-        {
-          abortSignal: abortController.signal,
-        }
+        { abortSignal: abortController.signal }
       )
-      .pipe(
-        filter(
-          (result) => !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined
-        ),
-        map((result) => result.rawResponse.hits.hits.map((doc) => doc._source))
-      )
+      .pipe(filter(isValidSearchResult), map(extractDocumentsFromResult))
       .subscribe(observer);
 
     return () => {
-      // Abort logic when unsubscribed
       abortController.abort();
       subscription.unsubscribe();
     };
   });
 }
 
-const buildSamplesSearchParams = ({
+/**
+ * Validates if the search result contains hits
+ */
+function isValidSearchResult(result: IEsSearchResponse): boolean {
+  return !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined;
+}
+
+/**
+ * Extracts documents from search result
+ */
+function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
+  return result.rawResponse.hits.hits.map((doc) => doc._source);
+}
+
+/**
+ * Builds search parameters for Elasticsearch query
+ */
+function buildSamplesSearchParams({
   condition,
   filters,
   index,
   query,
   size = 100,
   timeRange,
-}: {
-  condition?: Condition;
-  filters?: Filter[];
-  index: string;
-  query?: Query;
-  size?: number;
-  timeRange?: TimeRange;
-}) => {
+}: SearchParamsOptions) {
   const queryDefinition = buildEsQuery({ title: index, fields: [] }, query ?? [], filters ?? []);
+  addConditionToQuery(queryDefinition, condition);
+  addTimeRangeToQuery(queryDefinition, timeRange);
 
-  queryDefinition.bool.must.unshift(condition ? conditionToQueryDsl(condition) : { match_all: {} });
-
-  if (timeRange) {
-    queryDefinition.bool.must.unshift({
-      range: {
-        '@timestamp': {
-          gte: timeRange.from,
-          lte: timeRange.to,
-        },
-      },
-    });
-  }
-
-  const searchBody = {
+  return {
     index,
     allow_no_indices: true,
     query: queryDefinition,
@@ -147,13 +203,39 @@ const buildSamplesSearchParams = ({
     terminate_after: size,
     track_total_hits: false,
   };
+}
 
-  return searchBody;
-};
+/**
+ * Adds condition to the query definition
+ */
+function addConditionToQuery(queryDefinition: any, condition?: Condition): void {
+  queryDefinition.bool.must.unshift(condition ? conditionToQueryDsl(condition) : { match_all: {} });
+}
 
+/**
+ * Adds time range to the query definition if provided
+ */
+function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void {
+  if (timeRange) {
+    queryDefinition.bool.must.unshift({
+      range: {
+        '@timestamp': {
+          gte: timeRange.from,
+          lte: timeRange.to,
+        },
+      },
+    });
+  }
+}
+
+/**
+ * Creates a notifier for data collection failures
+ */
 export function createDataCollectionFailureNofitier({
   toasts,
-}: Pick<DataSourceMachineDeps, 'toasts'>) {
+}: {
+  toasts: DataSourceMachineDeps['toasts'];
+}) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
     const error = getFormattedError(event.error);

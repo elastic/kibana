@@ -32,7 +32,6 @@ export type DataSourceParentActor = ActorRef<Snapshot<unknown>, DataSourceToPare
 
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
-  previousDataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
@@ -40,14 +39,11 @@ export interface DataSourceContext {
 }
 
 export type DataSourceEvent =
-  | { type: 'dataSource.cancel' }
   | { type: 'dataSource.change'; dataSource: EnrichmentDataSourceWithUIAttributes }
   | { type: 'dataSource.delete' }
-  | { type: 'dataSource.edit' }
   | { type: 'dataSource.receive_condition'; condition?: Condition }
   | { type: 'dataSource.refresh' }
-  | { type: 'dataSource.toggleActivity' }
-  | { type: 'dataSource.update' };
+  | { type: 'dataSource.toggleActivity' };
 
 export interface DataSourceEmittedEvent {
   type: 'dataSource.changesDiscarded';
