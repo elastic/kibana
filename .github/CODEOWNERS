@@ -952,6 +952,7 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/test
+x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -1028,6 +1029,7 @@ x-pack/solutions/search/plugins/search_query_rules @elastic/search-kibana
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
+x-pack/solutions/search/test @elastic/search-kibana
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
@@ -1074,7 +1076,6 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -1109,13 +1110,13 @@ x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)
 /x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
-/x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-/x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 
 
 # Data Discovery
@@ -1599,7 +1600,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
-/x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
+/x-pack/platform/test/api_integration/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
@@ -2127,7 +2128,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/test/functional_search/ @elastic/search-kibana
-/x-pack/test/api_integration/apis/search_playground/ @elastic/search-kibana
+/x-pack/solutions/search/test/api_integration/apis/search_playground/ @elastic/search-kibana
 
 # workchat
 /x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana @elastic/workchat-eng

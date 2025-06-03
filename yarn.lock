@@ -5442,7 +5442,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entity-manager-fixture-plugin@link:x-pack/test/api_integration/apis/entity_manager/fixture_plugin":
+"@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
   version "0.0.0"
   uid ""
 
@@ -7739,6 +7739,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-platform@link:x-pack/platform/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-search@link:x-pack/solutions/search/test":
   version "0.0.0"
   uid ""
 
