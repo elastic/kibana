@@ -53,8 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   // Failing: See https://github.com/elastic/kibana/issues/196462
 
-  // TODO: reskip before merging
-  describe('@ess perform_bulk_action - ESS specific logic', () => {
+  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
