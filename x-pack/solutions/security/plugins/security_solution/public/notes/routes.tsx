@@ -32,8 +32,6 @@ NotesManagementContainer.displayName = 'NotesManagementContainer';
 export const routes = [
   {
     path: NOTES_PATH,
-    component: withSecurityRoutePageWrapper(NotesManagementContainer, SecurityPageName.notes, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(NotesManagementContainer, SecurityPageName.notes),
   },
 ];

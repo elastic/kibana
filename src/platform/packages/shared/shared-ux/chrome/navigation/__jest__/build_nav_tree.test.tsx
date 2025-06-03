@@ -260,6 +260,7 @@ describe('builds navigation tree', () => {
       href: undefined,
       href_prev: undefined,
       id: 'item1',
+      path: 'group1.item1',
     });
   });
 
