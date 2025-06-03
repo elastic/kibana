@@ -45885,6 +45885,1330 @@
         ]
       }
     },
+    "/api/maintenance_window": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: write-maintenance-window.",
+        "operationId": "post-maintenance-window",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                    "type": "boolean"
+                  },
+                  "schedule": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "custom": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "duration": {
+                            "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                            "type": "string"
+                          },
+                          "recurring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "end": {
+                                "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                "type": "string"
+                              },
+                              "every": {
+                                "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                "type": "string"
+                              },
+                              "occurrences": {
+                                "description": "The total number of recurrences of the schedule.",
+                                "minimum": 1,
+                                "type": "number"
+                              },
+                              "onMonth": {
+                                "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                "items": {
+                                  "maximum": 12,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onMonthDay": {
+                                "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                "items": {
+                                  "maximum": 31,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onWeekDay": {
+                                "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "start": {
+                            "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                            "type": "string"
+                          },
+                          "timezone": {
+                            "description": "The timezone of the schedule. The default timezone is UTC.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "duration"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "custom"
+                    ],
+                    "type": "object"
+                  },
+                  "scope": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "alerting": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kql": {
+                                "description": "A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "kql"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "query"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "alerting"
+                    ],
+                    "type": "object"
+                  },
+                  "title": {
+                    "description": "The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title",
+                  "schedule"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "custom": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "duration": {
+                              "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                              "type": "string"
+                            },
+                            "recurring": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "end": {
+                                  "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "every": {
+                                  "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                  "type": "string"
+                                },
+                                "occurrences": {
+                                  "description": "The total number of recurrences of the schedule.",
+                                  "type": "number"
+                                },
+                                "onMonth": {
+                                  "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onMonthDay": {
+                                  "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onWeekDay": {
+                                  "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "start": {
+                              "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                              "type": "string"
+                            },
+                            "timezone": {
+                              "description": "The timezone of the schedule. The default timezone is UTC.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "duration"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "custom"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "alerting": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "query": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kql": {
+                                  "description": "A filter written in Kibana Query Language (KQL).",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kql"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "query"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alerting"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "schedule"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          }
+        },
+        "summary": "Create a maintenance window.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      }
+    },
+    "/api/maintenance_window/{id}": {
+      "delete": {
+        "description": "[Required authorization] Route required privileges: write-maintenance-window.",
+        "operationId": "delete-maintenance-window-id",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the maintenance window to be deleted.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Delete a maintenance window.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      },
+      "get": {
+        "description": "[Required authorization] Route required privileges: read-maintenance-window.",
+        "operationId": "get-maintenance-window-id",
+        "parameters": [
+          {
+            "description": "The identifier for the maintenance window.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "custom": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "duration": {
+                              "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                              "type": "string"
+                            },
+                            "recurring": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "end": {
+                                  "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "every": {
+                                  "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                  "type": "string"
+                                },
+                                "occurrences": {
+                                  "description": "The total number of recurrences of the schedule.",
+                                  "type": "number"
+                                },
+                                "onMonth": {
+                                  "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onMonthDay": {
+                                  "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onWeekDay": {
+                                  "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "start": {
+                              "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                              "type": "string"
+                            },
+                            "timezone": {
+                              "description": "The timezone of the schedule. The default timezone is UTC.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "duration"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "custom"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "alerting": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "query": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kql": {
+                                  "description": "A filter written in Kibana Query Language (KQL).",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kql"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "query"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alerting"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "schedule"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Get maintenance window details.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      },
+      "patch": {
+        "description": "[Required authorization] Route required privileges: write-maintenance-window.",
+        "operationId": "patch-maintenance-window-id",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                    "type": "boolean"
+                  },
+                  "schedule": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "custom": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "duration": {
+                            "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                            "type": "string"
+                          },
+                          "recurring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "end": {
+                                "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                "type": "string"
+                              },
+                              "every": {
+                                "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                "type": "string"
+                              },
+                              "occurrences": {
+                                "description": "The total number of recurrences of the schedule.",
+                                "minimum": 1,
+                                "type": "number"
+                              },
+                              "onMonth": {
+                                "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                "items": {
+                                  "maximum": 12,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onMonthDay": {
+                                "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                "items": {
+                                  "maximum": 31,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onWeekDay": {
+                                "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "start": {
+                            "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                            "type": "string"
+                          },
+                          "timezone": {
+                            "description": "The timezone of the schedule. The default timezone is UTC.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "duration"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "custom"
+                    ],
+                    "type": "object"
+                  },
+                  "scope": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "alerting": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "kql": {
+                                "description": "A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "kql"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "query"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "alerting"
+                    ],
+                    "type": "object"
+                  },
+                  "title": {
+                    "description": "The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "custom": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "duration": {
+                              "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                              "type": "string"
+                            },
+                            "recurring": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "end": {
+                                  "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "every": {
+                                  "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                  "type": "string"
+                                },
+                                "occurrences": {
+                                  "description": "The total number of recurrences of the schedule.",
+                                  "type": "number"
+                                },
+                                "onMonth": {
+                                  "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onMonthDay": {
+                                  "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onWeekDay": {
+                                  "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "start": {
+                              "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                              "type": "string"
+                            },
+                            "timezone": {
+                              "description": "The timezone of the schedule. The default timezone is UTC.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "duration"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "custom"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "alerting": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "query": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kql": {
+                                  "description": "A filter written in Kibana Query Language (KQL).",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kql"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "query"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alerting"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "schedule"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          },
+          "409": {
+            "description": "Indicates that the maintenance window has already been updated by another user."
+          }
+        },
+        "summary": "Update a maintenance window.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      }
+    },
+    "/api/maintenance_window/{id}/_archive": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: write-maintenance-window.",
+        "operationId": "post-maintenance-window-id-archive",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the maintenance window to be archived.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "custom": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "duration": {
+                              "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                              "type": "string"
+                            },
+                            "recurring": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "end": {
+                                  "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "every": {
+                                  "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                  "type": "string"
+                                },
+                                "occurrences": {
+                                  "description": "The total number of recurrences of the schedule.",
+                                  "type": "number"
+                                },
+                                "onMonth": {
+                                  "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onMonthDay": {
+                                  "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onWeekDay": {
+                                  "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "start": {
+                              "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                              "type": "string"
+                            },
+                            "timezone": {
+                              "description": "The timezone of the schedule. The default timezone is UTC.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "duration"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "custom"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "alerting": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "query": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kql": {
+                                  "description": "A filter written in Kibana Query Language (KQL).",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kql"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "query"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alerting"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "schedule"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Archive a maintenance window.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      }
+    },
+    "/api/maintenance_window/{id}/_unarchive": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: write-maintenance-window.",
+        "operationId": "post-maintenance-window-id-unarchive",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the maintenance window to be unarchived.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "created_at": {
+                      "description": "The date and time when the maintenance window was created.",
+                      "type": "string"
+                    },
+                    "created_by": {
+                      "description": "The identifier for the user that created the maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "description": "Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.",
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The identifier for the maintenance window.",
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "custom": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "duration": {
+                              "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                              "type": "string"
+                            },
+                            "recurring": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "end": {
+                                  "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "every": {
+                                  "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                  "type": "string"
+                                },
+                                "occurrences": {
+                                  "description": "The total number of recurrences of the schedule.",
+                                  "type": "number"
+                                },
+                                "onMonth": {
+                                  "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onMonthDay": {
+                                  "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "type": "array"
+                                },
+                                "onWeekDay": {
+                                  "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "start": {
+                              "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                              "type": "string"
+                            },
+                            "timezone": {
+                              "description": "The timezone of the schedule. The default timezone is UTC.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "duration"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "custom"
+                      ],
+                      "type": "object"
+                    },
+                    "scope": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "alerting": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "query": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kql": {
+                                  "description": "A filter written in Kibana Query Language (KQL).",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kql"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "query"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "alerting"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "description": "The current status of the maintenance window.",
+                      "enum": [
+                        "running",
+                        "upcoming",
+                        "finished",
+                        "archived"
+                      ],
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The name of the maintenance window.",
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "description": "The date and time when the maintenance window was last updated.",
+                      "type": "string"
+                    },
+                    "updated_by": {
+                      "description": "The identifier for the user that last updated this maintenance window.",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "enabled",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at",
+                    "status",
+                    "schedule"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a maintenance window with the given ID does not exist."
+          }
+        },
+        "summary": "Unarchive a maintenance window.",
+        "tags": [
+          "maintenance-window"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
+      }
+    },
     "/api/saved_objects/_export": {
       "post": {
         "description": "Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.",
@@ -58824,6 +60148,9 @@
     },
     {
       "name": "Fleet uninstall tokens"
+    },
+    {
+      "name": "maintenance-window"
     },
     {
       "name": "Message Signing Service"
