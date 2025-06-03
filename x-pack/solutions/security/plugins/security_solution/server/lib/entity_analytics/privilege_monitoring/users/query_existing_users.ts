@@ -9,10 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { isRight, type Either } from 'fp-ts/Either';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
-import type { Batch } from './bulk/types';
+import type { Batch, BulkPrivMonUser } from './bulk/types';
 
 export const queryExistingUsers =
-  (esClient: ElasticsearchClient, index: string) => (batch: Array<Either<string, string>>) =>
+  (esClient: ElasticsearchClient, index: string) =>
+  (batch: Array<Either<string, BulkPrivMonUser>>) =>
     esClient
       .search<MonitoredUserDoc>({
         index,
@@ -23,7 +24,7 @@ export const queryExistingUsers =
                 terms: {
                   'user.name': Array.from(batch)
                     .filter(isRight)
-                    .map((e) => e.right),
+                    .map((e) => e.right.name),
                 },
               },
             ],

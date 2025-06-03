@@ -6,6 +6,12 @@
  */
 
 import { useMemo } from 'react';
+import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import {
+  PRIVMON_PUBLIC_INIT,
+  PRIVMON_USER_PUBLIC_CSV_UPLOAD_URL,
+} from '../../../common/entity_analytics/privileged_user_monitoring/constants';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import {
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   LIST_ENTITIES_URL,
@@ -277,6 +283,32 @@ export const useEntityAnalyticsRoutes = () => {
       );
     };
 
+    const uploadPrivilegedUserMonitoringFile = async (
+      fileContent: string,
+      fileName: string
+    ): Promise<PrivmonBulkUploadUsersCSVResponse> => {
+      const file = new File([new Blob([fileContent])], fileName, {
+        type: 'text/csv',
+      });
+      const body = new FormData();
+      body.append('file', file);
+
+      return http.fetch<PrivmonBulkUploadUsersCSVResponse>(PRIVMON_USER_PUBLIC_CSV_UPLOAD_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        headers: {
+          'Content-Type': undefined, // Lets the browser set the appropriate content type
+        },
+        body,
+      });
+    };
+
+    const initPrivilegedMonitoringEngine = async (): Promise<InitMonitoringEngineResponse> =>
+      http.fetch<InitMonitoringEngineResponse>(PRIVMON_PUBLIC_INIT, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+      });
+
     /**
      * Fetches risk engine settings
      */
@@ -319,6 +351,8 @@ export const useEntityAnalyticsRoutes = () => {
       deleteAssetCriticality,
       fetchAssetCriticality,
       uploadAssetCriticalityFile,
+      uploadPrivilegedUserMonitoringFile,
+      initPrivilegedMonitoringEngine,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

@@ -7,8 +7,12 @@
 
 import type { Either } from 'fp-ts/Either';
 
+export interface BulkPrivMonUser {
+  name: string;
+}
+
 export interface Batch {
-  uploaded: Array<Either<string, string>>;
+  uploaded: Array<Either<string, BulkPrivMonUser>>;
   existingUsers: Record<string, string>;
 }
 

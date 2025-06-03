@@ -27,7 +27,7 @@ export const softDeleteOmittedUsers =
       if (!isRight(either)) {
         return acc;
       }
-      acc.push(either.right);
+      acc.push(either.right.name);
       return acc;
     }, []);
     const res = await esClient.helpers.search<MonitoredUserDoc>({

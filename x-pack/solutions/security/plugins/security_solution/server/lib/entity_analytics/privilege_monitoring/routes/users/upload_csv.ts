@@ -10,12 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
+import { PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../constants';
+import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_prvileged_monitoring_resources';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -61,8 +62,9 @@ export const uploadUsersCSVRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const secSol = await context.securitySolution;
+          await checkAndInitPrivilegedMonitoringResources(context, logger);
 
+          const secSol = await context.securitySolution;
           const fileStream = request.body.file as HapiReadableStream;
 
           const body = await secSol.getPrivilegeMonitoringDataClient().uploadUsersCSV(fileStream, {
@@ -73,6 +75,7 @@ export const uploadUsersCSVRoute = (
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
+          console.error(error);
           logger.error(`Error uploading users via CSV: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
