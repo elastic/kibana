@@ -22,7 +22,7 @@ export const CAI_COMMENTS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
     comment: {
-      type: 'keyword',
+      type: 'text',
     },
     created_at: {
       type: 'date',

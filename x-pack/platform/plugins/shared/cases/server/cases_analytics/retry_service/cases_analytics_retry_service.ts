@@ -23,7 +23,7 @@ export class CasesAnalyticsRetryService extends RetryService {
     }
 
     this.logger.debug(`[${this.serviceName}][isRetryableError] Error is not retryable`, {
-      tags: ['case-connector:retry-error'],
+      tags: ['cai:retry-error'],
     });
 
     return false;

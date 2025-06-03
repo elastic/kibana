@@ -15,15 +15,14 @@ import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { CaseAnalyticsIndexBackfillTaskFactory } from './backfill_task_factory';
-
-const TASK_TYPE = 'cai:cases_analytics_index_backfill';
+import { TASK_TYPE, RUN_INTERVAL } from './constants';
 
 export function registerCAIBackfillTask({
-  taskManagerSetup,
+  taskManager,
   logger,
   core,
 }: {
-  taskManagerSetup: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
 }) {
@@ -32,9 +31,9 @@ export function registerCAIBackfillTask({
     return elasticsearch.client.asInternalUser;
   };
 
-  taskManagerSetup.registerTaskDefinitions({
+  taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
-      title: 'Backfill cases analytics index',
+      title: 'Backfill cases analytics indexes.',
       maxAttempts: 3,
       createTaskRunner: (context: RunContext) => {
         return new CaseAnalyticsIndexBackfillTaskFactory({ getESClient, logger }).create(context);
@@ -63,7 +62,7 @@ export async function scheduleCAIBackfillTask({
       id: taskId,
       taskType: TASK_TYPE,
       params: { sourceIndex, destIndex, sourceQuery },
-      runAt: new Date(Date.now() + 5 * 1000), // todo, value is short for testing but should run after 5 minutes
+      runAt: new Date(Date.now() + RUN_INTERVAL), // todo, value is short for testing but should run after 5 minutes
       state: {},
     });
   } catch (e) {

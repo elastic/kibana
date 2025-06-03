@@ -79,7 +79,7 @@ export class BackfillTaskRunner implements CancellableTask {
     const painlessScript = await this.getPainlessScript(esClient);
 
     if (painlessScript.found) {
-      this.logger.info(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
+      this.logger.debug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
       await esClient.reindex({
         source: {
           index: this.sourceIndex,
@@ -103,7 +103,7 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getPainlessScript(esClient: ElasticsearchClient) {
     const painlessScriptId = await this.getPainlessScriptId(esClient);
 
-    this.logger.info(`Getting painless script with id ${painlessScriptId}.`);
+    this.logger.debug(`Getting painless script with id ${painlessScriptId}.`);
     return esClient.getScript({
       id: painlessScriptId,
     });
@@ -128,7 +128,7 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getCurrentMapping(
     esClient: ElasticsearchClient
   ): Promise<IndicesGetMappingResponse> {
-    this.logger.info(`Getting mapping of index ${this.destIndex}.`);
+    this.logger.debug(`Getting mapping of index ${this.destIndex}.`);
     return esClient.indices.getMapping({
       index: this.destIndex,
     });

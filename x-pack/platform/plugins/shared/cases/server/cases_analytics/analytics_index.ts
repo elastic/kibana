@@ -95,9 +95,9 @@ export class AnalyticsIndex {
     this.retryService = new CasesAnalyticsRetryService(this.logger, backOffFactory);
   }
 
-  public async createIndex() {
+  public async upsertIndex() {
     try {
-      await this.retryService.retryWithBackoff(() => this._createIndex());
+      await this.retryService.retryWithBackoff(() => this._upsertIndex());
     } catch (error) {
       // We do not throw because errors should not break execution
       this.logger.error(`[${this.indexName}] Failed to create index.`);
@@ -105,15 +105,15 @@ export class AnalyticsIndex {
     }
   }
 
-  private async _createIndex() {
+  private async _upsertIndex() {
     try {
       const indexExists = await this.indexExists();
 
       if (!indexExists) {
-        this.logger.info(`[${this.indexName}] Index does not exist. Creating.`);
+        this.logger.debug(`[${this.indexName}] Index does not exist. Creating.`);
         await this.createIndexMapping();
       } else {
-        this.logger.info(`[${this.indexName}] Index exists. Updating mapping.`);
+        this.logger.debug(`[${this.indexName}] Index exists. Updating mapping.`);
         await this.updateIndexMapping();
       }
     } catch (error) {
@@ -142,30 +142,30 @@ export class AnalyticsIndex {
   }
 
   private async updateMapping() {
-    this.logger.info(`[${this.indexName}] Updating the painless script.`);
+    this.logger.debug(`[${this.indexName}] Updating the painless script.`);
     await this.esClient.putScript({
       id: this.painlessScriptId,
       script: this.painlessScript,
     });
 
-    this.logger.info(`[${this.indexName}] Updating index mapping.`);
+    this.logger.debug(`[${this.indexName}] Updating index mapping.`);
     await this.esClient.indices.putMapping({
       index: this.indexName,
       ...this.mappings,
     });
 
-    this.logger.info(`[${this.indexName}] Scheduling the backfill task.`);
+    this.logger.debug(`[${this.indexName}] Scheduling the backfill task.`);
     await this.scheduleBackfillTask();
   }
 
   private async createIndexMapping() {
-    this.logger.info(`[${this.indexName}] Creating painless script.`);
+    this.logger.debug(`[${this.indexName}] Creating painless script.`);
     await this.esClient.putScript({
       id: this.painlessScriptId,
       script: this.painlessScript,
     });
 
-    this.logger.info(`[${this.indexName}] Creating index.`);
+    this.logger.debug(`[${this.indexName}] Creating index.`);
     await this.esClient.indices.create({
       index: this.indexName,
       timeout: CAI_DEFAULT_TIMEOUT,
@@ -175,12 +175,12 @@ export class AnalyticsIndex {
       },
     });
 
-    this.logger.info(`[${this.indexName}] Scheduling the backfill task.`);
+    this.logger.debug(`[${this.indexName}] Scheduling the backfill task.`);
     await this.scheduleBackfillTask();
   }
 
   private async indexExists(): Promise<boolean> {
-    this.logger.info(`[${this.indexName}] Checking if index exists.`);
+    this.logger.debug(`[${this.indexName}] Checking if index exists.`);
     return this.esClient.indices.exists({
       index: this.indexName,
     });

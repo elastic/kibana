@@ -7,6 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+
 export const CAI_CASES_INDEX_NAME = '.internal.cases';
 
 export const CAI_CASES_SOURCE_QUERY: QueryDslQueryContainer = {
@@ -15,6 +17,6 @@ export const CAI_CASES_SOURCE_QUERY: QueryDslQueryContainer = {
   },
 };
 
-export const CAI_CASES_SOURCE_INDEX = '.kibana_alerting_cases';
+export const CAI_CASES_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 export const CAI_CASES_BACKFILL_TASK_ID = 'cai_cases_backfill_task';

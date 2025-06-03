@@ -11,9 +11,9 @@ export const CAI_ATTACHMENTS_INDEX_SCRIPT_ID = 'cai_attachments_script_1';
 export const CAI_ATTACHMENTS_INDEX_SCRIPT: StoredScript = {
   lang: 'painless',
   source: `
-    long milliSinceEpoch = new Date().getTime();
-    Instant instant = Instant.ofEpochMilli(milliSinceEpoch);
-    ctx._source['@timestamp'] = ZonedDateTime.ofInstant(instant, ZoneId.of('Z'));
+    long timestampInMillis = new Date().getTime();
+    Instant timestampInstance = Instant.ofEpochMilli(timestampInMillis);
+    ctx._source['@timestamp'] = ZonedDateTime.ofInstant(timestampInstance, ZoneId.of('Z'));
 
     ctx._source.type = ctx._source["cases-comments"].remove("type");
 

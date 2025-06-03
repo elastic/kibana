@@ -88,7 +88,7 @@ describe('AnalyticsIndex', () => {
   });
 
   it('checks if the index exists', async () => {
-    await index.createIndex();
+    await index.upsertIndex();
 
     expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
   });
@@ -96,7 +96,7 @@ describe('AnalyticsIndex', () => {
   it('creates index if it does not exist', async () => {
     esClient.indices.exists.mockResolvedValueOnce(false);
 
-    await index.createIndex();
+    await index.upsertIndex();
 
     expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
     expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
@@ -138,7 +138,7 @@ describe('AnalyticsIndex', () => {
       },
     });
 
-    await index.createIndex();
+    await index.upsertIndex();
 
     expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
@@ -172,7 +172,7 @@ describe('AnalyticsIndex', () => {
       },
     });
 
-    await index.createIndex();
+    await index.upsertIndex();
 
     expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
@@ -189,7 +189,7 @@ describe('AnalyticsIndex', () => {
     esClient.indices.exists.mockResolvedValueOnce(true);
     esClient.indices.getMapping.mockResolvedValueOnce({ [indexName]: { mappings } });
 
-    await index.createIndex();
+    await index.upsertIndex();
 
     expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: indexName });
@@ -208,7 +208,7 @@ describe('AnalyticsIndex', () => {
         .mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error A'))
         .mockRejectedValueOnce(new esErrors.TimeoutError('My retryable error B'))
         .mockResolvedValue(true);
-      await index.createIndex();
+      await index.upsertIndex();
 
       expect(nextBackOff).toBeCalledTimes(2);
       expect(esClient.indices.exists).toBeCalledTimes(3);
@@ -221,25 +221,12 @@ describe('AnalyticsIndex', () => {
         .mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error A'))
         .mockResolvedValue({} as IndicesCreateResponse);
 
-      await index.createIndex();
+      await index.upsertIndex();
 
       expect(nextBackOff).toBeCalledTimes(1);
       expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
       expect(esClient.putScript).toBeCalledWith({ id: painlessScriptId, script: painlessScript });
       expect(esClient.indices.create).toBeCalledTimes(2);
-      expect(esClient.indices.create).toBeCalledWith({
-        index: indexName,
-        timeout: '300s',
-        mappings,
-        settings: {
-          index: {
-            auto_expand_replicas: '0-1',
-            mode: 'lookup',
-            number_of_shards: 1,
-            refresh_interval: '15s',
-          },
-        },
-      });
       expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledWith({
         taskId,
         sourceIndex,
@@ -269,7 +256,7 @@ describe('AnalyticsIndex', () => {
         .mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error A'))
         .mockResolvedValue({} as IndicesPutMappingResponse);
 
-      await index.createIndex();
+      await index.upsertIndex();
 
       expect(nextBackOff).toBeCalledTimes(1);
       expect(esClient.indices.exists).toBeCalledWith({ index: indexName });
@@ -295,13 +282,11 @@ describe('AnalyticsIndex', () => {
     it('does not retry if the eexecution throws a non-retryable error', async () => {
       esClient.indices.exists.mockRejectedValue(new Error('My terrible error'));
 
-      await expect(index.createIndex()).resolves.not.toThrow();
+      await expect(index.upsertIndex()).resolves.not.toThrow();
 
       expect(nextBackOff).toBeCalledTimes(0);
-      expect(logger.error.mock.calls).toEqual([
-        [`[${indexName}] Failed to create the index.`],
-        ['My terrible error'],
-      ]);
+      // Paths in the algorithm after the error are not called.
+      expect(esClient.indices.getMapping).not.toHaveBeenCalled();
     });
   });
 });

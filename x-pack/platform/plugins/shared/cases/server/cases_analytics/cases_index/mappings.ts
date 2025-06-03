@@ -34,13 +34,13 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
     status_sort: {
-      type: 'short', // document says long, mapping is currently short
+      type: 'short',
     },
     severity: {
       type: 'keyword',
     },
     severity_sort: {
-      type: 'short', // document says long, mapping is currently short
+      type: 'short',
     },
     created_at: {
       type: 'date',
@@ -128,10 +128,6 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
         type: {
           type: 'keyword',
         },
-        // Application level
-        // label: {
-        //   type: 'keyword',
-        // },
         value: {
           type: 'keyword',
         },
@@ -153,13 +149,6 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
         // },
       },
     },
-    // Application level
-    // total_comments: {
-    //   type: 'integer',
-    // },
-    // total_alerts: {
-    //   type: 'integer',
-    // },
     total_assignees: {
       type: 'integer',
     },

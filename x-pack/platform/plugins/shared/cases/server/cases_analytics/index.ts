@@ -47,20 +47,20 @@ export const createCasesAnalyticsIndexes = async ({
   });
 
   return Promise.all([
-    casesIndex.createIndex(),
-    casesAttachmentsIndex.createIndex(),
-    casesCommentsIndex.createIndex(),
+    casesIndex.upsertIndex(),
+    casesAttachmentsIndex.upsertIndex(),
+    casesCommentsIndex.upsertIndex(),
   ]);
 };
 
 export const registerCasesAnalyticsIndicesTasks = ({
-  taskManagerSetup,
+  taskManager,
   logger,
   core,
 }: {
-  taskManagerSetup: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
 }) => {
-  registerCAIBackfillTask({ taskManagerSetup, logger, core });
+  registerCAIBackfillTask({ taskManager, logger, core });
 };

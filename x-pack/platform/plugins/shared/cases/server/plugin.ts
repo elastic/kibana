@@ -67,6 +67,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -76,6 +77,7 @@ export class CasePlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -95,7 +97,7 @@ export class CasePlugin
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndicesTasks({
-      taskManagerSetup: plugins.taskManager,
+      taskManager: plugins.taskManager,
       logger: this.logger,
       core,
     });
@@ -202,7 +204,7 @@ export class CasePlugin
     createCasesAnalyticsIndexes({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
-      isServerless: false, // todo
+      isServerless: this.isServerless,
       taskManager: plugins.taskManager,
     });
 

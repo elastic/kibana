@@ -41,7 +41,7 @@ export class RetryService {
       const res = await cb();
 
       this.logger.debug(
-        `[${this.serviceName}][retryWithBackoff] Ran successfully after ${this.attempt} attempts.`,
+        `[${this.serviceName}][retryWithBackoff] Run successfully after ${this.attempt} attempts.`,
         {
           labels: { attempt: this.attempt },
         }
