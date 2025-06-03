@@ -6,6 +6,5 @@
  */
 
 export { generateFakeToolCallId } from './tool_calls';
-export { callPromptUntil } from './call_prompt_until';
 export { Tokenizer } from './tokenizer';
 export { ShortIdTable } from './short_id_table';

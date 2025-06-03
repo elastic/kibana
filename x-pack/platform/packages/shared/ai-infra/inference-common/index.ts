@@ -106,7 +106,7 @@ export {
   isInferenceProviderError,
 } from './src/errors';
 
-export { Tokenizer, generateFakeToolCallId, callPromptUntil, ShortIdTable } from './src/utils';
+export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
 export { elasticModelDictionary } from './src/const';
 
