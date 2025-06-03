@@ -308,7 +308,10 @@ export const mergeOtherBucketAggResponse = (
 ): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
   const updatedOtherResponse = cloneDeep(otherResponse);
-  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(updatedOtherResponse, aggsConfig);
+  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(
+    updatedOtherResponse,
+    aggsConfig
+  );
   const updatedAggregationsRoot = getCorrectAggregationsCursorFromResponse(
     updatedResponse,
     aggsConfig
