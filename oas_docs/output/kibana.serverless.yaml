@@ -43119,6 +43119,7 @@ paths:
       summary: Archive a maintenance window.
       tags:
         - maintenance-window
+      x-state: Generally available; added in 9.1.0
   /api/maintenance_window/{id}/_unarchive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
