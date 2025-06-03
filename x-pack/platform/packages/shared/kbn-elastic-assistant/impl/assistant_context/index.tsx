@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
+import type { User } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -105,7 +106,7 @@ export interface UseAssistantContext {
   ) => CodeBlockDetails[][];
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
-  currentUserAvatar?: UserAvatar;
+  currentUser?: User;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled: boolean;
@@ -255,14 +256,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Current User Avatar
    */
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: async () =>
-      userProfileService.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => userProfileService.getCurrent(),
     select: (data) => {
-      return data.data.avatar;
+      return {
+        id: data.uid,
+        name: data.user.username,
+      };
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -291,7 +292,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
       http,
@@ -340,7 +341,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
       http,

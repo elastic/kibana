@@ -40,6 +40,7 @@ import {
 } from '../../conversations/utils';
 
 interface Params {
+  isConversationOwner: boolean;
   isDisabled?: boolean;
   onChatCleared?: () => void;
   selectedConversation?: Conversation;
@@ -58,7 +59,7 @@ const ConditionalWrap = ({
 }) => (condition ? wrap(children) : children);
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
-  ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+  ({ isConversationOwner, isDisabled = false, onChatCleared, selectedConversation }: Params) => {
     const { euiTheme } = useEuiTheme();
     const {
       assistantAvailability,
@@ -333,10 +334,15 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             key={'clear-chat'}
             onClick={showDestroyModal}
             icon={'refresh'}
+            disabled={!isConversationOwner}
             data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
+            css={
+              isConversationOwner
+                ? css`
+                    color: ${euiTheme.colors.textDanger};
+                  `
+                : null
+            }
           >
             {i18n.RESET_CONVERSATION}
           </EuiContextMenuItem>
@@ -353,6 +359,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleNavigateToSettings,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
+        isConversationOwner,
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,

@@ -59,7 +59,7 @@ export const getComments: GetAssistantMessages = ({
   refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
-  currentUserAvatar,
+  isConversationOwner,
   setIsStreaming,
   systemPromptContent,
   contentReferencesVisible,
@@ -148,7 +148,7 @@ export const getComments: GetAssistantMessages = ({
         eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
       };
 
-      const isControlsEnabled = isLastComment && !isUser;
+      const isControlsEnabled = isLastComment && !isUser && isConversationOwner;
 
       const transformMessage = (content: string) =>
         transformMessageWithReplacements({

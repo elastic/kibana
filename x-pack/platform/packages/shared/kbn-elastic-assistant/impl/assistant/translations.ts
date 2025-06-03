@@ -63,3 +63,8 @@ export const DISCLAIMER = i18n.translate('xpack.elasticAssistant.assistant.discl
   defaultMessage:
     'Responses from Al systems may not always be entirely accurate, although they can seem convincing. For more information on the assistant feature and its usage, please reference the documentation.',
 });
+
+export const DISABLED_OWNERSHIP = i18n.translate('xpack.elasticAssistant.assistant.ownership', {
+  defaultMessage:
+    'You are not the conversation owner and cannot make updates. Duplicate the conversation to continue the conversation with a copy of the original.',
+});

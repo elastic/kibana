@@ -31,6 +31,7 @@ import * as i18n from './translations';
 interface OwnProps {
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
+  isConversationOwner: boolean;
   isDisabled: boolean;
   isLoading: boolean;
   isSettingsModalVisible: boolean;
@@ -74,6 +75,7 @@ export const AssistantHeader: React.FC<Props> = ({
   conversations,
   conversationsLoaded,
   defaultConnector,
+  isConversationOwner,
   isAssistantEnabled,
   isDisabled,
   isLoading,
@@ -166,7 +168,7 @@ export const AssistantHeader: React.FC<Props> = ({
               <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
             ) : (
               <AssistantTitle
-                isDisabled={isDisabled || selectedConversation?.id === ''}
+                isDisabled={isDisabled || selectedConversation?.id === '' || !isConversationOwner}
                 title={selectedConversation?.title || NEW_CHAT}
                 selectedConversation={selectedConversation}
                 refetchCurrentUserConversations={refetchCurrentUserConversations}
@@ -178,7 +180,9 @@ export const AssistantHeader: React.FC<Props> = ({
             <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
               <EuiFlexItem>
                 <ConnectorSelectorInline
-                  isDisabled={isDisabled || selectedConversation === undefined}
+                  isDisabled={
+                    isDisabled || selectedConversation === undefined || !isConversationOwner
+                  }
                   selectedConnectorId={selectedConnectorId}
                   selectedConversation={selectedConversation}
                   onConnectorSelected={onConversationChange}
@@ -186,6 +190,7 @@ export const AssistantHeader: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu
+                  isConversationOwner={isConversationOwner}
                   isDisabled={isDisabled}
                   onChatCleared={onChatCleared}
                   selectedConversation={selectedConversation}

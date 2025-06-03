@@ -7,7 +7,6 @@
 
 import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiCommentProps } from '@elastic/eui';
-import { UserAvatar } from '.';
 
 export interface MessagePresentation {
   delay?: number;
@@ -39,6 +38,10 @@ export interface Conversation {
   messages: ClientMessage[];
   updatedAt?: string;
   createdAt?: string;
+  createdBy: {
+    id?: string;
+    name?: string;
+  };
   replacements: Replacements;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -79,11 +82,11 @@ export interface AssistantAvailability {
 export type GetAssistantMessages = (commentArgs: {
   abortStream: () => void;
   currentConversation?: Conversation;
+  isConversationOwner: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-  currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible: boolean;

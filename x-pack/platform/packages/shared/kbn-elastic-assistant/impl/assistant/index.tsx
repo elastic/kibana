@@ -24,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   useEuiTheme,
+  EuiCallOut,
 } from '@elastic/eui';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
@@ -58,6 +59,7 @@ import {
   useAssistantLastConversation,
   useAssistantSpaceId,
 } from './use_space_aware_context';
+import * as i18n from './translations';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -97,7 +99,7 @@ const AssistantComponent: React.FC<Props> = ({
     getComments,
     http,
     promptContexts,
-    currentUserAvatar,
+    currentUser,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -181,6 +183,13 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
   ]);
+
+  const isConversationOwner = useMemo(
+    () =>
+      currentConversation?.createdBy.id === currentUser?.id ||
+      currentConversation?.createdBy.name === currentUser?.name,
+    [currentConversation, currentUser]
+  );
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(
@@ -399,12 +408,12 @@ const AssistantComponent: React.FC<Props> = ({
           comments={getComments({
             abortStream,
             currentConversation,
+            isConversationOwner,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
-            currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
           })}
@@ -430,9 +439,9 @@ const AssistantComponent: React.FC<Props> = ({
       showAnonymizedValues,
       refetchCurrentConversation,
       handleRegenerateResponse,
+      isConversationOwner,
       isLoadingChatSend,
       setIsStreaming,
-      currentUserAvatar,
       currentSystemPrompt?.content,
       contentReferencesVisible,
       euiTheme.size.l,
@@ -498,6 +507,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
+                    isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled || isLoadingChatSend}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
@@ -575,72 +585,87 @@ const AssistantComponent: React.FC<Props> = ({
                     flex-direction: column;
                   `}
                 >
-                  <EuiPanel
-                    paddingSize="m"
-                    hasShadow={false}
-                    css={css`
-                      overflow: auto;
-                    `}
-                  >
-                    {!isDisabled &&
-                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
-                        <EuiFlexGroup>
-                          <EuiFlexItem>
-                            <>
-                              <ContextPills
-                                anonymizationFields={anonymizationFields}
+                  {isConversationOwner ? (
+                    <>
+                      <EuiPanel
+                        paddingSize="m"
+                        hasShadow={false}
+                        css={css`
+                          overflow: auto;
+                        `}
+                      >
+                        {!isDisabled &&
+                          Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                            <EuiFlexGroup>
+                              <EuiFlexItem>
+                                <>
+                                  <ContextPills
+                                    anonymizationFields={anonymizationFields}
+                                    promptContexts={promptContexts}
+                                    selectedPromptContexts={selectedPromptContexts}
+                                    setSelectedPromptContexts={setSelectedPromptContexts}
+                                  />
+                                  {Object.keys(promptContexts).length > 0 && (
+                                    <EuiSpacer size={'s'} />
+                                  )}
+                                </>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          )}
+
+                        <EuiFlexGroup direction="column" gutterSize="s">
+                          {Object.keys(selectedPromptContexts).length ? (
+                            <EuiFlexItem grow={false}>
+                              <SelectedPromptContexts
                                 promptContexts={promptContexts}
                                 selectedPromptContexts={selectedPromptContexts}
                                 setSelectedPromptContexts={setSelectedPromptContexts}
+                                currentReplacements={currentConversation?.replacements}
                               />
-                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-                            </>
+                            </EuiFlexItem>
+                          ) : null}
+
+                          <EuiFlexItem grow={false}>
+                            <ChatSend
+                              handleChatSend={handleChatSend}
+                              setUserPrompt={setUserPrompt}
+                              handleRegenerateResponse={handleRegenerateResponse}
+                              isDisabled={isSendingDisabled}
+                              isLoading={isLoadingChatSend}
+                              shouldRefocusPrompt={shouldRefocusPrompt}
+                              userPrompt={userPrompt}
+                            />
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      )}
+                      </EuiPanel>
 
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      {Object.keys(selectedPromptContexts).length ? (
-                        <EuiFlexItem grow={false}>
-                          <SelectedPromptContexts
-                            promptContexts={promptContexts}
-                            selectedPromptContexts={selectedPromptContexts}
-                            setSelectedPromptContexts={setSelectedPromptContexts}
-                            currentReplacements={currentConversation?.replacements}
+                      {!isDisabled && (
+                        <EuiPanel
+                          css={css`
+                            background: ${euiTheme.colors.backgroundBaseSubdued};
+                          `}
+                          hasShadow={false}
+                          paddingSize="m"
+                          borderRadius="none"
+                        >
+                          <QuickPrompts
+                            setInput={setUserPrompt}
+                            setIsSettingsModalVisible={setIsSettingsModalVisible}
+                            trackPrompt={trackPrompt}
+                            allPrompts={allPrompts}
                           />
-                        </EuiFlexItem>
-                      ) : null}
-
-                      <EuiFlexItem grow={false}>
-                        <ChatSend
-                          handleChatSend={handleChatSend}
-                          setUserPrompt={setUserPrompt}
-                          handleRegenerateResponse={handleRegenerateResponse}
-                          isDisabled={isSendingDisabled}
-                          isLoading={isLoadingChatSend}
-                          shouldRefocusPrompt={shouldRefocusPrompt}
-                          userPrompt={userPrompt}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-
-                  {!isDisabled && (
-                    <EuiPanel
+                        </EuiPanel>
+                      )}
+                    </>
+                  ) : (
+                    <EuiCallOut
                       css={css`
-                        background: ${euiTheme.colors.backgroundBaseSubdued};
+                        padding: ${euiTheme.size.m};
                       `}
-                      hasShadow={false}
-                      paddingSize="m"
-                      borderRadius="none"
-                    >
-                      <QuickPrompts
-                        setInput={setUserPrompt}
-                        setIsSettingsModalVisible={setIsSettingsModalVisible}
-                        trackPrompt={trackPrompt}
-                        allPrompts={allPrompts}
-                      />
-                    </EuiPanel>
+                      size="s"
+                      title={i18n.DISABLED_OWNERSHIP}
+                      iconType="readOnly"
+                    />
                   )}
                 </EuiFlyoutFooter>
               </EuiFlexItem>
