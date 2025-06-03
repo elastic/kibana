@@ -17,4 +17,5 @@ export const defaultBookAttributes: WithAllKeys<BookAttributes> = {
   synopsis:
     'A spellbinding epic set in 12th-century England, The Pillars of the Earth tells the story of the struggle to build the greatest Gothic cathedral the world has known.',
   published: 1989,
+  sequelTo: undefined,
 };

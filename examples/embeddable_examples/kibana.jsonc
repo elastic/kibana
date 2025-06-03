@@ -19,6 +19,12 @@
       "developerExamples",
       "dataViewFieldEditor"
     ],
-    "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
+    "requiredBundles": [
+      "dashboard",
+      "presentationUtil",
+      "kibanaUtils",
+      "kibanaReact",
+      "savedObjectsFinder"
+    ]
   }
 }

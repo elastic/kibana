@@ -19,14 +19,16 @@ export const useBookAttributePublishingSubjects: (
   title: string;
   synopsis?: string;
   published?: number;
+  sequelTo?: string;
 } = (bookAttributesManager) => {
   const { api: bookAttributesManagerApi } = bookAttributesManager;
-  const [author, pages, title, synopsis, published] = useBatchedPublishingSubjects(
+  const [author, pages, title, synopsis, published, sequelTo] = useBatchedPublishingSubjects(
     bookAttributesManagerApi.author$,
     bookAttributesManagerApi.pages$,
     bookAttributesManagerApi.bookTitle$,
     bookAttributesManagerApi.synopsis$,
-    bookAttributesManagerApi.published$
+    bookAttributesManagerApi.published$,
+    bookAttributesManagerApi.sequelTo$
   );
   return {
     author,
@@ -34,5 +36,6 @@ export const useBookAttributePublishingSubjects: (
     title,
     synopsis,
     published,
+    sequelTo,
   };
 };
