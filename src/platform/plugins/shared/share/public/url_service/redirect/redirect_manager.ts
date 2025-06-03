@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { Location } from 'history';
 import { BehaviorSubject } from 'rxjs';
-import { isInternalURL } from '@kbn/std';
 import type { UrlService } from '../../../common/url_service';
 import {
   LEGACY_SHORT_URL_LOCATOR_ID,
@@ -88,12 +87,12 @@ export class RedirectManager {
           const { hashUrl } = await import('@kbn/kibana-utils-plugin/public');
           redirectUrl = hashUrl(redirectUrl);
         }
-        // can not support external URL
-        if (!isInternalURL(redirectUrl, core.http.basePath.get())) {
-          throw new Error(`Can not redirect to external URL: ${redirectUrl}`);
-        }
 
         const url = core.http.basePath.prepend(redirectUrl);
+        if (!core.http.externalUrl.isInternalUrl(url)) {
+          throw new Error(`Can not redirect to external URL: ${url}`);
+        }
+
         location.href = url;
         return () => {};
       },

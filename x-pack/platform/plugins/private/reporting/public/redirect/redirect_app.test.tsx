@@ -108,13 +108,13 @@ describe('RedirectApp', () => {
 
       // Before async effect, error should not be shown
       expect(
-        screen.queryByText('The legacy short URL locator is not supported for opening report URLs.')
+        screen.queryByText('Analytics app locator is required for reporting jobs')
       ).not.toBeInTheDocument();
 
       // Wait for error message to appear
       await waitFor(() =>
         expect(
-          screen.getByText('The legacy short URL locator is not supported for opening report URLs.')
+          screen.getByText('Analytics app locator is required for reporting jobs')
         ).toBeInTheDocument()
       );
 
@@ -124,7 +124,7 @@ describe('RedirectApp', () => {
       expect(mockShare.navigate).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Redirect page error:'),
-        'The legacy short URL locator is not supported for opening report URLs.'
+        'Analytics app locator is required for reporting jobs'
       );
       consoleErrorSpy.mockRestore();
     });
@@ -150,7 +150,7 @@ describe('RedirectApp', () => {
 
       await waitFor(() =>
         expect(
-          screen.getByText('The legacy short URL locator is not supported for opening report URLs.')
+          screen.getByText('Analytics app locator is required for reporting jobs')
         ).toBeInTheDocument()
       );
 
@@ -158,7 +158,7 @@ describe('RedirectApp', () => {
       expect(mockShare.navigate).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Redirect page error:'),
-        'The legacy short URL locator is not supported for opening report URLs.'
+        'Analytics app locator is required for reporting jobs'
       );
       consoleErrorSpy.mockRestore();
     });

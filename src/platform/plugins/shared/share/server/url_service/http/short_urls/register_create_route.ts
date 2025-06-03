@@ -72,7 +72,6 @@ export const registerCreateRoute = (
       }
 
       const urlFromParams = (params as { url: string | undefined }).url;
-
       if (urlFromParams && !isInternalURL(urlFromParams, http.basePath.get(req))) {
         return res.customError({
           statusCode: 400,
