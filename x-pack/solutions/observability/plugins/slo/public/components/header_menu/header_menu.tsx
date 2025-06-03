@@ -50,10 +50,18 @@ export function HeaderMenu(): React.ReactElement | null {
             )}
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/observabilityOnboarding')}
+              href={http.basePath.prepend('/app/slos/management')}
             >
-              {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add data',
+              {i18n.translate('xpack.slo.home.manage', {
+                defaultMessage: 'Manage SLOs',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/annotations')}
+            >
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>
