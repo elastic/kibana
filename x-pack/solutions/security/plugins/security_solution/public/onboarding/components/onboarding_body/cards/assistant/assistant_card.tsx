@@ -70,7 +70,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    inferenceEnabled,
   } = useAssistantContext();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const {
@@ -142,8 +141,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   );
 
   const isEISConnectorAvailable = useMemo(
-    () => inferenceEnabled && (connectors?.some((c) => isElasticManagedLlmConnector(c)) ?? false),
-    [connectors, inferenceEnabled]
+    () => connectors?.some((c) => isElasticManagedLlmConnector(c)) ?? false,
+    [connectors]
   );
 
   if (!checkCompleteMetadata) {
