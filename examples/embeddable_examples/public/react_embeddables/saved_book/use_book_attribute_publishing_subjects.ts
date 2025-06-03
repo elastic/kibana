@@ -9,10 +9,10 @@
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BookAttributes } from './types';
+import { BookItem } from './types';
 
 export const useBookAttributePublishingSubjects: (
-  bookAttributesManager: StateManager<BookAttributes>
+  bookAttributesManager: StateManager<BookItem>
 ) => {
   author: string;
   pages: number;

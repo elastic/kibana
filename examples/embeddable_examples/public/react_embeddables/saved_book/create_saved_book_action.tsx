@@ -18,7 +18,7 @@ import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { defaultBookAttributes } from './book_state';
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
-import { BookAttributes, BookSerializedState } from './types';
+import { BookItem, BookSerializedState } from './types';
 
 export const registerCreateSavedBookAction = (
   uiActions: UiActionsPublicStart,
@@ -34,7 +34,7 @@ export const registerCreateSavedBookAction = (
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      const newPanelStateManager = initializeStateManager<BookAttributes>(
+      const newPanelStateManager = initializeStateManager<BookItem>(
         defaultBookAttributes,
         defaultBookAttributes
       );

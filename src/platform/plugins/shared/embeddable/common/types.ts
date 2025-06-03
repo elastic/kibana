@@ -14,7 +14,7 @@ import type {
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
 import type { Type } from '@kbn/config-schema';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -34,19 +34,12 @@ export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
   'attributes' | 'references'
 >;
 
-export type ItemAttributesWithReferences<ItemAttributes> = {
-  attributes: ItemAttributes;
-  references: SavedObjectReference[];
-};
-
 export type VersionableEmbeddableObject<SOAttributes, ItemAttributes> = {
   itemSchema?: Type<ItemAttributes>;
   savedObjectToItem?: (
     savedObject: SavedObjectAttributesWithReferences<SOAttributes>
-  ) => ItemAttributesWithReferences<ItemAttributes>;
-  itemToSavedObject?: (
-    item: ItemAttributesWithReferences<ItemAttributes>
-  ) => SavedObjectAttributesWithReferences<SOAttributes>;
+  ) => ItemAttributes;
+  itemToSavedObject?: (item: ItemAttributes) => SavedObjectAttributesWithReferences<SOAttributes>;
 };
 
 export type EmbeddableContentManagementDefinition = {

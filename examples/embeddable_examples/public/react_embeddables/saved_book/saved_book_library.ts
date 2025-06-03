@@ -17,7 +17,7 @@ import {
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import { BOOK_CONTENT_ID } from '../../../common/book/content_management/schema';
-import { BookAttributes, BookSavedObject } from './types';
+import { BookItem, BookSavedObject } from './types';
 
 type BookContentType = typeof BOOK_CONTENT_ID;
 
@@ -26,10 +26,10 @@ class SavedBookClient {
   constructor(contentManagement: ContentManagementPublicStart) {
     this.client = contentManagement.client;
   }
-  save(attributes: BookAttributes, id?: string) {
+  save(attributes: BookItem, id?: string) {
     if (id)
       return this.client.update<
-        UpdateIn<BookContentType, BookAttributes>,
+        UpdateIn<BookContentType, BookItem>,
         UpdateResult<BookSavedObject, { id: string }>
       >({
         contentTypeId: BOOK_CONTENT_ID,
@@ -38,15 +38,15 @@ class SavedBookClient {
       });
     else
       return this.client.create<
-        CreateIn<BookContentType, BookAttributes>,
+        CreateIn<BookContentType, BookItem>,
         CreateResult<BookSavedObject, { id: string }>
       >({
         contentTypeId: BOOK_CONTENT_ID,
         data: attributes,
       });
   }
-  load(id: string): Promise<GetResult<BookAttributes>> {
-    return this.client.get<GetIn<BookContentType>, GetResult<BookAttributes>>({
+  load(id: string): Promise<GetResult<BookItem>> {
+    return this.client.get<GetIn<BookContentType>, GetResult<BookItem>>({
       contentTypeId: BOOK_CONTENT_ID,
       id,
     });
@@ -56,7 +56,7 @@ class SavedBookClient {
 export const loadBookAttributes = async (
   contentManagement: ContentManagementPublicStart,
   id: string
-): Promise<BookAttributes> => {
+): Promise<BookItem> => {
   const client = new SavedBookClient(contentManagement);
   const { item } = await client.load(id);
   return item;
@@ -65,7 +65,7 @@ export const loadBookAttributes = async (
 export const saveBookAttributes = async (
   contentManagement: ContentManagementPublicStart,
   maybeId: string | undefined,
-  attributes: BookAttributes
+  attributes: BookItem
 ): Promise<string> => {
   const client = new SavedBookClient(contentManagement);
   const {

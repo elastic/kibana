@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { bookItemSchema } from '../../../../common/book/content_management/schema';
 
 export const referenceSchema = schema.object(
   {
@@ -19,15 +20,6 @@ export const referenceSchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
-
-export const bookAttributesSchema = schema.object({
-  bookTitle: schema.string(),
-  author: schema.string(),
-  pages: schema.number(),
-  synopsis: schema.maybe(schema.string()),
-  published: schema.nullable(schema.number()),
-  sequelTo: schema.maybe(schema.string()),
-});
 
 export const bookSearchOptionsSchema = schema.maybe(
   schema.object(
@@ -52,7 +44,7 @@ export const bookSearchOptionsSchema = schema.maybe(
 );
 
 export const bookResponseSchema = schema.object({
-  item: bookAttributesSchema,
+  item: bookItemSchema,
   meta: schema.object({
     id: schema.string(),
     type: schema.string(),
@@ -94,7 +86,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: bookCreateOptionsSchema,
       },
       data: {
-        schema: bookAttributesSchema,
+        schema: bookItemSchema,
       },
     },
     out: {
@@ -109,7 +101,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: bookUpdateOptionsSchema,
       },
       data: {
-        schema: bookAttributesSchema,
+        schema: bookItemSchema,
       },
     },
   },

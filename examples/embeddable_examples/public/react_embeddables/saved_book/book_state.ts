@@ -8,9 +8,9 @@
  */
 
 import { WithAllKeys } from '@kbn/presentation-publishing';
-import { BookAttributes } from './types';
+import { BookItem } from './types';
 
-export const defaultBookAttributes: WithAllKeys<BookAttributes> = {
+export const defaultBookAttributes: WithAllKeys<BookItem> = {
   bookTitle: 'Pillars of the earth',
   author: 'Ken follett',
   pages: 973,

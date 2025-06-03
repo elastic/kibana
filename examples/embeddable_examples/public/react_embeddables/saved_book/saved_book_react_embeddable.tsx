@@ -41,7 +41,7 @@ import { openSavedBookEditor } from './saved_book_editor';
 import { loadBookAttributes, saveBookAttributes } from './saved_book_library';
 import {
   BookApi,
-  BookAttributes,
+  BookItem,
   BookByReferenceSerializedState,
   BookByValueSerializedState,
   BookRuntimeState,
@@ -56,8 +56,13 @@ const bookSerializedStateIsByReference = (
   return Boolean(state && (state as BookByReferenceSerializedState).savedObjectId);
 };
 
-const bookAttributeComparators: StateComparators<{ attributes: BookAttributes }> = {
-  attributes: 'deepEquality',
+const bookAttributeComparators: StateComparators<BookItem> = {
+  bookTitle: 'referenceEquality',
+  author: 'referenceEquality',
+  pages: 'referenceEquality',
+  synopsis: 'referenceEquality',
+  published: 'referenceEquality',
+  sequelTo: 'referenceEquality',
 };
 
 interface Dependencies {
@@ -79,9 +84,9 @@ const deserializeState = async (
   const savedObjectId = bookSerializedStateIsByReference(serializedState.rawState)
     ? serializedState.rawState.savedObjectId
     : undefined;
-  const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
+  const attributes: BookItem = bookSerializedStateIsByReference(serializedState.rawState)
     ? await loadBookAttributes(contentManagement, serializedState.rawState.savedObjectId)!
-    : serializedState.rawState.attributes;
+    : serializedState.rawState;
 
   // Combine the serialized state from the parent with the state from the
   // external store to build runtime state.
@@ -102,9 +107,9 @@ export const getSavedBookEmbeddableFactory = (
       const state = await deserializeState(initialState, contentManagement);
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const bookAttributesManager = initializeStateManager<BookAttributes>(
+      const bookAttributesManager = initializeStateManager<BookItem>(
         state,
-        defaultBookAttributes as WithAllKeys<BookAttributes>
+        defaultBookAttributes as WithAllKeys<BookItem>
       );
       const isByReference = Boolean(state.savedObjectId);
 
@@ -120,7 +125,7 @@ export const getSavedBookEmbeddableFactory = (
         // if this book is currently by value, we serialize the entire state.
         const bookByValueState: BookByValueSerializedState = {
           ...titleManager.getLatestState(),
-          attributes: bookAttributesManager.getLatestState(),
+          ...bookAttributesManager.getLatestState(),
         };
         return { rawState: bookByValueState };
       };
