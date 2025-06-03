@@ -236,6 +236,11 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
+  if (item.literalType === 'keyword' && argType === 'text') {
+    // all functions accept keyword literals for text parameters
+    return true;
+  }
+
   if (item.literalType === 'null') {
     // all parameters accept null, but this is not yet reflected
     // in our function definitions so we let it through here
@@ -468,7 +473,10 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
+        (signature) =>
+          signature.returnType === 'unknown' ||
+          argType === signature.returnType ||
+          (argType === 'text' && signature.returnType === 'keyword')
       );
     }
   }
@@ -485,7 +493,14 @@ export function checkFunctionArgMatchesDefinition(
       ? validHit.type
       : [validHit.type];
 
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some(
+      (ct) =>
+        ct === argType ||
+        (ct === 'keyword' && argType === 'text') ||
+        (ct === 'text' && argType === 'keyword') ||
+        ct === 'null' ||
+        ct === 'unknown'
+    );
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();

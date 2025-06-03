@@ -450,13 +450,32 @@ describe('function validation', () => {
             },
           ],
         },
+        {
+          name: 'returns_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
       ]);
 
       const { expectErrors } = await setup();
 
+      // literals — all string literals are keywords
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+      // fields
       await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
       await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+      // functions
+      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
     });
 
     it('enforces constant-only parameters', async () => {
