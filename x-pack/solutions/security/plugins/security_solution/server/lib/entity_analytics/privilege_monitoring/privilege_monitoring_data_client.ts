@@ -23,6 +23,7 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import { parseMonitoredPrivilegedUserCsvRow } from '../../../../common/entity_analytics/privileged_user_monitoring/parse_privileged_user_monitoring_csv_row';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
@@ -54,8 +55,6 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
-
-import { parseMonitoredPrivilegedUserCsvRow } from './users/csv_parsing';
 
 import { batchPartitions } from '../shared/streams/batching';
 import { queryExistingUsers } from './users/query_existing_users';
@@ -110,6 +109,8 @@ export class PrivilegeMonitoringDataClient {
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
           this.opts.logger.info('Privilege monitoring index already exists');
+        } else {
+          throw e;
         }
       });
 
@@ -167,6 +168,16 @@ export class PrivilegeMonitoringDataClient {
         },
       },
     });
+  }
+
+  public async doesIndexExist() {
+    try {
+      return await this.internalUserClient.indices.exists({
+        index: this.getIndex(),
+      });
+    } catch (e) {
+      return false;
+    }
   }
 
   public async searchPrivilegesIndices(query: string | undefined) {
