@@ -307,7 +307,8 @@ export const mergeOtherBucketAggResponse = (
   otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
-  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(otherResponse, aggsConfig);
+  const updatedOtherResponse = cloneDeep(otherResponse);
+  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(updatedOtherResponse, aggsConfig);
   const updatedAggregationsRoot = getCorrectAggregationsCursorFromResponse(
     updatedResponse,
     aggsConfig
