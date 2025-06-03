@@ -11,16 +11,14 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { QueryLink, isQueryLink } from '../../../common/assets';
-import { EsqlRuleParams } from '../rules/esql/types';
+import { Condition, StreamQuery, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import type { StreamsConfig } from '../../../common/config';
 import { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { getRuleIdFromQueryLink } from './assets/helpers/query';
+import { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -32,7 +30,6 @@ import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_defin
 import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
-import type { StreamsConfig } from '../../../common/config';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -66,6 +63,7 @@ export class StreamsClient {
     private readonly dependencies: {
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
@@ -215,26 +213,17 @@ export class StreamsClient {
 
     const { dashboards, queries } = request;
 
-    const { deleted, indexed, updated } = await this.dependencies.assetClient.syncAssetList(
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
       stream.name,
-      [
-        ...dashboards.map((dashboard) => ({
-          [ASSET_ID]: dashboard,
-          [ASSET_TYPE]: 'dashboard' as const,
-        })),
-        ...queries.map((query) => ({
-          [ASSET_ID]: query.id,
-          [ASSET_TYPE]: 'query' as const,
-          query,
-        })),
-      ]
+      dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      }))
     );
 
-    await this.manageQueries(name, {
-      deleted: deleted.filter(isQueryLink),
-      indexed: indexed.filter(isQueryLink),
-      updated: updated.filter(isQueryLink),
-    });
+    // sync rules with asset links
+    await this.syncQueries(stream.name, queries);
 
     return {
       acknowledged: true,
@@ -242,97 +231,43 @@ export class StreamsClient {
     };
   }
 
-  async manageQueries(
-    name: string,
-    {
-      deleted = [],
-      indexed = [],
-      updated = [],
-    }: { deleted?: QueryLink[]; indexed?: QueryLink[]; updated?: QueryLink[] }
-  ) {
-    if (this.dependencies.config.experimental?.significantEventsEnabled !== true) {
-      return;
-    }
-
-    await Promise.all([
-      this.installQueries(name, { indexed, updated }),
-      this.uninstallQueries(name, deleted),
-    ]);
+  // Passthrough methods for query client
+  async syncQueries(name: string, queries: StreamQuery[]) {
+    await this.dependencies.queryClient.syncQueries(
+      name,
+      queries,
+      this.dependencies.config.experimental?.significantEventsEnabled ?? false
+    );
   }
 
-  private async installQueries(
-    name: string,
-    { indexed = [], updated = [] }: { indexed: QueryLink[]; updated: QueryLink[] }
-  ) {
-    const { rulesClient } = this.dependencies;
-
-    const indexedIds = new Set(indexed.map(getRuleIdFromQueryLink));
-    const updatedIds = new Set(updated.map(getRuleIdFromQueryLink));
-
-    const toUninstall = updated.filter((query) => !indexedIds.has(getRuleIdFromQueryLink(query)));
-    const toUpdate = indexed.filter((query) => updatedIds.has(getRuleIdFromQueryLink(query)));
-    const toCreate = indexed.filter((query) => !updatedIds.has(getRuleIdFromQueryLink(query)));
-
-    await Promise.all([
-      this.uninstallQueries(name, toUninstall),
-      ...toUpdate.map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.update<EsqlRuleParams>({
-          id: ruleId,
-          data: {
-            name: query.query.title,
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${name},${name}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
-            },
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
-            },
-          },
-        });
-      }),
-      ...toCreate.map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
-        return rulesClient.create<EsqlRuleParams>({
-          data: {
-            name: query.query.title,
-            consumer: 'streams',
-            alertTypeId: 'streams.rules.esql',
-            actions: [],
-            params: {
-              timestampField: '@timestamp',
-              query: `FROM ${name},${name}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
-            },
-            enabled: true,
-            tags: ['streams'],
-            schedule: {
-              interval: '1m',
-            },
-          },
-          options: {
-            id: ruleId,
-          },
-        });
-      }),
-    ]);
+  // Passthrough methods for query client
+  async upsertQuery(name: string, query: StreamQuery) {
+    await this.dependencies.queryClient.upsert(
+      name,
+      query,
+      this.dependencies.config.experimental?.significantEventsEnabled ?? false
+    );
   }
 
-  private async uninstallQueries(name: string, queries: QueryLink[]) {
-    if (queries.length === 0) {
-      return;
-    }
+  // Passthrough methods for query client
+  async deleteQuery(name: string, queryId: string) {
+    await this.dependencies.queryClient.delete(
+      name,
+      queryId,
+      this.dependencies.config.experimental?.significantEventsEnabled ?? false
+    );
+  }
 
-    const { rulesClient } = this.dependencies;
-    await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink) })
-      .catch((error) => {
-        if (isBoom(error) && error.output.statusCode === 400) {
-          return;
-        }
-        throw error;
-      });
+  // Passthrough methods for query client
+  async bulkQueryOperations(
+    stream: string,
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
+  ) {
+    return this.dependencies.queryClient.bulkOperations(
+      stream,
+      operations,
+      this.dependencies.config.experimental?.significantEventsEnabled ?? false
+    );
   }
 
   /**
@@ -737,10 +672,7 @@ export class StreamsClient {
       throw result.error;
     }
 
-    const { deleted } = await this.dependencies.assetClient.syncAssetList(name, []);
-    await this.manageQueries(name, {
-      deleted: deleted.filter(isQueryLink),
-    });
+    await this.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

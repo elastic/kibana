@@ -13,6 +13,7 @@ import { AssetClient } from './assets/asset_client';
 import { StreamsClient } from './client';
 import { createFakeRequestBoundToDefaultSpace } from './helpers/fake_request_factory';
 import type { StreamsConfig } from '../../../common/config';
+import { QueryClient } from './assets/query/query_client';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -52,6 +53,7 @@ export class StreamsService {
 
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
+    const queryClient = new QueryClient({ rulesClient, assetClient });
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
@@ -62,6 +64,7 @@ export class StreamsService {
 
     return new StreamsClient({
       assetClient,
+      queryClient,
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),

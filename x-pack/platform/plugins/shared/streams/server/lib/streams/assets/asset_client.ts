@@ -198,7 +198,7 @@ export class AssetClient {
   async syncAssetList(
     name: string,
     links: AssetLinkRequest[]
-  ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[]; updated: AssetLink[] }> {
+  ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[] }> {
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -213,17 +213,16 @@ export class AssetClient {
       return fromStorage(hit._source);
     });
 
-    const newAssetLinks = links.map((link) => {
+    const nextAssetLinks = links.map((link) => {
       return toAssetLink(name, link);
     });
-    const nextIds = new Set(newAssetLinks.map((link) => link[ASSET_UUID]));
 
+    const nextIds = new Set(nextAssetLinks.map((link) => link[ASSET_UUID]));
     const assetLinksDeleted = existingAssetLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
-    const assetLinksUpdated = existingAssetLinks.filter((link) => nextIds.has(link[ASSET_UUID]));
 
     const operations: AssetBulkOperation[] = [
       ...assetLinksDeleted.map((asset) => ({ delete: { asset } })),
-      ...newAssetLinks.map((asset) => ({ index: { asset } })),
+      ...nextAssetLinks.map((asset) => ({ index: { asset } })),
     ];
 
     if (operations.length) {
@@ -232,21 +231,17 @@ export class AssetClient {
 
     return {
       deleted: assetLinksDeleted,
-      indexed: newAssetLinks,
-      updated: assetLinksUpdated,
+      indexed: nextAssetLinks,
     };
   }
 
-  async unlinkAsset(name: string, asset: AssetUnlinkRequest): Promise<AssetLink> {
+  async unlinkAsset(name: string, asset: AssetUnlinkRequest): Promise<void> {
     const id = getUuid(name, asset);
-    const assetUnlinked = await this.clients.storageClient.get({ id });
 
     const { result } = await this.clients.storageClient.delete({ id });
     if (result === 'not_found') {
       throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
     }
-
-    return fromStorage(assetUnlinked._source!);
   }
 
   async clean() {

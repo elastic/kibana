@@ -6,16 +6,13 @@
  */
 
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
 import {
   StreamQuery,
   streamQuerySchema,
   upsertStreamQueryRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
 
 export interface ListQueriesResponse {
@@ -31,18 +28,6 @@ export interface DeleteQueryResponse {
 }
 
 export type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
-
-function isDeleteOperation(
-  operation: { index: StreamQuery } | { delete: { id: string } }
-): operation is { delete: { id: string } } {
-  return 'delete' in operation;
-}
-
-function isIndexOperation(
-  operation: { index: StreamQuery } | { delete: { id: string } }
-): operation is { index: StreamQuery } {
-  return 'index' in operation;
-}
 
 const listQueriesRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/queries 2023-10-31',
@@ -104,7 +89,7 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
@@ -112,22 +97,12 @@ const upsertQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const updated = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
-    const assetLinked = await assetClient.linkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-      query: {
-        id: queryId,
-        title: body.title,
-        kql: {
-          query: body.kql.query,
-        },
+    await streamsClient.upsertQuery(streamName, {
+      id: queryId,
+      title: body.title,
+      kql: {
+        query: body.kql.query,
       },
-    });
-
-    await streamsClient.manageQueries(streamName, {
-      indexed: [assetLinked as QueryLink],
-      updated,
     });
 
     return {
@@ -158,7 +133,7 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
     const {
       path: { queryId, name: streamName },
@@ -166,14 +141,7 @@ const deleteQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const assetUnlinked = await assetClient.unlinkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-    });
-
-    await streamsClient.manageQueries(streamName, {
-      deleted: [assetUnlinked as QueryLink],
-    });
+    await streamsClient.deleteQuery(streamName, queryId);
 
     return {
       acknowledged: true,
@@ -213,13 +181,8 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    logger,
-  }): Promise<BulkUpdateAssetsResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
+    const { streamsClient } = await getScopedClients({ request });
 
     const {
       path: { name: streamName },
@@ -228,64 +191,7 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const existingQueryLinks = await assetClient.getAssetLinks(streamName, ['query']);
-
-    const deleted = existingQueryLinks.filter((link) =>
-      operations.some(
-        (operation) => isDeleteOperation(operation) && operation.delete.id === link.query.id
-      )
-    );
-    const updated = existingQueryLinks.filter((link) =>
-      operations.some(
-        (operation) => isIndexOperation(operation) && operation.index.id === link.query.id
-      )
-    );
-
-    const result = await assetClient.bulk(
-      streamName,
-      operations.map((operation) => {
-        if (isIndexOperation(operation)) {
-          return {
-            index: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.index.id,
-                query: {
-                  id: operation.index.id,
-                  title: operation.index.title,
-                  kql: { query: operation.index.kql.query },
-                },
-              },
-            },
-          };
-        }
-        return {
-          delete: {
-            asset: {
-              [ASSET_TYPE]: 'query',
-              [ASSET_ID]: operation.delete.id,
-            },
-          },
-        };
-      })
-    );
-
-    if (result.errors) {
-      logger.error(`Error indexing some items`);
-      throw internal(`Could not index all items`, { errors: result.errors });
-    }
-
-    const queryLinksIndexed = await assetClient.bulkGetByIds(
-      streamName,
-      'query',
-      operations.filter(isIndexOperation).map((op) => op.index.id)
-    );
-
-    await streamsClient.manageQueries(streamName, {
-      indexed: queryLinksIndexed,
-      deleted,
-      updated,
-    });
+    await streamsClient.bulkQueryOperations(streamName, operations);
 
     return { acknowledged: true };
   },
