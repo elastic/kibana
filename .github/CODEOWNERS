@@ -2369,6 +2369,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_timeline_control_columns.tsx @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/data_view_manager @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alert_summary @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
@@ -2515,8 +2516,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
