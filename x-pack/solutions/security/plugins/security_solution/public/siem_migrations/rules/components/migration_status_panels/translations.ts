@@ -7,24 +7,43 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RULE_MIGRATION_READY_DESCRIPTION = (
-  totalRules: number,
-  missingResourcesText: string
-) =>
+export const RULE_MIGRATION_READY_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.ready.description', {
     defaultMessage:
-      'Migration of {totalRules} rules is created but the translation has not started yet. {missingResourcesText}',
-    values: { totalRules, missingResourcesText },
+      'Migration of {totalRules} rules is created but the translation has not started yet.',
+    values: { totalRules },
   });
+
+export const RULE_MIGRATION_ERROR_DESCRIPTION = (totalRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.error.description', {
+    defaultMessage:
+      'Migration of {totalRules} rules failed. Please correct the below error and try again.',
+    values: { totalRules },
+  });
+};
+
+export const RULE_MIGRATION_ABORTED_DESCRIPTION = (totalRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.aborted.description', {
+    defaultMessage: 'Migration of {totalRules} rules was stopped. You can resume it any time.',
+    values: { totalRules },
+  });
+};
+
 export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
-  { defaultMessage: 'Upload macros & lookups and start the translation process' }
+  { defaultMessage: 'Upload macros & lookups and start the translation process.' }
 );
 
 export const RULE_MIGRATION_START_TRANSLATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.translate.button',
   { defaultMessage: 'Start translation' }
 );
+
+export const RULE_MIGRATION_RESTART_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.restartButton',
+  { defaultMessage: 'Resume translation' }
+);
+
 export const RULE_MIGRATION_TITLE = (number: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.migrationTitle', {
     defaultMessage: 'SIEM rules migration #{number}',
