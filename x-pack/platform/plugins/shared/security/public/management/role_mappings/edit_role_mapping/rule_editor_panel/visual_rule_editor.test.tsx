@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -22,7 +23,11 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithIntl(
+      <EuiProvider>
+        <VisualRuleEditor {...props} />
+      </EuiProvider>
+    );
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     expect(props.onChange).toHaveBeenCalledTimes(1);
