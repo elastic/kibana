@@ -16,6 +16,7 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   description: '',
   filters: [],
   panels: {},
+  sections: {},
   title: '',
   tags: [],
 
