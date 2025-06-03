@@ -26,6 +26,7 @@ const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
       },
     },
   },
+  sections: {},
 };
 
 const extractedByValueRef = {
@@ -47,6 +48,7 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
       },
     },
   },
+  sections: {},
 };
 
 describe('inject/extract panels', () => {

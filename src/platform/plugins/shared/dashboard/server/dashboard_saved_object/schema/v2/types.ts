@@ -9,7 +9,7 @@
 
 import { Serializable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
-import { dashboardAttributesSchema, gridDataSchema } from './v2';
+import { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v2';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
@@ -38,3 +38,8 @@ export interface SavedDashboardPanel {
   panelRefName?: string;
   title?: string;
 }
+
+/**
+ * A saved dashboard section parsed directly from the Dashboard Attributes
+ */
+export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
