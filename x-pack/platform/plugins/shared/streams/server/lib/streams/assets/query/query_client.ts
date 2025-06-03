@@ -57,28 +57,29 @@ export class QueryClient {
     // step 1: find the existing queries for the stream
     const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
 
+    const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
+    const nextIds = new Set(queries.map((query) => query.id));
+
     // step 2: prepare the queries to create, update or delete
     // Find next queries to create
     const nextQueriesToCreate = queries
-      .filter((query) => !currentQueryLinks.some((link) => link['asset.id'] === query.id))
+      .filter((query) => !currentIds.has(query.id))
       .map((query) => toQueryLink(query, stream));
 
     // Find current queries to delete
-    const currentQueriesToDelete = currentQueryLinks.filter(
-      (link) => !queries.some((query) => query.id === link['asset.id'])
-    );
+    const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
 
     // Find current queries to delete before creating the new ones
     // because the KQL query has changed and a new rule is required
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
-      queries.some((query) => query.id === link['asset.id'] && hasBreakingChange(link.query, query))
+      queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
     );
 
     // Find the next queries to create because they have been updated with a breaking change in KQL
     const nextQueriesUpdatedWithBreakingChange = queries
       .filter((query) =>
         currentQueryLinks.some(
-          (link) => link['asset.id'] === query.id && hasBreakingChange(link.query, query)
+          (link) => link.query.id === query.id && hasBreakingChange(link.query, query)
         )
       )
       .map((query) => toQueryLink(query, stream));
@@ -87,7 +88,7 @@ export class QueryClient {
     const nextQueriesUpdatedWithoutBreakingChange = queries
       .filter((query) =>
         currentQueryLinks.some(
-          (link) => link['asset.id'] === query.id && !hasBreakingChange(link.query, query)
+          (link) => link.query.id === query.id && !hasBreakingChange(link.query, query)
         )
       )
       .map((query) => toQueryLink(query, stream));
@@ -165,7 +166,7 @@ export class QueryClient {
 
     const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
     const nextQueries = [
-      ...currentQueryLinks.filter((link) => link['asset.id'] !== query.id),
+      ...currentQueryLinks.filter((link) => link.query.id !== query.id),
       toQueryLink(query, stream),
     ];
 
@@ -187,7 +188,7 @@ export class QueryClient {
     }
 
     const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
-    const nextQueries = currentQueryLinks.filter((link) => link['asset.id'] !== queryId);
+    const nextQueries = currentQueryLinks.filter((link) => link.query.id !== queryId);
     await this.syncQueries(
       stream,
       nextQueries.map((link) => link.query),
@@ -236,12 +237,12 @@ export class QueryClient {
         .filter(
           (link) =>
             !operations.some(
-              (operation) => operation.delete && operation.delete.id === link['asset.id']
+              (operation) => operation.delete && operation.delete.id === link.query.id
             )
         )
         .map((link) => {
           const update = operations.find(
-            (operation) => operation.index && operation.index.id === link['asset.id']
+            (operation) => operation.index && operation.index.id === link.query.id
           );
           return update ? { ...link, query: update.index! } : link;
         }),
@@ -249,7 +250,7 @@ export class QueryClient {
         .filter(
           (operation) =>
             operation.index &&
-            !currentQueryLinks.some((link) => link['asset.id'] === operation.index!.id)
+            !currentQueryLinks.some((link) => link.query.id === operation.index!.id)
         )
         .map((operation) => toQueryLink(operation.index!, stream)),
     ];
