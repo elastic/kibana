@@ -386,12 +386,16 @@ interface ExceptionListEntry {
   namespace_type: string;
 }
 
-export interface ResponseActionsRuleTemplate {
+export interface ResponseActionsRuleTelemetryTemplate {
   '@timestamp': string;
   cluster_uuid: string;
   cluster_name: string;
   license_id: string | undefined;
-  response_actions?: TelemetryEvent;
+  response_actions?: {
+    rules: ResponseActionRules;
+    endpoint_rules_count: number;
+    osquery_rules_count: number;
+  };
 }
 export interface RulesParamsResponseActionsEntry {
   actionTypeId: '.endpoint' | '.osquery';
@@ -405,9 +409,8 @@ export interface RulesParamsResponseActionsEntry {
       };
 }
 
-export interface ResponseActionRules {
+export type ResponseActionRules = Array<{
   id: string;
-  namespaces: string[];
   attributes: {
     consumer: string;
     createdAt: string;
@@ -417,10 +420,9 @@ export interface ResponseActionRules {
     params: {
       responseActions: RulesParamsResponseActionsEntry[];
     };
-    tags: string[];
     updatedAt: string;
   };
-}
+}>;
 
 interface DetectionRuleParms {
   ruleId: string;

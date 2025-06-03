@@ -15,7 +15,6 @@ import type {
   IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
-  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
@@ -56,7 +55,6 @@ import type {
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 import { findRulesSo } from '@kbn/alerting-plugin/server/data/rule';
-import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';

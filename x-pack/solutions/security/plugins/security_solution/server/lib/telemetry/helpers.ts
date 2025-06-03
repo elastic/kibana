@@ -24,13 +24,14 @@ import type {
   ExtraInfo,
   ListTemplate,
   Nullable,
-  ResponseActionsRuleTemplate,
-  RulesParamsResponseActionsEntry,
+  ResponseActionsRuleTelemetryTemplate,
+  ResponseActionRules,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
+  RulesParamsResponseActionsEntry,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
@@ -241,42 +242,40 @@ export const templateExceptionList = (
 /**
  * Constructs the response actions custom rule telemetry schema from a list of rule params
  * */
-export const templateResponseActionsCustomRule = (
-  responseActionsEntries: RulesParamsResponseActionsEntry[],
+export const responseActionsCustomRuleTelemetryData = (
+  responseActionsRules: ResponseActionRules,
   clusterInfo: ESClusterInfo,
   licenseInfo: Nullable<ESLicense>
-): ResponseActionsRuleTemplate[] => {
-  return responseActionsEntries.map((item) => {
-    const telemetryTemplate: ResponseActionsRuleTemplate = {
+): ResponseActionsRuleTelemetryTemplate[] => {
+  return responseActionsRules.map((item) => {
+    const baseTelemetryData: ResponseActionsRuleTelemetryTemplate = {
       '@timestamp': moment().toISOString(),
       cluster_uuid: clusterInfo.cluster_uuid,
       cluster_name: clusterInfo.cluster_name,
       license_id: licenseInfo?.uid,
     };
 
-    const { endpointActionCount, osqueryActionCount } = responseActionsEntries.reduce<{
-      endpointActionCount: number;
-      osqueryActionCount: number;
-    }>(
-      (acc, entry) => {
-        if (entry.actionTypeId === '.endpoint') {
-          acc.endpointActionCount += 1;
-        } else if (entry.actionTypeId === '.osquery') {
-          acc.osqueryActionCount += 1;
-        }
-        return acc;
-      },
-      { endpointActionCount: 0, osqueryActionCount: 0 }
-    );
-
     return {
-      ...telemetryTemplate,
+      ...baseTelemetryData,
       response_actions: {
-        endpoint_action_count: endpointActionCount,
-        osquery_actions_count: osqueryActionCount,
+        rules: responseActionsRules,
+        endpoint_rules_count: getRulesCountForActionType(responseActionsRules, '.endpoint'),
+        osquery_rules_count: getRulesCountForActionType(responseActionsRules, '.osquery'),
       },
     };
   });
+};
+
+const getRulesCountForActionType = (
+  responseActionsRules: ResponseActionRules,
+  actionTypeId: RulesParamsResponseActionsEntry['actionTypeId']
+): number => {
+  return responseActionsRules.filter(
+    (rule) =>
+      rule.attributes.params.responseActions.filter(
+        (action) => action.actionTypeId === actionTypeId
+      ).length
+  ).length;
 };
 
 /**

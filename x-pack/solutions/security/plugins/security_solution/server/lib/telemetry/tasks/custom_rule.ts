@@ -10,14 +10,14 @@ import type { Logger } from '@kbn/core/server';
 import { TELEMETRY_CHANNEL_LISTS } from '../constants';
 import {
   batchTelemetryRecords,
-  templateResponseActionsCustomRule,
+  responseActionsCustomRuleTelemetryData,
   newTelemetryLogger,
   createUsageCounterLabel,
   safeValue,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { RulesParamsResponseActionsEntry, ResponseActionRules } from '../types';
+import type { ResponseActionRules } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -63,23 +63,22 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           return 0;
         }
 
-        const cacheArray = customRules.reduce<ResponseActionRules[]>((acc, rule) => {
+        const responseActionRulesArray = customRules.reduce<ResponseActionRules>((acc, rule) => {
           const ruleId = rule.id;
 
-          const shouldNotProcess =
+          const shouldNotProcessTelemetry =
             rule === null ||
             rule === undefined ||
             ruleId === null ||
             ruleId === undefined ||
             rule.attributes.params.responseActions.length === 0;
 
-          if (shouldNotProcess) {
+          if (shouldNotProcessTelemetry) {
             return acc;
           }
 
           acc.push({
             id: ruleId,
-            namespaces: rule.namespaces ?? [],
             attributes: {
               consumer: rule.attributes.consumer,
               createdAt: rule.attributes.createdAt,
@@ -89,39 +88,29 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
               params: {
                 responseActions: rule.attributes.params.responseActions,
               },
-              tags: rule.attributes.tags,
               updatedAt: rule.attributes.updatedAt,
             },
           });
           return acc;
         }, []);
 
-        const rulesParamsResponseActionsRulesEntries = [] as RulesParamsResponseActionsEntry[];
-        for (const item of cacheArray) {
-          for (const el of item.attributes.params.responseActions) {
-            rulesParamsResponseActionsRulesEntries.push({
-              ...el,
-            });
-          }
-        }
-
-        const responseActionsRulesJson = templateResponseActionsCustomRule(
-          rulesParamsResponseActionsRulesEntries,
+        const responseActionsRulesTelemetryEvent = responseActionsCustomRuleTelemetryData(
+          responseActionRulesArray,
           clusterInfo,
           licenseInfo
         );
         log.l('Custom response actions rule json length', {
-          length: responseActionsRulesJson.length,
+          length: responseActionsRulesTelemetryEvent.length,
         });
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
           counterType: 'response_actions_rules_count',
-          incrementBy: responseActionsRulesJson.length,
+          incrementBy: responseActionsRulesTelemetryEvent.length,
         });
 
         const batches = batchTelemetryRecords(
-          cloneDeep(responseActionsRulesJson),
+          cloneDeep(responseActionsRulesTelemetryEvent),
           maxTelemetryBatch
         );
         for (const batch of batches) {
@@ -129,9 +118,9 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         }
         await taskMetricsService.end(trace);
 
-        log.l('Task executed', { length: responseActionsRulesJson.length });
+        log.l('Task executed', { length: responseActionsRulesTelemetryEvent.length });
 
-        return responseActionsRulesJson.length;
+        return responseActionsRulesTelemetryEvent.length;
       } catch (err) {
         await taskMetricsService.end(trace, err);
         return 0;
