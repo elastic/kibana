@@ -10,5 +10,6 @@ import { mlSavedObjectType } from './ml_upgrade_operation_saved_object_type';
 
 export { reindexOperationSavedObjectType } from './reindex_operation_saved_object_type';
 export { mlSavedObjectType } from './ml_upgrade_operation_saved_object_type';
+// todo I don't think this needs to be shared
 export const hiddenTypes = [reindexOperationSavedObjectType.name, mlSavedObjectType.name];
 export const REINDEX_OP_TYPE = reindexOperationSavedObjectType.name;

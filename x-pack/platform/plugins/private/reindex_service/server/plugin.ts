@@ -25,7 +25,7 @@ import {
 // import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 // import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 
-import { hiddenTypes } from '@kbn/upgrade-assistant-pkg-server';
+import { reindexOperationSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
 import { versionService } from './src/lib/version';
 // import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { RouteDependencies } from './src/types';
@@ -60,7 +60,7 @@ export class ReindexServiceServerPlugin implements Plugin {
     versionService.setup(env.packageInfo.version);
   }
 
-  public setup({ http }: CoreSetup, { licensing }: PluginsSetup) {
+  public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
     this.licensing = licensing;
     const router = http.createRouter();
 
@@ -76,8 +76,12 @@ export class ReindexServiceServerPlugin implements Plugin {
       current: versionService.getCurrentVersion(),
     };
 
+    savedObjects.registerType(reindexOperationSavedObjectType);
+
     registerReindexIndicesRoutes(dependencies, () => this.getWorker());
     registerBatchReindexIndicesRoutes(dependencies, () => this.getWorker());
+    // eslint-disable-next-line no-console
+    console.log('Reindex Service Setup completed');
   }
 
   public start(
@@ -94,7 +98,9 @@ export class ReindexServiceServerPlugin implements Plugin {
       licensing: this.licensing!,
       elasticsearchService: elasticsearch,
       logger: this.logger,
-      savedObjects: new SavedObjectsClient(savedObjects.createInternalRepository(hiddenTypes)),
+      savedObjects: new SavedObjectsClient(
+        savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
+      ),
       security: this.securityPluginStart,
     });
 

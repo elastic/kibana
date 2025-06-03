@@ -20,10 +20,7 @@ import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import {
-  reindexOperationSavedObjectType,
-  mlSavedObjectType,
-} from '@kbn/upgrade-assistant-pkg-server';
+import { mlSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
@@ -75,8 +72,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
 
     // todo where should this live
-    savedObjects.registerType(reindexOperationSavedObjectType);
+    // eslint-disable-next-line no-console
+    console.log('################# REGISTERING TYPES');
+
     savedObjects.registerType(mlSavedObjectType);
+    // eslint-disable-next-line no-console
+    console.log('################# TYPES REGISTERED');
 
     features.registerElasticsearchFeature({
       id: 'upgrade_assistant',
