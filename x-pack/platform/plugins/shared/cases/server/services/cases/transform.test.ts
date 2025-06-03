@@ -432,6 +432,12 @@ describe('case transforms', () => {
         'status'
       );
     });
+
+    it('removes the incremental_id property', () => {
+      expect(transformAttributesToESModel({ incremental_id: 100 }).attributes).not.toHaveProperty(
+        'incremental_id'
+      );
+    });
   });
 
   describe('transformSavedObjectToExternalModel', () => {
