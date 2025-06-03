@@ -41,10 +41,10 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
 
 export const reportingPDFExportProvider = ({
   apiClient,
-  license,
-  application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
+  const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
+
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -54,39 +54,6 @@ export const reportingPDFExportProvider = ({
     shareableUrlForSavedObject,
     ...shareOpts
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    const licenseToolTipContent = message;
-    const licenseHasScreenshotReporting = showLinks;
-    const licenseDisabled = !enableLinks;
-
-    const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard_v2?.generateScreenshot === true;
-    const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize_v2?.generateScreenshot === true;
-
-    if (!licenseHasScreenshotReporting) {
-      return null;
-    }
-
-    // for lens png pdf and csv are combined into one modal
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
-
-    if (!isSupportedType) {
-      return null;
-    }
-
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return null;
-    }
-
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
-      return null;
-    }
-
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -163,15 +130,30 @@ export const reportingPDFExportProvider = ({
       name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
         defaultMessage: 'PDF',
       }),
-      toolTipContent: licenseToolTipContent,
-      disabled: licenseDisabled || sharingData.reportingDisabled,
+      icon: 'document',
+      disabled: sharingData.reportingDisabled,
       label: 'PDF' as const,
       generateAssetExport: generateReportPDF,
-      generateAssetURIValue: generateExportUrlPDF,
       exportType: 'printablePdfV2',
       requiresSavedState,
       renderLayoutOptionSwitch: objectType === 'dashboard',
-      renderCopyURIButton: true,
+      copyAssetURIConfig: {
+        headingText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHeading',
+          {
+            defaultMessage: 'Post URL',
+          }
+        ),
+        helpText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHelpText',
+          {
+            defaultMessage:
+              'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+          }
+        ),
+        contentType: 'text',
+        generateAssetURIValue: generateExportUrlPDF,
+      },
     };
   };
 
@@ -180,15 +162,53 @@ export const reportingPDFExportProvider = ({
     shareType: 'integration',
     groupId: 'export',
     config: getShareMenuItems,
+    prerequisiteCheck({ license, capabilities, objectType }) {
+      if (!license) {
+        return false;
+      }
+
+      let isSupportedType: boolean;
+
+      if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
+        return false;
+      }
+
+      const { showLinks: licenseHasScreenshotReporting } = checkLicense(
+        license.check('reporting', 'gold')
+      );
+
+      const capabilityHasDashboardScreenshotReporting =
+        capabilities.dashboard_v2?.generateScreenshot === true;
+      const capabilityHasVisualizeScreenshotReporting =
+        capabilities.visualize_v2?.generateScreenshot === true;
+
+      if (!licenseHasScreenshotReporting) {
+        return false;
+      }
+
+      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+        return false;
+      }
+
+      if (
+        isSupportedType &&
+        !capabilityHasVisualizeScreenshotReporting &&
+        !capabilityHasDashboardScreenshotReporting
+      ) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };
 
 export const reportingPNGExportProvider = ({
   apiClient,
-  license,
-  application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
+  const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
+
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -197,39 +217,7 @@ export const reportingPNGExportProvider = ({
     shareableUrl,
     shareableUrlForSavedObject,
     ...shareOpts
-  }: ShareContext): ReturnType<ExportShare['config']> | null => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    const licenseToolTipContent = message;
-    const licenseHasScreenshotReporting = showLinks;
-    const licenseDisabled = !enableLinks;
-
-    const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard_v2?.generateScreenshot === true;
-    const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize_v2?.generateScreenshot === true;
-
-    if (!licenseHasScreenshotReporting) {
-      return null;
-    }
-    // for lens png pdf and csv are combined into one modal
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
-
-    if (!isSupportedType) {
-      return null;
-    }
-
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return null;
-    }
-
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
-      return null;
-    }
-
+  }: ShareContext): ReturnType<ExportShare['config']> => {
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -307,14 +295,29 @@ export const reportingPNGExportProvider = ({
       name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabelPNG', {
         defaultMessage: 'PNG export',
       }),
-      toolTipContent: licenseToolTipContent,
-      disabled: licenseDisabled || sharingData.reportingDisabled,
+      icon: 'image',
+      disabled: sharingData.reportingDisabled,
       label: 'PNG' as const,
       generateAssetExport: generateReportPNG,
-      generateAssetURIValue: generateExportUrlPNG,
       exportType: 'pngV2',
       requiresSavedState,
-      renderCopyURIButton: true,
+      copyAssetURIConfig: {
+        headingText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHeading',
+          {
+            defaultMessage: 'Post URL',
+          }
+        ),
+        helpText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHelpText',
+          {
+            defaultMessage:
+              'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+          }
+        ),
+        contentType: 'text',
+        generateAssetURIValue: generateExportUrlPNG,
+      },
     };
   };
 
@@ -323,5 +326,42 @@ export const reportingPNGExportProvider = ({
     groupId: 'export',
     id: 'imageReports',
     config: getShareMenuItems,
+    prerequisiteCheck({ license, capabilities, objectType }) {
+      if (!license) {
+        return false;
+      }
+
+      let isSupportedType: boolean;
+
+      if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
+        return false;
+      }
+
+      const { showLinks } = checkLicense(license.check('reporting', 'gold'));
+      const licenseHasScreenshotReporting = showLinks;
+
+      const capabilityHasDashboardScreenshotReporting =
+        capabilities.dashboard_v2?.generateScreenshot === true;
+      const capabilityHasVisualizeScreenshotReporting =
+        capabilities.visualize_v2?.generateScreenshot === true;
+
+      if (!licenseHasScreenshotReporting) {
+        return false;
+      }
+
+      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+        return false;
+      }
+
+      if (
+        isSupportedType &&
+        !capabilityHasVisualizeScreenshotReporting &&
+        !capabilityHasDashboardScreenshotReporting
+      ) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };

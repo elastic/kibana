@@ -10,7 +10,8 @@
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
 import { ShareMenuProvider, type IShareContext } from './context';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen, render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
 import {
   BrowserShortUrlClient,
@@ -61,6 +62,15 @@ const mockShareContext: IShareContext = {
         anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
       },
     },
+    {
+      shareType: 'integration',
+      groupId: 'export',
+      id: 'csv',
+      config: {
+        icon: 'empty',
+        label: 'CSV',
+      },
+    },
   ],
   allowShortUrl: true,
   objectTypeMeta: {
@@ -77,12 +87,18 @@ const mockShareContext: IShareContext = {
   onClose: jest.fn(),
 };
 
-const mockGenerateExport = jest.fn();
-const mockGenerateExportUrl = jest.fn().mockImplementation(() => 'generated-export-url');
-const CSV = 'CSV' as const;
-const PNG = 'PNG' as const;
-
 describe('Share modal tabs', () => {
+  it('does not render an export tab', () => {
+    render(
+      <IntlProvider locale="en">
+        <ShareMenuProvider shareContext={{ ...mockShareContext }}>
+          <ShareMenuTabs />
+        </ShareMenuProvider>
+      </IntlProvider>
+    );
+    expect(screen.queryByTestId('export')).not.toBeInTheDocument();
+  });
+
   describe('link tab', () => {
     it('should not render the link tab when it is configured as disabled', async () => {
       const disabledLinkShareContext = {
@@ -98,111 +114,14 @@ describe('Share modal tabs', () => {
         },
       };
 
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
+      render(
+        <IntlProvider locale="en">
+          <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
+            <ShareMenuTabs />
+          </ShareMenuProvider>
+        </IntlProvider>
       );
-      expect(wrapper.find('[data-test-subj="link"]').exists()).toBeFalsy();
-    });
-  });
-
-  describe('export tab', () => {
-    it('should render export tab when there are share menu items that are not disabled', async () => {
-      const shareContextWithConfiguredExportItem: IShareContext = {
-        ...mockShareContext,
-        shareMenuItems: [
-          ...mockShareContext.shareMenuItems,
-          {
-            id: 'test-export',
-            shareType: 'integration',
-            groupId: 'export',
-            config: {
-              name: 'test',
-              disabled: false,
-              label: CSV,
-              generateExport: mockGenerateExport,
-              generateExportUrl: mockGenerateExportUrl,
-            },
-          },
-        ],
-      };
-
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
-      );
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
-    });
-
-    it('should not render export tab when it has only one item configured as disabled', async () => {
-      const shareContextWithConfiguredExportItem: IShareContext = {
-        ...mockShareContext,
-        shareMenuItems: [
-          ...mockShareContext.shareMenuItems,
-          {
-            id: 'test-export',
-            shareType: 'integration',
-            groupId: 'export',
-            config: {
-              name: 'test',
-              disabled: true,
-              label: CSV,
-              generateExport: mockGenerateExport,
-              generateExportUrl: mockGenerateExportUrl,
-            },
-          },
-        ],
-      };
-
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeFalsy();
-    });
-
-    it('would render the export tab when there is at least one export type which is not disabled', async () => {
-      const shareContextWithConfiguredExportItem: IShareContext = {
-        ...mockShareContext,
-        shareMenuItems: [
-          ...mockShareContext.shareMenuItems,
-          {
-            id: 'test-csv-export',
-            shareType: 'integration',
-            groupId: 'export',
-            config: {
-              name: 'test',
-              disabled: false,
-              label: CSV,
-              generateExport: mockGenerateExport,
-              generateExportUrl: mockGenerateExportUrl,
-            },
-          },
-          {
-            id: 'test-png-export',
-            shareType: 'integration',
-            groupId: 'export',
-            config: {
-              name: 'test',
-              disabled: true,
-              label: PNG,
-              generateExport: mockGenerateExport,
-              generateExportUrl: mockGenerateExportUrl,
-            },
-          },
-        ],
-      };
-
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
-      );
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
+      expect(screen.queryByTestId('link')).not.toBeInTheDocument();
     });
   });
 });
