@@ -28,8 +28,11 @@ export const mapParametersToCrowdStrikeArguments = (
           // If it's a single element (no spaces), use it as-is
           sanitizedValue = strippedValue;
         } else {
-          // If it contains multiple elements (spaces), wrap in ```
-          sanitizedValue = `\`\`\`${strippedValue}\`\`\``;
+          // If parameter is raw and it contains multiple elements (spaces), wrap in ```
+          const wrappedValue =
+            key === 'raw' ? `\`\`\`${strippedValue}\`\`\`` : `'${strippedValue}'`;
+
+          sanitizedValue = wrappedValue;
         }
       }
     } else {
