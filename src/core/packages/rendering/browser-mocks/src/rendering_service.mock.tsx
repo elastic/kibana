@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { RenderingService } from '@kbn/core-rendering-browser';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 
 /**
  * This is declared internally to avoid a circular dependency issue
@@ -27,7 +30,11 @@ const createMockInternal = () => {
 
 const createMock = () => {
   const mocked: jest.Mocked<RenderingService> = {
-    addContext: jest.fn().mockImplementation((element) => element),
+    addContext: jest.fn().mockImplementation((element) => (
+      <I18nProvider>
+        <EuiProvider>{element}</EuiProvider>
+      </I18nProvider>
+    )),
   };
   return mocked;
 };
