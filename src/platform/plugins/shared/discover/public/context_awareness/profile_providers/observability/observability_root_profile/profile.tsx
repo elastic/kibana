@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SolutionType } from '../../../profiles';
+import { DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { createGetDocViewer } from '../observability_document_profile/accessors/get_doc_viewer';
 import { createGetAppMenu, getDefaultAdHocDataViews } from './accessors';
 import type { ObservabilityRootProfileProvider } from './types';
 
@@ -20,6 +21,7 @@ export const createObservabilityRootProfileProvider = (
   profile: {
     getAppMenu: createGetAppMenu(services),
     getDefaultAdHocDataViews,
+    getDocViewer: createGetDocViewer(services),
   },
   resolve: (params) => {
     if (params.solutionNavId !== SolutionType.Observability) {
@@ -30,6 +32,7 @@ export const createObservabilityRootProfileProvider = (
       isMatch: true,
       context: {
         solutionType: SolutionType.Observability,
+        type: DocumentType.Default,
         allLogsIndexPattern: services.logsContextService.getAllLogsIndexPattern(),
       },
     };
