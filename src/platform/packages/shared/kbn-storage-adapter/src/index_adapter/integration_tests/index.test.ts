@@ -16,6 +16,7 @@ import {
   SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
+  StorageDocumentOf,
   StorageIndexAdapter,
   type StorageSettings,
 } from '../../..';
@@ -24,7 +25,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SimpleStorageIndexAdapter } from '..';
+import { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
 
 const TEST_INDEX_NAME = 'test_index';
 
@@ -284,6 +285,66 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    describe('migrates a document with a legacy property', () => {
+      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
+      beforeAll(async () => {
+        adapter = createStorageIndexAdapter(storageSettings, {
+          migrateSource: (source) => {
+            return {
+              ...source,
+              migratedProp: String(source.foo).toUpperCase(),
+            } as StorageDocumentOf<typeof storageSettings>;
+          },
+        });
+        migratingClient = adapter.getClient();
+        await client.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'otherdoc',
+                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+              },
+            },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('returns the migrated document on get', async () => {
+        const getResponse = await migratingClient.get({ id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'xyz',
+          migratedProp: 'XYZ',
+        });
+      });
+
+      it('returns the migrated document on search', async () => {
+        const searchResponse = await migratingClient.search({
+          track_total_hits: true,
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    foo: 'xyz',
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(searchResponse.hits.hits[0]._source).toMatchObject({
+          migratedProp: 'XYZ',
+          foo: 'xyz',
+        });
+      });
+    });
+
     describe('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
         await client.bulk({
@@ -408,9 +469,10 @@ describe('StorageIndexAdapter', () => {
   });
 
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
-    settings: TStorageSettings
+    settings: TStorageSettings,
+    options?: StorageIndexAdapterOptions<StorageDocumentOf<TStorageSettings>>
   ): SimpleStorageIndexAdapter<TStorageSettings> {
-    return new StorageIndexAdapter(esClient, loggerMock, settings);
+    return new StorageIndexAdapter(esClient, loggerMock, settings, options);
   }
 
   async function createServers() {
