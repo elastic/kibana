@@ -8,7 +8,7 @@
 import React, { type FC } from 'react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { type EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import { type TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IndicatorBarchartLegendAction } from './legend_action';
