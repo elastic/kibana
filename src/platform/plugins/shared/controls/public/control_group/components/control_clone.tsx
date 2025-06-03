@@ -48,9 +48,7 @@ export const ControlClone = ({
   const styles = useMemoizedStyles(controlCloneStyles);
 
   return (
-    <EuiFlexItem
-      css={[styles.container, styles.responsiveControlWidthStyles, controlPanelWidthStyles(width)]}
-    >
+    <EuiFlexItem css={[styles.container, controlPanelWidthStyles(width)]}>
       {isTwoLine && <EuiFormLabel>{panelTitle ?? defaultPanelTitle}</EuiFormLabel>}
       <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
         <EuiFlexItem grow={false}>
@@ -67,10 +65,12 @@ export const ControlClone = ({
 };
 
 const controlCloneStyles = {
-  responsiveControlWidthStyles,
-  container: css({
-    width: 'max-content',
-  }),
+  container: (context: UseEuiTheme) => [
+    css({
+      width: 'max-content',
+    }),
+    responsiveControlWidthStyles(context),
+  ],
   grabIcon: css({ cursor: 'grabbing' }),
   dragContainer: (context: UseEuiTheme) =>
     css([

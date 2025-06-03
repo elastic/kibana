@@ -225,7 +225,6 @@ const optionListPopoverSuggestionsStyles = {
   `,
   noMoreOptions: ({ euiTheme }: UseEuiTheme) =>
     css({
-      // TODO: cannot find this element
       textAlign: 'center',
       fontSize: euiTheme.size.m,
       height: 'auto !important',

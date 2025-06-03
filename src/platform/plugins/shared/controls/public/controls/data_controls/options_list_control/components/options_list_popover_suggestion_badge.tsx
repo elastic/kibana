@@ -12,12 +12,9 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiScreenReaderOnly, EuiText, EuiToolTip, UseEuiTheme } from '@elastic/eui';
 
-import { useMemoizedStyles } from '@kbn/core/public';
 import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentCount: number }) => {
-  const styles = useMemoizedStyles(optionListStyles);
-
   return (
     <>
       <EuiToolTip
@@ -44,7 +41,7 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
   );
 };
 
-const optionListStyles = {
+const styles = {
   documentCountBadge: ({ euiTheme }: UseEuiTheme) => css`
     font-weight: ${euiTheme.font.weight.medium} !important;
     color: ${euiTheme.colors.textSubdued} !important;

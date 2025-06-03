@@ -129,11 +129,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()
           }`}
-          className={classNames('presentationUtil__floatingActions', className)}
-          css={[
-            styles.floatingActions,
-            isTwoLine ? styles.floatingActionTwoLines : styles.floatingActionOneLine,
-          ]}
+          className={classNames(
+            'presentationUtil__floatingActions',
+            `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
+            className
+          )}
+          css={styles.floatingActions}
         >
           <>
             {floatingActions.map((action) =>
@@ -171,16 +172,14 @@ const floatingActionsStyles = {
       right: euiTheme.size.xs,
       top: `-${euiTheme.size.l}`,
       zIndex: euiTheme.levels.toast,
-    }),
-  floatingActionOneLine: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.xs,
-      borderRadius: euiTheme.border.radius.medium,
-      backgroundColor: euiTheme.colors.emptyShade,
-      boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
-    }),
-  floatingActionTwoLines: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      top: `-${euiTheme.size.xs} !important`,
+      '&.controlFrameFloatingActions--oneLine': {
+        padding: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.medium,
+        backgroundColor: euiTheme.colors.emptyShade,
+        boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
+      },
+      '&.controlFrameFloatingActions--twoLine': {
+        top: `-${euiTheme.size.xs} !important`,
+      },
     }),
 };

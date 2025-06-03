@@ -26,6 +26,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { useMemoizedStyles } from '@kbn/core/public';
+import classNames from 'classnames';
 import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
@@ -138,20 +139,14 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
-            className={controlType}
-            css={css([
-              styles.formControl,
-              isEditable
-                ? isTwoLine
-                  ? styles.formControlEditableTwoLines
-                  : styles.formControlEditableOneLine
-                : isTwoLine
-                ? styles.formControlNonEditableTwoLines
-                : styles.formControlNonEditableOneLine,
-              (insertBefore || insertAfter) && styles.formControlAfter,
-              insertBefore && styles.afterInsertBefore,
-              insertAfter && styles.afterInsertAfter,
-            ])}
+            className={classNames('controlFrame__formControlLayout', {
+              'controlFrame__formControlLayout--twoLine': isTwoLine,
+              'controlFrame__formControlLayout--edit': isEditable,
+              'controlFrame_formControlAfter--insertBefore': insertBefore,
+              'controlFrame_formControlAfter--insertAfter': insertAfter,
+              controlType,
+            })}
+            css={css(styles.formControl)}
             prepend={
               <>
                 <DragHandle
@@ -222,60 +217,61 @@ const controlPanelStyles = {
     textOverflow: 'ellipsis !important',
     whiteSpace: `nowrap !important` as 'nowrap',
   }),
-  formControl: css({
-    '.euiFormControlLayout__prepend': {
-      paddingLeft: 0,
-      gap: 0,
-      '&.timeSlider': {
-        paddingInlineStart: `0 !important`,
-      },
-    },
-  }),
-  formControlEditableTwoLines: css({
-    '.euiFormControlLayout__prepend': {
-      paddingInlineStart: `0 !important`,
-      paddingInlineEnd: `0 !important`,
-    },
-  }),
-  formControlEditableOneLine: ({ euiTheme }: UseEuiTheme) =>
+  formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiFormControlLayout__prepend': {
-        paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
+        paddingLeft: 0,
+        gap: 0,
+        '&.timeSlider': {
+          paddingInlineStart: `0 !important`,
+        },
+        '.euiFormControlLayout__prepend': {
+          // non-editable one line
+          paddingInlineStart: `${euiTheme.size.s} !important`,
+        },
       },
-    }),
-  formControlNonEditableTwoLines: css({
-    '.euiFormControlLayout__prepend': {
-      paddingInline: `0 !important`,
-    },
-  }),
-  formControlNonEditableOneLine: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '.euiFormControlLayout__prepend': {
-        paddingInlineStart: `${euiTheme.size.s} !important`,
+      '&.controlFrame__formControlLayout--edit': {
+        // editable one line
+        '.euiFormControlLayout__prepend': {
+          paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
+        },
       },
-    }),
-  formControlAfter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '&:after': {
-        content: "''",
-        position: 'absolute' as const,
-        borderRadius: euiTheme.border.radius.medium,
-        top: 0,
-        bottom: 0,
-        width: euiTheme.size.xxs,
-        backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+      '&.controlFrame__formControlLayout--twoLine': {
+        // non-editable two lines
+        '.euiFormControlLayout__prepend': {
+          paddingInline: `0 !important`,
+        },
       },
-    }),
-  afterInsertBefore: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '&:after': {
-        left: `calc(-${euiTheme.size.xs} - 1px)`,
+      '&.controlFrame__formControlLayout--twoLine.controlFrame__formControlLayout--edit': {
+        // editable two lines
+        '.euiFormControlLayout__prepend': {
+          paddingInlineStart: `0 !important`,
+          paddingInlineEnd: `0 !important`,
+        },
       },
-    }),
-  afterInsertAfter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '&:after': {
-        right: `calc(-${euiTheme.size.xs} - 1px)`,
+      '&.controlFrame_formControlAfter--insertBefore': {
+        '&:after': {
+          content: "''",
+          position: 'absolute' as const,
+          borderRadius: euiTheme.border.radius.medium,
+          top: 0,
+          bottom: 0,
+          width: euiTheme.size.xxs,
+          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+          left: `calc(-${euiTheme.size.xs} - 1px)`,
+        },
+      },
+      '&.controlFrame_formControlAfter--insertAfter': {
+        '&:after': {
+          content: "''",
+          position: 'absolute' as const,
+          borderRadius: euiTheme.border.radius.medium,
+          top: 0,
+          bottom: 0,
+          width: euiTheme.size.xxs,
+          backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
+          right: `calc(-${euiTheme.size.xs} - 1px)`,
+        },
       },
     }),
   tooltipAnchor: css({

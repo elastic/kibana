@@ -12,7 +12,6 @@ import { EuiButtonIcon, EuiToolTip, UseEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
 import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {
@@ -25,8 +24,6 @@ interface Props {
 }
 
 export function PlayButton(props: Props) {
-  const styles = useMemoizedStyles(playToggleStyles);
-
   if (
     props.waitForControlOutputConsumersToLoad$ === undefined ||
     (props.disablePlayButton && props.viewMode === 'view')
@@ -54,7 +51,7 @@ export function PlayButton(props: Props) {
   );
 }
 
-const playToggleStyles = {
+const styles = {
   icon: ({ euiTheme }: UseEuiTheme) => css`
     height: 100%;
     &:enabled {
