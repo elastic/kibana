@@ -3819,13 +3819,16 @@ components:
         value:
           type: object
           properties:
+            duration:
+              $ref: '#/components/schemas/AlertSuppressionDuration'
+              nullable: true
             group_by:
               items:
                 type: string
               maxItems: 3
               type: array
-            suppression_config:
-              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+            missing_fields_strategy:
+              $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:
@@ -3835,13 +3838,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadAddSetAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
-    BulkActionEditPayloadAlertSuppressionConfig:
-      type: object
-      properties:
-        duration:
-          $ref: '#/components/schemas/AlertSuppressionDuration'
-        missing_fields_strategy:
-          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:
@@ -3852,12 +3848,15 @@ components:
         value:
           type: object
           properties:
+            duration:
+              $ref: '#/components/schemas/AlertSuppressionDuration'
+              nullable: true
             group_by:
               items:
                 type: string
               type: array
-            suppression_config:
-              $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppressionConfig'
+            missing_fields_strategy:
+              $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:
