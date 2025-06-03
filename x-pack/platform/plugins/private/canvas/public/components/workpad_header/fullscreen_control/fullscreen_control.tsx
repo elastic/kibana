@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../../lib/is_text_input';
+import { forceReload } from '../../hooks/use_canvas_api';
 
 interface ChildrenProps {
   isFullscreen: boolean;
@@ -64,7 +65,10 @@ export class FullscreenControl extends React.PureComponent<Props> {
 
   // handle keypress events for presentation events
   _keyMap: { [key: string]: (...args: any[]) => void } = {
-    REFRESH: this.props.fetchAllRenderables,
+    REFRESH: () => {
+      forceReload();
+      this.props.fetchAllRenderables();
+    },
     PREV: this.previousPage,
     NEXT: this.nextPage,
     FULLSCREEN: this._toggleFullscreen,
