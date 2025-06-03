@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo, useEffect, useCallback } from 'react';
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import {
@@ -88,16 +80,17 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
 
       return {
         label: (
-          <EuiTitle
+          <span
             data-test-subj="connectorSelectorPanelBetaBadge"
             css={css`
               font-size: ${euiTheme.size.s};
               font-weight: ${euiTheme.font.weight.bold};
               line-height: ${euiTheme.base * 1.25}px;
+              vertical-align: top;
             `}
           >
-            <span>{i18n.PRECONFIGURED_CONNECTOR_LABEL}</span>
-          </EuiTitle>
+            {i18n.PRECONFIGURED_CONNECTOR_LABEL}
+          </span>
         ),
         title: i18n.PRECONFIGURED_CONNECTOR_LABEL,
         color: 'subdued' as const,
