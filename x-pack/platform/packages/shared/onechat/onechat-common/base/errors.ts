@@ -32,6 +32,14 @@ export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCo
   return err instanceof OnechatError;
 };
 
+export const createOnechatError = (
+  errorCode: OnechatErrorCode,
+  message: string,
+  meta?: Record<string, any>
+): OnechatError<OnechatErrorCode> => {
+  return new OnechatError(errorCode, message, meta ?? {});
+};
+
 /**
  * Represents an internal error
  */

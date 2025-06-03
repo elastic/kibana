@@ -75,6 +75,7 @@ export class ServiceManager {
       actions,
       inference,
       toolsService: tools,
+      agentsService: agents,
     });
     runner = runnerFactory.getRunner();
 

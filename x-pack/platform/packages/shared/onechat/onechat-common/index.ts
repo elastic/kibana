@@ -29,6 +29,7 @@ export {
   isToolNotFoundError,
   isOnechatError,
   isAgentNotFoundError,
+  createOnechatError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
