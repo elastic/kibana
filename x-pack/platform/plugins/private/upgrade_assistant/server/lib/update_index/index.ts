@@ -79,7 +79,9 @@ async function removeDeprecatedSettings(
 
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = indexSettings[index] || {};
-    const warnings = flatSettings ? getReindexWarnings(flatSettings, versionService) : undefined;
+    const warnings = flatSettings
+      ? getReindexWarnings(flatSettings, versionService.getMajorVersion())
+      : undefined;
     const indexSettingsWarning = warnings?.find(
       (warning) =>
         warning.warningType === 'indexSetting' &&

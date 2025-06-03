@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { Version } from './version';
-import { SemVer } from 'semver';
-
-const kibanaVersion = new SemVer('8.0.0');
-
 import { getReindexWarnings } from '..';
 
 describe('index settings', () => {
@@ -21,7 +16,7 @@ describe('index settings', () => {
             settings: {},
             mappings: {},
           },
-          { getMajorVersion: () => kibanaVersion } as unknown as Version
+          8
         )
       ).toEqual([]);
     });

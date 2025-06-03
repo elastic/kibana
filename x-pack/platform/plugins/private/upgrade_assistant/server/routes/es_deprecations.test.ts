@@ -12,7 +12,7 @@ import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks
 import { createRequestMock } from './__mocks__/request.mock';
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 // Need to require to get mock on named export to work.
@@ -44,6 +44,7 @@ describe('ES deprecations API', () => {
       router: mockRouter,
       lib: { handleEsError },
       log: { error: jest.fn() },
+      current: { major: 8 },
     };
     registerESDeprecationRoutes(routeDependencies);
   });

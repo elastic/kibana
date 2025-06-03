@@ -19,7 +19,10 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: <P, Q, B>(handler: RequestHandler<P, Q, B>) => handler,
+  versionCheckHandlerWrapper:
+    () =>
+    <P, Q, B>(handler: RequestHandler<P, Q, B>) =>
+      handler,
 }));
 
 const JOB_ID = 'job_id';
@@ -38,6 +41,7 @@ describe('ML snapshots APIs', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
+      current: { major: 8 },
     };
     registerMlSnapshotRoutes(routeDependencies);
   }

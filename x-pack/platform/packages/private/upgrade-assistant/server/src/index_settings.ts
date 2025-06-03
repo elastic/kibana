@@ -6,7 +6,6 @@
  */
 
 import { FlatSettings, IndexWarning } from './types';
-import { type Version } from './version';
 
 /**
  * An array of deprecated index settings specific to 7.0 --> 8.0 upgrade
@@ -60,11 +59,11 @@ export const getDeprecatedSettingWarning = (
  */
 export const getReindexWarnings = (
   flatSettings: FlatSettings,
-  versionService: Version
+  kibanaMajorVersion: number
 ): IndexWarning[] => {
   const warnings = [] as IndexWarning[];
 
-  if (versionService.getMajorVersion() === 8) {
+  if (kibanaMajorVersion === 8) {
     const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
 
     if (deprecatedSettingWarning) {

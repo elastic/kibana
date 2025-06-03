@@ -11,7 +11,7 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
@@ -30,6 +30,7 @@ describe('deprecation logging API', () => {
     routeDependencies = {
       router: mockRouter,
       lib: { handleEsError },
+      current: { major: 8 },
     };
     registerDeprecationLoggingRoutes(routeDependencies);
   });

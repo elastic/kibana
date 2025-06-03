@@ -404,7 +404,9 @@ export const reindexServiceFactory = (
 
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = await actions.getFlatSettings(indexName);
-    const warnings = flatSettings ? getReindexWarnings(flatSettings, versionService) : undefined;
+    const warnings = flatSettings
+      ? getReindexWarnings(flatSettings, versionService.getMajorVersion())
+      : undefined;
     const indexSettingsWarning = warnings?.find(
       (warning) =>
         warning.warningType === 'indexSetting' &&
@@ -549,7 +551,7 @@ export const reindexServiceFactory = (
             warningType: 'replaceIndexWithAlias',
             flow: 'reindex',
           },
-          ...getReindexWarnings(flatSettings, versionService),
+          ...getReindexWarnings(flatSettings, versionService.getMajorVersion()),
         ];
       }
     },
