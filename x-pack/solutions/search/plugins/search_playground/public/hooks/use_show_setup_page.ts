@@ -12,7 +12,7 @@ import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { useKibana } from './use_kibana';
 import { usePlaygroundParameters } from './use_playground_parameters';
 
-export const usePageMode = ({
+export const useShowSetupPage = ({
   hasSelectedIndices,
   hasConnectors,
 }: {
@@ -51,6 +51,5 @@ export const usePageMode = ({
 
   return {
     showSetupPage,
-    pageMode,
   };
 };
