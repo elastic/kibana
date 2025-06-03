@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectsFindResult } from '@kbn/core/server';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
+import { isDashboardSection } from '@kbn/dashboard-plugin/common';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import type { Logger } from '@kbn/core/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { RelevantPanel, RelatedDashboard } from '@kbn/observability-schema';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { InvestigateAlertsClient } from './investigate_alerts_client';
+import type { RelatedDashboard, RelevantPanel } from '@kbn/observability-schema';
+import { v4 as uuidv4 } from 'uuid';
 import type { AlertData } from './alert_data';
+import type { InvestigateAlertsClient } from './investigate_alerts_client';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -177,19 +177,21 @@ export class RelatedDashboardsClient {
     return { dashboards: relevantDashboards };
   }
 
-  getPanelsByIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
+  getPanelsByIndex(index: string, panels: DashboardAttributes['panels']): DashboardPanel[] {
     const panelsByIndex = panels.filter((p) => {
+      if (isDashboardSection(p)) return false; // filter out sections
       const panelIndices = this.getPanelIndices(p);
       return panelIndices.has(index);
-    });
+    }) as DashboardPanel[]; // filtering with type guard doesn't actually limit type, so need to cast
     return panelsByIndex;
   }
 
   getPanelsByField(
     fields: string[],
-    panels: DashboardPanel[]
+    panels: DashboardAttributes['panels']
   ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
     const panelsByField = panels.reduce((acc, p) => {
+      if (isDashboardSection(p)) return acc; // filter out sections
       const panelFields = this.getPanelFields(p);
       const matchingFields = fields.filter((f) => panelFields.has(f));
       if (matchingFields.length) {
