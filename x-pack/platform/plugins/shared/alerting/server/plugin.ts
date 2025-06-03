@@ -389,7 +389,7 @@ export class AlertingPlugin {
     initializeMaintenanceWindowEventsGenerator(
       this.logger,
       plugins.taskManager,
-      core.getStartServices()
+      core.getStartServices
     );
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(

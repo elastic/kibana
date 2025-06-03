@@ -157,7 +157,7 @@ const statusFilter = {
           value: 'maintenance-window.attributes.events',
         },
         {
-          isQuoted: false,
+          isQuoted: true,
           type: 'literal',
           value: 'now',
         },
@@ -177,7 +177,7 @@ const statusFilter = {
                   value: 'maintenance-window.attributes.events',
                 },
                 {
-                  isQuoted: false,
+                  isQuoted: true,
                   type: 'literal',
                   value: 'now',
                 },
@@ -196,9 +196,9 @@ const statusFilter = {
               type: 'literal',
               value: 'maintenance-window.attributes.events',
             },
-            'gte',
+            'gt',
             {
-              isQuoted: false,
+              isQuoted: true,
               type: 'literal',
               value: 'now',
             },
@@ -223,7 +223,7 @@ const statusFilter = {
                 },
                 'gte',
                 {
-                  isQuoted: false,
+                  isQuoted: true,
                   type: 'literal',
                   value: 'now',
                 },
@@ -242,9 +242,9 @@ const statusFilter = {
               type: 'literal',
               value: 'maintenance-window.attributes.expirationDate',
             },
-            'gte',
+            'gt',
             {
-              isQuoted: false,
+              isQuoted: true,
               type: 'literal',
               value: 'now',
             },
@@ -661,7 +661,7 @@ describe('Maintenance window events generator task', () => {
       });
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to update events in maintenance windows saved object". Error: something went wrong'
+        'MW event generator: Failed to update events in maintenance windows saved object". Error: something went wrong'
       );
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);

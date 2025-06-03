@@ -10,17 +10,17 @@ import type {
   SavedObject,
   ISavedObjectsRepository,
   ISavedObjectsPointInTimeFinder,
+  StartServicesAccessor,
 } from '@kbn/core/server';
-import { type CoreStart, type Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import type {
   IntervalSchedule,
-  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder, nodeTypes } from '@kbn/es-query';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE, MaintenanceWindowStatus } from '../../common';
 import type { AlertingPluginsStart } from '../plugin';
 import type { MaintenanceWindowAttributes } from '../data/maintenance_window/types';
 import {
@@ -28,7 +28,7 @@ import {
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../application/maintenance_window/transforms';
 import { generateMaintenanceWindowEvents } from '../application/maintenance_window/lib/generate_maintenance_window_events';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { getMaintenanceWindowStatus } from '../application/maintenance_window/lib/get_maintenance_window_status';
 
 export const MAINTENANCE_WINDOW_EVENTS_TASK_TYPE = 'maintenance-window:generate-events';
 
@@ -38,7 +38,7 @@ export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 export function initializeMaintenanceWindowEventsGenerator(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
+  coreStartServices: StartServicesAccessor<AlertingPluginsStart, unknown>
 ) {
   registerMaintenanceWindowEventsGeneratorTask(logger, taskManager, coreStartServices);
 }
@@ -52,7 +52,7 @@ export async function scheduleMaintenanceWindowEventsGenerator(
       id: MAINTENANCE_WINDOW_EVENTS_TASK_ID,
       taskType: MAINTENANCE_WINDOW_EVENTS_TASK_TYPE,
       schedule: SCHEDULE,
-      state: emptyState,
+      state: {},
       params: {},
     });
   } catch (e) {
@@ -63,12 +63,11 @@ export async function scheduleMaintenanceWindowEventsGenerator(
 function registerMaintenanceWindowEventsGeneratorTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
+  coreStartServices: StartServicesAccessor<AlertingPluginsStart, unknown>
 ) {
   taskManager.registerTaskDefinitions({
     [MAINTENANCE_WINDOW_EVENTS_TASK_TYPE]: {
       title: 'Maintenance window events generator task',
-      stateSchemaByVersion,
       createTaskRunner: createEventsGeneratorTaskRunner(logger, coreStartServices),
     },
   });
@@ -76,15 +75,14 @@ function registerMaintenanceWindowEventsGeneratorTask(
 
 export function createEventsGeneratorTaskRunner(
   logger: Logger,
-  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
+  coreStartServices: StartServicesAccessor<AlertingPluginsStart, unknown>
 ) {
-  return ({ taskInstance }: RunContext) => {
-    const state = taskInstance.state as LatestTaskStateSchema;
+  return () => {
     return {
       async run() {
         let totalMaintenanceWindowsWithGeneratedEvents = 0;
         try {
-          const [{ savedObjects }] = await coreStartServices;
+          const [{ savedObjects }] = await coreStartServices();
 
           const savedObjectsClient = savedObjects.createInternalRepository([
             MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -115,28 +113,11 @@ export function createEventsGeneratorTaskRunner(
             startRangeDate,
           });
 
-          const updatedState: LatestTaskStateSchema = {
-            runs: state.runs + 1,
-            total_mw_with_generated_events: totalMaintenanceWindowsWithGeneratedEvents,
-          };
-          logger.info(
-            `Maintenance windows events generator task updated ${updatedState.total_mw_with_generated_events} maintenance windows successfully`
+          logger.debug(
+            `Maintenance windows events generator task updated ${totalMaintenanceWindowsWithGeneratedEvents} maintenance windows successfully`
           );
-
-          return {
-            state: updatedState,
-            schedule: SCHEDULE,
-          };
         } catch (e) {
           logger.warn(`Error executing maintenance windows events generator task: ${e.message}`);
-          const updatedState: LatestTaskStateSchema = {
-            runs: state.runs + 1,
-            total_mw_with_generated_events: totalMaintenanceWindowsWithGeneratedEvents,
-          };
-          return {
-            state: updatedState,
-            schedule: SCHEDULE,
-          };
         }
       },
     };
@@ -144,23 +125,18 @@ export function createEventsGeneratorTaskRunner(
 }
 
 export function getStatusFilter() {
-  const running = nodeBuilder.is('maintenance-window.attributes.events', 'now');
-  const upcoming = nodeBuilder.and([
-    nodeTypes.function.buildNode(
-      'not',
-      nodeBuilder.is('maintenance-window.attributes.events', 'now')
-    ),
-    nodeBuilder.range('maintenance-window.attributes.events', 'gte', 'now'),
-  ]);
-  const finished = nodeBuilder.and([
-    nodeTypes.function.buildNode(
-      'not',
-      nodeBuilder.range('maintenance-window.attributes.events', 'gte', 'now')
-    ),
-    nodeBuilder.range('maintenance-window.attributes.expirationDate', 'gte', 'now'),
-  ]);
+  const mwStatusQuery = getMaintenanceWindowStatus();
 
-  return nodeBuilder.or([running, upcoming, finished]);
+  const fullQuery = [
+    MaintenanceWindowStatus.Running,
+    MaintenanceWindowStatus.Upcoming,
+    MaintenanceWindowStatus.Finished,
+  ]
+    .map((value) => mwStatusQuery[value])
+    .filter(Boolean)
+    .join(' or ');
+
+  return fromKueryExpression(fullQuery);
 }
 
 export async function getSOFinder({
@@ -182,7 +158,9 @@ export async function getSOFinder({
       filter,
     });
   } catch (e) {
-    logger.error(`Failed to find maintenance windows saved object". Error: ${e.message}`);
+    logger.error(
+      `MW event generator: Failed instantiate a createPointInTimeFinder instance". Error: ${e.message}`
+    );
     return null;
   }
 }
@@ -282,7 +260,7 @@ export const updateMaintenanceWindowsEvents = async ({
         }
       } catch (e) {
         logger.error(
-          `Failed to update events in maintenance windows saved object". Error: ${e.message}`
+          `MW event generator: Failed to update events in maintenance windows saved object". Error: ${e.message}`
         );
       }
     }
