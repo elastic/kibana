@@ -17,7 +17,7 @@ export const modelVersion3: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         incremental_id: {
-          type: 'integer',
+          type: 'unsigned_long',
         },
       },
     },
