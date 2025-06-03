@@ -10,15 +10,16 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, UseEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import type { ScopedHistory } from '@kbn/core/public';
+import { DASHBOARD_APP_LOCATOR, VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import { LocatorParams } from '@kbn/reporting-common/types';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginSetup } from '../shared_imports';
 
 interface Props {
@@ -63,9 +64,9 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           throw new Error('Could not find locator params for report');
         }
 
-        // Do not allow locatorParams to use LEGACY_SHORT_URL_LOCATOR
-        if (locatorParams.id === 'LEGACY_SHORT_URL_LOCATOR') {
-          throw new Error('The legacy short URL locator is not supported for opening report URLs.');
+        // Reporting job params should only contain locator for analytical apps, not for for short URLs.
+        if (![DASHBOARD_APP_LOCATOR, VISUALIZE_APP_LOCATOR].includes(locatorParams.id)) {
+          throw new Error('Analytics app locator is required for reporting jobs');
         }
 
         share.navigate(locatorParams);
