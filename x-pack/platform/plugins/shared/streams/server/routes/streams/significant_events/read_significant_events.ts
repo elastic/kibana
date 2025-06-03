@@ -34,7 +34,7 @@ export async function readSignificantEvents(
   const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
   const ruleIds = Object.keys(queryLinkByRuleId);
 
-  const response = await scopedClusterClient.asCurrentUser.search<
+  const response = await scopedClusterClient.asInternalUser.search<
     unknown,
     {
       by_rule: AggregationsTermsAggregateBase<{
