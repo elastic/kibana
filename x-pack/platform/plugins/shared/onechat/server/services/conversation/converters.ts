@@ -13,7 +13,11 @@ import type {
 } from '../../../common/conversations';
 import { ConversationProperties } from './storage';
 
-export const fromEs = (document: GetResponse<ConversationProperties>): Conversation => {
+export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+
+export const fromEs = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): Conversation => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }

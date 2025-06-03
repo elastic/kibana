@@ -16,3 +16,7 @@ export type ConversationCreateRequest = Omit<
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   Partial<Pick<Conversation, 'title' | 'rounds'>>;
+
+export type ConversationListOptions = {
+  agentId?: string;
+};

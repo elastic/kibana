@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
+import type { ListConversationsResponse } from '../../common/http_api/conversations';
+
+export function registerConversationRoutes({
+  router,
+  getInternalServices,
+  logger,
+}: RouteDependencies) {
+  const wrapHandler = getHandlerWrapper({ logger });
+
+  router.post(
+    {
+      path: '/api/onechat/conversations',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Platform feature - RBAC in lower layers',
+        },
+      },
+      validate: {
+        body: schema.object({
+          agentId: schema.maybe(schema.string({})),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { agentId } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const conversations = await client.list({ agentId });
+
+      return response.ok<ListConversationsResponse>({
+        body: {
+          conversations,
+        },
+      });
+    })
+  );
+}

@@ -10,15 +10,16 @@ import type { UserIdAndName, Conversation } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
+  ConversationListOptions,
 } from '../../../common/conversations';
 import { ConversationStorage } from './storage';
-import { fromEs, toEs, createRequestToEs, updateConversation } from './converters';
+import { fromEs, toEs, createRequestToEs, updateConversation, type Document } from './converters';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
-  // TODO: list
+  list(options?: ConversationListOptions): Promise<Conversation[]>;
   // TODO: delete
 }
 
@@ -39,6 +40,23 @@ class ConversationClientImpl implements ConversationClient {
   constructor({ storage, user }: { storage: ConversationStorage; user: UserIdAndName }) {
     this.storage = storage;
     this.user = user;
+  }
+
+  async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 100,
+      query: {
+        bool: {
+          must: [
+            { term: { user_id: this.user.id } },
+            ...(options.agentId ? [{ term: { agent_id: options.agentId } }] : []),
+          ],
+        },
+      },
+    });
+
+    return response.hits.hits.map((hit) => fromEs(hit as Document));
   }
 
   async get(conversationId: string): Promise<Conversation> {

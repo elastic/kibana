@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { AgentService } from './agents';
-export { ChatService } from './chat';
-export { ConversationsService } from './conversations';
-export type { OnechatInternalService } from './types';
+import type { Conversation } from '@kbn/onechat-common';
+
+export interface ListConversationsResponse {
+  conversations: Conversation[];
+}
