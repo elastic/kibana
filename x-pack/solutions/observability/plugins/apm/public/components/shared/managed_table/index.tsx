@@ -167,7 +167,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => {
     // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
-    if (!isLoading) setTableOptions(getStateFromUrl());
+    if (!isLoading) {
+      setTableOptions(getStateFromUrl());
+    }
   }, [getStateFromUrl, isLoading]);
 
   // Clean up searchQuery when fast filter is toggled off
