@@ -158,6 +158,13 @@ const shouldSkipAlertSuppressionFieldsBulkAction = (
     );
   }
 
+  if (action.type === BulkActionEditTypeEnum.set_alert_suppression) {
+    return (
+      alertSuppression?.groupBy?.length === action.value.group_by.length &&
+      hasAlertSuppressionGroupByFields(alertSuppression?.groupBy, action)
+    );
+  }
+
   if (action.type === BulkActionEditTypeEnum.delete_alert_suppression) {
     return hasNoAlertSuppressionGroupByFields(alertSuppression?.groupBy, action);
   }
@@ -199,6 +206,10 @@ const updateAlertSuppressionForThresholdRule = ({
   action: BulkActionEditPayloadAlertSuppression;
 }) => {
   const duration = action.value?.duration;
+  if (duration === null) {
+    return { alertSuppression: undefined, isActionSkipped: !alertSuppression?.duration };
+  }
+
   if (duration && !hasMatchingDuration(alertSuppression?.duration, action)) {
     return { alertSuppression: { duration }, isActionSkipped: false };
   }
