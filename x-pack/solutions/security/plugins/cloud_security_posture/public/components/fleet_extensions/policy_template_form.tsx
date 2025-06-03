@@ -561,6 +561,7 @@ const useEnsureDefaultNamespace = ({
   useEffect(() => {
     // If the namespace support is enabled, we don't need to set the default namespace
     if (cloudSecurityNamespaceSupportEnabled) return;
+    if (input.type.includes('vuln_mgmt')) return;
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
 
     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
@@ -1011,68 +1012,72 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        {cloudSecurityNamespaceSupportEnabled && !isEditPage && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              id="advancedOptions"
-              buttonContent={
-                <EuiText
-                  size="xs"
-                  color={euiTheme.colors.textPrimary}
-                  css={{
-                    fontWeight: euiTheme.font.weight.medium,
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
-                    defaultMessage="Advanced options"
-                  />
-                </EuiText>
-              }
-              paddingSize="m"
-            >
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.namespaceLabel"
-                    defaultMessage="Namespace"
-                  />
+        {cloudSecurityNamespaceSupportEnabled &&
+          !isEditPage &&
+          !input.type.includes('vuln_mgmt') && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id="advancedOptions"
+                data-test-subj="advancedOptionsAccordion"
+                buttonContent={
+                  <EuiText
+                    size="xs"
+                    color={euiTheme.colors.textPrimary}
+                    css={{
+                      fontWeight: euiTheme.font.weight.medium,
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                      defaultMessage="Advanced options"
+                    />
+                  </EuiText>
                 }
-                isInvalid={!!validationResults?.namespace}
-                error={validationResults?.namespace || null}
-                helpText={
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
-                    defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
-                    values={{
-                      learnMoreLink: (
-                        <a
-                          href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Learn more{' '}
-                          <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
-                        </a>
-                      ),
+                paddingSize="m"
+              >
+                <EuiFormRow
+                  fullWidth
+                  label={
+                    <FormattedMessage
+                      id="xpack.csp.fleetIntegration.namespaceLabel"
+                      defaultMessage="Namespace"
+                    />
+                  }
+                  isInvalid={!!validationResults?.namespace}
+                  error={validationResults?.namespace || null}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                      defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <a
+                            href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Learn more{' '}
+                            <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
+                          </a>
+                        ),
+                      }}
+                    />
+                  }
+                >
+                  <EuiFieldText
+                    fullWidth
+                    placeholder="default"
+                    data-test-subj="namespaceInput"
+                    isInvalid={!!validationResults?.namespace}
+                    onChange={(event) => {
+                      updatePolicy({ ...newPolicy, namespace: event.target.value });
                     }}
                   />
-                }
-              >
-                <EuiFieldText
-                  fullWidth
-                  placeholder="default"
-                  isInvalid={!!validationResults?.namespace}
-                  onChange={(event) => {
-                    updatePolicy({ ...newPolicy, namespace: event.target.value });
-                  }}
-                />
-              </EuiFormRow>
-            </EuiAccordion>
-          </>
-        )}
+                </EuiFormRow>
+              </EuiAccordion>
+            </>
+          )}
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector

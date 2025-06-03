@@ -22,6 +22,8 @@ const {
   SHARED_CREDENTIALS_FILE_TEST_ID,
   SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
   ROLE_ARN_TEST_ID,
+  ADVANCED_OPTION_ACCORDION,
+  NAMESPACE_INPUT,
 } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
@@ -29,6 +31,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
+  const browser = getService('browser');
   const retry = getService('retry');
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
@@ -349,6 +353,25 @@ export default function (providerContext: FtrProviderContext) {
             (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
               sharedCredentialProfileName
           ).to.be(true);
+        });
+      });
+    });
+    describe('Namespace Edit', () => {
+      it('should receive a non-default namespace field', async () => {
+        const namespace = 'foo';
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickOptionButton(ADVANCED_OPTION_ACCORDION);
+        await cisIntegration.fillInTextField(NAMESPACE_INPUT, namespace);
+        await cisIntegration.clickSaveButton();
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          const parsedUrl = (await browser.getCurrentUrl()).split('/');
+          const packagePolicyId = parsedUrl[parsedUrl.length - 1];
+          const { body } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+          expect(body.namespace).to.be(namespace);
         });
       });
     });
