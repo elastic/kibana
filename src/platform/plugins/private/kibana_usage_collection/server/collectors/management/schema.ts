@@ -464,15 +464,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAgentExplorerView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -606,10 +598,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmTraceExplorerTab': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -640,10 +628,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableCriticalPath': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureProfilingIntegration': {
@@ -692,10 +676,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'aiAssistant:preferredAIAssistantType': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:profilingFetchTopNFunctionsFromStacktraces': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:searchExcludedDataTiers': {
