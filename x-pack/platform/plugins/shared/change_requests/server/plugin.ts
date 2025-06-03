@@ -10,14 +10,15 @@ import {
   type Plugin,
   type Logger,
   type CoreSetup,
-  type KibanaRequest,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
+import { type SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { repository } from './routes/repository';
 import {
   ChangeRequestDoc,
@@ -35,6 +36,10 @@ export type ChangeRequestsPluginStart = ReturnType<ChangeRequestsPlugin['start']
 interface ChangeRequestsPluginSetupDependencies {
   features: FeaturesPluginSetup;
 }
+interface ChangeRequestsPluginStartDependencies {
+  security: SecurityPluginStart;
+  spaces: SpacesPluginStart;
+}
 
 const CHANGE_REQUESTS_FEATURE_ID = 'change_requests';
 
@@ -43,7 +48,8 @@ export class ChangeRequestsPlugin
     Plugin<
       ChangeRequestsPluginSetup,
       ChangeRequestsPluginStart,
-      ChangeRequestsPluginSetupDependencies
+      ChangeRequestsPluginSetupDependencies,
+      ChangeRequestsPluginStartDependencies
     >
 {
   public logger: Logger;
@@ -53,7 +59,7 @@ export class ChangeRequestsPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<ChangeRequestsPluginStartDependencies>,
     plugins: ChangeRequestsPluginSetupDependencies
   ) {
     plugins.features.registerKibanaFeature({
@@ -75,6 +81,7 @@ export class ChangeRequestsPlugin
             read: [],
           },
         },
+        // It's a bit odd because the UI shows read but this is all about creation.
         read: {
           app: [CHANGE_REQUESTS_FEATURE_ID],
           api: [CHANGE_REQUESTS_API_PRIVILEGES.create], // Can submit a new request for review
@@ -92,7 +99,7 @@ export class ChangeRequestsPlugin
       logger: this.logger,
       repository,
       dependencies: {
-        getScopedClients: async (request: KibanaRequest) => {
+        getClients: async () => {
           const [coreStart] = await core.getStartServices();
 
           const scopedClusterClient = coreStart.elasticsearch.client;
@@ -107,10 +114,12 @@ export class ChangeRequestsPlugin
           };
         },
         getStartServices: async () => {
-          const [coreStart] = await core.getStartServices();
+          const [coreStart, pluginsStart] = await core.getStartServices();
 
           return {
             core: coreStart,
+            security: pluginsStart.security,
+            spaces: pluginsStart.spaces,
           };
         },
       },

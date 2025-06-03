@@ -15,7 +15,9 @@
       "change_requests"
     ],
     "requiredPlugins": [
-      "features"
+      "features",
+      "security",
+      "spaces"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

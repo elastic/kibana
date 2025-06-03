@@ -7,11 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { badRequest } from '@hapi/boom';
+import { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { submitRequestBodyRt } from '../types';
 import { createChangeRequestsServerRoute } from './route_factory';
 import { CHANGE_REQUESTS_API_PRIVILEGES } from '../constants';
-
-// Test that the authz works
 
 const submitRequestRoute = createChangeRequestsServerRoute({
   endpoint: 'POST /internal/change_requests/change_requests',
@@ -23,7 +22,7 @@ const submitRequestRoute = createChangeRequestsServerRoute({
   params: z.object({
     body: submitRequestBodyRt,
   }),
-  handler: async ({ params, response, getScopedClients, request, context }) => {
+  handler: async ({ params, response, getClients, getStartServices, request }) => {
     if (params.body.requests.length === 0) {
       // The copy in this whole plugin is just bad.
       throw badRequest('An approval request should contain a least one request');
@@ -37,15 +36,18 @@ const submitRequestRoute = createChangeRequestsServerRoute({
       throw badRequest('An approval request should contain a least one required privilege');
     }
 
-    const { storageClient } = await getScopedClients(request);
+    const { core, spaces } = await getStartServices();
+    const user = await getCurrentUser(core, request);
+    const space = spaces.spacesService.getSpaceId(request);
 
-    const userId = (await (await context.core).userProfile.getCurrent())?.uid!;
+    const { storageClient } = await getClients();
 
     const indexResponse = await storageClient.index({
       document: {
         request: {
           ...params.body,
-          user: userId,
+          user,
+          space,
           status: 'pending',
           submittedAt: new Date().toISOString(),
           handledAt: undefined,
@@ -71,13 +73,54 @@ const listRequestsRoute = createChangeRequestsServerRoute({
       requiredPrivileges: [CHANGE_REQUESTS_API_PRIVILEGES.create],
     },
   },
-  handler: async ({ response }) => {
-    // Load your list with the storage client
+  handler: async ({ response, getClients, getStartServices, request }) => {
+    const { core, spaces } = await getStartServices();
+    const user = await getCurrentUser(core, request);
+    const space = spaces.spacesService.getSpaceId(request);
+
+    const { storageClient } = await getClients();
+
+    const result = await storageClient.search({
+      size: 10000,
+      track_total_hits: false,
+    });
+
+    if (result.hits.total) {
+      // This property is only there if there are 0 hits since we don't track total hits
+      return response.ok({
+        body: {
+          change_requests: [],
+        },
+      });
+    }
+
+    const changeRequests = result.hits.hits
+      .filter((hit) => hit._source.request.user === user && hit._source.request.space === space)
+      .map((hit) => {
+        const { user: _user, space: _space, ...requestWithoutUser } = hit._source.request;
+        return {
+          id: hit._id,
+          ...requestWithoutUser,
+        };
+      });
+
     return response.ok({
-      body: 'List of your requests',
+      body: {
+        change_requests: changeRequests,
+      },
     });
   },
 });
+
+async function getCurrentUser(core: CoreStart, request: KibanaRequest) {
+  const currentUser = core.security.authc.getCurrentUser(request);
+
+  if (!currentUser) {
+    throw new Error('Could not resolve current user');
+  }
+
+  return currentUser.username;
+}
 
 export const crudRoutes = {
   ...submitRequestRoute,
