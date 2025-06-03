@@ -7,7 +7,6 @@
 
 import { withInferenceSpan } from '@kbn/inference-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
-import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 
 import type { Logger } from '@kbn/core/server';
@@ -24,6 +23,7 @@ import {
   type Message,
   type AnonymizationRule,
 } from '../../../common/types';
+import { getEntityHash } from './get_entity_hash';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
@@ -93,7 +93,7 @@ export class AnonymizationService {
                 start_pos: e.start_pos + batchChunk.charStartOffset,
                 end_pos: e.end_pos + batchChunk.charStartOffset,
                 type: 'ner' as const,
-                hash: objectHash({ entity: e.entity, class_name: e.class_name }),
+                hash: getEntityHash(e.entity, e.class_name),
               }))
             );
           });

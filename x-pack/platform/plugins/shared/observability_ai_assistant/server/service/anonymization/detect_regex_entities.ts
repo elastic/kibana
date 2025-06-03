@@ -4,18 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import objectHash from 'object-hash';
 import type { Logger } from '@kbn/core/server';
 import { DetectedEntity } from '../../../common/types';
-
-export function getHashedEntity(
-  entity: string,
-  className: string,
-  normalize: boolean = false
-): string {
-  const textForHash = normalize ? entity.toLowerCase() : entity;
-  return objectHash({ entity: textForHash, class_name: className });
-}
+import { getEntityHash } from './get_entity_hash';
 
 function getMatches(
   content: string,
@@ -30,7 +21,7 @@ function getMatches(
     const entityText = match[0];
     const start = match.index;
     const end = start + entityText.length;
-    const hash = getHashedEntity(entityText, className, normalize);
+    const hash = getEntityHash(entityText, className, normalize);
     result.push({
       entity: entityText,
       class_name: className,
