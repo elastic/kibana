@@ -57,18 +57,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
   },
 };
 
-const version1: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        integrationName: {
-          type: 'keyword',
-        },
-      },
-    },
-  ],
-};
 
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
@@ -76,5 +64,4 @@ export const monitoringEntitySourceType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: monitoringEntitySourceTypeNameMappings,
-  modelVersions: { 1: version1 },
 };
