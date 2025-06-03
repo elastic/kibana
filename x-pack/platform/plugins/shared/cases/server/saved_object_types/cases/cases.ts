@@ -241,7 +241,7 @@ export const createCaseSavedObjectType = (
         },
       },
       incremental_id: {
-        type: 'integer',
+        type: 'unsigned_long',
       },
     },
   },
