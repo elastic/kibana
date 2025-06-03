@@ -42563,7 +42563,7 @@ paths:
       summary: Create a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}:
     delete:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -42594,7 +42594,7 @@ paths:
       summary: Delete a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     get:
       description: '[Required authorization] Route required privileges: read-maintenance-window.'
       operationId: get-maintenance-window-id
@@ -42735,7 +42735,7 @@ paths:
       summary: Get maintenance window details.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     patch:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
       operationId: patch-maintenance-window-id
@@ -42976,7 +42976,7 @@ paths:
       summary: Update a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_archive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43125,7 +43125,7 @@ paths:
       summary: Archive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_unarchive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43274,7 +43274,7 @@ paths:
       summary: Unarchive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/ml/saved_objects/sync:
     get:
       description: |
