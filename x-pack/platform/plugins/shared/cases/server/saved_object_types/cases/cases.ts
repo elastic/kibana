@@ -260,6 +260,7 @@ export const createCaseSavedObjectType = (
       context: SavedObjectsExportTransformContext,
       objects: Array<SavedObject<CasePersistedAttributes>>
     ) => handleExport({ context, objects, coreSetup, logger }),
-    onImport: (objects) => handleImport({ objects, logger }),
+    onImport: (objects: Array<SavedObject<CasePersistedAttributes>>) =>
+      handleImport({ objects, logger }),
   },
 });
