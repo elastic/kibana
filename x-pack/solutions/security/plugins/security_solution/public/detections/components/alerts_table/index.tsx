@@ -37,10 +37,7 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
+import { useSessionViewNavigation } from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -207,7 +204,6 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   const {
     initialized: isDataTableInitialized,
     graphEventId,
-    sessionViewConfig,
     viewMode: tableView = eventsDefaultModel.viewMode,
     columns,
     totalCount: count,
@@ -391,17 +387,10 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     scopeId: tableType,
   });
 
-  const { SessionView } = useSessionView({
-    scopeId: tableType,
-  });
-
   const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableType} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableType, sessionViewConfig, SessionView, Navigation]);
+    const shouldShowOverlay = graphEventId != null && graphEventId.length > 0;
+    return shouldShowOverlay ? <GraphOverlay scopeId={tableType} Navigation={Navigation} /> : null;
+  }, [graphEventId, tableType, Navigation]);
 
   const toolbarVisibility = useMemo(
     () => ({
