@@ -12,6 +12,8 @@ import { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
+
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -67,6 +69,20 @@ export const createDashboardSavedObjectType = ({
       schemas: {
         forwardCompatibility: dashboardAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: dashboardAttributesSchemaV2,
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            sections: { properties: {}, dynamic: false },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+        create: dashboardAttributesSchemaV3,
       },
     },
   },
