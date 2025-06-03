@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFormRow,
-  EuiRadioGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,13 +20,12 @@ import {
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
+import { METRIC_TYPE, track } from '../../../../../../common/lib/telemetry';
 import * as i18n from '../../../../../common/translations';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   AlertSuppressionDuration,
@@ -39,38 +37,43 @@ import {
   useForm,
   FIELD_TYPES,
   fieldValidators,
-  UseMultiFields,
 } from '../../../../../../shared_imports';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
-import { DurationInput } from '../../../../../rule_creation/components/duration_input';
-const CommonUseField = getUseField({ component: Field });
+import {
+  SuppressionFieldsSelector,
+  MissingFieldsStrategySelector,
+  SuppressionDurationSelector,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DEFAULT_DURATION,
+} from '../../../../../rule_creation/components/alert_suppression_edit';
+import { AlertSuppressionDurationType } from '../../../../../common/types';
 
+const CommonUseField = getUseField({ component: Field });
 type AlertSuppressionEditActions =
   | BulkActionEditTypeEnum['add_alert_suppression']
   | BulkActionEditTypeEnum['delete_alert_suppression']
   | BulkActionEditTypeEnum['set_alert_suppression'];
 
-enum GroupByOptions {
-  PerRuleExecution = 'per-rule-execution',
-  PerTimePeriod = 'per-time-period',
-}
-
 interface AlertSuppressionFormData {
-  groupBy: string[];
-  groupByRadioSelection: GroupByOptions;
-  groupByDuration: AlertSuppressionDuration;
-  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
-  overwriteGroupBy: boolean;
+  alertSuppressionFields: string[];
+  alertSuppressionDurationType: AlertSuppressionDurationType;
+  alertSuppressionDuration: AlertSuppressionDuration;
+  alertSuppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  isSuppressionFieldsOverwriteEnabled: boolean;
   isDurationOverwriteEnabled: boolean;
   isMissingFieldsStrategyOverwriteEnabled: boolean;
-  removeSuppression: boolean;
+  isSuppressionRemovalEnabled: boolean;
 }
 
 const getSchema = (maxFieldsNumber: number) => {
   return {
-    groupBy: {
-      fieldsToValidateOnChange: ['groupBy'],
-      type: FIELD_TYPES.COMBO_BOX,
+    [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
+      fieldsToValidateOnChange: [ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
       validations: [
         {
           validator: fieldValidators.maxLengthField({
@@ -80,15 +83,15 @@ const getSchema = (maxFieldsNumber: number) => {
         },
       ],
     },
-    groupByRadioSelection: {},
-    groupByDuration: {
-      value: {},
-      unit: {},
+    [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: {},
+    [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+      [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: {},
+      [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: {},
     },
-    suppressionMissingFields: {
+    [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
       label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
     },
-    overwriteGroupBy: {
+    isSuppressionFieldsOverwriteEnabled: {
       type: FIELD_TYPES.CHECKBOX,
       label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_OVERWRITE_LABEL,
     },
@@ -100,7 +103,7 @@ const getSchema = (maxFieldsNumber: number) => {
       type: FIELD_TYPES.CHECKBOX,
       label: 'Set suppression for missing fields',
     },
-    removeSuppression: {
+    isSuppressionRemovalEnabled: {
       type: FIELD_TYPES.CHECKBOX,
       label: 'Remove suppression in all selected rules',
     },
@@ -108,17 +111,14 @@ const getSchema = (maxFieldsNumber: number) => {
 };
 
 const initialFormData: AlertSuppressionFormData = {
-  groupBy: [],
-  overwriteGroupBy: false,
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+  isSuppressionFieldsOverwriteEnabled: false,
   isDurationOverwriteEnabled: false,
   isMissingFieldsStrategyOverwriteEnabled: false,
-  removeSuppression: false,
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    value: 5,
-    unit: 'm',
-  },
-  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  isSuppressionRemovalEnabled: false,
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: ALERT_SUPPRESSION_DEFAULT_DURATION,
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 };
 
 const getFormConfig = (editAction: AlertSuppressionEditActions) =>
@@ -163,24 +163,21 @@ const AlertSuppressionFormComponent = ({
 
   const [
     {
-      overwriteGroupBy,
-      removeSuppression,
+      isSuppressionFieldsOverwriteEnabled,
+      isSuppressionRemovalEnabled,
       isDurationOverwriteEnabled,
       isMissingFieldsStrategyOverwriteEnabled,
     },
   ] = useFormData<AlertSuppressionFormData>({
     form,
     watch: [
-      'overwriteGroupBy',
-      'removeSuppression',
+      'isSuppressionFieldsOverwriteEnabled',
+      'isSuppressionRemovalEnabled',
       'isDurationOverwriteEnabled',
       'isMissingFieldsStrategyOverwriteEnabled',
     ],
   });
   const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
-  const fieldOptions = indexPatterns.fields.map((field) => ({
-    label: field.name,
-  }));
 
   const handleSubmit = async () => {
     const { data, isValid } = await form.submit();
@@ -188,104 +185,40 @@ const AlertSuppressionFormComponent = ({
       return;
     }
 
-    const event = data.overwriteGroupBy
-      ? TELEMETRY_EVENT.SET_ALERT_SUPPRESSION
-      : editAction === 'delete_alert_suppression'
-      ? TELEMETRY_EVENT.DELETE_ALERT_SUPPRESSION
-      : TELEMETRY_EVENT.ADD_ALERT_SUPPRESSION;
-    track(METRIC_TYPE.CLICK, event);
-
     const durationValue =
-      data.groupByRadioSelection === GroupByOptions.PerTimePeriod ? data.groupByDuration : null;
+      data[ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME] ===
+      AlertSuppressionDurationType.PerTimePeriod
+        ? data[ALERT_SUPPRESSION_DURATION_FIELD_NAME]
+        : null;
 
     const suppressionConfig = {
       missing_fields_strategy: isMissingFieldsStrategyOverwriteEnabled
-        ? data.suppressionMissingFields
+        ? data[ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]
         : undefined,
       duration: isDurationOverwriteEnabled ? durationValue : undefined,
     };
 
-    onConfirm(
-      data.removeSuppression
-        ? {
-            value: {
-              group_by: [],
-            },
-            type: BulkActionEditTypeEnum.set_alert_suppression,
-          }
-        : {
-            value: {
-              group_by: data.groupBy,
-              ...suppressionConfig,
-            },
-            type: data.overwriteGroupBy ? BulkActionEditTypeEnum.set_alert_suppression : editAction,
-          }
-    );
+    const suppressionPayload = data.isSuppressionRemovalEnabled
+      ? {
+          value: {
+            group_by: [],
+          },
+          type: BulkActionEditTypeEnum.set_alert_suppression,
+        }
+      : {
+          value: {
+            group_by: data.alertSuppressionFields,
+            ...suppressionConfig,
+          },
+          type: data.isSuppressionFieldsOverwriteEnabled
+            ? BulkActionEditTypeEnum.set_alert_suppression
+            : editAction,
+        };
+
+    onConfirm(suppressionPayload);
+    track(METRIC_TYPE.CLICK, suppressionPayload.type);
   };
 
-  const GroupByChildren = useCallback(
-    ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
-      <EuiRadioGroup
-        idSelected={groupByRadioSelection.value}
-        options={[
-          {
-            id: GroupByOptions.PerRuleExecution,
-            disabled: removeSuppression,
-            label: <> {i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_RULE_EXECUTION_LABEL}</>,
-          },
-          {
-            id: GroupByOptions.PerTimePeriod,
-            disabled: removeSuppression,
-            label: (
-              <>
-                {i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_PER_TIME_PERIOD_LABEL}
-                <DurationInput
-                  data-test-subj="alertSuppressionDurationInput"
-                  durationValueField={groupByDurationValue}
-                  durationUnitField={groupByDurationUnit}
-                  // Suppression duration is also disabled suppression by rule execution is selected in radio button
-                  isDisabled={
-                    groupByRadioSelection.value !== GroupByOptions.PerTimePeriod ||
-                    removeSuppression
-                  }
-                  minimumValue={1}
-                />
-              </>
-            ),
-          },
-        ]}
-        onChange={(id: string) => {
-          groupByRadioSelection.setValue(id);
-        }}
-        data-test-subj="groupByDurationOptions"
-      />
-    ),
-    [removeSuppression]
-  );
-  const AlertSuppressionMissingFields = useCallback(
-    ({ suppressionMissingFields }) => (
-      <EuiRadioGroup
-        idSelected={suppressionMissingFields.value}
-        disabled={removeSuppression}
-        options={[
-          {
-            id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
-            label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_SUPPRESS_MISSING_FIELDS_OPTION,
-          },
-          {
-            id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
-            label:
-              i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_DO_NOT_SUPPRESS_MISSING_FIELDS_OPTION,
-          },
-        ]}
-        onChange={(id: string) => {
-          suppressionMissingFields.setValue(id);
-        }}
-        data-test-subj="suppressionMissingFieldsOptions"
-      />
-    ),
-    [removeSuppression]
-  );
   return (
     <BulkEditFormWrapper form={form} onClose={onClose} onSubmit={handleSubmit} title={formTitle}>
       <EuiFlexGroup gutterSize="s">
@@ -297,40 +230,15 @@ const AlertSuppressionFormComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <CommonUseField
-        path="groupBy"
-        config={{
-          ...schema.groupBy,
-          // label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_GROUP_BY_LABEL,
-          label: (
-            <div>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  {i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_GROUP_BY_LABEL}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
-                {'Select field(s) to use for suppressing extra alerts'}
-              </EuiText>
-            </div>
-          ) as unknown as string, // EuiComboBox doesn't support ReactNode as label
-        }}
-        componentProps={{
-          idAria: 'bulkEditRulesAlertSuppression',
-          'data-test-subj': 'bulkEditRulesAlertSuppression',
-          euiFieldProps: {
-            isDisabled: removeSuppression,
-            fullWidth: true,
-            placeholder: 'Select a field',
-            noSuggestions: false,
-            options: fieldOptions,
-          },
-        }}
+
+      <SuppressionFieldsSelector
+        suppressibleFields={indexPatterns.fields}
+        disabled={isSuppressionRemovalEnabled}
       />
+
       {editAction === BulkActionEditTypeEnum.add_alert_suppression ? (
         <CommonUseField
-          path="overwriteGroupBy"
+          path="isSuppressionFieldsOverwriteEnabled"
           componentProps={{
             idAria: 'bulkEditRulesOverwriteAlertSuppression',
             'data-test-subj': 'bulkEditRulesOverwriteAlertSuppression',
@@ -338,14 +246,14 @@ const AlertSuppressionFormComponent = ({
         />
       ) : (
         <CommonUseField
-          path="removeSuppression"
+          path="isSuppressionRemovalEnabled"
           componentProps={{
             idAria: 'bulkEditRulesRemoveAlertSuppression',
             'data-test-subj': 'bulkEditRulesRemoveAlertSuppression',
           }}
         />
       )}
-      {overwriteGroupBy && (
+      {isSuppressionFieldsOverwriteEnabled && (
         <EuiFormRow fullWidth>
           <EuiCallOut
             color="warning"
@@ -360,7 +268,7 @@ const AlertSuppressionFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-      {removeSuppression && (
+      {isSuppressionRemovalEnabled && (
         <EuiFormRow fullWidth>
           <EuiCallOut
             color="warning"
@@ -380,10 +288,10 @@ const AlertSuppressionFormComponent = ({
       <CommonUseField
         path="isDurationOverwriteEnabled"
         componentProps={{
-          idAria: 'bulkEditRulesAlertSuppressionisDurationOverwriteEnabled',
-          'data-test-subj': 'bulkEditAlertSuppressionisDurationOverwriteEnabled',
+          idAria: 'bulkEditRulesAlertSuppressionDurationOverwriteEnabled',
+          'data-test-subj': 'bulkEditAlertSuppressionDurationOverwriteEnabled',
           euiFieldProps: {
-            isDisabled: removeSuppression,
+            isDisabled: isSuppressionRemovalEnabled,
           },
         }}
       />
@@ -393,33 +301,17 @@ const AlertSuppressionFormComponent = ({
         forceState={isDurationOverwriteEnabled ? 'open' : 'closed'}
         paddingSize="m"
       >
-        <EuiFormRow data-test-subj="alertSuppressionDuration">
-          <UseMultiFields
-            fields={{
-              groupByRadioSelection: {
-                path: 'groupByRadioSelection',
-              },
-              groupByDurationValue: {
-                path: 'groupByDuration.value',
-              },
-              groupByDurationUnit: {
-                path: 'groupByDuration.unit',
-              },
-            }}
-          >
-            {GroupByChildren}
-          </UseMultiFields>
-        </EuiFormRow>
+        <SuppressionDurationSelector disabled={isSuppressionRemovalEnabled} />
       </EuiAccordion>
 
       <EuiSpacer size="m" />
       <CommonUseField
         path="isMissingFieldsStrategyOverwriteEnabled"
         componentProps={{
-          idAria: 'bulkEditRulesAlertSuppressionisMissingFieldsStrategyOverwriteEnabled',
-          'data-test-subj': 'bulkEditAlertSuppressionisMissingFieldsStrategyOverwriteEnabled',
+          idAria: 'bulkEditRulesAlertSuppressionMissingFieldsStrategyOverwriteEnabled',
+          'data-test-subj': 'bulkEditAlertSuppressionMissingFieldsStrategyOverwriteEnabled',
           euiFieldProps: {
-            isDisabled: removeSuppression,
+            isDisabled: isSuppressionRemovalEnabled,
           },
         }}
       />
@@ -429,21 +321,7 @@ const AlertSuppressionFormComponent = ({
         forceState={isMissingFieldsStrategyOverwriteEnabled ? 'open' : 'closed'}
         paddingSize="m"
       >
-        <EuiFormRow
-          data-test-subj="alertSuppressionMissingFields"
-          label={i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL}
-          fullWidth
-        >
-          <UseMultiFields
-            fields={{
-              suppressionMissingFields: {
-                path: 'suppressionMissingFields',
-              },
-            }}
-          >
-            {AlertSuppressionMissingFields}
-          </UseMultiFields>
-        </EuiFormRow>
+        <MissingFieldsStrategySelector disabled={isSuppressionRemovalEnabled} />
       </EuiAccordion>
     </BulkEditFormWrapper>
   );
