@@ -81,7 +81,6 @@ export function createChatCompleteCallbackApi({
           temperature,
           toolChoice,
           tools,
-          invokeParameters,
         } = callback(executor);
 
         const messages = givenMessages.map((message) => {
@@ -132,7 +131,6 @@ export function createChatCompleteCallbackApi({
                 modelName,
                 abortSignal,
                 metadata,
-                invokeParameters,
               })
               .pipe(
                 chunksIntoMessage({

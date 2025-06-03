@@ -25,7 +25,7 @@ export function promptToMessageOptions(
   match: PromptVersion;
   options: Pick<
     ChatCompleteOptions,
-    'messages' | 'system' | 'tools' | 'toolChoice' | 'temperature' | 'invokeParameters'
+    'messages' | 'system' | 'tools' | 'toolChoice' | 'temperature'
   >;
 } {
   const matches = prompt.versions.flatMap((version) => {
@@ -47,7 +47,7 @@ export function promptToMessageOptions(
     throw new Error(`No model match found for ${format(model)}`);
   }
 
-  const { toolChoice, tools, temperature, template, invokeParameters } = bestMatch;
+  const { toolChoice, tools, temperature, template } = bestMatch;
 
   const validatedInput = prompt.input.parse(input);
 
@@ -77,7 +77,6 @@ export function promptToMessageOptions(
       tools,
       toolChoice,
       temperature,
-      invokeParameters,
     },
   };
 }
