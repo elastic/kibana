@@ -11256,12 +11256,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:apmAgentExplorerView": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmEnableTableSearchBar": {
           "type": "boolean",
           "_meta": {
@@ -11436,12 +11430,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableAwsLambdaMetrics": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmProgressiveLoading": {
           "type": "keyword",
           "_meta": {
@@ -11450,12 +11438,6 @@
         },
         "observability:apmServiceGroupMaxNumberOfServices": {
           "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:apmServiceInventoryOptimizedSorting": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
