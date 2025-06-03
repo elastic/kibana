@@ -1272,7 +1272,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-2',
+          name: 'test agentless custom package',
           description: '',
           namespace: 'default',
           policy_ids: [agentPolicyId],
