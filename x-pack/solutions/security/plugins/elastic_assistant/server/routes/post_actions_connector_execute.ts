@@ -81,10 +81,12 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
         let onLlmResponse;
 
-        const { featureFlags } = await context.core;
-        const inferenceChatModelEnabled = featureFlags
-          ? await featureFlags?.getBooleanValue(INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG, false)
-          : false;
+        const coreContext = await context.core;
+        const inferenceChatModelEnabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
 
         try {
           const checkResponse = await performChecks({

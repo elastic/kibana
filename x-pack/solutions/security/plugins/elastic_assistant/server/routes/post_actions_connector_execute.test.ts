@@ -97,6 +97,9 @@ const mockContext = {
       }),
     },
     core: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       elasticsearch: {
         client: elasticsearchServiceMock.createScopedClusterClient(),
       },
