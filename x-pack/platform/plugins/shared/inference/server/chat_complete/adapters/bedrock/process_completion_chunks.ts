@@ -175,9 +175,6 @@ export function processConverseCompletionChunks() {
             };
           }
         }
-        // if (isOfType<MessageDeltaEvent>(chunkBody, type, 'messageDelta')) {
-        //   completionChunk = chunkBody.delta.stop_sequence || '';
-        // }
 
         if (completionChunk || toolCallChunk) {
           subscriber.next({
