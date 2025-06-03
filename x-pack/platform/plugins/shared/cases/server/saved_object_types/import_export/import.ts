@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import type { Logger, SavedObject, SavedObjectsImportHookResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsImportHookResult } from '@kbn/core/server';
 import type { CasePersistedAttributes } from '../../common/types/case';
-import { createCaseError } from '../../common/error';
 
 export function handleImport({
   objects,
-  logger,
 }: {
   objects: Array<SavedObject<CasePersistedAttributes>>;
-  logger: Logger;
 }): SavedObjectsImportHookResult {
   const hasObjectsWithIncrementalId = objects.some(
     (obj) => obj.attributes.incremental_id !== undefined
   );
   if (hasObjectsWithIncrementalId) {
-    throw createCaseError({
-      message: 'The `incremental_id` field is not supported on importing',
-      logger,
-    });
+    return {
+      warnings: [
+        {
+          type: 'simple',
+          message: 'The `incremental_id` field is not supported on importing.',
+        },
+      ],
+    };
   } else {
     return {};
   }
