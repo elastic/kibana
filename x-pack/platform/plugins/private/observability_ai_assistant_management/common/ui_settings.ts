@@ -64,7 +64,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsTab.anonymizationRulesLabel',
       { defaultMessage: 'Anonymization Rules' }
     ),
-    value: '[]', // Default is an empty array, which disables all anonymization rules.
+    value: [], // Default is an empty array, which disables all anonymization rules.
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
@@ -80,7 +80,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
           'Default is an empty array, which disables all anonymization rules.',
       }
     ),
-    schema: schema.string(),
+    schema: schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        entityClass: schema.string(),
+        type: schema.oneOf([schema.literal('ner'), schema.literal('regex')]),
+        pattern: schema.string(),
+        enabled: schema.boolean(),
+        builtIn: schema.boolean(),
+        description: schema.maybe(schema.string()),
+      })
+    ),
     type: 'json',
     requiresPageReload: true,
     solution: 'oblt',

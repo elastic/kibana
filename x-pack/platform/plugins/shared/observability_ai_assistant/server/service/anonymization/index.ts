@@ -22,28 +22,18 @@ import {
   DetectedEntityType,
   type InferenceChunk,
   type Message,
+  type AnonymizationRule,
 } from '../../../common/types';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
-
-export interface AnonymizationRule {
-  id: string;
-  entityClass: string;
-  type: 'regex' | 'ner';
-  pattern?: string;
-  enabled: boolean;
-  builtIn: boolean;
-  description?: string;
-  normalize?: boolean;
-}
 
 export interface Dependencies {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
   logger: Logger;
-  anonymizationRules: string;
+  anonymizationRules: AnonymizationRule[];
 }
 
 export class AnonymizationService {
@@ -54,7 +44,7 @@ export class AnonymizationService {
   constructor({ esClient, logger, anonymizationRules }: Dependencies) {
     this.esClient = esClient;
     this.logger = logger;
-    this.rules = JSON.parse(anonymizationRules || '[]');
+    this.rules = anonymizationRules;
   }
 
   private async detectNamedEntities(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {

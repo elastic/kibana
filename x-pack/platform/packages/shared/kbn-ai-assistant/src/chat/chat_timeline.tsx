@@ -19,6 +19,7 @@ import {
   type TelemetryEventTypeWithPayload,
   aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
@@ -121,11 +122,9 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
-  // Combine all anonymization logic into a single useMemo
   const { anonymizationEnabled } = useMemo(() => {
     try {
-      const rulesStr = uiSettings?.get<string>(aiAssistantAnonymizationRules);
-      const rules = JSON.parse(rulesStr || '[]');
+      const rules = uiSettings?.get<AnonymizationRule[]>(aiAssistantAnonymizationRules);
       return {
         anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
       };

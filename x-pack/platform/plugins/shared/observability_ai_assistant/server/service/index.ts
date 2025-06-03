@@ -20,6 +20,7 @@ import { ObservabilityAIAssistantConfig } from '../config';
 import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
 import { AnonymizationService } from './anonymization';
 import { aiAssistantAnonymizationRules } from '../../common';
+import type { AnonymizationRule } from '../../common/types';
 
 export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -98,9 +99,8 @@ export class ObservabilityAIAssistantService {
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
     // Read anonymization rules from advanced settings
-    const anonymizationRulesString = await uiSettingsClient.get<string>(
-      aiAssistantAnonymizationRules
-    );
+    const anonymizationRules =
+      (await uiSettingsClient.get<AnonymizationRule[]>(aiAssistantAnonymizationRules)) ?? [];
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -123,7 +123,7 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asCurrentUser,
       },
-      anonymizationRules: anonymizationRulesString,
+      anonymizationRules,
     });
 
     return new ObservabilityAIAssistantClient({

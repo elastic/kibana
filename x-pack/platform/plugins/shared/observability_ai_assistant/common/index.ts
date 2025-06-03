@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
+export type {
+  Message,
+  Conversation,
+  KnowledgeBaseEntry,
+  ConversationCreateRequest,
+  AnonymizationRule,
+} from './types';
 export {
   KnowledgeBaseEntryRole,
   MessageRole,

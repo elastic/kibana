@@ -175,3 +175,14 @@ export interface InferenceChunk {
   chunkText: string;
   charStartOffset: number;
 }
+
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
+}
