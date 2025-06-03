@@ -101,10 +101,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('.gen-ai-card');
       },
 
-      async expectPlaygroundStartChatPageIndexButtonExists() {
-        await testSubjects.existOrFail('createIndexButton');
-      },
-
       async expectPlaygroundStartChatPageIndexCalloutExists() {
         await testSubjects.existOrFail('createIndexCallout');
       },
@@ -116,6 +112,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectPlaygroundHeaderComponentsToDisabled() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be('true');
+        expect(await testSubjects.isEnabled('uploadFileButton')).to.be(true);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
@@ -127,51 +124,78 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectOpenFlyoutAndSelectIndex() {
         await browser.refresh();
         await selectIndex();
+      },
+      async expectDataSourcesButtonToBeSuccess() {
         await testSubjects.existOrFail('dataSourcesSuccessButton');
       },
-
       async expectToSelectIndicesAndLoadChat() {
         await selectIndex();
         await testSubjects.existOrFail('chatPage');
       },
       async expectSelectingIndicesWithNoFieldtoShowError() {
-        await selectIndex();
         await testSubjects.existOrFail('addDataSourcesButton');
         await testSubjects.click('addDataSourcesButton');
         await testSubjects.existOrFail('selectIndicesFlyout');
         await testSubjects.click('sourceIndex-0');
         await testSubjects.existOrFail('NoIndicesFieldsMessage');
-        expect(await testSubjects.isEnabled('saveButton')).to.be(true);
+        expect(await testSubjects.isEnabled('saveButton')).to.be(false);
       },
-
-      async expectAddConnectorButtonExists() {
+      async clickConnectLLMButton() {
         await testSubjects.existOrFail('connectLLMButton');
-      },
-
-      async expectOpenConnectorPagePlayground() {
         await testSubjects.click('connectLLMButton');
-        await testSubjects.existOrFail('create-connector-flyout');
       },
-      async expectAIConnectorFlyoutToOpen() {
+      async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');
-        await testSubjects.existOrFail('.gen-ai-card"');
+        await testSubjects.existOrFail('.inference-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.gen-ai-card');
       },
-      async createConnectorFromAIConnectorFlyout() {
+      async createOpenAiConnector(connectorName: string) {
         await testSubjects.existOrFail('.gen-ai-card');
         await testSubjects.click('.gen-ai-card');
+
         await testSubjects.existOrFail('create-connector-flyout-header');
         const headerValue = await testSubjects.getVisibleText('create-connector-flyout-header');
         expect(headerValue).to.contain('OpenAI connector');
         await testSubjects.existOrFail('nameInput');
-        await testSubjects.setValue('nameInput', 'myOpenaiConnector');
+        await testSubjects.setValue('nameInput', connectorName);
+
         const openaiProvider = await testSubjects.getVisibleText('config.apiProvider-select');
         expect(openaiProvider).to.contain('OpenAI');
+
         await testSubjects.existOrFail('secrets.apiKey-input');
         await testSubjects.setValue('secrets.apiKey-input', 'apiKey');
         await testSubjects.existOrFail('create-connector-flyout-save-btn');
         await testSubjects.click('create-connector-flyout-save-btn');
+        await testSubjects.existOrFail('euiToastHeader');
       },
 
+      // TODO remove this if not needed
+      async createGoogleGeminiConnector(connectorName: string) {
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.click('.gemini-card');
+
+        await testSubjects.existOrFail('create-connector-flyout-header');
+        const headerValue = await testSubjects.getVisibleText('create-connector-flyout-header');
+        expect(headerValue).to.contain('Google Gemini connector');
+        await testSubjects.existOrFail('nameInput');
+        await testSubjects.setValue('nameInput', connectorName);
+
+        await testSubjects.existOrFail('config.gcpProjectID-input');
+        await testSubjects.setValue('config.gcpProjectID-input', 'projectID');
+        await testSubjects.existOrFail('secrets.credentialsJson-input');
+        await testSubjects.setValue('secrets.credentialsJson-input', 'JsonInput');
+
+        await testSubjects.existOrFail('create-connector-flyout-save-btn');
+        await testSubjects.click('create-connector-flyout-save-btn');
+        await testSubjects.existOrFail('euiToastHeader');
+      },
+      async createIndex() {
+        await testSubjects.existOrFail('createIndexButton');
+        expect(await testSubjects.isEnabled('createIndexButton')).equal(true);
+        await testSubjects.click('createIndexButton');
+      },
       // async removeOpenAIConnector(connectorName) {
       //   const searchBox = await testSubjects.find. byCssSelector(
       //     '[data-test-subj="actionsList"] .euiFieldSearch'
@@ -206,7 +230,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const promptInstructions = await instructionsPromptElement.getVisibleText();
         expect(promptInstructions).to.contain(text);
       },
-
       async expectChatWindowLoaded() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(true);
@@ -232,11 +255,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async updatePrompt(prompt: string) {
-        await testSubjects.setValue('instructionsPrompt', prompt);
+        await testSubjects.setValue('instructionsPrompt', prompt, { clearWithKeyboard: true });
       },
 
       async updateQuestion(question: string) {
-        await testSubjects.setValue('questionInput', question);
+        await testSubjects.setValue('questionInput', question, { clearWithKeyboard: true });
       },
 
       async expectQuestionInputToBeEmpty() {
