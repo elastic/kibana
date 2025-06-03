@@ -231,27 +231,25 @@ export class QueryClient {
     }
 
     const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
+    const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
+    const indexOperationsMap = new Map(
+      operations
+        .filter((operation) => operation.index)
+        .map((operation) => [operation.index!.id, operation.index!])
+    );
+    const deleteOperationIds = new Set(
+      operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
+    );
 
     const nextQueries = [
       ...currentQueryLinks
-        .filter(
-          (link) =>
-            !operations.some(
-              (operation) => operation.delete && operation.delete.id === link.query.id
-            )
-        )
+        .filter((link) => !deleteOperationIds.has(link.query.id))
         .map((link) => {
-          const update = operations.find(
-            (operation) => operation.index && operation.index.id === link.query.id
-          );
-          return update ? { ...link, query: update.index! } : link;
+          const update = indexOperationsMap.get(link.query.id);
+          return update ? { ...link, query: update } : link;
         }),
       ...operations
-        .filter(
-          (operation) =>
-            operation.index &&
-            !currentQueryLinks.some((link) => link.query.id === operation.index!.id)
-        )
+        .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
         .map((operation) => toQueryLink(operation.index!, stream)),
     ];
 
