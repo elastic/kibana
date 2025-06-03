@@ -78,7 +78,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
@@ -89,7 +89,7 @@ import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/ru
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
+import { RuleActionsOverflow } from './rule_actions_overflow';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -117,7 +117,7 @@ import {
   RuleStatus,
   RuleStatusFailedCallOut,
   ruleStatusI18n,
-} from '../../../../detections/components/rules/rule_execution_status';
+} from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
