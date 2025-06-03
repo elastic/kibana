@@ -10,7 +10,7 @@ import { IngestDataCodeExamples } from '../types';
 
 import { JSIngestDataExample, JSSemanticIngestDataExample } from './javascript';
 import { PythonIngestDataExample, PythonSemanticIngestDataExample } from './python';
-import { ConsoleIngestDataExample } from './sense';
+import { ConsoleIngestDataExample, ConsoleSemanticIngestDataExample } from './sense';
 import { CurlIngestDataExample } from './curl';
 import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
@@ -76,7 +76,7 @@ export const SemanticIngestDataCodeExamples: IngestDataCodeExamples = {
   defaultMapping: {
     text: { type: 'semantic_text' },
   },
-  sense: ConsoleIngestDataExample,
+  sense: ConsoleSemanticIngestDataExample,
   curl: CurlIngestDataExample,
   python: PythonSemanticIngestDataExample,
   javascript: JSSemanticIngestDataExample,
