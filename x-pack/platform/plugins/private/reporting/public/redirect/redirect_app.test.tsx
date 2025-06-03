@@ -36,7 +36,7 @@ describe('RedirectApp', () => {
 
   it('navigates using share.navigate when apiClient.getInfo returns locatorParams', async () => {
     setLocationSearch('?jobId=happy');
-    const locatorParams = { id: 'SOME_LOCATOR', params: { foo: 'bar' } };
+    const locatorParams = { id: 'LENS_APP_LOCATOR', params: { foo: 'bar' } };
     mockApiClient.getInfo.mockResolvedValue({ locatorParams: [locatorParams] });
 
     render(
@@ -86,8 +86,8 @@ describe('RedirectApp', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  describe('when locatorParams.id is legacy', () => {
-    it('throws error when jobId is present in the URL', async () => {
+  describe('non-app locator', () => {
+    it('throws error when jobId present in the URL returns info with legacy locator', async () => {
       setLocationSearch('?jobId=123');
       mockApiClient.getInfo.mockResolvedValue({
         locatorParams: [{ id: 'LEGACY_SHORT_URL_LOCATOR' }],
@@ -129,7 +129,7 @@ describe('RedirectApp', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it('throws error when jobId is missing and screenshotMode returns legacy locator', async () => {
+    it('throws error when screenshotMode context returns info with legacy locator', async () => {
       setLocationSearch('');
       mockScreenshotMode.getScreenshotContext.mockReturnValue({
         id: 'LEGACY_SHORT_URL_LOCATOR',
