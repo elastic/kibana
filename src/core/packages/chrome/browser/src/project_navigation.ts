@@ -36,7 +36,6 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 
 import type { ChromeNavLink } from './nav_links';
