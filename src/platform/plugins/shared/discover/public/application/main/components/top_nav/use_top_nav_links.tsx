@@ -22,6 +22,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import type { RuleTypeWithDescription } from '@kbn/triggers-actions-ui-types';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -70,19 +71,25 @@ export const useTopNavLinks = ({
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
-  const { authorizedRuleTypes } = useGetRuleTypesPermissions({
-    http: services.http,
-    toasts: services.notifications.toasts,
-  });
+  const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
+    useGetRuleTypesPermissions({
+      http: services.http,
+      toasts: services.notifications.toasts,
+    });
+
+  const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
+    ruleTypes
+      .filter((ruleType) =>
+        Object.values(ruleType.authorizedConsumers).some((consumer) => consumer.all)
+      )
+      .map((ruleType) => ruleType.id);
 
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
       dataView,
       adHocDataViews,
-      authorizedRuleTypeIds: authorizedRuleTypes
-        .filter((ruleType) => ruleType.authorizedConsumers?.alerts?.all)
-        .map((ruleType) => ruleType.id),
+      authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
         await dispatch(internalStateActions.loadDataViewList());
         dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
