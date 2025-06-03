@@ -158,7 +158,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerUbuntu) {
     // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
+    artifactTasks.push(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerWolfi) {
