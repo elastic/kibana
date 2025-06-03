@@ -10,7 +10,7 @@ import type {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
@@ -100,6 +100,22 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
+      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    }
+
+    if (
+      startingState.get(this._definition.name)?.definition &&
+      this._lifecycleChanged &&
+      isInheritLifecycle(this.getLifecycle())
+    ) {
+      // temporary until https://github.com/elastic/kibana/issues/222440 is resolved
+      return {
+        isValid: false,
+        errors: [new Error('Cannot revert to default lifecycle once updated')],
+      };
+    }
+
     // Check for conflicts
     if (this._lifecycleChanged || this._processingChanged) {
       try {

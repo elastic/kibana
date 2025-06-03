@@ -446,13 +446,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
       };
 
-      it('noop when inherit lifecycle', async () => {
+      it('cannot update to inherit lifecycle', async () => {
         const indexName = 'unwired-stream-inherit';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
+        // initially set to inherit which is a noop
         await putStream(apiClient, indexName, unwiredPutBody);
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
 
+        // update to dsl
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
@@ -466,8 +468,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
-        // lifecycle remains unchanged after going back to inherit
-        await putStream(apiClient, indexName, unwiredPutBody);
+        // fail to set inherit
+        await putStream(apiClient, indexName, unwiredPutBody, 400);
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
       });
 
@@ -490,7 +492,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
       });
 
-      if (!isServerless) {
+      if (isServerless) {
+        it('does not support ilm', async () => {
+          const indexName = 'unwired-stream-no-ilm';
+          await createDataStream(indexName, { dsl: { data_retention: '2d' } });
+
+          await putStream(
+            apiClient,
+            indexName,
+            {
+              dashboards: [],
+              queries: [],
+              stream: {
+                description: '',
+                ingest: {
+                  ...wiredPutBody.stream.ingest,
+                  lifecycle: { ilm: { policy: 'my-policy' } },
+                },
+              },
+            },
+            400
+          );
+        });
+      } else {
         it('updates from ilm to dsl', async () => {
           const indexName = 'unwired-stream-ilm-to-dsl';
           await createDataStream(indexName, { ilm: { policy: 'my-policy' } });

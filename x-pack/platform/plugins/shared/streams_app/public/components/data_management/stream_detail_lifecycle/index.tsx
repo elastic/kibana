@@ -32,7 +32,7 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isUnwired = Streams.UnwiredStream.GetResponse.is(definition);
+    const isWired = Streams.WiredStream.GetResponse.is(definition);
 
     actions.push({
       name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
@@ -50,7 +50,7 @@ function useLifecycleState({
       });
     }
 
-    if (isUnwired || !isRoot(definition.stream.name)) {
+    if (isWired && !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
