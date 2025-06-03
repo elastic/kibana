@@ -36,6 +36,7 @@ import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointAgentListParams,
   MicrosoftDefenderEndpointAgentListResponse,
+  MSDefenderGetLibraryFilesResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -47,6 +48,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   private readonly urls: {
     machines: string;
     machineActions: string;
+    libraryFiles: string;
   };
 
   constructor(
@@ -62,6 +64,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       machines: `${this.config.apiUrl}/api/machines`,
       // API docs: https://learn.microsoft.com/en-us/defender-endpoint/api/get-machineactions-collection
       machineActions: `${this.config.apiUrl}/api/machineactions`,
+      libraryFiles: `${this.config.apiUrl}/api/libraryfiles`,
     };
 
     this.registerSubActions();
@@ -102,6 +105,17 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       method: 'getActions',
       schema: GetActionsParamsSchema,
     });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+      method: 'getLibraryFiles',
+      schema: TestConnectorParamsSchema, // Empty schema
+    });
+
+    // this.registerSubAction({
+    //   name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+    //   method: 'runScript',
+    //   schema: TestConnectorParamsSchema, // Empty schema
+    // });
   }
 
   private async fetchFromMicrosoft<R extends MicrosoftDefenderEndpointBaseApiResponse>(
@@ -270,6 +284,12 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         results.push('API call to Machine Actions was successful');
       });
 
+    await this.runscript({ pageSize: 1 }, connectorUsageCollector)
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machine Actions was successful');
+      });
+
     return { results };
   }
 
@@ -374,6 +394,21 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       pageSize,
       total: response['@odata.count'] ?? -1,
     };
+  }
+
+  public async getLibraryFiles(
+    payload: {},
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MSDefenderGetLibraryFilesResponse> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/list-library-files
+
+    return this.fetchFromMicrosoft<MSDefenderGetLibraryFilesResponse>(
+      {
+        url: `${this.urls.libraryFiles}`,
+        method: 'GET',
+      },
+      connectorUsageCollector
+    );
   }
 }
 

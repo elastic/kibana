@@ -207,6 +207,35 @@ export const GetActionsParamsSchema = schema.object({
   sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
+export const MSDefenderLibraryFileSchema = schema.object(
+  {
+    fileName: schema.maybe(schema.string()),
+    sha256: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string()),
+    creationTime: schema.maybe(schema.string()),
+    lastUpdatedTime: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    hasParameters: schema.maybe(schema.boolean()),
+    parametersDescription: schema.maybe(schema.nullable(schema.string())),
+  },
+  { unknowns: 'allow' }
+);
+
+export const MSDefenderGetLibraryFilesResponseSchema = schema.object(
+  {
+    status: schema.maybe(schema.string()),
+    data: schema.object(
+      {
+        '@odata.context': schema.maybe(schema.string()),
+        value: schema.maybe(schema.arrayOf(MSDefenderLibraryFileSchema)),
+      },
+      { unknowns: 'allow' }
+    ),
+    actionId: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------

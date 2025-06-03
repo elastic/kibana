@@ -13,6 +13,7 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
+  MSDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
@@ -55,6 +56,7 @@ import { stringify } from '../../../../../../utils/stringify';
 import { ResponseActionsClientError } from '../../../errors';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
 import { catchAndWrapError } from '../../../../../../utils';
@@ -666,5 +668,35 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return { isPending, isError, message };
+  }
+
+  async getCustomScripts(): Promise<CustomScriptsResponse> {
+    try {
+      const customScriptsResponse = (await this.sendAction(
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+        {}
+      )) as ActionTypeExecutorResult<MSDefenderGetLibraryFilesResponse>;
+
+      console.log({ customScriptsResponse });
+      const scripts = customScriptsResponse.data?.value || [];
+
+      // Transform MS Defender scripts to CustomScriptsResponse format
+      const data = scripts.map((script) => ({
+        // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
+        id: script.fileName || '',
+        name: script.fileName || '',
+        description: script.description || '',
+      }));
+
+      return { data } as CustomScriptsResponse;
+    } catch (err) {
+      const error = new ResponseActionsClientError(
+        `Failed to fetch Crowdstrike scripts, failed with: ${err.message}`,
+        500,
+        err
+      );
+      this.log.error(error);
+      throw error;
+    }
   }
 }
