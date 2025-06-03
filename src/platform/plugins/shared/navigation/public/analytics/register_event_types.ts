@@ -22,6 +22,14 @@ const fields: Record<NavigationFieldType, RootSchema<Record<string, unknown>>> =
       },
     },
   },
+  [NavigationFieldType.PATH]: {
+    [NavigationFieldType.PATH]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The path of the navigation node within the tree.',
+      },
+    },
+  },
   [NavigationFieldType.HREF]: {
     [NavigationFieldType.HREF]: {
       type: 'keyword',
