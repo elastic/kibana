@@ -334,9 +334,8 @@ export class ObservabilityAIAssistantClient {
                     initialMessages.concat(addedMessages)
                   )
                 ).pipe(
-                  switchMap(() => {
-                    const allMessages = initialMessages.concat(addedMessages);
-                    const lastMessage = last(allMessages);
+                  switchMap(({ processedMessages }) => {
+                    const lastMessage = last(processedMessages);
 
                     // if a function request is at the very end, close the stream to consumer
                     // without persisting or updating the conversation. we need to wait
@@ -356,7 +355,7 @@ export class ObservabilityAIAssistantClient {
                             // base conversation without messages
                             omit(conversation._source, 'messages'),
                             // update messages and system message
-                            { messages: allMessages, systemMessage },
+                            { messages: processedMessages, systemMessage },
                             // update title
                             {
                               conversation: {
@@ -386,7 +385,7 @@ export class ObservabilityAIAssistantClient {
                         labels: {},
                         numeric_labels: {},
                         systemMessage,
-                        messages: allMessages,
+                        messages: processedMessages,
                         archived: false,
                       })
                     ).pipe(
@@ -492,7 +491,7 @@ export class ObservabilityAIAssistantClient {
     if (stream) {
       return defer(() =>
         from(this.dependencies.anonymizationService.processMessages(messages)).pipe(
-          switchMap(() => {
+          switchMap(({ processedMessages }) => {
             this.dependencies.logger.debug(
               () =>
                 `Calling inference client for name: "${name}" with options: ${JSON.stringify(
@@ -502,7 +501,7 @@ export class ObservabilityAIAssistantClient {
             return this.dependencies.inferenceClient.chatComplete({
               ...options,
               stream: true,
-              messages: convertMessagesForInference(messages, this.dependencies.logger),
+              messages: convertMessagesForInference(processedMessages, this.dependencies.logger),
             });
           })
         )

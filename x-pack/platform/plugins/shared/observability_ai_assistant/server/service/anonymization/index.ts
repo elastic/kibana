@@ -70,10 +70,8 @@ export class AnonymizationService {
               docs: batchChunks.map((batchChunk) => ({ text_field: batchChunk.chunkText })),
             });
           } catch (error) {
-            this.logger.error(new Error('NER inference failed', { cause: error }));
-            return [];
+            throw new Error('NER inference failed', { cause: error });
           }
-
           // Process results from all documents in the batch
           const batchResults: DetectedEntity[] = [];
           const inferenceResults = response?.inference_results || [];
@@ -166,13 +164,13 @@ export class AnonymizationService {
    * @param messages - Messages to process for anonymization/deanonymization
    * @returns Object containing the processed messages
    */
-  async processMessages(messages: Message[]): Promise<{ anonymizedMessages: Message[] }> {
+  async processMessages(messages: Message[]): Promise<{ processedMessages: Message[] }> {
     this.logger.debug(
       `Processing ${messages.length} messages for entity detection and deanonymization`
     );
 
     if (!this.rules.length) {
-      return { anonymizedMessages: messages };
+      return { processedMessages: messages };
     }
 
     // Initialize hash map from existing entities
@@ -189,32 +187,24 @@ export class AnonymizationService {
 
       // Process user messages - detect entities
       if (role === 'user' && content) {
-        try {
-          const entities = await this.detectEntities(content);
-          message.message.detected_entities = entities.map((ent) => ({
-            entity: ent.entity,
-            class_name: ent.class_name,
-            start_pos: ent.start_pos,
-            end_pos: ent.end_pos,
-            type: ent.type,
-            hash: ent.hash,
-          }));
-          // Update hash map with newly detected entities
-          entities.forEach((entity) => {
-            hashMap.set(entity.hash, {
-              value: entity.entity,
-              class_name: entity.class_name,
-              type: entity.type,
-            });
+        const entities = await this.detectEntities(content);
+        message.message.detected_entities = entities.map((ent) => ({
+          entity: ent.entity,
+          class_name: ent.class_name,
+          start_pos: ent.start_pos,
+          end_pos: ent.end_pos,
+          type: ent.type,
+          hash: ent.hash,
+        }));
+        // Update hash map with newly detected entities
+        entities.forEach((entity) => {
+          hashMap.set(entity.hash, {
+            value: entity.entity,
+            class_name: entity.class_name,
+            type: entity.type,
           });
-          continue;
-        } catch (error) {
-          this.logger.error(
-            new Error('Entity detection failed for user message', { cause: error })
-          );
-          // Add the original message without entities detected (do nothing)
-          continue;
-        }
+        });
+        continue;
       }
       // Process assistant messages - replace hash placeholders
       else if (role === 'assistant') {
@@ -222,7 +212,7 @@ export class AnonymizationService {
       }
     }
 
-    return { anonymizedMessages: messages };
+    return { processedMessages: messages };
   }
 
   /**
