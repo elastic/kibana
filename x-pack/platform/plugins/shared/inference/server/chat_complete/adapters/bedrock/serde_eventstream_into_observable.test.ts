@@ -35,7 +35,7 @@ describe('serdeEventstreamIntoObservable', () => {
           return typeof value === 'object' && !!value;
         }),
         map((message) => {
-          return parseSerdeChunkMessage(message);
+          return parseSerdeChunkMessage(message.chunk);
         }),
         toArray()
       )
