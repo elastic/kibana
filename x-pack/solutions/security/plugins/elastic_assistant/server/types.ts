@@ -48,7 +48,7 @@ import type {
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
