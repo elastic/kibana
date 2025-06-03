@@ -330,14 +330,11 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? 'string';
         // Copy additional fields/properties from the original field definition
         // This ensures all properties like ignore_above, null_value, etc. are preserved
-        Object.entries(field).forEach(([key, value]) => {
-          if (
-            value !== undefined &&
-            !['name', 'type', 'object_type', 'object_type_mapping_type'].includes(key)
-          ) {
-            dynProperties[key] = value;
-          }
-        });
+        const wildcardMapping = generateWildcardMapping(field);
+        dynProperties = { ...dynProperties, ...wildcardMapping, type: field.object_type };
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
         break;
       case 'scaled_float':
         dynProperties = scaledFloat(field);
