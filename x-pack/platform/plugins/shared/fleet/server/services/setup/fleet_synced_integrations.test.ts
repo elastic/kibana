@@ -17,6 +17,7 @@ jest.mock('../app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     getLogger: jest.fn().mockReturnValue({
       error: jest.fn(),
+      debug: jest.fn(),
     }),
     getConfig: jest.fn().mockReturnValue({
       enableManagedLogsAndMetricsDataviews: true,

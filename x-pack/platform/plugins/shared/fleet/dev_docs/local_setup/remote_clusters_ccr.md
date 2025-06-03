@@ -135,7 +135,7 @@ On cluster 1, navigate to *Stack Management > Cross-Cluster Replication* and c
   - Equivalent Dev Tools API request
 
   ```
-  PUT /fleet-synced-integrations-ccr-local/_ccr/follow?wait_for_active_shards=1
+  PUT /fleet-synced-integrations-ccr-local/_ccr/follow
 {
   "remote_cluster" : "local",
   "leader_index" : "fleet-synced-integrations"
