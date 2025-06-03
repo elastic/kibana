@@ -37,7 +37,16 @@ const uiSettings = {} as unknown as CoreStart['uiSettings'];
 const spaces = {} as unknown as SpacesPluginStart;
 
 const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => mockDataViewManagerState);
+const mockGetState = jest.fn(() => {
+  const state = structuredClone(mockDataViewManagerState);
+
+  state.dataViewManager.default.dataViewId = null;
+  state.dataViewManager.detections = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.timeline = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.analyzer = structuredClone(state.dataViewManager.default);
+
+  return state;
+});
 
 const mockListenerApi = {
   dispatch: mockDispatch,
@@ -73,6 +82,12 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       sharedDataViewManagerSlice.actions.setDataViews([])
     );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      sharedDataViewManagerSlice.actions.setDefaultDataViewId(
+        DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID
+      )
+    );
+
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
