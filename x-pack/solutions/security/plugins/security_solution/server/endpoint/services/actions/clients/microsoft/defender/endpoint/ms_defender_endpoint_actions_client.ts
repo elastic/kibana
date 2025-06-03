@@ -13,6 +13,7 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
   MSDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
@@ -27,6 +28,7 @@ import { buildIndexNameWithNamespace } from '../../../../../../../../common/endp
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
+  RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../../../common/api/endpoint';
 import type {
@@ -37,6 +39,8 @@ import type {
   LogsEndpointActionResponse,
   MicrosoftDefenderEndpointActionRequestCommonMeta,
   MicrosoftDefenderEndpointLogEsDoc,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
 } from '../../../../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
@@ -487,6 +491,63 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return actionDetails;
   }
 
+  public async runscript(
+    actionRequest: RunScriptActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'runscript',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          const msActionResponse = await this.sendAction<
+            MicrosoftDefenderEndpointMachineAction,
+            MicrosoftDefenderEndpointRunScriptParams
+          >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT, {
+            id: actionRequest.endpoint_ids[0],
+            comment: this.buildExternalComment(reqIndexOptions),
+            parameters: {
+              scriptName: actionRequest.parameters.scriptName,
+              args: actionRequest.parameters.args,
+            },
+          });
+
+          if (msActionResponse?.data?.id) {
+            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+          } else {
+            throw new ResponseActionsClientError(
+              `Run Script request was sent to Microsoft Defender, but Machine Action Id was not provided!`
+            );
+          }
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
+
+    return actionDetails;
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -524,6 +585,18 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           case 'unisolate':
             addResponsesToQueueIfAny(
               await this.checkPendingIsolateReleaseActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    undefined,
+                    {},
+                    MicrosoftDefenderEndpointActionRequestCommonMeta
+                  >
+                >
+              )
+            );
+          case 'runscript':
+            addResponsesToQueueIfAny(
+              await this.checkPendingRunScriptActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
@@ -574,7 +647,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
             data: { command },
             error: {
-              message: `Unable to very if action completed. Microsoft Defender machine action id ('meta.machineActionId') missing on action request document!`,
+              message: `Unable to verify if action completed. Microsoft Defender machine action id ('meta.machineActionId') missing from the action request document!`,
             },
           })
         );
@@ -617,6 +690,117 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
+    this.log.debug(
+      () =>
+        `${completedResponses.length} action responses generated:\n${stringify(completedResponses)}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private async checkPendingRunScriptActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        undefined,
+        {},
+        MicrosoftDefenderEndpointActionRequestCommonMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const warnings: string[] = [];
+    const actionsByMachineId: Record<
+      string,
+      Array<LogsEndpointAction<undefined, {}, MicrosoftDefenderEndpointActionRequestCommonMeta>>
+    > = {};
+    const machineActionIds: string[] = [];
+    const msApiOptions: MicrosoftDefenderEndpointGetActionsParams = {
+      id: machineActionIds,
+      pageSize: 1000,
+    };
+
+    for (const { action } of actionRequests) {
+      const command = action.EndpointActions.data.command;
+      const machineActionId = action.meta?.machineActionId;
+
+      if (!machineActionId) {
+        warnings.push(
+          `${command} response action ID [${action.EndpointActions.action_id}] is missing Microsoft Defender for Endpoint machine action id, thus unable to check on it's status. Forcing it to complete as failure.`
+        );
+
+        completedResponses.push(
+          this.buildActionResponseEsDoc({
+            actionId: action.EndpointActions.action_id,
+            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+            data: { command },
+            error: {
+              message: `Unable to verify if action completed. Microsoft Defender machine action id ('meta.machineActionId') missing from the action request document!`,
+            },
+          })
+        );
+      } else {
+        if (!actionsByMachineId[machineActionId]) {
+          actionsByMachineId[machineActionId] = [];
+        }
+
+        actionsByMachineId[machineActionId].push(action);
+        machineActionIds.push(machineActionId);
+      }
+    }
+
+    const { data: machineActions } =
+      await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+        msApiOptions
+      );
+
+    console.log({ machineActions: JSON.stringify(machineActions, null, 2) });
+
+    if (machineActions?.value) {
+      for (const machineAction of machineActions.value) {
+        const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
+
+        if (!isPending) {
+          const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
+
+          for (const actionRequest of pendingActionRequests) {
+            const { data: result } =
+              await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
+                MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+                { id: machineAction.id }
+              );
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: actionRequest.EndpointActions.data.command,
+                  comment: 'test',
+                  output: {
+                    content: {
+                      stdout: result?.value ?? '', // Store the download link in stdout
+                      stderr: '',
+                      code: '200',
+                    },
+                    type: 'text' as const,
+                  },
+                },
+                error: isError ? { message } : undefined,
+              })
+            );
+          }
+        }
+      }
+    }
+
+    console.log({ completedResponses });
     this.log.debug(
       () =>
         `${completedResponses.length} action responses generated:\n${stringify(completedResponses)}`
@@ -677,7 +861,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         {}
       )) as ActionTypeExecutorResult<MSDefenderGetLibraryFilesResponse>;
 
-      console.log({ customScriptsResponse });
       const scripts = customScriptsResponse.data?.value || [];
 
       // Transform MS Defender scripts to CustomScriptsResponse format

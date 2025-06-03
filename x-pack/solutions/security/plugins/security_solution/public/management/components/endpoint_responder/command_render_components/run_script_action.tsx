@@ -18,16 +18,24 @@ import type {
 } from '../../../../../common/endpoint/types';
 import type { ActionRequestComponentProps } from '../types';
 
+export interface CrowdStrikeRunScriptActionParameters {
+  Raw?: string;
+  HostPath?: string;
+  CloudFile?: string;
+  CommandLine?: string;
+  Timeout?: number;
+  comment?: string;
+}
+
+export interface MicrosoftDefenderEndpointRunScriptActionParameters {
+  ScriptName: string;
+  Args?: string;
+  comment?: string;
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
-    {
-      Raw?: string;
-      HostPath?: string;
-      CloudFile?: string;
-      CommandLine?: string;
-      Timeout?: number;
-      comment?: string;
-    },
+    CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -43,6 +51,8 @@ export const RunScriptActionResult = memo<
       agent_type: agentType,
       endpoint_ids: [endpointId],
       parameters: {
+        scriptName: command.args.args.ScriptName?.[0],
+        args: command.args.args.Args?.[0],
         raw: command.args.args.Raw?.[0],
         hostPath: command.args.args.HostPath?.[0],
         cloudFile: command.args.args.CloudFile?.[0],

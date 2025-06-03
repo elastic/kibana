@@ -210,6 +210,7 @@ const OutputContent = memo<{
     );
   }
 
+  // todo
   if (isRunScriptAction(action)) {
     return (
       <EuiFlexGroup direction="column" data-test-subj={getTestId('runScriptDetails')}>

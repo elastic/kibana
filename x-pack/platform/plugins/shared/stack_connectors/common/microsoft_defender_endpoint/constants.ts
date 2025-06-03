@@ -17,4 +17,5 @@ export enum MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION {
   GET_ACTIONS = 'getActions',
   GET_LIBRARY_FILES = 'getLibraryFiles',
   RUN_SCRIPT = 'runScript',
+  GET_ACTION_RESULTS = 'getActionResults',
 }

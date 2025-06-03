@@ -18,7 +18,15 @@ const NonEmptyString = schema.string({
     }
   },
 });
+// TODO verify what is the issue here
 export const RunScriptActionRequestSchema = {
+  body: schema.object({
+    ...restBaseSchema,
+    parameters: schema.any(),
+  }),
+};
+
+export const CrowdStrikeRunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
     parameters: schema.object(
@@ -54,5 +62,27 @@ export const RunScriptActionRequestSchema = {
     ),
   }),
 };
+export const MSDefenderEndpointRunScriptActionRequestSchema = {
+  body: schema.object({
+    ...restBaseSchema,
+    parameters: schema.object(
+      {
+        /**
+         * The path to the script in the cloud to run
+         */
+        scriptName: schema.maybe(NonEmptyString),
+      },
+      {
+        validate: (params) => {
+          if (!params.scriptName) {
+            return 'ScriptName must be provided';
+          }
+        },
+      }
+    ),
+  }),
+};
 
-export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
+export type RunScriptActionRequestBody =
+  | TypeOf<typeof MSDefenderEndpointRunScriptActionRequestSchema.body>
+  | TypeOf<typeof CrowdStrikeRunScriptActionRequestSchema.body>;

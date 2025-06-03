@@ -11,6 +11,7 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
+import { validateCommandRequest } from './validate';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -351,6 +352,11 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   return async (context, req, res) => {
     logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
+    // Additional validation when schema is dependent on agent type
+    const validationError = validateCommandRequest(command, req, logger, res);
+    if (validationError) {
+      return validationError;
+    }
     const experimentalFeatures = endpointContext.experimentalFeatures;
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a

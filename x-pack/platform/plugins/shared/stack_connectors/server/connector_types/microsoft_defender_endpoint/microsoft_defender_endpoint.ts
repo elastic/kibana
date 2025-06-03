@@ -20,6 +20,8 @@ import {
   GetActionsParamsSchema,
   AgentDetailsParamsSchema,
   AgentListParamsSchema,
+  RunScriptParamsSchema,
+  MicrosoftDefenderEndpointBaseApiResponseSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -37,6 +39,8 @@ import type {
   MicrosoftDefenderEndpointAgentListParams,
   MicrosoftDefenderEndpointAgentListResponse,
   MSDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
+  MicrosoftDefenderEndpointMachineActionResult,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -111,11 +115,17 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       schema: TestConnectorParamsSchema, // Empty schema
     });
 
-    // this.registerSubAction({
-    //   name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
-    //   method: 'runScript',
-    //   schema: TestConnectorParamsSchema, // Empty schema
-    // });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+      method: 'runScript',
+      schema: RunScriptParamsSchema, // Empty schema
+    });
+
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+      method: 'getActionResults',
+      schema: MicrosoftDefenderEndpointBaseApiResponseSchema, // Empty schema
+    });
   }
 
   private async fetchFromMicrosoft<R extends MicrosoftDefenderEndpointBaseApiResponse>(
@@ -284,10 +294,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         results.push('API call to Machine Actions was successful');
       });
 
-    await this.runscript({ pageSize: 1 }, connectorUsageCollector)
+    await this.runscript({ id: 'elastic-connector-test', comment: 'connector test', parameters: { scriptName: 'test' } }, connectorUsageCollector)
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
-        results.push('API call to Machine Actions was successful');
+        results.push('API call to Machine RunScript was successful');
       });
 
     return { results };
@@ -366,6 +376,39 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     );
   }
 
+  public async runscript(
+    payload: MicrosoftDefenderEndpointRunScriptParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machines}/${payload.id}/runliveresponse`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment,
+          Commands: [
+            {
+              type: 'RunScript',
+              params: [
+                {
+                  key: 'ScriptName',
+                  value: payload.parameters.scriptName,
+                },
+                {
+                  key: 'Args',
+                  value: payload.parameters.args || '--noargs',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
   public async getActions(
     {
       page = 1,
@@ -394,6 +437,21 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       pageSize,
       total: response['@odata.count'] ?? -1,
     };
+  }
+
+  public async getActionResults(
+    { id }: MicrosoftDefenderEndpointGetActionsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineActionResult > {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineActionResult>(
+      {
+        url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+        method: 'GET',
+      },
+      connectorUsageCollector
+    );
   }
 
   public async getLibraryFiles(

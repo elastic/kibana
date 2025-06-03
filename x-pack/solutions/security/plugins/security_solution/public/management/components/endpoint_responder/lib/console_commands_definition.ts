@@ -530,8 +530,8 @@ export const getEndpointConsoleCommands = ({
     consoleCommands.push({
       name: 'runscript',
       about: getCommandAboutInfo({
-        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
-        isSupported: agentType === 'crowdstrike' && doesEndpointSupportCommand('runscript'),
+        aboutInfo: CONSOLE_COMMANDS.runscript.about,
+        isSupported: doesEndpointSupportCommand('runscript'),
       }),
       RenderComponent: RunScriptActionResult,
       meta: {
@@ -540,57 +540,21 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-      helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
-      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
+      exampleInstruction: CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
-      args: {
-        Raw: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
-          mustHaveValue: 'non-empty-string',
-          exclusiveOr: true,
-        },
-        CloudFile: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
-          mustHaveValue: 'truthy',
-          exclusiveOr: true,
-          SelectorComponent: CustomScriptSelector(agentType),
-        },
-        CommandLine: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
-          mustHaveValue: 'non-empty-string',
-        },
-        HostPath: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
-          mustHaveValue: 'non-empty-string',
-          exclusiveOr: true,
-        },
-        Timeout: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
-          mustHaveValue: 'number-greater-than-zero',
-        },
-        ...commandCommentArgument(),
-      },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
-      helpDisabled: !doesEndpointSupportCommand('runscript') || agentType !== 'crowdstrike',
+      helpDisabled:
+        !doesEndpointSupportCommand('runscript') ||
+        (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
       helpHidden:
         !getRbacControl({
           commandName: 'runscript',
           privileges: endpointPrivileges,
-        }) || agentType !== 'crowdstrike',
+        }) ||
+        (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
     });
   }
 
@@ -702,6 +666,50 @@ const adjustCommandsForCrowdstrike = ({
     ) {
       disableCommand(command, 'crowdstrike');
     }
+    if (command.name === 'runscript') {
+      return {
+        ...command,
+        exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
+        helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+        args: {
+          Raw: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
+            mustHaveValue: 'non-empty-string',
+            exclusiveOr: true,
+          },
+          CloudFile: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
+            mustHaveValue: 'truthy',
+            exclusiveOr: true,
+            SelectorComponent: CustomScriptSelector('crowdstrike'),
+          },
+          CommandLine: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
+            mustHaveValue: 'non-empty-string',
+          },
+          HostPath: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
+            mustHaveValue: 'non-empty-string',
+            exclusiveOr: true,
+          },
+          Timeout: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
+            mustHaveValue: 'number-greater-than-zero',
+          },
+          ...commandCommentArgument(),
+        },
+      };
+    }
 
     return command;
   });
@@ -726,6 +734,28 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
       )
     ) {
       disableCommand(command, 'microsoft_defender_endpoint');
+    }
+    if (command.name === 'runscript') {
+      return {
+        ...command,
+        exampleUsage: `runscript --ScriptName='test.ps1'`,
+        args: {
+          ScriptName: {
+            required: true,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about, // TODO change
+            mustHaveValue: 'truthy',
+            SelectorComponent: CustomScriptSelector('microsoft_defender_endpoint'),
+          },
+          Args: {
+            required: false,
+            allowMultiples: false,
+            about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about, // TODO change
+            mustHaveValue: 'non-empty-string',
+          },
+          ...commandCommentArgument(),
+        },
+      };
     }
 
     return command;

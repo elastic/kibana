@@ -212,6 +212,11 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  runscript: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
+      defaultMessage: 'Run a script on the host',
+    }),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -260,9 +265,6 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     },
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Isolate',
-    }),
-    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: 'Run a script on the host',
     }),
     helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
       defaultMessage: `Command Examples for Running Scripts:
