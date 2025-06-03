@@ -301,6 +301,11 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
+    if (navigateToEditRuleForm) {
+      navigateToEditRuleForm(ruleItem.id);
+      return;
+    }
+
     navigateToApp('management', {
       path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
       state: {
@@ -454,11 +459,7 @@ export const RulesList = ({
       cloneRuleId.current = null;
       setIsCloningRule(false);
       if (ruleItem) {
-        if (navigateToEditRuleForm) {
-          navigateToEditRuleForm(ruleItem.id);
-        } else {
-          onRuleEdit(ruleItem);
-        }
+        onRuleEdit(ruleItem);
       }
     }
   }, [tableItems]);
@@ -890,11 +891,7 @@ export const RulesList = ({
               }}
               onRuleEditClick={(rule) => {
                 if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
-                  if (navigateToEditRuleForm) {
-                    navigateToEditRuleForm(rule.id);
-                  } else {
-                    onRuleEdit(rule);
-                  }
+                  onRuleEdit(rule);
                 }
               }}
               onRuleDeleteClick={(rule) =>
@@ -930,9 +927,7 @@ export const RulesList = ({
                       rules: [rule],
                     })
                   }
-                  onEditRule={() =>
-                    navigateToEditRuleForm ? navigateToEditRuleForm(rule.id) : onRuleEdit(rule)
-                  }
+                  onEditRule={() => onRuleEdit(rule)}
                   onUpdateAPIKey={() =>
                     updateRulesToBulkEdit({
                       action: 'updateApiKey',

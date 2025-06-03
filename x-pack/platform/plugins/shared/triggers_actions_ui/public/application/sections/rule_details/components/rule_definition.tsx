@@ -113,6 +113,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     }, [rule, ruleTypeRegistry]);
 
     const onEditRuleClick = () => {
+      if (navigateToEditRuleForm) {
+        navigateToEditRuleForm(rule.id);
+        return;
+      }
+
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
@@ -174,10 +179,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                 >
                   <EuiFlexItem grow={false}>
                     {hasEditButton ? (
-                      <EuiButtonEmpty
-                        onClick={navigateToEditRuleForm ? navigateToEditRuleForm : onEditRuleClick}
-                        flush="left"
-                      >
+                      <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
                         <EuiText size="s">{getRuleConditionsWording()}</EuiText>
                       </EuiButtonEmpty>
                     ) : (
@@ -232,7 +234,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                   <EuiButtonEmpty
                     data-test-subj="ruleDetailsEditButton"
                     iconType={'pencil'}
-                    onClick={navigateToEditRuleForm ? navigateToEditRuleForm : onEditRuleClick}
+                    onClick={onEditRuleClick}
                   />
                 </EuiFlexItem>
               )
