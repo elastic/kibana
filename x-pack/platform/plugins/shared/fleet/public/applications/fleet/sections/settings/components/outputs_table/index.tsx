@@ -58,7 +58,8 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
   const { getHref } = useLink();
   const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
-  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [
@@ -123,7 +124,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           defaultMessage: 'Status',
         }),
       },
-      ...(enableSyncIntegrations && !cloud?.isServerlessEnabled
+      ...(enableSyncIntegrations
         ? [
             {
               render: (output: Output) => <IntegrationSyncStatus output={output} />,
@@ -182,13 +183,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         }),
       },
     ];
-  }, [
-    deleteOutput,
-    getHref,
-    authz.fleet.allSettings,
-    enableSyncIntegrations,
-    cloud?.isServerlessEnabled,
-  ]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrations]);
 
   return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
 };

@@ -135,11 +135,6 @@ export async function createCCSIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter
 ) {
-  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
-  if (isServerless) {
-    return;
-  }
-
   if (!canEnableSyncIntegrations()) {
     return;
   }

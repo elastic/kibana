@@ -54,7 +54,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
@@ -210,7 +211,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrations && !cloud?.isServerlessEnabled ? (
+      {enableSyncIntegrations ? (
         <>
           <EuiFormRow
             fullWidth

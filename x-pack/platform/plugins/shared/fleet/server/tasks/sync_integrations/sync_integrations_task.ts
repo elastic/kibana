@@ -19,7 +19,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../../services';
+import { outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
@@ -122,11 +122,6 @@ export class SyncIntegrationsTask {
     }
 
     this.logger.info(`[runTask()] started`);
-
-    const isServerless = appContextService.getCloud()?.isServerlessEnabled;
-    if (isServerless) {
-      return;
-    }
 
     if (!canEnableSyncIntegrations()) {
       return;
