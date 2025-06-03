@@ -8312,37 +8312,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -8406,37 +8380,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type
@@ -8885,38 +8833,12 @@ paths:
                                 required:
                                   - x
                                   - 'y'
-                              id:
-                                description: The saved object id for by reference panels
-                                type: string
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
-                                type: string
-                              panelRefName:
-                                type: string
-                              title:
-                                description: The title of the panel
                                 type: string
                               type:
                                 description: The embeddable type
@@ -8981,38 +8903,12 @@ paths:
                                       required:
                                         - x
                                         - 'y'
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -9382,37 +9278,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -9476,37 +9346,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type
@@ -9935,38 +9779,12 @@ paths:
                                 required:
                                   - x
                                   - 'y'
-                              id:
-                                description: The saved object id for by reference panels
-                                type: string
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
-                                type: string
-                              panelRefName:
-                                type: string
-                              title:
-                                description: The title of the panel
                                 type: string
                               type:
                                 description: The embeddable type
@@ -10031,38 +9849,12 @@ paths:
                                       required:
                                         - x
                                         - 'y'
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -10428,37 +10220,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -10522,37 +10288,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type
