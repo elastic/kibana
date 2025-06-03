@@ -25,7 +25,6 @@ import {
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { migrateOnRead } from './helpers/migrate_on_read';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
@@ -373,9 +372,7 @@ export class StreamsClient {
     if (!source) {
       throw new DefinitionNotFoundError(`Cannot find stream definition`);
     }
-    const migratedSource = migrateOnRead(source);
-    Streams.all.Definition.asserts(migratedSource);
-    return migratedSource;
+    return source;
   }
 
   /**
