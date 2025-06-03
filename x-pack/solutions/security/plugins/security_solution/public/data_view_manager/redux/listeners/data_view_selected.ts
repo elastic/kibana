@@ -99,7 +99,9 @@ export const createDataViewSelectedListener = (dependencies: {
       const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
 
       const currentScopeActions = scopes[action.payload.scope].actions;
-      if (resolvedIdToUse && resolvedIdToUse) {
+      if (resolvedIdToUse) {
+        // NOTE: this skips data view selection if an override selection
+        // has been dispatched
         if (listenerApi.signal.aborted) {
           return;
         }
