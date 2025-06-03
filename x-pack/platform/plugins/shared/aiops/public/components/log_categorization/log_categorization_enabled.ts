@@ -11,12 +11,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 export function getPatternAnalysisAvailable(application: ApplicationStart) {
   return (dataView: DataView) => {
-    const aiopsEnabled = application.capabilities.aiops.enabled;
-    if (!aiopsEnabled) {
-      return false;
-    }
-
     return (
+      application.capabilities.aiops.enabled &&
       dataView.isTimeBased() &&
       dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT))
     );
