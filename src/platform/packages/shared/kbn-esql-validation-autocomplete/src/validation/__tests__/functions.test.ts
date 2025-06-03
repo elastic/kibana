@@ -424,6 +424,41 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
     });
 
+    it('treats text and keyword as interchangeable', async () => {
+      setTestFunctions([
+        {
+          name: 'accepts_text',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'text' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'accepts_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'keyword' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+    });
+
     it('enforces constant-only parameters', async () => {
       setTestFunctions([
         {
