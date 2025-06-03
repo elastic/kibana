@@ -63,7 +63,7 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [privMonLinks, riskAnalyticsLinks],
+  links: [riskAnalyticsLinks, privMonLinks],
   hideTimeline: true,
   skipUrlState: true,
   experimentalKey: 'privilegeMonitoringEnabled',
