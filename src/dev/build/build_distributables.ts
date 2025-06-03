@@ -129,10 +129,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateArchives);
   }
 
-  if (
-    options.downloadCloudDependencies &&
-    (options.createDockerCloud || options.createDockerCloudFIPS)
-  ) {
+  if (options.downloadCloudDependencies && options.createDockerCloud) {
     // control w/ --skip-cloud-dependencies-download
     await globalRun(Tasks.DownloadCloudDependencies);
   }
@@ -157,7 +154,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerUbuntu) {
     // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
+    artifactTasks.push(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerWolfi) {
