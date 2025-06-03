@@ -200,7 +200,6 @@ export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props
 
   return (
     <RadioGroup
-      aria-label={`policy-templates radio group with options Azure, AWS, GCP, EKS`}
       disabled={disabled}
       idSelected={input.type}
       options={options}

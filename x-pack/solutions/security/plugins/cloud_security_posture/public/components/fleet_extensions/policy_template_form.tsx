@@ -250,7 +250,6 @@ const AwsAccountTypeSelect = ({
       )}
       <RadioGroup
         disabled={disabled}
-        aria-label={'AWS Account Type Radio Group - Select between single account or organization'}
         idSelected={getAwsAccountType(input) || ''}
         options={awsAccountTypeOptions}
         onChange={(accountType) => {

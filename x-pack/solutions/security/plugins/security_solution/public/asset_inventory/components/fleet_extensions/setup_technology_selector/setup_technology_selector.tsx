@@ -43,7 +43,7 @@ export const SetupTechnologySelector = ({
     {
       id: radioGroupItemId1,
       value: SetupTechnology.AGENTLESS,
-      'aria-label': 'agentless option',
+      tabIndex: 0,
       label: (
         <>
           <strong>
@@ -67,7 +67,7 @@ export const SetupTechnologySelector = ({
     {
       id: radioGroupItemId2,
       value: SetupTechnology.AGENT_BASED,
-      'aria-label': 'agent-based option',
+      tabIndex: 0,
       label: (
         <>
           <strong>

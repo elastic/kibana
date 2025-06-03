@@ -103,8 +103,8 @@ export const RadioGroup = ({
                 data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}
+                tabIndex={0}
                 checked={isChecked}
-                aria-label={`${option.label} radio option input`}
                 onChange={() => {}}
               />
               {option.isBeta && (
