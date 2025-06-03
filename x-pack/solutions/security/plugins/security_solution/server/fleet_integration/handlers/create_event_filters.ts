@@ -30,7 +30,6 @@ export const createEventFilters = async (
     return;
   }
 
-  // Check if the Event Filter List already exists
   try {
     const existingList = await exceptionsClient.getExceptionList({
       listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
@@ -38,7 +37,7 @@ export const createEventFilters = async (
       id: undefined,
     });
 
-    if (existingList != null) {
+    if (existingList) {
       logger.debug(
         `Event Filter List with id "${ENDPOINT_ARTIFACT_LISTS.eventFilters.id}" already exists. Skipping creation.`
       );
