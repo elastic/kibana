@@ -409,6 +409,13 @@ describe('getFieldSpecs', () => {
           searchable: true,
           type: 'string',
         },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.supports_agentless',
+          searchable: true,
+          type: 'boolean',
+        },
       ]
     );
   });

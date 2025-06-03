@@ -27,18 +27,32 @@ import { TopValuesPopover } from '../components/top_values_popover/top_values_po
 import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
+import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
+import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { type BrowserFields } from '../../common/containers/source';
 
 interface HomePageProps {
   children: React.ReactNode;
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const { pathname } = useLocation();
-  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
+  const sourcererScope = getScopeFromPath(pathname);
+  const { browserFields: oldBrowserFields } = useInitSourcerer(sourcererScope);
+  const { browserFields: experimentalBrowserFields } = useBrowserFields(sourcererScope);
+
+  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), sourcererScope);
+
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
-  useInitDataViewManager();
+
+  const browserFields = (
+    newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
+  ) as BrowserFields;
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
