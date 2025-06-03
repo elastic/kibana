@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
@@ -23,6 +24,8 @@ import {
 } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
+import { matchAutoResolutionPattern } from '../data_source_auto_resolution';
+import { updateIndex } from '../update_index';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -45,6 +48,8 @@ export interface BaseDeprecation {
   // these properties apply to index_settings deprecations only
   isFrozenIndex?: boolean;
   isClosedIndex?: boolean;
+  // indicates if the deprecation was auto-fixed by the Upgrade Assistant without user intervention
+  isAutoFixed?: boolean;
 }
 
 const createBaseDeprecation = (
@@ -156,6 +161,39 @@ const isKnownDeprecation = (deprecation: BaseDeprecation): boolean => {
   }
 };
 
+const autoCorrectIndexSettings = async (
+  esClient: ElasticsearchClient,
+  deprecations: BaseDeprecation[],
+  log: Logger
+): Promise<void> => {
+  const indexSettingsDeprecations = deprecations.filter(
+    (deprecation) => deprecation.type === 'index_settings'
+  );
+
+  await Promise.all(
+    indexSettingsDeprecations.map(async (deprecation) => {
+      const action = matchAutoResolutionPattern(deprecation.index!);
+      if (action === 'readOnly') {
+        const docCount = await esClient.count(
+          { index: deprecation.index!, ignore_unavailable: true, terminate_after: 1 },
+          { meta: true }
+        );
+
+        if (docCount.body.count === 0) {
+          await updateIndex({
+            esClient,
+            index: deprecation.index!,
+            operations: ['blockWrite'],
+            log,
+          });
+
+          deprecation.isAutoFixed = true;
+        }
+      }
+    })
+  );
+};
+
 const enrichIndexSettingsDeprecations = async (
   esClient: ElasticsearchClient,
   deprecations: BaseDeprecation[]
@@ -218,13 +256,18 @@ const excludeDeprecation = (
     // in this scenario we will already have a "frozen index" deprecation for the same index
     // we will filter this 'reindex' deprecation out, and let the 'unfreeze' one pass through
     return true;
+  } else if (deprecation.type === 'index_settings' && deprecation.isAutoFixed) {
+    // in this case the UA will already have auto-corrected the deprecation, we will filter this out
+    // so that the user doesn't see it in the UI
+    return true;
   }
 
   return false;
 };
 
 export const getEnrichedDeprecations = async (
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  log: Logger
 ): Promise<EnrichedDeprecationInfo[]> => {
   const esDeprecations = (await esClient.migration.deprecations()) as EsDeprecations;
   const deprecations = normalizeEsResponse(esDeprecations);
@@ -248,6 +291,8 @@ export const getEnrichedDeprecations = async (
   // Set extra metadata properties for index_settings deprecations
   await enrichIndexSettingsDeprecations(esClient, filteredDeprecations);
 
+  await autoCorrectIndexSettings(esClient, filteredDeprecations, log);
+
   // enrich deprecations with the corrective actions, remove metadata
   return filteredDeprecations.flatMap((deprecation) => {
     const correctiveAction = getCorrectiveAction(deprecation);
@@ -258,7 +303,14 @@ export const getEnrichedDeprecations = async (
     }
 
     return {
-      ...omit(deprecation, 'metadata', 'isFrozenIndex', 'isClosedIndex', 'isInDataStream'),
+      ...omit(
+        deprecation,
+        'metadata',
+        'isFrozenIndex',
+        'isClosedIndex',
+        'isInDataStream',
+        'isAutoFixed'
+      ),
       correctiveAction,
     };
   });

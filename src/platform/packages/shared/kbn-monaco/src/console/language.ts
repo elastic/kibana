@@ -12,12 +12,17 @@ import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { monaco } from '../monaco_imports';
 import { CONSOLE_LANG_ID } from './constants';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
+import { buildConsoleTheme } from './theme';
 
 const workerProxyService = new ConsoleWorkerProxyService();
 
 export const getParsedRequestsProvider = (model: monaco.editor.ITextModel | null) => {
   return new ConsoleParsedRequestsProvider(workerProxyService, model);
 };
+
+// Theme id is the same as lang id, as we register only one theme resolver that's color mode aware
+export const CONSOLE_THEME_ID = CONSOLE_LANG_ID;
+monaco.editor.registerLanguageThemeResolver(CONSOLE_THEME_ID, buildConsoleTheme);
 
 monaco.languages.onLanguage(CONSOLE_LANG_ID, async () => {
   workerProxyService.setup();

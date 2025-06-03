@@ -11,60 +11,43 @@ import { ArrayNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { lightenColor } from '@kbn/charts-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import { SerializedValue } from '@kbn/data-plugin/common';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries } from '../get_distinct_series';
-import { getNodeLabel } from './get_node_labels';
 
 const isTreemapOrMosaicChart = (shape: ChartTypes) =>
   [ChartTypes.MOSAIC, ChartTypes.TREEMAP].includes(shape);
 
 export const byDataColorPaletteMap = (
-  rows: Datatable['rows'],
-  column: Partial<BucketColumns>,
   paletteDefinition: PaletteDefinition,
   { params }: PaletteOutput,
-  formatters: Record<string, FieldFormat | undefined>,
-  formatter: FieldFormatsStart
+  colorIndexMap: Map<string, number>
 ) => {
-  const colorMap = new Map<string, string | undefined>(
-    rows.map((item) => {
-      const formattedName = getNodeLabel(
-        item[column.id ?? ''],
-        column,
-        formatters,
-        formatter.deserialize
-      );
-      return [formattedName, undefined];
-    })
-  );
-  let rankAtDepth = 0;
+  const colorCache = new Map<string, string | undefined>();
 
   return {
-    getColor: (item: unknown) => {
+    getColor: (item: string) => {
       const key = String(item);
-      if (!colorMap.has(key)) return;
+      let color = colorCache.get(key);
 
-      let color = colorMap.get(key);
-      if (color) {
-        return color;
-      }
+      if (color) return color;
+
+      const colorIndex = colorIndexMap.get(key) ?? -1;
       color =
         paletteDefinition.getCategoricalColor(
           [
             {
               name: key,
-              totalSeriesAtDepth: colorMap.size,
-              rankAtDepth: rankAtDepth++,
+              totalSeriesAtDepth: colorIndexMap.size,
+              rankAtDepth: colorIndex,
             },
           ],
           { behindText: false },
           params
         ) || undefined;
 
-      colorMap.set(key, color);
+      colorCache.set(key, color);
       return color;
     },
   };
@@ -136,21 +119,20 @@ export interface SimplifiedArrayNode {
  * (a node of a hierarchical tree, currently a partition tree) up to the root of the hierarchy tree.
  * The resulting array only shows, for each parent, the name of the node, its child index within the parent branch
  * (called rankInDepth) and the total number of children of the parent.
- *
  */
 const createSeriesLayers = (
   arrayNode: SimplifiedArrayNode,
   parentSeries: DistinctSeries['parentSeries'],
   isSplitChart: boolean,
-  formatters: Record<string, FieldFormat | undefined>,
-  formatter: FieldFormatsStart,
-  column: Partial<BucketColumns>
+  colorIndexMap: Map<SerializedValue, number>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
+
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);
+
     /**
      * FIXME this is a bad implementation: The `parentSeries` is an array of both `string` and `RangeKey` even if its type
      * is marked as `string[]` in `DistinctSeries`. Here instead we are checking if a stringified `RangeKey` is included into this array that
@@ -158,15 +140,14 @@ const createSeriesLayers = (
      * see https://github.com/elastic/kibana/issues/153437
      */
     const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
-    const formattedName = getNodeLabel(nodeKey, column, formatters, formatter.deserialize);
+    const colorIndex = colorIndexMap.get(seriesName) ?? tempParent.sortIndex;
+
     seriesLayers.unshift({
-      // by construction and types `formattedName` should be always be a string, but I leave this Nullish Coalescing
-      // because I don't trust much our formatting functions
-      name: formattedName ?? seriesName,
+      name: seriesName,
       rankAtDepth: isSplitParentLayer
         ? // FIXME as described above this will not work correctly if the `nodeKey` is a `RangeKey`
           parentSeries.findIndex((name) => name === seriesName)
-        : tempParent.sortIndex,
+        : colorIndex,
       totalSeriesAtDepth: isSplitParentLayer
         ? parentSeries.length
         : tempParent.parent.children.length,
@@ -213,7 +194,7 @@ export const getColor = (
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
   column: Partial<BucketColumns>,
-  formatters: Record<string, FieldFormat | undefined>
+  colorIndexMap: Map<SerializedValue, number>
 ) => {
   // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
   // therefore change it for dark mode
@@ -242,9 +223,7 @@ export const getColor = (
     arrayNode,
     distinctSeries.parentSeries,
     isSplitChart,
-    formatters,
-    formatter,
-    column
+    colorIndexMap
   );
 
   const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
@@ -257,18 +236,13 @@ export const getColor = (
     return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
   }
 
-  if (isTreemapOrMosaicChart(chartType)) {
-    if (layerIndex < columnsLength - 1) {
-      return defaultColor;
-    }
-    // for treemap use the top layer for coloring, for mosaic use the second layer
-    if (seriesLayers.length > 1) {
-      if (chartType === ChartTypes.MOSAIC) {
-        seriesLayers.shift();
-      } else {
-        seriesLayers.pop();
-      }
-    }
+  if (chartType === ChartTypes.MOSAIC && layerIndex < columnsLength - 1) {
+    return defaultColor;
+  }
+
+  //  Mosaic - use the second layer for color
+  if (chartType === ChartTypes.MOSAIC && seriesLayers.length > 1) {
+    seriesLayers.shift();
   }
 
   const outputColor = paletteService?.get(visParams.palette.name).getCategoricalColor(

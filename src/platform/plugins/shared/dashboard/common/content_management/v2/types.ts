@@ -16,7 +16,18 @@ import { DashboardContentType } from '../types';
 import {
   ControlGroupAttributesV1,
   DashboardAttributes as DashboardAttributesV1,
+  GridData as GridDataV1,
+  SavedDashboardPanel as SavedDashboardPanelV1,
 } from '../v1/types';
+import { DashboardSectionState } from '../..';
+
+export type GridData = GridDataV1 & {
+  sectionId?: string;
+};
+
+export type SavedDashboardPanel = Omit<SavedDashboardPanelV1, 'gridData'> & {
+  gridData: GridData;
+};
 
 export type ControlGroupAttributes = ControlGroupAttributesV1 & {
   showApplySelections?: boolean;
@@ -24,6 +35,7 @@ export type ControlGroupAttributes = ControlGroupAttributesV1 & {
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
   controlGroupInput?: ControlGroupAttributes;
+  sections?: DashboardSectionState[];
 };
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<

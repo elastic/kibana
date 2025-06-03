@@ -10,7 +10,7 @@
 import { attachTriggerCommand, getFieldNamesByType, setup } from './helpers';
 import { ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 
-describe.skip('autocomplete.suggest', () => {
+describe('autocomplete.suggest', () => {
   describe('CHANGE_POINT', () => {
     let assertSuggestions: Awaited<ReturnType<typeof setup>>['assertSuggestions'];
 

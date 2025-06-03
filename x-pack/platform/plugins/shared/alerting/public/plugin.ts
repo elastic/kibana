@@ -17,8 +17,8 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
+import { MAINTENANCE_WINDOWS_APP_ID } from '../common';
 import type { Rule } from '../common';
-import { ENABLE_MAINTENANCE_WINDOWS, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -82,6 +82,7 @@ export interface AlertingUIConfig {
       };
     };
   };
+  maintenanceWindow: { enabled: boolean };
 }
 
 export class AlertingPublicPlugin
@@ -115,7 +116,7 @@ export class AlertingPublicPlugin
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
-    if (ENABLE_MAINTENANCE_WINDOWS) {
+    if (this.config.maintenanceWindow?.enabled) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: MAINTENANCE_WINDOWS_APP_ID,
         title: i18n.translate('xpack.alerting.management.section.title', {

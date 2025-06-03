@@ -23,12 +23,11 @@ import {
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { PaletteRegistry, PaletteOutput, getColorFactory } from '@kbn/coloring';
+import { PaletteRegistry, PaletteOutput, getColorFactory, ColorHandlingFn } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
@@ -130,9 +129,11 @@ export const TagCloudChart = ({
     );
 
     return visData.rows.map((row) => {
-      const tag = tagColumn === undefined ? 'all' : row[tagColumn];
+      const { value: tagValue, tag } =
+        tagColumn === undefined
+          ? { value: undefined, tag: 'all' }
+          : { value: row[tagColumn], tag: row[tagColumn] };
 
-      const category = isMultiFieldKey(tag) ? tag.keys.map(String) : `${tag}`;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
@@ -140,7 +141,7 @@ export const TagCloudChart = ({
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
         color: colorFromMappingFn
-          ? colorFromMappingFn(category)
+          ? colorFromMappingFn(tagValue)
           : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
@@ -320,7 +321,7 @@ function getColorFromMappingFactory(
   palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMapping?: string
-): undefined | ((category: string | string[]) => string) {
+): undefined | ColorHandlingFn {
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
     return undefined;
