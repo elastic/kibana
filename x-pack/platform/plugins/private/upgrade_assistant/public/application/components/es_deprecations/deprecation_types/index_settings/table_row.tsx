@@ -97,9 +97,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
               fieldName={field}
               deprecation={deprecation}
               resolutionTableCell={<IndexSettingsResolutionCell status={status} />}
-              actionsTableCell={
-                <IndexSettingsActionsCell openFlyout={() => setShowFlyout(true)} status={status} />
-              }
+              actionsTableCell={<IndexSettingsActionsCell openFlyout={() => setShowFlyout(true)} />}
             />
           </EuiTableRowCell>
         );
