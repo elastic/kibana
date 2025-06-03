@@ -12,7 +12,6 @@ import {
   siemMigrationsBodyConfig,
 } from './components/onboarding_body/body_config';
 import type { TopicConfig } from './types';
-import { SECURITY_FEATURE_ID } from '../../common/constants';
 
 export const onboardingConfig: TopicConfig[] = [
   {

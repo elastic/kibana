@@ -12,7 +12,6 @@ import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
 import integrationsIcon from '../common/integrations/images/integrations_icon.png';
 import integrationsDarkIcon from '../common/integrations/images/integrations_icon_dark.png';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
