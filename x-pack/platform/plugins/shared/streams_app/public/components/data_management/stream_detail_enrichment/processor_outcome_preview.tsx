@@ -147,9 +147,26 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const explicitlyEnabledPreviewColumns = useSimulatorSelector(
+    (state) => state.context.explicitlyEnabledPreviewColumns
+  );
+  const explicitlyDisabledPreviewColumns = useSimulatorSelector(
+    (state) => state.context.explicitlyDisabledPreviewColumns
+  );
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
+
+  const allFields = useMemo(() => {
+    // Get all fields from the preview documents
+    const fields = new Set<string>();
+    previewDocuments.forEach((doc) => {
+      Object.keys(doc).forEach((key) => {
+        fields.add(key);
+      });
+    });
+    return Array.from(fields);
+  }, [previewDocuments]);
 
   const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)
@@ -159,10 +176,26 @@ const OutcomePreviewTable = () => {
     (machineState) => machineState.context.grokCollection
   );
 
-  const previewColumns = useMemo(
-    () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
-    [detectedFields, previewDocsFilter, processors]
-  );
+  const previewColumns = useMemo(() => {
+    const cols = getTableColumns(processors, detectedFields ?? [], previewDocsFilter);
+    // Filter out columns that are explicitly disabled
+    const filteredCols = cols.filter((col) => !explicitlyDisabledPreviewColumns.includes(col));
+    // Add explicitly enabled columns if they are not already included and exist in allFields
+    explicitlyEnabledPreviewColumns.forEach((col) => {
+      if (!filteredCols.includes(col) && allFields.includes(col)) {
+        filteredCols.push(col);
+      }
+    });
+    // TODO: What about the order?
+    return filteredCols;
+  }, [
+    allFields,
+    detectedFields,
+    explicitlyDisabledPreviewColumns,
+    explicitlyEnabledPreviewColumns,
+    previewDocsFilter,
+    processors,
+  ]);
 
   if (!previewDocuments || isEmpty(previewDocuments)) {
     return (

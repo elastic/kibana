@@ -21,9 +21,7 @@ export function PreviewTable({
   renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
 }) {
-  const columns = useMemo(() => {
-    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
-
+  const allColumns = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
       if (!doc || typeof doc !== 'object') {
@@ -34,16 +32,21 @@ export function PreviewTable({
       });
     });
     return Array.from(cols);
-  }, [displayColumns, documents]);
+  }, [documents]);
+  const columns = useMemo(() => {
+    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
+
+    return allColumns;
+  }, [allColumns, displayColumns]);
 
   const gridColumns = useMemo(() => {
-    return columns.map((column) => ({
+    return allColumns.map((column) => ({
       id: column,
       displayAsText: column,
       actions: false as false,
       initialWidth: columns.length > 10 ? 250 : undefined,
     }));
-  }, [columns]);
+  }, [allColumns, columns.length]);
 
   return (
     <EuiDataGrid
@@ -53,10 +56,11 @@ export function PreviewTable({
       columns={gridColumns}
       columnVisibility={{
         visibleColumns: columns,
-        setVisibleColumns: () => {},
+        setVisibleColumns: (visibleColumns) => {
+          console.log(visibleColumns);
+        },
         canDragAndDropColumns: false,
       }}
-      toolbarVisibility={false}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       renderCellValue={({ rowIndex, columnId }) => {
