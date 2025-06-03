@@ -25,6 +25,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import {
   type RoundInput,
   type Conversation,
+  type ChatEvent,
   type ChatAgentEvent,
   type RoundCompleteEvent,
   OneChatDefaultAgentId,
@@ -34,6 +35,7 @@ import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
+import { createConversationCreatedEvent, createConversationUpdatedEvent } from './utils';
 
 interface ChatServiceOptions {
   logger: Logger;
@@ -44,7 +46,7 @@ interface ChatServiceOptions {
 }
 
 export interface ChatService {
-  converse(params: ChatConverseParams): Observable<ChatAgentEvent | string>; // TODO: fix signature
+  converse(params: ChatConverseParams): Observable<ChatEvent>;
 }
 
 export interface ChatConverseParams {
@@ -178,8 +180,7 @@ const createConversation$ = ({
       });
     }),
     switchMap((createdConversation) => {
-      // TODO: emit conv created event
-      return of('TODO_created_event');
+      return of(createConversationCreatedEvent(createdConversation));
     })
   );
 };
@@ -211,8 +212,7 @@ const updateConversation$ = ({
       });
     }),
     switchMap((updatedConversation) => {
-      // TODO: emit conv updated event
-      return of('TODO_updated_event');
+      return of(createConversationUpdatedEvent(updatedConversation));
     })
   );
 };

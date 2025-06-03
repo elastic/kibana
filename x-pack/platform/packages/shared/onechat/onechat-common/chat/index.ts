@@ -12,3 +12,14 @@ export type {
   ConversationRound,
   Conversation,
 } from './conversation';
+export {
+  ChatEventType,
+  type ChatEventBase,
+  type ChatEvent,
+  type ConversationCreatedEvent,
+  type ConversationCreatedEventData,
+  type ConversationUpdatedEvent,
+  type ConversationUpdatedEventData,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+} from './events';

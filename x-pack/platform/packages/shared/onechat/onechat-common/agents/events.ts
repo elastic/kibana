@@ -9,7 +9,6 @@ import type { OnechatEvent } from '../base/events';
 import type { ConversationRound } from '../chat';
 import type { StructuredToolIdentifier } from '../tools/tools';
 
-// TODO: add prefix
 export enum ChatAgentEventType {
   toolCall = 'toolCall',
   toolResult = 'toolResult',

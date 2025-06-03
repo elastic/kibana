@@ -18,8 +18,8 @@ import {
   RoundCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
-  RoundInput,
 } from '@kbn/onechat-common/agents';
+import { RoundInput } from '@kbn/onechat-common/chat';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import { extractTextContent, getToolCalls } from './utils/from_langchain_messages';
 

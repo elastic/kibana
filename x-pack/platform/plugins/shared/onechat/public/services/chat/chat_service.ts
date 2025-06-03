@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { defer, catchError, throwError, Observable } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { isSSEError } from '@kbn/sse-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { type ChatAgentEvent, createOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
+import type { ChatEvent } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
+import { unwrapOnechatErrors } from '../utils/errors';
 
 export type ChatParams = ChatRequestBodyPayload;
 
@@ -21,12 +21,7 @@ export class ChatService {
     this.http = http;
   }
 
-  chat({
-    agentId,
-    connectorId,
-    conversationId,
-    nextMessage,
-  }: ChatParams): Observable<ChatAgentEvent> {
+  chat({ agentId, connectorId, conversationId, nextMessage }: ChatParams): Observable<ChatEvent> {
     return defer(() => {
       return this.http.post('/internal/onechat/chat', {
         asResponse: true,
@@ -35,16 +30,8 @@ export class ChatService {
       });
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
-      httpResponseIntoObservable<ChatAgentEvent>(), // TODO: ChatEvents
-      // TODO: factorize
-      catchError((err) => {
-        if (isSSEError(err)) {
-          return throwError(() =>
-            createOnechatError(err.code as OnechatErrorCode, err.message, err.meta)
-          );
-        }
-        return throwError(() => err);
-      })
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapOnechatErrors()
     );
   }
 }
