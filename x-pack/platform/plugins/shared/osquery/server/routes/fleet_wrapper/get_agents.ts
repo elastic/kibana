@@ -48,6 +48,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       async (context, request, response) => {
         let esAgents;
         const query = request.query as ListWithKuery & {
+          showAgentless?: boolean;
           showInactive: boolean;
           searchAfter?: SortResults;
           pitId?: string;
@@ -111,7 +112,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
               pitId: query.pitId,
               searchAfter: query.searchAfter,
               kuery,
-              showInactive: query.showInactive,
+              showAgentless: query.showAgentless,showInactive: query.showInactive,
               aggregations: {
                 platforms: {
                   terms: {
