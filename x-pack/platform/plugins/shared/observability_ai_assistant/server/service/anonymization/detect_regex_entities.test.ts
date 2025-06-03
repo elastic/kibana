@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { getHashedEntity, detectRegexEntities } from './detect_regex_entities';
+import { detectRegexEntities } from './detect_regex_entities';
+import { getEntityHash } from './get_entity_hash';
 import type { AnonymizationRule } from './detect_regex_entities';
 
-describe('getHashedEntity', () => {
+describe('getEntityHash', () => {
   it('returns the same hash for differently cased emails when normalize=true', () => {
-    const lower = getHashedEntity('KATY@GMAIL.COM', 'EMAIL', true);
-    const upper = getHashedEntity('katy@gmail.com', 'EMAIL', true);
+    const lower = getEntityHash('KATY@GMAIL.COM', 'EMAIL', true);
+    const upper = getEntityHash('katy@gmail.com', 'EMAIL', true);
     expect(lower).toEqual(upper);
   });
 
   it('returns different hashes for differently cased emails when normalize=false', () => {
-    const lower = getHashedEntity('KATY@GMAIL.COM', 'EMAIL');
-    const upper = getHashedEntity('katy@gmail.com', 'EMAIL');
+    const lower = getEntityHash('KATY@GMAIL.COM', 'EMAIL');
+    const upper = getEntityHash('katy@gmail.com', 'EMAIL');
     expect(lower).not.toEqual(upper);
   });
 
   it('defaults normalize=false when not passed', () => {
-    const withExplicitFalse = getHashedEntity('Test', 'CUSTOM');
-    const withDefault = getHashedEntity('Test', 'CUSTOM');
+    const withExplicitFalse = getEntityHash('Test', 'CUSTOM');
+    const withDefault = getEntityHash('Test', 'CUSTOM');
     expect(withExplicitFalse).toEqual(withDefault);
   });
 });
@@ -74,7 +75,7 @@ describe('detectRegexEntities', () => {
     expect(entities[0].class_name).toBe('EMAIL');
 
     // Confirm normalization by comparing hash to expected
-    const expectedHash = getHashedEntity('test@example.com', 'EMAIL', true);
+    const expectedHash = getEntityHash('test@example.com', 'EMAIL', true);
     expect(entities[0].hash).toBe(expectedHash);
   });
 
