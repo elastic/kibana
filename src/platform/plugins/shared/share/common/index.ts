@@ -10,3 +10,5 @@
 export type { LocatorDefinition, LocatorPublic } from './url_service';
 export { useLocatorUrl } from './url_service';
 export type { AnonymousAccessServiceContract, AnonymousAccessState } from './anonymous_access';
+
+export { LEGACY_SHORT_URL_LOCATOR_ID } from './url_service/locators/legacy_short_url_locator';
