@@ -24,5 +24,7 @@
     "@kbn/repo-info",
     "@kbn/core",
     "@kbn/telemetry",
+    "@kbn/inference-tracing",
+    "@kbn/logging",
   ]
 }

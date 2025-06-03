@@ -19,5 +19,7 @@
     "@kbn/sse-utils",
     "@kbn/zod",
     "@kbn/logging",
+    "@kbn/core",
+    "@kbn/inference-tracing",
   ]
 }
