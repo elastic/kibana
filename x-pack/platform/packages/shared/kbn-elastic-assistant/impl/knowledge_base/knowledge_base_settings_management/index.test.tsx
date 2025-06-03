@@ -22,11 +22,11 @@ import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_u
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { useAssistantContext } from '../../..';
-import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -68,11 +68,11 @@ const Wrapper = ({
   children: React.ReactNode;
   history?: History;
 }) => (
-  <I18nProvider>
+  <TestProviders>
     <Router history={history}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </Router>
-  </I18nProvider>
+  </TestProviders>
 );
 describe('KnowledgeBaseSettingsManagement', () => {
   const mockCreateEntry = jest.fn();

@@ -14,8 +14,8 @@ import {
   conversationWithContentReferences,
   welcomeConvo,
 } from '../../mock/conversation';
-import { I18nProvider } from '@kbn/i18n-react';
 import { TourState } from '../knowledge_base';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 
@@ -32,12 +32,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <I18nProvider>
+  <TestProviders>
     <div>
       <div id="aiAssistantSettingsMenuContainer" />
       {children}
     </div>
-  </I18nProvider>
+  </TestProviders>
 );
 
 describe('AnonymizedValuesAndCitationsTour', () => {
