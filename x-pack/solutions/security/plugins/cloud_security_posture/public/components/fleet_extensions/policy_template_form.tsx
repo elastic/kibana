@@ -994,7 +994,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        {cloudSecurityNamespaceSupportEnabled && (
+        {cloudSecurityNamespaceSupportEnabled && !isEditPage && (
           <>
             <EuiSpacer size="m" />
             <EuiAccordion

@@ -136,10 +136,8 @@ export const getPosturePolicy = (
 ): NewPackagePolicy => ({
   ...newPolicy,
   ...(ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled
-    ? {
-        namespace: POSTURE_NAMESPACE,
-      }
-    : {}),
+    ? {}
+    : { namespace: POSTURE_NAMESPACE }),
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
