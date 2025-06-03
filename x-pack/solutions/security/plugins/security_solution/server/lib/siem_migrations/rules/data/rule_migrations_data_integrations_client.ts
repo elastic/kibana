@@ -20,6 +20,9 @@ const RETURNED_INTEGRATIONS = 5 as const;
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
+    // return this.dependencies.packageService?.asInternalUser.getPackages({
+    //   prerelease: true,
+    // });
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
       prerelease: true,
       category: 'security',
@@ -33,9 +36,8 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
     const packages = await this.getSecurityLogsPackages();
     if (packages) {
       const ragIntegrations = packages.reduce<RuleMigrationIntegration[]>((acc, pkg) => {
-        // Index only the "logs" data streams
         const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
-        // All packages returned by getSecurityLogsPackages should have some logs data stream, but just in case
+        // Only include packages that have logs data streams
         if (logsDataStreams?.length) {
           acc.push({
             title: pkg.title,
@@ -92,8 +94,12 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
           { semantic: { query: semanticQuery, field: 'elser_embedding', boost: 1.5 } },
           { multi_match: { query: semanticQuery, fields: ['title^2', 'description'], boost: 3 } },
         ],
+        // Filter to ensure we only return integrations that have data streams
+        // because there may be integrations without data streams indexed in old migrations
+        filter: { exists: { field: 'data_streams' } },
       },
     };
+
     const results = await this.esClient
       .search<RuleMigrationIntegration>({
         index,
@@ -101,10 +107,7 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
         size: RETURNED_INTEGRATIONS,
         min_score: MIN_SCORE,
       })
-      .then((response) => {
-        const hits = this.processResponseHits(response);
-        return hits.filter((hit) => Boolean(hit.data_streams?.length)); // Ensure we only return integrations with data streams
-      })
+      .then(this.processResponseHits.bind(this))
       .catch((error) => {
         this.logger.error(`Error querying integration details for ELSER: ${error.message}`);
         throw error;
