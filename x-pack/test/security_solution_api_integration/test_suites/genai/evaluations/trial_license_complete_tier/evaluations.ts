@@ -25,6 +25,7 @@ import {
 import { MachineLearningProvider } from '../../../../../functional/services/ml';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
+import { waitForEvaluationComplete } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -99,12 +100,13 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'ES|QL Generation Regression Suite',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const { body: evaluationId } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
+          await waitForEvaluationComplete({ evaluationId, supertest, log });
         });
 
         // Uses attack discovery alerts from episodes 1-8
@@ -115,12 +117,13 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Alerts RAG Regression (Episodes 1-8)',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const { body: evaluationId } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
+          await waitForEvaluationComplete({ evaluationId, supertest, log });
         });
 
         it('should successfully run the "Assistant Eval: Custom Knowledge" dataset', async () => {
@@ -131,12 +134,13 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Assistant Eval: Custom Knowledge',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const { body: evaluationId } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
+          await waitForEvaluationComplete({ evaluationId, supertest, log });
         });
       });
 
@@ -149,12 +153,13 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Eval AD: All Scenarios',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const { body: evaluationId } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
+          await waitForEvaluationComplete({ evaluationId, supertest, log });
         });
       });
     });
