@@ -7,16 +7,12 @@
 
 import type { Subscription } from 'rxjs';
 
-import type {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import pRetry from 'p-retry';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
@@ -54,17 +50,6 @@ export class TelemetryConfigWatcher {
     };
   }
 
-  /**
-   * The policy watcher is not called as part of a HTTP request chain, where the
-   * request-scoped SOClient could be passed down. It is called via telemetry observable
-   * changes. We are acting as the 'system' in response to telemetry changes, so we are
-   * intentionally using the system user here. Be very aware of what you are using this
-   * client to do
-   */
-  private makeInternalSOClient(): SavedObjectsClientContract {
-    return this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
-  }
-
   public start(telemetryConfigProvider: TelemetryConfigProvider) {
     this.subscription = telemetryConfigProvider.getObservable()?.subscribe(this.watch.bind(this));
   }
@@ -85,6 +70,10 @@ export class TelemetryConfigWatcher {
     };
     let updated = 0;
     let failed = 0;
+    const isSpacesEnabled =
+      this.endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
+    const soClient =
+      this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
 
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
@@ -93,18 +82,27 @@ export class TelemetryConfigWatcher {
     do {
       try {
         response = await pRetry(
-          () =>
-            this.policyService.list(this.makeInternalSOClient(), {
-              page,
-              perPage: 100,
-              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-            }),
+          (attemptCount) =>
+            this.policyService
+              .list(soClient, {
+                page,
+                perPage: 100,
+                kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+                spaceId: isSpacesEnabled ? '*' : undefined,
+              })
+              .then((result) => {
+                this.logger.debug(
+                  `Retrieved page [${page}] of endpoint package policies on attempt [${attemptCount}]`
+                );
+                return result;
+              }),
           {
             onFailedAttempt: (error) =>
               this.logger.debug(
-                `Failed to read package policies on ${
-                  error.attemptNumber
-                }. attempt on page ${page}, reason: ${stringify(error)}`
+                () =>
+                  `Failed to fetch list of package policies. Attempt [${
+                    error.attemptNumber
+                  }] for page [${page}] returned error: ${stringify(error)}\n${error.stack}`
               ),
             ...this.retryOptions,
           }
@@ -118,23 +116,44 @@ export class TelemetryConfigWatcher {
         return;
       }
 
-      const updates: UpdatePackagePolicy[] = [];
+      this.logger.debug(
+        () => `Processing page [${response.page}] with [${response.items.length}] policy(s)`
+      );
+
+      const updatesBySpace: Record<string, UpdatePackagePolicy[]> = {};
+
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
+          this.logger.debug(
+            `Endpoint policy [${policy.id}] needs update to global telemetry enabled setting (currently set to [${policyConfig.global_telemetry_enabled}])`
+          );
+          const policySpace = policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
           policyConfig.global_telemetry_enabled = isTelemetryEnabled;
 
-          updates.push({ ...updatePolicy, id: policy.id });
+          if (!updatesBySpace[policySpace]) {
+            updatesBySpace[policySpace] = [];
+          }
+
+          updatesBySpace[policySpace].push({ ...updatePolicy, id: policy.id });
         }
       }
 
-      if (updates.length) {
+      for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
+        this.logger.debug(`Updating [${spaceUpdates.length}] policies for space [${spaceId}]`);
+
+        const soClientForSpace = isSpacesEnabled
+          ? this.endpointAppContextService.savedObjects.createInternalScopedSoClient({
+              spaceId,
+              readonly: false,
+            })
+          : soClient;
+
         try {
           const updateResult = await pRetry(
-            () =>
-              this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates),
+            () => this.policyService.bulkUpdate(soClientForSpace, this.esClient, spaceUpdates),
             {
               onFailedAttempt: (error) =>
                 this.logger.debug(
@@ -158,20 +177,26 @@ export class TelemetryConfigWatcher {
           failed += updateResult.failedPolicies.length;
         } catch (e) {
           this.logger.warn(
-            `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
+            `Unable to update telemetry config state to ${isTelemetryEnabled} in space [${spaceId}] for policies: ${spaceUpdates.map(
               (update) => update.id
             )}\n\n${stringify(e)}`
           );
 
-          failed += updates.length;
+          failed += spaceUpdates.length;
         }
       }
 
       page++;
     } while (response.page * response.perPage < response.total);
 
-    this.logger.info(
-      `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed.`
-    );
+    if (updated > 0 || failed > 0) {
+      this.logger.info(
+        `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed.`
+      );
+    } else {
+      this.logger.debug(
+        `Done checking Endpoint policies due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
+      );
+    }
   }
 }
