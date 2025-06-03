@@ -13,6 +13,7 @@ import { visitPrimaryExpression } from '../walkers';
 import { CompletionCommandContext } from '../../antlr/esql_parser';
 import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
 import { getPosition } from '../helpers';
+import { EDITOR_MARKER } from '../constants';
 
 export const createCompletionCommand = (
   ctx: CompletionCommandContext
@@ -35,18 +36,21 @@ export const createCompletionCommand = (
         name: 'with',
         args: [inferenceId],
       },
-      withCtx && inferenceIdCtx
+      inferenceIdCtx
         ? {
             location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
           }
         : undefined
     );
+
     if (inferenceId.incomplete || !withCtx) {
       optionWith.incomplete = true;
     }
 
-    command.args.push(optionWith);
-    command.inferenceId = inferenceId;
+    if (inferenceId.text !== EDITOR_MARKER) {
+      command.args.push(optionWith);
+      command.inferenceId = inferenceId;
+    }
   }
 
   if (ctx._targetField) {
