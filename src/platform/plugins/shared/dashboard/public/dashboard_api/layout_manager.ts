@@ -48,6 +48,7 @@ import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { areLayoutsEqual } from './are_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
 import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from './types';
+import { PanelPlacementSettings } from '../panel_placement/types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -166,9 +167,17 @@ export function initializeLayoutManager(
       };
     }
     const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
-    const customPlacementSettings = getCustomPlacementSettingFunc
-      ? await getCustomPlacementSettingFunc(serializedState)
-      : undefined;
+    let customPlacementSettings: undefined | PanelPlacementSettings;
+    if (getCustomPlacementSettingFunc) {
+      try {
+        customPlacementSettings = await getCustomPlacementSettingFunc(serializedState);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Unable to get panel placement settings; serizliedState: ${serializedState}, error: ${e}`
+        );
+      }
+    }
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
       customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
       {
