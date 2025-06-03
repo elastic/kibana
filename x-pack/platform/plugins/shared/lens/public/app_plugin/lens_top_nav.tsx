@@ -20,7 +20,7 @@ import moment from 'moment';
 import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializedStyles, css } from '@emotion/react';
-import { LENS_APP_LOCATOR } from '../../common/locator/locator';
+import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';

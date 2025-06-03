@@ -14,7 +14,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import type { ScopedHistory } from '@kbn/core/public';
-import { DASHBOARD_APP_LOCATOR, VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  DASHBOARD_APP_LOCATOR,
+  LENS_APP_LOCATOR,
+  VISUALIZE_APP_LOCATOR,
+} from '@kbn/deeplinks-analytics';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
@@ -65,7 +69,16 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         }
 
         // Reporting job params should only contain locator for analytical apps, not for for short URLs.
-        if (![DASHBOARD_APP_LOCATOR, VISUALIZE_APP_LOCATOR].includes(locatorParams.id)) {
+        if (
+          ![
+            //
+            DASHBOARD_APP_LOCATOR,
+            LENS_APP_LOCATOR,
+            VISUALIZE_APP_LOCATOR,
+          ].includes(locatorParams.id)
+        ) {
+          // eslint-disable-next-line no-console
+          console.error(`Can not allow locator type "${locatorParams.id}" for reporting jobs`);
           throw new Error('Analytics app locator is required for reporting jobs');
         }
 
