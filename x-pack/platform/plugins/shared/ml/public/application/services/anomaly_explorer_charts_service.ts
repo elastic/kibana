@@ -27,6 +27,7 @@ import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApi } from './ml_api_service';
 import type { MlResultsService } from './results_service';
+import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 const MAX_CHARTS_PER_ROW = 4;
 const OPTIMAL_CHART_WIDTH = 550;
@@ -110,9 +111,9 @@ export class AnomalyExplorerChartsService {
     chartsContainerWidth: number,
     selectedEarliestMs: number,
     selectedLatestMs: number,
+    severity: TableSeverityThreshold[],
     influencerFilterQuery?: InfluencersFilterQuery,
     influencers?: MlEntityField[],
-    severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
     const bounds = this.getTimeBounds();

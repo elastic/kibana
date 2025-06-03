@@ -50,6 +50,11 @@ interface Influencer {
   fieldValue: any;
 }
 
+export interface SeverityThreshold {
+  min: number;
+  max?: number;
+}
+
 /**
  * Extracts typical and actual values from the anomaly record.
  * @param source
@@ -95,7 +100,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     criteriaFields: CriteriaField[],
     influencers: Influencer[],
     aggregationInterval: string,
-    threshold: number,
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     dateFormatTz: string,
@@ -113,13 +118,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             gte: earliestMs,
             lte: latestMs,
             format: 'epoch_millis',
-          },
-        },
-      },
-      {
-        range: {
-          record_score: {
-            gte: threshold,
           },
         },
       },
@@ -193,6 +191,22 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
+
+    const thresholdCriteria = threshold.map((t) => ({
+      range: {
+        record_score: {
+          gte: t.min,
+          ...(t.max !== undefined && { lte: t.max }),
+        },
+      },
+    }));
+
+    boolCriteria.push({
+      bool: {
+        should: thresholdCriteria,
+        minimum_should_match: 1,
+      },
+    });
 
     const body = await mlClient.anomalySearch(
       {

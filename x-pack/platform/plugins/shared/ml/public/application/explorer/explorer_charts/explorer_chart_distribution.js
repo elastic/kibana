@@ -65,7 +65,7 @@ export class ExplorerChartDistribution extends React.Component {
 
   static propTypes = {
     seriesConfig: PropTypes.object,
-    severity: PropTypes.number,
+    severity: PropTypes.array,
     tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
@@ -514,9 +514,16 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('cy', (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
         .attr('class', (d) => {
           let markerClass = 'metric-value';
-          if (d.anomalyScore !== undefined && Number(d.anomalyScore) >= severity) {
-            markerClass += ' anomaly-marker ';
-            markerClass += getSeverityWithLow(d.anomalyScore).id;
+          if (d.anomalyScore !== undefined) {
+            // Check if the anomaly score falls within any of the selected severity ranges
+            const anomalyScore = Number(d.anomalyScore);
+            const isInSelectedRange = severity.some((s) => {
+              return anomalyScore >= s.min && (s.max === undefined || anomalyScore <= s.max);
+            });
+            if (isInSelectedRange) {
+              markerClass += ' anomaly-marker ';
+              markerClass += getSeverityWithLow(anomalyScore).id;
+            }
           }
           return markerClass;
         });

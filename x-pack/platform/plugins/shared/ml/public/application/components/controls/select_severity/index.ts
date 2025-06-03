@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useTableSeverity, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
+export { useTableSeverity, SelectSeverity } from './select_severity';

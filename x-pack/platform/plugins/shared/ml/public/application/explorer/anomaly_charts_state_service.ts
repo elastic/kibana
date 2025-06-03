@@ -16,7 +16,7 @@ import type { ExplorerChartsData } from './explorer_charts/explorer_charts_conta
 import { getDefaultChartsData } from './explorer_charts/explorer_charts_container_service';
 import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { getSelectionInfluencers, getSelectionJobIds } from './explorer_utils';
-import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity/select_severity';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 export class AnomalyChartsStateService extends StateService {
@@ -29,7 +29,7 @@ export class AnomalyChartsStateService extends StateService {
     private _anomalyTimelineStateServices: AnomalyTimelineStateService,
     private _anomalyExplorerChartsService: AnomalyExplorerChartsService,
     private _anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
-    private _tableSeverityState: UrlStateService<TableSeverity>
+    private _tableSeverityState: UrlStateService<TableSeverityState>
   ) {
     super();
     this._init();
@@ -87,9 +87,9 @@ export class AnomalyChartsStateService extends StateService {
               containerWidth!,
               selectedCells?.times[0] * 1000,
               selectedCells?.times[1] * 1000,
+              severityState.val,
               influencerFilterQuery,
               selectionInfluencers,
-              severityState.val,
               6
             );
           }

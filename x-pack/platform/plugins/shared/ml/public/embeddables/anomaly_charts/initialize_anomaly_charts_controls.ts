@@ -16,11 +16,12 @@ import type {
   AnomalyChartsEmbeddableRuntimeState,
   AnomalyChartsEmbeddableState,
 } from '../types';
+import type { TableSeverityThreshold } from '../../application/components/controls/select_severity/select_severity';
 
 export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
   jobIds: 'deepEquality',
   maxSeriesToPlot: 'referenceEquality',
-  severityThreshold: 'referenceEquality',
+  severityThreshold: 'deepEquality',
   selectedEntities: 'deepEquality',
 };
 
@@ -33,7 +34,10 @@ export const initializeAnomalyChartsControls = (
   const maxSeriesToPlot$ = new BehaviorSubject<number>(
     rawState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
-  const severityThreshold$ = new BehaviorSubject<number | undefined>(rawState.severityThreshold);
+
+  const severityThreshold$ = new BehaviorSubject<TableSeverityThreshold[] | undefined>(
+    rawState.severityThreshold
+  );
   const selectedEntities$ = new BehaviorSubject<MlEntityField[] | undefined>(
     rawState.selectedEntities
   );
@@ -49,7 +53,7 @@ export const initializeAnomalyChartsControls = (
     }
   };
 
-  const updateSeverityThreshold = (v: number) => severityThreshold$.next(v);
+  const updateSeverityThreshold = (v: TableSeverityThreshold[]) => severityThreshold$.next(v);
   const updateSelectedEntities = (v: MlEntityField[]) => selectedEntities$.next(v);
   const setInterval = (v: number) => interval$.next(v);
 

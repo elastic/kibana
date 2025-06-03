@@ -111,7 +111,7 @@ export class TimeSeriesExplorer extends React.Component {
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
     tableInterval: PropTypes.string,
-    tableSeverity: PropTypes.number,
+    tableSeverity: PropTypes.object,
     zoom: PropTypes.object,
     handleJobSelectionChange: PropTypes.func,
   };
@@ -337,7 +337,7 @@ export class TimeSeriesExplorer extends React.Component {
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
         [],
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         earliestMs,
         latestMs,
         dateFormatTz,

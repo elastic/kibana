@@ -42,6 +42,7 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import type { TableSeverityThreshold } from '../application/components/controls/select_severity/select_severity';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -110,7 +111,7 @@ export interface AnomalyChartsEmbeddableRuntimeState {
   jobIds: JobId[];
   maxSeriesToPlot: number;
   // Embeddable inputs which are not included in the default interface
-  severityThreshold?: number;
+  severityThreshold?: TableSeverityThreshold[];
   selectedEntities?: MlEntityField[];
 }
 export interface AnomalyChartsEmbeddableOverridableState
@@ -120,10 +121,10 @@ export interface AnomalyChartsEmbeddableOverridableState
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
-  severityThreshold$: PublishingSubject<number>;
+  severityThreshold$: PublishingSubject<TableSeverityThreshold[]>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
   updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
-  updateSeverityThreshold: (v?: number) => void;
+  updateSeverityThreshold: (v?: TableSeverityThreshold[]) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
 export interface AnomalyChartsDataLoadingApi {

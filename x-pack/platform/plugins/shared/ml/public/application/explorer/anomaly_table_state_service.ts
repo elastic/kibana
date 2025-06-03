@@ -30,7 +30,10 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type {
+  TableSeverityState,
+  TableSeverityThreshold,
+} from '../components/controls/select_severity/select_severity';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -63,7 +66,7 @@ export class AnomalyTableStateService extends StateService {
     private readonly timefilter: TimefilterContract,
     private readonly anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private readonly anomalyTimelineStateService: AnomalyTimelineStateService,
-    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverity>,
+    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverityState>,
     private readonly tableIntervalUrlStateService: UrlStateService<TableInterval>
   ) {
     super();
@@ -158,7 +161,7 @@ export class AnomalyTableStateService extends StateService {
     selectedJobs: ExplorerJob[],
     fieldName: string,
     tableInterval: string,
-    tableSeverity: number,
+    tableSeverity: TableSeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Observable<AnomaliesTableData | null> {
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);

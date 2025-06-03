@@ -32,12 +32,12 @@ import type {
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
-import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { useMlJobService } from '../../application/services/job_service';
+import { useThresholdToSeverity } from '../../application/components/controls/select_severity/select_severity';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -76,11 +76,22 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   });
 
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [severity, setSeverity] = useState(
-    optionValueToThreshold(
-      severityThreshold !== undefined ? severityThreshold : ML_ANOMALY_THRESHOLD.WARNING
-    )
+  const thresholdsToSeverity = useThresholdToSeverity();
+
+  // Define a default threshold to use when severityThreshold is undefined (embeddable creation)
+  const defaultThreshold = useMemo(
+    () => [{ min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING }],
+    []
   );
+
+  // Initialize severity state from props or default
+  const [severity, setSeverity] = useState(
+    thresholdsToSeverity(severityThreshold !== undefined ? severityThreshold : defaultThreshold)
+  );
+
+  // Extract thresholds from severity objects for API updates and data fetching
+  const severityThresholds = useMemo(() => severity.map((s) => s.threshold), [severity]);
+
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [
     { uiSettings },
@@ -110,10 +121,10 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   useEffect(() => {
     if (api?.updateSeverityThreshold) {
-      api.updateSeverityThreshold(severity.val);
+      api.updateSeverityThreshold(severityThresholds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity.val, api?.updateSeverityThreshold]);
+  }, [severityThresholds, api?.updateSeverityThreshold]);
 
   useEffect(() => {
     if (api?.updateSelectedEntities) {
@@ -129,7 +140,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(api, services, chartWidth, severity.val, renderCallbacks);
+  } = useAnomalyChartsData(api, services, chartWidth, severityThresholds, renderCallbacks);
 
   const dateFormatTz = useDateFormatTz();
 
@@ -167,7 +178,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           timeRangeBounds,
           'job ID',
           'auto',
-          0
+          { val: [{ min: 0 }] }
         );
 
         if (isMounted()) {
@@ -214,7 +225,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
         }
         color="danger"
         iconType="warning"
-        style={{ width: '100%' }}
+        css={{ width: '100%' }}
       >
         <p>{error.message}</p>
       </EuiCallOut>
@@ -257,7 +268,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           {isExplorerLoading && (
             <EuiText
               textAlign={'center'}
-              style={{
+              css={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
@@ -275,7 +286,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               id={id}
               showCharts={true}
               chartsData={chartsData}
-              severity={severity}
+              severity={severityThresholds}
               setSeverity={setSeverity}
               mlLocator={mlLocator}
               tableData={tableData}

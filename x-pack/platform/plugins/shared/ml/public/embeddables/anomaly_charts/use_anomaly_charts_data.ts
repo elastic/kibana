@@ -23,6 +23,7 @@ import {
 } from '../../application/explorer/explorer_utils';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import type { MlStartDependencies } from '../../plugin';
+import type { TableSeverityThreshold } from '../../application/components/controls/select_severity/select_severity';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -30,7 +31,7 @@ export function useAnomalyChartsData(
   api: AnomalyChartsApi,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
-  severity: number,
+  severity: TableSeverityThreshold[],
   renderCallbacks: {
     onRenderComplete: () => void;
     onLoading: (v: boolean) => void;
@@ -48,7 +49,7 @@ export function useAnomalyChartsData(
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  const severity$ = useMemo(() => new Subject<number>(), []);
+  const severity$ = useMemo(() => new Subject<TableSeverityThreshold[]>(), []);
 
   useEffect(() => {
     const subscription = combineLatest({
@@ -118,9 +119,9 @@ export function useAnomalyChartsData(
               embeddableContainerWidth,
               timeRange.earliestMs,
               timeRange.latestMs,
+              severityValue,
               influencersFilterQuery,
               selectionInfluencers,
-              severityValue ?? 0,
               maxSeriesToPlot
             );
           }

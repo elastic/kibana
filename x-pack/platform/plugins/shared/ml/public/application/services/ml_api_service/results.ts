@@ -26,6 +26,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
 import type { CriteriaField } from '../results_service';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import type { TableSeverityThreshold } from '../../components/controls/select_severity/select_severity';
 
 export interface CategoryDefinition {
   categoryId: number;
@@ -40,7 +41,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     criteriaFields: string[],
     influencers: MlEntityField[],
     aggregationInterval: string,
-    threshold: number,
+    threshold: TableSeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     dateFormatTz: string,
@@ -187,7 +188,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomalyCharts$(
     jobIds: string[],
     influencers: MlEntityField[],
-    threshold: number,
+    threshold: TableSeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     timeBounds: { min?: number; max?: number },

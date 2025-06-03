@@ -44,6 +44,7 @@ import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
+import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   ExplorerQueryBar,
@@ -114,7 +115,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 }) => (
   <>
     <EuiPageHeader>
-      <EuiPageHeaderSection style={{ width: '100%' }}>
+      <EuiPageHeaderSection css={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
         {indexPattern && updateLanguage ? (
@@ -139,7 +140,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 
 interface ExplorerUIProps {
   explorerState: ExplorerState;
-  severity: number;
+  severity: TableSeverityThreshold[];
   showCharts: boolean;
   selectedJobsRunning: boolean;
   overallSwimlaneData: OverallSwimlaneData | null;
@@ -575,7 +576,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             </EuiTitle>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+          <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
             <AnomalyContextMenu
               selectedJobs={selectedJobs!}
               mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}

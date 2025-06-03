@@ -14,6 +14,11 @@ const criteriaFieldSchema = schema.object({
   fieldValue: schema.any(),
 });
 
+const severityThresholdSchema = schema.object({
+  min: schema.number(),
+  max: schema.maybe(schema.number()),
+});
+
 export const anomaliesTableDataSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   criteriaFields: schema.arrayOf(criteriaFieldSchema),
@@ -21,7 +26,7 @@ export const anomaliesTableDataSchema = schema.object({
     schema.maybe(schema.object({ fieldName: schema.string(), fieldValue: schema.any() }))
   ),
   aggregationInterval: schema.string(),
-  threshold: schema.number(),
+  threshold: schema.arrayOf(severityThresholdSchema),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   dateFormatTz: schema.string(),
@@ -116,12 +121,7 @@ export const getDatafeedResultsChartDataSchema = schema.object({
 export const getAnomalyChartsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   influencers: schema.arrayOf(schema.any()),
-  threshold: schema.number({
-    defaultValue: 0,
-    min: 0,
-    max: 99,
-    meta: { description: 'Severity threshold' },
-  }),
+  threshold: schema.arrayOf(severityThresholdSchema),
   earliestMs: schema.number(),
   latestMs: schema.number(),
   maxResults: schema.number({

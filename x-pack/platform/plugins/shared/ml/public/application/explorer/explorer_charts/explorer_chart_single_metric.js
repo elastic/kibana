@@ -64,7 +64,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
-    severity: PropTypes.number.isRequired,
+    severity: PropTypes.array.isRequired,
     tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     timeBuckets: PropTypes.object.isRequired,
@@ -410,8 +410,13 @@ export class ExplorerChartSingleMetric extends React.Component {
         })
         .on('mouseout', () => tooltipService.hide());
 
-      const isAnomalyVisible = (d) =>
-        d.anomalyScore !== undefined && Number(d.anomalyScore) >= severity;
+      const isAnomalyVisible = (d) => {
+        if (d.anomalyScore === undefined) return false;
+        const anomalyScore = Number(d.anomalyScore);
+        return severity.some((s) => {
+          return anomalyScore >= s.min && (s.max === undefined || anomalyScore <= s.max);
+        });
+      };
 
       // Update all dots to new positions.
       dots
