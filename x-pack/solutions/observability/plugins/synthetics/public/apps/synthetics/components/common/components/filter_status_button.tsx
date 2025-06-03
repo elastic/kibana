@@ -46,7 +46,7 @@ export const FilterStatusButton = ({
       withNext={withNext}
       color={color}
     >
-      {content}fooooo
+      {content}
     </EuiFilterButton>
   );
 };
