@@ -131,7 +131,7 @@ describe('converter', () => {
         it('should convert array of string values as MultiFieldKey', () => {
           const values: string[] = ['some-string', '123', '0', '1', '1744261200000', '__other__'];
           const oldConfig = buildOldColorMappingFromValues([values]);
-          const newConfig = convertToRawColorMappings(oldConfig, { isBucketed: false });
+          const newConfig = convertToRawColorMappings(oldConfig, {});
           const rule = newConfig.assignments[0].rules[0];
 
           expect(rule).toEqual({
@@ -147,7 +147,6 @@ describe('converter', () => {
           const oldConfig = buildOldColorMappingFromValues([['some-string']]);
           const newConfig = convertToRawColorMappings(oldConfig, {
             fieldType: 'multi_terms',
-            isBucketed: false,
           });
           const rule = newConfig.assignments[0].rules[0];
 
@@ -164,7 +163,6 @@ describe('converter', () => {
           const oldConfig = buildOldColorMappingFromValues(['some-string']);
           const newConfig = convertToRawColorMappings(oldConfig, {
             fieldType: 'multi_terms',
-            isBucketed: false,
           });
           const rule = newConfig.assignments[0].rules[0];
 
@@ -189,7 +187,6 @@ describe('converter', () => {
           const oldConfig = buildOldColorMappingFromValues([rangeString]);
           const newConfig = convertToRawColorMappings(oldConfig, {
             fieldType: 'range',
-            isBucketed: false,
           });
           const rule = newConfig.assignments[0].rules[0];
 
@@ -207,7 +204,6 @@ describe('converter', () => {
           const oldConfig = buildOldColorMappingFromValues(['not-a-range']);
           const newConfig = convertToRawColorMappings(oldConfig, {
             fieldType: 'range',
-            isBucketed: false,
           });
           const rule = newConfig.assignments[0].rules[0];
 
@@ -346,7 +342,7 @@ describe('converter', () => {
           const expectedRule =
             expectedRulesByType.find((r) => r.types.includes(dataType ?? 'undefined'))
               ?.expectedRule ?? defaultExpectedRule;
-          const newConfig = convertToRawColorMappings(oldConfig, { ...column, isBucketed: false });
+          const newConfig = convertToRawColorMappings(oldConfig, { ...column });
           const rule = newConfig.assignments[0].rules[0];
 
           if (expectedRule.type === 'match') {

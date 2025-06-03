@@ -9,13 +9,10 @@ import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { GenericIndexPatternColumn } from '../../../datasources/form_based/types';
 import { getStructuredDatasourceStates } from '../../../react_embeddable/helper';
 import { GeneralDatasourceStates } from '../../../state_management';
-import { isNotNumeric } from '../../../datasources/form_based/esql_layer/utils';
-import { getAccessorTypeFromOperation } from '../../../shared_components';
 
 export interface ColumnMeta {
   fieldType?: string | 'multi_terms' | 'range';
   dataType?: GenericIndexPatternColumn['dataType'] | DatatableColumnType;
-  isBucketed: boolean;
 }
 
 export function getColumnMetaFn(
@@ -34,7 +31,6 @@ export function getColumnMetaFn(
             ? (column.params as { parentFormat?: { id?: string } })?.parentFormat?.id
             : undefined,
         dataType: column?.dataType,
-        isBucketed: getAccessorTypeFromOperation(column).isCategory,
       };
     };
   }
@@ -47,7 +43,6 @@ export function getColumnMetaFn(
 
       return {
         dataType: column?.meta?.type,
-        isBucketed: column ? isNotNumeric(column) : false,
       };
     };
   }
