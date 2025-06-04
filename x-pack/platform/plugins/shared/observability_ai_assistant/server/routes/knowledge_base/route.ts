@@ -13,6 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
+import { ConversationConfidenceEnum } from '@kbn/elastic-assistant-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
