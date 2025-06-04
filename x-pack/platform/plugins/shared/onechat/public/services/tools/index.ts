@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export { AgentService } from './agents';
-export { ChatService } from './chat';
-export { ConversationsService } from './conversations';
-export { ToolsService } from './tools';
-export type { OnechatInternalService } from './types';
+export { ToolsService } from './tools_service';

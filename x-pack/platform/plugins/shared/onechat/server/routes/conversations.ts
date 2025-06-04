@@ -19,7 +19,7 @@ export function registerConversationRoutes({
 
   router.post(
     {
-      path: '/api/onechat/conversations',
+      path: '/internal/onechat/conversations',
       security: {
         authz: {
           enabled: false,

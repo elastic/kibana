@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { AgentService } from './agents';
-export { ChatService } from './chat';
-export { ConversationsService } from './conversations';
-export { ToolsService } from './tools';
-export type { OnechatInternalService } from './types';
+export interface CallAgentResponse<TResult = unknown> {
+  runId: string;
+  result: TResult;
+}

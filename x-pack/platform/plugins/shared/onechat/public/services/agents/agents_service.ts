@@ -9,6 +9,7 @@ import { defer, Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { type ChatAgentEvent } from '@kbn/onechat-common';
+import type { CallAgentResponse } from '../../../common/http_api/agents';
 import { unwrapOnechatErrors } from '../utils/errors';
 
 export class AgentService {
@@ -18,10 +19,16 @@ export class AgentService {
     this.http = http;
   }
 
-  // async call({ agentId }: { agentId: string }) {
-  //   return await this.http.get<GetAgentResponse>(`/internal/workchat/agents/${agentId}`);
-  // }
+  /**
+   * Call an agent and await the final execution result.
+   */
+  async call({ agentId, agentParams }: { agentId: string; agentParams: Record<string, unknown> }) {
+    return await this.http.get<CallAgentResponse>('/internal/onechat/agents/invoke');
+  }
 
+  /**
+   * Call an agent and stream the events.
+   */
   stream({
     agentId,
     agentParams,
@@ -30,7 +37,7 @@ export class AgentService {
     agentParams: Record<string, unknown>;
   }): Observable<ChatAgentEvent> {
     return defer(() => {
-      return this.http.post('/api/onechat/agents/stream', {
+      return this.http.post('/internal/onechat/agents/stream', {
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify({ agentId, agentParams }),

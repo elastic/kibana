@@ -6,19 +6,18 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ListConversationsResponse } from '../../../common/http_api/conversations';
-import type { ConversationListOptions } from '../../../common/conversations';
+import type { ListToolsResponse } from '../../../common/http_api/tools';
 
-export class ConversationsService {
+export class ToolsService {
   private readonly http: HttpSetup;
 
   constructor({ http }: { http: HttpSetup }) {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions) {
-    return await this.http.post<ListConversationsResponse>('/internal/onechat/conversations', {
-      body: JSON.stringify({ agentId }),
+  async list() {
+    return await this.http.post<ListToolsResponse>('/internal/onechat/tools', {
+      body: JSON.stringify({}),
     });
   }
 }

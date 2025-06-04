@@ -18,6 +18,7 @@ import {
   AgentService,
   ChatService,
   ConversationsService,
+  ToolsService,
   OnechatInternalService,
 } from './services';
 
@@ -48,11 +49,13 @@ export class OnechatPlugin
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const toolsService = new ToolsService({ http });
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
+      toolsService,
     };
 
     /*

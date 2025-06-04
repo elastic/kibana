@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { AgentService } from './agents';
-export { ChatService } from './chat';
-export { ConversationsService } from './conversations';
-export { ToolsService } from './tools';
-export type { OnechatInternalService } from './types';
+import type { ToolDescriptor } from '@kbn/onechat-common';
+
+export interface ListToolsResponse {
+  tools: ToolDescriptor[];
+}
