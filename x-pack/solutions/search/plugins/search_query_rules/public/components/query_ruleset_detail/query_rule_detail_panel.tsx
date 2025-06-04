@@ -5,20 +5,48 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+
+import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
+import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
+import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 interface QueryRuleDetailPanelProps {
-  rules: QueryRulesQueryRule[];
-  setRules: (rules: QueryRulesQueryRule[]) => void;
+  rulesetId: QueryRulesQueryRuleset['ruleset_id'];
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
 }
-export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rules, setRules }) => {
+export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
+  rulesetId,
+  tourInfo,
+}) => {
+  const { rules, setNewRules, updateRule } = useQueryRulesetDetailState({ rulesetId });
+  const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
+
   return (
     <KibanaPageTemplate.Section restrictWidth>
+      {ruleIdToEdit !== null && (
+        <QueryRuleFlyout
+          rules={rules}
+          rulesetId={rulesetId}
+          ruleId={ruleIdToEdit}
+          onSave={(rule) => {
+            updateRule(rule);
+            setRuleIdToEdit(null);
+          }}
+          onClose={() => {
+            setRuleIdToEdit(null);
+          }}
+        />
+      )}
+
       <EuiFlexGroup justifyContent="spaceBetween" direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -30,7 +58,9 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
                     color="primary"
                     data-test-subj="queryRulesetDetailAddRuleButton"
                     onClick={() => {
-                      // Logic to add a new rule
+                      // TODO: Logic to add a new rule
+                      // This opens the query rule flyout in create mode.
+                      // ruleid cannot be null or empty when creating a new rule. Add logic to generate a rule id.
                     }}
                   >
                     <FormattedMessage
@@ -54,7 +84,13 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryRuleDraggableList rules={rules} onReorder={setRules} />
+          <QueryRuleDraggableList
+            rules={rules}
+            rulesetId={rulesetId}
+            onReorder={(newRules) => setNewRules(newRules)}
+            onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
+            tourInfo={tourInfo}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>

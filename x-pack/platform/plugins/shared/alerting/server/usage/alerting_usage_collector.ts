@@ -243,6 +243,7 @@ export function createAlertingUsageCollector(
           count_alerts_by_rule_type: {},
           count_rules_snoozed_by_type: {},
           count_rules_muted_by_type: {},
+          count_ignored_fields_by_rule_type: {},
         };
       }
     },
@@ -320,6 +321,7 @@ export function createAlertingUsageCollector(
       count_alerts_by_rule_type: byTypeSchema,
       count_rules_snoozed_by_type: byTypeSchema,
       count_rules_muted_by_type: byTypeSchema,
+      count_ignored_fields_by_rule_type: byTypeSchema,
     },
   });
 }
