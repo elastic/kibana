@@ -12,12 +12,13 @@ export const changeRequestsStorageSettings = {
   schema: {
     properties: {
       // Don't map anything until we know what the queries will look like
-      // Ideally I could disable mappings at the root rather than wrap like this, should implement that in the storage adapter
+      // TODO: Storage adapter should support disabling at top level
       request: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;
 
+// TODO: Use src/core/packages/security/server/src/api_privileges.ts instead
 export const CHANGE_REQUESTS_API_PRIVILEGES = {
   manage: 'manage_change_requests',
   create: 'create_change_request',

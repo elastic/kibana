@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { badRequest } from '@hapi/boom';
 import { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { submitRequestBodyRt } from '../types';
+import { RequiredPrivileges, submitRequestBodyRt } from '../types';
 import { createChangeRequestsServerRoute } from './route_factory';
 import { CHANGE_REQUESTS_API_PRIVILEGES } from '../constants';
 
@@ -23,15 +23,13 @@ const submitRequestRoute = createChangeRequestsServerRoute({
     body: submitRequestBodyRt,
   }),
   handler: async ({ params, response, getClients, getStartServices, request }) => {
-    if (params.body.requests.length === 0) {
+    if (params.body.actions.length === 0) {
       // The copy in this whole plugin is just bad.
       throw badRequest('An approval request should contain a least one request');
     }
 
     if (
-      params.body.requests.some(
-        (approvalRequest) => approvalRequest.requiredPrivileges.length === 0
-      )
+      params.body.actions.some((action) => isEmptyRequiredPrivileges(action.requiredPrivileges))
     ) {
       throw badRequest('An approval request should contain a least one required privilege');
     }
@@ -55,7 +53,7 @@ const submitRequestRoute = createChangeRequestsServerRoute({
       },
     });
 
-    // Send notification email if available, requires notifications plugin
+    // Could send a notification email if available, requires notifications plugin
     // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/notifications/README.mdx
 
     return response.created({
@@ -120,6 +118,36 @@ async function getCurrentUser(core: CoreStart, request: KibanaRequest) {
   }
 
   return currentUser.username;
+}
+
+function isEmptyRequiredPrivileges(requiredPrivileges: RequiredPrivileges) {
+  const missingKibanaPrivileges = requiredPrivileges.kibana
+    ? requiredPrivileges.kibana.length === 0
+    : true;
+
+  const missingClusterPrivileges = requiredPrivileges.elasticsearch
+    ? requiredPrivileges.elasticsearch.cluster.length === 0
+    : true;
+  const hasIndexPrivileges = requiredPrivileges.elasticsearch
+    ? isEmptyIndexPrivileges(requiredPrivileges.elasticsearch.index)
+    : true;
+  const missingElasticsearchPrivileges = missingClusterPrivileges && hasIndexPrivileges;
+
+  return missingKibanaPrivileges && missingElasticsearchPrivileges;
+}
+
+function isEmptyIndexPrivileges(
+  indexPrivileges: Exclude<RequiredPrivileges['elasticsearch'], undefined>['index']
+) {
+  if (Object.keys(indexPrivileges).length === 0) {
+    return true;
+  }
+
+  if (Object.values(indexPrivileges).some((privileges) => privileges.length === 0)) {
+    return true;
+  }
+
+  return false;
 }
 
 export const crudRoutes = {

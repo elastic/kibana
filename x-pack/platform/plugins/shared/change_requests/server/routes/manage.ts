@@ -42,45 +42,58 @@ const listRequestsRoute = createChangeRequestsServerRoute({
         .map((hit) => {
           const { space: _space, ...requestWithoutSpace } = hit._source.request;
           return {
-            id: hit._id,
+            id: hit._id!, // Odd that I have to insist here
             ...requestWithoutSpace,
           };
         }),
       'submittedAt'
     );
 
-    const allRequiredPrivileges = new Set(
-      changeRequests.flatMap((changeRequest) =>
-        changeRequest.requests.flatMap((apiRequest) => apiRequest.requiredPrivileges)
-      )
-    );
-
-    // Now check if the current user has these privileges, then based on that result, filter the change requests to only those it could actually approve
-    // By going one by one and checking that user.privileges includes ALL request.requiredPrivileges for ALL changeRequest.requests
-
+    // This process might be fairly expensive if it is done for many requests and requested frequently (add APM)
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
-    const { hasAllRequested, privileges } = await checkPrivileges({
-      kibana: ['some_crap'],
-      elasticsearch: {
-        cluster: ['manage_own_api_key'],
-        index: {
-          whatever: ['delete_index'],
-        },
-      },
-    });
+    const results = await Promise.all(
+      changeRequests
+        .flatMap((changeRequest) =>
+          changeRequest.actions.map(
+            (action, index) =>
+              [authorizationId(changeRequest, index), action.requiredPrivileges] as const
+          )
+        )
+        .map(async ([id, requiredPrivileges]) => {
+          const { hasAllRequested } = await checkPrivileges(requiredPrivileges);
+          return [id, hasAllRequested] as const;
+        })
+    );
+    const actionAuthorizationResults = Object.fromEntries(results);
 
-    console.log(JSON.stringify(privileges, null, 2));
+    const authorizedChangeRequests = changeRequests
+      .filter((changeRequest) => {
+        const authorizedActions = changeRequest.actions.filter((action, index) => {
+          return actionAuthorizationResults[authorizationId(changeRequest, index)];
+        });
+        return authorizedActions.length === changeRequest.actions.length;
+      })
+      .map((changeRequest) => {
+        return {
+          ...changeRequest,
+          actions: changeRequest.actions.map((action) => {
+            const { requiredPrivileges, ...actionWithoutRequiredPrivileges } = action;
+            return actionWithoutRequiredPrivileges;
+          }),
+        };
+      });
 
-    // If hasAllRequested is true, just return all since this user can approve all of these requests
-
-    // Else, filter the requests down to the subset that they can actually approve
     return response.ok({
       body: {
-        change_requests: changeRequests,
+        change_requests: authorizedChangeRequests,
       },
     });
   },
 });
+
+function authorizationId(changeRequest: { id: string }, index: number) {
+  return `${changeRequest.id}_${index}` as string;
+}
 
 const approveRequestRoute = createChangeRequestsServerRoute({
   endpoint: 'POST /internal/change_requests/manage/change_requests/{id}/_approve',

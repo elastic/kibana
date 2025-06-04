@@ -126,7 +126,8 @@ export class ChangeRequestsPlugin
       runDevModeChecks: false,
     });
 
-    // Need to return a server side client here
+    // TODO: Need to return a server side service here
+    // I guess it should only have access to submit CRs
   }
 
   public start() {}

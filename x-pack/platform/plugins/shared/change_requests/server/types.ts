@@ -14,28 +14,39 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { changeRequestsStorageSettings } from './constants';
 
 const apiRequestRt = z.object({
-  // Do I add method and version here, what else is needed to run all requests?
+  method: z.union([z.literal('post'), z.literal('put'), z.literal('patch'), z.literal('delete')]),
   endpoint: z.string(),
-  // Do these types need to be stricter?
+  version: z.string().optional(),
   query: z.record(z.string(), z.any()).optional(),
   path: z.record(z.string(), z.any()).optional(),
   body: z.record(z.string(), z.any()).optional(),
-  // I guess I don't really care here what any of this is, but on the client side
-  // How can I make sure that the request the UI makes to submit this request still matches the API type of the target
-  // endpoint if I'm using the route repository?
 });
 
-const requestWithMeta = z.object({
-  request: apiRequestRt, // The request to perform if approved
+const requiredPrivilegesRt = z.object({
+  kibana: z.array(z.string()).optional(), // based on security.authz.actions.X.get
+  elasticsearch: z
+    .object({
+      cluster: z.array(z.string()),
+      index: z.record(z.string(), z.array(z.string())),
+    })
+    .optional(),
+});
+
+export type RequiredPrivileges = z.TypeOf<typeof requiredPrivilegesRt>;
+
+const actionRt = z.object({
+  request: apiRequestRt,
+  requiredPrivileges: requiredPrivilegesRt,
+  label: z.string(), // These fields are filled out by the Kibana app, not the user
+  summary: z.string(), // To explain for the admin the resources affected or the impact of this change
   originApp: z.string(), // The Kibana app that this change applies to
-  requiredPrivileges: z.array(z.string()),
 });
 
 export const submitRequestBodyRt = z.object({
-  requests: z.array(requestWithMeta),
-  title: z.string(),
-  description: z.string(),
+  actions: z.array(actionRt),
   urgency: z.union([z.literal('low'), z.literal('medium'), z.literal('high')]),
+  title: z.string(), // User explanation of why this change is needed etc.
+  description: z.string(),
 });
 
 type SubmitRequestBody = z.TypeOf<typeof submitRequestBodyRt>;
@@ -43,7 +54,7 @@ type SubmitRequestBody = z.TypeOf<typeof submitRequestBodyRt>;
 export interface ChangeRequestDoc extends SubmitRequestBody {
   user: string;
   space: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected'; // Maybe in the future we'll also have a status like "exported", and maybe "approved" should be "applied" instead
   submittedAt: string;
   handledAt: string | undefined;
 }
