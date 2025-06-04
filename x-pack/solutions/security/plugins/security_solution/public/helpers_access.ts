@@ -11,7 +11,6 @@ export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean
   return Boolean(
     // Using `siemV2`
     capabilities[SECURITY_FEATURE_ID]?.show ||
-      capabilities.securitySolutionCasesV3?.read_cases ||
       capabilities.securitySolutionAttackDiscovery?.['attack-discovery']
   );
 }

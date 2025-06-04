@@ -443,7 +443,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
-    if (!hasAccessToSecuritySolution(capabilities)) {
+    if (
+      !hasAccessToSecuritySolution(capabilities) &&
+      !capabilities.securitySolutionCasesV3?.read_cases
+    ) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
       // no need to register the links updater when the plugin is inaccessible. return early
       return;
