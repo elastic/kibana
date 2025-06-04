@@ -96,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe.skip('CIS_AWS Organization Manual Assume Role', () => {
+    describe('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
