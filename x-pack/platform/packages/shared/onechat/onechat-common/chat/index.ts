@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-export type {
-  RoundInput,
-  AssistantResponse,
-  ToolCallWithResult,
-  ConversationRound,
-  Conversation,
+export {
+  type RoundInput,
+  type AssistantResponse,
+  type ToolCallWithResult,
+  type ConversationRound,
+  type Conversation,
+  type ToolCallStep,
+  type ConversationRoundStep,
+  ConversationRoundStepType,
+  isToolCallStep,
 } from './conversation';
 export {
   ChatEventType,

@@ -10,6 +10,7 @@ import {
   RoundInput,
   ToolCallWithResult,
   toSerializedToolIdentifier,
+  isToolCallStep,
 } from '@kbn/onechat-common';
 import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 
@@ -41,8 +42,10 @@ export const roundToLangchain = (round: ConversationRound): BaseMessage[] => {
   messages.push(createUserMessage({ content: round.userInput.message }));
 
   // tool calls
-  for (const toolCall of round.toolCalls) {
-    messages.push(...createToolCallMessages(toolCall));
+  for (const step of round.steps) {
+    if (isToolCallStep(step)) {
+      messages.push(...createToolCallMessages(step));
+    }
   }
 
   // assistant response

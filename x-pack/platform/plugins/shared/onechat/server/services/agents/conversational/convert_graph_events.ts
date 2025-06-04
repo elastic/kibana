@@ -19,7 +19,7 @@ import {
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common/agents';
-import { RoundInput } from '@kbn/onechat-common/chat';
+import { RoundInput, ConversationRoundStepType } from '@kbn/onechat-common/chat';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import { extractTextContent, getToolCalls } from './utils/from_langchain_messages';
 
@@ -49,11 +49,12 @@ export const addRoundCompleteEvent = ({
             data: {
               round: {
                 userInput,
-                toolCalls: toolCalls.map((toolCall) => {
+                steps: toolCalls.map((toolCall) => {
                   const toolResult = toolResults.find(
                     (result) => result.toolCallId === toolCall.toolCallId
                   );
                   return {
+                    type: ConversationRoundStepType.toolCall,
                     toolCallId: toolCall.toolCallId,
                     toolId: toolCall.toolId,
                     args: toolCall.args,

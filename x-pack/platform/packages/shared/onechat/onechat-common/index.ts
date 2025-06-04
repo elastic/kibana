@@ -90,4 +90,8 @@ export {
   type ConversationUpdatedEventData,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  type ToolCallStep,
+  type ConversationRoundStep,
+  ConversationRoundStepType,
+  isToolCallStep,
 } from './chat';

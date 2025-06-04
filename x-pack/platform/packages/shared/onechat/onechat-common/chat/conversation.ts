@@ -51,6 +51,26 @@ export interface ToolCallWithResult {
   result: string;
 }
 
+export enum ConversationRoundStepType {
+  toolCall = 'toolCall',
+}
+
+export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, TData> = TData & {
+  type: TType;
+};
+
+export type ToolCallStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.toolCall,
+  ToolCallWithResult
+>;
+
+export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
+  return step.type === ConversationRoundStepType.toolCall;
+};
+
+// may have more type of steps later.
+export type ConversationRoundStep = ToolCallStep;
+
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
@@ -58,12 +78,10 @@ export interface ToolCallWithResult {
 export interface ConversationRound {
   /** The user input that initiated the round */
   userInput: RoundInput;
-  /** List of tool calls with results */
-  toolCalls: ToolCallWithResult[];
+  /** List of intermediate steps before the end result, such as tool calls */
+  steps: ConversationRoundStep[];
   /** The final response from the assistant */
   assistantResponse: AssistantResponse;
-  // TODO: artifacts
-  // TODO: additional stuff we might need?
 }
 
 export interface Conversation {
