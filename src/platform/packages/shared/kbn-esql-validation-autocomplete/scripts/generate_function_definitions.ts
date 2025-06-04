@@ -226,11 +226,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       params: [{}, { constantOnly: true }],
     }),
   },
-  bucket: {
-    signatures: new Array(58).fill({
-      params: [{}, { constantOnly: true }],
-    }),
-  },
   top: {
     signatures: new Array(6).fill({
       params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
@@ -617,10 +612,29 @@ const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
   return groupingFunctionDefinitions.map((op) => {
-    return {
+    const newOp = {
       ...op,
       locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
     };
+    if (newOp.name === 'bucket') {
+      const updatedSignatures = newOp.signatures.map((signature) => {
+        const newSignature = { ...signature };
+        if (newSignature.params && newSignature.params.length > 1) {
+          const indicesToMakeConstantOnly = [1, 2, 3];
+
+          newSignature.params = newSignature.params.map((param, index) => {
+            const newParam = { ...param };
+            if (indicesToMakeConstantOnly.includes(index)) {
+              newParam.constantOnly = true;
+            }
+            return newParam;
+          });
+        }
+        return newSignature;
+      });
+      newOp.signatures = updatedSignatures;
+    }
+    return newOp;
   });
 };
 
