@@ -34,7 +34,7 @@
     "@kbn/i18n-react",
     "@kbn/visualization-utils",
     "@kbn/esql-types",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
   ],
   "exclude": [
     "target/**/*",
