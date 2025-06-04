@@ -21,6 +21,7 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -68,6 +69,8 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
+        - '.adhoc.alerts*'
+        - '.internal.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'

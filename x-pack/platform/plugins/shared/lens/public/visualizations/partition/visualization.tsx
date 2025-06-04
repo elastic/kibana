@@ -15,15 +15,15 @@ import {
   PaletteRegistry,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
-import useObservable from 'react-use/lib/useObservable';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -505,17 +505,15 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
+
     return (
       <DimensionEditor
         {...props}
         paletteService={paletteService}
         palettes={palettes}
-        isDarkMode={theme.darkMode}
+        isDarkMode={isDarkMode}
         formatFactory={formatFactory}
       />
     );

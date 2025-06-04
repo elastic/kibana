@@ -10,10 +10,15 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
+import {
+  reportAttackDiscoveryGenerationFailure,
+  reportAttackDiscoveryGenerationSuccess,
+} from '../../../../routes/attack_discovery/helpers/telemetry';
 import {
   mockAnonymizedAlerts,
   mockAnonymizedAlertsReplacements,
@@ -29,9 +34,16 @@ jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', ()
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
+jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
+  ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
+  reportAttackDiscoveryGenerationFailure: jest.fn(),
+  reportAttackDiscoveryGenerationSuccess: jest.fn(),
+}));
 
 describe('attackDiscoveryScheduleExecutor', () => {
+  const date = '2025-05-20T15:18:21.000Z';
   const mockLogger = loggerMock.create();
+  const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
   const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const spaceId = 'test-space';
@@ -80,21 +92,35 @@ describe('attackDiscoveryScheduleExecutor', () => {
         must_not: [],
       },
     },
-    size: '123',
+    size: 123,
     start: 'now-24h',
   };
   const executorOptions = {
     params,
+    rule: {
+      id: 'rule-1',
+      schedule: { interval: '12m' },
+      actions: [{ actionTypeId: '.slack' }, { actionTypeId: '.jest' }],
+    },
     services: {
       ...services,
       actionsClient,
+      shouldStopExecution: () => false,
     },
     spaceId,
     state: {},
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.setSystemTime(new Date(date));
 
     (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
@@ -114,8 +140,9 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
-      logger: mockLogger,
       options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
     });
     await expect(attackDiscoveryScheduleExecutorPromise).rejects.toBeInstanceOf(AlertsClientError);
   });
@@ -126,8 +153,9 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
-      logger: mockLogger,
       options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
     });
     await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Expected actionsClient not to be null!"'
@@ -137,7 +165,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
   it('should call `findDocuments` with the correct arguments', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
-    await attackDiscoveryScheduleExecutor({ logger: mockLogger, options });
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
+    });
 
     expect(findDocuments).toHaveBeenCalledWith({
       esClient: services.scopedClusterClient.asCurrentUser,
@@ -151,7 +183,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
   it('should call `generateAttackDiscoveries` with the correct arguments', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
-    await attackDiscoveryScheduleExecutor({ logger: mockLogger, options });
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
+    });
     const anonymizationFields = [
       {
         timestamp: '2019-12-13T16:40:33.400Z',
@@ -175,10 +211,56 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
   });
 
+  it('should call `reportAttackDiscoveryGenerationFailure` with the correct arguments', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(new Error('Big time failure'));
+
+    await expect(async () => {
+      await attackDiscoveryScheduleExecutor({
+        options,
+        logger: mockLogger,
+        telemetry: mockTelemetry,
+      });
+    }).rejects.toThrow();
+
+    expect(reportAttackDiscoveryGenerationFailure).toHaveBeenCalledWith({
+      apiConfig: params.apiConfig,
+      errorMessage: 'Big time failure',
+      scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
+      telemetry: mockTelemetry,
+    });
+  });
+
+  it('should call `reportAttackDiscoveryGenerationSuccess` with the correct arguments', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
+    });
+
+    expect(reportAttackDiscoveryGenerationSuccess).toHaveBeenCalledWith({
+      alertsContextCount: 2,
+      apiConfig: params.apiConfig,
+      attackDiscoveries: mockAttackDiscoveries,
+      durationMs: 0,
+      hasFilter: true,
+      scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
+      size: 123,
+      start: 'now-24h',
+      telemetry: mockTelemetry,
+    });
+  });
+
   it('should report generated attack discoveries as alerts', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
-    await attackDiscoveryScheduleExecutor({ logger: mockLogger, options });
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      telemetry: mockTelemetry,
+    });
 
     const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
@@ -233,5 +315,19 @@ describe('attackDiscoveryScheduleExecutor', () => {
       },
       context: { attack: restDiscovery },
     });
+  });
+
+  it('should throw an error on execution timeout', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    options.services.shouldStopExecution = () => true;
+
+    const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      logger: mockLogger,
+      options,
+      telemetry: mockTelemetry,
+    });
+    await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Rule execution cancelled due to timeout"'
+    );
   });
 });
