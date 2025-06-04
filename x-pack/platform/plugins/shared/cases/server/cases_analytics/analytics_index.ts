@@ -14,7 +14,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { isRetryableEsClientError } from './utils';
 import {
   CAI_NUMBER_OF_SHARDS,
   CAI_AUTO_EXPAND_REPLICAS,
@@ -100,8 +99,9 @@ export class AnalyticsIndex {
       await this.retryService.retryWithBackoff(() => this._upsertIndex());
     } catch (error) {
       // We do not throw because errors should not break execution
-      this.logger.error(`[${this.indexName}] Failed to create index.`);
-      this.logger.error(error.message);
+      this.logger.error(
+        `[${this.indexName}] Failed to create index. Error message: ${error.message}`
+      );
     }
   }
 
@@ -143,10 +143,7 @@ export class AnalyticsIndex {
 
   private async updateMapping() {
     this.logger.debug(`[${this.indexName}] Updating the painless script.`);
-    await this.esClient.putScript({
-      id: this.painlessScriptId,
-      script: this.painlessScript,
-    });
+    await this.putScript();
 
     this.logger.debug(`[${this.indexName}] Updating index mapping.`);
     await this.esClient.indices.putMapping({
@@ -160,10 +157,7 @@ export class AnalyticsIndex {
 
   private async createIndexMapping() {
     this.logger.debug(`[${this.indexName}] Creating painless script.`);
-    await this.esClient.putScript({
-      id: this.painlessScriptId,
-      script: this.painlessScript,
-    });
+    await this.putScript();
 
     this.logger.debug(`[${this.indexName}] Creating index.`);
     await this.esClient.indices.create({
@@ -195,12 +189,17 @@ export class AnalyticsIndex {
   }
 
   private handleError(message: string, error: EsErrors.ElasticsearchClientError) {
-    this.logger.error(`[${this.indexName}] ${message}`);
+    this.logger.error(`[${this.indexName}] ${message} Error message: ${error.message}`);
     this.logger.error(error.message);
 
-    if (isRetryableEsClientError(error)) {
-      throw error;
-    }
+    throw error;
+  }
+
+  private async putScript() {
+    await this.esClient.putScript({
+      id: this.painlessScriptId,
+      script: this.painlessScript,
+    });
   }
 
   private async scheduleBackfillTask() {

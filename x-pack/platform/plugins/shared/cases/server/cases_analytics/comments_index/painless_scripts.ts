@@ -6,29 +6,30 @@
  */
 
 import type { StoredScript } from '@elastic/elasticsearch/lib/api/types';
+import { CAI_COMMENTS_INDEX_VERSION } from './constants';
 
-export const CAI_COMMENTS_INDEX_SCRIPT_ID = 'cai_comments_script_1';
+export const CAI_COMMENTS_INDEX_SCRIPT_ID = `cai_comments_script_${CAI_COMMENTS_INDEX_VERSION}`;
 export const CAI_COMMENTS_INDEX_SCRIPT: StoredScript = {
   lang: 'painless',
   source: `
+    def source = [:];
+    source.putAll(ctx._source);
+    ctx._source.clear();
+
     long milliSinceEpoch = new Date().getTime();
     Instant instant = Instant.ofEpochMilli(milliSinceEpoch);
     ctx._source['@timestamp'] = ZonedDateTime.ofInstant(instant, ZoneId.of('Z'));
 
-    ctx._source.comment = ctx._source["cases-comments"].remove("comment");
-    ctx._source.created_at = ctx._source["cases-comments"].remove("created_at");
-    ctx._source.created_by = ctx._source["cases-comments"].remove("created_by");
-    ctx._source.owner = ctx._source["cases-comments"].remove("owner");
+    ctx._source.comment = source["cases-comments"].comment;
+    ctx._source.created_at = source["cases-comments"].created_at;
+    ctx._source.created_by = source["cases-comments"].created_by;
+    ctx._source.owner = source["cases-comments"].owner;
+    ctx._source.space_ids = source.namespaces;
 
-    for (item in ctx._source.references) {
+    for (item in source.references) {
       if (item.type == "cases") {
         ctx._source.case_id = item.id;
       }
     }
-
-    ctx._source.remove("updated_at");
-    ctx._source.remove("cases-comments");
-    ctx._source.remove("type");
-    ctx._source.remove("references"); // ?
   `,
 };

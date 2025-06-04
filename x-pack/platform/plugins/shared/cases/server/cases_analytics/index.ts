@@ -16,7 +16,7 @@ import { createCasesAnalyticsIndex } from './cases_index';
 import { createCommentsAnalyticsIndex } from './comments_index';
 import { createAttachmentsAnalyticsIndex } from './attachments_index';
 
-export const createCasesAnalyticsIndexes = async ({
+export const createCasesAnalyticsIndexes = ({
   esClient,
   logger,
   isServerless,

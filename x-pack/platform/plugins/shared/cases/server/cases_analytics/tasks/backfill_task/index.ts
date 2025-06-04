@@ -15,7 +15,7 @@ import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { CaseAnalyticsIndexBackfillTaskFactory } from './backfill_task_factory';
-import { TASK_TYPE, RUN_INTERVAL } from './constants';
+import { TASK_TYPE, BACKFILL_RUN_AT } from './constants';
 
 export function registerCAIBackfillTask({
   taskManager,
@@ -62,7 +62,7 @@ export async function scheduleCAIBackfillTask({
       id: taskId,
       taskType: TASK_TYPE,
       params: { sourceIndex, destIndex, sourceQuery },
-      runAt: new Date(Date.now() + RUN_INTERVAL), // todo, value is short for testing but should run after 5 minutes
+      runAt: new Date(Date.now() + BACKFILL_RUN_AT), // todo, value is short for testing but should run after 5 minutes
       state: {},
     });
   } catch (e) {

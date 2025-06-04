@@ -11,6 +11,8 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 export const CAI_CASES_INDEX_NAME = '.internal.cases';
 
+export const CAI_CASES_INDEX_VERSION = 1;
+
 export const CAI_CASES_SOURCE_QUERY: QueryDslQueryContainer = {
   term: {
     type: 'cases',

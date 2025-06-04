@@ -7,11 +7,12 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { CAI_CASES_INDEX_SCRIPT_ID } from './painless_scripts';
+import { CAI_CASES_INDEX_VERSION } from './constants';
 
 export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   _meta: {
-    mapping_version: 1,
+    mapping_version: CAI_CASES_INDEX_VERSION,
     painless_script_id: CAI_CASES_INDEX_SCRIPT_ID,
   },
   properties: {
@@ -111,21 +112,24 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     assignees: {
       type: 'keyword',
     },
-    // Application level
     time_to_resolve: {
-      type: 'long', // in seconds, calculated by case.closed_at - case.created_at
+      // in seconds, calculated by case.closed_at - case.created_at
+      type: 'long',
     },
-    // leaving these commented out for that since in_progress_at does not exist.
-    // time_to_acknowledge: {
-    //   type: 'long', // in seconds, calculated by case.in_progress_at - case.created_at
-    // },
-    // time_to_investigaste: {
-    //   type: 'long', // in seconds, calculated by case.closed_at - case.in_progress_at
-    // },
-    // custom_fields might change to type: 'nested' like in cases
+    time_to_acknowledge: {
+      // in seconds, calculated by case.in_progress_at - case.created_at
+      type: 'long',
+    },
+    time_to_investigaste: {
+      // in seconds, calculated by case.closed_at - case.in_progress_at
+      type: 'long',
+    },
     custom_fields: {
       properties: {
         type: {
+          type: 'keyword',
+        },
+        key: {
           type: 'keyword',
         },
         value: {
@@ -140,13 +144,8 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
           type: 'keyword',
         },
         value: {
-          // called typeKey in the cases mapping
           type: 'keyword',
         },
-        // Application level
-        // label: {
-        //   type: 'keyword',
-        // },
       },
     },
     total_assignees: {
@@ -155,9 +154,8 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     owner: {
       type: 'keyword',
     },
-    // Where does this come from?
-    // spaceId: {
-    //   type: 'keyword',
-    // },
+    space_ids: {
+      type: 'keyword',
+    },
   },
 };

@@ -135,6 +135,9 @@ export class BackfillTaskRunner implements CancellableTask {
   }
 
   private async waitForDestIndex(esClient: ElasticsearchClient) {
+    this.logger.debug(`Checking ${this.destIndex} availability.`, {
+      tags: ['cai-backfill-debug'],
+    });
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',

@@ -11,6 +11,8 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 export const CAI_COMMENTS_INDEX_NAME = '.internal.cases-comments';
 
+export const CAI_COMMENTS_INDEX_VERSION = 1;
+
 export const CAI_COMMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
   bool: {
     filter: [
