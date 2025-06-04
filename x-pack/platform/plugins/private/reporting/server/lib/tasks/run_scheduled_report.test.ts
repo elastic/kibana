@@ -468,7 +468,7 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('06/04/2025');
+      const runAt = new Date('2025-06-04T00:00:00Z');
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
@@ -480,7 +480,7 @@ describe('Run Scheduled Report Task', () => {
           bcc: ['test2@test.com'],
           cc: undefined,
           spaceId: 'default',
-          subject: 'Test Report [2025-06-04T07:00:00.000Z] scheduled report',
+          subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
           to: ['test1@test.com'],
         },
         id: '290357209345723095',
@@ -498,7 +498,7 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('06/04/2025');
+      const runAt = new Date('2025-06-04T00:00:00Z');
       const byteSize = 11534336; // 11MB
       const output = { content_type: 'application/pdf' };
 
@@ -522,7 +522,7 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager);
-      const runAt = new Date('06/04/2025');
+      const runAt = new Date('2025-06-04T00:00:00Z');
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
@@ -550,7 +550,7 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('06/04/2025');
+      const runAt = new Date('2025-06-04T00:00:00Z');
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
@@ -562,7 +562,7 @@ describe('Run Scheduled Report Task', () => {
           bcc: ['test2@test.com'],
           cc: undefined,
           spaceId: 'default',
-          subject: 'Test Report [2025-06-04T07:00:00.000Z] scheduled report',
+          subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
           to: ['test1@test.com'],
         },
         id: '290357209345723095',
