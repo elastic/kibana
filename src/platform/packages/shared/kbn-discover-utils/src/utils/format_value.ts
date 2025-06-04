@@ -10,10 +10,10 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  type FieldFormatsContentType,
-  type HtmlContextTypeOptions,
-  type TextContextTypeOptions,
+import type {
+  FieldFormatsContentType,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
 import { EsHitRecord } from '../types';
 
