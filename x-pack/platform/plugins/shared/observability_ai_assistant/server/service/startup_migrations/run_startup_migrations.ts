@@ -129,7 +129,7 @@ async function allowInferenceEndpointScaleToZero({
 }) {
   try {
     const response = await esClient.asInternalUser.ml.getTrainedModelsStats({
-      model_id: 'obs_ai_assistant_kb_inference',
+      model_id: LEGACY_CUSTOM_INFERENCE_ID,
     });
 
     if (response.count === 0) {
