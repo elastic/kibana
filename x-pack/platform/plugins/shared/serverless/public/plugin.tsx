@@ -45,8 +45,9 @@ export class ServerlessPlugin
     core: CoreStart,
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
-    // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { chrome, rendering } = core;
+
+    // Casting the "chrome.project" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = chrome as InternalChromeStart;
     const { cloud } = dependencies;
 
