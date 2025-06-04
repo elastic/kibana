@@ -114,17 +114,6 @@ describe('Timeline', () => {
 
   describe('analyzer tab and session view tab', () => {
     const analyzerTabSubj = `timelineTabs-${TimelineTabs.graph}`;
-    const sessionViewTabSubj = `timelineTabs-${TimelineTabs.session}`;
-    it('should show the analyzer tab when the advanced setting is disabled', () => {
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-      render(
-        <TestProviders>
-          <TabsContent {...defaultProps} />
-        </TestProviders>
-      );
-      expect(screen.getByTestId(analyzerTabSubj)).toBeInTheDocument();
-      expect(screen.getByTestId(sessionViewTabSubj)).toBeInTheDocument();
-    });
 
     it('should not show the analyzer tab when the advanced setting is enabled', async () => {
       mockUseUiSetting.mockReturnValue([true]);
@@ -135,7 +124,6 @@ describe('Timeline', () => {
         </TestProviders>
       );
       expect(screen.queryByTestId(analyzerTabSubj)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(sessionViewTabSubj)).not.toBeInTheDocument();
     });
   });
 

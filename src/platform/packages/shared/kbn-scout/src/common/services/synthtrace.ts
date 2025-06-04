@@ -40,11 +40,10 @@ export async function getApmSynthtraceEsClient(
       logger,
       refreshAfterIndex: true,
       version,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    apmSynthtraceEsClientInstance.pipeline(
-      apmSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('apmSynthtraceClient');
   }
@@ -72,11 +71,10 @@ export async function getInfraSynthtraceEsClient(
       client: esClient,
       logger,
       refreshAfterIndex: true,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    infraSynthtraceEsClientInstance.pipeline(
-      infraSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('infraSynthtraceClient');
   }

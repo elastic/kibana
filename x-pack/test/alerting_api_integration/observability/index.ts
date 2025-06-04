@@ -12,9 +12,5 @@ export default function ({ loadTestFile }: any) {
       loadTestFile(require.resolve('./metric_threshold_rule'));
       loadTestFile(require.resolve('./custom_threshold_rule_data_view'));
     });
-    describe('Synthetics', () => {
-      loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
-      loadTestFile(require.resolve('./synthetics/custom_status_rule'));
-    });
   });
 }

@@ -14,6 +14,7 @@ import {
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
+import { getConcreteWriteIndexFromAlias } from './knowledge_base';
 
 export async function runStartupMigrations(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
@@ -67,9 +68,16 @@ export async function restoreIndexAssets(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const retry = getService('retry');
+  const es = getService('es');
+  const log = getService('log');
 
-  await deleteIndexAssets(getService);
-  await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+  await retry.try(async () => {
+    log.debug('Restoring index assets');
+    await deleteIndexAssets(getService);
+    await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+    expect(await getConcreteWriteIndexFromAlias(es)).to.be(resourceNames.concreteWriteIndexName.kb);
+  });
 }
 
 export async function getComponentTemplate(es: Client) {

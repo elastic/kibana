@@ -117,7 +117,7 @@ components:
           $ref: '../../../common/api/detection_engine/model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
 
     RuleMigration:
-      description: The rule migration document object.
+      description: The rule migration object with its settings.
       allOf:
         - type: object
           required:
@@ -129,6 +129,36 @@ components:
         - $ref: '#/components/schemas/RuleMigrationData'
 
     RuleMigrationData:
+      type: object
+      description: The rule migration object ( without Id ) with its settings.
+      required:
+        - created_by
+        - created_at
+      properties:
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          description:  The moment migration was created
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        last_execution:
+          description: The last execution of the rule migration task.
+          $ref: '#/components/schemas/RuleMigrationLastExecution'
+
+
+    RuleMigrationRule:
+      description: The rule migration document object.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/RuleMigrationRuleData'
+
+    RuleMigrationRuleData:
       type: object
       description: The rule migration document object.
       required:
@@ -229,6 +259,7 @@ components:
         - running
         - stopped
         - finished
+        - aborted
 
     RuleMigrationTranslationStats:
       type: object
@@ -331,7 +362,7 @@ components:
         description: The comments for the migration
         $ref: '#/components/schemas/RuleMigrationComment'
 
-    UpdateRuleMigrationData:
+    UpdateRuleMigrationRule:
       type: object
       description: The rule migration data object for rule update operation
       required:
@@ -353,6 +384,26 @@ components:
       enum: # should match SiemMigrationRetryFilter enum at ../constants.ts
         - failed
         - not_fully_translated
+
+    RuleMigrationAllIntegrationsStats:
+      type: array
+      description: The integrations stats objects of all the rule of all the migrations.
+      items:
+        description: The migration rules integration stats object.
+        $ref: '#/components/schemas/RuleMigrationIntegrationStats'
+    RuleMigrationIntegrationStats:
+      type: object
+      description: The migration rules integration stats object.
+      required:
+        - id
+        - total_rules
+      properties:
+        id:
+          description: The integration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        total_rules:
+          type: integer
+          description: The number of rules that are associated with the integration.
 
     ## Rule migration resources
 
@@ -417,3 +468,25 @@ components:
             updated_by:
               type: string
               description: The user who last updated the resource
+
+    RuleMigrationLastExecution:
+      type: object
+      description: The last execution of the rule migration task.
+      properties:
+        started_at:
+          type: string
+          description: The moment the last execution started.
+        ended_at:
+          type: string
+          nullable: true
+          description: The moment the last execution ended.
+        connector_id:
+          type: string
+          description: The connector ID used for the last execution.
+        error:
+          type: string
+          nullable: true
+          description: The error message if the last execution failed.
+        is_aborted:
+          type: boolean
+          description: Indicates if the last execution was aborted by the user.

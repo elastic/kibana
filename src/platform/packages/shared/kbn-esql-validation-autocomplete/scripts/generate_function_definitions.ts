@@ -322,7 +322,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE];
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,

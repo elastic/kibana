@@ -29,20 +29,19 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async ({
-    service,
-    request,
-  }): Promise<{
+  handler: async (
+    resources
+  ): Promise<{
     errorMessage?: string;
     enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
-    currentInferenceId: string | undefined;
+    currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
   }> => {
-    const client = await service.getClient({ request });
+    const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();
   },
 });
@@ -50,9 +49,10 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
 const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
   params: t.type({
-    query: t.type({
-      inference_id: t.string,
-    }),
+    query: t.intersection([
+      t.type({ inference_id: t.string }),
+      t.partial({ wait_until_complete: toBooleanRt }),
+    ]),
   }),
   security: {
     authz: {
@@ -67,8 +67,9 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
     nextInferenceId: string;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    const { inference_id: inferenceId } = resources.params.query;
-    return client.setupKnowledgeBase(inferenceId);
+    const { inference_id: inferenceId, wait_until_complete: waitUntilComplete } =
+      resources.params.query;
+    return client.setupKnowledgeBase(inferenceId, waitUntilComplete);
   },
 });
 
@@ -163,7 +164,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   params: t.type({
     body: t.type({
       id: t.string,
-      text: t.string,
+      text: nonEmptyStringRt,
       public: toBooleanRt,
     }),
   }),
@@ -177,7 +178,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
 
     const { id, text, public: isPublic } = resources.params.body;
     return client.addUserInstruction({
-      entry: { id, text, public: isPublic },
+      entry: { id, text, public: isPublic, title: `User instruction` },
     });
   },
 });

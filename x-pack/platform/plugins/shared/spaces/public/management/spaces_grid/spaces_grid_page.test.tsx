@@ -67,6 +67,15 @@ describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
   it('renders the list of spaces', async () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
@@ -169,6 +178,54 @@ describe('SpacesGridPage', () => {
         }),
       ])
     );
+  });
+
+  it('renders filtered spaces based on search input', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    await act(async () => {});
+    wrapper.update();
+
+    const searchBox = wrapper.find('[data-test-subj="spacesListTableSearchBox"] input');
+    expect(searchBox.exists()).toBe(true);
+
+    searchBox.simulate('keyup', { key: 'Enter', target: { value: 'Custom 1' } });
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    wrapper.update();
+
+    const filteredItems = wrapper.find('EuiInMemoryTable').prop('items');
+
+    expect(filteredItems).toEqual([
+      {
+        id: 'custom-1',
+        name: 'Custom 1',
+        disabledFeatures: [],
+        solution: 'es',
+      },
+    ]);
   });
 
   it('renders a "current" badge for the current space', async () => {

@@ -7,14 +7,12 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import pRetry from 'p-retry';
 import { errors } from '@elastic/elasticsearch';
 import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { populateMissingSemanticTextFieldWithLock } from './populate_missing_semantic_text_fields';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';
 
@@ -57,22 +55,6 @@ export async function runStartupMigrations({
       if (!isKbSemanticTextCompatible) {
         await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
       }
-
-      await pRetry(
-        async () => populateMissingSemanticTextFieldWithLock({ core, logger, config, esClient }),
-        {
-          retries: 5,
-          minTimeout: 10_000,
-          onFailedAttempt: async (error) => {
-            // if the error is a LockAcquisitionError the operation is already in progress and we should not retry
-            // for other errors we should retry
-            // throwing the error will cause pRetry to abort all retries
-            if (isLockAcquisitionError(error)) {
-              throw error;
-            }
-          },
-        }
-      );
     })
     .catch((error) => {
       // we should propogate the error if it is not a LockAcquisitionError

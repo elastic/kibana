@@ -1,4 +1,5 @@
 {
+  "esModuleInterop": true,
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",

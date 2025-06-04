@@ -31,9 +31,10 @@ import {
 } from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
-const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
+const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
   filters,
+  pageFilters,
   sort: [['@timestamp', 'desc']],
 });
 
@@ -87,7 +88,6 @@ const AllAssetsComponent = () => {
         <AssetInventoryTitle />
         <EuiSpacer size="l" />
         <OnboardingSuccessCallout />
-        <EuiSpacer size="l" />
         <AssetInventoryFilters setQuery={setUrlQuery} />
         <EuiSpacer size="l" />
         <AssetInventoryBarChart
@@ -95,7 +95,7 @@ const AllAssetsComponent = () => {
           isFetching={isFetchingChartData}
           assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
         />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="xl" />
         <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>
     </I18nProvider>

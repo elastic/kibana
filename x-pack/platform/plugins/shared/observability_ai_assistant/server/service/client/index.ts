@@ -70,7 +70,6 @@ import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
@@ -664,7 +663,8 @@ export class ObservabilityAIAssistantClient {
   };
 
   setupKnowledgeBase = async (
-    nextInferenceId: string
+    nextInferenceId: string,
+    waitUntilComplete: boolean = false
   ): Promise<{
     reindex: boolean;
     currentInferenceId: string | undefined;
@@ -674,16 +674,15 @@ export class ObservabilityAIAssistantClient {
 
     logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
 
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
-      logger.debug(
-        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
-      );
-      return undefined;
-    });
-
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
     if (currentInferenceId === nextInferenceId) {
       logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
+      if (waitUntilComplete) {
+        logger.debug('Waiting for warmup to complete...');
+        await warmupModelPromise;
+        logger.debug('Warmup completed.');
+      }
       return { reindex: false, currentInferenceId, nextInferenceId };
     }
 
@@ -693,7 +692,7 @@ export class ObservabilityAIAssistantClient {
       inferenceId: nextInferenceId,
     });
 
-    waitForKbModel({
+    const kbSetupPromise = waitForKbModel({
       core: this.dependencies.core,
       esClient,
       logger,
@@ -710,12 +709,6 @@ export class ObservabilityAIAssistantClient {
           logger,
           esClient,
         });
-        await populateMissingSemanticTextFieldWithLock({
-          core,
-          logger,
-          config: this.dependencies.config,
-          esClient: this.dependencies.esClient,
-        });
       })
       .catch((e) => {
         if (isLockAcquisitionError(e)) {
@@ -728,17 +721,21 @@ export class ObservabilityAIAssistantClient {
         }
       });
 
+    if (waitUntilComplete) {
+      logger.debug('Waiting for knowledge base setup to complete...');
+      await kbSetupPromise;
+      logger.debug('Knowledge base setup completed.');
+    }
+
     return { reindex: true, currentInferenceId, nextInferenceId };
   };
 
   warmupKbModel = (inferenceId: string) => {
-    return waitForKbModel({
-      core: this.dependencies.core,
-      esClient: this.dependencies.esClient,
-      logger: this.dependencies.logger,
-      config: this.dependencies.config,
-      inferenceId,
-    });
+    const { esClient, logger } = this.dependencies;
+
+    logger.debug(`Warming up model for for inference ID: ${inferenceId}`);
+    warmupModel({ esClient, logger, inferenceId }).catch(() => {});
+    return;
   };
 
   reIndexKnowledgeBaseWithLock = () => {
@@ -767,7 +764,7 @@ export class ObservabilityAIAssistantClient {
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
-    this.dependencies.logger.debug('Adding user instruction entry');
+
     const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
       isPublic: entry.public,
       namespace: this.dependencies.namespace,
@@ -775,8 +772,14 @@ export class ObservabilityAIAssistantClient {
     });
 
     if (existingId) {
+      this.dependencies.logger.debug(
+        `Updating user instruction. id = "${existingId}", user = "${this.dependencies.user?.name}"`
+      );
       entry.id = existingId;
-      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    } else {
+      this.dependencies.logger.debug(
+        `Creating user instruction. id = "${entry.id}", user = "${this.dependencies.user?.name}"`
+      );
     }
 
     return this.dependencies.knowledgeBaseService.addEntry({

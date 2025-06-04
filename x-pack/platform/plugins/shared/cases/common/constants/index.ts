@@ -161,6 +161,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
+  observables: { enabled: true },
 });
 
 /**

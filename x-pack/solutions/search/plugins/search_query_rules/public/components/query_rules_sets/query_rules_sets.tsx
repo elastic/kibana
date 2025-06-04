@@ -22,6 +22,8 @@ import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_table_data';
 import { QueryRulesSetsSearch } from './query_rules_sets_search';
+import { DeleteRulesetModal } from './delete_ruleset_modal';
+import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
 
 export const QueryRulesSets = () => {
   const {
@@ -32,6 +34,7 @@ export const QueryRulesSets = () => {
   const [searchKey, setSearchKey] = useState('');
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: queryRulesData } = useFetchQueryRulesSets({ from, size: pageSize });
+  const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
     queryRulesData?.data,
@@ -72,25 +75,84 @@ export const QueryRulesSets = () => {
         <div data-test-subj="queryRuleSetItemRuleCount">{ruleCount}</div>
       ),
     },
+    {
+      actions: [
+        {
+          render: (item: QueryRulesListRulesetsQueryRulesetListItem) => {
+            return (
+              <UseRunQueryRuleset
+                rulesetId={item.ruleset_id}
+                type="contextMenuItem"
+                content={i18n.translate('xpack.queryRules.queryRulesSetTable.actions.run', {
+                  defaultMessage: 'Test in Console',
+                })}
+              />
+            );
+          },
+        },
+        {
+          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.edit', {
+            defaultMessage: 'Edit',
+          }),
+          description: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.editDescription', {
+              defaultMessage: 'Edit query ruleset {name}',
+              values: { name: ruleset.ruleset_id },
+            }),
+          icon: 'pencil',
+          color: 'text',
+          type: 'icon',
+          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            application.navigateToUrl(
+              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${ruleset.ruleset_id}`)
+            ),
+        },
+        {
+          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.delete', {
+            defaultMessage: 'Delete',
+          }),
+          description: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.deleteDescription', {
+              defaultMessage: 'Delete query ruleset {name}',
+              values: { name: ruleset.ruleset_id },
+            }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          isPrimary: true,
+          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
+            setRulesetToDelete(ruleset.ruleset_id);
+          },
+        },
+      ],
+    },
   ];
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiBasicTable
-          data-test-subj="queryRulesSetTable"
-          items={queryRulesSetsFilteredData} // Use filtered data from hook
-          columns={columns}
-          pagination={pagination}
-          onChange={({ page: changedPage }) => {
-            setPageIndex(changedPage.index);
-            setPageSize(changedPage.size);
-          }}
+    <>
+      {rulesetToDelete && (
+        <DeleteRulesetModal
+          rulesetId={rulesetToDelete}
+          closeDeleteModal={() => setRulesetToDelete(null)}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiBasicTable
+            data-test-subj="queryRulesSetTable"
+            items={queryRulesSetsFilteredData} // Use filtered data from hook
+            columns={columns}
+            pagination={pagination}
+            onChange={({ page: changedPage }) => {
+              setPageIndex(changedPage.index);
+              setPageSize(changedPage.size);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

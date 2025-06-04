@@ -324,6 +324,13 @@ export class StreamsClient {
     throw streamDefinition;
   }
 
+  private getStreamDefinitionFromSource(source: Streams.all.Definition | undefined) {
+    if (!source) {
+      throw new DefinitionNotFoundError(`Cannot find stream definition`);
+    }
+    return source;
+  }
+
   /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
@@ -339,9 +346,7 @@ export class StreamsClient {
     try {
       const response = await this.dependencies.storageClient.get({ id: name });
 
-      const streamDefinition = response._source!;
-
-      Streams.all.Definition.asserts(streamDefinition);
+      const streamDefinition = this.getStreamDefinitionFromSource(response._source);
 
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
@@ -372,9 +377,7 @@ export class StreamsClient {
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
     return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
-        const source = response._source!;
-        Streams.all.Definition.asserts(source);
-        return source;
+        return this.getStreamDefinitionFromSource(response._source);
       }),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
@@ -419,14 +422,16 @@ export class StreamsClient {
    * include the dashboard links.
    */
   async getPrivileges(name: string) {
+    const REQUIRED_MANAGE_PRIVILEGES = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [
-          'manage_index_templates',
-          'manage_ingest_pipelines',
-          'manage_pipeline',
-          'read_pipeline',
-        ],
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
         index: [
           {
             names: [name],
@@ -445,12 +450,13 @@ export class StreamsClient {
 
     return {
       manage:
-        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
         Object.values(privileges.index[name]).every((privilege) => privilege === true),
       monitor: privileges.index[name].monitor,
       lifecycle:
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+      text_structure: privileges.cluster.monitor_text_structure,
     };
   }
 
@@ -562,11 +568,9 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) => {
-      const source = hit._source!;
-      Streams.all.Definition.asserts(source);
-      return source;
-    });
+    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
+      this.getStreamDefinitionFromSource(hit._source)
+    );
 
     const privileges = await checkAccessBulk({
       names: streams
