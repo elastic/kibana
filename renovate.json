@@ -1810,7 +1810,8 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
