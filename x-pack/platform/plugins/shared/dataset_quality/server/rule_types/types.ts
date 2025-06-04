@@ -37,7 +37,7 @@ export interface AdditionalContext {
   [x: string]: any;
 }
 
-export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'dataset_quality';
+export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'dataset.quality';
 export const DATASET_QUALITY_DATASTREAM_NAME = '_dataStreamName';
 
 const THRESHOLD_MET_GROUP_ID = 'threshold_met';
