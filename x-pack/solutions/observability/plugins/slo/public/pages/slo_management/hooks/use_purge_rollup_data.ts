@@ -15,7 +15,7 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void } = {}) {
+export function usePurgeRollupData({ name, onConfirm }: { name: string; onConfirm?: () => void }) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -35,19 +35,19 @@ export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void }
       });
     },
     {
-      onError: (error, { list }) => {
+      onError: (error) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.slo.bulkPurge.errorNotification', {
-            defaultMessage: 'Failed to schedule bulk purge of rollup data for {count} SLOs',
-            values: { count: list.length },
+            defaultMessage: 'Failed to schedule bulk purge of rollup data for {name}',
+            values: { name },
           }),
         });
       },
-      onSuccess: (_, { list }) => {
+      onSuccess: () => {
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkPurge.successNotification', {
-            defaultMessage: 'Bulk purge of rollup data scheduled for {count} SLOs',
-            values: { count: list.length },
+            defaultMessage: 'Bulk purge of rollup data scheduled for {name}',
+            values: { name },
           })
         );
         onConfirm?.();

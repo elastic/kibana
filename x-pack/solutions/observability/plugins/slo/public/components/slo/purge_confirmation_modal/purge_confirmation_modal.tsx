@@ -16,21 +16,29 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import moment, { Moment } from 'moment';
-import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
+
+export interface PurgePolicyData {
+  purgeType: string;
+  purgeDate: Moment | null;
+  forcePurge: boolean;
+  age: string;
+}
 
 export interface Props {
   onCancel: () => void;
-  onConfirm: () => void;
-  items: SLODefinitionResponse[];
-  single: boolean;
+  onConfirm: (purgePolicyData: PurgePolicyData) => void;
+  modalTitle: string;
+  purgePolicyHelpText: string;
 }
 
-export function SloPurgeConfirmationModal({ items, single, onCancel, onConfirm }: Props) {
-  const { mutate: bulkPurge } = useBulkPurgeRollupData({ onConfirm });
-
+export function SloPurgeConfirmationModal({
+  modalTitle,
+  purgePolicyHelpText,
+  onCancel,
+  onConfirm,
+}: Props) {
   const [purgeDate, setPurgeDate] = React.useState<Moment | null>(moment());
   const [purgeType, setPurgeType] = React.useState<string>('fixed_age');
   const [forcePurge, setForgePurge] = React.useState<boolean>(false);
@@ -42,33 +50,15 @@ export function SloPurgeConfirmationModal({ items, single, onCancel, onConfirm }
     defaultMessage: 'Purge data older than',
   });
 
-  const MODAL_TITLE = single
-    ? i18n.translate('xpack.slo.purgeConfirmationModal.title', {
-        defaultMessage: 'Purge {name}',
-        values: { name: items[0].name },
-      })
-    : i18n.translate('xpack.slo.purgeConfirmationModal.title', {
-        defaultMessage: 'Purge {count} SLOs',
-        values: { count: items.length },
-      });
-
-  const PURGE_POLICY_HELP_TEXT = single
-    ? i18n.translate('xpack.slo.purgeConfirmationModal.descriptionText', {
-        defaultMessage:
-          'Rollup data for {count} SLOs will be purged according to the policy provided below.',
-        values: { count: items.length },
-      })
-    : i18n.translate('xpack.slo.purgeConfirmationModal.descriptionText', {
-        defaultMessage:
-          'Rollup data for {name} will be purged according to the policy provided below.',
-        values: { name: items[0].name },
-      });
+  const onClickConfirm = () => {
+    onConfirm({ purgeDate, purgeType, forcePurge, age });
+  };
 
   return (
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="sloPurgeConfirmationModal"
-      title={MODAL_TITLE}
+      title={modalTitle}
       cancelButtonText={i18n.translate('xpack.slo.purgeConfirmationModal.cancelButtonLabel', {
         defaultMessage: 'Cancel',
       })}
@@ -76,24 +66,9 @@ export function SloPurgeConfirmationModal({ items, single, onCancel, onConfirm }
         defaultMessage: 'Purge',
       })}
       onCancel={onCancel}
-      onConfirm={() => {
-        bulkPurge({
-          list: items.map(({ id }) => id),
-          purgePolicy:
-            purgeType === 'fixed_age'
-              ? {
-                  purgeType: 'fixed_age',
-                  age,
-                }
-              : {
-                  purgeType: 'fixed_time',
-                  timestamp: purgeDate!.toISOString(),
-                },
-          force: forcePurge,
-        });
-      }}
+      onConfirm={onClickConfirm}
     >
-      {PURGE_POLICY_HELP_TEXT}
+      {purgePolicyHelpText}
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.slo.purgeConfirmationModal.purgeTypeLabel', {
