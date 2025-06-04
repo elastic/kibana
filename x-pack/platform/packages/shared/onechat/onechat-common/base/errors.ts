@@ -16,6 +16,7 @@ export enum OnechatErrorCode {
   internalError = 'internalError',
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
+  conversationNotFound = 'conversationNotFound',
 }
 
 const OnechatError = ServerSentEventError;
@@ -65,9 +66,9 @@ export const createInternalError = (
 export type OnechatToolNotFoundError = OnechatError<OnechatErrorCode.toolNotFound>;
 
 /**
- * Checks if the given error is a {@link OnechatInternalError}
+ * Checks if the given error is a {@link OnechatToolNotFoundError}
  */
-export const isToolNotFoundError = (err: unknown): err is OnechatInternalError => {
+export const isToolNotFoundError = (err: unknown): err is OnechatToolNotFoundError => {
   return isOnechatError(err) && err.code === OnechatErrorCode.toolNotFound;
 };
 
@@ -95,7 +96,7 @@ export type OnechatAgentNotFoundError = OnechatError<OnechatErrorCode.agentNotFo
 /**
  * Checks if the given error is a {@link OnechatInternalError}
  */
-export const isAgentNotFoundError = (err: unknown): err is OnechatInternalError => {
+export const isAgentNotFoundError = (err: unknown): err is OnechatAgentNotFoundError => {
   return isOnechatError(err) && err.code === OnechatErrorCode.agentNotFound;
 };
 
@@ -116,6 +117,36 @@ export const createAgentNotFoundError = ({
 };
 
 /**
+ * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
+ */
+export type OnechatConversationNotFoundError = OnechatError<OnechatErrorCode.conversationNotFound>;
+
+/**
+ * Checks if the given error is a {@link OnechatConversationNotFoundError}
+ */
+export const isConversationNotFoundError = (
+  err: unknown
+): err is OnechatConversationNotFoundError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.conversationNotFound;
+};
+
+export const createConversationNotFoundError = ({
+  conversationId,
+  customMessage,
+  meta = {},
+}: {
+  conversationId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): OnechatConversationNotFoundError => {
+  return new OnechatError(
+    OnechatErrorCode.conversationNotFound,
+    customMessage ?? `Conversation ${conversationId} not found`,
+    { ...meta, conversationId, statusCode: 404 }
+  );
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const OnechatErrorUtils = {
@@ -123,7 +154,9 @@ export const OnechatErrorUtils = {
   isInternalError,
   isToolNotFoundError,
   isAgentNotFoundError,
+  isConversationNotFoundError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
+  createConversationNotFoundError,
 };

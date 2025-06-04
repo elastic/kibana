@@ -6,7 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { UserIdAndName, Conversation } from '@kbn/onechat-common';
+import {
+  type UserIdAndName,
+  type Conversation,
+  createConversationNotFoundError,
+} from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -20,7 +24,6 @@ export interface ConversationClient {
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<Conversation[]>;
-  // TODO: delete
 }
 
 export const createClient = ({
@@ -62,7 +65,9 @@ class ConversationClientImpl implements ConversationClient {
   async get(conversationId: string): Promise<Conversation> {
     const document = await this.storage.getClient().get({ id: conversationId });
 
-    // TODO: access check
+    if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
     return fromEs(document);
   }
@@ -88,7 +93,9 @@ class ConversationClientImpl implements ConversationClient {
   async update(conversation: ConversationUpdateRequest): Promise<Conversation> {
     const document = await this.storage.getClient().get({ id: conversation.id });
 
-    // TODO: access check
+    if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId: conversation.id });
+    }
 
     const storedConversation = fromEs(document);
     const updatedConversation = updateConversation(storedConversation, conversation);
@@ -102,3 +109,13 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(conversation.id);
   }
 }
+
+const hasAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<Document, '_source'>;
+  user: UserIdAndName;
+}) => {
+  return conversation._source!.user_id === user.id;
+};
