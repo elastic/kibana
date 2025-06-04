@@ -91,7 +91,6 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'observabilityCases',
         'observabilityCasesV2',
         'observabilityCasesV3',
-        'onechat',
         'securitySolutionAssistant',
         'securitySolutionAttackDiscovery',
         'securitySolutionCases',

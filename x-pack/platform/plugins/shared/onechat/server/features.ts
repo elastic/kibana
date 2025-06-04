@@ -22,7 +22,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     name: ONECHAT_FEATURE_NAME,
     minimumLicense: 'enterprise',
     order: 1000,
-    category: DEFAULT_APP_CATEGORIES.chat,
+    category: DEFAULT_APP_CATEGORIES.kibana,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['kibana', ONECHAT_APP_ID],
     catalogue: [ONECHAT_FEATURE_ID],
