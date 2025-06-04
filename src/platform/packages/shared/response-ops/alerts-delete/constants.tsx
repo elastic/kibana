@@ -16,6 +16,12 @@ export const THRESHOLD_UNITS: EuiSelectOption[] = [
   { text: i18n.YEARS, value: 'years' },
 ];
 
+export const THRESHOLD_UNITS_SINGULAR: EuiSelectOption[] = [
+  { text: i18n.DAY, value: 'days' },
+  { text: i18n.MONTH, value: 'months' },
+  { text: i18n.YEAR, value: 'years' },
+];
+
 export const MAX_ALERT_DELETE_THRESHOLD_DAYS = 3 * 365; // 3 years
 export const MIN_ALERT_DELETE_THRESHOLD_DAYS = 1; // 1 day
 

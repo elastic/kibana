@@ -25,6 +25,7 @@ import {
   EuiFieldText,
   EuiPanel,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -233,7 +234,7 @@ export const AlertDeleteModal = ({
       setActiveState((prev) => ({ ...prev, threshold: Number(e.target.value) }));
     },
     onChangeThresholdUnit: (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const selectedValue = THRESHOLD_UNITS.find((option) => option.text === e.target.value);
+      const selectedValue = THRESHOLD_UNITS.find((option) => option.value === e.target.value);
       if (selectedValue) {
         setActiveState((prev) => ({ ...prev, thresholdUnit: selectedValue }));
       }
@@ -248,7 +249,7 @@ export const AlertDeleteModal = ({
       setInactiveState((prev) => ({ ...prev, threshold: Number(e.target.value) }));
     },
     onChangeThresholdUnit: (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const selectedValue = THRESHOLD_UNITS.find((option) => option.text === e.target.value);
+      const selectedValue = THRESHOLD_UNITS.find((option) => option.value === e.target.value);
       if (selectedValue) {
         setInactiveState((prev) => ({ ...prev, thresholdUnit: selectedValue }));
       }
@@ -263,12 +264,14 @@ export const AlertDeleteModal = ({
     ev.preventDefault();
 
     const bodyParams = {
-      activeAlertDeleteThreshold: validations.isActiveThresholdValid
-        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
-        : undefined,
-      inactiveAlertDeleteThreshold: validations.isInactiveThresholdValid
-        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
-        : undefined,
+      activeAlertDeleteThreshold:
+        activeState.checked && validations.isActiveThresholdValid
+          ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
+          : undefined,
+      inactiveAlertDeleteThreshold:
+        inactiveState.checked && validations.isInactiveThresholdValid
+          ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
+          : undefined,
       categoryIds,
     };
 
@@ -314,7 +317,15 @@ export const AlertDeleteModal = ({
             </>
           )}
 
-          <p>{translations.MODAL_DESCRIPTION}</p>
+          <p>
+            {translations.MODAL_DESCRIPTION}&nbsp;
+            <EuiIconTip
+              color="subdued"
+              size="s"
+              type="questionInCircle"
+              content={translations.MODAL_DESCRIPTION_EXCEPTION}
+            />
+          </p>
           <EuiSpacer size="l" />
 
           <EuiPanel hasShadow={false} hasBorder color="subdued" id="alert-delete-active-panel">
@@ -335,6 +346,7 @@ export const AlertDeleteModal = ({
                   onChangeThresholdUnit={activeAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isActiveThresholdValid}
                   isDisabled={!activeState.checked || isDisabled}
+                  isChecked={activeState.checked}
                   error={errorMessages.activeThreshold}
                   thresholdTestSubj="alert-delete-active-threshold"
                   thresholdUnitTestSubj="alert-delete-active-threshold-unit"
@@ -362,6 +374,7 @@ export const AlertDeleteModal = ({
                   onChangeThresholdUnit={inactiveAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isInactiveThresholdValid}
                   isDisabled={!inactiveState.checked || isDisabled}
+                  isChecked={inactiveState.checked}
                   error={errorMessages.inactiveThreshold}
                   thresholdTestSubj="alert-delete-inactive-threshold"
                   thresholdUnitTestSubj="alert-delete-inactive-threshold-unit"

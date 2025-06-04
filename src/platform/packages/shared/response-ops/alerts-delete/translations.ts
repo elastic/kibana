@@ -17,6 +17,13 @@ export const MODAL_DESCRIPTION = i18n.translate('responseOpsAlertDelete.modalDes
   defaultMessage: 'Remove alerts that exceed a threshold age or duration',
 });
 
+export const MODAL_DESCRIPTION_EXCEPTION = i18n.translate(
+  'responseOpsAlertDelete.modalDescriptionException',
+  {
+    defaultMessage: 'Alerts attached to cases will not be deleted by this cleanup task',
+  }
+);
+
 export const FORM_TITLE = i18n.translate('responseOpsAlertDelete.modalFormTitle', {
   defaultMessage: 'Select the type of alerts to include in this cleanup task',
 });
@@ -62,6 +69,18 @@ export const MONTHS = i18n.translate('responseOpsAlertDelete.months', {
 
 export const YEARS = i18n.translate('responseOpsAlertDelete.years', {
   defaultMessage: 'years',
+});
+
+export const DAY = i18n.translate('responseOpsAlertDelete.day', {
+  defaultMessage: 'day',
+});
+
+export const MONTH = i18n.translate('responseOpsAlertDelete.month', {
+  defaultMessage: 'month',
+});
+
+export const YEAR = i18n.translate('responseOpsAlertDelete.year', {
+  defaultMessage: 'year',
 });
 
 export const DELETE_PASSKEY = i18n.translate('responseOpsAlertDelete.deletePasskey', {

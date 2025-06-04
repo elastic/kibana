@@ -33,7 +33,7 @@ const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
     if (path.includes('_preview')) {
       return { affected_alert_count: affectedAlertCount };
     }
-    throw new Error(`No mock implementation for path: ${path}`);
+    throw new Error(`No mock implementation for GET ${path}`);
   });
 };
 
@@ -175,7 +175,7 @@ describe('AlertDelete Modal', () => {
     expect(closeModalMock).toHaveBeenCalledTimes(1);
   });
 
-  it('submits the form when all validations pass', async () => {
+  it('enables the submit button the form when all validations passes', async () => {
     mockHttpGet({ affectedAlertCount: 100 });
 
     render(
@@ -257,6 +257,55 @@ describe('AlertDelete Modal', () => {
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
       expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('doesnt include a threshold that has been activated and then deactivated', async () => {
+    mockHttpGet({ affectedAlertCount: 100 });
+    http.post.mockResolvedValueOnce(null);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const inactiveCheckbox = screen.getByTestId('alert-delete-inactive-checkbox');
+    fireEvent.click(inactiveCheckbox);
+
+    // deactivates because this state isn't the same as the initial state
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
+      expect(closeModalMock).toHaveBeenCalledTimes(1);
+    });
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/internal/alerting/rules/settings/_alert_delete_schedule',
+      expect.objectContaining({
+        body: JSON.stringify({
+          active_alert_delete_threshold: undefined,
+          inactive_alert_delete_threshold: 90,
+          category_ids: ['management'],
+        }),
+      })
+    );
   });
 });
 

@@ -17,8 +17,12 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
-import { MIN_ALERT_DELETE_THRESHOLD_DAYS, MAX_ALERT_DELETE_THRESHOLD_DAYS } from '../constants';
-import { THRESHOLD_UNITS } from '../constants';
+import {
+  MIN_ALERT_DELETE_THRESHOLD_DAYS,
+  MAX_ALERT_DELETE_THRESHOLD_DAYS,
+  THRESHOLD_UNITS_SINGULAR,
+  THRESHOLD_UNITS,
+} from '../constants';
 
 interface ModalThresholdSelectorProps {
   title: string;
@@ -29,6 +33,7 @@ interface ModalThresholdSelectorProps {
   onChangeThresholdUnit: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   isDisabled: boolean;
   isInvalid: boolean;
+  isChecked: boolean;
   error: string[];
   thresholdTestSubj: string;
   thresholdUnitTestSubj: string;
@@ -42,10 +47,13 @@ export const ModalThresholdSelector = ({
   onChangeThresholdUnit,
   isDisabled,
   isInvalid,
+  isChecked,
   error,
   thresholdTestSubj,
   thresholdUnitTestSubj,
 }: ModalThresholdSelectorProps) => {
+  const options = threshold === 1 ? THRESHOLD_UNITS_SINGULAR : THRESHOLD_UNITS;
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -53,7 +61,12 @@ export const ModalThresholdSelector = ({
       description={description}
       descriptionFlexItemProps={{ grow: 2 }}
     >
-      <EuiFormRow fullWidth isInvalid={isInvalid} isDisabled={isDisabled} error={error}>
+      <EuiFormRow
+        fullWidth
+        isInvalid={isInvalid}
+        isDisabled={isDisabled}
+        error={isChecked ? error : []}
+      >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={1}>
             <EuiFieldNumber
@@ -63,7 +76,7 @@ export const ModalThresholdSelector = ({
               value={threshold}
               onChange={onChangeThreshold}
               disabled={isDisabled}
-              isInvalid={error.length > 0}
+              isInvalid={isChecked && error.length > 0}
               data-test-subj={thresholdTestSubj}
             />
           </EuiFlexItem>
@@ -71,7 +84,7 @@ export const ModalThresholdSelector = ({
             <EuiSelect
               value={thresholdUnit.text as string}
               onChange={onChangeThresholdUnit}
-              options={THRESHOLD_UNITS}
+              options={options}
               disabled={isDisabled}
               data-test-subj={thresholdUnitTestSubj}
             />
