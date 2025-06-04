@@ -78,7 +78,7 @@ const onChange = jest.fn();
 jest.mock('../../common/experimental_features_service', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn().mockReturnValue({
-      isEnabled: jest.fn().mockReturnValue(true),
+      cloudSecurityNamespaceSupportEnabled: true,
     }),
   },
 }));
