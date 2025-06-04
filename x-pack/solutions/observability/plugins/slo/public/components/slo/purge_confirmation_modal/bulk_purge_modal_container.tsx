@@ -38,13 +38,13 @@ export function BulkPurgeConfirmationContainer({ items, onCancel, onConfirm }: P
     });
   };
 
-  const MODAL_TITLE = i18n.translate('xpack.slo.purgeConfirmationModal.title', {
+  const MODAL_TITLE = i18n.translate('xpack.slo.bulkPurgeConfirmationModal.title', {
     defaultMessage: 'Purge {count} SLOs',
     values: { count: items.length },
   });
 
   const PURGE_POLICY_HELP_TEXT = i18n.translate(
-    'xpack.slo.purgeConfirmationModal.descriptionText',
+    'xpack.slo.bulkPurgeConfirmationModal.descriptionText',
     {
       defaultMessage:
         'Rollup data for {count} SLOs will be purged according to the policy provided below.',
