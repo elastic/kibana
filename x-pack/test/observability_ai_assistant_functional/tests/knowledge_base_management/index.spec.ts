@@ -181,7 +181,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(savedContent).to.eql(instruction);
       });
 
-      it('cancels editing without saving changes', async () => {
+      it('cancels editing without saving changes when the cancel button is clicked', async () => {
         // First create an instruction
         await openUserInstructionFlyout();
         const originalInstruction = 'Original instruction';
@@ -201,15 +201,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('Bulk import functionality', () => {
+    describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
       async function prepareBulkImportData() {
         const entries = [
-          { id: '12233', title: 'Testing 4', text: 'Contents of item' },
-          { id: '6775', title: 'Testing 2', text: 'Contents of second item' },
-          { id: '6573', title: 'Testing', text: 'Contents of third item' },
+          { id: '1', title: 'Testing 1', text: 'Contents of first item' },
+          { id: '2', title: 'Testing 2', text: 'Contents of second item' },
+          { id: '3', title: 'Testing 3', text: 'Contents of third item' },
         ];
 
         return entries;
@@ -270,7 +270,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
       });
 
-      it('successfully imports multiple entries from a JSON file', async () => {
+      it('successfully imports multiple entries from a NDJSON file', async () => {
         const initialCount = await getKnowledgeBaseEntryCount();
         expect(initialCount).to.eql(0);
 
@@ -289,7 +289,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(finalCount).to.eql(entries.length);
       });
 
-      it('displays validation errors for invalid import data', async () => {
+      it('displays validation errors when invalid data is imported', async () => {
         await openBulkImportFlyout();
         await uploadBulkImportFile("{ title: 'Invalid Entry' ");
 
@@ -303,7 +303,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(count).to.eql(0);
       });
 
-      it('cancels import without saving entries', async () => {
+      it('cancels import without saving entries when the cancel button is clicked', async () => {
         await openBulkImportFlyout();
 
         const entries = await prepareBulkImportData();

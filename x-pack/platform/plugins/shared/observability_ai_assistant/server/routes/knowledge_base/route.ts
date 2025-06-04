@@ -304,7 +304,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 
     await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
 
-    resources.logger.info(`Imported ${entries.length} knowledge base entries using bulk API`);
+    resources.logger.info(`Imported ${entries.length} knowledge base entries`);
   },
 });
 

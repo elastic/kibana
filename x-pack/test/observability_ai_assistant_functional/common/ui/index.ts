@@ -38,7 +38,6 @@ const pages = {
     saveEntryButton: 'knowledgeBaseEditManualEntryFlyoutSaveButton',
     newEntryButton: 'knowledgeBaseNewEntryButton',
     bulkImportEntryButton: 'knowledgeBaseBulkImportContextMenuItem',
-    bulkImportUploadNdjson: 'knowledgeBaseBulkImportFlyoutUploadNdjsonFileInput',
     bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
     bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
     bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',

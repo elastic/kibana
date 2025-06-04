@@ -158,7 +158,6 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
             'xpack.observabilityAiAssistantManagement.knowledgeBaseBulkImportFlyout.euiFilePicker.uploadJSONLabel',
             { defaultMessage: 'Upload JSON' }
           )}
-          data-test-subj="knowledgeBaseBulkImportFlyoutUploadNdjsonFileInput"
           display="large"
           fullWidth
           id={filePickerId}

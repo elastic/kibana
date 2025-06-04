@@ -496,12 +496,14 @@ export class KnowledgeBaseService {
         const errorMessages = bulkResult.items
           .filter((item: any) => item.index?.error)
           .map((item: any) => item.index?.error?.reason);
-        throw new Error(`Bulk indexing failed: ${errorMessages.join(', ')}`);
+        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
       }
 
-      this.dependencies.logger.debug(`Bulk added ${entries.length} entries to knowledge base`);
+      this.dependencies.logger.debug(
+        `Successfully added ${entries.length} entries to the knowledge base`
+      );
     } catch (error) {
-      this.dependencies.logger.error(`Failed to bulk add entries to knowledge base: ${error}`);
+      this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error);
       }
