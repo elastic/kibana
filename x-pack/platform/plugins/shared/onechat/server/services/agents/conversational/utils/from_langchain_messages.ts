@@ -7,10 +7,11 @@
 
 import { BaseMessage, MessageContentComplex, isAIMessage } from '@langchain/core/messages';
 import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
+import { SerializedToolIdentifier } from '@kbn/onechat-common';
 
 export interface ToolCall {
   toolCallId: string;
-  toolId: string;
+  toolId: SerializedToolIdentifier;
   args: Record<string, any>;
 }
 
@@ -24,7 +25,7 @@ export const getToolCalls = (message: BaseMessage): ToolCall[] => {
 const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
   return {
     toolCallId: toolCall.id!, // TODO: figure out a default, e.g {messageId}_{callIndex}
-    toolId: toolCall.name,
+    toolId: toolCall.name as SerializedToolIdentifier,
     args: toolCall.args,
   };
 };

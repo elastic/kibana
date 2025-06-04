@@ -28,10 +28,10 @@ export const createHandler = ({
 }: CreateConversationalAgentHandlerParams): ConversationalAgentHandlerFn => {
   return async (
     { agentParams: { nextInput, conversation = [] }, runId },
-    { request, modelProvider, toolProvider, events }
+    { request, modelProvider, toolProvider, events, runner }
   ) => {
     const model = await modelProvider.getDefaultModel();
-    const tools = await providerToLangchainTools({ request, toolProvider, logger });
+    const tools = await providerToLangchainTools({ request, toolProvider, runner, logger });
     const initialMessages = conversationLangchainMessages({
       nextInput,
       previousRounds: conversation,

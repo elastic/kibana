@@ -19,5 +19,6 @@ export {
   toStructuredToolIdentifier,
   toSerializedToolIdentifier,
   createBuiltinToolId,
+  toolDescriptorToIdentifier,
   builtinSourceId,
 } from './tools';

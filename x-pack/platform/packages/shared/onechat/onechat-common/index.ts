@@ -19,6 +19,7 @@ export {
   isPlainToolIdentifier,
   toStructuredToolIdentifier,
   toSerializedToolIdentifier,
+  toolDescriptorToIdentifier,
   createBuiltinToolId,
   builtinSourceId,
 } from './tools';
