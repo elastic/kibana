@@ -306,7 +306,7 @@ function getExceedsAlertLimitRuleType() {
         limit = services.alertFactory.alertLimit.getValue();
       }
 
-      const alertsToCreate = limit ? limit : 25;
+      const alertsToCreate = limit ? limit : 115;
 
       range(alertsToCreate)
         .map(() => uuidv4())
