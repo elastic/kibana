@@ -21,7 +21,6 @@ import {
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { METRIC_TYPE, track } from '../../../../../../common/lib/telemetry';
-import * as i18n from '../../../../../common/translations';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -52,6 +51,7 @@ import {
   ALERT_SUPPRESSION_DEFAULT_DURATION,
 } from '../../../../../rule_creation/components/alert_suppression_edit';
 import { AlertSuppressionDurationType } from '../../../../../common/types';
+import { bulkAlertSuppression as i18n } from '../translations';
 
 const CommonUseField = getUseField({ component: Field });
 type AlertSuppressionEditActions =
@@ -77,7 +77,7 @@ const getSchema = (maxFieldsNumber: number) => {
       validations: [
         {
           validator: fieldValidators.maxLengthField({
-            message: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_MAX_LENGTH_ERROR,
+            message: i18n.SUPPRESSION_MAX_LENGTH_ERROR,
             length: maxFieldsNumber,
           }),
         },
@@ -89,23 +89,23 @@ const getSchema = (maxFieldsNumber: number) => {
       [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: {},
     },
     [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
-      label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
+      //   label: i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
     },
     isSuppressionFieldsOverwriteEnabled: {
       type: FIELD_TYPES.CHECKBOX,
-      label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_OVERWRITE_LABEL,
+      label: i18n.OVERWRITE_LABEL,
     },
     isDurationOverwriteEnabled: {
       type: FIELD_TYPES.CHECKBOX,
-      label: 'Set duration of suppression',
+      label: i18n.DURATION_OVERWRITE_LABEL,
     },
     isMissingFieldsStrategyOverwriteEnabled: {
       type: FIELD_TYPES.CHECKBOX,
-      label: 'Set suppression for missing fields',
+      label: i18n.MISSING_FIELDS_STRATEGY_OVERWRITE_LABEL,
     },
     isSuppressionRemovalEnabled: {
       type: FIELD_TYPES.CHECKBOX,
-      label: 'Remove suppression in all selected rules',
+      label: i18n.REMOVE_SUPPRESSION_LABEL,
     },
   };
 };
@@ -121,19 +121,6 @@ const initialFormData: AlertSuppressionFormData = {
   [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 };
 
-const getFormConfig = (editAction: AlertSuppressionEditActions) =>
-  editAction === BulkActionEditTypeEnum.add_alert_suppression
-    ? {
-        indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_LABEL,
-        indexHelpText: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_HELP_TEXT,
-        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_TITLE,
-      }
-    : {
-        indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_LABEL,
-        indexHelpText: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_HELP_TEXT,
-        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_TITLE,
-      };
-
 interface AlertSuppressionFormProps {
   editAction: AlertSuppressionEditActions;
   rulesCount: number;
@@ -148,18 +135,23 @@ const AlertSuppressionFormComponent = ({
   onConfirm,
 }: AlertSuppressionFormProps) => {
   const schema = useMemo(
-    () => getSchema(editAction === 'delete_alert_suppression' ? Infinity : 3),
+    () => getSchema(editAction === BulkActionEditTypeEnum.delete_alert_suppression ? Infinity : 3),
     [editAction]
   );
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
   });
+  const formTitle = useMemo(
+    () =>
+      editAction === BulkActionEditTypeEnum.add_alert_suppression
+        ? i18n.ADD_TITLE
+        : i18n.DELETE_TITLE,
+    [editAction]
+  );
 
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-
-  const { formTitle } = getFormConfig(editAction);
 
   const [
     {
@@ -226,7 +218,7 @@ const AlertSuppressionFormComponent = ({
           <EuiIcon type="iInCircle" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="xs">{i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_INFO}</EuiText>
+          <EuiText size="xs">{i18n.SUPPRESSION_INFO_TEXT}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />

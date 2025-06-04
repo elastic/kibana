@@ -190,3 +190,69 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
+
+export const bulkAlertSuppression = {
+  SUPPRESSION_MAX_LENGTH_ERROR: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.alertSuppressionMaxLengthErrorMessage',
+    {
+      defaultMessage: 'Number of suppress by fields must be at most 3.',
+    }
+  ),
+  ADD_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.addTitle',
+    {
+      defaultMessage: 'Add alert suppression',
+    }
+  ),
+  DELETE_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteTitle',
+    {
+      defaultMessage: 'Remove alert suppression',
+    }
+  ),
+  OVERWRITE_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.overwriteCheckboxLabel',
+    {
+      defaultMessage: 'Overwrite alert suppression for all selected rules',
+    }
+  ),
+  WARNING_OVERWRITE: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.warningOverwrite"
+      defaultMessage="You’re about to overwrite alert suppression for the {rulesCount, plural, one {# rule} other {# rules}} you selected. To apply and save the changes, click Save."
+      values={{ rulesCount }}
+    />
+  ),
+  WARNING_REMOVE: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.warningRemove"
+      defaultMessage="You’re about to remove alert suppression for the {rulesCount, plural, one {# rule} other {# rules}} you selected. To apply and save the changes, click Save."
+      values={{ rulesCount }}
+    />
+  ),
+  DURATION_OVERWRITE_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.durationOverwriteCheckboxLabel',
+    {
+      defaultMessage: 'Set duration of suppression',
+    }
+  ),
+  MISSING_FIELDS_STRATEGY_OVERWRITE_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.missingFieldsStrategyOverwriteCheckboxLabel',
+    {
+      defaultMessage: 'Set suppression for missing fields',
+    }
+  ),
+  REMOVE_SUPPRESSION_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.removeSuppressionCheckboxLabel',
+    {
+      defaultMessage: 'Remove suppression in all selected rules',
+    }
+  ),
+  SUPPRESSION_INFO_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.infoText',
+    {
+      defaultMessage:
+        'Bulk editing will not show the existing suppression on the selected rules. The message after editing has been applied will indicate the amount of changes that have been made on your selection.',
+    }
+  ),
+};
