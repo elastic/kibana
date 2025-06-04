@@ -45110,6 +45110,339 @@
         ]
       }
     },
+    "/api/fleet/remote_synced_integrations/status": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
+        "operationId": "get-fleet-remote-synced-integrations-status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "custom_assets": {
+                      "additionalProperties": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed",
+                              "warning"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "name",
+                          "package_name",
+                          "package_version",
+                          "sync_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "integrations": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed",
+                              "warning"
+                            ],
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sync_status",
+                          "install_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "integrations"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get CCR Remote synced integrations status",
+        "tags": [
+          "CCR Remote synced integrations"
+        ]
+      }
+    },
+    "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
+        "operationId": "get-fleet-remote-synced-integrations-outputid-remote-status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "outputId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "custom_assets": {
+                      "additionalProperties": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed",
+                              "warning"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "name",
+                          "package_name",
+                          "package_version",
+                          "sync_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "integrations": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed",
+                              "warning"
+                            ],
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sync_status",
+                          "install_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "integrations"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get CCR Remote synced integrations status by outputId",
+        "tags": [
+          "CCR Remote synced integrations"
+        ]
+      }
+    },
     "/api/fleet/service_tokens": {
       "post": {
         "description": "[Required authorization] Route required privileges: fleet-agents-all.",
@@ -46220,7 +46553,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}": {
@@ -46266,7 +46599,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       },
       "get": {
         "description": "[Required authorization] Route required privileges: read-maintenance-window.",
@@ -46462,7 +46795,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       },
       "patch": {
         "description": "[Required authorization] Route required privileges: write-maintenance-window.",
@@ -46799,7 +47132,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}/_archive": {
@@ -47007,7 +47340,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}/_unarchive": {
@@ -47215,12 +47548,12 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/saved_objects/_export": {
       "post": {
-        "description": "Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.",
         "operationId": "post-saved-objects-export",
         "parameters": [
           {
@@ -47437,7 +47770,7 @@
     },
     "/api/saved_objects/_import": {
       "post": {
-        "description": "Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.",
+        "description": "Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.",
         "operationId": "post-saved-objects-import",
         "parameters": [
           {
@@ -60106,6 +60439,9 @@
   "tags": [
     {
       "name": "alerting"
+    },
+    {
+      "name": "CCR Remote synced integrations"
     },
     {
       "name": "connectors"

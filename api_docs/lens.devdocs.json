@@ -303,7 +303,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -629,7 +629,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -851,7 +851,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1880,7 +1880,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>"
+              "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -6295,7 +6295,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+              "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -7034,7 +7034,7 @@
                     "section": "def-common.PaletteOutput",
                     "text": "PaletteOutput"
                   },
-                  "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+                  "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
                   {
                     "pluginId": "uiActionsEnhanced",
                     "scope": "common",
@@ -7856,7 +7856,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+              "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -8084,7 +8084,7 @@
                     "section": "def-common.PaletteOutput",
                     "text": "PaletteOutput"
                   },
-                  "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+                  "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
@@ -8969,7 +8969,9 @@
             "parentPluginId": "lens",
             "id": "def-public.PieVisualizationState.palette",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "palette",
             "description": [],
             "signature": [
@@ -8980,11 +8982,17 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -9770,7 +9778,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "<Record<string, unknown>>; } | { type: \"colorMapping\"; value: ",
               "Config",
               "; } | undefined"
             ],
@@ -10072,7 +10080,9 @@
             "parentPluginId": "lens",
             "id": "def-public.TagcloudState.palette",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "palette",
             "description": [],
             "signature": [
@@ -10083,11 +10093,12 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/tagcloud/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
           },
           {
             "parentPluginId": "lens",
@@ -10417,7 +10428,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "<Record<string, unknown>>; } | { type: \"colorMapping\"; value: ",
               "Config",
               "; } | undefined, datasourceStates?: ",
               "GeneralDatasourceStates",
@@ -10429,7 +10440,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "<Record<string, unknown>>; } | { type: \"colorMapping\"; value: ",
               "Config",
               "; } | undefined, datasourceStates?: ",
               "GeneralDatasourceStates",
@@ -10587,7 +10598,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
+              "<Record<string, unknown>>; } | { type: \"colorMapping\"; value: ",
               "Config",
               "; } | undefined) | undefined"
             ],
@@ -14306,7 +14317,9 @@
             "parentPluginId": "lens",
             "id": "def-public.XYDataLayerConfig.palette",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "palette",
             "description": [],
             "signature": [
@@ -14317,11 +14330,12 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
           },
           {
             "parentPluginId": "lens",
@@ -15289,7 +15303,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }>; table: ",
+          "<Record<string, unknown>>; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -15509,7 +15523,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -16233,7 +16247,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -17276,7 +17290,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17602,7 +17616,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17824,7 +17838,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18275,7 +18289,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; onBrushEnd?: ((data: { table: ",
+          "<Record<string, unknown>> | undefined; onBrushEnd?: ((data: { table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -19016,7 +19030,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; onBrushEnd?: ((data: { table: ",
+          "<Record<string, unknown>> | undefined; onBrushEnd?: ((data: { table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -19432,7 +19446,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19758,7 +19772,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19980,7 +19994,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20415,7 +20429,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21154,7 +21168,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "common",
@@ -21472,7 +21486,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          "<Record<string, unknown>> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -23542,7 +23556,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }> | undefined; onBrushEnd?: ((data: { table: ",
+          "<Record<string, unknown>> | undefined; onBrushEnd?: ((data: { table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
