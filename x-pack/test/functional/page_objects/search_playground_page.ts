@@ -170,44 +170,25 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('create-connector-flyout-save-btn');
         await testSubjects.existOrFail('euiToastHeader');
       },
-
-      // TODO remove this if not needed
-      async createGoogleGeminiConnector(connectorName: string) {
-        await testSubjects.existOrFail('.gemini-card');
-        await testSubjects.click('.gemini-card');
-
-        await testSubjects.existOrFail('create-connector-flyout-header');
-        const headerValue = await testSubjects.getVisibleText('create-connector-flyout-header');
-        expect(headerValue).to.contain('Google Gemini connector');
-        await testSubjects.existOrFail('nameInput');
-        await testSubjects.setValue('nameInput', connectorName);
-
-        await testSubjects.existOrFail('config.gcpProjectID-input');
-        await testSubjects.setValue('config.gcpProjectID-input', 'projectID');
-        await testSubjects.existOrFail('secrets.credentialsJson-input');
-        await testSubjects.setValue('secrets.credentialsJson-input', 'JsonInput');
-
-        await testSubjects.existOrFail('create-connector-flyout-save-btn');
-        await testSubjects.click('create-connector-flyout-save-btn');
-        await testSubjects.existOrFail('euiToastHeader');
-      },
       async createIndex() {
         await testSubjects.existOrFail('createIndexButton');
         expect(await testSubjects.isEnabled('createIndexButton')).equal(true);
         await testSubjects.click('createIndexButton');
       },
-      // async removeOpenAIConnector(connectorName) {
-      //   const searchBox = await testSubjects.find. byCssSelector(
-      //     '[data-test-subj="actionsList"] .euiFieldSearch'
-      //   );
-      //   await searchBox.click();
-      //   await searchBox.clearValue();
-      //   await searchBox.type(connectorName);
-      //   await searchBox.pressKeys(ENTER_KEY);
-      //   await find.byCssSelector(
-      //     '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
-      //   );
-      // },
+
+      async searchConnector(connectorName: string) {
+        const searchBox = await findService.byCssSelector(
+          '[data-test-subj="actionsList"] .euiFieldSearch'
+        );
+        await searchBox.click();
+        await searchBox.clearValue();
+        await searchBox.type(connectorName);
+        await searchBox.pressKeys(browser.keys.ENTER);
+        const s = await findService.byCssSelector(
+          '.euiBasicTable[data-test-subj="actionsTable"] .euiTableCellContent__text'
+        );
+        expect(await s.getVisibleText()).to.be(connectorName);
+      },
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();

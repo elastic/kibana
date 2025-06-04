@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonNavigation',
     'searchPlayground',
     'embeddedConsole',
-    'svlTriggersActionsUI',
     'solutionNavigation',
     'svlSearchElasticsearchStartPage',
     'svlSearchCreateIndexPage',
@@ -86,18 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
       });
-      describe('when selecting indices with no fields should show error in add data flyout', () => {
-        before(async () => {
-          await es.indices.create({ index: 'my-test-index' });
-        });
-        after(async () => {
-          await esDeleteAllIndices('my-test-index');
-        });
-        it('selecting index with no fields should show error', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectingIndicesWithNoFieldtoShowError();
-        });
-      });
-      // with LLM connector
+
       describe('with existing LLM connectors', () => {
         before(async () => {
           await createOpenaiConnector();
@@ -112,10 +100,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
-      // without LLM connector
+
       describe('without existing LLM connectors', () => {
         after(async () => {
-          // delete openai connector
           await svlSearchNavigation.navigateToLandingPage();
           await pageObjects.svlCommonNavigation.sidenav.openSection(
             'search_project_nav_footer.project_settings_project_nav'
@@ -126,8 +113,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
             'management:triggersActionsConnectors'
           );
-          // confirm if we can use svlTriggersActionsUI page Object
-          await pageObjects.svlTriggersActionsUI.searchConnectors(openaiConnectorName);
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.searchConnector(
+            openaiConnectorName
+          );
           await testSubjects.click('deleteConnector');
           await testSubjects.existOrFail('deleteIdsConfirmation');
           await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
@@ -143,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
-      // indices
+
       describe('with existing indices', () => {
         before(async () => {
           await createOpenaiConnector();
@@ -173,6 +161,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
+      describe('when selecting indices with no fields should show error in add data flyout', () => {
+        before(async () => {
+          await es.indices.create({ index: 'my-test-index' });
+        });
+        after(async () => {
+          await esDeleteAllIndices('my-test-index');
+        });
+        it('selecting index with no fields should show error', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectingIndicesWithNoFieldtoShowError();
+        });
+      });
+
       describe('without any indices', () => {
         after(async () => {
           await esDeleteAllIndices('my-test-index');
@@ -186,7 +186,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
           await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
           await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
-          // add some data
+
+          // add data
           await es.index({
             index: 'my-test-index',
             refresh: true,
@@ -225,7 +226,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
       it('loads successfully', async () => {
-        // await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
       });
 
