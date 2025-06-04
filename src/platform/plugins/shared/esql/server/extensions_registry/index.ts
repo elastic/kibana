@@ -8,9 +8,10 @@
  */
 import { uniqBy } from 'lodash';
 import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
+
+type SolutionId = 'es' | 'oblt' | 'security';
 
 /**
  * `ESQLExtensionsRegistry` serves as a central hub for managing and retrieving extrensions of the ES|QL editor.

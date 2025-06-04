@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { ESQLExtensionsRegistry } from '.';
 
 describe('ESQLExtensionsRegistry', () => {
@@ -31,7 +30,7 @@ describe('ESQLExtensionsRegistry', () => {
       };
     });
     it('should add recommended queries to the registry', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Query 1', query: 'FROM logs-2023 | STATS count()' },
         { name: 'Query 2', query: 'FROM metrics-* | STATS avg(value)' },
@@ -54,7 +53,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should skip malformed recommended queries (missing name or query)', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Valid Query', query: 'FROM my_index | STATS count()' },
         { name: 'Missing Query' } as RecommendedQuery, // Malformed
@@ -75,7 +74,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should skip queries if no index pattern is found from the query string', () => {
-      const solutionId: SolutionId = 'es';
+      const solutionId = 'es';
       const queries: RecommendedQuery[] = [
         { name: 'Valid Query', query: 'FROM my_index | STATS count()' },
         { name: 'No Pattern Query', query: 'STATS count()' }, // No index pattern, malformed
@@ -102,7 +101,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should not add duplicate recommended queries for the same registryId and query', () => {
-      const solutionId: SolutionId = 'es';
+      const solutionId = 'es';
       const queryA: RecommendedQuery = {
         name: 'Query A',
         query: 'FROM another_index | STATS count()',

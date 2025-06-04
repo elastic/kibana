@@ -18,8 +18,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
-
 import {
   esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
@@ -32,6 +30,8 @@ import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
+
+type SolutionId = 'es' | 'oblt' | 'security';
 
 interface EsqlPluginSetupDependencies {
   indexManagement: IndexManagementPluginSetup;
