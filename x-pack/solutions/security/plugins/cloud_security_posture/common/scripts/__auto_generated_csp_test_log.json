@@ -14416,7 +14416,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/benchmarks.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/benchmarks.ts",
     "fileName": "benchmarks.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -14585,7 +14585,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_bulk_update.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts",
     "fileName": "csp_benchmark_rules_bulk_update.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -14812,7 +14812,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/csp_benchmark_rules_get_states.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts",
     "fileName": "csp_benchmark_rules_get_states.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -14935,7 +14935,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/get_detection_engine_alerts_count_by_rule_tags.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts",
     "fileName": "get_detection_engine_alerts_count_by_rule_tags.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -15038,7 +15038,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/index.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -15074,7 +15074,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/stats.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/stats.ts",
     "fileName": "stats.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -15435,7 +15435,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/status.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/status.ts",
     "fileName": "status.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -15538,7 +15538,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditroutes/vulnerabilities_dashboard.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts",
     "fileName": "vulnerabilities_dashboard.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
@@ -15660,7 +15660,7 @@
     ]
   },
   {
-    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audittelemetry/telemetry.ts",
+    "filePath": "x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts",
     "fileName": "telemetry.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [

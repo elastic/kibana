@@ -65,7 +65,7 @@ yarn test:jest --config x-pack/solutions/security/plugins/cloud_security_posture
 Run [**API Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
 
 ```bash
-yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditconfig.ts
+yarn test:ftr --config x-pack/test/cloud_security_posture_api/config.ts
 yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
 yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
 ```
@@ -102,8 +102,8 @@ yarn test:ftr:runner --config x-pack/test/api_integration/apis/cloud_security_po
 
 run ESS (stateful) telemetry integration tests:
 ```bash
-yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditconfig.ts
-yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_auditconfig.ts
+yarn test:ftr:server --config x-pack/test/cloud_security_posture_api/config.ts
+yarn test:ftr:runner --config x-pack/test/cloud_security_posture_api/config.ts
 ```
 
 run ESS (stateful) e2e tests:
