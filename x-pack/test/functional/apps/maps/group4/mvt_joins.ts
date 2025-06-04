@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await maps.setView(-1, 60, 9);
       await maps.lockTooltipAtPosition(200, -200);
 
-      const tooltipRows = await find.allByCssSelector(`tr[class='mapFeatureTooltip_row']`);
+      const tooltipRows = await find.allByCssSelector(`.mapFeatureTooltip_row`);
       expect(tooltipRows.length).to.equal(2);
       expect(await tooltipRows[0].getVisibleText()).to.equal('name charlie');
       expect(await tooltipRows[1].getVisibleText()).to.equal('max prop1 12');
