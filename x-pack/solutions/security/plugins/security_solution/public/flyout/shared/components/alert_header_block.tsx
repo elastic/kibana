@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement, ReactNode, VFC } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
@@ -19,6 +19,12 @@ export interface AlertHeaderBlockProps {
    */
   children: ReactNode;
   /**
+   * If true, adds a slight 1px border on all edges.
+   * False by default.
+   * This is passed to the EuiPanel's hasBorder property.
+   */
+  hasBorder?: boolean;
+  /**
    * data-test-subj to use for the title
    */
   ['data-test-subj']?: string;
@@ -27,9 +33,14 @@ export interface AlertHeaderBlockProps {
 /**
  * Reusable component for rendering a block with rounded edges, show a title and value below one another
  */
-export const AlertHeaderBlock: VFC<AlertHeaderBlockProps> = memo(
-  ({ title, children, 'data-test-subj': dataTestSubj }) => (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+export const AlertHeaderBlock = memo(
+  ({
+    title,
+    children,
+    hasBorder = false,
+    'data-test-subj': dataTestSubj,
+  }: AlertHeaderBlockProps) => (
+    <EuiPanel hasShadow={false} hasBorder={hasBorder} paddingSize="s">
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
