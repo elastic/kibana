@@ -35,6 +35,8 @@ const defaultConfig: TestBedConfig = {
 };
 
 /**
+ * @deprecated - use @testing-library/react instead
+ *
  * Register a new Testbed to test a React Component.
  *
  * @param Component The component under test
