@@ -330,7 +330,7 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? 'string';
         // Copy additional fields/properties from the original field definition
         // This ensures all properties like ignore_above, null_value, etc. are preserved
-        const wildcardMapping = generateWildcardMapping(field);
+        const wildcardMapping = generateWildcardMappingForDynamic(field);
         dynProperties = { ...dynProperties, ...wildcardMapping, type: field.object_type };
         if (field.multi_fields) {
           dynProperties.fields = generateMultiFields(field.multi_fields);
@@ -735,6 +735,17 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {
     ignore_above: DEFAULT_IGNORE_ABOVE,
   };
+  if (field.null_value) {
+    mapping.null_value = field.null_value;
+  }
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
+
+function generateWildcardMappingForDynamic(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
   if (field.null_value) {
     mapping.null_value = field.null_value;
   }
