@@ -237,9 +237,22 @@ export class CoreVersionedRoute implements VersionedRoute {
         });
         validator.getBody(response.payload, 'response body');
       } catch (e) {
+        const message = `${this.method.toUpperCase()} ${
+          this.path
+        } (version: ${version}) failed to validate response schema:
+
+\`\`\`
+${e}
+\`\`\`
+
+Please check the code in your handler definition. This is an indication that your application code may contain errors
+because your routes are returning unexpected values.
+
+Note: response validation only runs in DEV mode.`;
+        this.log.get('versioned-router-response-validation').error(message);
         return responseFactory.custom({
           statusCode: 500,
-          body: `Failed output validation: ${e.message}`,
+          body: message,
         });
       }
     }
