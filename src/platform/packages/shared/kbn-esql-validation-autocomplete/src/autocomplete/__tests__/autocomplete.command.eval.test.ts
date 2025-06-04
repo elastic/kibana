@@ -20,7 +20,6 @@ import {
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import { FunctionDefinitionTypes, Location } from '../../definitions/types';
 import {
   getCompatibleTypesToSuggestNext,
@@ -504,7 +503,7 @@ describe('autocomplete.suggest', () => {
                   hasMoreMandatoryArgs && fn.type !== FunctionDefinitionTypes.OPERATOR;
 
                 const constantOnlyParamDefs = typesToSuggestNext.filter(
-                  (p) => p.constantOnly || /_literal/.test(p.type as string)
+                  (p) => p.constantOnly || /_duration/.test(p.type as string)
                 );
 
                 const suggestedConstants = uniq(
@@ -582,8 +581,6 @@ describe('autocomplete.suggest', () => {
     });
 
     test('date math', async () => {
-      const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
-
       // Eval bucket is not a valid expression
       await assertSuggestions('from a | eval col0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
@@ -614,11 +611,9 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: '(' }
       );
-      await assertSuggestions(
-        'from a | eval col0=date_trunc(2 /)',
-        [...dateSuggestions.map((t) => `${t}, `), ','],
-        { triggerCharacter: ' ' }
-      );
+      await assertSuggestions('from a | eval col0=date_trunc(2 /)', [','], {
+        triggerCharacter: ' ',
+      });
     });
   });
 });

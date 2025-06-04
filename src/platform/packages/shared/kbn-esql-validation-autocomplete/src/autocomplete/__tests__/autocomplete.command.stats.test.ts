@@ -473,9 +473,14 @@ describe('autocomplete.suggest', () => {
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
             ...getLiteralsByType('time_duration'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
+            ...getFieldNamesByType(['integer']),
           ]
         );
       });

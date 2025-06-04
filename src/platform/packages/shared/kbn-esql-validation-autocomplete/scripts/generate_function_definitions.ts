@@ -612,27 +612,6 @@ const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
   return groupingFunctionDefinitions.map((op) => {
-    // if (op.name === 'bucket') {
-    //   const signatures = [
-    //     ...bucketParameterTypes.map((signature) => {
-    //       const [fieldType, bucketType, fromType, toType, resultType] = signature;
-    //       return {
-    //         params: [
-    //           { name: 'field', type: fieldType },
-    //           { name: 'buckets', type: bucketType, constantOnly: true },
-    //           ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
-    //           ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
-    //         ],
-    //         returnType: resultType,
-    //       };
-    //     }),
-    //   ];
-    //   return {
-    //     ...op,
-    //     locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
-    //     signatures,
-    //   };
-    // }
     return {
       ...op,
       locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
@@ -866,7 +845,7 @@ ${
 }
 
 (async function main() {
-  const pathToElasticsearch = '/Users/stratoulakalafateli/Documents/elasticsearch';
+  const pathToElasticsearch = process.argv[2];
   if (!pathToElasticsearch) {
     throw new Error('Path to Elasticsearch is required');
   }
