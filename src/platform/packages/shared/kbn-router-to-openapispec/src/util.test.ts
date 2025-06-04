@@ -351,57 +351,115 @@ describe('createOpIdGenerator', () => {
 });
 
 describe('setXState', () => {
-  test.each([
-    {
-      name: 'stable with since',
-      availability: { stability: 'stable' as const, since: '8.0.0' },
-      expected: 'Generally available; added in 8.0.0',
-    },
-    {
-      name: 'stable without since',
-      availability: { stability: 'stable' as const },
-      expected: 'Generally available',
-    },
-    {
-      name: 'experimental with since',
-      availability: { stability: 'experimental' as const, since: '8.0.0' },
-      expected: 'Technical Preview; added in 8.0.0',
-    },
-    {
-      name: 'experimental without since',
-      availability: { stability: 'experimental' as const },
-      expected: 'Technical Preview',
-    },
-    {
-      name: 'beta with since',
-      availability: { stability: 'beta' as const, since: '8.0.0' },
-      expected: 'Beta; added in 8.0.0',
-    },
-    {
-      name: 'beta without since',
-      availability: { stability: 'beta' as const },
-      expected: 'Beta',
-    },
-    {
-      name: 'no availability',
-      availability: undefined,
-      expected: undefined,
-    },
-    {
-      name: 'only since',
-      availability: { since: '8.0.0' },
-      expected: 'Added in 8.0.0',
-    },
-  ])('$name', ({ availability, expected }) => {
-    // Create a minimal valid CustomOperationObject with required responses property
-    const operation: CustomOperationObject = {
-      responses: {
-        '200': {
-          description: 'OK',
-        },
+  describe('with serverless=false (default)', () => {
+    test.each([
+      {
+        name: 'stable with since',
+        availability: { stability: 'stable' as const, since: '8.0.0' },
+        expected: 'Generally available; added in 8.0.0',
       },
-    };
-    setXState(availability, operation);
-    expect(operation['x-state']).toBe(expected);
+      {
+        name: 'stable without since',
+        availability: { stability: 'stable' as const },
+        expected: 'Generally available',
+      },
+      {
+        name: 'experimental with since',
+        availability: { stability: 'experimental' as const, since: '8.0.0' },
+        expected: 'Technical Preview; added in 8.0.0',
+      },
+      {
+        name: 'experimental without since',
+        availability: { stability: 'experimental' as const },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'beta with since',
+        availability: { stability: 'beta' as const, since: '8.0.0' },
+        expected: 'Beta; added in 8.0.0',
+      },
+      {
+        name: 'beta without since',
+        availability: { stability: 'beta' as const },
+        expected: 'Beta',
+      },
+      {
+        name: 'no availability',
+        availability: undefined,
+        expected: undefined,
+      },
+      {
+        name: 'only since',
+        availability: { since: '8.0.0' },
+        expected: 'Added in 8.0.0',
+      },
+    ])('$name', ({ availability, expected }) => {
+      // Create a minimal valid CustomOperationObject with required responses property
+      const operation: CustomOperationObject = {
+        responses: {
+          '200': {
+            description: 'OK',
+          },
+        },
+      };
+      setXState(availability, operation, { serverless: false });
+      expect(operation['x-state']).toBe(expected);
+    });
+  });
+
+  describe('with serverless=true', () => {
+    test.each([
+      {
+        name: 'stable with since',
+        availability: { stability: 'stable' as const, since: '8.0.0' },
+        expected: 'Generally available',
+      },
+      {
+        name: 'stable without since',
+        availability: { stability: 'stable' as const },
+        expected: 'Generally available',
+      },
+      {
+        name: 'experimental with since',
+        availability: { stability: 'experimental' as const, since: '8.0.0' },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'experimental without since',
+        availability: { stability: 'experimental' as const },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'beta with since',
+        availability: { stability: 'beta' as const, since: '8.0.0' },
+        expected: 'Beta',
+      },
+      {
+        name: 'beta without since',
+        availability: { stability: 'beta' as const },
+        expected: 'Beta',
+      },
+      {
+        name: 'no availability',
+        availability: undefined,
+        expected: undefined,
+      },
+      {
+        name: 'only since',
+        availability: { since: '8.0.0' },
+        expected: '',
+      },
+    ])('$name', ({ availability, expected }) => {
+      // Create a minimal valid CustomOperationObject with required responses property
+      const operation: CustomOperationObject = {
+        responses: {
+          '200': {
+            description: 'OK',
+          },
+        },
+      };
+      setXState(availability, operation, { serverless: true });
+      expect(operation['x-state']).toBe(expected);
+    });
   });
 });
