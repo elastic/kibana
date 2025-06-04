@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
     before(async () => {
       await esArchiver.loadIfNeeded(
-        'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
       supertestViewer = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         useCookieHeader: true, // to avoid generating API key and use Cookie header instead
@@ -44,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+      );
     });
 
     describe('Authorization', () => {
