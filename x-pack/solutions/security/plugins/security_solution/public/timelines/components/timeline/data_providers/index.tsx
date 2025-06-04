@@ -10,13 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import {
-  EuiToolTip,
-  EuiSuperSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  transparentize,
-} from '@elastic/eui';
+import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
@@ -44,8 +38,8 @@ const DropTargetDataProvidersContainer = styled.div`
   position: relative;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
-    background: ${({ theme }) => transparentize(theme.euiTheme.colors.success, 0.9)};
-    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.success};
+    background: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSuccess};
+    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseSuccess};
 
     & .timeline-drop-area-empty__text {
       color: ${({ theme }) => theme.euiTheme.colors.success};
@@ -62,7 +56,7 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseSubdued};
   border-radius: 5px;
   padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
