@@ -62,6 +62,11 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
           {'Add Field'}
         </button>
       )}
+      {props.onEditDataView && (
+        <button type="button" onClick={() => props.onEditDataView()} data-test-subj="editDataView">
+          {'Edit Data View'}
+        </button>
+      )}
       <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
       <div data-test-subj="trigger">{props.trigger.label}</div>
     </div>
@@ -89,7 +94,10 @@ describe('DataViewPicker', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         dataViewFieldEditor: { openEditor: jest.fn() },
-        dataViewEditor: { openEditor: jest.fn() },
+        dataViewEditor: {
+          openEditor: jest.fn(),
+          userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
+        },
         data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -192,6 +200,36 @@ describe('DataViewPicker', () => {
         'security-solution-default'
       );
       expect(jest.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
+    });
+  });
+
+  describe('when user does not have editDataView permission', () => {
+    it('does not render edit data view button', () => {
+      jest
+        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
+        .mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <DataViewPicker scope={DataViewManagerScopeName.default} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('editDataView')).not.toBeInTheDocument();
+    });
+
+    it('does not render add field button', () => {
+      jest
+        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
+        .mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <DataViewPicker scope={DataViewManagerScopeName.default} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('addField')).not.toBeInTheDocument();
     });
   });
 });
