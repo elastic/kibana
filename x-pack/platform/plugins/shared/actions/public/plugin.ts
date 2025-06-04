@@ -14,7 +14,7 @@ export interface ActionsPublicPluginSetup {
     emails: string[],
     options?: ValidateEmailAddressesOptions
   ): ValidatedEmail[];
-  isWebhookSslWithPfxEnabled: boolean;
+  isWebhookSslWithPfxEnabled?: boolean;
 }
 
 export interface Config {

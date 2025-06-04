@@ -399,7 +399,7 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
-  isWebhookSslWithPfxEnabled: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
+  isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
 }
 
 export interface RulesListFilters {
