@@ -272,7 +272,6 @@ const commandOptionNameToLocation: Record<string, Location> = {
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
-  completion: Location.COMPLETION,
 };
 
 /**
@@ -373,7 +372,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
 
   /**
    * Returns a list of recommended fields or functions based on the type.

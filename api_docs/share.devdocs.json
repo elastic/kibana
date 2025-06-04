@@ -1049,20 +1049,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              "IToasts"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
