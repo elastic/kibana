@@ -36,9 +36,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-// Failing: See https://github.com/elastic/kibana/issues/219711
-// Failing: See https://github.com/elastic/kibana/issues/219712
-describe.skip('Service Inventory', () => {
+describe('Service Inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -103,7 +101,7 @@ describe.skip('Service Inventory', () => {
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
         .contains('button', 'production')
-        .click();
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
@@ -112,8 +110,6 @@ describe.skip('Service Inventory', () => {
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(mainAliasNames);
-
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
@@ -156,9 +152,6 @@ describe.skip('Service Inventory', () => {
           to: new Date(rangeTo).getTime(),
         })
       );
-    });
-
-    beforeEach(() => {
       cy.loginAsViewerUser();
     });
 
@@ -170,10 +163,8 @@ describe.skip('Service Inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
       cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
