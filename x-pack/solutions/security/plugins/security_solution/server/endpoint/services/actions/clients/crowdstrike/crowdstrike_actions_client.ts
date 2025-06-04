@@ -40,6 +40,7 @@ import type {
 import type {
   CrowdStrikeRunScriptActionRequestBody,
   IsolationRouteRequestBody,
+  RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
@@ -434,12 +435,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   public async runscript(
-    actionRequest: CrowdStrikeRunScriptActionRequestBody,
+    actionRequest: RunScriptActionRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<CrowdStrikeRunScriptActionRequestBody['parameters']> = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'runscript',

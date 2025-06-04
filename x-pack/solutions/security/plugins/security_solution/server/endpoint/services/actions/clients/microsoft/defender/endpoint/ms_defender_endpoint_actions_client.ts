@@ -29,6 +29,7 @@ import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../..
 import type {
   IsolationRouteRequestBody,
   MSDefenderRunScriptActionRequestBody,
+  RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../../../common/api/endpoint';
 import type {
@@ -492,13 +493,13 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   public async runscript(
-    actionRequest: MSDefenderRunScriptActionRequestBody,
+    actionRequest: RunScriptActionRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      undefined,
+    MSDefenderRunScriptActionRequestBody['parameters'],
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
     > = {
@@ -516,11 +517,11 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             MicrosoftDefenderEndpointMachineAction,
             MicrosoftDefenderEndpointRunScriptParams
           >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT, {
-            id: actionRequest.endpoint_ids[0],
+            id: reqIndexOptions.endpoint_ids[0],
             comment: this.buildExternalComment(reqIndexOptions),
             parameters: {
-              scriptName: actionRequest.parameters.scriptName,
-              args: actionRequest.parameters.args,
+              scriptName: reqIndexOptions.parameters.scriptName,
+              args: reqIndexOptions.parameters.args,
             },
           });
 
@@ -545,7 +546,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    return actionDetails;
+    return actionDetails as ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>;
   }
 
   async processPendingActions({

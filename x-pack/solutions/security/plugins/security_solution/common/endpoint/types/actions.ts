@@ -13,6 +13,8 @@ import type {
   ActionStatusRequestSchema,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
+  MSDefenderRunScriptActionRequestBody,
+  CrowdStrikeRunScriptActionRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -20,7 +22,6 @@ import type {
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../service/response_actions/constants';
-import { CrowdStrikeRunScriptActionParameters, MicrosoftDefenderEndpointRunScriptActionParameters } from '@kbn/security-solution-plugin/public/management/components/endpoint_responder/command_render_components/run_script_action';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -251,8 +252,9 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-export type ResponseActionRunScriptParameters = CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters;
-
+export type ResponseActionRunScriptParameters =
+  | MSDefenderRunScriptActionRequestBody['parameters']
+  | CrowdStrikeRunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -611,7 +613,3 @@ export interface ResponseActionUploadOutputContent {
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
 }
-
-type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
-  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
-  : never;

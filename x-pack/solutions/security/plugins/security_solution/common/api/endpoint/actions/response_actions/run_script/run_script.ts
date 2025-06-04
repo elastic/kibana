@@ -92,6 +92,11 @@ export type MSDefenderRunScriptActionRequestBody = TypeOf<
 export type CrowdStrikeRunScriptActionRequestBody = TypeOf<
   typeof CrowdStrikeRunScriptActionRequestSchema.body
 >;
-export type RunScriptActionRequestBody =
-  | MSDefenderRunScriptActionRequestBody
-  | CrowdStrikeRunScriptActionRequestBody;
+
+type BaseRunScriptActionRequest = TypeOf<typeof RunScriptActionRequestSchema.body>;
+
+export type RunScriptActionRequestBody = Omit<BaseRunScriptActionRequest, 'parameters'> & {
+  parameters:
+    | MSDefenderRunScriptActionRequestBody['parameters']
+    | CrowdStrikeRunScriptActionRequestBody['parameters'];
+};
