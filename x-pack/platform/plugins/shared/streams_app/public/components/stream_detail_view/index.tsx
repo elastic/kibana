@@ -4,25 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiBadgeGroup, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
-import { StreamDetailOverview } from '../stream_detail_overview';
+import React from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
-import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RedirectTo } from '../redirect_to';
+import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { StreamDescription } from './description';
 
 const getStreamDetailTabs = ({
   definition,
   router,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
+  refreshDefinition: () => void;
 }) =>
   ({
     overview: {
@@ -40,7 +43,9 @@ const getStreamDetailTabs = ({
         path: { key: definition.stream.name, tab: 'dashboards' },
       }),
       background: true,
-      content: <StreamDetailDashboardsView definition={definition} />,
+      content: (
+        <StreamDetailDashboardsView definition={definition} refreshDefinition={refreshDefinition} />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
@@ -59,7 +64,7 @@ export function StreamDetailView() {
   const { path } = useStreamsAppParams('/{key}/{tab}', true);
   const { key, tab } = path;
 
-  const { definition } = useStreamDetail();
+  const { definition, refresh: refreshDefinition } = useStreamDetail();
 
   if (tab === 'management') {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
@@ -69,7 +74,7 @@ export function StreamDetailView() {
     return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
   }
 
-  const tabs = getStreamDetailTabs({ definition, router });
+  const tabs = getStreamDetailTabs({ definition, router, refreshDefinition });
 
   const selectedTabObject = tabs[tab as StreamDetailTabName];
 
@@ -78,12 +83,16 @@ export function StreamDetailView() {
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            {key}
-            <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+
+            <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {

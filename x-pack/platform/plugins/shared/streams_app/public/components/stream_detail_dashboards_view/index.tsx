@@ -30,8 +30,10 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailDashboardsView({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  refreshDefinition: () => void;
 }) {
   const [query, setQuery] = useState('');
 
@@ -39,8 +41,11 @@ export function StreamDetailDashboardsView({
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
   const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
 
-  const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
-  const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
+  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
+  const { addDashboards, removeDashboards } = useDashboardsApi(
+    definition.stream.name,
+    refreshDefinition
+  );
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {

@@ -9,7 +9,7 @@ import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
-export const useDashboardsApi = (name?: string) => {
+export const useDashboardsApi = (name: string, refreshDefinition: () => void) => {
   const { signal } = useAbortController();
   const {
     dependencies: {
@@ -21,10 +21,6 @@ export const useDashboardsApi = (name?: string) => {
 
   const addDashboards = useCallback(
     async (dashboards: SanitizedDashboardAsset[]) => {
-      if (!name) {
-        return;
-      }
-
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {
@@ -38,15 +34,13 @@ export const useDashboardsApi = (name?: string) => {
           },
         },
       });
+      refreshDefinition();
     },
-    [name, signal, streamsRepositoryClient]
+    [name, signal, streamsRepositoryClient, refreshDefinition]
   );
 
   const removeDashboards = useCallback(
     async (dashboards: SanitizedDashboardAsset[]) => {
-      if (!name) {
-        return;
-      }
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {
@@ -60,8 +54,9 @@ export const useDashboardsApi = (name?: string) => {
           },
         },
       });
+      refreshDefinition();
     },
-    [name, signal, streamsRepositoryClient]
+    [name, signal, streamsRepositoryClient, refreshDefinition]
   );
 
   return {
