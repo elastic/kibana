@@ -51,7 +51,8 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardSavedObjectCrudTypes['UpdateIn']['data']) => attributesTov3(data, [], () => []),
+        up: (data: DashboardSavedObjectCrudTypes['UpdateIn']['data']) =>
+          attributesTov3(data, [], () => []),
       },
     },
   },

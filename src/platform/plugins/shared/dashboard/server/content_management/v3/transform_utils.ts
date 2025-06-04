@@ -81,7 +81,9 @@ export function dashboardAttributesOut(
   };
 }
 
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardSavedObjectCrudTypesV2['GetOut'] => {
+export const getResultV3ToV2 = (
+  result: DashboardGetOut
+): DashboardSavedObjectCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
@@ -100,7 +102,9 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardSavedObjectCr
 
   const v2Attributes = {
     ...(controlGroupInput && {
-      controlGroupInput: transformControlGroupIn(controlGroupInput) as DashboardSavedObjectControlGroupInputV2,
+      controlGroupInput: transformControlGroupIn(
+        controlGroupInput
+      ) as DashboardSavedObjectControlGroupInputV2,
     }),
     description,
     ...(kibanaSavedObjectMeta && {

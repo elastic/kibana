@@ -8,10 +8,14 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
 import { dashboardAttributesSchema } from './v1';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
-import { ContentManagementCrudTypes, SavedObjectCreateOptions, SavedObjectUpdateOptions } from '@kbn/content-management-utils';
 
 export type DashboardContentType = typeof DASHBOARD_SAVED_OBJECT_TYPE;
 
@@ -27,5 +31,3 @@ export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
     onlyTitle?: boolean;
   }
 >;
-
-export type DashboardItem = DashboardSavedObjectCrudTypes['Item'];

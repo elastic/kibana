@@ -9,8 +9,17 @@
 
 import { Serializable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
-import { controlGroupInputSchema, dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v2';
-import { ContentManagementCrudTypes, SavedObjectCreateOptions, SavedObjectUpdateOptions } from '@kbn/content-management-utils';
+import {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
+import {
+  controlGroupInputSchema,
+  dashboardAttributesSchema,
+  gridDataSchema,
+  sectionSchema,
+} from './v2';
 import { DashboardContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
@@ -53,4 +62,3 @@ export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
     onlyTitle?: boolean;
   }
 >;
-
