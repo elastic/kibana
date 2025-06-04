@@ -31,7 +31,11 @@ const timestampColumn: EuiBasicTableColumn<TableItemType> = {
   ),
   width: '20%',
   dataType: 'date',
-  render: (timestamp: string) => {
+  render: (timestamp?: string) => {
+    if (!timestamp) {
+      return getEmptyTagValue();
+    }
+
     return <PreferenceFormattedDate value={new Date(timestamp)} />;
   },
 };
@@ -205,7 +209,11 @@ export const buildAuthenticationsColumns = (
         defaultMessage="Source"
       />
     ),
-    render: (source: string) => {
+    render: (source?: string) => {
+      if (!source) {
+        return getEmptyTagValue();
+      }
+
       return capitalize(source);
     },
   },
@@ -217,7 +225,11 @@ export const buildAuthenticationsColumns = (
         defaultMessage="Type"
       />
     ),
-    render: (type: string) => {
+    render: (type?: string) => {
+      if (!type) {
+        return getEmptyTagValue();
+      }
+
       if (type.startsWith('/api/v1/authn')) {
         return i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',

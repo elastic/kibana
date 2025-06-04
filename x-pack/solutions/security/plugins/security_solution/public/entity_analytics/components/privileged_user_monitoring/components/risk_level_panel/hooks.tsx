@@ -15,18 +15,26 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
-import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY } from './constants';
 import type { RiskLevelsTableItem, RiskLevelsPrivilegedUsersQueryResult } from './types';
 import { RiskScoreLevel } from '../../../severity/common';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
+import { getRiskLevelsPrivilegedUsersQueryBody } from './esql_query';
 
-export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) => {
+export const useRiskLevelsPrivilegedUserQuery = ({
+  skip,
+  spaceId,
+}: {
+  skip: boolean;
+  spaceId: string;
+}) => {
   const { data } = useKibana().services;
 
   const index = useGetDefaultRiskIndex(true); // only latest
   const filterQuery = useEsqlGlobalFilterQuery();
-  const query = `FROM ${index} ${RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY}`;
+
+  const query = `FROM ${index} ${getRiskLevelsPrivilegedUsersQueryBody(spaceId)}`;
+
   const {
     isLoading,
     isRefetching,

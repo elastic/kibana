@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
   generateListESQLQuery,
   generateVisualizationESQLQuery,
@@ -51,14 +52,19 @@ const toggleOptionsConfig = {
 export const usePrivilegedUserActivityParams = (
   selectedToggleOption: VisualizationToggleOptions
 ) => {
+  const spaceId = useSpaceId();
   const esqlSource = useMemo(
-    () => toggleOptionsConfig[selectedToggleOption].generateEsqlSource(),
-    [selectedToggleOption]
+    () =>
+      spaceId ? toggleOptionsConfig[selectedToggleOption].generateEsqlSource(spaceId) : undefined,
+    [selectedToggleOption, spaceId]
   );
 
-  const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
+  const generateTableQuery = useMemo(
+    () => (esqlSource ? generateListESQLQuery(esqlSource) : undefined),
+    [esqlSource]
+  );
   const generateVisualizationQuery = useMemo(
-    () => generateVisualizationESQLQuery(esqlSource),
+    () => (esqlSource ? generateVisualizationESQLQuery(esqlSource) : undefined),
     [esqlSource]
   );
 

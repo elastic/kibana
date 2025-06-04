@@ -67,17 +67,19 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
         outerDirection="column"
         hideSubtitle
       >
-        <LinkAnchor
-          href={getAppUrl({
-            appId: 'discover',
-            path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
-          })}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
-            defaultMessage="View all events"
-          />
-        </LinkAnchor>
+        {generateTableQuery && (
+          <LinkAnchor
+            href={getAppUrl({
+              appId: 'discover',
+              path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
+            })}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
+              defaultMessage="View all events"
+            />
+          </LinkAnchor>
+        )}
       </HeaderSection>
       {toggleStatus && (
         <>
@@ -107,17 +109,19 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EsqlDashboardPanel<TableItemType>
-            title={TITLE}
-            stackByField={selectedStackByOption.value}
-            timerange={{ from, to }}
-            getLensAttributes={getLensAttributes}
-            generateVisualizationQuery={generateVisualizationQuery}
-            generateTableQuery={generateTableQuery}
-            columns={columns}
-            pageSize={PAGE_SIZE}
-            showInspectTable={true}
-          />
+          {generateVisualizationQuery && generateTableQuery && (
+            <EsqlDashboardPanel<TableItemType>
+              title={TITLE}
+              stackByField={selectedStackByOption.value}
+              timerange={{ from, to }}
+              getLensAttributes={getLensAttributes}
+              generateVisualizationQuery={generateVisualizationQuery}
+              generateTableQuery={generateTableQuery}
+              columns={columns}
+              pageSize={PAGE_SIZE}
+              showInspectTable={true}
+            />
+          )}
         </>
       )}
     </EuiPanel>
