@@ -29,16 +29,14 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Rule upgrade workflow: individual updates from Rule Updates table](#rule-upgrade-workflow-individual-updates-from-rule-updates-table)
-    - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
-    - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
-  - [Rule upgrade workflow: bulk updates from Rule Updates table](#rule-upgrade-workflow-bulk-updates-from-rule-updates-table)
-    - [**Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-conflict-free-prebuilt-rules-selected-on-the-page)
-    - [**Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**](#scenario-user-cannot-upgrade-multiple-prebuilt-rules-selected-on-the-page-when-they-have-upgrade-conflicts)
-    - [**Scenario: User can upgrade all available conflict-free prebuilt rules at once**](#scenario-user-can-upgrade-all-available-conflict-free-prebuilt-rules-at-once)
-    - [**Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**](#scenario-user-cannot-upgrade-all-prebuilt-rules-at-once-if-they-have-upgrade-conflicts)
-    - [**Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade**](#scenario-user-can-upgrade-only-conflict-free-rules-when-a-mix-of-rules-with-and-without-conflicts-are-selected-for-upgrade)
-    - [**Scenario: User can upgrade only conflict-free rules when attempting to upgrade all rules**](#scenario-user-can-upgrade-only-conflict-free-rules-when-attempting-to-upgrade-all-rules)
+  - [Rule upgrade workflow: individual upgrades from Rule Updates table](#rule-upgrade-workflow-individual-upgrades-from-rule-updates-table)
+    - [**Scenario: User can upgrade a single conflict-free prebuilt rule from Rules Update table**](#scenario-user-can-upgrade-a-single-conflict-free-prebuilt-rule-from-rules-update-table)
+    - [**Scenario: User CAN'T upgrade a single prebuilt rule with upgrade conflicts from Rules Update table**](#scenario-user-cant-upgrade-a-single-prebuilt-rule-with-upgrade-conflicts-from-rules-update-table)
+  - [Rule upgrade workflow: bulk upgrade from Rule Updates table](#rule-upgrade-workflow-bulk-upgrade-from-rule-updates-table)
+    - [**Scenario: User can bulk upgrade conflict-free prebuilt rules**](#scenario-user-can-bulk-upgrade-conflict-free-prebuilt-rules)
+    - [**Scenario: User can bulk upgrade prebuilt rules with auto-resolved upgrade conflicts**](#scenario-user-can-bulk-upgrade-prebuilt-rules-with-auto-resolved-upgrade-conflicts)
+    - [**Scenario: User CAN'T bulk upgrade all prebuilt rules with unresolved upgrade conflicts**](#scenario-user-cant-bulk-upgrade-all-prebuilt-rules-with-unresolved-upgrade-conflicts)
+    - [**Scenario: User can bulk upgrade a mix of prebuilt rules with and without upgrade conflicts**](#scenario-user-can-bulk-upgrade-a-mix-of-prebuilt-rules-with-and-without-upgrade-conflicts)
   - [Rule upgrade workflow: upgrading rules with rule type changes](#rule-upgrade-workflow-upgrading-rules-with-rule-type-changes)
     - [**Scenario: User can upgrade rules with rule type changes one-by-one**](#scenario-user-can-upgrade-rules-with-rule-type-changes-one-by-one)
     - [**Scenario: User can NOT bulk upgrade rules with rule type changes when upgrading selected rules**](#scenario-user-can-not-bulk-upgrade-rules-with-rule-type-changes-when-upgrading-selected-rules)
@@ -93,11 +91,13 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Relax the rules of handling missing base versions of prebuilt rules](https://github.com/elastic/kibana/issues/210358)
 - [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
 ### Terminology
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **Upgrade conflict**: this is a situation when a prebuilt rule can't be 100% safely upgraded due to customizations made to the rule specific edge cases defined by the diffable algorithms.
 - **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
 - **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
@@ -107,7 +107,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 Assumptions about test environments and scenarios outlined in this test plan.
 
+Unless explicitly indicated otherwise:
+
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+- Package with prebuilt rules is already installed, and rule assets from it are stored in Elasticsearch.
+- Prebuilt rules have the corresponding base versions until it's explicitly indicated otherwise
 
 ### Technical requirements
 
@@ -150,160 +154,135 @@ User stories, misc:
 
 ## Scenarios
 
-### Rule upgrade workflow: individual updates from Rule Updates table
+### Rule upgrade workflow: individual upgrades from Rule Updates table
 
-#### **Scenario: User can upgrade conflict-free prebuilt rules one by one**
+#### **Scenario: User can upgrade a single conflict-free prebuilt rule from Rules Update table**
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
+Given a prebuilt rule is installed
+And the rule has an upgrade
+And the rule doesn't have upgrade conflicts
 When user is on the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-When user upgrades one individual rule without previewing it
-Then success message should be displayed after upgrade
-And the upgraded rule should be removed from the table
+Then the rule should be shown in the table
+When user upgrades the rule without previewing it
+Then a success message should be shown after the upgrade
+And the upgraded prebuilt rule should be removed from the table
 And user should see the number of rules available to upgrade decreased by 1
 ```
 
-#### **Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**
+#### **Scenario: User CAN'T upgrade a single prebuilt rule with upgrade conflicts from Rules Update table**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And user is on the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-And for Z (where Z < Y) of the rules with upgrades there are upgrade conflicts
-Then for those Z rules the Upgrade Rule button should be disabled
-And the user should not be able to upgrade them directly from the table
-And there should be a message/tooltip indicating why the rule cannot be upgraded directly
+Given a prebuilt rule is installed
+And the rule has an upgrade
+And the rule has an upgrade conflict
+When user is on the Rule Updates table
+Then the rule should be shown in the table
+And it's visible the rule has upgrade conflicts
+And "Review" button is shown in the rule's row
+When user hovers on the button
+Then an explanation text should appear
+When user click the button
+Then Prebuilt Rule Upgrade Flyout should be shown
 ```
 
-### Rule upgrade workflow: bulk updates from Rule Updates table
+### Rule upgrade workflow: bulk upgrade from Rule Updates table
 
-#### **Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**
+#### **Scenario: User can bulk upgrade conflict-free prebuilt rules**
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And user opens the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-When user selects Z (where Z < Y) rules, which have no upgrade conflicts
-Then user should see a CTA to upgrade <Z> rules
-When user clicks the CTA
-Then success message should be displayed after upgrade
-And all the <Z> upgraded rules should be removed from the table
-And user should see the number of rules available to upgrade decreased by <Z> number of upgraded rules
-
-Examples:
-  | Z                               |
-  | a few rules on the page, e.g. 2 |
-  | all rules on the page, e.g. 12  |
-```
-
-#### **Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**
-
-**Automation**: 1 e2e test with mock rules
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And all of those Y new versions have conflicts with the current versions
-And user is on the Rule Management page
-When user is on the Rule Updates table
-When user selects <Z> rules, all of which have upgrade conflicts
-Then user should see a CTA to upgrade <Z> number of rules, which should be disabled
-When user hovers on the CTA to upgrade multiple rules
-Then a message should be displayed that informs the user why the rules cannot be updated
-
-Examples:
-  | Z                               |
-  | a few rules on the page, e.g. 2 |
-  | all rules on the page, e.g. 12  |
-```
-
-#### **Scenario: User can upgrade all available conflict-free prebuilt rules at once**
-
-**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And those Y new versions don't have conflicts with the current versions
-When user is on the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-When user upgrades all rules
-Then success message should be displayed after upgrade
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-```
-
-#### **Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**
-
-**Automation**: 1 e2e test with mock rules
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And all Y new versions have conflicts with the current versions
+Given multiple prebuilt rules are installed
+And the installed prebuilt rules have upgrades available
+And the installed prebuilt rules don't have upgrade conflicts
 When user opens the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-Then user should see a CTA to upgrade all rules
-And the CTA to upgrade all rules should be disabled
-When user hovers on the CTA to upgrade all rules
-Then a message should be displayed that informs the user why the rules cannot be updated
+Then the prebuilt rules having upgrades should be shown in the table
+And user should see a <CTA>
+When user clicks the <CTA>
+Then success message should be shown after the upgrade
+And all the rules should be removed from the table
+And user should NOT see any prebuilt rules having upgrades
 ```
-
-#### **Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade**
-
-**Automation**: 1 e2e test with mock rules
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And a subset Z of the rules have conflicts with the current versions
-And user is on the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-And user selects <Z> rules, which is a mixture of rules with and without upgrade conflicts
-Then user should see a CTA to upgrade <Z> number of rules, which is enabled
-When user clicks the CTA
-A modal window should inform the user that only W rules without conflicts will be upgraded
-When user confirms the action in the modal
-Then success message should be displayed after upgrade informing that W rules were updated
-And the W upgraded rules should be removed from the table
-And the remaining Z - W rules should still be present in the table
-And user should see the number of rules available to upgrade decreased by W number of upgraded rules
 
 Examples:
-  | Z                               |
-  | a few rules on the page, e.g. 2 |
-  | all rules on the page, e.g. 12  |
-```
+| \<CTA\> | comment |
+| ---- | ---- |
+| CTA to upgrade all prebuilt rules | - |
+| CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Rule Updates table to see this CTA |
 
-#### **Scenario: User can upgrade only conflict-free rules when attempting to upgrade all rules**
+#### **Scenario: User can bulk upgrade prebuilt rules with auto-resolved upgrade conflicts**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given X prebuilt rules are installed in Kibana
-And for Y of the installed rules there are new versions available
-And Z (where Z < Y) rules have conflicts with the current versions
-And user is on the Rule Updates table
-Then Y rules available for upgrade should be displayed in the table
-Then user should see an enabled CTA to upgrade all rules
-When user clicks the CTA
-A modal window should inform the user that only K (where K < Y) rules without conflicts will be upgraded
-When user confirms the action in the modal
-Then success message should be displayed after upgrade informing that K rules were updated
-And the K upgraded rules should be removed from the table
-And the remaining M = Y - K rules should still be present in the table
-And user should see the number of rules available to upgrade decreased by K number of upgraded rules
+Given multiple prebuilt rules are installed
+And the installed prebuilt rules have upgrades available
+And the installed prebuilt have auto-resolved upgrade conflicts
+When user opens the Rule Updates table
+Then user should see a <CTA>
+When user clicks the <CTA>
+Then user should see a warning modal with several CTAs
+When users clicks the CTA to proceed with rules upgrade
+Then a success message should be shown after the upgrade
+And all the upgraded prebuilt rules should be removed from the table
+And user should see the number of rules available to upgrade decreased by the number of upgraded rules
 ```
+
+Examples:
+| \<CTA\> | comment |
+| ---- | ---- |
+| CTA to upgrade all prebuilt rules | - |
+| CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Rule Updates table to see this CTA |
+
+#### **Scenario: User CAN'T bulk upgrade all prebuilt rules with unresolved upgrade conflicts**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules are installed
+And the installed prebuilt rules have upgrades available
+And the installed prebuilt have unresolved upgrade conflicts
+When user opens the Rule Updates table
+Then user should see a <CTA>
+When user clicks the <CTA>
+Then user should see a warning modal saying the upgrade isn't possible
+```
+
+Examples:
+| \<CTA\> | comment |
+| ---- | ---- |
+| CTA to upgrade all prebuilt rules | - |
+| CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Rule Updates table to see this CTA |
+
+#### **Scenario: User can bulk upgrade a mix of prebuilt rules with and without upgrade conflicts**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules are installed
+And the installed prebuilt rules have upgrades available
+And some of the installed prebuilt have auto-resolved upgrade conflicts
+And some of the installed prebuilt have unresolved upgrade conflicts
+When user opens the Rule Updates table
+Then user should see a <CTA>
+When user clicks the <CTA>
+Then user should see a warning modal with several CTAs
+When users clicks the CTA to proceed with conflict-free and auto-resolved upgrade conflicts rules upgrade
+Then a success message should be shown after the upgrade
+And all the upgraded prebuilt rules should be removed from the table
+And user should see the number of rules available to upgrade decreased by the number of upgraded rules
+```
+
+Examples:
+| \<CTA\> | comment |
+| ---- | ---- |
+| CTA to upgrade all prebuilt rules | - |
+| CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Rule Updates table to see this CTA |
 
 ### Rule upgrade workflow: upgrading rules with rule type changes
 
