@@ -251,23 +251,17 @@
             "section": "def-public.ExportShare",
             "text": "ExportShare"
           },
-          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ",
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.ShareContext",
-            "text": "ShareContext"
-          },
-          " & ",
-          "ShareRegistryApiStart",
-          ") => { name?: string | undefined; icon?: ",
+          " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => { name?: string | undefined; icon?: ",
           "IconType",
-          " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButton?: React.ReactNode; generateAssetExport: (args: ",
+          " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
           "ExportGenerationOpts",
-          ") => Promise<unknown>; generateAssetURIValue: (args: ",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
           "ExportGenerationOpts",
-          ") => string | undefined; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; } | null; }"
+          ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); prerequisiteCheck?: ((args: { capabilities: ",
+          "Capabilities",
+          "; objectType: string; license?: ",
+          "ILicense",
+          " | undefined; }) => boolean) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
@@ -897,6 +891,22 @@
           },
           {
             "parentPluginId": "share",
+            "id": "def-public.ShareContext.objectTypeAlias",
+            "type": "string",
+            "tags": [],
+            "label": "objectTypeAlias",
+            "description": [
+              "\nAn alias of type of the object to share, that's more human friendly."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.ShareContext.objectTypeMeta",
             "type": "Object",
             "tags": [],
@@ -909,7 +919,7 @@
               "LinkShareUIConfig",
               "; embed: ",
               "EmbedShareUIConfig",
-              "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: { draftModeCallOut?: React.ReactNode; helpText?: React.ReactNode; CTAButtonConfig?: { id: string; dataTestSubj: string; label: string; } | undefined; disabled?: boolean | undefined; }; }; }>; }"
+              "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>; }"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
@@ -1039,20 +1049,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.ShareContext.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              "IToasts"
-            ],
-            "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1176,6 +1172,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.asExport",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "asExport",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "share",
             "id": "def-public.ShowShareMenuOptions.anchorElement",
@@ -1334,17 +1344,11 @@
         },
         " extends { register: (value: ",
         "ShareMenuProviderLegacy",
-        ") => void; registerShareIntegration: <I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ",
-        {
-          "pluginId": "share",
-          "scope": "public",
-          "docId": "kibSharePluginApi",
-          "section": "def-public.ShareContext",
-          "text": "ShareContext"
-        },
-        " & ",
-        "ShareRegistryApiStart",
-        ") => Record<string, unknown> | null; }>(...args: [string, Omit<I, \"shareType\">] | [Omit<I, \"shareType\">]) => void; }"
+        ") => void; registerShareIntegration: <I extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Record<string, unknown>; prerequisiteCheck?: ((args: { capabilities: ",
+        "Capabilities",
+        "; objectType: string; license?: ",
+        "ILicense",
+        " | undefined; }) => boolean) | undefined; }>(...args: [string, Omit<I, \"shareType\">] | [Omit<I, \"shareType\">]) => void; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
@@ -1509,7 +1513,9 @@
           "section": "def-common.SerializableRecord",
           "text": "SerializableRecord"
         },
-        ">): void; }"
+        ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+        "ShareActionIntents",
+        "[]; }"
       ],
       "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
