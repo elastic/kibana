@@ -7,7 +7,6 @@
 
 import { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { apmEnableContinuousRollups } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
@@ -67,15 +66,10 @@ export const getApmDataAccessClient = ({
         end: number;
         kuery?: string;
       }) => {
-        const enableContinuousRollups = await uiSettingsClient.get<boolean>(
-          apmEnableContinuousRollups
-        );
-
         return services.getDocumentSources({
           start,
           end,
           kuery,
-          enableContinuousRollups,
         });
       },
     };

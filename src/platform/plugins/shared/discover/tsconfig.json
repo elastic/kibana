@@ -95,6 +95,7 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/logs-data-access-plugin",
+    "@kbn/apm-sources-access-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/discover-contextual-components",
     "@kbn/esql-ast",
@@ -103,7 +104,8 @@
     "@kbn/ui-theme",
     "@kbn/response-ops-rule-form",
     "@kbn/embeddable-enhanced-plugin",
-    "@kbn/shared-ux-page-analytics-no-data-types"
+    "@kbn/shared-ux-page-analytics-no-data-types",
+    "@kbn/core-application-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

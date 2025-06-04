@@ -99,12 +99,12 @@ describe('get color', () => {
     const buckets = createMockBucketColumns();
     const visParams = createMockPieParams();
     const colors = ['color1', 'color2', 'color3', 'color4'];
-    const categories = (chartType?: ChartTypes) =>
+    const getCategories = (chartType?: ChartTypes) =>
       chartType === ChartTypes.MOSAIC && visData.columns.length === 2
         ? getColorCategories(visData.rows, visData.columns[1]?.id)
         : getColorCategories(visData.rows, visData.columns[0]?.id);
-    const colorIndexMap = (chartType?: ChartTypes) =>
-      new Map(categories(chartType).map((d, i) => [d[0], i]));
+    const getColorIndexMap = (chartType?: ChartTypes) =>
+      new Map(getCategories(chartType).map((d, i) => [d, i]));
     const dataMock = dataPluginMock.createStartContract();
     interface RangeProps {
       gte: number;
@@ -146,7 +146,8 @@ describe('get color', () => {
         getAll: () => [mockPalette1],
       };
     };
-    it('should return the correct color based on the parent sortIndex', () => {
+
+    it('should return the correct color based on color map index', () => {
       const d: SimplifiedArrayNode = {
         depth: 1,
         sortIndex: 0,
@@ -177,7 +178,43 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
+      );
+      expect(color).toEqual(colors[2]);
+    });
+
+    it('should return the correct color based on the parent sortIndex when no color map index found', () => {
+      const d: SimplifiedArrayNode = {
+        depth: 1,
+        sortIndex: 0,
+        parent: {
+          children: [
+            ['ES-Air', undefined],
+            ['Kibana Airlines', undefined],
+          ],
+          depth: 0,
+          sortIndex: 0,
+        },
+        children: [],
+      };
+
+      const color = getColor(
+        ChartTypes.PIE,
+        'ES-Air',
+        d,
+        0,
+        false,
+        {},
+        distinctSeries,
+        dataLength,
+        visParams,
+        getPaletteRegistry(),
+        { getColor: () => undefined },
+        false,
+        false,
+        dataMock.fieldFormats,
+        visData.columns[0],
+        new Map()
       );
       expect(color).toEqual(colors[0]);
     });
@@ -212,7 +249,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('color3');
     });
@@ -246,7 +283,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('#000028');
     });
@@ -310,7 +347,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         column,
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('#3F6833');
     });
@@ -351,7 +388,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.MOSAIC)
+        getColorIndexMap(ChartTypes.MOSAIC)
       );
       expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
         [expect.objectContaining({ name: 'Second level 1' })],

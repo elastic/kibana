@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getApmIndicesSavedObject } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import { getApmIndicesSavedObject } from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import type { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
 
 export type ApmIndexSettingsResponse = Array<{

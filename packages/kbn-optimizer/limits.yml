@@ -5,11 +5,12 @@ pageLoadAssetSize:
   aiops: 18000
   alerting: 106936
   apm: 64385
+  apmSourcesAccess: 16765
   banners: 17946
   bfetch: 22837
   canvas: 29355
   cases: 180037
-  charts: 55000
+  charts: 60000
   cloud: 21076
   cloudDataMigration: 19170
   cloudDefend: 18697

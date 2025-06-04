@@ -11,15 +11,21 @@ import type { OnboardingCardId } from '../constants';
 import { OnboardingTopicId } from '../constants';
 import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
 import { onboardingConfig } from '../config';
+import type { TrackLinkClick } from './lib/telemetry';
 
 export interface OnboardingTelemetry {
   reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardComplete: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardLinkClicked: (cardId: OnboardingCardId, linkId: string) => void;
   reportCardSelectorClicked: (cardId: OnboardingCardId, selectorId: string) => void;
+  trackLinkClick?: TrackLinkClick;
 }
 
-export const useOnboardingTelemetry = (): OnboardingTelemetry => {
+export const useOnboardingTelemetry = ({
+  trackLinkClick,
+}: {
+  trackLinkClick?: TrackLinkClick;
+}): OnboardingTelemetry => {
   const { telemetry } = useKibana().services;
   return useMemo(
     () => ({
@@ -47,8 +53,9 @@ export const useOnboardingTelemetry = (): OnboardingTelemetry => {
           selectorId,
         });
       },
+      trackLinkClick,
     }),
-    [telemetry]
+    [telemetry, trackLinkClick]
   );
 };
 

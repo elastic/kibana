@@ -649,6 +649,8 @@ export class AIAssistantService {
     opts: CreateAttackDiscoveryScheduleDataClientParams
   ): Promise<AttackDiscoveryScheduleDataClient | null> {
     return new AttackDiscoveryScheduleDataClient({
+      actionsClient: opts.actionsClient,
+      logger: opts.logger,
       rulesClient: opts.rulesClient,
     });
   }

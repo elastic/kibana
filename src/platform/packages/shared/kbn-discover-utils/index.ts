@@ -35,6 +35,7 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
+  createTracesContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -42,6 +43,8 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
+  getTransactionDocumentOverview,
+  getSpanDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
@@ -63,7 +66,7 @@ export {
   LogLevelBadge,
 } from './src';
 
-export type { LogsContextService } from './src';
+export type { LogsContextService, TracesContextService } from './src';
 
 export * from './src/types';
 
