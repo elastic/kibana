@@ -61,11 +61,6 @@ export interface TrackedSavedObjectClick {
   selectedLabel: string | null;
   selectedRank: number | null;
 }
-/* @internal */
-export interface TrackedError {
-  message: string | Error;
-  searchValue?: string;
-}
 
 export interface GlobalSearchBarConfigType {
   input_max_limit: number;
