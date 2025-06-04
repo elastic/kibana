@@ -24,7 +24,7 @@ export function registerPricingRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route delegates authorization to the PricingTiersClient',
+          reason: 'This route does not require authorization',
         },
         authc: {
           enabled: false,
