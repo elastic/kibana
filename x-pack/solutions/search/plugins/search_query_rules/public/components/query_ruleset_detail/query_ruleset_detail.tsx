@@ -49,7 +49,16 @@ export const QueryRulesetDetail: React.FC = () => {
 
   const { mutate: createRuleset } = usePutRuleset();
 
-  const { queryRuleset, rules, isInitialLoading, isError, error } = useQueryRulesetDetailState({
+  const {
+    queryRuleset,
+    rules,
+    setNewRules,
+    addNewRule,
+    updateRule,
+    isInitialLoading,
+    isError,
+    error,
+  } = useQueryRulesetDetailState({
     rulesetId,
   });
   const [isPopoverActionsOpen, setPopoverActions] = useState(false);
@@ -148,6 +157,14 @@ export const QueryRulesetDetail: React.FC = () => {
     setTourState({
       ...tourState,
       isTourActive: false,
+    });
+  };
+
+  const handleSave = () => {
+    createRuleset({
+      rulesetId,
+      forceWrite: true,
+      rules,
     });
   };
 
@@ -254,13 +271,7 @@ export const QueryRulesetDetail: React.FC = () => {
                     fill
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
-                    onClick={() => {
-                      createRuleset({
-                        rulesetId,
-                        forceWrite: true,
-                        rules,
-                      });
-                    }}
+                    onClick={handleSave}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.queryRulesetDetail.saveButton"
@@ -296,7 +307,13 @@ export const QueryRulesetDetail: React.FC = () => {
       )}
       {!isError && (
         <>
-          <QueryRuleDetailPanel rulesetId={rulesetId} />
+          <QueryRuleDetailPanel
+            rulesetId={rulesetId}
+            setNewRules={setNewRules}
+            addNewRule={addNewRule}
+            updateRule={updateRule}
+            rules={rules}
+          />
 
           {tourStepsInfo[1]?.tourTargetRef?.current && (
             <EuiTourStep

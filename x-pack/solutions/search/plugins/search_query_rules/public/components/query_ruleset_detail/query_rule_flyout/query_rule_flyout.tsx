@@ -135,12 +135,30 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
           },
         ]);
       }
-      onSave({
+      const updatedRule = {
         rule_id: ruleId,
-        criteria: getValues('criteria'),
+        criteria: fields.map((criteria) => {
+          const normalizedCriteria = {
+            values: criteria.values,
+            metadata: criteria.metadata,
+            type: criteria.type,
+          };
+          return normalizedCriteria;
+        }),
         type: getValues('type'),
-        actions: getValues('actions'),
-      });
+        actions: {
+          // if there is docs, use them, otherwise use ids make sure docs doesn't exist when using ids
+          ...((isDocRule && {
+            docs: actionFields.map((doc) => ({
+              _id: doc._id,
+              _index: doc._index,
+            })),
+          }) ||
+            (isIdRule && { ids: actionIdsFields }) ||
+            {}),
+        },
+      };
+      onSave(updatedRule);
     }
   };
 

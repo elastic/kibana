@@ -13,10 +13,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
 import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
-import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
+import { SearchQueryRulesQueryRule } from '../../types';
 
 interface QueryRuleDetailPanelProps {
+  rules: SearchQueryRulesQueryRule[];
+  setNewRules: (newRules: SearchQueryRulesQueryRule[]) => void;
+  updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
+  addNewRule: (newRuleId: string) => void;
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
   tourInfo?: {
     title: string;
@@ -27,8 +31,11 @@ interface QueryRuleDetailPanelProps {
 export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rulesetId,
   tourInfo,
+  rules,
+  setNewRules,
+  updateRule,
+  addNewRule,
 }) => {
-  const { rules, setNewRules, updateRule, addNewRule } = useQueryRulesetDetailState({ rulesetId });
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
 
   const { mutate: generateRuleId } = useGenerateRuleId(rulesetId);
