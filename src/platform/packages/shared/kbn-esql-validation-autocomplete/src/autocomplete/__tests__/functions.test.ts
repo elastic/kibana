@@ -128,7 +128,33 @@ describe('functions arg suggestions', () => {
                 type: 'text',
               },
             ],
-            returnType: 'keyword',
+            returnType: 'double',
+          },
+        ],
+        locationsAvailable: [Location.EVAL],
+      },
+      {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'accepts_keyword_and_text',
+        description: '',
+        signatures: [
+          {
+            params: [
+              {
+                name: 'arg',
+                type: 'keyword',
+              },
+            ],
+            returnType: 'double',
+          },
+          {
+            params: [
+              {
+                name: 'arg',
+                type: 'text',
+              },
+            ],
+            returnType: 'double',
           },
         ],
         locationsAvailable: [Location.EVAL],
@@ -145,7 +171,7 @@ describe('functions arg suggestions', () => {
                 type: 'text',
               },
             ],
-            returnType: 'keyword',
+            returnType: 'double',
           },
         ],
         locationsAvailable: [Location.EVAL],
@@ -162,6 +188,7 @@ describe('functions arg suggestions', () => {
 
     const { assertSuggestions } = await setup();
 
+    await assertSuggestions('FROM index | EVAL ACCEPTS_KEYWORD_AND_TEXT(/)', expected);
     await assertSuggestions('FROM index | EVAL ACCEPTS_KEYWORD(/)', expected);
     await assertSuggestions('FROM index | EVAL ACCEPTS_TEXT(/)', expected);
   });
