@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiButtonIcon,
@@ -45,6 +45,8 @@ export const FullScreenWaterfall = ({
   const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [scrollElement, setScrollElement] = useState(null);
+  const overlayMaskRef = useRef(null);
   let flyout;
 
   const getParentApi = useCallback(
@@ -56,6 +58,7 @@ export const FullScreenWaterfall = ({
           rangeTo,
           serviceName: transaction?.[SERVICE_NAME_FIELD],
           entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
+          scrollElement,
           onNodeClick: (item: { id: string }) => {
             setSpanId(item.id);
             setIsFlyoutVisible(true);
@@ -63,7 +66,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [rangeFrom, rangeTo, traceId, transaction]
+    [traceId, rangeFrom, rangeTo, transaction, scrollElement]
   );
 
   if (isFlyoutVisible && spanId) {
@@ -79,11 +82,25 @@ export const FullScreenWaterfall = ({
     );
   }
 
+  useEffect(() => {
+    if (overlayMaskRef.current) {
+      setScrollElement(overlayMaskRef.current);
+    }
+  }, []);
+
   return (
     <>
-      <EuiOverlayMask css={{ paddingBlockEnd: '0 !important' }}>
-        <EuiFocusTrap scrollLock preventScrollOnFocus css={{ height: '100%', width: '100%' }}>
-          <EuiPanel hasShadow={false} css={{ height: '100%', width: '100%' }}>
+      <EuiOverlayMask
+        maskRef={overlayMaskRef}
+        data-test-subj="EuiOverlayMask-Irene"
+        css={{ paddingBlockEnd: '0 !important', overflowY: 'scroll' }}
+      >
+        <EuiFocusTrap data-test-subj="EuiFocusTrap-Irene" css={{ height: '100%', width: '100%' }}>
+          <EuiPanel
+            data-test-subj="EuiPanel-Irene"
+            hasShadow={false}
+            css={{ minHeight: '100%', width: '100%' }}
+          >
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={1}>
                 <EuiTitle size="l">
