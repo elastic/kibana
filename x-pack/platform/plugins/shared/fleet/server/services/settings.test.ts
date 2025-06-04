@@ -112,9 +112,9 @@ describe('settingsSetup', () => {
       items: [],
       page: 1,
       perPage: 10,
-      total: 0
+      total: 0,
     });
-    
+
     const soClientMock = savedObjectsClientMock.create();
 
     mockedAppContextService.getConfig.mockReturnValue({
@@ -158,7 +158,7 @@ describe('settingsSetup', () => {
       items: [],
       page: 1,
       perPage: 10,
-      total: 0
+      total: 0,
     });
 
     await settingsSetup(soClientMock);
@@ -171,7 +171,7 @@ describe('settingsSetup', () => {
       items: [],
       page: 1,
       perPage: 10,
-      total: 0
+      total: 0,
     });
     const soClientMock = savedObjectsClientMock.create();
     mockedAppContextService.getConfig.mockReturnValue({
