@@ -11,7 +11,6 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
-import { DEFAULT_AWS_SES_CONFIG } from './config';
 
 const createActionsConfigMock = () => {
   const mocked: jest.Mocked<ActionsConfigurationUtilities> = {
@@ -37,7 +36,7 @@ const createActionsConfigMock = () => {
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(1000),
-    getAwsSesConfig: jest.fn().mockReturnValue(DEFAULT_AWS_SES_CONFIG),
+    getAwsSesConfig: jest.fn().mockReturnValue(null),
   };
   return mocked;
 };

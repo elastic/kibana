@@ -571,3 +571,34 @@ describe('getMaxQueued()', () => {
     expect(max).toEqual(1000000);
   });
 });
+
+describe('getAwsSesConfig()', () => {
+  test('returns null when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns config if set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          ses: {
+            host: 'https://email.us-east-1.amazonaws.com',
+            port: 1234,
+          },
+        },
+      },
+    });
+    expect(acu.getAwsSesConfig()).toEqual({
+      host: 'https://email.us-east-1.amazonaws.com',
+      port: 1234,
+      secure: true,
+    });
+  });
+});

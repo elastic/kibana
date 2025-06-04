@@ -107,7 +107,7 @@ function validateConfig(
     if (config.tenantId == null) {
       throw new Error('[tenantId] is required');
     }
-  } else if (config.service === AdditionalEmailServices.AWS_SES) {
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
     if (awsSesConfig.host !== config.host && awsSesConfig.port !== config.port) {
       throw new Error(
         '[ses.host]/[ses.port] does not match with the configured AWS SES host/port combination'

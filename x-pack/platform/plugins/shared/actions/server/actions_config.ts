@@ -12,12 +12,7 @@ import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
 import type { ActionsConfig, CustomHostSettings } from './config';
-import {
-  AllowedHosts,
-  EnabledActionTypes,
-  DEFAULT_QUEUED_MAX,
-  DEFAULT_AWS_SES_CONFIG,
-} from './config';
+import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import type { AwsSesConfig, ProxySettings, ResponseSettings, SSLSettings } from './types';
@@ -232,11 +227,15 @@ export function getActionsConfigurationUtilities(
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
     getAwsSesConfig: () => {
-      return {
-        host: config.email?.services?.ses.host || DEFAULT_AWS_SES_CONFIG.host,
-        port: config.email?.services?.ses.port || DEFAULT_AWS_SES_CONFIG.port,
-        secure: DEFAULT_AWS_SES_CONFIG.secure,
-      };
+      if (config.email?.services?.ses.host && config.email?.services?.ses.port) {
+        return {
+          host: config.email?.services?.ses.host,
+          port: config.email?.services?.ses.port,
+          secure: true,
+        };
+      }
+
+      return null;
     },
   };
 }

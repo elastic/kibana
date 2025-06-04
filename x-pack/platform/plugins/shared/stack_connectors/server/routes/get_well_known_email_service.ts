@@ -54,7 +54,7 @@ export const getWellKnownEmailServiceRoute = (router: IRouter, awsSesConfig: Aws
     let response: SMTPConnection.Options = {};
     if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
       response = ELASTIC_CLOUD_SERVICE;
-    } else if (service === AdditionalEmailServices.AWS_SES && awsSesConfig) {
+    } else if (awsSesConfig && service === AdditionalEmailServices.AWS_SES) {
       response = {
         host: awsSesConfig.host,
         port: awsSesConfig.port,

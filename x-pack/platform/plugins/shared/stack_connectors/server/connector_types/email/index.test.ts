@@ -1263,7 +1263,7 @@ describe('execute()', () => {
   });
 });
 
-describe('validateConfig AWS_SES specific checks', () => {
+describe('validateConfig AWS SES specific checks', () => {
   const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
   const awsSesPort = 465;
   const awsSesConfig = {

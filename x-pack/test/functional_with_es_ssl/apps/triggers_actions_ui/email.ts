@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { DEFAULT_AWS_SES_CONFIG } from '@kbn/actions-plugin/server/config';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -14,26 +13,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
 
   describe('Email', () => {
-    describe('connector page', () => {
-      beforeEach(async () => {
-        await pageObjects.common.navigateToApp('triggersActionsConnectors');
-      });
+    beforeEach(async () => {
+      await pageObjects.common.navigateToApp('triggersActionsConnectors');
+    });
 
-      it('should use the kibana config for aws ses defaults', async () => {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-        await testSubjects.click('.email-card');
-        await testSubjects.selectValue('emailServiceSelectInput', 'ses');
+    it('should use the kibana config for aws ses defaults', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+      await testSubjects.click('.email-card');
+      await testSubjects.selectValue('emailServiceSelectInput', 'ses');
 
-        await testSubjects.waitForAttributeToChange(
-          'emailHostInput',
-          'value',
-          DEFAULT_AWS_SES_CONFIG.host
-        );
-        expect(await testSubjects.getAttribute('emailPortInput', 'value')).to.be(
-          DEFAULT_AWS_SES_CONFIG.port.toString()
-        );
-        expect(await testSubjects.getAttribute('emailSecureSwitch', 'aria-checked')).to.be('true');
-      });
+      await testSubjects.waitForAttributeToChange(
+        'emailHostInput',
+        'value',
+        'email-smtp.us-east-1.amazonaws.com'
+      );
+      expect(await testSubjects.getAttribute('emailPortInput', 'value')).to.be('465');
+      expect(await testSubjects.getAttribute('emailSecureSwitch', 'aria-checked')).to.be('true');
     });
   });
 };

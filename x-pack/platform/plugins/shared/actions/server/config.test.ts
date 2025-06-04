@@ -250,37 +250,52 @@ describe('config validation', () => {
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 
-  test('email.services.ses', () => {
+  describe('email.services.ses', () => {
     const config: Record<string, unknown> = {};
-    let result = configSchema.validate(config);
-    expect(result.email === undefined);
+    test('validates no email config at all', () => {
+      expect(configSchema.validate(config).email).toBe(undefined);
+    });
 
-    config.email = {};
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
-    );
+    test('validates empty email config', () => {
+      config.email = {};
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+      );
+    });
 
-    config.email = { services: {} };
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
-    );
+    test('validates email config with empty services', () => {
+      config.email = { services: {} };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+      );
+    });
 
-    config.email = { services: { ses: {} } };
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
-    );
+    test('validates email config with empty ses service', () => {
+      config.email = { services: { ses: {} } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+      );
+    });
 
-    config.email = { services: { ses: { host: 'ses.host.com' } } };
-    result = configSchema.validate(config);
-    expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com' });
+    test('validates ses config with host only', () => {
+      config.email = { services: { ses: { host: 'ses.host.com' } } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: Email configuration requires both services.ses.host and services.ses.port to be specified"`
+      );
+    });
 
-    config.email = { services: { ses: { port: 1 } } };
-    result = configSchema.validate(config);
-    expect(result.email?.services?.ses).toEqual({ port: 1 });
+    test('validates ses config with port only', () => {
+      config.email = { services: { ses: { port: 1 } } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: Email configuration requires both services.ses.host and services.ses.port to be specified"`
+      );
+    });
 
-    config.email = { services: { ses: { host: 'ses.host.com', port: 1 } } };
-    result = configSchema.validate(config);
-    expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com', port: 1 });
+    test('validates ses service', () => {
+      config.email = { services: { ses: { host: 'ses.host.com', port: 1 } } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com', port: 1 });
+    });
   });
 });
 

@@ -14,22 +14,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
 
   describe('Email - with AWS SES Kibana config', () => {
-    describe('connector page', () => {
-      beforeEach(async () => {
-        await pageObjects.common.navigateToApp('triggersActionsConnectors');
-      });
+    beforeEach(async () => {
+      await pageObjects.common.navigateToApp('triggersActionsConnectors');
+    });
 
-      it('should use the kibana config for aws ses', async () => {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-        await testSubjects.click('.email-card');
-        await testSubjects.selectValue('emailServiceSelectInput', 'ses');
+    it('should use the kibana config for aws ses', async () => {
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+      await testSubjects.click('.email-card');
+      await testSubjects.selectValue('emailServiceSelectInput', 'ses');
 
-        await testSubjects.waitForAttributeToChange('emailHostInput', 'value', awsSesConfig.host);
-        expect(await testSubjects.getAttribute('emailPortInput', 'value')).to.be(
-          awsSesConfig.port.toString()
-        );
-        expect(await testSubjects.getAttribute('emailSecureSwitch', 'aria-checked')).to.be('true');
-      });
+      await testSubjects.waitForAttributeToChange('emailHostInput', 'value', awsSesConfig.host);
+      expect(await testSubjects.getAttribute('emailPortInput', 'value')).to.be(
+        awsSesConfig.port.toString()
+      );
+      expect(await testSubjects.getAttribute('emailSecureSwitch', 'aria-checked')).to.be('true');
     });
   });
 };

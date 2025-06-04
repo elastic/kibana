@@ -282,8 +282,8 @@ export interface ConnectorToken extends SavedObjectAttributes {
 // execution.
 export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];
 
-export interface AwsSesConfig {
-  host?: string;
-  port?: number;
-  secure?: boolean;
-}
+export type AwsSesConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+} | null;

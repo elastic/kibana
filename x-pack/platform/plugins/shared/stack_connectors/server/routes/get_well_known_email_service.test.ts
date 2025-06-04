@@ -9,11 +9,10 @@ import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 describe('getWellKnownEmailServiceRoute', () => {
-  const emptyAwsSesConfig = {};
   it('returns config for well known email service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
+    getWellKnownEmailServiceRoute(router, null);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -38,7 +37,7 @@ describe('getWellKnownEmailServiceRoute', () => {
   it('returns config for elastic cloud email service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
+    getWellKnownEmailServiceRoute(router, null);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -64,7 +63,7 @@ describe('getWellKnownEmailServiceRoute', () => {
   it('returns empty for unknown service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
+    getWellKnownEmailServiceRoute(router, null);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -86,6 +85,7 @@ describe('getWellKnownEmailServiceRoute', () => {
     const awsSesConfig = {
       host: 'fake-email-smtp.us-east-1.amazonaws.com',
       port: 1,
+      secure: true,
     };
     const router = httpServiceMock.createRouter();
     getWellKnownEmailServiceRoute(router, awsSesConfig);

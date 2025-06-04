@@ -135,7 +135,11 @@ $$$action-config-email-domain-allowlist$$$
     Data type: `string`
 
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:    The hostname for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+:    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+    ::::{warning}
+    This setting alone is insufficient to override system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+    ::::
 
     Data type: `string`
     Default: `email-smtp.us-east-1.amazonaws.com`
