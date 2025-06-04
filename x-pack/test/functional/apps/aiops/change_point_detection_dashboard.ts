@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['dashboard', 'timePicker']);
 
   describe('change point detection in dashboard', function () {
     before(async () => {
@@ -73,6 +73,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.dashboardEmbeddables.submitChangePointInitForm();
       await aiops.dashboardEmbeddables.assertChangePointPanelExists();
       await PageObjects.dashboard.saveDashboard(dashboardTitle);
+    });
+
+    it('shows a no data screen if there is no data available for selected time range', async () => {
+      await aiops.changePointDetectionPage.assertNoDataFoundScreen();
+    });
+
+    it('shows a warning when no change point was found', async () => {
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jun 12, 2023 @ 01:00:19.000'
+      );
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning();
     });
   });
 }
