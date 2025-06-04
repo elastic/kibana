@@ -110,7 +110,12 @@ export const Trace = ({
               iconSize="m"
               iconType="fullScreen"
               color="text"
-              aria-label="pepito"
+              aria-label={i18n.translate(
+                'unifiedDocViewer.observability.traces.trace.fullScreen.button',
+                {
+                  defaultMessage: 'Open full screen waterfall',
+                }
+              )}
               onClick={() => {
                 setShowFullScreenWaterfall(true);
               }}
