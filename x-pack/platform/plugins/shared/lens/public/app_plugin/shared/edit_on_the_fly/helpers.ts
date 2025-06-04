@@ -81,7 +81,7 @@ export const getGridAttrs = async (
   let queryColumns = results.response.columns;
   // if the query columns are empty, we need to use the all_columns property
   // which has all columns regardless if they have data or not
-  if (queryColumns.length === 0 && results.response.all_columns) {
+  if (results.response.all_columns) {
     queryColumns = results.response.all_columns;
   }
 

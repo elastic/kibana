@@ -43,15 +43,15 @@ export function mergeSuggestionWithVisContext({
   }
   const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
 
+  const visualizationId = visAttributes.visualizationType;
   // should be based on same columns
   if (
     !datasourceState?.layers ||
-    Object.values(datasourceState?.layers).some(
-      (layer) =>
-        layer.columns?.some(
-          (c: { fieldName: string }) =>
-            !context?.textBasedColumns?.find((col) => col.id === c.fieldName)
-        ) || layer.columns?.length !== context?.textBasedColumns?.length
+    Object.values(datasourceState?.layers).some((layer) =>
+      layer.columns?.some(
+        (c: { fieldName: string }) =>
+          !context?.textBasedColumns?.find((col) => col.id === c.fieldName)
+      )
     )
   ) {
     return suggestion;
@@ -60,7 +60,7 @@ export function mergeSuggestionWithVisContext({
   try {
     return {
       title: visAttributes.title,
-      visualizationId: visAttributes.visualizationType,
+      visualizationId,
       visualizationState: visAttributes.state.visualization,
       keptLayerIds: layerIds,
       datasourceState,
