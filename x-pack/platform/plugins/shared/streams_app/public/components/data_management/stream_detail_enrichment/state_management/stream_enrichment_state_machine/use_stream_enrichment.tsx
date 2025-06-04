@@ -65,13 +65,19 @@ export const useStreamEnrichmentEvents = () => {
       },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
-          type: 'explicitlyEnabledPreviewColumns.update',
+          type: 'previewColumns.updateExplicitlyEnabledColumns',
           columns: columns.filter((col) => col.trim() !== ''),
         });
       },
       setExplicitlyDisabledPreviewColumns: (columns: string[]) => {
         service.send({
-          type: 'explicitlyDisabledPreviewColumns.update',
+          type: 'previewColumns.updateExplicitlyDisabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setPreviewColumnsOrder: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.order',
           columns: columns.filter((col) => col.trim() !== ''),
         });
       },

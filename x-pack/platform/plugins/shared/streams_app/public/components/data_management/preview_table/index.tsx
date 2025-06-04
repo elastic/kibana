@@ -7,7 +7,6 @@
 import { EuiDataGrid, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 
 export function PreviewTable({
@@ -15,11 +14,17 @@ export function PreviewTable({
   displayColumns,
   renderCellValue,
   rowHeightsOptions,
+  toolbarVisibility = false,
+  setVisibleColumns,
+  columnOrderHint = [],
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
   renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
+  toolbarVisibility?: boolean;
+  setVisibleColumns?: (visibleColumns: string[]) => void;
+  columnOrderHint?: string[];
 }) {
   const allColumns = useMemo(() => {
     const cols = new Set<string>();
@@ -31,22 +36,42 @@ export function PreviewTable({
         cols.add(key);
       });
     });
-    return Array.from(cols);
-  }, [documents]);
-  const columns = useMemo(() => {
-    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
+    let unorderedAllColumns = Array.from(cols);
+    // Sort columns based on the columnOrderHint if provided
+    if (columnOrderHint.length > 0) {
+      const orderedCols = columnOrderHint.filter((col) => unorderedAllColumns.includes(col));
+      const unorderedCols = unorderedAllColumns.filter((col) => !orderedCols.includes(col));
+      unorderedAllColumns = [...orderedCols, ...unorderedCols];
+    }
+    // Always show the displayColumns first, but preserve the order from unorderedAllColumns
+    if (displayColumns) {
+      const displaySet = new Set(displayColumns);
+      unorderedAllColumns = [
+        ...unorderedAllColumns.filter((col) => displaySet.has(col)),
+        ...unorderedAllColumns.filter((col) => !displaySet.has(col)),
+      ];
+    }
+    return unorderedAllColumns;
+  }, [columnOrderHint, displayColumns, documents]);
+  const visibleColumns = useMemo(() => {
+    if (displayColumns) {
+      // if displayColumns is provided, order them according to the columnOrderHint
+      const orderedCols = columnOrderHint.filter((col) => displayColumns.includes(col));
+      const unorderedCols = displayColumns.filter((col) => !orderedCols.includes(col));
+      return [...orderedCols, ...unorderedCols];
+    }
 
     return allColumns;
-  }, [allColumns, displayColumns]);
+  }, [allColumns, columnOrderHint, displayColumns]);
 
   const gridColumns = useMemo(() => {
     return allColumns.map((column) => ({
       id: column,
       displayAsText: column,
       actions: false as false,
-      initialWidth: columns.length > 10 ? 250 : undefined,
+      initialWidth: visibleColumns.length > 10 ? 250 : undefined,
     }));
-  }, [allColumns, columns.length]);
+  }, [allColumns, visibleColumns.length]);
 
   return (
     <EuiDataGrid
@@ -55,12 +80,11 @@ export function PreviewTable({
       })}
       columns={gridColumns}
       columnVisibility={{
-        visibleColumns: columns,
-        setVisibleColumns: (visibleColumns) => {
-          console.log(visibleColumns);
-        },
+        visibleColumns,
+        setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
+      toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       renderCellValue={({ rowIndex, columnId }) => {

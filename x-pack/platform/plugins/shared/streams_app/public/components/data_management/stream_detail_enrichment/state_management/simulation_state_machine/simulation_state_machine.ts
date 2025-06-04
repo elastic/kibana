@@ -101,6 +101,9 @@ export const simulationMachine = setup({
         (col) => !params.columns.includes(col)
       ),
     })),
+    storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
+      previewColumnsOrder: params.columns,
+    })),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
@@ -122,6 +125,9 @@ export const simulationMachine = setup({
     resetSimulation: assign({
       processors: [],
       detectedSchemaFields: [],
+      explicitlyEnabledPreviewColumns: [],
+      explicitlyDisabledPreviewColumns: [],
+      previewColumnsOrder: [],
       simulation: undefined,
       samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
@@ -151,6 +157,7 @@ export const simulationMachine = setup({
     previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
+    previewColumnsOrder: [],
     processors: input.processors,
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
@@ -170,7 +177,7 @@ export const simulationMachine = setup({
       target: '.idle',
       actions: [{ type: 'resetSimulation' }],
     },
-    'explicitlyEnabledPreviewColumns.update': {
+    'previewColumns.updateExplicitlyEnabledColumns': {
       actions: [
         {
           type: 'storeExplicitlyEnabledPreviewColumns',
@@ -179,10 +186,19 @@ export const simulationMachine = setup({
       ],
       target: '.idle',
     },
-    'explicitlyDisabledPreviewColumns.update': {
+    'previewColumns.updateExplicitlyDisabledColumns': {
       actions: [
         {
           type: 'storeExplicitlyDisabledPreviewColumns',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.order': {
+      actions: [
+        {
+          type: 'storePreviewColumnsOrder',
           params: ({ event }) => event,
         },
       ],
