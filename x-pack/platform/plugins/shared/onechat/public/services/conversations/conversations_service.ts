@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { toSerializedAgentIdentifier } from '@kbn/onechat-common';
 import type { ListConversationsResponse } from '../../../common/http_api/conversations';
 import type { ConversationListOptions } from '../../../common/conversations';
 
@@ -18,7 +19,7 @@ export class ConversationsService {
 
   async list({ agentId }: ConversationListOptions) {
     return await this.http.post<ListConversationsResponse>('/internal/onechat/conversations', {
-      body: JSON.stringify({ agentId }),
+      body: JSON.stringify({ agentId: agentId ? toSerializedAgentIdentifier(agentId) : undefined }),
     });
   }
 }

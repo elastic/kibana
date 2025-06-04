@@ -6,6 +6,7 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
+import type { SerializedAgentIdentifier } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -67,7 +68,7 @@ export interface ConversationRound {
 
 export interface Conversation {
   id: string;
-  agentId: string;
+  agentId: SerializedAgentIdentifier;
   user: UserIdAndName;
   title: string;
   createdAt: string;

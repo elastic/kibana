@@ -84,6 +84,7 @@ describe('runTool', () => {
     });
 
     expect(result).toEqual({
+      runId: expect.any(String),
       result: { test: true, over: 9000 },
     });
   });

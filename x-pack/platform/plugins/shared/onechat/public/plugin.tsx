@@ -58,17 +58,17 @@ export class OnechatPlugin
       toolsService,
     };
 
-    /*
+
     // TODO: remove
     chatService
       .chat({
-        conversationId: '4389bbb8-441e-4d08-9c7a-af4d0d7d63a2',
+        conversationId: '6a5d2477-62d2-46c5-a243-6cf06768be99',
         nextMessage: 'What was my first message?',
       })
       .subscribe((event) => {
         console.log('**** event', event);
       });
-     */
+
 
     return {};
   }

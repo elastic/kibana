@@ -30,6 +30,9 @@ import {
   type ChatAgentEvent,
   type RoundCompleteEvent,
   OneChatDefaultAgentId,
+  toSerializedAgentIdentifier,
+  AgentIdentifier,
+  SerializedAgentIdentifier,
   isRoundCompleteEvent,
   isOnechatError,
   createInternalError,
@@ -64,7 +67,7 @@ export interface ChatConverseParams {
    * Id of the conversational agent to converse with.
    * If empty, will use the default agent id.
    */
-  agentId?: string;
+  agentId?: AgentIdentifier;
   /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
@@ -148,7 +151,16 @@ class ChatServiceImpl implements ChatService {
       ),
     }).pipe(
       switchMap(({ conversationClient, chatModel, agent }) => {
-        const conversation$ = getConversation$({ agentId, conversationId, conversationClient });
+        const agentIdentifier = toSerializedAgentIdentifier({
+          agentId: agent.agentId,
+          providerId: agent.providerId,
+        });
+
+        const conversation$ = getConversation$({
+          agentId: agentIdentifier,
+          conversationId,
+          conversationClient,
+        });
         const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
 
         const title$ = isNewConversation
@@ -163,7 +175,7 @@ class ChatServiceImpl implements ChatService {
 
         const saveOrUpdateAndEmit$ = isNewConversation
           ? createConversation$({
-              agentId,
+              agentId: agentIdentifier,
               conversationClient,
               title$,
               roundCompletedEvents$,
@@ -223,7 +235,7 @@ const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: string;
+  agentId: SerializedAgentIdentifier;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -319,7 +331,7 @@ const getConversation$ = ({
   conversationId,
   conversationClient,
 }: {
-  agentId: string;
+  agentId: SerializedAgentIdentifier;
   conversationId: string | undefined;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
@@ -332,7 +344,11 @@ const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+const placeholderConversation = ({
+  agentId,
+}: {
+  agentId: SerializedAgentIdentifier;
+}): Conversation => {
   return {
     id: uuidv4(),
     title: 'New conversation',

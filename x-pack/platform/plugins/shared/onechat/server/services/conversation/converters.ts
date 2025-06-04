@@ -6,7 +6,12 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { UserIdAndName, Conversation } from '@kbn/onechat-common';
+import {
+  type UserIdAndName,
+  type Conversation,
+  toStructuredAgentIdentifier,
+  toSerializedAgentIdentifier,
+} from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -24,7 +29,10 @@ export const fromEs = (
 
   return {
     id: document._id,
-    agentId: document._source.agent_id,
+    agentId: toSerializedAgentIdentifier({
+      agentId: document._source.agent_id,
+      providerId: document._source.agent_provider_id,
+    }),
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
@@ -37,8 +45,10 @@ export const fromEs = (
 };
 
 export const toEs = (conversation: Conversation): ConversationProperties => {
+  const structuredAgentId = toStructuredAgentIdentifier(conversation.agentId);
   return {
-    agent_id: conversation.agentId,
+    agent_id: structuredAgentId.agentId,
+    agent_provider_id: structuredAgentId.providerId,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
     title: conversation.title,
@@ -48,13 +58,19 @@ export const toEs = (conversation: Conversation): ConversationProperties => {
   };
 };
 
-export const updateConversation = (
-  conversation: Conversation,
-  update: ConversationUpdateRequest
-) => {
+export const updateConversation = ({
+  conversation,
+  update,
+  updateDate,
+}: {
+  conversation: Conversation;
+  update: ConversationUpdateRequest;
+  updateDate: Date;
+}) => {
   const updated = {
     ...conversation,
     ...update,
+    updatedAt: updateDate.toISOString(),
   };
 
   return updated;
@@ -69,8 +85,10 @@ export const createRequestToEs = ({
   currentUser: UserIdAndName;
   creationDate: Date;
 }): ConversationProperties => {
+  const structuredAgentId = toStructuredAgentIdentifier(conversation.agentId);
   return {
-    agent_id: conversation.agentId,
+    agent_id: structuredAgentId.agentId,
+    agent_provider_id: structuredAgentId.providerId,
     user_id: currentUser.id,
     user_name: currentUser.username,
     title: conversation.title,

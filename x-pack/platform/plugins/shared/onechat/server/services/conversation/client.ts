@@ -10,6 +10,7 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
+  toStructuredAgentIdentifier,
 } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
@@ -46,6 +47,10 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+    const agentId = options.agentId
+      ? toStructuredAgentIdentifier(options.agentId).agentId
+      : undefined;
+
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 100,
@@ -53,7 +58,7 @@ class ConversationClientImpl implements ConversationClient {
         bool: {
           must: [
             { term: { user_id: this.user.id } },
-            ...(options.agentId ? [{ term: { agent_id: options.agentId } }] : []),
+            ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
         },
       },
@@ -90,23 +95,28 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(id);
   }
 
-  async update(conversation: ConversationUpdateRequest): Promise<Conversation> {
-    const document = await this.storage.getClient().get({ id: conversation.id });
+  async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
+    const now = new Date();
+    const document = await this.storage.getClient().get({ id: conversationUpdate.id });
 
     if (!hasAccess({ conversation: document, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId: conversation.id });
+      throw createConversationNotFoundError({ conversationId: conversationUpdate.id });
     }
 
     const storedConversation = fromEs(document);
-    const updatedConversation = updateConversation(storedConversation, conversation);
+    const updatedConversation = updateConversation({
+      conversation: storedConversation,
+      update: conversationUpdate,
+      updateDate: now,
+    });
     const attributes = toEs(updatedConversation);
 
     await this.storage.getClient().index({
-      id: conversation.id,
+      id: conversationUpdate.id,
       document: attributes,
     });
 
-    return this.get(conversation.id);
+    return this.get(conversationUpdate.id);
   }
 }
 
