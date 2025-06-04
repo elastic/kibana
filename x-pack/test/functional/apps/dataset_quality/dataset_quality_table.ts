@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const failedDatasetName = datasetNames[1];
 
-  // Failing: See https://github.com/elastic/kibana/issues/213289
   describe('Dataset quality table', () => {
     before(async () => {
       // Install Integration and ingest logs for it
