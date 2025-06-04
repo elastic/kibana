@@ -23,8 +23,12 @@ export const getToolCalls = (message: BaseMessage): ToolCall[] => {
 };
 
 const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
+  if (!toolCall.id) {
+    throw new Error('Tool call must have an id');
+  }
+
   return {
-    toolCallId: toolCall.id!, // TODO: figure out a default, e.g {messageId}_{callIndex}
+    toolCallId: toolCall.id,
     toolId: toolCall.name as SerializedToolIdentifier,
     args: toolCall.args,
   };
