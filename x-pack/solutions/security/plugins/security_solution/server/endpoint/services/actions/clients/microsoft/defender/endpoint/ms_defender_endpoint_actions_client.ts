@@ -499,7 +499,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-    MSDefenderRunScriptActionRequestBody['parameters'],
+      MSDefenderRunScriptActionRequestBody['parameters'],
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
     > = {
@@ -546,7 +546,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    return actionDetails as ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>;
+    return actionDetails as ActionDetails<
+      ResponseActionRunScriptOutputContent,
+      ResponseActionRunScriptParameters
+    >;
   }
 
   async processPendingActions({
@@ -597,14 +600,15 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           case 'runscript':
             addResponsesToQueueIfAny(
-              await this.checkPendingRunScriptActions(
+              await this.checkPendingIsolateReleaseActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
                     {},
                     MicrosoftDefenderEndpointActionRequestCommonMeta
                   >
-                >
+                >,
+                { fetchResult: true }
               )
             );
         }
@@ -619,7 +623,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         {},
         MicrosoftDefenderEndpointActionRequestCommonMeta
       >
-    >
+    >,
+    options: { fetchResult?: boolean } = { fetchResult: false }
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const warnings: string[] = [];
@@ -676,121 +681,33 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
 
           for (const actionRequest of pendingActionRequests) {
-            completedResponses.push(
-              this.buildActionResponseEsDoc({
-                actionId: actionRequest.EndpointActions.action_id,
-                agentId: Array.isArray(actionRequest.agent.id)
-                  ? actionRequest.agent.id[0]
-                  : actionRequest.agent.id,
-                data: { command: actionRequest.EndpointActions.data.command },
-                error: isError ? { message } : undefined,
-              })
-            );
-          }
-        }
-      }
-    }
+            let additionalData = {};
+            // Getting the live response result
+            if (options.fetchResult) {
+              const { data: result } =
+                await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
+                  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+                  { id: machineAction.id }
+                );
 
-    this.log.debug(
-      () =>
-        `${completedResponses.length} action responses generated:\n${stringify(completedResponses)}`
-    );
-
-    if (warnings.length > 0) {
-      this.log.warn(warnings.join('\n'));
-    }
-
-    return completedResponses;
-  }
-
-  private async checkPendingRunScriptActions(
-    actionRequests: Array<
-      ResponseActionsClientPendingAction<
-        undefined,
-        {},
-        MicrosoftDefenderEndpointActionRequestCommonMeta
-      >
-    >
-  ): Promise<LogsEndpointActionResponse[]> {
-    const completedResponses: LogsEndpointActionResponse[] = [];
-    const warnings: string[] = [];
-    const actionsByMachineId: Record<
-      string,
-      Array<LogsEndpointAction<undefined, {}, MicrosoftDefenderEndpointActionRequestCommonMeta>>
-    > = {};
-    const machineActionIds: string[] = [];
-    const msApiOptions: MicrosoftDefenderEndpointGetActionsParams = {
-      id: machineActionIds,
-      pageSize: 1000,
-    };
-
-    for (const { action } of actionRequests) {
-      const command = action.EndpointActions.data.command;
-      const machineActionId = action.meta?.machineActionId;
-
-      if (!machineActionId) {
-        warnings.push(
-          `${command} response action ID [${action.EndpointActions.action_id}] is missing Microsoft Defender for Endpoint machine action id, thus unable to check on it's status. Forcing it to complete as failure.`
-        );
-
-        completedResponses.push(
-          this.buildActionResponseEsDoc({
-            actionId: action.EndpointActions.action_id,
-            agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
-            data: { command },
-            error: {
-              message: `Unable to verify if action completed. Microsoft Defender machine action id ('meta.machineActionId') missing from the action request document!`,
-            },
-          })
-        );
-      } else {
-        if (!actionsByMachineId[machineActionId]) {
-          actionsByMachineId[machineActionId] = [];
-        }
-
-        actionsByMachineId[machineActionId].push(action);
-        machineActionIds.push(machineActionId);
-      }
-    }
-
-    const { data: machineActions } =
-      await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
-        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
-        msApiOptions
-      );
-
-    if (machineActions?.value) {
-      for (const machineAction of machineActions.value) {
-        const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
-
-        if (!isPending) {
-          const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
-
-          for (const actionRequest of pendingActionRequests) {
-            const { data: result } =
-              await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
-                MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
-                { id: machineAction.id }
-              );
-
-            completedResponses.push(
-              this.buildActionResponseEsDoc({
-                actionId: actionRequest.EndpointActions.action_id,
-                agentId: Array.isArray(actionRequest.agent.id)
-                  ? actionRequest.agent.id[0]
-                  : actionRequest.agent.id,
-                data: {
-                  command: actionRequest.EndpointActions.data.command,
-                  comment: 'test',
-                  output: {
-                    content: {
-                      stdout: result?.value ?? '', // Store the download link in stdout
-                      stderr: '',
-                      code: '200',
-                    },
-                    type: 'text' as const,
+              additionalData = {
+                output: {
+                  content: {
+                    stdout: result?.value ?? '', // Store the download link in stdout
+                    stderr: '',
+                    code: '200',
                   },
+                  type: 'text' as const,
                 },
+              };
+            }
+            completedResponses.push(
+              this.buildActionResponseEsDoc({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: { command: actionRequest.EndpointActions.data.command, ...additionalData },
                 error: isError ? { message } : undefined,
               })
             );

@@ -61,12 +61,12 @@ describe('MS Defender response actions client', () => {
     getFileInfo: false,
     killProcess: false,
     runningProcesses: false,
-    runscript: false,
+    runscript: true,
     suspendProcess: false,
     isolate: true,
     release: true,
     processPendingActions: true,
-    getCustomScripts: false,
+    getCustomScripts: true,
   };
 
   it.each(
@@ -227,6 +227,16 @@ describe('MS Defender response actions client', () => {
           connectorActionsMock,
           MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
           msMachineActionsApiResponse
+        );
+
+        const msGetActionResultsApiResponse =
+          microsoftDefenderMock.createGetActionResultsApiResponse();
+
+        // Set the mock response for GET_ACTION_RESULTS
+        responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+          connectorActionsMock,
+          MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+          msGetActionResultsApiResponse
         );
       });
 

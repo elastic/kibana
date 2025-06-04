@@ -201,6 +201,13 @@ const createMicrosoftGetActionsApiResponseMock = (
     value: [createMicrosoftMachineActionMock(overrides)],
   };
 };
+const createMicrosoftGetActionResultsApiResponseMock =
+  (): MicrosoftDefenderEndpointGetActionsResponse => {
+    return {
+      '@odata.context': 'some-context',
+      value: ['http://example.com'],
+    };
+  };
 
 const createMicrosoftGetMachineListApiResponseMock = (
   /** Any overrides to the 1 machine action that is included in the mock response */
@@ -222,5 +229,6 @@ export const microsoftDefenderMock = {
   createMachineAction: createMicrosoftMachineActionMock,
   createMachine: createMicrosoftMachineMock,
   createGetActionsApiResponse: createMicrosoftGetActionsApiResponseMock,
+  createGetActionResultsApiResponse: createMicrosoftGetActionResultsApiResponseMock,
   createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
 };
