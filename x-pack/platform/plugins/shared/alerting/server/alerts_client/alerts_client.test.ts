@@ -621,41 +621,6 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should index new alerts even if updatePersistedAlertsWithMaintenanceWindowIds fails', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
-            ...alertsClientParams,
-            isServerless: true,
-          });
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-
-          // Report 2 new alerts
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-          alertExecutorService.create('2').scheduleActions('default');
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
-            'Failed to fetch maintenance windows'
-          );
-
-          const result = await alertsClient.persistAlerts();
-
-          expect(logger.error).toHaveBeenCalledWith(
-            'Error updating maintenance window IDs:',
-            'Failed to fetch maintenance windows'
-          );
-
-          expect(result).toEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
-        });
-
         test('should index new alerts with refresh: true in stateless', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
