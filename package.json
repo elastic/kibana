@@ -1251,7 +1251,7 @@
     "polished": "^4.3.1",
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
-    "proxy-from-env": "1.0.0",
+    "proxy-from-env": "1.1.0",
     "puppeteer": "24.8.1",
     "query-string": "^6.13.2",
     "rbush": "^4.0.1",
