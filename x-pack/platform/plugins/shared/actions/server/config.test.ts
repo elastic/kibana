@@ -249,6 +249,24 @@ describe('config validation', () => {
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
+
+  test('validates xpack.actions.webhook', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.webhook === undefined);
+
+    config.webhook = {};
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx).toEqual(true);
+
+    config.webhook = { ssl: {} };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx).toEqual(true);
+
+    config.webhook = { ssl: { pfx: false } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx).toEqual(false);
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

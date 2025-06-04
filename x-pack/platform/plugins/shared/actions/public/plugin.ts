@@ -14,26 +14,35 @@ export interface ActionsPublicPluginSetup {
     emails: string[],
     options?: ValidateEmailAddressesOptions
   ): ValidatedEmail[];
+  isWebhookSslWithPfxEnabled: boolean;
 }
 
 export interface Config {
   email: {
     domain_allowlist: string[];
   };
+  webhook: {
+    ssl: {
+      pfx: boolean;
+    };
+  };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
+  private readonly webhookSslWithPfxEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
+    this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx ?? true;
   }
 
   public setup(): ActionsPublicPluginSetup {
     return {
       validateEmailAddresses: (emails: string[], options: ValidateEmailAddressesOptions) =>
         validateEmails(this.allowedEmailDomains, emails, options),
+      isWebhookSslWithPfxEnabled: this.webhookSslWithPfxEnabled,
     };
   }
 

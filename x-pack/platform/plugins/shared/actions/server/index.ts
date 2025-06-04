@@ -50,6 +50,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     email: { domain_allowlist: true },
+    webhook: { ssl: { pfx: true } },
   },
 };
 

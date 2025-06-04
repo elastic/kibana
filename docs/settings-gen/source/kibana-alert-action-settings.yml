@@ -2260,6 +2260,27 @@ groups:
             self: all
          # example: |
 
+      - setting: xpack.actions.webhook.ssl.pfx
+        # id:
+        description: |
+          Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to [webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
   - group: Alerting settings
     id: alert-settings
     # description: |

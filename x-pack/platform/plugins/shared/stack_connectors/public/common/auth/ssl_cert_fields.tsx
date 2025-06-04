@@ -12,6 +12,7 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FilePickerField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { SSLCertType } from '../../../common/auth/constants';
 import * as i18n from './translations';
@@ -28,111 +29,121 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
   readOnly,
   certTypeDefaultValue,
   certType,
-}) => (
-  <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="sslCertFields">
-    <EuiFlexItem>
-      <UseField
-        path="secrets.password"
-        config={{
-          label: i18n.PASSWORD,
-        }}
-        component={PasswordField}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'webhookSSLPassphraseInput',
-            readOnly,
-          },
-        }}
-      />
-      <EuiSpacer size="s" />
-      <UseField
-        path="config.certType"
-        defaultValue={certTypeDefaultValue}
-        component={({ field }) => (
-          <EuiTabs size="s" data-test-subj="webhookCertTypeTabs">
-            <EuiTab
-              onClick={() => field.setValue(SSLCertType.CRT)}
-              isSelected={field.value === SSLCertType.CRT}
-            >
-              {i18n.CERT_TYPE_CRT_KEY}
-            </EuiTab>
-            <EuiTab
-              onClick={() => field.setValue(SSLCertType.PFX)}
-              isSelected={field.value === SSLCertType.PFX}
-            >
-              {i18n.CERT_TYPE_PFX}
-            </EuiTab>
-          </EuiTabs>
-        )}
-      />
-      <EuiSpacer size="s" />
-      {certType === SSLCertType.CRT && (
-        <EuiFlexGroup wrap>
-          <EuiFlexItem css={{ minWidth: 200 }}>
-            <UseField
-              path="secrets.crt"
-              config={{
-                label: 'CRT file',
-                validations: [
-                  {
-                    validator: emptyField(i18n.CRT_REQUIRED),
-                  },
-                ],
-              }}
-              component={FilePickerField}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'webhookSSLCRTInput',
-                  display: 'default',
-                  accept: '.crt,.cert,.cer,.pem',
-                },
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem css={{ minWidth: 200 }}>
-            <UseField
-              path="secrets.key"
-              config={{
-                label: 'KEY file',
-                validations: [
-                  {
-                    validator: emptyField(i18n.KEY_REQUIRED),
-                  },
-                ],
-              }}
-              component={FilePickerField}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'webhookSSLKEYInput',
-                  display: 'default',
-                  accept: '.key,.pem',
-                },
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {certType === SSLCertType.PFX && (
+}) => {
+  const {
+    services: { isWebhookSslWithPfxEnabled },
+  } = useConnectorContext();
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="sslCertFields">
+      <EuiFlexItem>
         <UseField
-          path="secrets.pfx"
+          path="secrets.password"
           config={{
-            label: 'PFX file',
-            validations: [
-              {
-                validator: emptyField(i18n.PFX_REQUIRED),
-              },
-            ],
+            label: i18n.PASSWORD,
           }}
-          component={FilePickerField}
+          component={PasswordField}
           componentProps={{
             euiFieldProps: {
-              'data-test-subj': 'webhookSSLPFXInput',
-              display: 'default',
-              accept: '.pfx,.p12',
+              'data-test-subj': 'webhookSSLPassphraseInput',
+              readOnly,
             },
           }}
         />
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+        <EuiSpacer size="s" />
+        <UseField
+          path="config.certType"
+          defaultValue={certTypeDefaultValue}
+          component={({ field }) => (
+            <EuiTabs size="s" data-test-subj="webhookCertTypeTabs">
+              <EuiTab
+                onClick={() => field.setValue(SSLCertType.CRT)}
+                isSelected={field.value === SSLCertType.CRT || !isWebhookSslWithPfxEnabled}
+                data-test-subj="webhookCertTypeCRTab"
+              >
+                {i18n.CERT_TYPE_CRT_KEY}
+              </EuiTab>
+              {isWebhookSslWithPfxEnabled && (
+                <EuiTab
+                  onClick={() => field.setValue(SSLCertType.PFX)}
+                  isSelected={field.value === SSLCertType.PFX}
+                  data-test-subj="webhookCertTypePFXTab"
+                >
+                  {i18n.CERT_TYPE_PFX}
+                </EuiTab>
+              )}
+            </EuiTabs>
+          )}
+        />
+        <EuiSpacer size="s" />
+        {(!isWebhookSslWithPfxEnabled || certType === SSLCertType.CRT) && (
+          <EuiFlexGroup wrap>
+            <EuiFlexItem css={{ minWidth: 200 }}>
+              <UseField
+                path="secrets.crt"
+                config={{
+                  label: 'CRT file',
+                  validations: [
+                    {
+                      validator: emptyField(i18n.CRT_REQUIRED),
+                    },
+                  ],
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'webhookSSLCRTInput',
+                    display: 'default',
+                    accept: '.crt,.cert,.cer,.pem',
+                  },
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem css={{ minWidth: 200 }}>
+              <UseField
+                path="secrets.key"
+                config={{
+                  label: 'KEY file',
+                  validations: [
+                    {
+                      validator: emptyField(i18n.KEY_REQUIRED),
+                    },
+                  ],
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'webhookSSLKEYInput',
+                    display: 'default',
+                    accept: '.key,.pem',
+                  },
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {isWebhookSslWithPfxEnabled && certType === SSLCertType.PFX && (
+          <UseField
+            path="secrets.pfx"
+            config={{
+              label: 'PFX file',
+              validations: [
+                {
+                  validator: emptyField(i18n.PFX_REQUIRED),
+                },
+              ],
+            }}
+            component={FilePickerField}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'webhookSSLPFXInput',
+                display: 'default',
+                accept: '.pfx,.p12',
+              },
+            }}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

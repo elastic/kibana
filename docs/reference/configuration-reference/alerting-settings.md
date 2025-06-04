@@ -825,6 +825,11 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     Data type: `string`
 
+`xpack.actions.webhook.ssl.pfx`
+:   Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to [webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+    Data type: `bool`
+    Default: `true`
+
 ## Alerting settings [alert-settings]
 
 `xpack.alerting.cancelAlertsOnRuleTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
