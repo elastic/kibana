@@ -75,7 +75,7 @@ export class TestTrackLane {
   }
 
   public get runtimeEstimate(): number {
-    return this.loads.reduce((sum, load) => sum + load.stats.runtime.pc95th, 0);
+    return this.loads.reduce((sum, load) => sum + load.stats.runtime.estimate, 0);
   }
 
   public get availableCapacity(): number {
