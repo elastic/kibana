@@ -13,6 +13,7 @@ import type {
   ToolProvider,
   AgentRegistry,
 } from '@kbn/onechat-server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
@@ -23,6 +24,7 @@ import type { ToolsServiceSetup, ScopedPublicToolRegistry } from './services/too
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
   inference: InferenceServerSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface OnechatStartDependencies {

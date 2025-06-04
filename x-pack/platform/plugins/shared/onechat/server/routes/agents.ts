@@ -11,6 +11,7 @@ import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ChatAgentEvent } from '@kbn/onechat-common';
 import type { CallAgentResponse } from '../../common/http_api/agents';
+import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -21,10 +22,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/agents/invoke',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: {
         body: schema.object({
@@ -54,10 +52,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/agents/stream',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: {
         body: schema.object({
@@ -88,7 +83,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         })
         .then(
           (result) => {
-            // TODO: send event with final result?
+            // TODO: should we emit an event with the final result?
             subject$.complete();
           },
           (error) => {

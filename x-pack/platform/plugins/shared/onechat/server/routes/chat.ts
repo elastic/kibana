@@ -10,6 +10,7 @@ import type { Observable } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { OneChatDefaultAgentId } from '@kbn/onechat-common';
+import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -20,10 +21,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
     {
       path: '/internal/onechat/chat',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: {
         body: schema.object({

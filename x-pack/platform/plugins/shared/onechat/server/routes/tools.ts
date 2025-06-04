@@ -9,6 +9,7 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
 import type { ListToolsResponse } from '../../common/http_api/tools';
+import { apiPrivileges } from '../../common/features';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -17,10 +18,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/tools',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: false,
     },

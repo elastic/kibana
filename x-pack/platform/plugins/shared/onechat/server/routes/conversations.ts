@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type { ListConversationsResponse } from '../../common/http_api/conversations';
+import { apiPrivileges } from '../../common/features';
 
 export function registerConversationRoutes({
   router,
@@ -21,10 +22,7 @@ export function registerConversationRoutes({
     {
       path: '/internal/onechat/conversations',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: {
         body: schema.object({

@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
+import { registerFeatures } from './features';
 
 export class OnechatPlugin
   implements
@@ -43,6 +44,8 @@ export class OnechatPlugin
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
     });
+
+    registerFeatures({ features: pluginsSetup.features });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
