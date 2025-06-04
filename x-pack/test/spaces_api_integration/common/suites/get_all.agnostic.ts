@@ -83,7 +83,6 @@ const ALL_SPACE_RESULTS: Space[] = [
       'observabilityCases',
       'observabilityCasesV2',
       'observabilityCasesV3',
-      'onechat',
       'securitySolutionAssistant',
       'securitySolutionAttackDiscovery',
       'securitySolutionCases',
