@@ -28,9 +28,7 @@ export function registerPricingRoutes(
             'Pricing information does not require authorization and should be always accessible.',
         },
         authc: {
-          enabled: false,
-          reason:
-            'Pricing information does not require authentication and should be always accessible at Kibana startup.',
+          enabled: 'optional',
         },
       },
       options: { access: 'internal' },
