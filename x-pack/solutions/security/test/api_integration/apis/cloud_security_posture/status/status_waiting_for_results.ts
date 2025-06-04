@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
@@ -65,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.com:8080', 'https://test.com:8081'],
           })
           .expect(200);
-        await generateAgent(providerContext, 'healthy', `Agent policy test 2`, agentPolicyId);
+        await fleetAndAgents.generateAgent('healthy', `Agent policy test 2`, agentPolicyId);
       });
 
       afterEach(async () => {
