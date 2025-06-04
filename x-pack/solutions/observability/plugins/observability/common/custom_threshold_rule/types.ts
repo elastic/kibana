@@ -117,8 +117,7 @@ export interface SearchConfigurationType {
 }
 
 export interface SearchConfigurationWithExtractedReferenceType {
-  // Index will be data view spec if data view is ad-hoc and string (index ID) if it's a saved one.
-  index: DataViewSpec | string;
+  index: DataViewSpec;
   query: {
     query: string;
     language: string;
