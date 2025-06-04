@@ -251,20 +251,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectTokenTooltipExists();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanRegenerateQuestion();
+          await pageObjects.searchPlayground.PlaygroundChatPage.clearChat();
+        });
+        it('can toggle to include or remove citations', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanChangeCitations();
+        });
+        it('can change number of documents', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanChangeNumberOfDocumentsSent();
         });
 
         it('open view code', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
         });
 
-        it('show edit context', async () => {
+        it('can edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.openChatMode();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
             ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
           );
+          await pageObjects.searchPlayground.PlaygroundChatPage.editContext(
+            'basic_index',
+            'nestedField.child'
+          );
         });
-        // add change change context fields tests here.
 
         it('save selected fields between modes', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();

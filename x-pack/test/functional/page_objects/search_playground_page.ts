@@ -253,6 +253,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('editContextPanel');
         await testSubjects.existOrFail('summarizationPanel');
       },
+      async expectCanRegenerateQuestion() {
+        await testSubjects.existOrFail('regenerateActionButton');
+        await (await testSubjects.find('regenerateActionButton')).click();
+        await this.expectChatWorks();
+      },
+      async clearChat() {
+        await testSubjects.existOrFail('clearChatActionButton');
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(true);
+        await (await testSubjects.find('clearChatActionButton')).click();
+
+        const userMessageElement = await testSubjects.find('systemMessage');
+        const userMessage = await userMessageElement.getVisibleText();
+        expect(userMessage).to.contain('Welcome! Ask a question to get started.');
+      },
 
       async updatePrompt(prompt: string) {
         await testSubjects.setValue('instructionsPrompt', prompt, { clearWithKeyboard: true });
@@ -293,6 +307,36 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('euiFlyoutCloseButton');
       },
 
+      async expectCanChangeCitations() {
+        await testSubjects.existOrFail('includeCitationsToggle');
+        expect(
+          await testSubjects.isEuiSwitchChecked(await testSubjects.find('includeCitationsToggle'))
+        ).to.be(true);
+        await (await testSubjects.find('includeCitationsToggle')).click();
+        expect(
+          await testSubjects.isEuiSwitchChecked(await testSubjects.find('includeCitationsToggle'))
+        ).to.be(false);
+      },
+      async expectCanChangeNumberOfDocumentsSent() {
+        await testSubjects.existOrFail('playground_context_doc_number-3');
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-3')
+          ).getAttribute('aria-pressed')
+        ).to.be('true');
+        await testSubjects.existOrFail('playground_context_doc_number-10');
+        await (await testSubjects.find('playground_context_doc_number-10')).click();
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-10')
+          ).getAttribute('aria-pressed')
+        ).to.be('true');
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-3')
+          ).getAttribute('aria-pressed')
+        ).to.be('false');
+      },
       async openQueryMode() {
         await testSubjects.existOrFail('queryMode');
         await testSubjects.click('queryMode');
@@ -320,6 +364,19 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         ).to.eql(expectedSelectedFields);
       },
 
+      async editContext(indexName: string = 'basic_index', fieldToRemove: string) {
+        await testSubjects.click('chatMode');
+        await testSubjects.existOrFail(`contextField-${fieldToRemove}`);
+        const wrapper = await testSubjects.find(`contextField-${fieldToRemove}`);
+        await (
+          await wrapper.findByCssSelector(
+            `[aria-label="Remove ${fieldToRemove} from selection in this group"]`
+          )
+        ).click();
+        expect(
+          await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
+        ).to.eql(['bar', 'baz', 'baz.keyword', 'foo', 'nestedField']);
+      },
       async expectSaveFieldsBetweenModes() {
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-true');
