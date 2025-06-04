@@ -236,7 +236,7 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
-  if (item.literalType === 'keyword' && argType === 'text') {
+  if (bothStringTypes(argType, item.literalType)) {
     // all functions accept keyword literals for text parameters
     return true;
   }
@@ -449,6 +449,18 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
 }
 
 /**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+/**
  * Checks if an AST function argument is of the correct type
  * given the definition.
  */
@@ -476,7 +488,7 @@ export function checkFunctionArgMatchesDefinition(
         (signature) =>
           signature.returnType === 'unknown' ||
           argType === signature.returnType ||
-          (argType === 'text' && signature.returnType === 'keyword')
+          bothStringTypes(argType, signature.returnType)
       );
     }
   }
@@ -494,12 +506,7 @@ export function checkFunctionArgMatchesDefinition(
       : [validHit.type];
 
     return wrappedTypes.some(
-      (ct) =>
-        ct === argType ||
-        (ct === 'keyword' && argType === 'text') ||
-        (ct === 'text' && argType === 'keyword') ||
-        ct === 'null' ||
-        ct === 'unknown'
+      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
     );
   }
   if (arg.type === 'inlineCast') {

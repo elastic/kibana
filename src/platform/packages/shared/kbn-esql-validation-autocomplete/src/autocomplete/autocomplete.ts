@@ -83,7 +83,11 @@ import {
   FunctionParameterType,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
-import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import {
+  getRecommendedQueriesSuggestionsFromStaticTemplates,
+  mapRecommendedQueriesFromExtensions,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -138,8 +142,19 @@ export async function suggest(
           resourceRetriever,
           innerText
         );
+        const editorExtensions =
+          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
+        const recommendedQueriesSuggestionsFromExtensions =
+          mapRecommendedQueriesFromExtensions(editorExtensions);
+
+        const recommendedQueriesSuggestionsFromStaticTemplates =
+          await getRecommendedQueriesSuggestionsFromStaticTemplates(
+            getFieldsByTypeEmptyState,
+            fromCommand
+          );
         recommendedQueriesSuggestions.push(
-          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+          ...recommendedQueriesSuggestionsFromExtensions,
+          ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
@@ -337,6 +352,18 @@ async function getSuggestionsWithinCommandExpression(
     });
   }
 
+  // Function returning suggestions from static templates and editor extensions
+  const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
+    const recommendedQueriesFromExtensions =
+      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
+
+    const recommendedQueriesFromTemplates =
+      await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
+
+    return [...recommendedQueriesFromExtensions, ...recommendedQueriesFromTemplates];
+  };
+
   return commandDef.suggest({
     innerText,
     command: astContext.command,
@@ -361,8 +388,8 @@ async function getSuggestionsWithinCommandExpression(
     getPreferences,
     definition: commandDef,
     getSources,
-    getRecommendedQueriesSuggestions: (prefix) =>
-      getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+    getRecommendedQueriesSuggestions: (queryString, prefix) =>
+      getRecommendedQueries(queryString, prefix),
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,
