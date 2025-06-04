@@ -27,6 +27,9 @@ export const registerDashboardPanelPlacementSetting = <SerializedState extends o
   registry.set(embeddableType, getPanelPlacementSettings as GetPanelPlacementSettings<object>);
 };
 
+/**
+ * Use getPanelPlacementSetting to access registry
+ */
 export const getRegistryItem = (embeddableType: string) => {
   return registry.get(embeddableType);
 };
