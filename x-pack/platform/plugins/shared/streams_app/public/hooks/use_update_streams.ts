@@ -21,10 +21,6 @@ export const useUpdateStreams = (name: string) => {
 
   return useCallback(
     async (request: Streams.all.UpsertRequest) => {
-      if (!name) {
-        return null;
-      }
-
       await streamsRepositoryClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         signal,
         params: {
