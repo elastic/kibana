@@ -131,7 +131,6 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
-    console.log({action})
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
@@ -151,7 +150,6 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     } = useGetFileInfo(action, undefined, {
       enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
-
 
     if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
       return null;
@@ -183,7 +181,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           iconType="download"
           data-test-subj={getTestId('downloadButton')}
           flush="left"
-          style={STYLE_INHERIT_FONT_FAMILY}
+          css={STYLE_INHERIT_FONT_FAMILY}
           iconSize="s"
           download
         >

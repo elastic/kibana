@@ -14,7 +14,7 @@ import type {
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointRunScriptParams,
-  MSDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
@@ -28,7 +28,7 @@ import { buildIndexNameWithNamespace } from '../../../../../../../../common/endp
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
-  RunScriptActionRequestBody,
+  MSDefenderRunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../../../common/api/endpoint';
 import type {
@@ -492,7 +492,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: MSDefenderRunScriptActionRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
@@ -758,8 +758,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         msApiOptions
       );
 
-    console.log({ machineActions: JSON.stringify(machineActions, null, 2) });
-
     if (machineActions?.value) {
       for (const machineAction of machineActions.value) {
         const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
@@ -800,7 +798,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
-    console.log({ completedResponses });
     this.log.debug(
       () =>
         `${completedResponses.length} action responses generated:\n${stringify(completedResponses)}`
@@ -859,7 +856,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       const customScriptsResponse = (await this.sendAction(
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
         {}
-      )) as ActionTypeExecutorResult<MSDefenderGetLibraryFilesResponse>;
+      )) as ActionTypeExecutorResult<MicrosoftDefenderGetLibraryFilesResponse>;
 
       const scripts = customScriptsResponse.data?.value || [];
 

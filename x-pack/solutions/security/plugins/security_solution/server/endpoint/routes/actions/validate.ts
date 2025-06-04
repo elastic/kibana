@@ -10,6 +10,7 @@ import {
   CrowdStrikeRunScriptActionRequestSchema,
   MSDefenderEndpointRunScriptActionRequestSchema,
 } from '../../../../common/api/endpoint';
+import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -28,25 +29,16 @@ const getSchema = (agentType: ResponseActionAgentType) => {
 };
 export const validateCommandRequest = (
   command: ResponseActionsApiCommandNames,
-  req: any,
+  reqBody: ResponseActionsRequestBody | undefined,
   logger: Logger,
   res: KibanaResponseFactory
 ) => {
+  console.log({ reqBody });
   switch (command) {
     case 'runscript':
       try {
-        const schema = getSchema(req?.body.agent_type);
-        const validationResult = schema?.body.validate(req?.body);
-        
-        if (validationResult && 'error' in validationResult && validationResult.error) {
-          const errorMessage = validationResult.error !== null ? (validationResult.error as any).message : ""
-            
-          return errorHandler(
-            logger,
-            res,
-            new CustomHttpRequestError(`Invalid request body: ${errorMessage}`, 400)
-          );
-        }
+        const schema = getSchema(reqBody?.agent_type);
+        schema?.body.validate(reqBody);
       } catch (err) {
         return errorHandler(
           logger,
@@ -57,7 +49,7 @@ export const validateCommandRequest = (
       break;
 
     // Add cases for other commands that need validation here
-    // case 'some-other-command':
+    // case 'isolate':
     //   ...
     //   break;
   }

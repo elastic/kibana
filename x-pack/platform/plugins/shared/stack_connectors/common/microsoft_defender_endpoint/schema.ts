@@ -150,9 +150,10 @@ export const RunScriptParamsSchema = schema.object({
   id: schema.string({ minLength: 1 }),
   comment: schema.string({ minLength: 1 }),
   parameters: schema.object({
-      scriptName: schema.string({ minLength: 1 }),
-      args: schema.maybe(schema.string({ minLength: 1 })),
-    })
+    scriptName: schema.string({ minLength: 1 }),
+    args: schema.maybe(schema.string({ minLength: 1 })),
+    comment: schema.maybe(schema.string({ minLength: 1 })),
+  }),
 });
 
 const MachineActionTypeSchema = schema.oneOf([
@@ -239,20 +240,42 @@ export const MSDefenderLibraryFileSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const MSDefenderGetLibraryFilesResponseSchema = schema.object(
+export const GetLibraryFilesResponse = schema.object(
   {
-    status: schema.maybe(schema.string()),
-    data: schema.object(
-      {
-        '@odata.context': schema.maybe(schema.string()),
-        value: schema.maybe(schema.arrayOf(MSDefenderLibraryFileSchema)),
-      },
-      { unknowns: 'allow' }
-    ),
-    actionId: schema.maybe(schema.string()),
+    '@odata.context': schema.maybe(schema.string()),
+    value: schema.maybe(schema.arrayOf(MSDefenderLibraryFileSchema)),
   },
   { unknowns: 'allow' }
 );
+
+export const RunScriptResponseSchema = schema.object({
+  '@odata.context': schema.maybe(schema.string()),
+  '@odata.count': schema.maybe(schema.number()),
+  value: schema.arrayOf(
+    schema.object({
+      id: schema.maybe(schema.string({ minLength: 1 })),
+      type: schema.maybe(schema.string({ minLength: 1 })),
+      title: schema.maybe(schema.string()),
+      requestor: schema.maybe(schema.string({ minLength: 1 })),
+      requestorComment: schema.maybe(schema.string({ minLength: 1 })),
+      status: schema.maybe(schema.string({ minLength: 1 })),
+      machineId: schema.maybe(schema.string({ minLength: 1 })),
+      computerDnsName: schema.maybe(schema.string({ minLength: 1 })),
+      creationDateTimeUtc: schema.maybe(schema.string({ minLength: 1 })),
+      lastUpdateDateTimeUtc: schema.maybe(schema.string({ minLength: 1 })),
+      cancellationRequestor: schema.maybe(schema.string()),
+      cancellationComment: schema.maybe(schema.string()),
+      cancellationDateTimeUtc: schema.maybe(schema.string()),
+      errorHResult: schema.maybe(schema.number()),
+      scope: schema.maybe(schema.string()),
+      externalId: schema.maybe(schema.string()),
+      requestSource: schema.maybe(schema.string({ minLength: 1 })),
+      relatedFileInfo: schema.maybe(schema.any()),
+      commands: schema.maybe(schema.arrayOf(schema.any())),
+      troubleshootInfo: schema.maybe(schema.any()),
+    })
+  ),
+});
 
 // ----------------------------------
 // Connector Sub-Actions

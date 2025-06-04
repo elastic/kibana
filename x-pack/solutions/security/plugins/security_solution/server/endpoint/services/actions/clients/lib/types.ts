@@ -40,12 +40,6 @@ import type {
   RunScriptActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
-type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
-  T,
-  // We don't need agent type in the Response Action client because each client is initialized for only 1 agent type
-  'agent_type'
->;
-
 /**
  * Additional options for response action methods that fall outside of the Request Body
  */
@@ -203,4 +197,10 @@ export interface ResponseActionsClient {
 export type ResponseActionsClientMethods = keyof Omit<
   ResponseActionsClient,
   'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+>;
+
+export type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
+  T,
+  // We don't need agent type in the Response Action client because each client is initialized for only 1 agent type
+  'agent_type'
 >;

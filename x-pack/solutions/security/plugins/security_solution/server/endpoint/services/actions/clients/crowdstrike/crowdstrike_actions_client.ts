@@ -38,8 +38,8 @@ import type {
   ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
+  CrowdStrikeRunScriptActionRequestBody,
   IsolationRouteRequestBody,
-  RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
@@ -434,7 +434,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: CrowdStrikeRunScriptActionRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>

@@ -353,7 +353,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
     // Additional validation when schema is dependent on agent type
-    const validationError = validateCommandRequest(command, req, logger, res);
+    const validationError = validateCommandRequest(command, req?.body, logger, res);
     if (validationError) {
       return validationError;
     }

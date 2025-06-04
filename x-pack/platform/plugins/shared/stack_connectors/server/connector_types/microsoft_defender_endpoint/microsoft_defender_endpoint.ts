@@ -38,9 +38,10 @@ import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointAgentListParams,
   MicrosoftDefenderEndpointAgentListResponse,
-  MSDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointMachineActionResult,
+  MicrosoftDefenderRunscriptResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -150,6 +151,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     try {
       response = await this.request<R>(requestOptions, connectorUsageCollector);
+
+      console.log({ response: JSON.stringify(response.data, null, 2) });
     } catch (err) {
       if (was401RetryDone) {
         throw err;
@@ -294,7 +297,14 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         results.push('API call to Machine Actions was successful');
       });
 
-    await this.runscript({ id: 'elastic-connector-test', comment: 'connector test', parameters: { scriptName: 'test' } }, connectorUsageCollector)
+    await this.runScript(
+      {
+        id: 'elastic-connector-test',
+        comment: 'connector test',
+        parameters: { scriptName: 'test' },
+      },
+      connectorUsageCollector
+    )
       .catch(catchErrorAndIgnoreExpectedErrors)
       .then(() => {
         results.push('API call to Machine RunScript was successful');
@@ -376,13 +386,13 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     );
   }
 
-  public async runscript(
+  public async runScript(
     payload: MicrosoftDefenderEndpointRunScriptParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+  ): Promise<MicrosoftDefenderRunscriptResponse> {
     // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response
 
-    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+    return this.fetchFromMicrosoft<MicrosoftDefenderRunscriptResponse>(
       {
         url: `${this.urls.machines}/${payload.id}/runliveresponse`,
         method: 'POST',
@@ -442,7 +452,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async getActionResults(
     { id }: MicrosoftDefenderEndpointGetActionsParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderEndpointMachineActionResult > {
+  ): Promise<MicrosoftDefenderEndpointMachineActionResult> {
     // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
 
     return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineActionResult>(
@@ -457,10 +467,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async getLibraryFiles(
     payload: {},
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MSDefenderGetLibraryFilesResponse> {
+  ): Promise<MicrosoftDefenderGetLibraryFilesResponse> {
     // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/list-library-files
 
-    return this.fetchFromMicrosoft<MSDefenderGetLibraryFilesResponse>(
+    return this.fetchFromMicrosoft<MicrosoftDefenderGetLibraryFilesResponse>(
       {
         url: `${this.urls.libraryFiles}`,
         method: 'GET',
