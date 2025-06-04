@@ -7,7 +7,9 @@
 
 import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
+import { registerESQLToolsRoutes } from './esql-tools';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
+  registerESQLToolsRoutes(dependencies);
 };
