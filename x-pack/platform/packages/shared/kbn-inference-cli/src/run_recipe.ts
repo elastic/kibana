@@ -20,6 +20,6 @@ registerInstrumentations({
 
 const shutdown = init(`kbn-inference-cli`);
 
-const { createRunRecipe } = require('./create_run_recipe');
+const { createRunRecipe } = require('./create_run_recipe') as typeof import('./create_run_recipe');
 
 export const runRecipe = createRunRecipe(shutdown);

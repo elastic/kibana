@@ -25,14 +25,19 @@ type RunRecipeCallback = (options: {
   flags: Flags;
 }) => Promise<void>;
 
-interface Options {
+export interface RunRecipeOptions {
   name: string;
   flags?: FlagOptions;
 }
 
 export const createRunRecipe =
   (shutdown?: () => Promise<void>) =>
-  (...args: [RunRecipeCallback] | [string, RunRecipeCallback] | [Options, RunRecipeCallback]) => {
+  (
+    ...args:
+      | [RunRecipeCallback]
+      | [string, RunRecipeCallback]
+      | [RunRecipeOptions, RunRecipeCallback]
+  ) => {
     const callback = args.length === 1 ? args[0] : args[1];
     const options = args.length === 1 ? undefined : args[0];
 
