@@ -378,7 +378,7 @@ const waitForStatusReady = (retries = 5) => {
   cy.wait('@getStatus', { timeout: 20000 }).then(({ response }) => {
     if (response?.body?.status !== 'ready') {
       // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(7000);
+      cy.wait(3000);
       waitForStatusReady(retries - 1);
     } else {
       expect(response.body.status).to.eq('ready');
@@ -412,7 +412,7 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess', '@serverless'] }
     login();
     visit(ASSET_INVENTORY_URL);
     cy.intercept('GET', '/api/asset_inventory/status').as('getStatus');
-    waitForStatusReady(10);
+    waitForStatusReady(15);
   });
 
   it('should display All assets title', () => {
