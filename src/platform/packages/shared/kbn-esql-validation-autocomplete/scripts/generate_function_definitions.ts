@@ -226,6 +226,11 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       params: [{}, { constantOnly: true }],
     }),
   },
+  bucket: {
+    signatures: new Array(58).fill({
+      params: [{}, { constantOnly: true }],
+    }),
+  },
   top: {
     signatures: new Array(6).fill({
       params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],

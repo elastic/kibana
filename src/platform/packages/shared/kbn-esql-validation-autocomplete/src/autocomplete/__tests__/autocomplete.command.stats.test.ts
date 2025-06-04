@@ -480,7 +480,6 @@ describe('autocomplete.suggest', () => {
                 scalar: true,
               }
             ),
-            ...getFieldNamesByType(['integer']),
           ]
         );
       });
