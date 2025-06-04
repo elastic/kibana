@@ -83,5 +83,16 @@
     "@kbn/task-manager-plugin",
     "@kbn/alerting-state-types",
     "@kbn/std",
+    "@kbn/actions-simulators-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/alerting-api-integration-helpers",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/actions-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerts-as-data-utils",
   ]
 }
