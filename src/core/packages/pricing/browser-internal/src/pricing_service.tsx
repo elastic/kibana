@@ -15,13 +15,24 @@ interface StartDeps {
   http: InternalHttpStart;
 }
 
+const defaultPricingResponse: GetPricingResponse = {
+  tiers: {
+    enabled: false,
+    products: [],
+  },
+  product_features: {},
+};
+
 /**
  * Service that is responsible for UI Pricing.
  * @internal
  */
 export class PricingService {
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
-    const pricingResponse = await http.get<GetPricingResponse>('/internal/core/pricing');
+    const isAnonymous = http.anonymousPaths.isAnonymous(window.location.pathname);
+    const pricingResponse = isAnonymous
+      ? defaultPricingResponse
+      : await http.get<GetPricingResponse>('/internal/core/pricing');
 
     const tiersClient = new PricingTiersClient(
       pricingResponse.tiers,

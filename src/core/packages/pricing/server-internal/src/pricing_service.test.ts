@@ -60,7 +60,7 @@ describe('PricingService', () => {
   describe('#setup()', () => {
     it('registers the pricing routes', async () => {
       await service.preboot({ http: prebootHttp });
-      service.setup({ http: setupHttp });
+      await service.setup({ http: setupHttp });
 
       expect(setupHttp.createRouter).toHaveBeenCalledWith('');
       expect(router.get).toHaveBeenCalledTimes(1);
@@ -82,7 +82,7 @@ describe('PricingService', () => {
 
     it('allows registering product features', async () => {
       await service.preboot({ http: prebootHttp });
-      const setup = service.setup({ http: setupHttp });
+      const setup = await service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
         {
@@ -109,7 +109,7 @@ describe('PricingService', () => {
   describe('#start()', () => {
     it('returns a PricingTiersClient with the configured tiers', async () => {
       await service.preboot({ http: prebootHttp });
-      service.setup({ http: setupHttp });
+      await service.setup({ http: setupHttp });
       const start = service.start();
 
       expect(start).toHaveProperty('isFeatureAvailable');
@@ -117,7 +117,7 @@ describe('PricingService', () => {
 
     it('returns a PricingTiersClient that can check feature availability', async () => {
       await service.preboot({ http: prebootHttp });
-      const setup = service.setup({ http: setupHttp });
+      const setup = await service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
         {

@@ -364,7 +364,7 @@ export class Server {
       rendering: renderingSetup,
     });
 
-    const pricingSetup = this.pricing.setup({ http: httpSetup });
+    const pricingSetup = await this.pricing.setup({ http: httpSetup });
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,

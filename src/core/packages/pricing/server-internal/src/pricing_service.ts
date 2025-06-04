@@ -45,12 +45,8 @@ export class PricingService {
     this.pricingConfig = { tiers: { enabled: false, products: [] } };
   }
 
-  public async preboot({ http }: PrebootDeps) {
+  public preboot({ http }: PrebootDeps) {
     this.logger.debug('Prebooting pricing service');
-
-    this.pricingConfig = await firstValueFrom(
-      this.configService.atPath<PricingConfigType>('pricing')
-    );
 
     // The preboot server has no need for real pricing.
     http.registerRoutes('', (router) => {
@@ -61,8 +57,12 @@ export class PricingService {
     });
   }
 
-  public setup({ http }: SetupDeps) {
+  public async setup({ http }: SetupDeps) {
     this.logger.debug('Setting up pricing service');
+
+    this.pricingConfig = await firstValueFrom(
+      this.configService.atPath<PricingConfigType>('pricing')
+    );
 
     registerRoutes(http.createRouter(''), {
       pricingConfig: this.pricingConfig,

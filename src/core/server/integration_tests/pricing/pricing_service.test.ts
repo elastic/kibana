@@ -35,7 +35,7 @@ describe('PricingService', () => {
   let httpSetup: InternalHttpServiceSetup;
 
   let service: PricingService;
-  let serviceSetup: ReturnType<PricingService['setup']>;
+  let serviceSetup: Awaited<ReturnType<PricingService['setup']>>;
 
   beforeEach(async () => {
     server = createHttpService();
@@ -51,7 +51,7 @@ describe('PricingService', () => {
       configService,
     });
     await service.preboot({ http: httpPreboot });
-    serviceSetup = service.setup({ http: httpSetup });
+    serviceSetup = await service.setup({ http: httpSetup });
     await server.start();
   });
 
