@@ -72,8 +72,10 @@ import { waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { deleteInferenceEndpoint } from '../knowledge_base_service/delete_inference_endpoint';
 
 const MAX_FUNCTION_CALLS = 8;
+const LEGACY_CUSTOM_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -709,6 +711,17 @@ export class ObservabilityAIAssistantClient {
           logger,
           esClient,
         });
+
+        // If the inference ID switched to a preconfigured model, delete the legacy custom model if it exists.
+        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+          logger.debug(`Deleting legacy custom model with ID: ${LEGACY_CUSTOM_INFERENCE_ID}`);
+          deleteInferenceEndpoint({
+            esClient,
+            logger,
+            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+            taskType: 'sparse_embedding',
+          });
+        }
       })
       .catch((e) => {
         if (isLockAcquisitionError(e)) {
