@@ -1333,7 +1333,7 @@
     "vega-tooltip": "^0.34.0",
     "vinyl": "^2.2.0",
     "wellknown": "^0.5.0",
-    "whatwg-fetch": "^3.0.0",
+    "whatwg-fetch": "^3.6.20",
     "xml2js": "^0.5.0",
     "xstate": "^4.38.3",
     "xstate5": "npm:xstate@^5.19.2",
