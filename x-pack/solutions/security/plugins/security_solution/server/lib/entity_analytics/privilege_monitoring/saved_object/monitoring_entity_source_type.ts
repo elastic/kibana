@@ -24,7 +24,7 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     indexPattern: {
       type: 'keyword',
-      index: false, // Not ideal, cannot change to searchable later. Double check before we merge.
+      dynamic: false,
     },
     enabled: {
       type: 'boolean',
@@ -41,11 +41,9 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
       properties: {
         fields: {
           type: 'keyword',
-          index: false,
         },
         values: {
           type: 'keyword',
-          index: false,
         },
       },
     },

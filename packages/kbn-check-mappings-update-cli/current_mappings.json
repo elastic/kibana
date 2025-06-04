@@ -1056,7 +1056,7 @@
         "type": "object"
       },
       "indexPattern": {
-        "index": false,
+        "dynamic": false,
         "type": "keyword"
       },
       "integrationName": {
@@ -1069,11 +1069,9 @@
         "dynamic": false,
         "properties": {
           "fields": {
-            "index": false,
             "type": "keyword"
           },
           "values": {
-            "index": false,
             "type": "keyword"
           }
         },
