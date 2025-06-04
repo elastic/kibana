@@ -420,7 +420,6 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
-            // TODO: add license check
             ...(isBulkEditAlertSuppressionEnabled
               ? [
                   {
@@ -608,10 +607,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_ADD_ALERT_SUPPRESSION,
               'data-test-subj': 'addAlertSuppressionBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.add_alert_suppression),
-              disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges
-                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
-                : undefined,
+              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
               toolTipProps: { position: 'right' },
             },
             {
@@ -619,10 +615,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
               'data-test-subj': 'deleteAlertSuppressionBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_alert_suppression),
-              disabled: isEditDisabled,
-              toolTipContent: missingActionPrivileges
-                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
-                : undefined,
+              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
               toolTipProps: { position: 'right' },
             },
           ],
