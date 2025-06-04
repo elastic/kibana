@@ -100,7 +100,7 @@ describe('slices', () => {
 
     describe('state transitions', () => {
       it('should set status to loading when init is called', () => {
-        const state = reducer(initialSharedState, actions.init());
+        const state = reducer(initialSharedState, actions.init([]));
 
         expect(state.status).toBe('loading');
       });
@@ -142,7 +142,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [testScope],
+            scope: testScope,
           })
         );
 
@@ -154,7 +154,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [DataViewManagerScopeName.analyzer],
+            scope: DataViewManagerScopeName.analyzer,
           })
         );
 

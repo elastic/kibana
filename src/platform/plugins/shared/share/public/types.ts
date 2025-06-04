@@ -9,19 +9,24 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, ToastsSetup } from '@kbn/core/public';
-import type { EuiIconProps } from '@elastic/eui';
+import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import { AnonymousAccessServiceContract } from '../common/anonymous_access';
 
 export interface ShareRegistryApiStart {
+  capabilities: Capabilities;
   urlService: BrowserUrlService;
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  getLicense: () => ILicense | undefined;
 }
+
+type ShareActionConfigArgs = ShareContext &
+  Pick<ShareRegistryApiStart, 'anonymousAccessServiceProvider' | 'urlService'>;
 
 export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
 
@@ -54,11 +59,20 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+      config: (ctx: ShareActionConfigArgs) => C;
+      /**
+       * when provided, this method will be used to evaluate if this integration should be available,
+       * given the current license and capabilities of kibana
+       */
+      prerequisiteCheck?: (args: {
+        capabilities: Capabilities;
+        objectType: ShareContext['objectType'];
+        license?: ILicense;
+      }) => boolean;
     }
   : {
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+      config: (ctx: ShareActionConfigArgs) => C | null;
     };
 
 // New type definition to extract the config return type
@@ -107,39 +121,49 @@ export interface ShareLegacy {
  * @description Share integration implementation definition for performing exports within kibana
  */
 export interface ExportShare
-  extends ShareIntegration<{
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    name?: string;
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    icon?: EuiIconProps['type'];
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    sortOrder?: number;
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    toolTipContent?: string;
-    label: string;
-    exportType: string;
-    /**
-     * allows disabling the export action based on there factors, for instance licensing
-     */
-    disabled?: boolean;
-    helpText?: ReactNode;
-    generateExportButton?: ReactNode;
-    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
-    generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
-    renderCopyURIButton?: boolean;
-    warnings?: Array<{ title: string; message: string }>;
-    requiresSavedState?: boolean;
-    supportedLayoutOptions?: Array<'print'>;
-    renderLayoutOptionSwitch?: boolean;
-  }> {
+  extends ShareIntegration<
+    {
+      /**
+       * @deprecated only kept around for legacy reasons
+       */
+      name?: string;
+      icon?: EuiIconProps['type'];
+      sortOrder?: number;
+      /**
+       * @deprecated only kept around for legacy reasons
+       */
+      toolTipContent?: string;
+      label: string;
+      exportType: string;
+      /**
+       * allows disabling the export action, for instance the current app has no data to export
+       */
+      disabled?: boolean;
+      helpText?: ReactNode;
+      generateExportButtonLabel?: ReactNode;
+      generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+      renderCopyURIButton?: boolean;
+      warnings?: Array<{ title: string; message: string }>;
+      requiresSavedState?: boolean;
+      supportedLayoutOptions?: Array<'print'>;
+      renderLayoutOptionSwitch?: boolean;
+    } & (
+      | {
+          generateAssetComponent?: never;
+          copyAssetURIConfig: {
+            headingText: string;
+            helpText?: string;
+            contentType: EuiCodeProps['language'];
+            generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+          };
+        }
+      | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
+      | {
+          generateAssetComponent?: never;
+          copyAssetURIConfig?: never;
+        }
+    )
+  > {
   groupId: 'export';
 }
 
@@ -179,7 +203,10 @@ export type EmbedShareUIConfig = ShareActionUserInputBase<{
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }>;
 
-type ExportShareUIConfig = ShareActionUserInputBase<{}>;
+/**
+ * @description record of user config for each registered export integration
+ */
+type ExportShareUIConfig = Record<string, ShareActionUserInputBase<{}>>;
 
 export interface ShareUIConfig {
   link: LinkShareUIConfig;
@@ -238,6 +265,10 @@ export interface ShareContext {
    */
   objectType: string;
   /**
+   * An alias of type of the object to share, that's more human friendly.
+   */
+  objectTypeAlias?: string;
+  /**
    * Allows for passing contextual information that each consumer can provide to customize the share menu
    */
   objectTypeMeta: {
@@ -271,7 +302,6 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  toasts: ToastsSetup;
 }
 
 /**
@@ -317,6 +347,7 @@ export interface UrlParamExtension {
 
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
+  asExport?: boolean;
   anchorElement?: HTMLElement;
   allowShortUrl: boolean;
   onClose?: () => void;
