@@ -27,9 +27,6 @@ export function registerPricingRoutes(
           reason:
             'Pricing information does not require authorization and should be always accessible.',
         },
-        authc: {
-          enabled: 'optional',
-        },
       },
       options: { access: 'internal' },
       validate: false,
