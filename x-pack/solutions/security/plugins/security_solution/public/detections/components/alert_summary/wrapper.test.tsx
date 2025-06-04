@@ -152,12 +152,7 @@ describe('<Wrapper />', () => {
         status: 'ready',
       });
 
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(<Wrapper packages={packages} />);
+      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -180,11 +175,6 @@ describe('<Wrapper />', () => {
         dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
         status: 'ready',
       });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
 
       render(
         <TestProviders>
