@@ -4248,6 +4248,24 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getLegacyTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getLegacyTypes",
+            "description": [
+              "Return legacy types, this types can't be registered"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectTypeRegistry.getType",
             "type": "Function",
             "tags": [],
@@ -9137,6 +9155,10 @@
                 "path": "x-pack/solutions/observability/plugins/apm/server/saved_objects/apm_service_groups.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
+              },
+              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
@@ -9910,6 +9932,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
               },
               {
                 "plugin": "visualizations",

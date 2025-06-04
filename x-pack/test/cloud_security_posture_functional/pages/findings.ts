@@ -122,7 +122,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return requestedBenchmarkRules.map((item) => item.attributes);
   };
 
-  describe('Findings Page - DataTable', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/220423
+  describe.skip('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;

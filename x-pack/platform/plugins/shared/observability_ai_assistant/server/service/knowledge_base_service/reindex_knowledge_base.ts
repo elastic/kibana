@@ -13,11 +13,6 @@ import { CoreSetup } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import {
-  addIndexWriteBlock,
-  hasIndexWriteBlock,
-  removeIndexWriteBlock,
-} from './index_write_block_utils';
 import { createKnowledgeBaseIndex } from './create_knowledge_base_index';
 import { updateKnowledgeBaseWriteIndexAlias } from './update_knowledge_base_index_alias';
 
@@ -26,63 +21,25 @@ export async function reIndexKnowledgeBaseWithLock({
   core,
   logger,
   esClient,
-  inferenceId,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   logger: Logger;
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
-  inferenceId: string;
-}): Promise<boolean> {
+}): Promise<void> {
   const lmService = new LockManagerService(core, logger);
   return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
-    reIndexKnowledgeBaseWithWriteIndexBlock({
-      logger: logger.get('kb-reindex'),
-      esClient,
-      inferenceId,
-    })
+    reIndexKnowledgeBase({ logger, esClient })
   );
-}
-
-async function reIndexKnowledgeBaseWithWriteIndexBlock({
-  logger,
-  esClient,
-  inferenceId,
-}: {
-  logger: Logger;
-  esClient: { asInternalUser: ElasticsearchClient };
-  inferenceId: string;
-}): Promise<boolean> {
-  logger.debug('Initializing re-indexing of knowledge base...');
-  if (await hasIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb })) {
-    throw new Error(
-      `Write block is already set on the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
-    );
-  }
-
-  try {
-    await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
-    await reIndexKnowledgeBase({ logger, esClient, inferenceId });
-    logger.info('Re-indexing knowledge base completed successfully.');
-  } catch (error) {
-    logger.error(`Re-indexing knowledge base failed: ${error.message}`);
-    throw error;
-  } finally {
-    await removeIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
-  }
-
-  return true;
 }
 
 async function reIndexKnowledgeBase({
   logger,
   esClient,
-  inferenceId,
 }: {
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
-  inferenceId: string;
 }): Promise<void> {
   const activeReindexingTask = await getActiveReindexingTaskId(esClient);
   if (activeReindexingTask) {
@@ -96,18 +53,11 @@ async function reIndexKnowledgeBase({
     logger,
   });
 
-  await createKnowledgeBaseIndex({ esClient, logger, inferenceId, indexName: nextWriteIndexName });
+  await createKnowledgeBaseIndex({ esClient, logger, indexName: nextWriteIndexName });
 
   logger.info(
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
   );
-
-  const reindexResponse = await esClient.asInternalUser.reindex({
-    source: { index: currentWriteIndexName },
-    dest: { index: nextWriteIndexName },
-    refresh: true,
-    wait_for_completion: false,
-  });
 
   // Point write index alias to the new index
   await updateKnowledgeBaseWriteIndexAlias({
@@ -115,6 +65,13 @@ async function reIndexKnowledgeBase({
     logger,
     nextWriteIndexName,
     currentWriteIndexName,
+  });
+
+  const reindexResponse = await esClient.asInternalUser.reindex({
+    source: { index: currentWriteIndexName },
+    dest: { index: nextWriteIndexName },
+    refresh: true,
+    wait_for_completion: false,
   });
 
   const taskId = reindexResponse.task?.toString();
@@ -235,9 +192,6 @@ export async function isReIndexInProgress({
     lmService.getLock(KB_REINDEXING_LOCK_ID),
     getActiveReindexingTaskId(esClient),
   ]);
-
-  logger.debug(`Lock: ${!!lock}`);
-  logger.debug(`ES re-indexing task: ${!!activeReindexingTask}`);
 
   return lock !== undefined || activeReindexingTask !== undefined;
 }

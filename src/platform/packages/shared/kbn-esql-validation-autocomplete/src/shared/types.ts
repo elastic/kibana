@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLFieldWithMetadata, JoinIndexAutocompleteItem } from '../validation/types';
+import type { ESQLControlVariable, IndexAutocompleteItem, RecommendedQuery } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -48,7 +48,9 @@ export interface ESQLCallbacks {
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getEditorExtensions?: (queryString: string) => Promise<RecommendedQuery[]>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
