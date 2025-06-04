@@ -13,9 +13,11 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { IndexUpdateService } from './index_update_service';
 
 export interface EditLookupIndexContentContext {
   indexName?: string;
+  doesIndexExist: boolean;
   onSave?: () => void;
   onClose?: () => void;
 }
@@ -26,12 +28,17 @@ export interface EditLookupIndexFlyoutDeps {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  /** Custom service for indexing documents */
+  indexUpdateService: IndexUpdateService;
 }
 
+/** Extended kibana context */
 export interface KibanaContextExtra {
   share: SharePluginStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
+  /** Custom service for indexing documents */
+  indexUpdateService: IndexUpdateService;
 }

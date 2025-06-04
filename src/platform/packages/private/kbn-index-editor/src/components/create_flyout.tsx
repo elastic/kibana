@@ -16,6 +16,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
+import { IndexUpdateService } from '../index_update_service';
 
 export function createFlyout(
   deps: EditLookupIndexFlyoutDeps,
@@ -27,6 +28,13 @@ export function createFlyout(
     application: { currentAppId$ },
     ...startServices
   } = deps.coreStart;
+
+  const indexUpdateService = new IndexUpdateService(http);
+
+  if (props.indexName) {
+    // set initial index name
+    indexUpdateService.setIndexName(props.indexName);
+  }
 
   const LazyFlyoutContent = lazy(async () => {
     const { FlyoutContent } = await import('./flyout_content');
@@ -47,7 +55,10 @@ export function createFlyout(
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<LoadingContents />}>
-        <LazyFlyoutContent deps={deps} props={{ ...props, onClose: onFlyoutClose, onSave }} />
+        <LazyFlyoutContent
+          deps={{ ...deps, indexUpdateService }}
+          props={{ ...props, onClose: onFlyoutClose, onSave }}
+        />
       </Suspense>,
       startServices
     ),

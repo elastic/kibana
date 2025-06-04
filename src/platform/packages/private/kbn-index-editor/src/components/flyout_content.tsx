@@ -128,7 +128,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
       const resultRows: DataTableRecord[] = hits.map((hit: any, idx: number) => {
         return {
-          id: String(idx),
+          id: String(hit._id),
           raw: hit._source,
           flattened: hit._source,
         } as unknown as DataTableRecord;

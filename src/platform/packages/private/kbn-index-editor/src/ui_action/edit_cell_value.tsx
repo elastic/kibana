@@ -9,19 +9,16 @@
 
 import { createCellActionFactory } from '@kbn/cell-actions/src/actions';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-import {
-  filterOutNullableValues,
-  isTypeSupportedByDefaultActions,
-  isValueSupportedByDefaultActions,
-  valueToArray,
-} from '@kbn/cell-actions/src/actions/utils';
+import { isTypeSupportedByDefaultActions } from '@kbn/cell-actions/src/actions/utils';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import { isString } from 'lodash/fp';
-import copy from 'copy-to-clipboard';
-import type { Trigger } from '@kbn/ui-actions-browser';
 import { i18n } from '@kbn/i18n';
+import type { Trigger } from '@kbn/ui-actions-browser';
+import { EditCellValue } from '../components/value_input_control';
+import { IndexUpdateService } from '../index_update_service';
+import { or } from '../../../../../../../bazel-kibana/x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client';
 
 export const EDIT_CELL_VALUE_TRIGGER_ID = 'EDIT_CELL_VALUE_TRIGGER_ID';
 
@@ -38,12 +35,20 @@ const description = i18n.translate('indexEditor.dataGrid.editCellDescription', {
 });
 
 export const createEditCellValueActionFactory = createCellActionFactory(
-  ({ notifications }: { notifications: NotificationsStart }) => ({
+  ({
+    notifications,
+    indexUpdateService,
+  }: {
+    notifications: NotificationsStart;
+    indexUpdateService: IndexUpdateService;
+  }) => ({
     type: ACTION_EDIT_CELL_VALUE_INDEX,
     getIconType: () => 'pencil',
     getDisplayName: () => description,
     getDisplayNameTooltip: () => description,
-    isCompatible: async ({ data }) => {
+    isCompatible: async ({ data, metadata }) => {
+      console.log(data, '___data___');
+
       return true;
       // Only support scalar values for now
       // TODO
@@ -57,36 +62,41 @@ export const createEditCellValueActionFactory = createCellActionFactory(
         isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
-    execute: async ({ data }) => {
-      return;
+    execute: async ({ data, metadata, nodeRef }) => {
+      // const container = document.createElement('div');
+      // document.body.appendChild(nodeRef.current || container);
+
+      // Save the original content so it can be restored later
+      const originalContent = nodeRef.current?.innerHTML || '';
+
+      const fieldName = data[0]?.field?.name;
+      const docId = '';
+
+      const onClose = () => {
+        ReactDOM.unmountComponentAtNode(nodeRef.current);
+        // document.body.removeChild(container);
+      };
+
+      const onSave = (updatedValue: any) => {
+        console.log(updatedValue, '______updatedValue______');
+
+        // Index document
+        indexUpdateService.updateDoc(docId, {
+          [fieldName]: updatedValue,
+        });
+      };
+
+      ReactDOM.render(
+        <EditCellValue value={data[0].value} onCancel={onClose} onSave={onSave} ref={nodeRef} />,
+        nodeRef.current
+      );
+
+      console.log(metadata, '___metadata___');
+      console.log(nodeRef, '___nodeRef___');
+      console.log(data, '___data__123213_');
 
       // create a popover with an input field to edit the value
       // best would be to create a portal to render an input based on the position
-      const field = data[0]?.field;
-      const rawValue = data[0]?.value;
-      const value = filterOutNullableValues(valueToArray(rawValue));
-
-      if (!isValueSupportedByDefaultActions(value)) {
-        notifications.toasts.addWarning({
-          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
-        });
-        return;
-      }
-
-      const textValue = value.map((v) => (isString(v) ? `"${escapeValue(v)}"` : v)).join(' AND ');
-      const text = textValue !== '' ? `${field.name}: ${textValue}` : field.name;
-      const isSuccess = copy(text, { debug: true });
-
-      if (isSuccess) {
-        notifications.toasts.addSuccess(
-          {
-            title: COPY_TO_CLIPBOARD_SUCCESS,
-          },
-          {
-            toastLifeTimeMs: 800,
-          }
-        );
-      }
     },
   })
 );

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiPortal,
+  EuiDataGridCellProps,
+  EuiDataGridCellPopoverElementProps,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
@@ -22,11 +29,13 @@ import {
   UnifiedDataTableRenderCustomToolbarProps,
   renderCustomToolbar,
   type SortOrder,
+  CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
 import { INDEX_EDITOR_CELL_ACTION_TRIGGER_ID } from '../ui_action';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
+import { EditCellValue } from './value_input_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -57,6 +66,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       settings,
       dataViewFieldEditor,
+      indexUpdateService,
     },
   } = useKibana<KibanaContextExtra>();
 
@@ -179,51 +189,79 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [activeColumns, discoverLocator, data.query.timefilter.timefilter, props.dataView, props.query]
   );
 
+  // temp solution. need to render an input on click on the cell.
+  const customPopoverRenderer = useMemo<EuiDataGridCellProps['renderCellPopover']>(() => {
+    return ({ rowIndex, columnId, ...rest }: EuiDataGridCellPopoverElementProps) => {
+      const row = rows[rowIndex];
+      const docId = row.id;
+      const cellValue = row.flattened[columnId];
+      if (cellValue == null) {
+        return null;
+      }
+
+      return (
+        <EditCellValue
+          value={cellValue}
+          onSave={(updatedValue) =>
+            indexUpdateService.updateDoc(docId, { [columnId]: updatedValue })
+          }
+          onCancel={() => {}}
+        />
+      );
+    };
+  }, [indexUpdateService, rows]);
+
   return (
-    <UnifiedDataTable
-      columns={activeColumns}
-      css={css`
-        .unifiedDataTableToolbar {
-          padding: 4px 0px;
-        }
-      `}
-      rows={rows}
-      columnsMeta={columnsMeta}
-      services={services}
-      enableInTableSearch
-      isPlainRecord
-      isSortEnabled
-      showMultiFields={false}
-      showColumnTokens
-      showTimeCol
-      enableComparisonMode
-      isPaginationEnabled
-      showKeyboardShortcuts
-      totalHits={props.totalHits}
-      rowsPerPageState={rowsPerPage}
-      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-      sampleSizeState={10_000}
-      canDragAndDropColumns
-      loadingState={DataLoadingState.loaded}
-      dataView={props.dataView}
-      onSetColumns={onSetColumns}
-      onUpdateRowsPerPage={setRowsPerPage}
-      expandedDoc={expandedDoc}
-      setExpandedDoc={setExpandedDoc}
-      sort={sortOrder}
-      ariaLabelledBy="lookupIndexDataGrid"
-      maxDocFieldsDisplayed={100}
-      renderDocumentView={renderDocumentView}
-      showFullScreenButton={false}
-      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-      rowHeightState={rowHeight}
-      onUpdateRowHeight={setRowHeight}
-      controlColumnIds={props.controlColumnIds}
-      renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
-      cellActionsHandling={'append'}
-      cellActionsTriggerId={INDEX_EDITOR_CELL_ACTION_TRIGGER_ID}
-      visibleCellActions={4}
-    />
+    <>
+      <UnifiedDataTable
+        columns={activeColumns}
+        css={css`
+          .unifiedDataTableToolbar {
+            padding: 4px 0px;
+          }
+        `}
+        rows={rows}
+        columnsMeta={columnsMeta}
+        // cellContext={cellContext}
+        services={services}
+        enableInTableSearch
+        // externalCustomRenderers={externalCustomRenderers}
+        isPlainRecord
+        isSortEnabled
+        showMultiFields={false}
+        showColumnTokens
+        showTimeCol
+        enableComparisonMode
+        isPaginationEnabled
+        showKeyboardShortcuts
+        totalHits={props.totalHits}
+        rowsPerPageState={rowsPerPage}
+        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+        sampleSizeState={10_000}
+        canDragAndDropColumns
+        loadingState={DataLoadingState.loaded}
+        dataView={props.dataView}
+        onSetColumns={onSetColumns}
+        onUpdateRowsPerPage={setRowsPerPage}
+        expandedDoc={expandedDoc}
+        setExpandedDoc={setExpandedDoc}
+        sort={sortOrder}
+        ariaLabelledBy="lookupIndexDataGrid"
+        maxDocFieldsDisplayed={100}
+        renderDocumentView={renderDocumentView}
+        showFullScreenButton={false}
+        configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
+        rowHeightState={rowHeight}
+        onUpdateRowHeight={setRowHeight}
+        controlColumnIds={props.controlColumnIds}
+        renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
+        cellActionsHandling={'replace'}
+        // cellActionsTriggerId={INDEX_EDITOR_CELL_ACTION_TRIGGER_ID}
+        visibleCellActions={0}
+        renderCellPopover={customPopoverRenderer}
+        expandable
+      />
+    </>
   );
 };
 
