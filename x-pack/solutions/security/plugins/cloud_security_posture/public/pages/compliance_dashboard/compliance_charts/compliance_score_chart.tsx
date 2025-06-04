@@ -33,7 +33,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -111,6 +111,8 @@ const CompactPercentageLabels = ({
   onEvalCounterClick: (evaluation: Evaluation) => void;
   stats: { totalPassed: number; totalFailed: number };
 }) => {
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
+
   return (
     <>
       <CounterLink
@@ -146,6 +148,7 @@ const PercentageLabels = ({
   stats: { totalPassed: number; totalFailed: number };
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
   const borderLeftStyles = { borderLeft: euiTheme.border.thin, paddingLeft: euiTheme.size.m };
 
   return (
