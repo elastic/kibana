@@ -20,21 +20,16 @@ import {
 import { useGetUrlParams } from '../../../hooks';
 
 interface UseSelectedMonitorOptions {
-  monId?: string;
   refetchMonitorEnabled?: boolean;
 }
 
 export const useSelectedMonitor = ({
-  monId = undefined,
   refetchMonitorEnabled = true,
 }: UseSelectedMonitorOptions = {}) => {
-  let monitorId = monId;
-  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  const { monitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
   const { spaceId } = useGetUrlParams();
-  if (!monitorId) {
-    monitorId = urlMonitorId;
-  }
+
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
 
