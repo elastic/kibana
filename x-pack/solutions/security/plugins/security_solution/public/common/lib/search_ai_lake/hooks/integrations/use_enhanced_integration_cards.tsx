@@ -32,7 +32,7 @@ const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
 const addPathParamToUrl = (url: string, path: string | undefined) => {
   if (!path) {
-    return undefined;
+    return url;
   }
   const encodedPath = encodeURIComponent(path);
   const paramsString = `${RETURN_APP_ID}=${SECURITY_UI_APP_ID}&${RETURN_PATH}=${encodedPath}`;
@@ -51,11 +51,11 @@ export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
   options?: EnhancedCardOptions
 ): IntegrationCardItem => {
-  const url = addPathParamToUrl(card.url, options?.returnPath ?? undefined);
+  const url = addPathParamToUrl(card.url, options?.returnPath);
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
-    url: url ?? card.url,
+    url,
     showInstallationStatus: options?.showInstallationStatus,
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
