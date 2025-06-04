@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 import { registerGetJoinIndicesRoute } from './get_join_indices';
@@ -24,4 +25,5 @@ export const registerRoutes = (
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
+  registerGetInferenceEndpointsRoute(router, initContext);
 };
