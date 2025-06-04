@@ -34,6 +34,7 @@
     "@kbn/sse-utils",
     "@kbn/sse-utils-client",
     "@kbn/sse-utils-server",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/features-plugin"
   ]
 }
