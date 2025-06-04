@@ -36,7 +36,7 @@ import {
   HealthIndicatorTableRow,
   DataStreamTableRow,
 } from './deprecation_types';
-import { DeprecationTableColumns } from '../types';
+import { DeprecationSortableTableColumns, DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {
@@ -191,7 +191,7 @@ interface Props {
 
 interface SortConfig {
   isSortAscending: boolean;
-  sortField: DeprecationTableColumns;
+  sortField: DeprecationSortableTableColumns;
 }
 
 const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: SortConfig) => {
@@ -259,7 +259,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   );
 
   const handleSort = useCallback(
-    (fieldName: DeprecationTableColumns) => {
+    (fieldName: DeprecationSortableTableColumns) => {
       const newSortConfig = {
         isSortAscending: sortConfig.sortField === fieldName ? !sortConfig.isSortAscending : true,
         sortField: fieldName,
@@ -358,7 +358,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
               <EuiTableHeaderCell
                 width={cell.width}
                 key={cell.label}
-                onSort={() => handleSort(fieldName as DeprecationTableColumns)}
+                onSort={() => handleSort(fieldName as DeprecationSortableTableColumns)}
                 isSorted={sortConfig.sortField === fieldName}
                 isSortAscending={sortConfig.isSortAscending}
                 readOnly={!cell.sortable}

@@ -28,6 +28,8 @@ export type DeprecationTableColumns =
   | 'level'
   | 'actions';
 
+export type DeprecationSortableTableColumns = Exclude<DeprecationTableColumns, 'actions'>;
+
 export type Status = 'in_progress' | 'complete' | 'idle' | 'error';
 export interface DeprecationLoggingPreviewProps {
   isDeprecationLogIndexingEnabled: boolean;

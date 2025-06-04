@@ -76,6 +76,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
     if (actionsTableCell) {
       return <>{actionsTableCell}</>;
     }
+    return <></>;
   }
 
   // Default behavior: render value or empty string if undefined
