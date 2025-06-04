@@ -92,15 +92,10 @@ export const FullScreenWaterfall = ({
     <>
       <EuiOverlayMask
         maskRef={overlayMaskRef}
-        data-test-subj="EuiOverlayMask-Irene"
         css={{ paddingBlockEnd: '0 !important', overflowY: 'scroll' }}
       >
-        <EuiFocusTrap data-test-subj="EuiFocusTrap-Irene" css={{ height: '100%', width: '100%' }}>
-          <EuiPanel
-            data-test-subj="EuiPanel-Irene"
-            hasShadow={false}
-            css={{ minHeight: '100%', width: '100%' }}
-          >
+        <EuiFocusTrap css={{ height: '100%', width: '100%' }}>
+          <EuiPanel hasShadow={false} css={{ minHeight: '100%', width: '100%' }}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={1}>
                 <EuiTitle size="l">
