@@ -1839,7 +1839,7 @@
     "sass-loader": "^10.5.2",
     "selenium-webdriver": "^4.33.0",
     "sharp": "0.32.6",
-    "simple-git": "^3.16.0",
+    "simple-git": "^3.27.0",
     "sinon": "^7.4.2",
     "sort-package-json": "^1.53.1",
     "source-map": "^0.7.4",
