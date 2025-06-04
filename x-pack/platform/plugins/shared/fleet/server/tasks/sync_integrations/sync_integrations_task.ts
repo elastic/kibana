@@ -32,7 +32,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.4';
+export const VERSION = '1.0.5';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -183,8 +183,6 @@ export class SyncIntegrationsTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
   ) => {
-    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
-
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
@@ -192,6 +190,10 @@ export class SyncIntegrationsTask {
     const isSyncEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
+
+    if (isSyncEnabled) {
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
+    }
 
     const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
 
