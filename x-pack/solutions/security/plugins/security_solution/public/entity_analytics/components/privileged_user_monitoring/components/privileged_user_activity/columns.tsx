@@ -20,6 +20,8 @@ import type { TableItemType } from './types';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { SCOPE_ID } from '../../constants';
 
+const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
+
 const timestampColumn: EuiBasicTableColumn<TableItemType> = {
   field: '@timestamp',
   truncateText: true,
@@ -29,7 +31,7 @@ const timestampColumn: EuiBasicTableColumn<TableItemType> = {
       defaultMessage="Timestamp"
     />
   ),
-  width: '20%',
+  width: COLUMN_WIDTHS['@timestamp'],
   dataType: 'date',
   render: (timestamp?: string) => {
     if (!timestamp) {
@@ -48,13 +50,14 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
       defaultMessage="Privileged user"
     />
   ),
-  width: '15%',
+  width: COLUMN_WIDTHS.privileged_user,
   render: (user: string[] | string) =>
     user != null
       ? getRowItemsWithActions({
           values: isArray(user) ? user : [user],
-          // TODO can we have an array of field names and do an OR?
-          // that would be helpful for when the source indices have different field names
+          // TODO We need a way to filter by several field with an OR expression
+          // because the ESQL queries several source indices that have different field names
+          // Issue to extend SecurityCellActions to support this: https://github.com/elastic/security-team/issues/12712
           fieldName,
           idPrefix: 'privileged-user-monitoring-privileged-user',
           render: (item) => <UserName userName={item} />,
@@ -136,7 +139,7 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
       />
     );
   },
-  width: '5%',
+  width: COLUMN_WIDTHS.actions,
 });
 
 type OpenRightPanelType = (props: FlyoutPanelProps) => void;
@@ -218,40 +221,29 @@ export const buildAuthenticationsColumns = (
     },
   },
   {
-    field: 'type',
+    field: 'url',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type"
         defaultMessage="Type"
       />
     ),
-    render: (type?: string) => {
-      if (!type) {
+    render: (url?: string) => {
+      if (!url) {
         return getEmptyTagValue();
       }
 
-      if (type.startsWith('/api/v1/authn')) {
-        return i18n.translate(
-          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',
-          { defaultMessage: 'Direct' }
-        );
-      }
+      const type = getLoginTypeFromUrl(url);
 
-      if (
-        type.startsWith('/oauth2/v1/authorize') ||
-        type.startsWith('/oauth2/v1/token') ||
-        type.includes('/sso/saml')
-      ) {
-        return i18n.translate(
-          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.federated',
-          { defaultMessage: 'Federated' }
-        );
+      if (!type) {
+        return getEmptyTagValue();
       }
 
       return type;
     },
     truncateText: true,
   },
+  // TODO Add the column depending on this ticket output https://github.com/elastic/security-team/issues/12713
   // {
   //   field: 'method',
   //   name: (
@@ -301,4 +293,26 @@ const getResultColor = (value: string) => {
     return 'danger';
   }
   return 'default';
+};
+
+// TODO Verify if we can improve this logic https://github.com/elastic/security-team/issues/12713
+const getLoginTypeFromUrl = (url: string) => {
+  if (url.startsWith('/api/v1/authn')) {
+    return i18n.translate(
+      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',
+      { defaultMessage: 'Direct' }
+    );
+  }
+
+  if (
+    url.startsWith('/oauth2/v1/authorize') ||
+    url.startsWith('/oauth2/v1/token') ||
+    url.includes('/sso/saml')
+  ) {
+    return i18n.translate(
+      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.federated',
+      { defaultMessage: 'Federated' }
+    );
+  }
+  return undefined;
 };
