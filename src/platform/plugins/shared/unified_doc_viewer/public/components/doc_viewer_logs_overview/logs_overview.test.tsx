@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -70,11 +71,11 @@ dataView.fields.getByName = (name: string) => {
   return dataView.fields.getAll().find((field) => field.name === name);
 };
 
-const buildHit = (fields?: Record<string, unknown>) =>
+const buildHit = (fields: Record<string, unknown> = {}, customIndex: string = DATA_STREAM_NAME) =>
   buildDataTableRecord(
     {
-      _index: DATA_STREAM_NAME,
-      _id: DATA_STREAM_NAME,
+      _index: customIndex,
+      _id: customIndex,
       _score: 1,
       _source: {
         '@timestamp': NOW + 1000,
@@ -111,6 +112,7 @@ const buildHit = (fields?: Record<string, unknown>) =>
         'agent.name': 'node',
         ...fields,
       },
+      fields,
       ignored_field_values: {
         'cloud.availability_zone': [MORE_THAN_1024_CHARS],
       },
@@ -229,36 +231,25 @@ describe('LogsOverview', () => {
       ).toBeInTheDocument();
 
       // The accordion must be closed by default
-      const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion1');
-
-      if (accordion === null) {
-        return;
-      }
-      const button = accordion.querySelector('button');
-
-      if (button === null) {
-        return;
-      }
-      // Check the aria-expanded property of the button
-      const isExpanded = button.getAttribute('aria-expanded');
-      expect(isExpanded).toBe('false');
-
-      button.click();
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[0];
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
+      const user = userEvent.setup();
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      await user.click(button);
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable')
       ).toBeInTheDocument();
     });
 
-    it('should render the dataset quality link for local indices', () => {
+    it('should render the dataset quality link for local indices', async () => {
       const sourceFields = {
         'data_stream.type': ['logs'],
         'data_stream.dataset': [DATASET_NAME],
         'data_stream.namespace': [NAMESPACE],
       };
 
-      const hitWithDataStream = buildHit({});
-
-      hitWithDataStream.raw.fields = sourceFields;
+      const hitWithDataStream = buildHit(sourceFields);
 
       const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
       mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
@@ -277,11 +268,9 @@ describe('LogsOverview', () => {
       const accordion = accordions[accordions.length - 1];
       const button = accordion.querySelector('button');
 
-      if (button) {
-        act(() => {
-          button.click();
-        });
-      }
+      act(() => {
+        button?.click();
+      });
 
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
@@ -290,17 +279,14 @@ describe('LogsOverview', () => {
       mockUnifiedDocViewerServices.share.url.locators.get = originalGet;
     });
 
-    it('should not render the dataset quality link for CCS remote indices', () => {
+    it('should not render the dataset quality link for CCS remote indices', async () => {
       const sourceFields = {
         'data_stream.type': ['logs'],
         'data_stream.dataset': [DATASET_NAME],
         'data_stream.namespace': [NAMESPACE],
       };
 
-      const remoteHit = buildHit({});
-
-      remoteHit.raw.fields = sourceFields;
-      remoteHit.raw._index = `remoteCluster:${DATA_STREAM_NAME}`;
+      const remoteHit = buildHit(sourceFields, `remoteCluster:${DATA_STREAM_NAME}`);
 
       const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
       mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
@@ -319,11 +305,9 @@ describe('LogsOverview', () => {
       const accordion = accordions[accordions.length - 1];
       const button = accordion.querySelector('button');
 
-      if (button) {
-        act(() => {
-          button.click();
-        });
-      }
+      act(() => {
+        button?.click();
+      });
 
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
