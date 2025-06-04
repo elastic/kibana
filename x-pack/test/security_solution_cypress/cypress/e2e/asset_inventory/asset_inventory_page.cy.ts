@@ -393,9 +393,9 @@ describe('Asset Inventory page - uiSetting disabled', { tags: ['@ess', '@serverl
     visit(ASSET_INVENTORY_URL);
   });
 
-  it('should display Privileges Required box', () => {
-    cy.get(NO_PRIVILEGES_BOX).should('be.visible');
-    cy.get(ALL_ASSETS_TITLE).should('not.exist');
+  it('should navigate user to Security welcome when asset inventory is not enabled', () => {
+    // Should navigate user back to Security welcome page
+    cy.url().should('include', 'security/get_started');
   });
 });
 
