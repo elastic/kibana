@@ -92,10 +92,8 @@ export type DashboardLocatorParams = Partial<
     useHash?: boolean;
 
     /**
-     * When `true` filters from saved filters from destination dashboard as merged with applied filters
-     * When `false` applied filters take precedence and override saved filters
-     *
-     * true is default
+     * Denotes whether to merge provided filters from the locator state with the filters saved into the Dashboard. 
+     * When false, the saved filters will be overwritten. Defaults to true.
      */
     preserveSavedFilters?: boolean;
 
