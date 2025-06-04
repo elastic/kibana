@@ -27,6 +27,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
+  buttonId: string;
   label: string;
   helpTooltip?: string;
   hasLoaded: boolean;
@@ -39,6 +40,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   paginatedFields: T[];
   renderFieldItem: (params: RenderFieldItemParams<T>) => JSX.Element;
   renderCallout: () => JSX.Element;
+  extraAction: React.ReactNode;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
 }
@@ -47,6 +49,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
+  buttonId,
   label,
   helpTooltip,
   hasLoaded,
@@ -61,6 +64,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   renderCallout,
   showExistenceFetchError,
   showExistenceFetchTimeout,
+  extraAction,
 }: FieldsAccordionProps<T>) {
   const styles = useMemoizedStyles(componentStyles);
 
@@ -94,7 +98,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
     );
   }, [label, helpTooltip, fieldsCount, styles.titleTooltip]);
 
-  const extraAction = useMemo(() => {
+  const accordionExtraAction = useMemo(() => {
     if (showExistenceFetchError) {
       return (
         <EuiIconTip
@@ -147,27 +151,33 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       onToggle={onToggle}
       data-test-subj={id}
       id={id}
+      buttonProps={{
+        id: buttonId,
+      }}
       buttonContent={renderButton}
-      extraAction={extraAction}
+      extraAction={accordionExtraAction}
     >
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <ul>
-            {paginatedFields &&
-              paginatedFields.map((field, index) => (
-                <Fragment key={getFieldKey(field)}>
-                  {renderFieldItem({
-                    field,
-                    itemIndex: index,
-                    groupIndex,
-                    groupName,
-                    hideDetails,
-                    fieldSearchHighlight,
-                  })}
-                </Fragment>
-              ))}
-          </ul>
+          <>
+            {extraAction}
+            <ul>
+              {paginatedFields &&
+                paginatedFields.map((field, index) => (
+                  <Fragment key={getFieldKey(field)}>
+                    {renderFieldItem({
+                      field,
+                      itemIndex: index,
+                      groupIndex,
+                      groupName,
+                      hideDetails,
+                      fieldSearchHighlight,
+                    })}
+                  </Fragment>
+                ))}
+            </ul>
+          </>
         ) : (
           renderCallout()
         ))}
