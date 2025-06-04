@@ -198,7 +198,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe.only('Bulk import functionality', () => {
+    describe('Bulk import functionality', () => {
       const fs = require('fs');
       const path = require('path');
       const os = require('os');
@@ -300,7 +300,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         console.log(toastText)
         expect(toastText).to.eql("Something went wrong")
 
-        // Verify no entries were imported
         const count = await getKnowledgeBaseEntryCount();
         expect(count).to.eql(0);
       });
