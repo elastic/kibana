@@ -199,19 +199,11 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 export const ExpandButtonSize = 18;
 
 export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
-  border-radius: 50%;
-  background-color: ${(_props) => useEuiBackgroundColor('plain')};
   width: ${ExpandButtonSize}px;
   height: ${ExpandButtonSize}px;
 
   > svg {
     transform: translate(0.75px, 0.75px);
-  }
-
-  :hover,
-  :focus,
-  :active {
-    background-color: ${(_props) => useEuiBackgroundColor('plain')};
   }
 `;
 

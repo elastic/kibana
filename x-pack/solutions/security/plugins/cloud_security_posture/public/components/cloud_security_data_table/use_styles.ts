@@ -27,10 +27,6 @@ export const useStyles = () => {
     & .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
       border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};
     }
-    & .euiButtonIcon[data-test-subj='docTableExpandToggleColumn'] {
-      color: ${euiTheme.colors.primary};
-    }
-
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
 

@@ -11,10 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  useEuiTheme,
   type CommonProps,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { type ReactFlowState, useStore, useReactFlow, type FitViewOptions } from '@xyflow/react';
 import {
@@ -68,7 +66,6 @@ export const Controls = ({
   onFitView,
   ...props
 }: ControlsProps) => {
-  const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
@@ -87,13 +84,6 @@ export const Controls = ({
     onFitView?.();
   };
 
-  const btnCss = css`
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.medium};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    box-sizing: content-box;
-  `;
-
   if (!showZoom && !showCenter && !showFitView) {
     return <></>;
   }
@@ -101,7 +91,7 @@ export const Controls = ({
   return (
     <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
       {showZoom && (
-        <EuiFlexItem grow={false} css={btnCss}>
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="plusInCircle"
             aria-label={ZoomInLabel}
@@ -130,7 +120,6 @@ export const Controls = ({
           size="m"
           color="text"
           data-test-subj={GRAPH_CONTROLS_CENTER_ID}
-          css={btnCss}
           onClick={() => onCenter?.()}
         />
       )}
@@ -143,7 +132,6 @@ export const Controls = ({
             size="m"
             color="text"
             data-test-subj={GRAPH_CONTROLS_FIT_VIEW_ID}
-            css={btnCss}
             onClick={onFitViewHandler}
           />
         </EuiFlexItem>

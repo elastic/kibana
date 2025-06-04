@@ -153,7 +153,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-wprskz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-6m8561-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -180,7 +180,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-wprskz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-6m8561-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);

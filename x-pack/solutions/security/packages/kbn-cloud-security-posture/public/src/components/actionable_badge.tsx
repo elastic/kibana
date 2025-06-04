@@ -57,7 +57,6 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
   };
 
   const buttonIconCss = css`
-    color: ${euiTheme.colors.plainLight};
     inline-size: ${euiTheme.base}px;
     block-size: ${euiTheme.base}px;
     svg {
@@ -80,6 +79,7 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
   };
 
   const actionButtons = createPortal(
+    // eslint-disable-next-line @elastic/eui/prefer-css-attributes-for-eui-components
     <EuiFlexGroup
       ref={iconsContainerRef}
       gutterSize="xs"

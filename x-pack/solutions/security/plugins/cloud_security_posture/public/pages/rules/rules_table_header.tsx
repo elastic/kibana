@@ -157,6 +157,8 @@ export const RulesTableHeader = ({
               <EuiFilterGroup>
                 <EuiFilterButton
                   withNext
+                  isToggle
+                  isSelected={enabledDisabledItemsFilterState === 'enabled'}
                   hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
                   onClick={toggleEnabledRulesFilter}
                   data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_ENABLED_FILTER}
@@ -167,6 +169,8 @@ export const RulesTableHeader = ({
                   />
                 </EuiFilterButton>
                 <EuiFilterButton
+                  isToggle
+                  isSelected={enabledDisabledItemsFilterState === 'enabled'}
                   hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
                   onClick={toggleDisabledRulesFilter}
                   data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_DISABLED_FILTER}
