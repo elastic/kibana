@@ -135,6 +135,7 @@ import type {
   PackagePolicyClientFindAllForAgentPolicyOptions,
   PackagePolicyClientGetByIdsOptions,
   PackagePolicyClientGetOptions,
+  PackagePolicyClientListIdsOptions,
   PackagePolicyService,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
@@ -1005,7 +1006,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async listIds(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery & { spaceIds?: string[] }
+    options: PackagePolicyClientListIdsOptions
   ): Promise<ListResult<string>> {
     const logger = this.getLogger('listIds');
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
