@@ -267,7 +267,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: true,
+  trustedAppsAdvancedMode: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
