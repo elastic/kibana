@@ -15,11 +15,24 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
-import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
+import { i18n } from '@kbn/i18n';
+
+import {
+  RULE_INVESTIGATION_GUIDE_LABEL,
+  RULE_NAME_INPUT_TITLE,
+  RULE_TAG_INPUT_TITLE,
+  RULE_TAG_PLACEHOLDER,
+} from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
+import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+
+export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors, plugins } = useRuleFormState();
@@ -72,6 +85,19 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
+  const onSetArtifacts = useCallback(
+    (value: object) => {
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+        },
+      });
+    },
+    [dispatch, formData.artifacts]
+  );
+
   return (
     <>
       <EuiFlexGroup>
@@ -113,7 +139,43 @@ export const RuleDetails = () => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>{RULE_INVESTIGATION_GUIDE_LABEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="questionInCircle"
+                content={
+                  <p>
+                    {i18n.translate(
+                      'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
+                      {
+                        defaultMessage:
+                          'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
+                      }
+                    )}
+                  </p>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        labelAppend={OptionalFieldLabel}
+        isInvalid={
+          (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
+          MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
+        }
+      >
+        <InvestigationGuideEditor
+          setRuleParams={onSetArtifacts}
+          value={formData.artifacts?.investigation_guide?.blob ?? ''}
+        />
+      </EuiFormRow>
       {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+      <EuiSpacer size="xxl" />
     </>
   );
 };

@@ -41,25 +41,19 @@ import type {
   InstallSource,
   InstallType,
   KibanaAssetType,
-  NewPackagePolicy,
-  PackageInfo,
   PackageVerificationResult,
   InstallResultStatus,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
-  DATASET_VAR_NAME,
-  DATA_STREAM_TYPE_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
   FleetError,
   PackageOutdatedError,
-  PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
-  PackageNotFoundError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
 } from '../../../errors';
@@ -68,7 +62,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
   MAX_REINSTALL_RETRIES,
 } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -90,7 +84,7 @@ import { _stateMachineInstallPackage } from './install_state_machine/_state_mach
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
-import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
+import { getPackageSavedObjects } from './get';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -100,8 +94,6 @@ import { generateDatastreamEntries } from './custom_integrations/assets/dataset/
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
-import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 
@@ -1300,130 +1292,6 @@ export async function ensurePackagesCompletedInstall(
   );
   await Promise.all(installingPromises);
   return installingPackages;
-}
-
-export async function installAssetsForInputPackagePolicy(opts: {
-  pkgInfo: PackageInfo;
-  logger: Logger;
-  packagePolicy: NewPackagePolicy;
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-  force: boolean;
-}) {
-  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
-
-  if (pkgInfo.type !== 'input') return;
-
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const dataStreamType =
-    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-    packagePolicy.inputs[0].streams[0].data_stream?.type ||
-    'logs';
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
-  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingDataStreams.length) {
-    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
-      (ds) => ds._meta?.package?.name !== pkgInfo.name
-    );
-    if (existingDataStreamsAreFromDifferentPackage && !force) {
-      // user has opted to send data to an existing data stream which is managed by another
-      // package. This means certain custom setting such as elasticsearch settings
-      // defined by the package will not have been applied which could lead
-      // to unforeseen circumstances, so force flag must be used.
-      const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
-        type: dataStream.type,
-        dataset: datasetName,
-      });
-
-      throw new PackagePolicyValidationError(
-        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingIndexTemplate) {
-    const indexTemplateOwnnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
-    if (indexTemplateOwnnedByDifferentPackage && !force) {
-      // index template already exists but there is no data stream yet
-      // we do not want to override the index template
-
-      throw new PackagePolicyValidationError(
-        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const installedPkgWithAssets = await getInstalledPackageWithAssets({
-    savedObjectsClient: soClient,
-    pkgName: pkgInfo.name,
-    logger,
-  });
-  let packageInstallContext: PackageInstallContext | undefined;
-  if (!installedPkgWithAssets) {
-    throw new PackageNotFoundError(
-      `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
-    );
-  }
-  try {
-    if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
-      const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
-        ignoreUnverified: force,
-      });
-
-      const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
-      packageInstallContext = {
-        packageInfo: pkg.packageInfo,
-        paths: pkg.paths,
-        archiveIterator,
-      };
-    } else {
-      const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
-      packageInstallContext = {
-        packageInfo: installedPkgWithAssets.packageInfo,
-        paths: installedPkgWithAssets.paths,
-        archiveIterator,
-      };
-    }
-
-    await installIndexTemplatesAndPipelines({
-      installedPkg: installedPkgWithAssets.installation,
-      packageInstallContext,
-      esReferences: installedPkgWithAssets.installation.installed_es || [],
-      savedObjectsClient: soClient,
-      esClient,
-      logger,
-      onlyForDataStreams: [dataStream],
-    });
-    // Upate ES index patterns
-    await optimisticallyAddEsAssetReferences(
-      soClient,
-      installedPkgWithAssets.installation.name,
-      [],
-      generateESIndexPatterns([dataStream])
-    );
-  } catch (error) {
-    logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
-  }
 }
 
 interface NoPkgArgs {

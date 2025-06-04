@@ -249,7 +249,6 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     },
     async createSourceOnlyRepositoryStepTwo(location: string) {
       await testSubjects.setValue('locationInput', location);
-      await testSubjects.click('compressToggle');
       await testSubjects.click('submitButton');
       await retry.waitFor('repository list to be visible', async () => {
         return await testSubjects.isDisplayed('repositoryList');
