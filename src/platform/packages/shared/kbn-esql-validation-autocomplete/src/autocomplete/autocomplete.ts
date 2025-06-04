@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import {
   parse,
   type ESQLAstItem,
@@ -80,6 +80,7 @@ import {
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  Location,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
@@ -362,6 +363,24 @@ async function getSuggestionsWithinCommandExpression(
     getSources,
     getRecommendedQueriesSuggestions: (prefix) =>
       getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+    suggestFieldsOrFunctionsByType: async (types: string[], location: Location) => {
+      const userDefinedColumnsExceptCurrentCommandOnes =
+        excludeUserDefinedColumnsFromCurrentCommand(
+          commands,
+          astContext.command,
+          fieldsMap,
+          innerText
+        );
+
+      return uniqBy(
+        await getFieldsOrFunctionsSuggestions(types, location, getColumnsByType, {
+          functions: true,
+          fields: true,
+          userDefinedColumns: userDefinedColumnsExceptCurrentCommandOnes,
+        }),
+        'label'
+      );
+    },
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,

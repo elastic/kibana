@@ -14,7 +14,7 @@ import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
-import { isExpressionComplete, suggestForExpression } from '../../helper';
+import { isExpressionComplete } from '../../helper';
 
 export enum CompletionPosition {
   PROMPT = 'prompt',
@@ -46,37 +46,35 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
     return CompletionPosition.AFTER_TARGET_ID;
   }
 
-  if (/COMPLETION\s+\S*(?!\s+WITH)\s*$/i.test(innerText)) {
-    // COMPLETION <prompt>^
-    const expressionRoot = command.prompt?.text !== EDITOR_MARKER ? command.prompt : undefined;
-    const expressionType = getExpressionType(expressionRoot);
+  // COMPLETION <prompt>^
+  const expressionRoot = command.prompt?.text !== EDITOR_MARKER ? command.prompt : undefined;
+  const expressionType = getExpressionType(expressionRoot);
 
-    if (isExpressionComplete(expressionType, innerText)) {
-      return CompletionPosition.AFTER_PROMPT;
-    }
+  if (isExpressionComplete(expressionType, innerText) && command.args.length < 2) {
+    return CompletionPosition.AFTER_PROMPT;
+  }
 
-    // COMPLETION ^
+  // COMPLETION ^
+  if (!isExpressionComplete(expressionType, innerText)) {
     return CompletionPosition.PROMPT;
   }
+
   return undefined;
 }
 
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const command = params.command as ESQLAstCompletionCommand;
+  const { suggestFieldsOrFunctionsByType } = params;
 
   const position = getPosition(params);
 
   switch (position) {
     case CompletionPosition.PROMPT:
-      const expressionRoot = command.prompt?.text !== EDITOR_MARKER ? command.prompt : undefined;
-      return await suggestForExpression({
-        ...params,
-        expressionRoot,
-        location: Location.COMPLETION,
-        preferredExpressionType: 'text',
-      });
+      return await suggestFieldsOrFunctionsByType(
+        ['text', 'keyword', 'unknown'],
+        Location.COMPLETION
+      );
 
     case CompletionPosition.AFTER_PROMPT:
       return [withCompletionItem];
