@@ -16,6 +16,7 @@ import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -60,19 +61,17 @@ const kbnServerArgsFromController = {
   chat: [],
 };
 
-export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
+export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
-    if (options.esServerArgs || options.kbnServerArgs) {
-      throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the serverless project on MKI.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
-      );
-    }
-
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    let kbnServerArgs: string[] = [];
+
+    if (options.kbnServerArgs) {
+      kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
+    }
 
     /**
      * This is used by CI to set the docker registry port
@@ -114,6 +113,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
             ? ['xpack.security.authc.native_roles.enabled=true']
             : []),
           ...esServerArgsFromController[options.serverlessProject],
+          ...(options.esServerArgs || []),
         ],
       },
       kbnTestServer: {
@@ -135,6 +135,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
+          ...kbnServerArgs,
         ],
       },
       testFiles: options.testFiles,

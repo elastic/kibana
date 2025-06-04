@@ -48,3 +48,4 @@ enabled:
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts
