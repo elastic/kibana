@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { APIRoutes } from '../common/api_routes';
 
-import { errorHandler } from './utils/error_handler';
-import { fetchQueryRulesSets } from './lib/fetch_query_rules_sets';
 import { DEFAULT_PAGE_VALUE } from '../common/pagination';
+import { deleteRuleset } from './lib/delete_query_rules_ruleset';
+import { deleteRulesetRule } from './lib/delete_query_rules_ruleset_rule';
+import { fetchIndices } from './lib/fetch_indices';
+import { fetchQueryRulesQueryRule } from './lib/fetch_query_rules_query_rule';
 import { fetchQueryRulesRuleset } from './lib/fetch_query_rules_ruleset';
+import { fetchQueryRulesSets } from './lib/fetch_query_rules_sets';
 import { isQueryRulesetExist } from './lib/is_query_ruleset_exist';
 import { putRuleset } from './lib/put_query_rules_ruleset_set';
-import { fetchQueryRulesQueryRule } from './lib/fetch_query_rules_query_rule';
-import { deleteRuleset } from './lib/delete_query_rules_ruleset';
-import { fetchIndices } from './lib/fetch_indices';
-import { deleteRulesetRule } from './lib/delete_query_rules_ruleset_rule';
+import { errorHandler } from './utils/error_handler';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -142,6 +143,34 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
         }),
+        body: schema.maybe(
+          schema.object({
+            rules: schema.arrayOf(
+              schema.object({
+                rule_id: schema.string(),
+                type: schema.string(),
+                criteria: schema.arrayOf(
+                  schema.object({
+                    type: schema.string(),
+                    metadata: schema.string(),
+                    values: schema.arrayOf(schema.string()),
+                  })
+                ),
+                actions: schema.object({
+                  ids: schema.maybe(schema.arrayOf(schema.string())),
+                  docs: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        _id: schema.string(),
+                        _index: schema.string(),
+                      })
+                    )
+                  ),
+                }),
+              })
+            ),
+          })
+        ),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -166,6 +195,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       const rulesetId = request.params.ruleset_id;
       const forceWrite = request.query.forceWrite;
+      const rules = request.body?.rules as QueryRulesQueryRuleset['rules'] | undefined;
       const isExisting = await isQueryRulesetExist(asCurrentUser, rulesetId);
       if (isExisting && !forceWrite) {
         return response.customError({
@@ -176,7 +206,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           }),
         });
       }
-      const result = await putRuleset(asCurrentUser, rulesetId);
+      const result = await putRuleset(asCurrentUser, rulesetId, rules);
       return response.ok({
         headers: {
           'content-type': 'application/json',
@@ -420,9 +450,11 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           },
         });
       } catch (error) {
-        return response.notFound({
-          body: `Document with ID ${documentId} not found in index ${indexName}`,
-        });
+        if (error.statusCode === 404) {
+          return response.notFound({
+            body: `Document with ID ${documentId} not found in index ${indexName}`,
+          });
+        }
         throw error;
       }
     })

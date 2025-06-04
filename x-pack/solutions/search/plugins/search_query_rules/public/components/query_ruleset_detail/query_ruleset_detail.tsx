@@ -36,6 +36,7 @@ import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { DeleteRulesetModal } from '../query_rules_sets/delete_ruleset_modal';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
+import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
 
 export const QueryRulesetDetail: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -46,7 +47,9 @@ export const QueryRulesetDetail: React.FC = () => {
     rulesetId?: string;
   }>();
 
-  const { queryRuleset, isInitialLoading, isError, error } = useQueryRulesetDetailState({
+  const { mutate: createRuleset } = usePutRuleset();
+
+  const { queryRuleset, rules, isInitialLoading, isError, error } = useQueryRulesetDetailState({
     rulesetId,
   });
   const [isPopoverActionsOpen, setPopoverActions] = useState(false);
@@ -252,7 +255,11 @@ export const QueryRulesetDetail: React.FC = () => {
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
                     onClick={() => {
-                      // Logic to save the query ruleset
+                      createRuleset({
+                        rulesetId,
+                        forceWrite: true,
+                        rules,
+                      });
                     }}
                   >
                     <FormattedMessage
