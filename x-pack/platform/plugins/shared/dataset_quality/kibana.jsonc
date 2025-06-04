@@ -30,6 +30,7 @@
       "share",
       "taskManager",
       "triggersActionsUi",
+      "unifiedHistogram",
     ],
     "optionalPlugins": [
       "alerting",
@@ -40,7 +41,6 @@
       "charts",
       "discover",
       "stackAlerts",
-      "unifiedHistogram",
     ],
     "extraPublicDirs": [
       "common"

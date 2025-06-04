@@ -14,7 +14,6 @@ import { createDatasetQualityDetailsControllerLazyFactory } from './controller/d
 import { registerRuleTypes } from './rule_types';
 import { DataStreamDetailsService } from './services/data_stream_details';
 import { DataStreamsStatsService } from './services/data_streams_stats';
-import { TelemetryService } from './services/telemetry';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -27,7 +26,7 @@ export class DatasetQualityPlugin
 {
   private telemetry = new TelemetryService();
 
-  public setup(core: CoreSetup, _plugins: DatasetQualitySetupDeps) {
+  public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
 
     registerRuleTypes({
