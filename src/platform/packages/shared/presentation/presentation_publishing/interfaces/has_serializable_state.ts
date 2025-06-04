@@ -14,7 +14,7 @@ import type { Reference } from '@kbn/content-management-utils';
  * strategy, this is the format that should be used.
  */
 export interface SerializedPanelState<RawStateType extends object = object> {
-  /** @deprecated Inject references directly into the rawState as part of the embeddable's savedObjectToItem trasnform */
+  /** @deprecated Inject references directly into the rawState as part of the embeddable's savedObjectToItem transform */
   references?: Reference[];
   rawState: RawStateType;
 }
