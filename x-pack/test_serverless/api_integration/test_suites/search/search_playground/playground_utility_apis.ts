@@ -107,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestDeveloperWithCookieCredentials
           .post('/internal/search_playground/search')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {

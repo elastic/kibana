@@ -11,68 +11,31 @@ import { ALL_USERS, USERS } from './common/users';
 import { ALL_ROLES } from './common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from './common/helpers';
 
+const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
+const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('es');
+  const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  const createIndices = async () => {
+    await esArchiver.load(archivedBooksIndex);
+    await esArchiver.load(archiveDenseVectorIndex);
+  };
+
+  const deleteIndices = async () => {
+    await esArchiver.unload(archivedBooksIndex);
+    await esArchiver.unload(archiveDenseVectorIndex);
+  };
 
   describe('playgrounds - /internal/search_playground', function () {
     before(async () => {
       await createUsersAndRoles(getService, ALL_USERS, ALL_ROLES);
-
-      // Create a books index with sample documents
-      await es.indices.create({
-        index: 'books',
-        mappings: {
-          properties: {
-            title: { type: 'text' },
-            description: { type: 'text' },
-          },
-        },
-      });
-      await es.index({
-        index: 'books',
-        document: {
-          title: 'The Great Gatsby',
-          description: 'A novel written by American author F. Scott Fitzgerald.',
-        },
-      });
-      await es.index({
-        index: 'books',
-        document: {
-          title: 'To Kill a Mockingbird',
-          description: 'A novel by Harper Lee published in 1960.',
-        },
-      });
-
-      // Create a users index with sample documents
-      await es.indices.create({
-        index: 'users',
-        mappings: {
-          properties: {
-            name: { type: 'text' },
-            address: { type: 'text' },
-          },
-        },
-      });
-      await es.index({
-        index: 'users',
-        document: {
-          name: 'Alice',
-          address: '123 Main St',
-        },
-      });
-      await es.index({
-        index: 'users',
-        document: {
-          name: 'Bob',
-          address: '456 Elm St',
-        },
-      });
+      await createIndices();
     });
 
     after(async () => {
-      await es.indices.delete({ index: 'books' });
-      await es.indices.delete({ index: 'users' });
+      await deleteIndices();
       await deleteUsersAndRoles(getService, ALL_USERS, ALL_ROLES);
     });
 
@@ -85,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(body).toBeDefined();
-        expect(body.indices).toEqual(['books', 'users']);
+        expect(body.indices).toEqual(['search-books', 'search-national-parks']);
       });
 
       it('should return mappings for the specified indices', async () => {
@@ -93,23 +56,23 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.ALL.username, USERS.ALL.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(200);
 
         expect(body).toBeDefined();
         expect(body).toEqual({
-          mappings: {
-            books: {
+          mappings: expect.objectContaining({
+            'search-books': {
               mappings: {
-                properties: { description: { type: 'text' }, title: { type: 'text' } },
+                properties: {
+                  author: { type: 'text' },
+                  name: { type: 'text' },
+                  page_count: { type: 'float' },
+                  release_date: { type: 'date' },
+                },
               },
             },
-            users: {
-              mappings: {
-                properties: { name: { type: 'text' }, address: { type: 'text' } },
-              },
-            },
-          },
+          }),
         });
       });
 
@@ -121,12 +84,15 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            query: 'Gatsby',
-            chat_context: { source_fields: '{"books":["title"]}', doc_size: 1 },
+            indices: ['search-national-parks'],
+            query: 'Banff',
+            chat_context: {
+              source_fields: '{"search-national-parks":["description"]}',
+              doc_size: 1,
+            },
           })
           .expect(200);
 
@@ -142,11 +108,11 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            search_query: 'Mockingbird',
+            indices: ['search-national-parks'],
+            search_query: 'Banff',
             size: 10,
             from: 0,
           })
@@ -163,14 +129,18 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.ALL.username, USERS.ALL.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(200);
 
         expect(body).toBeDefined();
-        expect(body.books).toBeDefined();
-        expect(body.users).toBeDefined();
-        expect(body.books.source_fields).toEqual(expect.arrayContaining(['title', 'description']));
-        expect(body.users.source_fields).toEqual(expect.arrayContaining(['name', 'address']));
+        expect(body['search-books']).toBeDefined();
+        expect(body['search-national-parks']).toBeDefined();
+        expect(body['search-books'].source_fields).toEqual(
+          expect.arrayContaining(['author', 'name'])
+        );
+        expect(body['search-national-parks'].source_fields).toEqual(
+          expect.arrayContaining(['acres', 'date_established', 'description'])
+        );
       });
     });
 
@@ -188,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.READ.username, USERS.READ.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(400);
       });
 
@@ -200,12 +170,15 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            query: 'Gatsby',
-            chat_context: { source_fields: '{"books":["title"]}', doc_size: 1 },
+            indices: ['search-national-parks'],
+            query: 'Banff',
+            chat_context: {
+              source_fields: '{"search-national-parks":["description"]}',
+              doc_size: 1,
+            },
           })
           .expect(200);
 
@@ -221,11 +194,11 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            search_query: 'Mockingbird',
+            indices: ['search-national-parks'],
+            search_query: 'Banff',
             size: 10,
             from: 0,
           })
@@ -242,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.READ.username, USERS.READ.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(403);
       });
     });
@@ -261,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(403);
       });
 
@@ -273,12 +246,15 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            query: 'Gatsby',
-            chat_context: { source_fields: '{"books":["title"]}', doc_size: 1 },
+            indices: ['search-national-parks'],
+            query: 'Banff',
+            chat_context: {
+              source_fields: '{"search-national-parks":["description"]}',
+              doc_size: 1,
+            },
           })
           .expect(403);
       });
@@ -291,11 +267,11 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {
-                standard: { query: { multi_match: { query: '{query}', fields: ['title'] } } },
+                standard: { query: { multi_match: { query: '{query}', fields: ['description'] } } },
               },
             }),
-            indices: ['books'],
-            search_query: 'Mockingbird',
+            indices: ['search-national-parks'],
+            search_query: 'Banff',
             size: 10,
             from: 0,
           })
@@ -307,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
-          .send({ indices: ['books', 'users'] })
+          .send({ indices: ['search-books', 'search-national-parks'] })
           .expect(403);
       });
     });
