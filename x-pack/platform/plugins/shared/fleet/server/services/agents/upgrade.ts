@@ -101,6 +101,7 @@ export async function sendUpgradeAgentsActions(
 
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
