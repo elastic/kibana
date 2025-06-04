@@ -37,7 +37,7 @@ export class RuleMigrationsTaskClient {
 
   /** Starts a rule migration task */
   async start(params: RuleMigrationTaskStartParams): Promise<RuleMigrationTaskStartResult> {
-    const { migrationId, connectorId, invocationConfig } = params;
+    const { migrationId, connectorId, invocationConfig, shouldMatchPrebuiltRules } = params;
     if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
@@ -68,7 +68,10 @@ export class RuleMigrationsTaskClient {
       this.dependencies
     );
 
-    await migrationTaskRunner.setup(connectorId);
+    await migrationTaskRunner.setup({
+      connectorId,
+      shouldMatchPrebuiltRules,
+    });
 
     if (this.migrationsRunning.has(migrationId)) {
       // Just to prevent a race condition in the setup
@@ -82,6 +85,7 @@ export class RuleMigrationsTaskClient {
     await this.data.migrations.saveAsStarted({
       id: migrationId,
       connectorId,
+      shouldMatchPrebuiltRules,
     });
 
     // run the migration in the background without awaiting and resolve the `start` promise
@@ -140,7 +144,7 @@ export class RuleMigrationsTaskClient {
     }
     const dataStats = await this.data.rules.getStats(migrationId);
     const taskStats = this.getTaskStats(migration, dataStats.rules);
-    return { ...taskStats, ...dataStats };
+    return { ...taskStats, ...dataStats, last_execution: migration.last_execution };
   }
 
   /** Returns the stats of all migrations */
@@ -157,7 +161,7 @@ export class RuleMigrationsTaskClient {
       const migration = allMigrationsMap.get(dataStats.id);
       if (migration) {
         const taksStats = this.getTaskStats(migration, dataStats.rules);
-        allStats.push({ ...taksStats, ...dataStats });
+        allStats.push({ ...taksStats, ...dataStats, last_execution: migration.last_execution });
       }
     }
     return allStats;
@@ -166,11 +170,9 @@ export class RuleMigrationsTaskClient {
   private getTaskStats(
     migration: StoredSiemMigration,
     dataStats: RuleMigrationDataStats['rules']
-  ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
-    const lastError = migration?.last_execution?.error;
+  ): Pick<RuleMigrationTaskStats, 'status'> {
     return {
       status: this.getTaskStatus(migration, dataStats),
-      ...(lastError && { last_error: lastError }),
     };
   }
 

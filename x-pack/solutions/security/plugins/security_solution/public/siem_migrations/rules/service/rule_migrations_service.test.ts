@@ -309,7 +309,9 @@ describe('SiemRulesMigrationsService', () => {
         const stoppedMigration = {
           id: 'mig-1',
           status: SiemMigrationTaskStatus.STOPPED,
-          last_error: 'some failure',
+          last_execution: {
+            error: 'some failure',
+          },
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 

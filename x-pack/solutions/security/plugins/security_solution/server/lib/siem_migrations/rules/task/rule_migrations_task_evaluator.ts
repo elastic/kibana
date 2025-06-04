@@ -53,7 +53,10 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
     }
 
     // for each connector, setup the evaluator
-    await this.setup(connectorId);
+    await this.setup({
+      connectorId,
+      shouldMatchPrebuiltRules: true,
+    });
 
     // create the migration task after setup
     const migrateRuleTask = this.createMigrateRuleTask(invocationConfig);

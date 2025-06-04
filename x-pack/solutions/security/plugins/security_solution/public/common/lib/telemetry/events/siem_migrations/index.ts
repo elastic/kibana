@@ -175,6 +175,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: false,
       },
     },
+    shouldMatchPrebuiltRules: {
+      type: 'boolean',
+      _meta: {
+        description: 'Flag indicating if prebuilt rules should be matched',
+        optional: false,
+      },
+    },
     isRetry: {
       type: 'boolean',
       _meta: {

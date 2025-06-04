@@ -56,6 +56,11 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
+interface TaskRunnerSetupParams {
+  connectorId: string;
+  shouldMatchPrebuiltRules: boolean;
+}
+
 export class RuleMigrationTaskRunner {
   private telemetry?: SiemMigrationTelemetryClient;
   protected agent?: MigrationAgent;
@@ -83,7 +88,7 @@ export class RuleMigrationTaskRunner {
   }
 
   /** Retrieves the connector and creates the migration agent */
-  public async setup(connectorId: string) {
+  public async setup({ connectorId, shouldMatchPrebuiltRules }: TaskRunnerSetupParams) {
     const { inferenceClient } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
@@ -112,6 +117,9 @@ export class RuleMigrationTaskRunner {
       ruleMigrationsRetriever: this.retriever,
       telemetryClient: this.telemetry,
       logger: this.logger,
+      runOptions: {
+        shouldMatchPrebuiltRules,
+      },
     });
   }
 

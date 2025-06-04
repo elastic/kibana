@@ -55,7 +55,6 @@ export const REPROCESS_FAILED_RULES = (numberOfFailedRules: number) => {
     values: { numberOfFailedRules },
   });
 };
-
 export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
   {
@@ -120,5 +119,54 @@ export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installAndEnableButtonLabel',
   {
     defaultMessage: 'Install and enable',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_TITLE = (count: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.title', {
+    defaultMessage: 'Reprocess {count} {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const REPROCESS_RULES_DIALOG_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.description',
+  {
+    defaultMessage:
+      "You are about to reprocess selected rules and this will incur additional tokens. You have option to choose a different LLM and to switch off mapping to Elastic's prebuilt rules. These options apply only to the current execution.",
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_AI_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.aiConnectorLabel',
+  {
+    defaultMessage: 'AI connector',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.setupNewAiConnectorHelpText',
+  {
+    defaultMessage: 'Configure AI Provider',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.prebuiltRulesLabel',
+  {
+    defaultMessage: 'Match to Elastic prebuilt rules',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_TRANSLATE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.translate',
+  {
+    defaultMessage: 'Translate',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_CANCEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.cancel',
+  {
+    defaultMessage: 'Cancel',
   }
 );

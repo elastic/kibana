@@ -134,9 +134,11 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   async saveAsStarted({
     id,
     connectorId,
+    shouldMatchPrebuiltRules = true,
   }: {
     id: string;
     connectorId: RuleMigrationLastExecution['connector_id'];
+    shouldMatchPrebuiltRules?: boolean;
   }): Promise<void> {
     this.logger.info(`Saving migration ${id} as started`);
 
@@ -148,6 +150,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         is_aborted: false,
         error: null,
         ended_at: null,
+        should_match_prebuilt_rules: shouldMatchPrebuiltRules,
       },
     });
   }

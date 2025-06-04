@@ -11,19 +11,24 @@ import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
+
 export function getRuleMigrationAgent({
   model,
   esqlKnowledgeBase,
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
+  runOptions = { shouldMatchPrebuiltRules: true },
 }: MigrateRuleGraphParams) {
+  const { shouldMatchPrebuiltRules = true } = runOptions;
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
     logger,
     ruleMigrationsRetriever,
     telemetryClient,
+    shouldMatchPrebuiltRules,
   });
+
   const translationSubGraph = getTranslateRuleGraph({
     model,
     esqlKnowledgeBase,

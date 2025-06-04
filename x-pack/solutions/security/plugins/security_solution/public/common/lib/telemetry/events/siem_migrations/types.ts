@@ -107,6 +107,7 @@ export interface ReportStartMigrationActionParams extends BaseResultActionParams
   eventName: string;
   migrationId: string;
   connectorId: string;
+  shouldMatchPrebuiltRules: boolean;
   isRetry: boolean;
   retryFilter?: SiemMigrationRetryFilter;
 }

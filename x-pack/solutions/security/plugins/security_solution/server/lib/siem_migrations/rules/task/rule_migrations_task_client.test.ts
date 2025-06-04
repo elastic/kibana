@@ -322,8 +322,6 @@ describe('RuleMigrationsTaskClient', () => {
 
     it('should include last_error if one exists', async () => {
       const error = new Error('Test error');
-      // @ts-expect-error private property
-      RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
       data.rules.getStats.mockResolvedValue({
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
@@ -343,7 +341,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const stats = await client.getStats(migrationId);
-      expect(stats.last_error).toEqual('Test error');
+      expect(stats.last_execution?.error).toEqual('Test error');
     });
   });
 

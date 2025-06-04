@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CriteriaWithPagination,
-  EuiSuperSelectOption,
-  EuiTableSelectionType,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiSkeletonLoading,
   EuiSkeletonTitle,
@@ -19,28 +15,13 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  useGeneratedHtmlId,
-  EuiSuperSelect,
-  EuiFormRow,
-  EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { fetchConnectors } from '@kbn/alerts-ui-shared/src/common/apis';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import {
-  getActionTypeTitle,
-  getGenAiConfig,
-} from '@kbn/elastic-assistant/impl/connectorland/helpers';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -66,7 +47,7 @@ import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '.
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
+import { ReprocessFailedRulesDialog } from './reprocess_rule_dialog';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -382,7 +363,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         <ReprocessFailedRulesDialog
           isModalVisible={isReprocessFailedRulesModalVisible}
           closeModal={() => setIsReprocessFailedRulesModalVisible(false)}
-          lastExecution={migrationStats?.last_execution}
+          lastExecution={{
+            connectorId: migrationStats?.last_execution?.connector_id,
+            shouldMatchPrebuiltRules: migrationStats?.last_execution?.should_match_prebuilt_rules,
+          }}
           startMigration={reprocessFailedRules}
           connectors={aiConnectors}
           numberOfFailedRules={translationStats?.rules.failed}
@@ -451,106 +435,3 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
   }
 );
 MigrationRulesTable.displayName = 'MigrationRulesTable';
-
-interface ReprocessFailedRulesDialogProps {
-  isModalVisible: boolean;
-  closeModal: () => void;
-  lastExecution?: RuleMigrationSettings;
-  startMigration: (settings: RuleMigrationSettings) => void;
-  connectors: ActionConnector[];
-  numberOfFailedRules?: number;
-}
-
-const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = React.memo(
-  function ReprocessFailedRulesDialog({
-    isModalVisible,
-    closeModal,
-    lastExecution,
-    startMigration,
-    numberOfFailedRules = 0,
-    connectors = [],
-  }) {
-    const spaceId = useSpaceId() ?? 'default';
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
-    const [siemMigrationsDefaultConnectorId] = useStoredAssistantConnectorId(spaceId);
-    const [selectedConnectorId, setSelectedConnectorId] = useState<string>(
-      lastExecution?.connectorId || siemMigrationsDefaultConnectorId || ''
-    );
-    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      lastExecution?.shouldMatchPrebuiltRules ?? true
-    );
-
-    const modalTitleId = useGeneratedHtmlId();
-
-    const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-      return connectors.map((connector) => {
-        // TODO : dedup from x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/common/connectors/connector_selector_panel.tsx
-        let description: string;
-        if (connector.isPreconfigured) {
-          description = 'Pre-configured Connector';
-        } else {
-          description =
-            getGenAiConfig(connector)?.apiProvider ??
-            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-        }
-
-        return {
-          value: connector.id,
-          inputDisplay: connector.name,
-          dropdownDisplay: (
-            <>
-              <strong>{connector.name}</strong>
-              <EuiText size="s" color="subdued">
-                <p>{description}</p>
-              </EuiText>
-            </>
-          ),
-          'data-test-subj': `reprocessFailedRulesConnectorSelector-${connector.id}`,
-        };
-      });
-    }, [actionTypeRegistry, connectors]);
-
-    if (isModalVisible) {
-      return (
-        <EuiModal onClose={closeModal} data-test-subj="reprocessFailedRulesDialog">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>
-              {i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiFormRow>
-              <EuiSuperSelect
-                options={selectOptions}
-                valueOfSelected={selectedConnectorId}
-                onChange={setSelectedConnectorId}
-                data-test-subj="reprocessFailedRulesConnectorSelector"
-                aria-label={'Selector for AI connector to reprocess failed rules'}
-              />
-            </EuiFormRow>
-            <EuiFormRow>
-              <EuiSwitch
-                label={'Enable Prebuilt rules Matching'}
-                checked={enablePrebuiltRulesMatching}
-                onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() =>
-                startMigration({
-                  connectorId: selectedConnectorId,
-                  shouldMatchPrebuiltRules: enablePrebuiltRulesMatching,
-                })
-              }
-            >
-              {'Reprocess Rules'}
-            </EuiButton>
-          </EuiModalBody>
-        </EuiModal>
-      );
-    }
-  }
-);

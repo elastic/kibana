@@ -109,7 +109,7 @@ export const ElasticRule = z.object({
   /**
    * The Elastic prebuilt rule id matched.
    */
-  prebuilt_rule_id: NonEmptyString.optional(),
+  prebuilt_rule_id: NonEmptyString.nullable().optional(),
   /**
    * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
@@ -166,6 +166,10 @@ export const RuleMigrationLastExecution = z.object({
    * Indicates if the last execution was aborted by the user.
    */
   is_aborted: z.boolean().optional(),
+  /**
+   * Indicates if the last execution should match prebuilt rules.
+   */
+  should_match_prebuilt_rules: z.boolean().optional(),
 });
 
 /**
@@ -362,9 +366,9 @@ export const RuleMigrationTaskStats = z.object({
    */
   last_updated_at: z.string(),
   /**
-   * The last error message if the migration task execution failed.
+   * The last execution of the migration task.
    */
-  last_error: z.string().optional(),
+  last_execution: RuleMigrationLastExecution.optional(),
 });
 
 /**
@@ -539,3 +543,18 @@ export const RuleMigrationResource = RuleMigrationResourceBase.merge(
     updated_by: z.string().optional(),
   })
 );
+
+/**
+ * The rule migration task execution settings.
+ */
+export type RuleMigrationTaskExecutionSettings = z.infer<typeof RuleMigrationTaskExecutionSettings>;
+export const RuleMigrationTaskExecutionSettings = z.object({
+  /**
+   * The connector ID used for the last execution.
+   */
+  connector_id: z.string(),
+  /**
+   * Indicates if the last execution should match prebuilt rules.
+   */
+  should_match_prebuilt_rules: z.boolean().optional(),
+});

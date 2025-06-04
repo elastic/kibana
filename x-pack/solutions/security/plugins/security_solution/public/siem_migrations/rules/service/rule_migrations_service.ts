@@ -180,11 +180,17 @@ export class SiemRulesMigrationsService {
       return { started: false };
     }
     const connectorId = settings?.connectorId ?? this.connectorIdStorage.get();
+    const shouldMatchPrebuiltRules = settings?.shouldMatchPrebuiltRules ?? true;
     if (!connectorId) {
       this.core.notifications.toasts.add(getNoConnectorToast(this.core));
       return { started: false };
     }
-    const params: api.StartRuleMigrationParams = { migrationId, connectorId, retry };
+    const params: api.StartRuleMigrationParams = {
+      migrationId,
+      connectorId,
+      retry,
+      shouldMatchPrebuiltRules,
+    };
 
     const traceOptions = this.traceOptionsStorage.get();
     if (traceOptions) {
@@ -264,10 +270,16 @@ export class SiemRulesMigrationsService {
         }
 
         // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
+        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_execution?.error) {
           const connectorId = this.connectorIdStorage.get();
+          const shouldMatchPrebuiltRules =
+            result.last_execution?.should_match_prebuilt_rules ?? true;
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            await api.startRuleMigration({ migrationId: result.id, connectorId });
+            await api.startRuleMigration({
+              migrationId: result.id,
+              connectorId,
+              shouldMatchPrebuiltRules,
+            });
             pendingMigrationIds.push(result.id);
           }
         }

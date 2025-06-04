@@ -119,9 +119,9 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-            {migrationStats.last_error && (
+            {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_error} />
+                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
                 <EuiSpacer size="m" />
               </>
             )}

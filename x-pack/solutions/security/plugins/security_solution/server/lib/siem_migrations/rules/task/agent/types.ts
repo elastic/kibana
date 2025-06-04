@@ -15,10 +15,15 @@ import type { migrateRuleState } from './state';
 export type MigrateRuleState = typeof migrateRuleState.State;
 export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
 
+export interface RuleMigrationAgentRunOptions {
+  shouldMatchPrebuiltRules: boolean;
+}
+
 export interface MigrateRuleGraphParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
   model: ChatModel;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
   telemetryClient: SiemMigrationTelemetryClient;
+  runOptions?: RuleMigrationAgentRunOptions;
 }
