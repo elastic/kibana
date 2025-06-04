@@ -11,7 +11,7 @@ import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID }
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 jest.mock('./table', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view');
+jest.mock('../../../common/hooks/use_create_data_view');
 
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };

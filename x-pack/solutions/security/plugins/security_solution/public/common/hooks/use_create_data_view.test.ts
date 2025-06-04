@@ -7,12 +7,11 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { useCreateDataView } from '.';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useCreateDataView } from './use_create_data_view';
+import { useKibana } from '../lib/kibana';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../lib/kibana');
+jest.mock('./use_experimental_features');
 
 describe('useCreateDataView', () => {
   const dataViewSpec = { title: 'test' };
@@ -22,7 +21,6 @@ describe('useCreateDataView', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         dataViews: mockDataViews,
@@ -31,7 +29,9 @@ describe('useCreateDataView', () => {
   });
 
   it('returns undefined on initial render', () => {
-    const { result } = renderHook(() => useCreateDataView({ dataViewSpec, loading: true }));
+    const { result } = renderHook(() =>
+      useCreateDataView({ dataViewSpec, loading: true, skip: false })
+    );
 
     expect(result.current.dataView).toBeUndefined();
     expect(result.current.loading).toBe(true);
@@ -41,7 +41,9 @@ describe('useCreateDataView', () => {
     const mockDataView = { id: 'mockDataViewId', title: 'test' };
     mockDataViews.create.mockResolvedValue(mockDataView);
 
-    const { result } = renderHook(() => useCreateDataView({ dataViewSpec, loading: false }));
+    const { result } = renderHook(() =>
+      useCreateDataView({ dataViewSpec, loading: false, skip: false })
+    );
     await waitFor(() => {});
 
     expect(result.current.dataView).toEqual(mockDataView);
@@ -51,10 +53,21 @@ describe('useCreateDataView', () => {
   it('returns undefined if dataViews.create throws an error', async () => {
     mockDataViews.create.mockRejectedValue(new Error('simulated error'));
 
-    const { result } = renderHook(() => useCreateDataView({ dataViewSpec, loading: false }));
+    const { result } = renderHook(() =>
+      useCreateDataView({ dataViewSpec, loading: false, skip: false })
+    );
     await waitFor(() => {});
 
     expect(result.current.dataView).toBeUndefined();
     expect(result.current.loading).toBe(false);
+  });
+
+  it('skips data view creation if skip is true', async () => {
+    const { result } = renderHook(() =>
+      useCreateDataView({ dataViewSpec, loading: false, skip: true })
+    );
+
+    expect(mockDataViews.create).not.toHaveBeenCalled();
+    expect(result.current.dataView).toBeUndefined();
   });
 });

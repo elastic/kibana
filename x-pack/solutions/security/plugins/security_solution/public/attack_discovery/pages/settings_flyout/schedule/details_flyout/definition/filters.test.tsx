@@ -9,12 +9,12 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 
 import { Filters } from './filters';
-import { useCreateDataView } from '../../../alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../alert_selection/use_create_data_view');
+jest.mock('../../../../../../common/hooks/use_create_data_view');
 jest.mock('../../../../../../sourcerer/containers');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 

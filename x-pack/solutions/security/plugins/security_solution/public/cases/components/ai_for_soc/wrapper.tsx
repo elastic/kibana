@@ -14,7 +14,7 @@ import { Table } from './table';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -52,17 +52,20 @@ interface AiForSOCAlertsTableProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   const spaceId = useSpaceId();
+  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
+
   const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec: { title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
+    dataViewSpec,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   // TODO: use alert only data view when it is ready
   // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-
-  const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
+  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   // Fetch all integrations
@@ -82,7 +85,7 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
     <EuiSkeletonRectangle
       data-test-subj={SKELETON_TEST_ID}
       height={400}
-      isLoading={integrationIsLoading || loading}
+      isLoading={integrationIsLoading || dataViewLoading}
       width="100%"
     >
       <>

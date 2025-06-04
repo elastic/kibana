@@ -7,8 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SeverityLevelPanel } from '../../alerts_kpis/severity_level_panel';
@@ -17,16 +15,20 @@ import { AlertsProgressBarByHostNamePanel } from './alerts_progress_bar_by_host_
 
 export const KPIS_SECTION = 'alert-summary-kpis-section';
 
+export interface KPIsSectionProps {
+  /**
+   * Index name of the signal index
+   */
+  signalIndexName: string;
+}
+
 /**
  * Section rendering 3 charts in the alert summary page.
  * The component leverages existing chart components from the alerts page but is making a few tweaks:
  * - the SeverityLevelPanel and AlertsByRulePanel are used directly from the alerts page
  * - the UI differences on the AlertsProgressBarPanel were significant enough that a separate component was created
  */
-export const KPIsSection = memo(() => {
-  const spaceId = useSpaceId();
-  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-
+export const KPIsSection = memo(({ signalIndexName }: KPIsSectionProps) => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
 

@@ -14,7 +14,7 @@ import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integration
 import { DATA_VIEW_LOADING_PROMPT_TEST_ID } from '../../components/alert_summary/wrapper';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../hooks/alert_summary/use_fetch_integrations');
@@ -22,7 +22,7 @@ jest.mock('../../../common/hooks/use_add_integrations_url');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view');
+jest.mock('../../../common/hooks/use_create_data_view');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 describe('<AlertSummaryPage />', () => {

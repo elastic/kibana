@@ -7,8 +7,7 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEffect, useState } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
 interface UseCreateDataViewParams {
   /**
@@ -19,6 +18,10 @@ interface UseCreateDataViewParams {
    * Whether the fetch index pattern is loading.
    */
   loading?: boolean;
+  /**
+   * Whether to skip the data view creation.
+   */
+  skip: boolean;
 }
 
 interface UseCreateDataViewResults {
@@ -34,17 +37,17 @@ interface UseCreateDataViewResults {
 
 /**
  * This hook is used to create a data view from a data view spec.
- * It is used in the attack discovery pages to create a data view from the sourcerer data view.
+ * It is used in the attack discovery pages and AI4DSOC pages to create a data view.
+ * When skip is true, it does not create a data view.
  */
 export const useCreateDataView = ({
   dataViewSpec,
   loading = false,
+  skip,
 }: UseCreateDataViewParams): UseCreateDataViewResults => {
   const { dataViews } = useKibana().services;
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
   const [dataViewLoading, setDataViewLoading] = useState<boolean>(true);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   useEffect(() => {
     let active = true;
@@ -66,15 +69,14 @@ export const useCreateDataView = ({
         }
       }
     }
-
-    if (!newDataViewPickerEnabled) {
+    if (!skip) {
       createDataView();
     }
 
     return () => {
       active = false;
     };
-  }, [dataViewSpec, dataViews, loading, newDataViewPickerEnabled]);
+  }, [dataViewSpec, dataViews, loading, skip]);
 
   return { dataView, loading: dataViewLoading };
 };

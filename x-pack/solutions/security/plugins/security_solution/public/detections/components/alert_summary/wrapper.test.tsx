@@ -24,7 +24,7 @@ import { KPIS_SECTION } from './kpis/kpis_section';
 import { GROUPED_TABLE_TEST_ID } from './table/table_section';
 import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_navigate_to_integrations_page';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../../../common/components/search_bar', () => ({
@@ -37,7 +37,7 @@ jest.mock('../alerts_table/alerts_grouping', () => ({
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
 jest.mock('../../hooks/alert_summary/use_integrations_last_activity');
 jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view');
+jest.mock('../../../common/hooks/use_create_data_view');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const packages: PackageListItem[] = [

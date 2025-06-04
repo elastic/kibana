@@ -19,7 +19,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { useCreateDataView } from '../use_create_data_view';
+import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
@@ -50,6 +50,9 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
     useSourcererDataView(SourcererScopeName.detections);
@@ -58,10 +61,8 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({
     dataViewSpec: oldSourcererDataViewSpec,
     loading: oldIsLoadingIndexPattern,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
 
   const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
   const isLoadingIndexPattern = newDataViewPickerEnabled

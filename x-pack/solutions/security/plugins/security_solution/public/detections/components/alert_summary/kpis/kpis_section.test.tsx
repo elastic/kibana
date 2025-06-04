@@ -32,7 +32,7 @@ describe('<KPIsSection />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <KPIsSection />
+        <KPIsSection signalIndexName="test" />
       </TestProviders>
     );
 

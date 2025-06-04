@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../../../../common/mock';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
-import { useCreateDataView } from '../../../../../settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../../../../../common/hooks/use_create_data_view';
 import { useDataView } from '../../../../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('./table', () => ({
@@ -21,7 +21,7 @@ jest.mock('./table', () => ({
 jest.mock('../../../../../../../common/lib/kibana');
 jest.mock('../../../../../../../detections/hooks/alert_summary/use_fetch_integrations');
 jest.mock('../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
-jest.mock('../../../../../settings_flyout/alert_selection/use_create_data_view');
+jest.mock('../../../../../../../common/hooks/use_create_data_view');
 jest.mock('../../../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../../../common/hooks/use_experimental_features');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiHorizontalRule,
@@ -21,7 +21,7 @@ import { KPIsSection } from './kpis/kpis_section';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
-import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -64,15 +64,20 @@ export interface WrapperProps {
  */
 export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
   const spaceId = useSpaceId();
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec: { title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
-  });
+  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
+
+  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
+    dataViewSpec,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
+  });
+
   // TODO: use alert only data view when it is ready
   // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-
   const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
@@ -110,7 +115,7 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
                 ruleResponse={ruleResponse}
               />
               <EuiSpacer />
-              <KPIsSection />
+              <KPIsSection signalIndexName={signalIndexName} />
               <EuiSpacer />
               <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
             </div>

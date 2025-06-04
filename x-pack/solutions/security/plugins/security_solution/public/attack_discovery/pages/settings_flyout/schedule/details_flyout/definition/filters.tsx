@@ -14,7 +14,7 @@ import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
-import { useCreateDataView } from '../../../alert_selection/use_create_data_view';
+import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 interface FiltersProps {
@@ -22,6 +22,9 @@ interface FiltersProps {
 }
 
 export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
     useSourcererDataView(SourcererScopeName.detections);
@@ -30,10 +33,8 @@ export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
   const { dataView: oldDataView } = useCreateDataView({
     dataViewSpec: oldSourcererDataView,
     loading: oldIsLoadingIndexPattern,
+    skip: newDataViewPickerEnabled,
   });
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
