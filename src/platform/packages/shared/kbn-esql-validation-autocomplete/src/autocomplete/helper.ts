@@ -49,6 +49,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
   sourceExists,
+  isParamExpressionType,
 } from '../shared/helpers';
 import type { ESQLSourceResult } from '../shared/types';
 import { listCompleteItem, commaCompleteItem, pipeCompleteItem } from './complete_items';
@@ -606,13 +607,16 @@ export function checkFunctionInvocationComplete(
     return { complete: false, reason: 'tooFewArgs' };
   }
 
+  // If the function is complete, check that the types of the arguments match the function definition
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
         fnDefinition.name.endsWith('null') ||
         def.params[index].type === 'any' ||
         def.params[index].type === getExpressionType(a) ||
-        getExpressionType(a) === 'param'
+        // this is a special case for expressions with named parameters
+        // e.g. "WHERE field == ?value"
+        isParamExpressionType(getExpressionType(a))
       );
     });
   });
@@ -864,7 +868,9 @@ export async function suggestForExpression({
       suggestions.push(
         ...getOperatorSuggestions({
           location,
-          leftParamType: expressionType !== 'param' ? expressionType : undefined,
+          // In case of a param literal, we don't know the type of the left operand
+          // so we can only suggest operators that accept any type as a left operand
+          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
           ignored: ['='],
         })
       );

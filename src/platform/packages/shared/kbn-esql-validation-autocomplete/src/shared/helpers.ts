@@ -821,136 +821,6 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
-/**
- * Determines the type of the expression
- */
-export function getExpressionType(
-  root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
-): SupportedDataType | 'unknown' {
-  if (!root) {
-    return 'unknown';
-  }
-
-  if (!isSingleItem(root)) {
-    if (root.length === 0) {
-      return 'unknown';
-    }
-    return getExpressionType(root[0], fields, userDefinedColumns);
-  }
-
-  if (isLiteralItem(root)) {
-    return root.literalType;
-  }
-
-  if (isTimeIntervalItem(root)) {
-    return 'time_literal';
-  }
-
-  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
-  if (isInlineCastItem(root)) {
-    switch (root.castType) {
-      case 'int':
-        return 'integer';
-      case 'bool':
-        return 'boolean';
-      case 'string':
-        return 'keyword';
-      case 'text':
-        return 'keyword';
-      case 'datetime':
-        return 'date';
-      default:
-        return root.castType;
-    }
-  }
-
-  if (isColumnItem(root) && fields && userDefinedColumns) {
-    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
-    const lastArg = lastItem(root.args);
-    // If the last argument is a param, we return its type (param literal type)
-    if (isParam(lastArg)) {
-      return lastArg.literalType;
-    }
-    if (!column) {
-      return 'unknown';
-    }
-    return column.type;
-  }
-
-  if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, userDefinedColumns);
-  }
-
-  if (isFunctionItem(root)) {
-    const fnDefinition = getFunctionDefinition(root.name);
-    if (!fnDefinition) {
-      return 'unknown';
-    }
-
-    /**
-     * Special case for COUNT(*) because
-     * the "*" column doesn't match any
-     * of COUNT's function definitions
-     */
-    if (
-      fnDefinition.name === 'count' &&
-      root.args[0] &&
-      isColumnItem(root.args[0]) &&
-      root.args[0].name === '*'
-    ) {
-      return 'long';
-    }
-
-    if (fnDefinition.name === 'case' && root.args.length) {
-      /**
-       * The CASE function doesn't fit our system of function definitions
-       * and needs special handling. This is imperfect, but it's a start because
-       * at least we know that the final argument to case will never be a conditional
-       * expression, always a result expression.
-       *
-       * One problem with this is that if a false case is not provided, the return type
-       * will be null, which we aren't detecting. But this is ok because we consider
-       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
-       */
-      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
-    }
-
-    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
-
-    if (!signaturesWithCorrectArity.length) {
-      return 'unknown';
-    }
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
-
-    // When functions are passed null for any argument, they generally return null
-    // This is a special case that is not reflected in our function definitions
-    if (argTypes.some((argType) => argType === 'null')) return 'null';
-
-    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
-      return argTypes.every((argType, i) => {
-        const param = getParamAtPosition(signature, i);
-        return (
-          param &&
-          (param.type === 'any' ||
-            param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
-            argType === 'param')
-        );
-      });
-    });
-
-    if (!matchingSignature) {
-      return 'unknown';
-    }
-
-    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
-  }
-
-  return 'unknown';
-}
-
 export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>
 ): ESQLFieldWithMetadata[] {
@@ -1028,4 +898,140 @@ export async function getCurrentQueryAvailableFields(
     const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
     return allFields;
   }
+}
+
+// --- Expression types helpers ---
+
+// Type guard to check if the type is 'param'
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
+/**
+ * Determines the type of the expression
+ */
+export function getExpressionType(
+  root: ESQLAstItem | undefined,
+  fields?: Map<string, ESQLFieldWithMetadata>,
+  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
+): SupportedDataType | 'unknown' {
+  if (!root) {
+    return 'unknown';
+  }
+
+  if (!isSingleItem(root)) {
+    if (root.length === 0) {
+      return 'unknown';
+    }
+    return getExpressionType(root[0], fields, userDefinedColumns);
+  }
+
+  if (isLiteralItem(root)) {
+    return root.literalType;
+  }
+
+  if (isTimeIntervalItem(root)) {
+    return 'time_literal';
+  }
+
+  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
+  if (isInlineCastItem(root)) {
+    switch (root.castType) {
+      case 'int':
+        return 'integer';
+      case 'bool':
+        return 'boolean';
+      case 'string':
+        return 'keyword';
+      case 'text':
+        return 'keyword';
+      case 'datetime':
+        return 'date';
+      default:
+        return root.castType;
+    }
+  }
+
+  if (isColumnItem(root) && fields && userDefinedColumns) {
+    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+    const lastArg = lastItem(root.args);
+    // If the last argument is a param, we return its type (param literal type)
+    // This is useful for cases like `where ??field`
+    if (isParam(lastArg)) {
+      return lastArg.literalType;
+    }
+    if (!column) {
+      return 'unknown';
+    }
+    return column.type;
+  }
+
+  if (root.type === 'list') {
+    return getExpressionType(root.values[0], fields, userDefinedColumns);
+  }
+
+  if (isFunctionItem(root)) {
+    const fnDefinition = getFunctionDefinition(root.name);
+    if (!fnDefinition) {
+      return 'unknown';
+    }
+
+    /**
+     * Special case for COUNT(*) because
+     * the "*" column doesn't match any
+     * of COUNT's function definitions
+     */
+    if (
+      fnDefinition.name === 'count' &&
+      root.args[0] &&
+      isColumnItem(root.args[0]) &&
+      root.args[0].name === '*'
+    ) {
+      return 'long';
+    }
+
+    if (fnDefinition.name === 'case' && root.args.length) {
+      /**
+       * The CASE function doesn't fit our system of function definitions
+       * and needs special handling. This is imperfect, but it's a start because
+       * at least we know that the final argument to case will never be a conditional
+       * expression, always a result expression.
+       *
+       * One problem with this is that if a false case is not provided, the return type
+       * will be null, which we aren't detecting. But this is ok because we consider
+       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
+       */
+      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
+    }
+
+    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
+
+    if (!signaturesWithCorrectArity.length) {
+      return 'unknown';
+    }
+    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
+
+    // When functions are passed null for any argument, they generally return null
+    // This is a special case that is not reflected in our function definitions
+    if (argTypes.some((argType) => argType === 'null')) return 'null';
+
+    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
+      return argTypes.every((argType, i) => {
+        const param = getParamAtPosition(signature, i);
+        return (
+          param &&
+          (param.type === 'any' ||
+            param.type === argType ||
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
+            isParamExpressionType(argType))
+        );
+      });
+    });
+
+    if (!matchingSignature) {
+      return 'unknown';
+    }
+
+    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
+  }
+
+  return 'unknown';
 }
