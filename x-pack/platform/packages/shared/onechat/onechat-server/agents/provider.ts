@@ -121,7 +121,8 @@ export type AgentDefinition = ConversationalAgentDefinition;
 /**
  * Provider that can be registered to expose agents to onechat
  */
-export interface AgentProvider {
+export interface AgentProvider<TAgent = AgentDefinition> {
   has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<AgentDefinition>;
+  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<TAgent>;
+  list(opts: { request: KibanaRequest }): MaybePromise<TAgent[]>;
 }

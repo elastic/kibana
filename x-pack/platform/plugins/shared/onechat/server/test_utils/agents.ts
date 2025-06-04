@@ -18,6 +18,7 @@ export const createAgentRegistryMock = (): AgentRegistryMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
+    list: jest.fn(),
   };
 };
 
@@ -25,6 +26,7 @@ export const createInternalAgentRegistryMock = (): InternalAgentRegistryMock => 
   return {
     has: jest.fn(),
     get: jest.fn(),
+    list: jest.fn(),
     asPublicRegistry: jest.fn().mockImplementation(() => createAgentRegistryMock()),
   };
 };

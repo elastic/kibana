@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AgentWithIdProvider, AgentProviderWithId } from '../types';
+import type {
+  AgentWithIdProvider,
+  AgentProviderWithId,
+  AgentDefinitionWithProviderId,
+} from '../types';
 
 /**
  * Creates a tool provider that combines multiple tool providers.
@@ -33,6 +37,21 @@ export const combineToolProviders = (...providers: AgentProviderWithId[]): Agent
         }
       }
       throw new Error(`Agent with id ${options.agentId} not found`);
+    },
+    list: async (options) => {
+      const results = await Promise.all(
+        providers.map(async (provider) => {
+          const agents = await provider.list(options);
+          return agents.map((agent) => ({
+            ...agent,
+            providerId: provider.id,
+          }));
+        })
+      );
+      return results.reduce(
+        (acc, result) => [...acc, ...result],
+        [] as AgentDefinitionWithProviderId[]
+      );
     },
   };
 

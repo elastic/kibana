@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { MaybePromise } from '@kbn/utility-types';
-import {
-  AgentType,
-  PlainIdAgentIdentifier,
-  AgentDescriptor,
-  AgentIdentifier,
-} from '@kbn/onechat-common/agents';
+import { AgentType, PlainIdAgentIdentifier, AgentDescriptor } from '@kbn/onechat-common/agents';
 import type { RunAgentParams, RunAgentReturn } from './runner';
-import { ConversationalAgentParams, ConversationalAgentResponse } from './provider';
+import { ConversationalAgentParams, ConversationalAgentResponse, AgentProvider } from './provider';
 
 export interface ExecutableAgentBase<TType extends AgentType, TParams, TResult>
   extends AgentDescriptor {
@@ -42,7 +35,4 @@ export type ExecutableConversationalAgent = ExecutableAgentBase<
 
 export type ExecutableAgent = ExecutableConversationalAgent;
 
-export interface AgentRegistry {
-  has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<ExecutableAgent>;
-}
+export type AgentRegistry = AgentProvider<ExecutableAgent>;

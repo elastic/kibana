@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { MaybePromise } from '@kbn/utility-types';
-import { AgentIdentifier } from '@kbn/onechat-common';
 import type {
   AgentProvider,
   AgentRegistry,
@@ -31,13 +28,7 @@ export type AgentDefinitionWithProviderId = AgentDefinition & {
   providerId: string;
 };
 
-export interface AgentWithIdProvider {
-  has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: {
-    agentId: AgentIdentifier;
-    request: KibanaRequest;
-  }): MaybePromise<AgentDefinitionWithProviderId>;
-}
+export type AgentWithIdProvider = AgentProvider<AgentDefinitionWithProviderId>;
 
 export type InternalAgentRegistry = AgentWithIdProvider & {
   asPublicRegistry: () => AgentRegistry;

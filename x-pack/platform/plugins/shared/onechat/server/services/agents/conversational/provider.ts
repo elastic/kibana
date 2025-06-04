@@ -32,6 +32,9 @@ export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): Agen
       }
       throw createAgentNotFoundError({ agentId: toSerializedAgentIdentifier(agentId) });
     },
+    list: () => {
+      return [createDefaultAgentDescriptor({ logger })];
+    },
   };
 
   return provider;

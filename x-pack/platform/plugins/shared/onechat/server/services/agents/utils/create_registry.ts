@@ -49,6 +49,12 @@ export const internalProviderToPublic = ({
       const agent = await provider.get(options);
       return toExecutableAgent({ agent, getRunner, request: options.request });
     },
+    async list(options) {
+      const agents = await provider.list(options);
+      return agents.map((agent) =>
+        toExecutableAgent({ agent, getRunner, request: options.request })
+      );
+    },
   };
 };
 
