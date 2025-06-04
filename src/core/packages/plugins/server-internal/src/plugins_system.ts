@@ -368,7 +368,7 @@ const getTopologicallySortedPluginNames = (plugins: Map<PluginName, PluginWrappe
     try {
       const circularDependencies = findCircularDependencies(pluginsDependenciesGraph);
 
-      cyclePaths = circularDependencies.map(cycle => `\n  ${cycle.join(' -> ')} -> ${cycle[0]}`);
+      cyclePaths = circularDependencies.map((cycle) => `\n  ${cycle.join(' -> ')} -> ${cycle[0]}`);
     } catch (e) {
       cyclePaths = [];
     }
@@ -377,8 +377,10 @@ const getTopologicallySortedPluginNames = (plugins: Map<PluginName, PluginWrappe
 
     throw new Error(
       `Topological ordering of plugins did not complete due to circular dependencies:` +
-      `${cyclePaths.length > 0 ? `\n\nDetected circular dependencies:${cyclePaths.join('')}` : ''}` +
-      `\n\nPlugins with cyclic or missing dependencies: ${edgesLeft}`
+        `${
+          cyclePaths.length > 0 ? `\n\nDetected circular dependencies:${cyclePaths.join('')}` : ''
+        }` +
+        `\n\nPlugins with cyclic or missing dependencies: ${edgesLeft}`
     );
   }
 
@@ -426,12 +428,11 @@ const buildPluginRuntimeDependencyMap = (
  * @returns Array of circular dependency paths
  */
 export const findCircularDependencies = (
-  dependencyGraph: Map<PluginName, Set<PluginName>>,
+  dependencyGraph: Map<PluginName, Set<PluginName>>
 ): PluginName[][] => {
   // Store found cycles as a set of stringified paths to avoid duplicates
   const cycleSet = new Set<string>();
   const cycles: PluginName[][] = [];
-
 
   // Find all cycles for each node in the graph
   for (const startNode of dependencyGraph.keys()) {
@@ -488,9 +489,9 @@ export const findCircularDependencies = (
  */
 export const normalizeCycle = (cycle: PluginName[]): PluginName[] => {
   if (cycle.length <= 1) return cycle;
-  if(new Set(cycle).size !== cycle.length) {
+  if (new Set(cycle).size !== cycle.length) {
     throw new Error(`Cycle contains duplicate plugins: ${cycle}`);
-  };
+  }
 
   // Find the index of the alphabetically first node
   let minIndex = 0;

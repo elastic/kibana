@@ -828,84 +828,127 @@ describe('asynchronous plugins', () => {
   });
 });
 
-describe('normalizeCycle', ()=>{
+describe('normalizeCycle', () => {
   it.each([
     [[], []],
-    [["a"], ["a"]],
-    [["a", "b"], ["a", "b"]],
-    [["b", "a"], ["a", "b"]],
-    [["a", "b", "c"], ["a", "b", "c"]],
-    [["c", "a", "b"], ["a", "b", "c"]],
-    [["a", "c", "b"], ["a", "c", "b"]],
+    [['a'], ['a']],
+    [
+      ['a', 'b'],
+      ['a', 'b'],
+    ],
+    [
+      ['b', 'a'],
+      ['a', 'b'],
+    ],
+    [
+      ['a', 'b', 'c'],
+      ['a', 'b', 'c'],
+    ],
+    [
+      ['c', 'a', 'b'],
+      ['a', 'b', 'c'],
+    ],
+    [
+      ['a', 'c', 'b'],
+      ['a', 'c', 'b'],
+    ],
   ])("normalizes cycle '%s'", (plugins: PluginName[], expected: PluginName[]) => {
     expect(normalizeCycle(plugins)).toEqual(expected);
   });
 
   it.each([
-    [["a", "b", "a"]],
-    [["b", "a", "b"]],
-    [["a", "b", "c", "a"]],
-    [["c", "a", "b", "c"]],
-    [["a", "c", "b", "a"]],
+    [['a', 'b', 'a']],
+    [['b', 'a', 'b']],
+    [['a', 'b', 'c', 'a']],
+    [['c', 'a', 'b', 'c']],
+    [['a', 'c', 'b', 'a']],
   ])("throws error for invalid cycle format '%s'", (plugins: PluginName[]) => {
     expect(() => normalizeCycle(plugins)).toThrowError();
   });
-})
+});
 
-describe('findCircularDependencies', ()=>{
+describe('findCircularDependencies', () => {
   it.each([
     [new Map([]) as Map<PluginName, Set<PluginName>>, []],
-    [new Map([
-      ["a", new Set(["b"])],
-    ]), []],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["c"])],
-      ["c", new Set(["d"])],
-      ["d", new Set(["e"])],
-    ]), []],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["a"])],
-    ]), [["a", "b"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["c"])],
-      ["c", new Set(["a"])],
-    ]), [["a", "b", "c"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["a"])],
-      ["c", new Set(["d"])],
-      ["d", new Set(["c"])],
-    ]), [["a", "b"], ["c", "d"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["c"])],
-      ["c", new Set(["d"])],
-      ["d", new Set(["c"])],
-    ]), [["c", "d"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["c"])],
-      ["c", new Set(["d"])],
-      ["d", new Set(["a"])],
-    ]), [["a", "b", "c", "d"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["a"])],
-      ["b", new Set(["a"])],
-    ]), [["a", "b"]]],
-    [new Map([
-      ["a", new Set(["b"])],
-      ["b", new Set(["c"])],
-      ["c", new Set(["a"])],
-      ["d", new Set(["e"])],
-    ]), [["a", "b", "c"]]],
-  ])("returns correct circular dependencies for '%s'", (dependencyGraph: Map<PluginName, Set<PluginName>>, expected: PluginName[][]) => {
-    expect(findCircularDependencies(dependencyGraph)).toEqual(expected);
-  });
-})
+    [new Map([['a', new Set(['b'])]]), []],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['e'])],
+      ]),
+      [],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+      ]),
+      [['a', 'b']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['a'])],
+      ]),
+      [['a', 'b', 'c']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['c'])],
+      ]),
+      [
+        ['a', 'b'],
+        ['c', 'd'],
+      ],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['c'])],
+      ]),
+      [['c', 'd']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['a'])],
+      ]),
+      [['a', 'b', 'c', 'd']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+        ['b', new Set(['a'])],
+      ]),
+      [['a', 'b']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['a'])],
+        ['d', new Set(['e'])],
+      ]),
+      [['a', 'b', 'c']],
+    ],
+  ])(
+    "returns correct circular dependencies for '%s'",
+    (dependencyGraph: Map<PluginName, Set<PluginName>>, expected: PluginName[][]) => {
+      expect(findCircularDependencies(dependencyGraph)).toEqual(expected);
+    }
+  );
+});
 
 describe('stop', () => {
   beforeAll(() => {
@@ -1053,5 +1096,3 @@ describe('stop', () => {
     );
   });
 });
-
-
