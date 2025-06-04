@@ -68,7 +68,6 @@ export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
       setError(e);
       // eslint-disable-next-line no-console
       console.error(i18nTexts.consoleMessagePrefix, e.message);
-      throw e;
     }
   }, [share]);
 
