@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(hasAgentBased).to.be(false);
     });
 
-    it.only(`should show an invalid form state when agentless is default and switching between cloud providers`, async () => {
+    it(`should show an invalid form state when agentless is default and switching between cloud providers`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
