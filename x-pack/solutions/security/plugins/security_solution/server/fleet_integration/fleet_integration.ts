@@ -343,7 +343,12 @@ export const getPackagePolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for endpoint integration policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return packagePolicy;
   };
@@ -366,7 +371,12 @@ export const getPackagePolicyPostCreateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
@@ -451,7 +461,12 @@ export const getAgentPolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [endpointPolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${endpointPolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return agentPolicy;
   };
