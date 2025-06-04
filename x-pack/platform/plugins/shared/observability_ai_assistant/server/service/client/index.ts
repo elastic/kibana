@@ -713,7 +713,7 @@ export class ObservabilityAIAssistantClient {
 
         // If the inference ID switched to a preconfigured model, delete the legacy custom model if it exists.
         if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-          deleteInferenceEndpoint({
+          void deleteInferenceEndpoint({
             esClient,
             logger,
             inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
