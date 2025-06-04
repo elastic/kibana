@@ -56,6 +56,7 @@ const getSummaryProps = (
   shouldShowFieldHandler: () => true,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
+  isTracesSummary: false,
   ...opts,
 });
 
@@ -166,6 +167,56 @@ describe('SummaryColumn', () => {
           `dataTableCellAction_copyToClipboardAction_${constants.SERVICE_NAME_FIELD}`
         )
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('when rendering trace badges', () => {
+    it('should display service.name with different fields exposed', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'failure',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_DURATION_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not display the event.outcome badge if the outcome is not "failure"', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
+      ).not.toBeInTheDocument();
     });
   });
 

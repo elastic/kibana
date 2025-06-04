@@ -16,15 +16,11 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
   apmLabsButton,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
-  enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableContinuousRollups,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -177,28 +173,6 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.number({ min: 1 }),
     solution: 'oblt',
   },
-  [apmTraceExplorerTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
-      defaultMessage: 'APM Trace Explorer',
-    }),
-    description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        link: traceExplorerDocsLink({
-          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
-        }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmLabs', {
@@ -246,42 +220,6 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAwsLambdaMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
-      defaultMessage: 'AWS Lambda Metrics',
-    }),
-    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
-  [enableAgentExplorerView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAgentExplorer', {
-      defaultMessage: 'Agent explorer',
-    }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{betaLabel} Enables Agent explorer view.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
@@ -380,21 +318,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableContinuousRollups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
-      defaultMessage: 'Continuous rollups',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
-      defaultMessage:
-        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {
@@ -617,12 +540,5 @@ function throttlingDocsLink({ href }: { href: string }) {
   return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
     'xpack.observability.uiSettings.throttlingDocsLinkText',
     { defaultMessage: 'read notice here.' }
-  )}</a>`;
-}
-
-function traceExplorerDocsLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank">${i18n.translate(
-    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
-    { defaultMessage: 'Learn more.' }
   )}</a>`;
 }

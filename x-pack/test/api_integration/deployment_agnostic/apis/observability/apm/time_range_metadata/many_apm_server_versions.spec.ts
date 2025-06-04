@@ -100,7 +100,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: endLegacy.toISOString(),
               end: end.toISOString(),
-              enableContinuousRollups: true,
               useSpanName: false,
               kuery: '',
             },
@@ -127,7 +126,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: endLegacy.toISOString(),
-              enableContinuousRollups: true,
               useSpanName: false,
               kuery: '',
             },
@@ -148,7 +146,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: end.toISOString(),
-              enableContinuousRollups: true,
               useSpanName: false,
               kuery: '',
             },
