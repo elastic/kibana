@@ -9,13 +9,10 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import {
-  getActionTypeTitle,
-  getGenAiConfig,
-} from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { AIConnector } from './types';
 import * as i18n from './translations';
+import { getConnectorDescription } from '../../../../../../common/utils/get_connector_description';
 
 interface ConnectorSelectorPanelProps {
   connectors: AIConnector[];
@@ -49,14 +46,10 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
     const connectorOptions = useMemo(
       () =>
         connectors.map((connector) => {
-          let description: string;
-          if (connector.isPreconfigured) {
-            description = i18n.PRECONFIGURED_CONNECTOR;
-          } else {
-            description =
-              getGenAiConfig(connector)?.apiProvider ??
-              getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-          }
+          const description = getConnectorDescription({
+            connector,
+            actionTypeRegistry,
+          });
           return { id: connector.id, name: connector.name, description };
         }),
       [actionTypeRegistry, connectors]
@@ -73,7 +66,7 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
     );
 
     return (
-      <EuiPanel hasShadow={false} hasBorder css={{ height: '160px' }}>
+      <EuiPanel hasShadow={false} hasBorder>
         <EuiFlexGroup
           css={css`
             height: 100%;

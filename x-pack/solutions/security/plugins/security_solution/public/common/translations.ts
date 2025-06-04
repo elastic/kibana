@@ -129,3 +129,10 @@ export const RULE_EXECUTION_TYPE_STANDARD = i18n.translate(
     defaultMessage: 'Scheduled',
   }
 );
+
+export const PRECONFIGURED_CONNECTOR = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.preconfiguredTitle',
+  {
+    defaultMessage: 'Preconfigured',
+  }
+);

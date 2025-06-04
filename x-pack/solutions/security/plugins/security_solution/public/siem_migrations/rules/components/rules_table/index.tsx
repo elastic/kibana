@@ -257,7 +257,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const reprocessFailedRulesInitiate = useCallback(async () => {
       setIsReprocessFailedRulesModalVisible(true);
-      // startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
     }, []);
 
     const reprocessFailedRules = useCallback(

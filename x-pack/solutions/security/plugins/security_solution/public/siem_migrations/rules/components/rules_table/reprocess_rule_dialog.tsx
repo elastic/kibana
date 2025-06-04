@@ -26,12 +26,9 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import {
-  getActionTypeTitle,
-  getGenAiConfig,
-} from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { getConnectorDescription } from '../../../../common/utils/get_connector_description';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import * as i18n from './translations';
@@ -48,6 +45,8 @@ interface ReprocessFailedRulesDialogProps {
   connectors: ActionConnector[];
   numberOfFailedRules?: number;
 }
+
+const DATA_TEST_SUBJ_PREFIX = 'reprocessFailedRulesDialog';
 
 export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = React.memo(
   function ReprocessFailedRulesDialog({
@@ -71,16 +70,10 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
 
     const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
       return connectors.map((connector) => {
-        // TODO : dedup from x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/common/connectors/connector_selector_panel.tsx
-        let description: string;
-        if (connector.isPreconfigured) {
-          description = 'Pre-configured Connector';
-        } else {
-          description =
-            getGenAiConfig(connector)?.apiProvider ??
-            getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-        }
-
+        const connectorDescription = getConnectorDescription({
+          connector,
+          actionTypeRegistry,
+        });
         return {
           value: connector.id,
           inputDisplay: connector.name,
@@ -88,11 +81,11 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
             <>
               <strong>{connector.name}</strong>
               <EuiText size="s" color="subdued">
-                <p>{description}</p>
+                <p>{connectorDescription}</p>
               </EuiText>
             </>
           ),
-          'data-test-subj': `reprocessFailedRulesConnectorSelector-${connector.id}`,
+          'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector-${connector.id}`,
         };
       });
     }, [actionTypeRegistry, connectors]);
@@ -114,9 +107,12 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
 
     if (isModalVisible) {
       return (
-        <EuiModal onClose={closeModal} data-test-subj="reprocessFailedRulesDialog">
+        <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX} size="m">
           <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>
+            <EuiModalHeaderTitle
+              data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`}
+              id={modalTitleId}
+            >
               {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfFailedRules)}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -146,11 +142,12 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
                 options={selectOptions}
                 valueOfSelected={selectedConnectorId}
                 onChange={setSelectedConnectorId}
-                data-test-subj="reprocessFailedRulesConnectorSelector"
+                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
               />
             </EuiFormRow>
             <EuiFormRow>
               <EuiSwitch
+                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
                 label={i18n.REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL}
                 checked={enablePrebuiltRulesMatching}
                 onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
@@ -161,13 +158,18 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   onClick={closeModal}
-                  data-test-subj="reprocessFailedRulesDialogCancel"
+                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
                 >
                   {i18n.REPROCESS_RULES_DIALOG_CANCEL}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill onClick={startMigrationWithSettings}>
+                <EuiButton
+                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Translate`}
+                  color="primary"
+                  fill
+                  onClick={startMigrationWithSettings}
+                >
                   {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
                 </EuiButton>
               </EuiFlexItem>
