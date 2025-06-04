@@ -38,6 +38,7 @@ interface Props {
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   displayLimit?: number;
   isEmbeddable?: boolean;
+  scrollElement?: Element;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -77,6 +78,7 @@ export function Waterfall({
   onNodeClick,
   displayLimit,
   isEmbeddable,
+  scrollElement,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -180,6 +182,7 @@ export function Waterfall({
             }
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
+            scrollElement={scrollElement}
           />
         )}
       </WaterfallItemsContainer>
