@@ -77,9 +77,9 @@ const nestedFunctions = {
 };
 
 const literals = {
-  time_literal: timeUnitsToSuggest[0].name,
+  time_duration: timeUnitsToSuggest[0].name,
 };
-function getLiteralType(typeString: 'time_literal') {
+function getLiteralType(typeString: 'time_duration') {
   return `1 ${literals[typeString]}`;
 }
 
@@ -160,7 +160,7 @@ function getFieldMapping(
       }
       if (/literal$/.test(typeString) && useLiterals) {
         return {
-          name: getLiteralType(typeString as 'time_literal'),
+          name: getLiteralType(typeString as 'time_duration'),
           type,
           ...rest,
         };

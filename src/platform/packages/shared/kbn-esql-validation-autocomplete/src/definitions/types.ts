@@ -62,13 +62,7 @@ export const isFieldType = (type: string | FunctionParameterType): type is Field
  * the capabilities of the client-side engines grow.
  * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
  */
-export const dataTypes = [
-  ...fieldTypes,
-  'null',
-  'time_literal', // @TODO consider merging time_literal with time_duration
-  'time_duration',
-  'date_period',
-] as const;
+export const dataTypes = [...fieldTypes, 'null', 'time_duration', 'date_period'] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
 

@@ -466,7 +466,7 @@ describe('autocomplete.suggest', () => {
                 const testCase = `${fn.name}(${signature.params
                   .slice(0, i + 1)
                   .map((p) =>
-                    p.type === 'time_literal'
+                    p.type === 'time_duration'
                       ? '1 year,'
                       : `${
                           typeof p.type === 'string' && isFieldType(p.type)
@@ -607,7 +607,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from a | eval col0=date_trunc(/)',
         [
-          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
+          ...getLiteralsByType('time_duration').map((t) => `${t}, `),
           ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
             scalar: true,
           }).map((t) => `${t.text},`),

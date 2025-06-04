@@ -15,7 +15,6 @@ import type { RecursivePartial } from '@kbn/utility-types';
 import {
   FunctionDefinition,
   FunctionParameterType,
-  FunctionReturnType,
   Signature,
   FunctionDefinitionTypes,
   Location,
@@ -32,59 +31,6 @@ const aliasTable: Record<string, string[]> = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
-const bucketParameterTypes: Array<
-  [
-    FunctionParameterType,
-    FunctionParameterType,
-    FunctionParameterType | null,
-    FunctionParameterType | null,
-    FunctionReturnType
-  ]
-> = [
-  // field   // bucket   //from    // to   //result
-  // 2-param signatures
-  ['date_nanos', 'date_period', null, null, 'date_nanos'],
-  ['date', 'date_period', null, null, 'date'],
-  ['date_nanos', 'time_literal', null, null, 'date_nanos'],
-  ['date', 'time_literal', null, null, 'date'],
-  ['double', 'double', null, null, 'double'],
-  ['double', 'integer', null, null, 'double'],
-  ['integer', 'double', null, null, 'double'],
-  ['integer', 'integer', null, null, 'double'],
-  ['long', 'double', null, null, 'double'],
-  ['long', 'integer', null, null, 'double'],
-  // 4-param signatures
-  ['date', 'integer', 'date', 'date', 'date'],
-  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
-  ['double', 'integer', 'double', 'double', 'double'],
-  ['double', 'integer', 'double', 'integer', 'double'],
-  ['double', 'integer', 'double', 'long', 'double'],
-  ['double', 'integer', 'integer', 'double', 'double'],
-  ['double', 'integer', 'integer', 'integer', 'double'],
-  ['double', 'integer', 'integer', 'long', 'double'],
-  ['double', 'integer', 'long', 'double', 'double'],
-  ['double', 'integer', 'long', 'integer', 'double'],
-  ['double', 'integer', 'long', 'long', 'double'],
-  ['integer', 'integer', 'double', 'double', 'double'],
-  ['integer', 'integer', 'double', 'integer', 'double'],
-  ['integer', 'integer', 'double', 'long', 'double'],
-  ['integer', 'integer', 'integer', 'double', 'double'],
-  ['integer', 'integer', 'integer', 'integer', 'double'],
-  ['integer', 'integer', 'integer', 'long', 'double'],
-  ['integer', 'integer', 'long', 'double', 'double'],
-  ['integer', 'integer', 'long', 'integer', 'double'],
-  ['integer', 'integer', 'long', 'long', 'double'],
-  ['long', 'integer', 'double', 'double', 'double'],
-  ['long', 'integer', 'double', 'integer', 'double'],
-  ['long', 'integer', 'double', 'long', 'double'],
-  ['long', 'integer', 'integer', 'double', 'double'],
-  ['long', 'integer', 'integer', 'integer', 'double'],
-  ['long', 'integer', 'integer', 'long', 'double'],
-  ['long', 'integer', 'long', 'double', 'double'],
-  ['long', 'integer', 'long', 'integer', 'double'],
-  ['long', 'integer', 'long', 'long', 'double'],
-];
-
 const defaultScalarFunctionLocations: Location[] = [
   Location.EVAL,
   Location.ROW,
@@ -97,8 +43,6 @@ const defaultScalarFunctionLocations: Location[] = [
 
 const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
-// coalesce can be removed when a test is added for version type
-// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
 const excludedFunctions = new Set(['case', 'cast']);
 
 const extraFunctions: FunctionDefinition[] = [
@@ -272,14 +216,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       },
     ],
   },
-  date_trunc: {
-    signatures: [
-      {
-        // override the first param to be of type time_literal
-        params: [{ type: 'time_literal' }],
-      },
-    ],
-  },
   mv_sort: {
     signatures: new Array(10).fill({
       params: [{}, { acceptedValues: ['asc', 'desc'] }],
@@ -397,7 +333,7 @@ const operatorsMeta: Record<
     extraSignatures: [
       {
         params: [
-          { name: 'left', type: 'time_literal' as const },
+          { name: 'left', type: 'time_duration' as const },
           { name: 'right', type: 'date' as const },
         ],
         returnType: 'date' as const,
@@ -405,7 +341,7 @@ const operatorsMeta: Record<
       {
         params: [
           { name: 'left', type: 'date' as const },
-          { name: 'right', type: 'time_literal' as const },
+          { name: 'right', type: 'time_duration' as const },
         ],
         returnType: 'date' as const,
       },
@@ -418,7 +354,7 @@ const operatorsMeta: Record<
     extraSignatures: [
       {
         params: [
-          { name: 'left', type: 'time_literal' as const },
+          { name: 'left', type: 'time_duration' as const },
           { name: 'right', type: 'date' as const },
         ],
         returnType: 'date' as const,
@@ -426,7 +362,7 @@ const operatorsMeta: Record<
       {
         params: [
           { name: 'left', type: 'date' as const },
-          { name: 'right', type: 'time_literal' as const },
+          { name: 'right', type: 'time_duration' as const },
         ],
         returnType: 'date' as const,
       },
@@ -676,27 +612,27 @@ const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
   return groupingFunctionDefinitions.map((op) => {
-    if (op.name === 'bucket') {
-      const signatures = [
-        ...bucketParameterTypes.map((signature) => {
-          const [fieldType, bucketType, fromType, toType, resultType] = signature;
-          return {
-            params: [
-              { name: 'field', type: fieldType },
-              { name: 'buckets', type: bucketType, constantOnly: true },
-              ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
-              ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
-            ],
-            returnType: resultType,
-          };
-        }),
-      ];
-      return {
-        ...op,
-        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
-        signatures,
-      };
-    }
+    // if (op.name === 'bucket') {
+    //   const signatures = [
+    //     ...bucketParameterTypes.map((signature) => {
+    //       const [fieldType, bucketType, fromType, toType, resultType] = signature;
+    //       return {
+    //         params: [
+    //           { name: 'field', type: fieldType },
+    //           { name: 'buckets', type: bucketType, constantOnly: true },
+    //           ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+    //           ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+    //         ],
+    //         returnType: resultType,
+    //       };
+    //     }),
+    //   ];
+    //   return {
+    //     ...op,
+    //     locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+    //     signatures,
+    //   };
+    // }
     return {
       ...op,
       locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
@@ -930,7 +866,7 @@ ${
 }
 
 (async function main() {
-  const pathToElasticsearch = process.argv[2];
+  const pathToElasticsearch = '/Users/stratoulakalafateli/Documents/elasticsearch';
   if (!pathToElasticsearch) {
     throw new Error('Path to Elasticsearch is required');
   }

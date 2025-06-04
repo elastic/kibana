@@ -410,7 +410,7 @@ export function getAllArrayTypes(
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
-        types.push('time_literal');
+        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -473,7 +473,7 @@ export function checkFunctionArgMatchesDefinition(
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg.unit);
+    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -844,7 +844,7 @@ export function getExpressionType(
   }
 
   if (isTimeIntervalItem(root)) {
-    return 'time_literal';
+    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json

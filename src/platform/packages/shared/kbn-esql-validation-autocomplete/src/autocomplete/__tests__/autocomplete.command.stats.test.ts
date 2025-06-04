@@ -472,7 +472,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
+            ...getLiteralsByType('time_duration'),
             ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
               scalar: true,
             }),
