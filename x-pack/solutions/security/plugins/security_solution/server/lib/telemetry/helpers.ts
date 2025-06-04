@@ -13,6 +13,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, type KueryNode } from '@kbn/es-query';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -419,6 +420,14 @@ export const copyLicenseFields = (lic: ESLicense) => {
     ...(lic.issuer ? { issuer: lic.issuer } : {}),
   };
 };
+
+export function stringToKueryNode(expression?: string): KueryNode | undefined {
+  if (!expression) {
+    return;
+  }
+
+  return fromKueryExpression(expression);
+}
 
 export class TelemetryTimelineFetcher {
   private receiver: ITelemetryReceiver;

@@ -55,6 +55,11 @@ import type {
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 import { findRulesSo } from '@kbn/alerting-plugin/server/data/rule';
+import {
+  buildFilter,
+  buildConsumersFilter,
+  combineFilters,
+} from '@kbn/alerting-plugin/server/rules_client/common/filters';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -64,6 +69,7 @@ import {
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
   newTelemetryLogger,
+  stringToKueryNode,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -763,30 +769,37 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       );
     }
 
-    const timeFrom = `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`;
-    const enabledCustomRules =
-      'alert.attributes.enabled: true AND ' +
-      'alert.attributes.params.immutable: false AND ' +
-      'alert.attributes.consumer: "siem"';
-    const responseActionsRules =
-      '(alert.attributes.params.responseActions.actionTypeId: .endpoint OR ' +
-      'alert.attributes.params.responseActions.actionTypeId: .osquery)';
-    const combinedFilters = [enabledCustomRules, responseActionsRules, timeFrom].join(' AND ');
+    const timeFrom = stringToKueryNode(
+      `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`
+    );
+    const consumersFilter = buildConsumersFilter(['siem', 'securitySolution']);
+    const enabledFilter = stringToKueryNode('alert.attributes.enabled: true');
+    const customRulesFilter = stringToKueryNode('alert.attributes.params.immutable: false');
+    const responseActionsFilter = buildFilter({
+      filters: ['.endpoint', '.osquery'],
+      field: 'params.responseActions.actionTypeId',
+      operator: 'or',
+    });
+
+    const combinedFilter = combineFilters(
+      [consumersFilter, enabledFilter, customRulesFilter, responseActionsFilter, timeFrom],
+      'and'
+    );
 
     return findRulesSo({
       savedObjectsClient: this.soClient,
       savedObjectsFindOptions: {
+        filter: combinedFilter,
         fields: [
           'alert.updated_at',
-          'alert.attributes.enabled',
           'alert.attributes.consumer',
+          'alert.attributes.enabled',
           'alert.attributes.params.immutable',
           'alert.attributes.params.responseActions.actionTypeId',
         ],
-        filter: combinedFilters,
         perPage: this.maxRecords,
         page: 1,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       },
     });
