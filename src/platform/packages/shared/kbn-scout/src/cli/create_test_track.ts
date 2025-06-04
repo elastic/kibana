@@ -151,7 +151,7 @@ export const createTestTrack: Command<void> = {
   name: 'create-test-track',
   description: 'Distribute tests across a test track for parallel execution',
   flags: {
-    string: ['configManifest', 'targetRuntimeMinutes', 'maxLaneCount'],
+    string: ['configManifest', 'targetRuntimeMinutes', 'minRuntimeMinutes', 'maxLaneCount'],
     boolean: ['noSummary'],
     default: {
       outputPath: `./scout_test_track_${Date.now()}.json`,
@@ -160,6 +160,7 @@ export const createTestTrack: Command<void> = {
     --configManifest        (required)  Path to config manifest; can be specified multiple times
     --outputPath            (optional)  Where to write the test track specification (default: ./scout_test_track_{timestamp}.json)
     --targetRuntimeMinutes  (optional)  How long the test track should run (default: longest estimated config runtime)
+    --minRuntimeMinutes     (optional)  Target runtime minutes shouldn't be lower than this
     --maxLaneCount          (optional)  Maximum number of lanes allowed
     --noSummary             (optional)  Don't display test track summary
     `,
@@ -184,14 +185,25 @@ export const createTestTrack: Command<void> = {
     // Load stats & initialize test track
     const stats = loadTestConfigStats();
 
-    const targetRuntimeMinutes = flagsReader.number('targetRuntimeMinutes');
-    const track = new TestTrack({
-      runtimeTarget:
-        targetRuntimeMinutes !== undefined
-          ? targetRuntimeMinutes * 60 * 1000
-          : stats.largestConfig.runtime.estimate,
-    });
+    let runtimeTarget = (flagsReader.number('targetRuntimeMinutes') || 0) * 60 * 1000;
+    const runtimeMin = (flagsReader.number('minRuntimeMinutes') || 0) * 60 * 1000;
 
+    if (runtimeTarget === 0) {
+      // No runtime target was set, so we'll use the longest runtime estimate
+      runtimeTarget = mergedConfigManifest.enabled
+        .map((configPath): number => stats.findConfigByPath(configPath)?.runtime.estimate || 0)
+        .reduce((prevEstimate, currentEstimate) => Math.max(prevEstimate, currentEstimate));
+    }
+
+    if (runtimeTarget === 0) {
+      // Runtime target is *still* zero, which is unacceptable !!!
+      // This would suggest that a target runtime wasn't set, and we also didn't find stats for any of the configs
+      throw createFlagError(
+        "Failed to auto-determine runtime target: couldn't find stats for any of the given configs"
+      );
+    }
+
+    const track = new TestTrack({ runtimeTarget: Math.max(runtimeMin, runtimeTarget) });
     log.info(`Targeting a track runtime of ${msToHuman(track.runtimeTarget)}`);
 
     // Prepare loads for assignment
