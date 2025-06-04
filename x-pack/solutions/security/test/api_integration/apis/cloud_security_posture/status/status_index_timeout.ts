@@ -14,7 +14,6 @@ import {
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
@@ -83,7 +82,7 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.com:8080', 'https://test.com:8081'],
           })
           .expect(200);
-        await generateAgent(providerContext, 'healthy', `Agent policy test 2`, agentPolicyId);
+        await fleetAndAgents.generateAgent('healthy', `Agent policy test 2`, agentPolicyId);
 
         await findingsIndex.deleteAll();
         await latestFindingsIndex.deleteAll();

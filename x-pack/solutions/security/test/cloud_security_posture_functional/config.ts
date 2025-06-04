@@ -12,9 +12,9 @@ import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import type { services as inheritedServices } from '@kbn/test-suites-xpack/functional/services';
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import type { services as inheritedServices } from '../functional/services';
 
 type SecurityTelemetryServices = typeof inheritedServices &
   typeof services & {
@@ -28,7 +28,7 @@ export type SecurityTelemetryFtrProviderContext = GenericFtrProviderContext<
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
 
   return {
@@ -70,7 +70,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Required for telemetry e2e tests
         `--plugin-path=${resolve(
           __dirname,
-          '../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+          '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
         )}`,
       ],
     },

@@ -64,13 +64,13 @@ export default function (providerContext: FtrProviderContext) {
     describe('Happy flows', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
-          'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
       });
 

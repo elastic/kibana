@@ -18,46 +18,55 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const pageObjects = getPageObjects([
     'common',
     'header',
-    'networkEvents',
+    'alerts',
     'expandedFlyoutGraph',
     'timeline',
   ]);
-  const networkEventsPage = pageObjects.networkEvents;
+  const alertsPage = pageObjects.alerts;
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  describe('Security Network Page - Graph visualization', function () {
+  describe('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
 
       await waitForPluginInitialized({ retry, supertest, logger });
 
       // Setting the timerange to fit the data and open the flyout for a specific alert
-      await networkEventsPage.navigateToNetworkEventsPage(
-        `${networkEventsPage.getAbsoluteTimerangeFilter(
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
           '2024-09-01T00:00:00.000Z',
           '2024-09-02T00:00:00.000Z'
-        )}&${networkEventsPage.getFlyoutFilter('1')}`
+        )}&${alertsPage.getFlyoutFilter(
+          '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
+        )}`
       );
 
-      await networkEventsPage.waitForListToHaveEvents();
+      await alertsPage.waitForListToHaveAlerts();
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
     });
 
     it('expanded flyout - filter by node', async () => {
-      await networkEventsPage.flyout.expandVisualizations();
-      await networkEventsPage.flyout.assertGraphPreviewVisible();
-      await networkEventsPage.flyout.assertGraphNodesNumber(3);
+      await alertsPage.flyout.expandVisualizations();
+
+      await alertsPage.flyout.assertGraphPreviewVisible();
+      await alertsPage.flyout.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
