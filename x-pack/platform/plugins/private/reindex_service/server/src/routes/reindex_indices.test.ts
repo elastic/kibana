@@ -26,16 +26,17 @@ const mockReindexService = {
   getIndexAliases: jest.fn().mockResolvedValue({}),
   getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
   versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
-jest.mock('../lib', () => {
-  return {
-    reindexServiceFactory: () => mockReindexService,
-    generateNewIndexName: () => 'reindexed-foo',
-  };
-});
+jest.mock('../lib/reindex_service', () => ({
+  reindexServiceFactory: () => mockReindexService,
+}));
+
+jest.mock('../lib/index_settings', () => ({
+  generateNewIndexName: () => 'reindexed-foo',
+}));
 
 import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { credentialStoreFactory } from '../lib/credential_store';

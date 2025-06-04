@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({ esIndicesStateCheck: jest.fn() }));
+jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => ({
+  esIndicesStateCheck: jest.fn(),
+}));
 import { BehaviorSubject } from 'rxjs';
 import { TransportResult } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/core/server';

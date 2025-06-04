@@ -24,15 +24,13 @@ const mockReindexService = {
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
 };
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
   versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
-jest.mock('../lib', () => {
-  return {
-    reindexServiceFactory: () => mockReindexService,
-  };
-});
+jest.mock('../lib/reindex_service', () => ({
+  reindexServiceFactory: () => mockReindexService,
+}));
 
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerBatchReindexIndicesRoutes } from './batch_reindex_indices';
