@@ -68,8 +68,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       integrationTabs,
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    // const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
-    //   useSelectedTab('SecurityIntegrationsGridTabs');
+
     const createAutoImportCard = useCreateAutoImportCard();
 
     const integrationTabOptions = useMemo<EuiButtonGroupOptionProps[]>(

@@ -76,7 +76,6 @@ export const useIntegrationCardList = ({
   activeIntegrations,
   selectedTab,
 }: UseIntegrationCardListProps): IntegrationCardItem[] => {
-  // const { selectedTab } = useSelectedTab('useIntegrationCardList');
   const featuredCardIds = selectedTab?.featuredCardIds;
 
   const addSecurityProps = useAddSecurityProps(activeIntegrations);
