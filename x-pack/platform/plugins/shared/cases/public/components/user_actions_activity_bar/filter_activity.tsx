@@ -32,22 +32,9 @@ export const FilterActivity = React.memo<FilterActivityProps>(
     );
 
     return (
-      <EuiFilterGroup
-        data-test-subj="user-actions-filter-activity-group"
-        css={css`
-          > .euiFilterButton-hasNotification {
-            min-width: 68px;
-          }
-        `}
-      >
+      <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
           withNext
-          css={css`
-            &,
-            & .euiFilterButton__text {
-              min-width: 28px;
-            }
-          `}
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
