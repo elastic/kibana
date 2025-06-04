@@ -92,7 +92,15 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
+  }).filter(
+    (sug) =>
+      // Datatables are always return as hidden suggestions
+      // if the user has requested for a datatable (preferredChartType), we want to return it
+      // although it is a hidden suggestion
+      (sug.hide && sug.visualizationId === 'lnsDatatable') ||
+      // Filter out suggestions that are hidden and legacy metrics
+      (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
+  );
 
   // check if there is an XY chart suggested
   // if user has requested for a line or area, we want to sligthly change the state
