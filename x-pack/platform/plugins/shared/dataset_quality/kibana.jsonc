@@ -30,7 +30,6 @@
       "share",
       "taskManager",
       "triggersActionsUi",
-      "unifiedHistogram",
     ],
     "optionalPlugins": [
       "alerting",
