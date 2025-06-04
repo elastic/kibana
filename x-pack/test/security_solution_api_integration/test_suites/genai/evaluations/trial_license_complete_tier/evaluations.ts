@@ -163,5 +163,5 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
-  });
+  }).timeout('60m');
 };
