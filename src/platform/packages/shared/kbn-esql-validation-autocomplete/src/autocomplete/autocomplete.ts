@@ -503,18 +503,20 @@ async function getFunctionArgsSuggestions(
 
     const finalCommandArg = command.args[finalCommandArgIndex];
 
-    const fnToIgnore = [];
-    // just ignore the current function
+    // never suggest grouping functions as args to other functions
+    const fnToIgnore = getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(
+      ({ name }) => name
+    );
+
     if (
       command.name !== 'stats' ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
+      // ignore the current function
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-        // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
