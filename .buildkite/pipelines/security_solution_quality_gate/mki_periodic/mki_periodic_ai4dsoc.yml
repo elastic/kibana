@@ -5,16 +5,16 @@ steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai4dsoc
         label: "Cypress MKI - AI4DSOC"
         key: test_ai4dsoc
-	    env:
-	      BK_TEST_SUITE_KEY: "serverless-cypress-ai4dsoc"
-	    agents:
-	      image: family/kibana-ubuntu-2004
-	      imageProject: elastic-images-prod
-	      provider: gcp
-	      machineType: n2-standard-4
-	    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
-	    timeout_in_minutes: 300
-	    parallelism: 1
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-ai4dsoc"
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
 
   - group: "API MKI - AI4DSOC"
     key: api_test_ai4dsoc
