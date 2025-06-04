@@ -9,7 +9,7 @@ import { createStatefulFeatureFlagTestConfig } from '../../default_configs/featu
 
 export default createStatefulFeatureFlagTestConfig({
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],
-  kbnServerArgs: [`--xpack.actions.preconfigured`],
+  kbnServerArgs: ['--xpack.actions.preconfigured'],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests',
   },

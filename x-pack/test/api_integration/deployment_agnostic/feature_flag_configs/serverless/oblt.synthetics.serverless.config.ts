@@ -10,7 +10,7 @@ import { createServerlessFeatureFlagTestConfig } from '../../default_configs/fea
 export default createServerlessFeatureFlagTestConfig({
   serverlessProject: 'oblt',
   kbnServerArgs: [
-    `--xpack.actions.preconfigured`,
+    '--xpack.actions.preconfigured',
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
   ],
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],

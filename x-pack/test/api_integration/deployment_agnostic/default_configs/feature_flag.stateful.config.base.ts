@@ -24,10 +24,9 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
-import { getTlsWebhookServerUrls } from '../../../alerting_api_integration/common/lib/get_tls_webhook_servers';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
@@ -47,14 +46,10 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    let kbnServerArgs: string[] = [];
 
     if (options.kbnServerArgs) {
-      const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);
-      options.kbnServerArgs = options.kbnServerArgs.map((arg) =>
-        arg.startsWith('--xpack.actions.preconfigured=')
-          ? `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`
-          : arg
-      );
+      kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
     }
 
     /**
@@ -166,7 +161,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
-          ...(options.kbnServerArgs || []),
+          ...kbnServerArgs,
         ],
       },
     };
