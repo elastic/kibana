@@ -54,9 +54,14 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    if (await this.isExportFlyoutOpen()) {
-      await this.testSubjects.click('exportFlyoutCloseButton');
-    }
+    await this.retry.waitFor('close export flyout', async () => {
+      let isExportFlyoutOpen;
+      if ((isExportFlyoutOpen = await this.isExportFlyoutOpen())) {
+        await this.testSubjects.click('exportFlyoutCloseButton');
+      }
+
+      return !isExportFlyoutOpen;
+    });
   }
 
   async getExportAssetTextButton() {
