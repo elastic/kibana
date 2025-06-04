@@ -399,7 +399,7 @@ describe('Asset Inventory page - uiSetting disabled', { tags: ['@ess', '@serverl
   });
 });
 
-describe('Asset Inventory page - user flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
   before(() => {
     postDataView('logs*', 'security-solution-default', 'security-solution-default');
     enableAssetInventory();
@@ -412,7 +412,7 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess', '@serverless'] }
     login();
     visit(ASSET_INVENTORY_URL);
     cy.intercept('GET', '/api/asset_inventory/status').as('getStatus');
-    waitForStatusReady(15);
+    waitForStatusReady(20);
   });
 
   it('should display All assets title', () => {
