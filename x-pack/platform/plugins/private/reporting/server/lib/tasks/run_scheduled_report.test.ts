@@ -65,6 +65,8 @@ jest.mock('../content_stream', () => ({
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
 }));
 
+jest.mock('../../services/notifications/email_notification_service');
+
 const logger = loggingSystemMock.createLogger();
 const fakeRawRequest: FakeRawRequest = {
   headers: {
@@ -93,10 +95,31 @@ const reportSO: SavedObject<ScheduledReportType> = {
     payload: JSON.stringify(payload),
     schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
     title: 'Test Report',
+    notification: {
+      email: {
+        to: ['test1@test.com'],
+        bcc: ['test2@test.com'],
+      },
+    },
   },
   references: [],
   type: 'scheduled-report',
 };
+
+const savedReport = new SavedReport({
+  _id: '290357209345723095',
+  _index: '.reporting-fantastic',
+  _seq_no: 23,
+  _primary_term: 354000,
+  jobtype: 'test1',
+  migration_version: '8.0.0',
+  payload,
+  created_at: new Date().toISOString(),
+  created_by: 'test-user',
+  meta: { objectType: 'test' },
+  scheduled_report_id: 'report-so-id',
+  status: JOB_STATUS.PROCESSING,
+});
 
 describe('Run Scheduled Report Task', () => {
   let mockReporting: ReportingCore;
@@ -127,30 +150,12 @@ describe('Run Scheduled Report Task', () => {
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
-
-    notifications.isEmailServiceAvailable.mockReturnValue(true);
-    emailNotificationService = new EmailNotificationService({
-      notifications,
-    });
   });
 
   beforeEach(async () => {
     reportStore = await mockReporting.getStore();
     reportStore.addReport = jest.fn().mockImplementation(async () => {
-      return new SavedReport({
-        _id: '290357209345723095',
-        _index: '.reporting-fantastic',
-        _seq_no: 23,
-        _primary_term: 354000,
-        jobtype: 'test1',
-        migration_version: '8.0.0',
-        payload,
-        created_at: new Date().toISOString(),
-        created_by: 'test-user',
-        meta: { objectType: 'test' },
-        scheduled_report_id: 'report-so-id',
-        status: JOB_STATUS.PROCESSING,
-      });
+      return savedReport;
     });
     reportStore.setReportError = jest.fn(() =>
       Promise.resolve({
@@ -159,6 +164,10 @@ describe('Run Scheduled Report Task', () => {
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
+    reportStore.setReportWarning = jest.fn();
+    emailNotificationService = new EmailNotificationService({
+      notifications,
+    });
   });
 
   it('Instance setup', () => {
@@ -448,5 +457,126 @@ describe('Run Scheduled Report Task', () => {
         }),
       })
     );
+  });
+
+  describe('notify', () => {
+    it('sends an email notification', async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const runAt = new Date('06/04/2025');
+      const byteSize = 2097152; // 2MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      expect(emailNotificationService.notify).toHaveBeenCalledWith({
+        contentType: 'application/pdf',
+        emailParams: {
+          bcc: ['test2@test.com'],
+          cc: undefined,
+          spaceId: 'default',
+          subject: 'Test Report [2025-06-04T07:00:00.000Z] scheduled report',
+          to: ['test1@test.com'],
+        },
+        id: '290357209345723095',
+        index: '.reporting-fantastic',
+        jobType: 'test1',
+        reporting: mockReporting,
+      });
+    });
+
+    it('logs a warning and sets the execution to warning when the report is larger than 10MB', async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const runAt = new Date('06/04/2025');
+      const byteSize = 11534336; // 11MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      expect(emailNotificationService.notify).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Error sending scheduled report: The report is larger than the 10MB limit.'
+      );
+      expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
+        output: { content_type: 'application/pdf', size: 11534336 },
+        warning: 'Error sending scheduled report: The report is larger than the 10MB limit.',
+      });
+    });
+
+    it('logs a warning and sets the execution to warning when the notification service is not initialized', async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager);
+      const runAt = new Date('06/04/2025');
+      const byteSize = 2097152; // 2MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      expect(emailNotificationService.notify).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Error sending scheduled report: Reporting notification service has not been initialized.'
+      );
+      expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
+        output: { content_type: 'application/pdf', size: 2097152 },
+        warning:
+          'Error sending scheduled report: Reporting notification service has not been initialized.',
+      });
+    });
+
+    it('logs a warning and sets the execution to warning if the notification service throws an error', async () => {
+      jest
+        .spyOn(emailNotificationService, 'notify')
+        .mockRejectedValueOnce(new Error('This is a test error!'));
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const runAt = new Date('06/04/2025');
+      const byteSize = 2097152; // 2MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      expect(emailNotificationService.notify).toHaveBeenCalledWith({
+        contentType: 'application/pdf',
+        emailParams: {
+          bcc: ['test2@test.com'],
+          cc: undefined,
+          spaceId: 'default',
+          subject: 'Test Report [2025-06-04T07:00:00.000Z] scheduled report',
+          to: ['test1@test.com'],
+        },
+        id: '290357209345723095',
+        index: '.reporting-fantastic',
+        jobType: 'test1',
+        reporting: mockReporting,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Error sending scheduled report: This is a test error!'
+      );
+      expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
+        output: { content_type: 'application/pdf', size: 2097152 },
+        warning: 'Error sending scheduled report: This is a test error!',
+      });
+    });
   });
 });
