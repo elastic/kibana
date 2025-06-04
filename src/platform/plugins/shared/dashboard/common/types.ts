@@ -88,8 +88,7 @@ export type DashboardLocatorParams = Partial<
     dashboardId?: string;
 
     /**
-     * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-     * whether to hash the data in the url to avoid url length issues.
+     * Determines whether to hash the contents of the url to avoid url length issues. Defaults to the uiSettings configuration for `storeInSessionStorage`. 
      */
     useHash?: boolean;
 
