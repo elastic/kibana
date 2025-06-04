@@ -27,6 +27,9 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-test-helpers-test-utils",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
