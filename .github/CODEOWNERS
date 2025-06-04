@@ -1068,7 +1068,6 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
