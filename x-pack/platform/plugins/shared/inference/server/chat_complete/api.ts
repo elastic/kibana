@@ -17,6 +17,7 @@ import {
   ChatCompleteOptions,
   getConnectorModel,
   getConnectorProvider,
+  RedactionConfiguration,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getInferenceAdapter } from './adapters';
@@ -29,6 +30,8 @@ import {
   getRetryFilter,
 } from './utils';
 import { withChatCompleteSpan } from '../tracing/with_chat_complete_span';
+import { redactMessages } from './redaction/redact_messages';
+import { unredactMessage } from './redaction/unredact_message';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -37,6 +40,7 @@ interface CreateChatCompleteApiOptions {
 }
 
 export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
+
 export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
   return ({
     connectorId,
@@ -52,14 +56,21 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     metadata,
     maxRetries = 3,
     retryConfiguration = {},
-  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
+    redactionConfiguration,
+  }: ChatCompleteOptions<
     ToolOptions,
-    boolean
-  > => {
+    boolean,
+    RedactionConfiguration | undefined
+  >): ChatCompleteCompositeResponse<ToolOptions, boolean, RedactionConfiguration | undefined> => {
     const inference$ = defer(async () => {
-      return await getInferenceExecutor({ connectorId, request, actions });
+      return Promise.all([
+        getInferenceExecutor({ connectorId, request, actions }),
+        redactionConfiguration && redactionConfiguration.enabled
+          ? redactMessages({ messages, redactionConfiguration })
+          : undefined,
+      ]);
     }).pipe(
-      switchMap((executor) => {
+      switchMap(([executor, redaction]) => {
         const connector = executor.getConnector();
         const connectorType = connector.type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
@@ -70,7 +81,9 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           );
         }
 
-        const messagesWithoutData = messages.map((message) => omit(message, 'data'));
+        const maybeRedactedMessages = redaction ? redaction.messages : messages;
+
+        const messagesWithoutData = maybeRedactedMessages.map((message) => omit(message, 'data'));
 
         logger.debug(
           () => `Sending request, last message is: ${JSON.stringify(last(messagesWithoutData))}`
@@ -114,7 +127,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
                 })
               );
           }
-        );
+        ).pipe(unredactMessage({ redaction }));
       }),
       retryWithExponentialBackoff({
         maxRetry: maxRetries,

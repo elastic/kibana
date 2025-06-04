@@ -10,6 +10,7 @@ import type { ToolCallsOf, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
+import type { RedactionConfiguration, UnredactionOutput } from './redaction/types';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -57,17 +58,19 @@ import type { ChatCompleteMetadata } from './metadata';
  */
 export type ChatCompleteAPI = <
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
 >(
-  options: ChatCompleteOptions<TToolOptions, TStream>
-) => ChatCompleteCompositeResponse<TToolOptions, TStream>;
+  options: ChatCompleteOptions<TToolOptions, TStream, TRedactionConfiguration>
+) => ChatCompleteCompositeResponse<TToolOptions, TStream, TRedactionConfiguration>;
 
 /**
  * Options used to call the {@link ChatCompleteAPI}
  */
 export type ChatCompleteOptions<
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
 > = {
   /**
    * The ID of the connector to use.
@@ -126,6 +129,11 @@ export type ChatCompleteOptions<
    * Note that defaults are very fine, so only use this if you really have a reason to do so.
    */
   retryConfiguration?: ChatCompleteRetryConfiguration;
+
+  /**
+   * Redaction rules
+   */
+  redactionConfiguration?: TRedactionConfiguration;
 } & TToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -161,24 +169,29 @@ export interface ChatCompleteRetryConfiguration {
  */
 export type ChatCompleteCompositeResponse<
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
 > = TStream extends true
-  ? ChatCompleteStreamResponse<TToolOptions>
-  : Promise<ChatCompleteResponse<TToolOptions>>;
+  ? ChatCompleteStreamResponse<TToolOptions, TRedactionConfiguration>
+  : Promise<ChatCompleteResponse<TToolOptions, TRedactionConfiguration>>;
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is enabled.
  *
  * Observable of {@link ChatCompletionEvent}
  */
-export type ChatCompleteStreamResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
-  ChatCompletionEvent<TToolOptions>
->;
+export type ChatCompleteStreamResponse<
+  TToolOptions extends ToolOptions = ToolOptions,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
+> = Observable<ChatCompletionEvent<TToolOptions, TRedactionConfiguration>>;
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is not enabled.
  */
-export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOptions> {
+export type ChatCompleteResponse<
+  TToolOptions extends ToolOptions = ToolOptions,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
+> = {
   /**
    * The text content of the LLM response.
    */
@@ -191,7 +204,9 @@ export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOpt
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
-}
+} & (TRedactionConfiguration extends RedactionConfiguration
+  ? { unredaction: UnredactionOutput }
+  : {});
 
 /**
  * Define the function calling mode when using inference APIs.

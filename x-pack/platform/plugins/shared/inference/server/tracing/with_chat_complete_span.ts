@@ -10,6 +10,7 @@ import {
   ChatCompleteCompositeResponse,
   Message,
   MessageRole,
+  RedactionConfiguration,
   ToolCall,
   ToolMessage,
   ToolOptions,
@@ -132,15 +133,16 @@ function mapAssistantResponse({
  * @param options
  * @param cb
  */
-export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse<ToolOptions, boolean>>(
-  options: InferenceGenerationOptions,
-  cb: (span?: Span) => T
-): T;
+export function withChatCompleteSpan<
+  T extends ChatCompleteCompositeResponse<ToolOptions, boolean, RedactionConfiguration | undefined>
+>(options: InferenceGenerationOptions, cb: (span?: Span) => T): T;
 
 export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
-  cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
-): ChatCompleteCompositeResponse<ToolOptions, boolean> {
+  cb: (
+    span?: Span
+  ) => ChatCompleteCompositeResponse<ToolOptions, boolean, RedactionConfiguration | undefined>
+): ChatCompleteCompositeResponse<ToolOptions, boolean, RedactionConfiguration | undefined> {
   const { system, messages, model, provider, ...attributes } = options;
 
   const next = withInferenceSpan(

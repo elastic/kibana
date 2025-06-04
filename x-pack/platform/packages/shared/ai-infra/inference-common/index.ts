@@ -59,6 +59,15 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type UnredactedMessage,
+  type RedactionConfiguration,
+  type UnredactionOutput,
+  type RedactionOutput,
+  type Redaction,
+  type RedactionEntity,
+  type Unredaction,
+  type NamedEntityRecognitionRule,
+  type RegExpRule,
 } from './src/chat_complete';
 export {
   OutputEventType,

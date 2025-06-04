@@ -12,13 +12,21 @@ import {
   createInferenceInternalError,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
+  RedactionConfiguration,
   ToolOptions,
   withoutChunkEvents,
 } from '@kbn/inference-common';
 
-export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>(
-  streamResponse$: ChatCompleteStreamResponse<TToolOptions>
-): Promise<ChatCompleteResponse<TToolOptions>> => {
+export function streamToResponse<
+  TToolOptions extends ToolOptions,
+  TRedactionConfiguration extends RedactionConfiguration | undefined
+>(
+  streamResponse$: ChatCompleteStreamResponse<ToolOptions, RedactionConfiguration | undefined>
+): Promise<ChatCompleteResponse<ToolOptions, RedactionConfiguration | undefined>>;
+
+export function streamToResponse(
+  streamResponse$: ChatCompleteStreamResponse<ToolOptions, RedactionConfiguration | undefined>
+): Promise<ChatCompleteResponse<ToolOptions, RedactionConfiguration | undefined>> {
   return firstValueFrom(
     streamResponse$.pipe(
       withoutChunkEvents(),
@@ -39,4 +47,4 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
       })
     )
   );
-};
+}

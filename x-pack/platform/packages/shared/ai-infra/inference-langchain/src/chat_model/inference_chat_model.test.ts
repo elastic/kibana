@@ -26,6 +26,7 @@ import {
   InferenceConnector,
   InferenceConnectorType,
   MessageRole,
+  ToolOptions,
   createInferenceRequestError,
 } from '@kbn/inference-common';
 import { InferenceChatModel } from './inference_chat_model';
@@ -53,7 +54,7 @@ const createStreamResponse = (
   chunks: ChunkEventInput[],
   tokenCount?: ChatCompletionTokenCount
 ): ChatCompleteStreamResponse => {
-  const events: ChatCompletionEvent[] = chunks.map(createChunkEvent);
+  const events: Array<ChatCompletionEvent<ToolOptions, undefined>> = chunks.map(createChunkEvent);
   if (tokenCount) {
     events.push({
       type: ChatCompletionEventType.ChatCompletionTokenCount,

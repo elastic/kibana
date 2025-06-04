@@ -6,6 +6,7 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
+import { RedactionConfiguration, UnredactionOutput } from './redaction/types';
 import type { ToolCallsOf, ToolOptions } from './tools';
 
 /**
@@ -15,6 +16,7 @@ export enum ChatCompletionEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
   ChatCompletionTokenCount = 'chatCompletionTokenCount',
   ChatCompletionMessage = 'chatCompletionMessage',
+  ChatCompletionUnredactedMessage = 'chatCompletionUnredactedMessage',
 }
 
 /**
@@ -33,6 +35,22 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * The eventual tool calls performed by the LLM.
        */
       toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+    }
+  >;
+
+export type ChatCompletionUnredactedMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
+  InferenceTaskEventBase<
+    ChatCompletionEventType.ChatCompletionUnredactedMessage,
+    {
+      /**
+       * The text content of the LLM response.
+       */
+      content: string;
+      /**
+       * The eventual tool calls performed by the LLM.
+       */
+      toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+      unredaction: UnredactionOutput;
     }
   >;
 
@@ -127,7 +145,14 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
  * event will be emitted ex
  *
  */
-export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> =
-  | ChatCompletionChunkEvent
-  | ChatCompletionTokenCountEvent
-  | ChatCompletionMessageEvent<TToolOptions>;
+export type ChatCompletionEvent<
+  TToolOptions extends ToolOptions = ToolOptions,
+  TRedactionConfiguration extends RedactionConfiguration | undefined =
+    | RedactionConfiguration
+    | undefined
+> = TRedactionConfiguration extends RedactionConfiguration
+  ? ChatCompletionUnredactedMessageEvent<TToolOptions>
+  :
+      | ChatCompletionChunkEvent
+      | ChatCompletionTokenCountEvent
+      | ChatCompletionMessageEvent<TToolOptions>;

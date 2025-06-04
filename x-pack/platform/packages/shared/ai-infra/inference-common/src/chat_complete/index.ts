@@ -69,3 +69,15 @@ export {
   isTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
+
+export type {
+  UnredactedMessage,
+  RedactionConfiguration,
+  RedactionOutput,
+  UnredactionOutput,
+  Redaction,
+  RedactionEntity,
+  Unredaction,
+  NamedEntityRecognitionRule,
+  RegExpRule,
+} from './redaction';
