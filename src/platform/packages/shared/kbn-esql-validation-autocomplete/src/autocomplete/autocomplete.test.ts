@@ -34,7 +34,9 @@ import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } fro
 import { getRecommendedQueries } from './recommended_queries/templates';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries/suggestions';
 
-const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
+const commandDefinitions = unmodifiedCommandDefinitions.filter(
+  ({ name, hidden }) => !hidden && name !== 'rrf'
+);
 
 const getRecommendedQueriesSuggestionsFromTemplates = (fromCommand: string, timeField?: string) =>
   getRecommendedQueries({

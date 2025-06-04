@@ -30,9 +30,9 @@ import {
   canEditRuleWithActions,
   explainLackOfPermission,
 } from '../../../../common/utils/privileges';
-import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
-import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { IntegrationsPopover } from '../../../common/components/related_integrations/integrations_popover';
+import { RuleStatusBadge } from '../../../common/components/rule_execution_status';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';

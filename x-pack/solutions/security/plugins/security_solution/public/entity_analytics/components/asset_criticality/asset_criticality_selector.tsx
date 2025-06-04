@@ -272,13 +272,11 @@ const option = (
   dropdownDisplay: (
     <AssetCriticalityBadge
       criticalityLevel={level}
-      style={{ lineHeight: 'inherit' }}
+      css={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
     />
   ),
-  inputDisplay: (
-    <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
-  ),
+  inputDisplay: <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />,
 });
 
 export const assetCriticalityOptions: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> =
