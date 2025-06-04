@@ -1805,7 +1805,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
         'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
-        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',

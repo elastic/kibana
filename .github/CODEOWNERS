@@ -1070,12 +1070,12 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/test
 x-pack/test_serverless
-x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
-x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
-x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
-x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
-x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
-x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -1483,8 +1483,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/services/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
-/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
-/x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
@@ -1607,8 +1607,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/ml/ @elastic/ml-ui
-/x-pack/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
-/x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui @elastic/kibana-management
+/x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
+/x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
 /x-pack/test_serverless/**/test_suites/**/ml/ @elastic/ml-ui
@@ -2069,8 +2069,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_oblt_overview_page.ts @elastic/response-ops
-/x-pack/test/alerting_api_integration/ @elastic/response-ops
-/x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
+/x-pack/platform/test/alerting_api_integration/ @elastic/response-ops
+/x-pack/solutions/observability/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
@@ -2476,14 +2476,15 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
-/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
+/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces @elastic/security-defend-workflows
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
-/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/crowdstrike.ts @elastic/security-defend-workflows
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/crowdstrike.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/microsoft_defender_endpoint @elastic/security-defend-workflows
-/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/microsoft_defender_endpoint.ts @elastic/security-defend-workflows
+/x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/microsoft_defender_endpoint.ts @elastic/security-defend-workflows
 
 
 ## Security Solution shared OAS schemas

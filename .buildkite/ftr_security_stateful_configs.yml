@@ -114,3 +114,4 @@ enabled:
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_trial.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_trial.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_basic.ts
+  - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group1/config.ts

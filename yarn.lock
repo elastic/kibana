@@ -3754,7 +3754,7 @@
   dependencies:
     tslib "^2.6.2"
 
-"@kbn/aad-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/aad":
+"@kbn/aad-fixtures-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/aad":
   version "0.0.0"
   uid ""
 
@@ -3762,7 +3762,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/actions-simulators-plugin@link:x-pack/test/alerting_api_integration/common/plugins/actions_simulators":
+"@kbn/actions-simulators-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators":
   version "0.0.0"
   uid ""
 
@@ -3822,11 +3822,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-api-integration-helpers@link:x-pack/test/alerting_api_integration/packages/helpers":
+"@kbn/alerting-api-integration-helpers@link:x-pack/platform/test/alerting_api_integration/packages/helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-api-integration-test-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts":
+"@kbn/alerting-api-integration-test-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -3866,7 +3866,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-restricted-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted":
+"@kbn/alerts-restricted-fixtures-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted":
   version "0.0.0"
   uid ""
 
@@ -7662,7 +7662,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-fixture-plugin@link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture":
+"@kbn/task-manager-fixture-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture":
   version "0.0.0"
   uid ""
 
@@ -7743,6 +7743,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-search@link:x-pack/solutions/search/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
   version "0.0.0"
   uid ""
 
