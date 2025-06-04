@@ -120,7 +120,8 @@ export function SloManagementTable() {
               defaultMessage: 'Enable',
             }),
       'data-test-subj': 'sloActionsManage',
-      enabled: () => !!permissions?.hasAllWriteRequested,
+      enabled: (slo: SLODefinitionResponse) =>
+        !!permissions?.hasAllWriteRequested && slo.isTemplate === false,
       onClick: (slo: SLODefinitionResponse) => {
         const isEnabled = slo.enabled;
         triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
@@ -150,7 +151,8 @@ export function SloManagementTable() {
         defaultMessage: 'Reset',
       }),
       'data-test-subj': 'sloActionsReset',
-      enabled: () => !!permissions?.hasAllWriteRequested,
+      enabled: (slo: SLODefinitionResponse) =>
+        !!permissions?.hasAllWriteRequested && slo.isTemplate === false,
       onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'reset' }),
     },
   ];
@@ -162,6 +164,9 @@ export function SloManagementTable() {
         defaultMessage: 'Name',
       }),
       render: (_, slo: SLODefinitionResponse) => {
+        if (slo.isTemplate) {
+          return <EuiText size="s">{slo.name}</EuiText>;
+        }
         return (
           <EuiLink
             data-test-subj="sloDetailsLink"
@@ -171,6 +176,27 @@ export function SloManagementTable() {
             {slo.name}
           </EuiLink>
         );
+      },
+    },
+    {
+      field: 'State',
+      width: '20%',
+      name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
+        defaultMessage: 'State',
+      }),
+      render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
+        if (item.isTemplate) {
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.slo.sloManagementTable.columns.state.template', {
+                defaultMessage: 'Template',
+              })}
+            </EuiBadge>
+          );
+        }
+        const color = item.enabled ? 'success' : 'danger';
+        const label = item.enabled ? 'Running' : 'Paused';
+        return <EuiHealth color={color}>{label}</EuiHealth>;
       },
     },
     {
@@ -212,18 +238,7 @@ export function SloManagementTable() {
         );
       },
     },
-    {
-      field: 'State',
-      width: '20%',
-      name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
-        defaultMessage: 'State',
-      }),
-      render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
-        const color = item.enabled ? 'success' : 'danger';
-        const label = item.enabled ? 'Running' : 'Paused';
-        return <EuiHealth color={color}>{label}</EuiHealth>;
-      },
-    },
+
     {
       name: 'Actions',
       width: '10%',

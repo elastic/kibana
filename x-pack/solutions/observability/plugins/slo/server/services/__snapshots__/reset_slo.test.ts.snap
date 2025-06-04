@@ -110,6 +110,7 @@ exports[`ResetSLO happy path resets all associated resources 4`] = `
           },
           "type": "sli.apm.transactionDuration",
         },
+        "isTemplate": false,
         "name": "irrelevant",
         "objective": Object {
           "target": 0.999,
@@ -559,6 +560,7 @@ exports[`ResetSLO happy path resets all associated resources 7`] = `
           },
           "type": "sli.apm.transactionDuration",
         },
+        "isTemplate": false,
         "name": "irrelevant",
         "objective": Object {
           "target": 0.999,

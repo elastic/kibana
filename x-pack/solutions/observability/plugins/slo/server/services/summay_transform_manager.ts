@@ -127,7 +127,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
           ),
         { logger: this.logger }
       );
-      return response?.transforms[0]?._meta?.version;
+      return response?.transforms?.[0]?._meta?.version;
     } catch (err) {
       this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;

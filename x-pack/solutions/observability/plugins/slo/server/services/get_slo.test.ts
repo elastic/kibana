@@ -110,6 +110,7 @@ describe('GetSLO', () => {
         instanceId: ALL_VALUE,
         meta: {},
         version: SLO_MODEL_VERSION,
+        isTemplate: false,
       });
     });
   });

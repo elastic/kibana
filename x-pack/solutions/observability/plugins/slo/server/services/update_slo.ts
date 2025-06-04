@@ -71,8 +71,16 @@ export class UpdateSLO {
     );
 
     const rollbackOperations = [];
+
     await this.repository.update(updatedSlo);
     rollbackOperations.push(() => this.repository.update(originalSlo));
+
+    if (updatedSlo.isTemplate) {
+      // Template SLOs are only meant to store the SLO Definition
+      // and should not install pipelines or transforms
+      // so we skip the rest of the installation process
+      return this.toResponse(updatedSlo);
+    }
 
     if (!requireRevisionBump) {
       // we only have to update the summary pipeline to include the non-breaking changes (name, desc, tags, ...) in the summary index

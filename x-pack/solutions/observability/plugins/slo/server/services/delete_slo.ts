@@ -42,6 +42,10 @@ export class DeleteSLO {
   ): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
+    if (slo.isTemplate) {
+      return this.repository.deleteById(slo.id, { ignoreNotFound: true });
+    }
+
     // First delete the linked resources before deleting the data
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);

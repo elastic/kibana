@@ -76,6 +76,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   updatedAt: now,
   version: 2,
   meta: {},
+  isTemplate: false,
 };
 
 export const sloList: FindSLOResponse = {

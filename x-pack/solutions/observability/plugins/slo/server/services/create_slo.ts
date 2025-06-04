@@ -66,6 +66,13 @@ export class CreateSLO {
     const createPromise = this.repository.create(slo);
     rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 
+    if (slo.isTemplate) {
+      // Template SLOs are only meant to store the SLO Definition
+      // and should not install pipelines or transforms
+      // so we skip the rest of the installation process
+      return this.toResponse(slo);
+    }
+
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
@@ -108,6 +115,8 @@ export class CreateSLO {
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
       ]);
+
+      return this.toResponse(slo);
     } catch (err) {
       this.logger.debug(
         `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
@@ -127,8 +136,6 @@ export class CreateSLO {
 
       throw err;
     }
-
-    return this.toResponse(slo);
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
@@ -237,6 +244,7 @@ export class CreateSLO {
       updatedBy: this.username,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
       version: SLO_MODEL_VERSION,
+      isTemplate: params.isTemplate ?? false,
     };
   }
 

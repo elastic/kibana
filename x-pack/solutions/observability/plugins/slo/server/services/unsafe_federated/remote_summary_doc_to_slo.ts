@@ -44,6 +44,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     version: 1,
     createdBy: summaryDoc.slo.createdBy,
     updatedBy: summaryDoc.slo.updatedBy,
+    isTemplate: false, // by definition, a summary doc cannot be from a template
   });
 
   if (isLeft(res)) {

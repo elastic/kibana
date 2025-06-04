@@ -25,6 +25,7 @@ import { AssetTitleMap } from '../../../constants';
 import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
+import { AssetSloType } from './asset_type/slo';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
@@ -63,11 +64,21 @@ export const AssetsAccordion: FunctionComponent<{
           hasShadow={false}
           data-test-subj={`fleetAssetsAccordion.content.${type}`}
         >
-          {savedObjects.map(({ id, attributes, appLink }, idx) => {
+          {savedObjects.map((savedObject, idx) => {
+            const { id, attributes, appLink } = savedObject;
             const { title: soTitle, description } = attributes || {};
             // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
+            }
+
+            if (type === 'slo') {
+              return (
+                <Fragment key={id}>
+                  <AssetSloType idx={idx} savedObject={savedObject} />
+                  {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
+                </Fragment>
+              );
             }
 
             const title = soTitle ?? id;

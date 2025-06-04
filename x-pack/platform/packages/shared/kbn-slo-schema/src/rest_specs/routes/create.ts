@@ -31,6 +31,7 @@ const createSLOParamsSchema = t.type({
       tags: tagsSchema,
       groupBy: allOrAnyStringOrArray,
       revision: t.number,
+      isTemplate: t.boolean,
     }),
   ]),
 });
