@@ -80,6 +80,7 @@ import {
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  Location,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
