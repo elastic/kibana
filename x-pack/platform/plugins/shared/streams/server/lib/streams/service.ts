@@ -8,12 +8,10 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
-import type { StreamsConfig } from '../../../common/config';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { AssetClient } from './assets/asset_client';
 import { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import { createFakeRequestBoundToDefaultSpace } from './helpers/fake_request_factory';
 import { migrateOnRead } from './helpers/migrate_on_read';
 
 export const streamsStorageSettings = {
@@ -35,27 +33,23 @@ export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger,
-    private readonly isDev: boolean,
-    private readonly config: StreamsConfig
+    private readonly isDev: boolean
   ) {}
 
   async getClientWithRequest({
     request,
     assetClient,
+    queryClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
+    queryClient: QueryClient;
   }): Promise<StreamsClient> {
-    const [coreStart, pluginStart] = await this.coreSetup.getStartServices();
+    const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
-    const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
-    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
-    const queryClient = new QueryClient({ rulesClient, assetClient });
-
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, Streams.all.Definition>(
@@ -73,11 +67,9 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
-      rulesClient,
       request,
       isServerless,
       isDev: this.isDev,
-      config: this.config,
     });
   }
 }

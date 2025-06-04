@@ -7,8 +7,10 @@
 
 import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
+import { Logger } from '@kbn/core/server';
 import { StreamQuery } from '@kbn/streams-schema';
 import { QueryLink } from '../../../../../common/assets';
+import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetClient, getUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
@@ -28,20 +30,23 @@ function toQueryLink(query: StreamQuery, stream: string): QueryLink {
 }
 
 export class QueryClient {
+  private readonly isSignificantEventsEnabled: boolean;
+
   constructor(
-    private readonly clients: {
+    private readonly dependencies: {
       assetClient: AssetClient;
       rulesClient: RulesClient;
+      logger: Logger;
+      config: StreamsConfig;
     }
-  ) {}
-
-  public async syncQueries(
-    stream: string,
-    queries: StreamQuery[],
-    significantEventsEnabled: boolean
   ) {
-    if (!significantEventsEnabled) {
-      return await this.clients.assetClient.syncAssetList(
+    this.isSignificantEventsEnabled =
+      dependencies.config.experimental?.significantEventsEnabled ?? false;
+  }
+
+  public async syncQueries(stream: string, queries: StreamQuery[]) {
+    if (!this.isSignificantEventsEnabled) {
+      return await this.dependencies.assetClient.syncAssetList(
         stream,
         queries.map((query) => ({
           [ASSET_ID]: query.id,
@@ -61,7 +66,7 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
+    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -98,7 +103,7 @@ export class QueryClient {
       stream
     );
 
-    await this.clients.assetClient.syncAssetList(
+    await this.dependencies.assetClient.syncAssetList(
       stream,
       queries.map((query) => ({
         [ASSET_ID]: query.id,
@@ -109,10 +114,10 @@ export class QueryClient {
     );
   }
 
-  public async upsert(stream: string, query: StreamQuery, significantEventsEnabled: boolean) {
-    const { assetClient } = this.clients;
+  public async upsert(stream: string, query: StreamQuery) {
+    const { assetClient } = this.dependencies;
 
-    if (!significantEventsEnabled) {
+    if (!this.isSignificantEventsEnabled) {
       return await assetClient.linkAsset(stream, {
         [ASSET_ID]: query.id,
         [ASSET_TYPE]: 'query',
@@ -120,7 +125,7 @@ export class QueryClient {
       });
     }
 
-    const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
+    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
     const nextQueries = [
       ...currentQueryLinks.filter((link) => link.query.id !== query.id),
       toQueryLink(query, stream),
@@ -128,38 +133,35 @@ export class QueryClient {
 
     await this.syncQueries(
       stream,
-      nextQueries.map((link) => link.query),
-      significantEventsEnabled
+      nextQueries.map((link) => link.query)
     );
   }
 
-  public async delete(stream: string, queryId: string, significantEventsEnabled: boolean) {
-    const { assetClient } = this.clients;
+  public async delete(stream: string, queryId: string) {
+    const { assetClient } = this.dependencies;
 
-    if (!significantEventsEnabled) {
+    if (!this.isSignificantEventsEnabled) {
       return await assetClient.unlinkAsset(stream, {
         [ASSET_TYPE]: 'query',
         [ASSET_ID]: queryId,
       });
     }
 
-    const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
+    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
     const nextQueries = currentQueryLinks.filter((link) => link.query.id !== queryId);
     await this.syncQueries(
       stream,
-      nextQueries.map((link) => link.query),
-      significantEventsEnabled
+      nextQueries.map((link) => link.query)
     );
   }
 
   public async bulkOperations(
     stream: string,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
-    significantEventsEnabled: boolean
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {
-    const { assetClient } = this.clients;
+    const { assetClient } = this.dependencies;
 
-    if (!significantEventsEnabled) {
+    if (!this.isSignificantEventsEnabled) {
       return await assetClient.bulk(
         stream,
         operations.map((operation) => {
@@ -186,7 +188,7 @@ export class QueryClient {
       );
     }
 
-    const currentQueryLinks = await this.clients.assetClient.getAssetLinks(stream, ['query']);
+    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations
@@ -211,8 +213,7 @@ export class QueryClient {
 
     await this.syncQueries(
       stream,
-      nextQueries.map((link) => link.query),
-      significantEventsEnabled
+      nextQueries.map((link) => link.query)
     );
   }
 
@@ -221,7 +222,7 @@ export class QueryClient {
     queriesToUpdate: QueryLink[],
     stream: string
   ) {
-    const { rulesClient } = this.clients;
+    const { rulesClient } = this.dependencies;
 
     await Promise.all([
       ...queriesToCreate.map((query) => {
@@ -320,7 +321,7 @@ export class QueryClient {
       return;
     }
 
-    const { rulesClient } = this.clients;
+    const { rulesClient } = this.dependencies;
     await rulesClient
       .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink) })
       .catch((error) => {

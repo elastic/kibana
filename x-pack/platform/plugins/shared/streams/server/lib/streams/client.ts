@@ -11,11 +11,9 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, StreamQuery, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import type { StreamsConfig } from '../../../common/config';
+import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import { QueryClient } from './assets/query/query_client';
@@ -68,8 +66,6 @@ export class StreamsClient {
       request: KibanaRequest;
       isServerless: boolean;
       isDev: boolean;
-      rulesClient: RulesClient;
-      config: StreamsConfig;
     }
   ) {}
 
@@ -223,51 +219,12 @@ export class StreamsClient {
     );
 
     // sync rules with asset links
-    await this.syncQueries(stream.name, queries);
+    await this.dependencies.queryClient.syncQueries(stream.name, queries);
 
     return {
       acknowledged: true,
       result: result.changes.created.includes(name) ? 'created' : 'updated',
     };
-  }
-
-  // Passthrough methods for query client
-  async syncQueries(name: string, queries: StreamQuery[]) {
-    await this.dependencies.queryClient.syncQueries(
-      name,
-      queries,
-      this.dependencies.config.experimental?.significantEventsEnabled ?? false
-    );
-  }
-
-  // Passthrough methods for query client
-  async upsertQuery(name: string, query: StreamQuery) {
-    await this.dependencies.queryClient.upsert(
-      name,
-      query,
-      this.dependencies.config.experimental?.significantEventsEnabled ?? false
-    );
-  }
-
-  // Passthrough methods for query client
-  async deleteQuery(name: string, queryId: string) {
-    await this.dependencies.queryClient.delete(
-      name,
-      queryId,
-      this.dependencies.config.experimental?.significantEventsEnabled ?? false
-    );
-  }
-
-  // Passthrough methods for query client
-  async bulkQueryOperations(
-    stream: string,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
-  ) {
-    return this.dependencies.queryClient.bulkOperations(
-      stream,
-      operations,
-      this.dependencies.config.experimental?.significantEventsEnabled ?? false
-    );
   }
 
   /**
@@ -670,7 +627,7 @@ export class StreamsClient {
       throw result.error;
     }
 
-    await this.syncQueries(name, []);
+    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

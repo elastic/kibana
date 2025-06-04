@@ -38,6 +38,7 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { QueryService } from './lib/streams/assets/query/query_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -94,8 +95,9 @@ export class StreamsPlugin
     }
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger, this.isDev, this.config);
+    const streamsService = new StreamsService(core, this.logger, this.isDev);
     const contentService = new ContentService(core, this.logger);
+    const queryService = new QueryService(core, this.logger, this.config);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -167,7 +169,16 @@ export class StreamsPlugin
             contentService.getClient(),
           ]);
 
-          const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });
+          const queryClient = await queryService.getClientWithRequest({
+            request,
+            assetClient,
+          });
+
+          const streamsClient = await streamsService.getClientWithRequest({
+            request,
+            assetClient,
+            queryClient,
+          });
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
@@ -180,6 +191,7 @@ export class StreamsPlugin
             streamsClient,
             inferenceClient,
             contentClient,
+            queryClient,
           };
         },
       },

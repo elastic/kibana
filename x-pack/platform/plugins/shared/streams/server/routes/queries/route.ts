@@ -88,14 +88,14 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
 
     await streamsClient.ensureStream(streamName);
-    await streamsClient.upsertQuery(streamName, {
+    await queryClient.upsert(streamName, {
       id: queryId,
       title: body.title,
       kql: {
@@ -131,14 +131,14 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient } = await getScopedClients({ request });
 
     const {
       path: { queryId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
-    await streamsClient.deleteQuery(streamName, queryId);
+    await queryClient.delete(streamName, queryId);
 
     return {
       acknowledged: true,
@@ -179,7 +179,7 @@ const bulkQueriesRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient } = await getScopedClients({ request });
 
     const {
       path: { name: streamName },
@@ -187,7 +187,7 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-    await streamsClient.bulkQueryOperations(streamName, operations);
+    await queryClient.bulkOperations(streamName, operations);
 
     return { acknowledged: true };
   },
