@@ -9,7 +9,9 @@ import { getKibanaCliLoggers, type FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+  const xPackAPITestsConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-xpack-platform/api_integration/config')
+  );
 
   return {
     ...xPackAPITestsConfig.getAll(),

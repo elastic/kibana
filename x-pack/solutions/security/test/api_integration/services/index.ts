@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 
-import { pageObjects } from './page_objects';
-import { services } from '../functional/services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export const services = {
+  ...platformServices,
+};
