@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { EDITOR_MARKER } from '../../../shared/constants';
 import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
@@ -86,6 +87,9 @@ export async function suggest(
     case CompletionPosition.AFTER_INFERENCE_ID:
       return [asCompletionItem, pipeCompleteItem];
 
+    case CompletionPosition.AS:
+      return [targetIdCompletionItem];
+
     case CompletionPosition.AFTER_TARGET_ID:
       return [pipeCompleteItem];
 
@@ -111,5 +115,20 @@ const asCompletionItem: SuggestionRawDefinition = {
   kind: 'Reference',
   label: 'AS',
   sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
   text: 'AS ',
+};
+
+const targetIdCompletionItem: SuggestionRawDefinition = {
+  detail: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.completionTargetIdDoc',
+    {
+      defaultMessage: 'Target ID',
+    }
+  ),
+  command: TRIGGER_SUGGESTION_COMMAND,
+  kind: 'Reference',
+  label: 'completion',
+  sortText: '1',
+  text: 'completion ',
 };
