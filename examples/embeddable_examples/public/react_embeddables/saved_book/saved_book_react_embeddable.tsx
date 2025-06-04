@@ -104,6 +104,7 @@ export const getSavedBookEmbeddableFactory = (
   const savedBookEmbeddableFactory: EmbeddableFactory<BookSerializedState, BookApi> = {
     type: SAVED_BOOK_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      console.error('INITIAL STATE', initialState);
       const state = await deserializeState(initialState, contentManagement);
       const titleManager = initializeTitleManager(initialState.rawState);
 
