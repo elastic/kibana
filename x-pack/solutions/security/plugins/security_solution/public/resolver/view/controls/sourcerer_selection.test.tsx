@@ -55,7 +55,10 @@ describe('SourcererButton', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         dataViewFieldEditor: { openEditor: jest.fn() },
-        dataViewEditor: { openEditor: jest.fn() },
+        dataViewEditor: {
+          openEditor: jest.fn(),
+          userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
+        },
         data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
