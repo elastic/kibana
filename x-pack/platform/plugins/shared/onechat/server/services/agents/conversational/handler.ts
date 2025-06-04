@@ -12,7 +12,7 @@ import { isRoundCompleteEvent } from '@kbn/onechat-common';
 import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
 import { providerToLangchainTools, conversationLangchainMessages } from './utils';
 import { createAgentGraph } from './graph';
-import { convertGraphEvents, emitRoundEvent } from './convert_graph_events';
+import { convertGraphEvents, addRoundCompleteEvent } from './convert_graph_events';
 
 export interface CreateConversationalAgentHandlerParams {
   logger: Logger;
@@ -21,8 +21,7 @@ export interface CreateConversationalAgentHandlerParams {
 const defaultAgentGraphName = 'default-onechat-agent';
 
 /**
- * Create the agent handler
- * @param logger
+ * Create the handler function for the default onechat agent.
  */
 export const createHandler = ({
   logger,
@@ -56,7 +55,7 @@ export const createHandler = ({
     const events$ = from(eventStream).pipe(
       filter(isStreamEvent),
       convertGraphEvents({ graphName: defaultAgentGraphName, runName: defaultAgentGraphName }),
-      emitRoundEvent({ userInput: nextInput }),
+      addRoundCompleteEvent({ userInput: nextInput }),
       shareReplay()
     );
 

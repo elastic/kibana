@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { createToolEventEmitter, convertInternalEvent } from './events';
+import { createToolEventEmitter, createAgentEventEmitter, convertInternalEvent } from './events';
 import type { InternalRunEvent, RunContext } from '@kbn/onechat-server';
+import { ChatAgentEventType, type MessageChunkEvent } from '@kbn/onechat-common/agents';
 
 describe('Event utilities', () => {
   describe('createEventEmitter', () => {
@@ -68,6 +69,58 @@ describe('Event utilities', () => {
           stack: [],
         },
       });
+    });
+  });
+
+  describe('createAgentEventEmitter', () => {
+    it('should emit events directly to the event handler when provided', () => {
+      const mockEventHandler = jest.fn();
+      const context: RunContext = {
+        runId: 'test-run-id',
+        stack: [],
+      };
+
+      const emitter = createAgentEventEmitter({
+        eventHandler: mockEventHandler,
+        context,
+      });
+
+      const testEvent: MessageChunkEvent = {
+        type: ChatAgentEventType.messageChunk,
+        data: {
+          messageId: 'test-message-id',
+          textChunk: 'test message',
+        },
+        meta: { runId: 'test-run-id' },
+      };
+
+      emitter.emit(testEvent);
+
+      expect(mockEventHandler).toHaveBeenCalledWith(testEvent);
+    });
+
+    it('should create a noop emitter when no event handler is provided', () => {
+      const context: RunContext = {
+        runId: 'test-run-id',
+        stack: [],
+      };
+
+      const emitter = createAgentEventEmitter({
+        eventHandler: undefined,
+        context,
+      });
+
+      const testEvent: MessageChunkEvent = {
+        type: ChatAgentEventType.messageChunk,
+        data: {
+          messageId: 'test-message-id',
+          textChunk: 'test message',
+        },
+        meta: { runId: 'test-run-id' },
+      };
+
+      // This should not throw
+      emitter.emit(testEvent);
     });
   });
 

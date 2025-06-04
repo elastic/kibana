@@ -30,6 +30,8 @@ import {
   type RoundCompleteEvent,
   OneChatDefaultAgentId,
   isRoundCompleteEvent,
+  isOnechatError,
+  createInternalError,
 } from '@kbn/onechat-common';
 import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
@@ -49,11 +51,32 @@ export interface ChatService {
   converse(params: ChatConverseParams): Observable<ChatEvent>;
 }
 
+/**
+ * Parameters for {@link ChatService.converse}
+ */
 export interface ChatConverseParams {
+  /**
+   * Id of the conversational agent to converse with.
+   * If empty, will use the default agent id.
+   */
   agentId?: string;
+  /**
+   * Id of the genAI connector to use.
+   * If empty, will use the default connector.
+   */
   connectorId?: string;
+  /**
+   * Id of the conversation to continue.
+   * If empty, will create a new conversation instead.
+   */
   conversationId?: string;
+  /**
+   * Next user input to start the round.
+   */
   nextInput: RoundInput;
+  /**
+   * Request bound to this call.
+   */
   request: KibanaRequest;
 }
 
@@ -144,9 +167,14 @@ class ChatServiceImpl implements ChatService {
 
         return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
           catchError((err) => {
-            // TODO: catch/rethrow non onechat errors.
-            this.logger.error(err);
-            return throwError(err);
+            this.logger.error(`Error executing agent: ${err.stack}`);
+            return throwError(() =>
+              isOnechatError(err)
+                ? err
+                : createInternalError(`Error executing agent: ${err.message}`, {
+                    statusCode: 500,
+                  })
+            );
           })
         );
       })

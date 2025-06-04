@@ -29,7 +29,7 @@ export type ConvertedEvents =
   | ToolCallEvent
   | ToolResultEvent;
 
-export const emitRoundEvent = ({
+export const addRoundCompleteEvent = ({
   userInput,
 }: {
   userInput: RoundInput;

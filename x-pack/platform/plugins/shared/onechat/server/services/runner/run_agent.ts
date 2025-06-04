@@ -15,8 +15,8 @@ import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
-  manager,
   agentExecutionParams,
+  manager,
 }: {
   agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
   manager: RunnerManager;
@@ -51,7 +51,7 @@ export const runAgent = async <TParams = Record<string, unknown>, TResult = unkn
   const agentHandlerContext = createAgentHandlerContext<TParams>({ agentExecutionParams, manager });
   const agentResult = await agent.handler(
     {
-      runId: 'foo',
+      runId: manager.context.runId,
       agentParams: agentParams as ConversationalAgentParams,
     },
     agentHandlerContext

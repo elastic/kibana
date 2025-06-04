@@ -40,6 +40,9 @@ export class AgentsService {
 
     return {
       registry,
+      execute: async (args) => {
+        return getRunner().runAgent(args);
+      },
     };
   }
 }

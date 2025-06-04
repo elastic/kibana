@@ -68,6 +68,7 @@ export const createAgentGraph = async ({
     };
   };
 
+  // note: the node names are used in the event convertion logic, they should not be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)

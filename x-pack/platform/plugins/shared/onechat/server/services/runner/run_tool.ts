@@ -11,7 +11,7 @@ import type {
   RunToolReturn,
 } from '@kbn/onechat-server';
 import { forkContextForToolRun } from './utils/run_context';
-import { createToolEventEmitter, createNoopEventEmitter } from './utils/events';
+import { createToolEventEmitter } from './utils/events';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>, TResult = unknown>({
@@ -51,8 +51,6 @@ export const createToolHandlerContext = <TParams = Record<string, unknown>>({
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
-    events: onEvent
-      ? createToolEventEmitter({ eventHandler: onEvent, context: manager.context })
-      : createNoopEventEmitter(),
+    events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

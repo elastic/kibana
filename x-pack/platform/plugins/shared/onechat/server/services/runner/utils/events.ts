@@ -44,9 +44,13 @@ export const createToolEventEmitter = ({
   eventHandler,
   context,
 }: {
-  eventHandler: RunEventHandlerFn;
+  eventHandler: RunEventHandlerFn | undefined;
   context: RunContext;
 }): RunEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopEventEmitter();
+  }
+
   return {
     emit: (internalEvent) => {
       const event = convertInternalEvent({ event: internalEvent, context });
@@ -55,10 +59,7 @@ export const createToolEventEmitter = ({
   };
 };
 
-/**
- * Creates a run event emitter sending events to the provided event handler.
- */
-export const createNoopEventEmitter = () => {
+const createNoopEventEmitter = () => {
   return {
     emit: () => {},
   };

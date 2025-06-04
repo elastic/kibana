@@ -8,13 +8,19 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { MaybePromise } from '@kbn/utility-types';
 import { AgentIdentifier } from '@kbn/onechat-common';
-import type { AgentProvider, AgentRegistry, AgentDefinition } from '@kbn/onechat-server';
+import type {
+  AgentProvider,
+  AgentRegistry,
+  AgentDefinition,
+  RunAgentFn,
+} from '@kbn/onechat-server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentsServiceSetup {}
 
 export interface AgentsServiceStart {
   registry: InternalAgentRegistry;
+  execute: RunAgentFn;
 }
 
 export type AgentProviderWithId = AgentProvider & {

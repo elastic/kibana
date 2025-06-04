@@ -29,10 +29,9 @@ export const createInternalRegistry = ({
 }): InternalAgentRegistry => {
   const globalProvider = combineToolProviders(...providers);
   const publicRegistry = internalProviderToPublic({ provider: globalProvider, getRunner });
-  return {
-    ...globalProvider,
+  return Object.assign(globalProvider, {
     asPublicRegistry: () => publicRegistry,
-  };
+  });
 };
 
 export const internalProviderToPublic = ({

@@ -32,5 +32,6 @@ export const createInternalAgentRegistryMock = (): InternalAgentRegistryMock => 
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     registry: createInternalAgentRegistryMock(),
+    execute: jest.fn(),
   };
 };

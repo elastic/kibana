@@ -96,7 +96,7 @@ export class OnechatPlugin
       agents: {
         registry: agents.registry.asPublicRegistry(),
         execute: async (args) => {
-          return runner.runAgent(args);
+          return agents.execute(args);
         },
       },
     };
