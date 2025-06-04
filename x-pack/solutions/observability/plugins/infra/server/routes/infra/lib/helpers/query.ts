@@ -13,9 +13,9 @@ import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_a
 import type { SYSTEM_INTEGRATION } from '../../../../../common/constants';
 import {
   EVENT_MODULE,
-  EVENT_DATASET,
   OTEL_RECEIVER_DATASET_VALUE,
   METRICSET_MODULE,
+  DATASTREAM_DATASET,
 } from '../../../../../common/constants';
 import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
@@ -37,7 +37,7 @@ export const getOTelHostmetricsOrSystemIntegrationFilter = () => {
       should: [
         ...termQuery(EVENT_MODULE, 'system'),
         ...termQuery(METRICSET_MODULE, 'system'),
-        ...termQuery(EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE),
+        ...termQuery(DATASTREAM_DATASET, OTEL_RECEIVER_DATASET_VALUE),
       ],
       minimum_should_match: 1,
     },

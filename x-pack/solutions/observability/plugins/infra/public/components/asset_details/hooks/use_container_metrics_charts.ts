@@ -45,7 +45,7 @@ export const useDockerContainerPageViewMetricsCharts = ({
 
 const getDockerContainerCharts = async (metric: ContainerMetricTypes) => {
   const model = findInventoryModel('container');
-  const { cpu, memory, network, diskIO } = await model.metrics.getCharts();
+  const { cpu, memory, network, diskIO } = await model.metrics.getCharts({ schemas: ['ecs'] });
 
   switch (metric) {
     case 'cpu':
@@ -88,7 +88,7 @@ export const useK8sContainerPageViewMetricsCharts = ({
 
 const getK8sContainerCharts = async (metric: ContainerMetricTypes) => {
   const model = findInventoryModel('container');
-  const { cpu, memory } = await model.metrics.getCharts();
+  const { cpu, memory } = await model.metrics.getCharts({ schemas: ['ecs'] });
 
   switch (metric) {
     case 'cpu':
@@ -111,7 +111,7 @@ export const useDockerContainerKpiCharts = ({
 
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
-    const { cpu, memory } = await model.metrics.getCharts();
+    const { cpu, memory } = await model.metrics.getCharts({ schemas: ['ecs'] });
 
     return [cpu.metric.dockerContainerCpuUsage, memory.metric.dockerContainerMemoryUsage].map(
       (chart) => ({
@@ -141,7 +141,7 @@ export const useK8sContainerKpiCharts = ({
 
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
-    const { cpu, memory } = await model.metrics.getCharts();
+    const { cpu, memory } = await model.metrics.getCharts({ schemas: ['ecs'] });
 
     return [cpu.metric.k8sContainerCpuUsage, memory.metric.k8sContainerMemoryUsage].map(
       (chart) => ({

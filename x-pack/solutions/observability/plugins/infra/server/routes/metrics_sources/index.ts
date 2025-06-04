@@ -8,17 +8,19 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { castArray } from 'lodash';
+import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
-  EVENT_DATASET,
+  DATASTREAM_DATASET,
   EVENT_MODULE,
   METRICSET_MODULE,
   OTEL_RECEIVER_DATASET_VALUE,
+  SYSTEM_INTEGRATION,
 } from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
+  getTimeRangeMetadataQueryParamsRT,
+  getTimeRangeMetadataResponseRT,
 } from '../../../common/metrics_sources/get_has_data';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
@@ -38,7 +40,12 @@ const defaultStatus = {
   remoteClustersExist: false,
 };
 
-const MAX_MODULES = 5;
+const integrationNameBySource: Record<string, { beats: string; otel: string }> = {
+  host: {
+    beats: SYSTEM_INTEGRATION,
+    otel: OTEL_RECEIVER_DATASET_VALUE,
+  },
+};
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework, logger } = libs;
@@ -213,19 +220,72 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const modules = request.query.modules ? castArray(request.query.modules) : [];
-
-        if (modules.length > MAX_MODULES) {
-          throw Boom.badRequest(
-            `'modules' size is greater than maximum of ${MAX_MODULES} allowed.`
-          );
-        }
-
+        const { dataSource: integration } = request.query;
         const infraMetricsClient = await getInfraMetricsClient({
           request,
           libs,
           context,
         });
+
+        const source = integration ? integrationNameBySource[integration] : undefined;
+
+        const hasDataResponse = await infraMetricsClient.search({
+          track_total_hits: true,
+          terminate_after: 1,
+          size: 0,
+          query: {
+            bool: {
+              should: source
+                ? [
+                    ...termQuery(EVENT_MODULE, source.beats),
+                    ...termQuery(METRICSET_MODULE, source.beats),
+                    ...termQuery(DATASTREAM_DATASET, source.otel),
+                  ]
+                : [],
+            },
+          },
+        });
+
+        return response.ok({
+          body: getHasDataResponseRT.encode({
+            hasData: hasDataResponse.hits.total.value > 0,
+          }),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
+    }
+  );
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/metrics/source/time_range_metadata',
+      validate: {
+        query: createRouteValidationFunction(getTimeRangeMetadataQueryParamsRT),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { from, to, dataSource, kuery } = request.query;
+        const infraMetricsClient = await getInfraMetricsClient({
+          request,
+          libs,
+          context,
+        });
+
+        const source = integrationNameBySource[dataSource];
 
         const [ecsResponse, otelResponse] = (
           await infraMetricsClient.msearch([
@@ -233,33 +293,30 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               track_total_hits: true,
               terminate_after: 1,
               size: 0,
-              ...(modules.length > 0
-                ? {
-                    query: {
-                      bool: {
-                        should: [
-                          ...termsQuery(EVENT_MODULE, ...modules),
-                          ...termsQuery(METRICSET_MODULE, ...modules),
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  }
-                : {}),
+              query: {
+                bool: {
+                  should: [
+                    ...termsQuery(EVENT_MODULE, source.beats),
+                    ...termsQuery(METRICSET_MODULE, source.beats),
+                  ],
+                  minimum_should_match: 1,
+                  filter: [...rangeQuery(from, to), ...kqlQuery(kuery)],
+                },
+              },
             },
             {
               track_total_hits: true,
               terminate_after: 1,
               size: 0,
-              ...(modules.length > 0
-                ? {
-                    query: {
-                      bool: {
-                        must: [...termQuery(EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE)],
-                      },
-                    },
-                  }
-                : {}),
+              query: {
+                bool: {
+                  filter: [
+                    ...termQuery(DATASTREAM_DATASET, source.otel),
+                    ...rangeQuery(from, to),
+                    ...kqlQuery(kuery),
+                  ],
+                },
+              },
             },
           ])
         ).responses;
@@ -268,8 +325,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const hasOtelData = otelResponse.hits.total.value !== 0;
 
         return response.ok({
-          body: getHasDataResponseRT.encode({
-            hasData: hasEcsData || hasOtelData,
+          body: getTimeRangeMetadataResponseRT.encode({
             schemas: (['ecs', 'semconv'] as const).filter((key) => {
               return (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData);
             }),

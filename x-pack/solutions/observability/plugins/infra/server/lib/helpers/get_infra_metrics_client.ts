@@ -17,10 +17,12 @@ import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/ex
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 
-type RequiredParams = Omit<ESSearchRequest, 'index'> & {
+export type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   size: number;
   track_total_hits: boolean | number;
 };
+
+export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
 
 interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
   responses: Array<InferSearchResponseOf<TDocument, TParams>>;
@@ -67,7 +69,7 @@ export async function getInfraMetricsClient({
         request
       ) as Promise<any>;
     },
-    msearch<TDocument, TParams extends Omit<RequiredParams, 'allow_no_indices'>>(
+    msearch<TDocument, TParams extends MSearchParams>(
       searchParams: TParams[]
     ): Promise<TypedMSearchResponse<TDocument, TParams>> {
       const searches = searchParams

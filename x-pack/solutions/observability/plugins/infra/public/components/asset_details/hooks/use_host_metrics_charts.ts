@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { usePreferredSchemaContext } from '../../../hooks/use_preferred_schema';
 import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
 
@@ -21,8 +22,14 @@ export const useHostCharts = ({
   dataViewId?: string;
   overview?: boolean;
 }) => {
+  const { preferredSchema } = usePreferredSchemaContext();
+
   const { value: charts = [], error } = useAsync(async () => {
-    const hostCharts = await getHostsCharts({ metric, overview });
+    const hostCharts = await getHostsCharts({
+      metric,
+      overview,
+      schemas: preferredSchema,
+    });
     return hostCharts.map((chart) => ({
       ...chart,
       ...(dataViewId && {
@@ -31,7 +38,7 @@ export const useHostCharts = ({
         },
       }),
     }));
-  }, [dataViewId, metric, overview]);
+  }, [dataViewId, metric, overview, preferredSchema]);
 
   return { charts, error };
 };
@@ -46,7 +53,7 @@ export const useKubernetesCharts = ({
   const model = useMemo(() => findInventoryModel('host'), []);
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts({ schemas: ['ecs', 'semconv'] });
+    const { kibernetesNode } = await model.metrics.getCharts({ schemas: ['ecs'] });
 
     const items = overview
       ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
@@ -90,9 +97,13 @@ export const useHostKpiCharts = ({
 }) => {
   seriesColor = useChartSeriesColor(seriesColor);
 
+  const { preferredSchema } = usePreferredSchemaContext();
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, memory, disk } = await model.metrics.getCharts({ schemas: ['semconv', 'ecs'] });
+    const { cpu, memory, disk } = await model.metrics.getCharts({
+      schemas: preferredSchema,
+    });
 
     return [
       cpu.metric.cpuUsage,
@@ -110,7 +121,7 @@ export const useHostKpiCharts = ({
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle]);
+  }, [preferredSchema, seriesColor, getSubtitle, dataViewId]);
 
   return charts;
 };
@@ -118,13 +129,15 @@ export const useHostKpiCharts = ({
 const getHostsCharts = async ({
   metric,
   overview,
+  schemas = ['ecs'],
 }: {
   metric: HostMetricTypes;
   overview?: boolean;
+  schemas?: Array<'ecs' | 'semconv'>;
 }) => {
   const model = findInventoryModel('host');
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
-    schemas: ['semconv'],
+    schemas,
   });
 
   switch (metric) {

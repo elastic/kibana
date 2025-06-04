@@ -22,6 +22,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { usePreferredSchemaContext } from '../../../../hooks/use_preferred_schema';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
 import { Popover } from '../../../../components/asset_details/tabs/common/popover';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
@@ -152,13 +153,14 @@ const sortTableData =
 export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
+  const { preferredSchema } = usePreferredSchemaContext();
   const { hostNodes } = useHostsViewContext();
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
 
   const { value: formulas } = useAsync(() =>
-    inventoryModel.metrics.getFormulas({ schemas: ['ecs', 'semconv'] })
+    inventoryModel.metrics.getFormulas({ schemas: preferredSchema })
   );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();

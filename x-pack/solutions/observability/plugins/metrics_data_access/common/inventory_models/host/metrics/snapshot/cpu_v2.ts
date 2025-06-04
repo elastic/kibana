@@ -21,7 +21,7 @@ export const cpuV2: MetricsUIAggregation = {
     aggs: {
       avg: {
         avg: {
-          field: 'metrics.system.cpu.utilization',
+          field: 'system.cpu.utilization',
         },
       },
     },
