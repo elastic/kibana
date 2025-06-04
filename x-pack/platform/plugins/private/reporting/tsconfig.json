@@ -53,7 +53,6 @@
     "@kbn/core-security-common",
     "@kbn/core-http-server-utils",
     "@kbn/notifications-plugin",
-    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*",
