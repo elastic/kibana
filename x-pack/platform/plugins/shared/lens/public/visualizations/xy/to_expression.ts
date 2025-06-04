@@ -27,7 +27,6 @@ import {
   ExtendedDataLayerFn,
   LayeredXyVisFn,
   LegendConfigFn,
-  PointVisibilityOptions,
   ReferenceLineDecorationConfigFn,
   ReferenceLineLayerFn,
   SeriesType,
@@ -37,9 +36,12 @@ import {
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
 
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
+import {
+  LayerTypes,
+  FittingFunctions,
+  PointVisibilityOptions,
+} from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
   State as XYState,
