@@ -19,5 +19,8 @@ export class ChangeRequestsPlugin
     // endpoint if I'm using the route repository?
   }
 
-  public start() {}
+  public start() {
+    // I guess I should expose an API client here based on the repository?
+    // In case another plugin wants to submit a CR
+  }
 }

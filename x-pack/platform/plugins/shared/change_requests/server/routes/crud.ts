@@ -24,15 +24,16 @@ const submitRequestRoute = createChangeRequestsServerRoute({
   }),
   handler: async ({ params, response, getClients, getStartServices, request }) => {
     if (params.body.actions.length === 0) {
-      // The copy in this whole plugin is just bad.
-      throw badRequest('An approval request should contain a least one request');
+      throw badRequest('An change request should contain a least one action');
     }
 
     if (
       params.body.actions.some((action) => isEmptyRequiredPrivileges(action.requiredPrivileges))
     ) {
-      throw badRequest('An approval request should contain a least one required privilege');
+      throw badRequest('An action should require at least one privilege');
     }
+
+    // How can I verify if the privileges actually exist? So that the request doesn't fail checking?
 
     const { core, spaces } = await getStartServices();
     const user = await getCurrentUser(core, request);
