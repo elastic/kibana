@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiLink, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -101,31 +101,6 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               {ruleCriteria.map((criteria, criteriaIndex) => {
                 const observedValue = criteria.observedValue;
                 const pctAboveThreshold = criteria.pctAboveThreshold;
-                return (
-                  <EuiText size="s" key={`${observedValue}-${criteriaIndex}`}>
-                    <h4 style={{ display: 'inline' }}>{observedValue}</h4>
-                    <span>{pctAboveThreshold}</span>
-                  </EuiText>
-                );
-              })}
-              {ruleCriteria.length > 1 && (
-                <EuiCallOut
-                  size="s"
-                  title={i18n.translate(
-                    'xpack.observability.columns.euiCallOut.multipleConditionsLabel',
-                    { defaultMessage: 'Multiple conditions' }
-                  )}
-                  iconType="alert"
-                />
-              )}
-            </div>
-          );
-
-        case ColumnIDs.THRESHOLD:
-          if (!ruleCriteria) return <>{'-'}</>;
-          return (
-            <div>
-              {ruleCriteria.map((criteria, criticalIndex) => {
                 const { threshold, comparator } = criteria;
                 let formattedComparator = comparator.toUpperCase();
                 if (
@@ -136,8 +111,37 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                   formattedComparator = 'NOT BETWEEN';
                 }
                 return (
-                  <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
-                    <h4>{`${formattedComparator} ${threshold}`}</h4>
+                  <EuiText size="s" key={`${observedValue}-${criteriaIndex}`}>
+                    <EuiToolTip
+                      title={i18n.translate(
+                        'xpack.observability.alertFlyout.overviewTab.conditionCounterTitle',
+                        {
+                          defaultMessage: 'Condition {index}',
+                          values: {
+                            index: ruleCriteria.length > 1 ? `${' '}${criteriaIndex + 1}` : '',
+                          },
+                        }
+                      )}
+                      content={
+                        <EuiText size="s" key={`${threshold}-${criteriaIndex}`}>
+                          <h4>{`${formattedComparator} ${threshold}`}</h4>
+                        </EuiText>
+                      }
+                    >
+                      <a css={{ marginRight: '5px' }}>
+                        {i18n.translate(
+                          'xpack.observability.alertFlyout.overviewTab.conditionCounterLabel',
+                          {
+                            defaultMessage: 'Condition{index}: ',
+                            values: {
+                              index: ruleCriteria.length > 1 ? `${' '}${criteriaIndex + 1}` : '',
+                            },
+                          }
+                        )}
+                      </a>
+                    </EuiToolTip>
+                    <h4 style={{ display: 'inline' }}>{observedValue}</h4>
+                    <span>{pctAboveThreshold}</span>
                   </EuiText>
                 );
               })}
