@@ -184,3 +184,18 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
     defaultMessage: 'Inference endpoint update failed',
   }
 );
+
+export const ADAPTIVE_ALLOCATIONS_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.adaptiveAllocationsTitle',
+  {
+    defaultMessage: 'Adaptive allocations will be enabled for this endpoint',
+  }
+);
+
+export const ADAPTIVE_ALLOCATIONS_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.adaptiveAllocationsHelpMessage',
+  {
+    defaultMessage:
+      'The number of allocations scales automatically, based on load. Resources scale up when the load increases and scale down to zero when the load decreases. Scaling down to zero means that there is no cost for the duration that the model is not used. When scaled down to zero due to inactivity, subsequent inference calls may return temporary errors, until the auto-scaler makes available resources again. You can optionally set the maximum number of allocations. Autoscaling will occur dynamically between zero and maximum available or the user set maximum.',
+  }
+);

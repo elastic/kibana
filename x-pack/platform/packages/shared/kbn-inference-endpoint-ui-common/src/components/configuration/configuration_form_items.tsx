@@ -20,6 +20,7 @@ import {
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
+import { HelpTextCallout } from './helptext_callout';
 
 interface ConfigurationFormItemsProps {
   isLoading: boolean;
@@ -43,10 +44,8 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
   return (
     <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
       {items.map((configEntry) => {
-        const { hidden, key, isValid, label, sensitive, description, validationErrors, required } =
+        const { key, isValid, label, sensitive, description, validationErrors, required } =
           configEntry;
-        // skip hidden fields
-        if (hidden) return null;
 
         // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel = description ? (
@@ -82,33 +81,36 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
         ) : undefined;
 
         return (
-          <EuiFlexItem key={key}>
-            <EuiFormRow
-              label={rowLabel}
-              fullWidth
-              helpText={helpText}
-              error={validationErrors}
-              isInvalid={!isValid}
-              labelAppend={optionalLabel}
-              data-test-subj={`configuration-formrow-${key}`}
-            >
-              <ConfigurationField
-                configEntry={configEntry}
-                isLoading={isLoading}
-                setConfigValue={(value) => {
-                  setConfigEntry(key, value);
-                }}
-                isEdit={isEdit}
-                isPreconfigured={isPreconfigured}
-              />
-            </EuiFormRow>
-            {sensitive ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
-              </>
-            ) : null}
-          </EuiFlexItem>
+          <>
+            <HelpTextCallout field={key} />
+            <EuiFlexItem key={key}>
+              <EuiFormRow
+                label={rowLabel}
+                fullWidth
+                helpText={helpText}
+                error={validationErrors}
+                isInvalid={!isValid}
+                labelAppend={optionalLabel}
+                data-test-subj={`configuration-formrow-${key}`}
+              >
+                <ConfigurationField
+                  configEntry={configEntry}
+                  isLoading={isLoading}
+                  setConfigValue={(value) => {
+                    setConfigEntry(key, value);
+                  }}
+                  isEdit={isEdit}
+                  isPreconfigured={isPreconfigured}
+                />
+              </EuiFormRow>
+              {sensitive ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+                </>
+              ) : null}
+            </EuiFlexItem>
+          </>
         );
       })}
     </EuiFlexGroup>

@@ -7,7 +7,7 @@
 
 import { ConfigProperties } from './dynamic_config/types';
 
-interface ConfigEntry extends ConfigProperties {
+export interface ConfigEntry extends ConfigProperties {
   key: string;
 }
 
@@ -15,6 +15,7 @@ export * from './dynamic_config/types';
 
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
+  range?: { min: number; max: number };
   validationErrors: string[];
   value: string | number | boolean | null;
 }

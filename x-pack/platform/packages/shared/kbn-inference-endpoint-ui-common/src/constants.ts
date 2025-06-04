@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type { FieldsConfiguration } from './types/types';
+import { FieldType } from './types/types';
+
+const MAX_ALLOCATIONS_MAX = 32;
+const MAX_ALLOCATIONS_MIN = 1;
+
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
@@ -30,8 +36,34 @@ export const DEFAULT_TASK_TYPE = 'completion';
 
 type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
 type InternalOverrideFieldsType = {
-  [Key in ServiceProviderKeysType | string]?: string[];
+  [Key in ServiceProviderKeysType | string]?: {
+    hidden: string[];
+    additional: FieldsConfiguration[];
+  };
 };
+
+// This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
-  [ServiceProviderKeys.elasticsearch]: ['num_allocations', 'num_threads'],
+  [ServiceProviderKeys.elasticsearch]: {
+    hidden: ['num_allocations', 'num_threads'],
+    additional: [
+      {
+        max_number_of_allocations: {
+          default_value: 32,
+          description: 'Maximum number of allocations for the inference endpoint.',
+          label: 'Max Allocations',
+          required: true,
+          range: { min: MAX_ALLOCATIONS_MIN, max: MAX_ALLOCATIONS_MAX },
+          sensitive: false,
+          supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
+          type: FieldType.INTEGER,
+          updatable: true,
+        },
+      },
+    ],
+  },
+};
+
+export const DEFAULT_VALUES = {
+  [ServiceProviderKeys.elasticsearch]: { num_allocations: 1, num_threads: 16 },
 };
