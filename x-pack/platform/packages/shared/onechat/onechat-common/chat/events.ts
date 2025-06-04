@@ -16,7 +16,7 @@ export enum ChatEventType {
 export type ChatEventBase<
   TEventType extends ChatEventType,
   TData extends Record<string, any>
-> = OnechatEvent<TEventType, TData, {}>;
+> = OnechatEvent<TEventType, TData>;
 
 // conversation created
 
@@ -31,7 +31,7 @@ export type ConversationCreatedEvent = ChatEventBase<
 >;
 
 export const isConversationCreatedEvent = (
-  event: OnechatEvent<string, any, any>
+  event: OnechatEvent<string, any>
 ): event is ConversationCreatedEvent => {
   return event.type === ChatEventType.conversationCreated;
 };
@@ -49,7 +49,7 @@ export type ConversationUpdatedEvent = ChatEventBase<
 >;
 
 export const isConversationUpdatedEvent = (
-  event: OnechatEvent<string, any, any>
+  event: OnechatEvent<string, any>
 ): event is ConversationUpdatedEvent => {
   return event.type === ChatEventType.conversationUpdated;
 };

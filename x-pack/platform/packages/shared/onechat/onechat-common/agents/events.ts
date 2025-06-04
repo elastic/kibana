@@ -17,14 +17,10 @@ export enum ChatAgentEventType {
   roundComplete = 'roundComplete',
 }
 
-export interface ChatAgentEventMeta {
-  runId?: string;
-}
-
 export type ChatAgentEventBase<
   TEventType extends ChatAgentEventType,
   TData extends Record<string, any>
-> = OnechatEvent<TEventType, TData, ChatAgentEventMeta>;
+> = OnechatEvent<TEventType, TData>;
 
 // Tool call
 
@@ -36,7 +32,7 @@ export interface ToolCallEventData {
 
 export type ToolCallEvent = ChatAgentEventBase<ChatAgentEventType.toolCall, ToolCallEventData>;
 
-export const isToolCallEvent = (event: OnechatEvent<string, any, any>): event is ToolCallEvent => {
+export const isToolCallEvent = (event: OnechatEvent<string, any>): event is ToolCallEvent => {
   return event.type === ChatAgentEventType.toolCall;
 };
 
@@ -53,9 +49,7 @@ export type ToolResultEvent = ChatAgentEventBase<
   ToolResultEventData
 >;
 
-export const isToolResultEvent = (
-  event: OnechatEvent<string, any, any>
-): event is ToolResultEvent => {
+export const isToolResultEvent = (event: OnechatEvent<string, any>): event is ToolResultEvent => {
   return event.type === ChatAgentEventType.toolResult;
 };
 
@@ -74,7 +68,7 @@ export type MessageChunkEvent = ChatAgentEventBase<
 >;
 
 export const isMessageChunkEvent = (
-  event: OnechatEvent<string, any, any>
+  event: OnechatEvent<string, any>
 ): event is MessageChunkEvent => {
   return event.type === ChatAgentEventType.messageChunk;
 };
@@ -94,7 +88,7 @@ export type MessageCompleteEvent = ChatAgentEventBase<
 >;
 
 export const isMessageCompleteEvent = (
-  event: OnechatEvent<string, any, any>
+  event: OnechatEvent<string, any>
 ): event is MessageCompleteEvent => {
   return event.type === ChatAgentEventType.messageComplete;
 };
@@ -112,7 +106,7 @@ export type RoundCompleteEvent = ChatAgentEventBase<
 >;
 
 export const isRoundCompleteEvent = (
-  event: OnechatEvent<string, any, any>
+  event: OnechatEvent<string, any>
 ): event is RoundCompleteEvent => {
   return event.type === ChatAgentEventType.roundComplete;
 };

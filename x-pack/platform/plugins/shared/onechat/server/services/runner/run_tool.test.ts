@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { toSerializedToolIdentifier } from '@kbn/onechat-common';
-import type { ScopedRunnerRunToolsParams, OnechatRunEvent } from '@kbn/onechat-server';
+import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
@@ -118,7 +117,7 @@ describe('runTool', () => {
   });
 
   it('exposes an event emitter to the tool handler caller can attach to using the onEvent param', async () => {
-    const emittedEvents: OnechatRunEvent[] = [];
+    const emittedEvents: OnechatToolEvent[] = [];
 
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
@@ -132,7 +131,6 @@ describe('runTool', () => {
       events.emit({
         type: 'test-event',
         data: { foo: 'bar' },
-        meta: { hello: 'dolly' },
       });
       return 42;
     });
@@ -147,16 +145,6 @@ describe('runTool', () => {
       type: 'test-event',
       data: {
         foo: 'bar',
-      },
-      meta: {
-        hello: 'dolly',
-        runId: expect.any(String),
-        stack: [
-          {
-            type: 'tool',
-            toolId: toSerializedToolIdentifier('test-tool'),
-          },
-        ],
       },
     });
   });

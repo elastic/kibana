@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createToolEventEmitter, createAgentEventEmitter, convertInternalEvent } from './events';
-import type { InternalRunEvent, RunContext } from '@kbn/onechat-server';
+import { createToolEventEmitter, createAgentEventEmitter } from './events';
+import type { InternalToolEvent, RunContext } from '@kbn/onechat-server';
 import { ChatAgentEventType, type MessageChunkEvent } from '@kbn/onechat-common/agents';
 
 describe('Event utilities', () => {
-  describe('createEventEmitter', () => {
-    it('should emit events with context metadata', () => {
+  describe('createToolEventEmitter', () => {
+    it('should emit events ', () => {
       const mockEventHandler = jest.fn();
       const context: RunContext = {
         runId: 'test-run-id',
@@ -23,38 +23,7 @@ describe('Event utilities', () => {
         context,
       });
 
-      const testEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: { baz: 'qux' },
-      };
-
-      emitter.emit(testEvent);
-
-      expect(mockEventHandler).toHaveBeenCalledWith({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          baz: 'qux',
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
-    });
-
-    it('should handle events without meta data', () => {
-      const mockEventHandler = jest.fn();
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const emitter = createToolEventEmitter({
-        eventHandler: mockEventHandler,
-        context,
-      });
-
-      const testEvent: InternalRunEvent = {
+      const testEvent: InternalToolEvent = {
         type: 'test-event',
         data: { foo: 'bar' },
       };
@@ -64,10 +33,6 @@ describe('Event utilities', () => {
       expect(mockEventHandler).toHaveBeenCalledWith({
         type: 'test-event',
         data: { foo: 'bar' },
-        meta: {
-          runId: 'test-run-id',
-          stack: [],
-        },
       });
     });
   });
@@ -91,7 +56,6 @@ describe('Event utilities', () => {
           messageId: 'test-message-id',
           textChunk: 'test message',
         },
-        meta: { runId: 'test-run-id' },
       };
 
       emitter.emit(testEvent);
@@ -116,67 +80,10 @@ describe('Event utilities', () => {
           messageId: 'test-message-id',
           textChunk: 'test message',
         },
-        meta: { runId: 'test-run-id' },
       };
 
       // This should not throw
       emitter.emit(testEvent);
-    });
-  });
-
-  describe('convertInternalEvent', () => {
-    it('should convert internal event to public event with context', () => {
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const internalEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: { baz: 'qux' },
-      };
-
-      const publicEvent = convertInternalEvent({
-        event: internalEvent,
-        context,
-      });
-
-      expect(publicEvent).toEqual({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          baz: 'qux',
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
-    });
-
-    it('should handle events without meta data', () => {
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const internalEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-      };
-
-      const publicEvent = convertInternalEvent({
-        event: internalEvent,
-        context,
-      });
-
-      expect(publicEvent).toEqual({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
     });
   });
 });

@@ -11,7 +11,7 @@ import type { OnechatEvent } from '../base/events';
 describe('Chat events', () => {
   describe('isConversationCreatedEvent', () => {
     it('should return true for a conversation created event', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: ChatEventType.conversationCreated,
         data: {
           conversationId: 'test-conversation',
@@ -22,7 +22,7 @@ describe('Chat events', () => {
     });
 
     it('should return false for a conversation updated event', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: ChatEventType.conversationUpdated,
         data: {
           conversationId: 'test-conversation',
@@ -33,7 +33,7 @@ describe('Chat events', () => {
     });
 
     it('should return false for an unknown event type', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: 'unknownEvent',
         data: {
           conversationId: 'test-conversation',
@@ -46,7 +46,7 @@ describe('Chat events', () => {
 
   describe('isConversationUpdatedEvent', () => {
     it('should return true for a conversation updated event', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: ChatEventType.conversationUpdated,
         data: {
           conversationId: 'test-conversation',
@@ -57,7 +57,7 @@ describe('Chat events', () => {
     });
 
     it('should return false for a conversation created event', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: ChatEventType.conversationCreated,
         data: {
           conversationId: 'test-conversation',
@@ -68,7 +68,7 @@ describe('Chat events', () => {
     });
 
     it('should return false for an unknown event type', () => {
-      const event: OnechatEvent<string, any, any> = {
+      const event: OnechatEvent<string, any> = {
         type: 'unknownEvent',
         data: {
           conversationId: 'test-conversation',

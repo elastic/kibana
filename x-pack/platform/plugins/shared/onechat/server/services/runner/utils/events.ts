@@ -6,12 +6,9 @@
  */
 
 import type {
-  OnechatRunEvent,
-  InternalRunEvent,
   RunContext,
-  OnechatRunEventMeta,
-  RunEventHandlerFn,
-  RunEventEmitter,
+  ToolEventHandlerFn,
+  ToolEventEmitter,
   AgentEventEmitter,
   RunAgentOnEventFn,
 } from '@kbn/onechat-server';
@@ -44,16 +41,15 @@ export const createToolEventEmitter = ({
   eventHandler,
   context,
 }: {
-  eventHandler: RunEventHandlerFn | undefined;
+  eventHandler: ToolEventHandlerFn | undefined;
   context: RunContext;
-}): RunEventEmitter => {
+}): ToolEventEmitter => {
   if (eventHandler === undefined) {
     return createNoopEventEmitter();
   }
 
   return {
-    emit: (internalEvent) => {
-      const event = convertInternalEvent({ event: internalEvent, context });
+    emit: (event) => {
       eventHandler(event);
     },
   };
@@ -62,31 +58,5 @@ export const createToolEventEmitter = ({
 const createNoopEventEmitter = () => {
   return {
     emit: () => {},
-  };
-};
-
-/**
- * Convert an internal onechat run event to its public-facing format.
- */
-export const convertInternalEvent = <
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends Record<string, any> = Record<string, any>
->({
-  event: { type, data, meta },
-  context,
-}: {
-  event: InternalRunEvent<TEventType, TData, TMeta>;
-  context: RunContext;
-}): OnechatRunEvent<TEventType, TData, TMeta & OnechatRunEventMeta> => {
-  // TODO use OnechatEvent?
-  return {
-    type,
-    data,
-    meta: {
-      ...((meta ?? {}) as TMeta),
-      runId: context.runId,
-      stack: context.stack,
-    },
   };
 };

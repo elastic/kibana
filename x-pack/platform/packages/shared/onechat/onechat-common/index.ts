@@ -52,7 +52,6 @@ export {
   type StructuredAgentIdentifier,
   ChatAgentEventType,
   type ChatAgentEvent,
-  type ChatAgentEventMeta,
   type ChatAgentEventBase,
   type ToolResultEvent,
   type ToolResultEventData,

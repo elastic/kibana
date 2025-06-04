@@ -12,4 +12,4 @@ export {
   forkContextForToolRun,
   forkContextForAgentRun,
 } from './run_context';
-export { convertInternalEvent, createToolEventEmitter, createAgentEventEmitter } from './events';
+export { createToolEventEmitter, createAgentEventEmitter } from './events';

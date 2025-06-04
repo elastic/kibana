@@ -11,7 +11,7 @@ import type {
   SerializedToolIdentifier,
   SerializedAgentIdentifier,
 } from '@kbn/onechat-common';
-import type { RunEventHandlerFn } from './events';
+import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
 /**
@@ -97,7 +97,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * Optional event handler.
    */
-  onEvent?: RunEventHandlerFn;
+  onEvent?: ToolEventHandlerFn;
   /**
    * The request that initiated that run.
    */

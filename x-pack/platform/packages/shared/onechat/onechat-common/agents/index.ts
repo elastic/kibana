@@ -14,7 +14,6 @@ export {
 export {
   ChatAgentEventType,
   type ChatAgentEvent,
-  type ChatAgentEventMeta,
   type ChatAgentEventBase,
   type ToolResultEvent,
   type ToolResultEventData,
