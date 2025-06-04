@@ -220,6 +220,7 @@ export class BasicPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
+      console.log(ctx.node);
       return '<EXPRESSION>';
     })
 

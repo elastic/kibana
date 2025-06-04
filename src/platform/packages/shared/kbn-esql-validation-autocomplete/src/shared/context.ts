@@ -8,7 +8,6 @@
  */
 
 import {
-  ESQLCommandMode,
   ESQLCommandOption,
   Walker,
   isIdentifier,
@@ -43,7 +42,7 @@ function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | u
   return findCommandSubType(nodes, offset, isOptionItem);
 }
 
-function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
+function findCommandSubType<T extends ESQLCommandOption>(
   nodes: ESQLAstItem[],
   offset: number,
   isOfTypeFn: (node: ESQLAstItem) => node is T

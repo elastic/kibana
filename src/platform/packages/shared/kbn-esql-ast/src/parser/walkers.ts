@@ -76,8 +76,6 @@ import {
   createNumericLiteral,
   createOption,
   createParam,
-  createPolicy,
-  createSetting,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
@@ -98,6 +96,7 @@ import {
   ESQLLiteral,
   ESQLMap,
   ESQLMapEntry,
+  ESQLSource,
   ESQLStringLiteral,
   InlineCastingType,
 } from '../types';
@@ -145,17 +144,68 @@ export function collectAllColumnIdentifiers(
   return makeColumnsOutOfIdentifiers(identifiers);
 }
 
-export function getPolicyName(ctx: EnrichCommandContext) {
+export const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource | undefined => {
   if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
-    return [];
+    return;
   }
-  const policyComponents = ctx._policyName.text.split(':');
-  if (policyComponents.length > 1) {
-    const [setting, policyName] = policyComponents;
-    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
+
+  const name = ctx._policyName.text;
+  const colonIndex = name.indexOf(':');
+  const withCluster = colonIndex !== -1;
+  const incomplete = false;
+  let index: ESQLStringLiteral | undefined;
+  let cluster: ESQLStringLiteral | undefined;
+
+  if (withCluster) {
+    const clusterName = name.substring(0, colonIndex);
+    const indexName = name.substring(colonIndex + 1);
+
+    cluster = Builder.expression.literal.string(
+      clusterName,
+      {},
+      // TODO: implement "parser fields"
+      {}
+    );
+    index = Builder.expression.literal.string(
+      indexName,
+      {},
+      // TODO: implement "parser fields"
+      {}
+    );
+  } else {
+    index = Builder.expression.literal.string(
+      name,
+      {},
+      // TODO: implement "parser fields"
+      {}
+    );
   }
-  return [createPolicy(ctx._policyName, policyComponents[0])];
-}
+
+  const source = Builder.expression.source.node(
+    {
+      sourceType: 'policy',
+      name,
+      index,
+      cluster,
+    },
+    {
+      incomplete,
+    }
+  );
+  // {
+  //   type: 'source',
+  //   name: policy,
+  //   text: policy,
+  //   sourceType: 'policy',
+  //   location: getPosition({
+  //     start: token.stop - policy.length + 1,
+  //     stop: token.stop,
+  //   }), // take into account ccq modes
+  //   incomplete: false,
+  // }
+
+  return source;
+};
 
 export function getMatchField(ctx: EnrichCommandContext) {
   if (!ctx._matchField) {

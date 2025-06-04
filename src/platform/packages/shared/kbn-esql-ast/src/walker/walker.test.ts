@@ -12,7 +12,6 @@ import { Parser } from '../parser/parser';
 import {
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
@@ -165,34 +164,6 @@ describe('structurally can walk all nodes', () => {
 
         expect(options.length).toBe(1);
         expect(options[0].name).toBe('metadata');
-      });
-    });
-
-    describe('command mode', () => {
-      test('visits "mode" nodes', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitCommandMode: (opt) => modes.push(opt),
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-
-      test('"visitAny" can capture a mode node', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'mode') modes.push(node);
-          },
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
       });
     });
 
