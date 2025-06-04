@@ -1196,7 +1196,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -1613,7 +1615,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
