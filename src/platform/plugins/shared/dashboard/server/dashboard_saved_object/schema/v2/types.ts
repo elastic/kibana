@@ -20,7 +20,7 @@ import {
   gridDataSchema,
   sectionSchema,
 } from './v2';
-import { DashboardContentType } from '../v1/types';
+import { DashboardSavedObjectContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
@@ -53,7 +53,7 @@ export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
 export type DashboardSavedObjectControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
 
 export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
-  DashboardContentType,
+  DashboardSavedObjectContentType,
   DashboardAttributes,
   Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
   Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,

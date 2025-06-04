@@ -17,12 +17,12 @@ import { dashboardAttributesSchema } from './v1';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
 
-export type DashboardContentType = typeof DASHBOARD_SAVED_OBJECT_TYPE;
+export type DashboardSavedObjectContentType = typeof DASHBOARD_SAVED_OBJECT_TYPE;
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 
 export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
-  DashboardContentType,
+  DashboardSavedObjectContentType,
   DashboardAttributes,
   Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
