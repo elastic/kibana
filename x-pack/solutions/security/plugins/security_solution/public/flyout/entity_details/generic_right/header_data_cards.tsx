@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useToasts } from '../../../common/lib/kibana';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -38,6 +39,7 @@ export const HeaderDataCards = ({
   subType: string;
   type: string;
 }) => {
+  const toasts = useToasts();
   const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
     idField: EntityIdentifierFields.generic,
     idValue: id,
@@ -45,15 +47,35 @@ export const HeaderDataCards = ({
 
   const criticality = getAssetCriticality.data?.criticality_level;
 
+  // const assignCriticality = useCallback(
+  //   (value: CriticalityLevelWithUnassigned) => {
+  //     assignAssetCriticality.mutate({
+  //       criticalityLevel: value,
+  //       idField: EntityIdentifierFields.generic,
+  //       idValue: id,
+  //     });
+  //   },
+  //   [assignAssetCriticality, id]
+  // );
   const assignCriticality = useCallback(
     (value: CriticalityLevelWithUnassigned) => {
-      assignAssetCriticality.mutate({
-        criticalityLevel: value,
-        idField: EntityIdentifierFields.generic,
-        idValue: id,
-      });
+      assignAssetCriticality.mutate(
+        {
+          criticalityLevel: value,
+          idField: EntityIdentifierFields.generic,
+          idValue: id,
+        },
+        {
+          onError: (error) => {
+            toasts.addDanger({
+              title: 'Failed to assign criticality',
+              text: (error as Error).message,
+            });
+          },
+        }
+      );
     },
-    [assignAssetCriticality, id]
+    [assignAssetCriticality, id, toasts]
   );
 
   const cards = useMemo(

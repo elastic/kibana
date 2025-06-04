@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { AssetInventorySearchBar } from '../components/asset_inventory_search_bar';
 import { AssetInventoryFilters } from '../components/filters/asset_inventory_filters';
@@ -45,8 +53,33 @@ export const AllAssets = () => {
     spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
   );
 
+  if (dataViewQuery.isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (!dataViewQuery.data) {
-    return null;
+    return (
+      <>
+        <EuiCallOut title="Failed to load data view" color="danger" iconType="alert">
+          <p>{'The asset inventory data view could not be loaded. Please try again.'}</p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+        <EuiButton
+          onClick={() => {
+            dataViewQuery.refetch();
+          }}
+          isLoading={dataViewQuery.isRefetching}
+        >
+          {'Reload'}
+        </EuiButton>
+      </>
+    );
   }
   const dataViewContextValue = {
     dataView: dataViewQuery.data,
