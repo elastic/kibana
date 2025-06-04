@@ -124,6 +124,7 @@ describe('TableRowActions', () => {
         agentPolicy: {
           is_managed: true,
           is_protected: false,
+          package_policies: [{ package: { name: 'fleet_server' } }],
         } as AgentPolicy,
       });
 
