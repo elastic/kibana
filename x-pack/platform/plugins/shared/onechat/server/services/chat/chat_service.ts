@@ -20,6 +20,7 @@ import {
   Observable,
 } from 'rxjs';
 import { KibanaRequest } from '@kbn/core-http-server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
@@ -37,7 +38,11 @@ import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
-import { createConversationCreatedEvent, createConversationUpdatedEvent } from './utils';
+import {
+  createConversationCreatedEvent,
+  createConversationUpdatedEvent,
+  generateConversationTitle,
+} from './utils';
 
 interface ChatServiceOptions {
   logger: Logger;
@@ -143,11 +148,16 @@ class ChatServiceImpl implements ChatService {
       ),
     }).pipe(
       switchMap(({ conversationClient, chatModel, agent }) => {
-        // TODO: generate title
-        const title$ = of('New conversation');
-
         const conversation$ = getConversation$({ agentId, conversationId, conversationClient });
         const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
+
+        const title$ = isNewConversation
+          ? generatedTitle$({ chatModel, conversation$, nextInput })
+          : conversation$.pipe(
+              switchMap((conversation) => {
+                return of(conversation.title);
+              })
+            );
 
         const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -181,6 +191,28 @@ class ChatServiceImpl implements ChatService {
     );
   }
 }
+
+const generatedTitle$ = ({
+  chatModel,
+  conversation$,
+  nextInput,
+}: {
+  chatModel: InferenceChatModel;
+  conversation$: Observable<Conversation>;
+  nextInput: RoundInput;
+}) => {
+  return conversation$.pipe(
+    switchMap((conversation) => {
+      return defer(async () =>
+        generateConversationTitle({
+          previousRounds: conversation.rounds,
+          nextInput,
+          chatModel,
+        })
+      ).pipe(shareReplay());
+    })
+  );
+};
 
 /**
  * Persist a new conversation and emit the corresponding event
