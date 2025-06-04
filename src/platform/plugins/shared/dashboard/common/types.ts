@@ -87,12 +87,12 @@ export type DashboardLocatorParams = Partial<
     dashboardId?: string;
 
     /**
-     * Determines whether to hash the contents of the url to avoid url length issues. Defaults to the uiSettings configuration for `storeInSessionStorage`. 
+     * Determines whether to hash the contents of the url to avoid url length issues. Defaults to the uiSettings configuration for `storeInSessionStorage`.
      */
     useHash?: boolean;
 
     /**
-     * Denotes whether to merge provided filters from the locator state with the filters saved into the Dashboard. 
+     * Denotes whether to merge provided filters from the locator state with the filters saved into the Dashboard.
      * When false, the saved filters will be overwritten. Defaults to true.
      */
     preserveSavedFilters?: boolean;
