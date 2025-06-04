@@ -12,6 +12,7 @@ import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '..
 import type { DataViewsState } from '../state_management';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext } from './helpers';
+import { MAX_NUM_OF_COLUMNS } from '../datasources/form_based/esql_layer/utils';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -96,8 +97,11 @@ export const suggestionsApi = ({
     (sug) =>
       // Datatables are always return as hidden suggestions
       // if the user has requested for a datatable (preferredChartType), we want to return it
-      // although it is a hidden suggestion
-      (sug.hide && sug.visualizationId === 'lnsDatatable') ||
+      // although it is a hidden suggestion if the columns are greater than 5
+      (sug.hide &&
+        sug.visualizationId === 'lnsDatatable' &&
+        'textBasedColumns' in context &&
+        (context?.textBasedColumns?.length ?? 0) > MAX_NUM_OF_COLUMNS) ||
       // Filter out suggestions that are hidden and legacy metrics
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
