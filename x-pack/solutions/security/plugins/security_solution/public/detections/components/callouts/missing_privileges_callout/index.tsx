@@ -12,7 +12,7 @@ import { CallOutSwitcher } from '../../../../common/components/callouts';
 import * as i18n from './translations';
 import { useMissingPrivileges } from './use_missing_privileges';
 
-const MissingPrivilegesCallOutComponent = () => {
+export const MissingPrivilegesCallOut = memo(() => {
   const missingPrivileges = useMissingPrivileges();
 
   const MissingPrivilegesMessage: CallOutMessage | null = useMemo(() => {
@@ -44,6 +44,6 @@ const MissingPrivilegesCallOutComponent = () => {
       <CallOutSwitcher namespace="detections" condition={true} message={MissingPrivilegesMessage} />
     )
   );
-};
+});
 
-export const MissingPrivilegesCallOut = memo(MissingPrivilegesCallOutComponent);
+MissingPrivilegesCallOut.displayName = 'MissingPrivilegesCallOut';
