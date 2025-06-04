@@ -87,6 +87,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
     [ConfigKey.LABELS]: t.record(t.string, t.string),
+    [ConfigKey.MAINTENANCE_WINDOWS]: t.array(t.string),
     retest_on_failure: t.boolean,
   }),
 ]);

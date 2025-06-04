@@ -7,7 +7,8 @@
 
 import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { replaceStringWithParams } from '../formatting_utils';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import {
   BrowserFields,
@@ -37,7 +38,8 @@ export const formatMonitorConfigFields = (
   configKeys: ConfigKey[],
   config: Partial<MonitorFields>,
   logger: Logger,
-  params: Record<string, string>
+  params: Record<string, string>,
+  mws: MaintenanceWindow[]
 ) => {
   const formattedMonitor = {} as Record<ConfigKey, any>;
 
@@ -74,6 +76,19 @@ export const formatMonitorConfigFields = (
       key.includes('ssl')
     ) as unknown as Array<keyof TLSFields>;
     sslKeys.forEach((key) => (formattedMonitor[key] = null));
+  }
+
+  if (config[ConfigKey.MAINTENANCE_WINDOWS]) {
+    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+    formattedMonitor[ConfigKey.MAINTENANCE_WINDOWS] = formatMWs(
+      maintenanceWindows.map((window) => {
+        if (typeof window === 'string') {
+          return mws.find((m) => m.id === window);
+        }
+        return window;
+      }) as MaintenanceWindow[],
+      false
+    );
   }
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;

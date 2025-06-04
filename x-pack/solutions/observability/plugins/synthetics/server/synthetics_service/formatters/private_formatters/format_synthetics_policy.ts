@@ -7,11 +7,12 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
-import { replaceStringWithParams } from '../formatting_utils';
+import { formatMWs, replaceStringWithParams } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -31,6 +32,7 @@ export const formatSyntheticsPolicy = (
   monitorType: MonitorTypeEnum,
   config: Partial<MonitorFields & ProcessorFields>,
   params: Record<string, string>,
+  mws: MaintenanceWindow[],
   isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
@@ -72,6 +74,22 @@ export const formatSyntheticsPolicy = (
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
     processorItem.value = processorsFormatter(config as MonitorFields & ProcessorFields);
+  }
+
+  const mwItem = dataStream?.vars?.[ConfigKey.MAINTENANCE_WINDOWS];
+  if (config[ConfigKey.MAINTENANCE_WINDOWS]?.length && mwItem) {
+    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+    const formattedVal = formatMWs(
+      maintenanceWindows.map((window) => {
+        if (typeof window === 'string') {
+          return mws.find((m) => m.id === window);
+        }
+        return window;
+      }) as MaintenanceWindow[]
+    );
+    if (formattedVal) {
+      mwItem.value = formattedVal;
+    }
   }
 
   // TODO: remove this once we remove legacy support

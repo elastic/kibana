@@ -130,6 +130,7 @@ describe('ProjectMonitorFormatter', () => {
   syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 

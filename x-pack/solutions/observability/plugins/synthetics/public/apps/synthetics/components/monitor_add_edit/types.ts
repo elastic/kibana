@@ -166,4 +166,5 @@ export interface FieldMap {
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
   [ConfigKey.LABELS]: FieldMeta<ConfigKey.LABELS>;
+  [ConfigKey.MAINTENANCE_WINDOWS]: FieldMeta<ConfigKey.MAINTENANCE_WINDOWS>;
 }

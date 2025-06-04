@@ -15,7 +15,8 @@ describe('formatSyntheticsPolicy', () => {
       testNewPolicy,
       MonitorTypeEnum.BROWSER,
       browserConfig,
-      gParams
+      gParams,
+      []
     );
 
     expect(formattedPolicy).toEqual({
@@ -473,7 +474,8 @@ describe('formatSyntheticsPolicy', () => {
         ...httpPolicy,
         [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
       },
-      gParams
+      gParams,
+      []
     );
 
     expect(formattedPolicy).toEqual({

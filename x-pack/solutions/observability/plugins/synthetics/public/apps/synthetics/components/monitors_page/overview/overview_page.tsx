@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
+import { MonitorsMWsCallout } from '../../common/mws_callout/monitors_mws_callout';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
@@ -77,6 +78,7 @@ export const OverviewPage: React.FC = () => {
   return (
     <>
       <DisabledCallout total={absoluteTotal} />
+      <MonitorsMWsCallout />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
