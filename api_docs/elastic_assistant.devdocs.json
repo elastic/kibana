@@ -133,7 +133,9 @@
               },
               ") => ",
               "StructuredToolInterface",
-              "<ZodObjectAny> | null"
+              "<",
+              "ToolInputSchemaBase",
+              ", any, any> | null"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
