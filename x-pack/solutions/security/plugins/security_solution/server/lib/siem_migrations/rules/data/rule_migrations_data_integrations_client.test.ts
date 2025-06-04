@@ -157,15 +157,6 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
             data_streams: [{ title: 'Logs 1', dataset: 'ds1', index_pattern: 'logs-ds1-*' }],
           },
         },
-        {
-          _id: '2',
-          _source: {
-            title: 'Integration 2',
-            description: 'Description 2',
-            id: '2',
-            data_streams: [],
-          },
-        },
       ] as Array<SearchHit<RuleMigrationIntegration>>;
 
       const mockResponse: SearchResponse<RuleMigrationIntegration> = {
@@ -181,7 +172,24 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
       esClientMock.search = jest.fn().mockResolvedValue(mockResponse);
 
-      const results = await client.semanticSearch('test query');
+      const query = 'test query';
+
+      const results = await client.semanticSearch(query);
+
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: 'mock-index',
+        query: {
+          bool: {
+            should: [
+              { semantic: { query, field: 'elser_embedding', boost: 1.5 } },
+              { multi_match: { query, fields: ['title^2', 'description'], boost: 3 } },
+            ],
+            filter: { exists: { field: 'data_streams' } },
+          },
+        },
+        size: 5,
+        min_score: 40,
+      });
       expect(results).toHaveLength(1);
       expect(results[0].title).toBe('Integration 1');
     });
