@@ -17,6 +17,7 @@ import React, {
   useMemo,
   useEffect,
 } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -32,7 +33,9 @@ import {
   EuiPortal,
   EuiShowFor,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
@@ -119,6 +122,8 @@ const UnifiedFieldListSidebarContainer = memo(
         onFieldEdited,
         additionalFilters,
       } = props;
+      const styles = useMemoizedStyles(componentStyles);
+
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
       );
@@ -287,7 +292,7 @@ const UnifiedFieldListSidebarContainer = memo(
       const renderButtonVariant = () => {
         return (
           <>
-            <div className="unifiedFieldListSidebar__mobile">
+            <div className="unifiedFieldListSidebar__mobile" css={styles.sidebarMobile}>
               <EuiButton
                 {...buttonPropsToTriggerFlyout}
                 contentProps={{
@@ -303,6 +308,7 @@ const UnifiedFieldListSidebarContainer = memo(
                 />
                 <EuiBadge
                   className="unifiedFieldListSidebar__mobileBadge"
+                  css={styles.sidebarMobileBadge}
                   color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
                 >
                   {!workspaceSelectedFieldNames?.length ||
@@ -374,6 +380,19 @@ const UnifiedFieldListSidebarContainer = memo(
     }
   )
 );
+
+const componentStyles = {
+  sidebarMobile: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+  sidebarMobileBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+      verticalAlign: 'text-bottom',
+    }),
+};
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export
