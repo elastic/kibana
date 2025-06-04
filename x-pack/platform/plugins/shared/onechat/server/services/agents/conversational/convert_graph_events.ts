@@ -159,7 +159,7 @@ export const convertGraphEvents = ({
           return of(...toolResultEvents);
         }
 
-        // run is finished, we emit
+        // run is finished
         // if (event.event === 'on_chain_end' && event.name === runName) {}
 
         return EMPTY;

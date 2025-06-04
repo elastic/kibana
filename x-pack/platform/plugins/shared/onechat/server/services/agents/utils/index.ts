@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { combineToolProviders } from './combine_providers';
+export { combineAgentProviders } from './combine_providers';
 export { createInternalRegistry } from './create_registry';

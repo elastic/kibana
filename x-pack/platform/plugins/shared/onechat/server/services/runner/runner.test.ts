@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { ScopedRunnerRunToolsParams, RunToolParams } from '@kbn/onechat-server';
+import type {
+  ScopedRunnerRunToolsParams,
+  ScopedRunnerRunAgentParams,
+  RunToolParams,
+  RunAgentParams,
+} from '@kbn/onechat-server';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
+  createMockedAgent,
   CreateScopedRunnerDepsMock,
   MockedTool,
+  MockedAgent,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
 
@@ -73,6 +80,74 @@ describe('Onechat runner', () => {
       expect(response).toEqual({
         runId: expect.any(String),
         result: { someProp: 'someValue' },
+      });
+    });
+  });
+
+  describe('runAgent', () => {
+    let agent: MockedAgent;
+
+    beforeEach(() => {
+      const {
+        agentsService: { registry },
+      } = runnerDeps;
+
+      agent = createMockedAgent();
+      registry.get.mockResolvedValue(agent);
+    });
+
+    it('can be invoked through a scoped runner', async () => {
+      agent.handler.mockResolvedValue({ result: 'someResult' as any });
+
+      const params: ScopedRunnerRunAgentParams = {
+        agentId: 'test-tool',
+        agentParams: { foo: 'bar' },
+      };
+
+      const runner = createScopedRunner(runnerDeps);
+      const response = await runner.runAgent(params);
+
+      expect(agent.handler).toHaveBeenCalledTimes(1);
+      expect(agent.handler).toHaveBeenCalledWith(
+        {
+          runId: expect.any(String),
+          agentParams: params.agentParams,
+        },
+        expect.any(Object)
+      );
+
+      expect(response).toEqual({
+        runId: expect.any(String),
+        result: 'someResult',
+      });
+    });
+
+    it('can be invoked through a runner', async () => {
+      agent.handler.mockResolvedValue({ result: 'someResult' as any });
+
+      const { request, ...otherRunnerDeps } = runnerDeps;
+
+      const params: RunAgentParams = {
+        agentId: 'test-tool',
+        agentParams: { foo: 'bar' },
+        request,
+      };
+
+      const runner = createRunner(otherRunnerDeps);
+      const response = await runner.runAgent(params);
+
+      expect(agent.handler).toHaveBeenCalledTimes(1);
+      expect(agent.handler).toHaveBeenCalledWith(
+        {
+          runId: expect.any(String),
+          agentParams: params.agentParams,
+        },
+        expect.any(Object)
+      );
+
+      expect(response).toEqual({
+        runId: expect.any(String),
+        result: 'someResult',
       });
     });
   });

@@ -125,7 +125,7 @@ class ChatServiceImpl implements ChatService {
     conversationId?: string;
     nextInput: RoundInput;
     request: KibanaRequest;
-  }) {
+  }): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
 
     return forkJoin({

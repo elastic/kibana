@@ -18,7 +18,7 @@ import type {
   AgentWithIdProvider,
   AgentDefinitionWithProviderId,
 } from '../types';
-import { combineToolProviders } from './combine_providers';
+import { combineAgentProviders } from './combine_providers';
 
 export const createInternalRegistry = ({
   providers,
@@ -27,7 +27,7 @@ export const createInternalRegistry = ({
   providers: AgentProviderWithId[];
   getRunner: () => Runner;
 }): InternalAgentRegistry => {
-  const globalProvider = combineToolProviders(...providers);
+  const globalProvider = combineAgentProviders(...providers);
   const publicRegistry = internalProviderToPublic({ provider: globalProvider, getRunner });
   return Object.assign(globalProvider, {
     asPublicRegistry: () => publicRegistry,

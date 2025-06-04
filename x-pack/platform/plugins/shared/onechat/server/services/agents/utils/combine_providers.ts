@@ -12,11 +12,11 @@ import type {
 } from '../types';
 
 /**
- * Creates a tool provider that combines multiple tool providers.
+ * Creates an agent provider that combines multiple providers.
  *
  * Note: order matters - providers will be checked in the order they are in the list (in case of ID conflict)
  */
-export const combineToolProviders = (...providers: AgentProviderWithId[]): AgentWithIdProvider => {
+export const combineAgentProviders = (...providers: AgentProviderWithId[]): AgentWithIdProvider => {
   const combined: AgentWithIdProvider = {
     has: async (options) => {
       for (const provider of providers) {
