@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BoundChatCompleteOptions } from '@kbn/inference-common';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { BoundInferenceClient, InferenceClient } from './types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from './bind_client';
@@ -16,6 +17,7 @@ import { bindClient } from './bind_client';
 interface UnboundOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
+  esClient: ElasticsearchClient;
   logger: Logger;
 }
 
@@ -28,8 +30,13 @@ export function createClient(options: BoundOptions): BoundInferenceClient;
 export function createClient(
   options: UnboundOptions | BoundOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger } = options;
-  const client = createInferenceClient({ request, actions, logger: logger.get('client') });
+  const { actions, request, logger, esClient } = options;
+  const client = createInferenceClient({
+    request,
+    actions,
+    logger: logger.get('client'),
+    esClient,
+  });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
   } else {

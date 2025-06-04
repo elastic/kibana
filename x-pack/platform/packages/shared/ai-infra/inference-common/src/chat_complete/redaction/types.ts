@@ -18,6 +18,7 @@ enum RuleMaskType {
 
 export interface NamedEntityRecognitionRule extends RedactionRuleBase {
   type: 'NER';
+  model_id: string;
 }
 
 export interface RegExpRule extends RedactionRuleBase {

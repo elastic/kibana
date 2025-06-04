@@ -20,6 +20,7 @@ import {
   RedactionConfiguration,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { getInferenceAdapter } from './adapters';
 import {
   getInferenceExecutor,
@@ -36,12 +37,18 @@ import { unredactMessage } from './redaction/unredact_message';
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
+  esClient: ElasticsearchClient;
   logger: Logger;
 }
 
 export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
 
-export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
+export function createChatCompleteApi({
+  request,
+  actions,
+  logger,
+  esClient,
+}: CreateChatCompleteApiOptions) {
   return ({
     connectorId,
     messages,
@@ -66,7 +73,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
       return Promise.all([
         getInferenceExecutor({ connectorId, request, actions }),
         redactionConfiguration && redactionConfiguration.enabled
-          ? redactMessages({ messages, redactionConfiguration })
+          ? redactMessages({ messages, redactionConfiguration, esClient })
           : undefined,
       ]);
     }).pipe(
