@@ -25,11 +25,11 @@ interface BaseProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }
 
 export interface ApmTraceWaterfallEmbeddableFocusedProps extends BaseProps, SerializedTitles {
   docId: string;
+  onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }
 
 export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, SerializedTitles {
@@ -58,7 +58,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
-      const onErrorClick$ = new BehaviorSubject(state.onErrorClick);
+      const onErrorClick$ = new BehaviorSubject(
+        'onErrorClick' in state ? state.onErrorClick : undefined
+      );
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
       const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
 
