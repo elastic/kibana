@@ -143,33 +143,35 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
         }),
-        body: schema.maybe(
-          schema.object({
-            rules: schema.arrayOf(
-              schema.object({
-                rule_id: schema.string(),
-                type: schema.string(),
-                criteria: schema.arrayOf(
-                  schema.object({
-                    type: schema.string(),
-                    metadata: schema.string(),
-                    values: schema.arrayOf(schema.string()),
-                  })
-                ),
-                actions: schema.object({
-                  ids: schema.maybe(schema.arrayOf(schema.string())),
-                  docs: schema.maybe(
-                    schema.arrayOf(
-                      schema.object({
-                        _id: schema.string(),
-                        _index: schema.string(),
-                      })
-                    )
+        body: schema.nullable(
+          schema.maybe(
+            schema.object({
+              rules: schema.arrayOf(
+                schema.object({
+                  rule_id: schema.string(),
+                  type: schema.string(),
+                  criteria: schema.arrayOf(
+                    schema.object({
+                      type: schema.string(),
+                      metadata: schema.string(),
+                      values: schema.arrayOf(schema.string()),
+                    })
                   ),
-                }),
-              })
-            ),
-          })
+                  actions: schema.object({
+                    ids: schema.maybe(schema.arrayOf(schema.string())),
+                    docs: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({
+                          _id: schema.string(),
+                          _index: schema.string(),
+                        })
+                      )
+                    ),
+                  }),
+                })
+              ),
+            })
+          )
         ),
       },
     },
