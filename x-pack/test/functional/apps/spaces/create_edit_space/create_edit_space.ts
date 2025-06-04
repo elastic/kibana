@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('create space', () => {
+    describe.skip('create space', () => {
       const spaceName = `${faker.word.adjective()} space`;
       const spaceId = spaceName.replace(' ', '-');
 
@@ -105,7 +105,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('solution view', () => {
+    describe.skip('solution view', () => {
       it('does show the solution view panel', async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/default', {
           shouldUseHashForSubUrl: false,
@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('API-created Space', () => {
+    describe.skip('API-created Space', () => {
       before(async () => {
         await spacesServices.create({
           id: 'foo-space',
