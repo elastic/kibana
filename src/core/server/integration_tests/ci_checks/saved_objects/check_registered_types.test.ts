@@ -90,7 +90,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "connector_token": "79977ea2cb1530ba7e315b95c1b5a524b622a6b3",
         "core-usage-stats": "b3c04da317c957741ebcdedfea4524049fdc79ff",
         "csp-rule-template": "c151324d5f85178169395eecb12bac6b96064654",
-        "dashboard": "0da0a81a6a7965c71895223948e8361138b9fd16",
+        "dashboard": "904b7a17c97a8df4292fa411195c33c693aab510",
         "dynamic-config-overrides": "eb3ec7d96a42991068eda5421eecba9349c82d2b",
         "endpoint:unified-user-artifact-manifest": "71c7fcb52c658b21ea2800a6b6a76972ae1c776e",
         "endpoint:user-artifact-manifest": "1c3533161811a58772e30cdc77bac4631da3ef2b",
