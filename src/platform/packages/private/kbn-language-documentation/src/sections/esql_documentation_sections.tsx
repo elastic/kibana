@@ -145,10 +145,7 @@ ROW a = ROUND(1.23, 0)
         <Markdown
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
             defaultMessage: `### SHOW
-The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
-
-* Use \`SHOW INFO\` to return the deployment's version, build date and hash.
-* Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
+The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
             ignoreTag: true,
             description:
@@ -416,7 +413,7 @@ ROW language_code = 1
 | LOOKUP JOIN languages ON language_code
 \`\`\`
 
-An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a lookup index, set the index mode to lookup.
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index mode](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#_static_index_settings) needs to be set when the index is created.
 
 \`\`\` esql
 PUT languages
@@ -682,194 +679,7 @@ Refer to **Operators** for an overview of the supported operators.
   ],
 };
 
-export const operators = {
-  label: i18n.translate('languageDocumentation.documentationESQL.operators', {
-    defaultMessage: 'Operators',
-  }),
-  description: i18n.translate(
-    'languageDocumentation.documentationESQL.operatorsDocumentationESQLDescription',
-    {
-      defaultMessage: `ES|QL supports the following operators:`,
-    }
-  ),
-  items: [
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.binaryOperators', {
-        defaultMessage: 'Binary operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.binaryOperators.markdown',
-            {
-              defaultMessage: `### Binary operators
-These binary comparison operators are supported:
-
-* equality: \`==\`
-* inequality: \`!=\`
-* less than: \`<\`
-* less than or equal: \`<=\`
-* greater than: \`>\`
-* greater than or equal: \`>=\`
-* add: \`+\`
-* subtract: \`-\`
-* multiply: \`*\`
-* divide: \`/\`
-* modulus: \`%\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.booleanOperators', {
-        defaultMessage: 'Boolean operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.booleanOperators.markdown',
-            {
-              defaultMessage: `### Boolean operators
-The following boolean operators are supported:
-
-* \`AND\`
-* \`OR\`
-* \`NOT\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.castOperator', {
-        defaultMessage: 'Cast (::)',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.castOperator.markdown',
-            {
-              defaultMessage: `### CAST (\`::\`)
-The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
-
-Example:
-\`\`\` esql
-ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.inOperator', {
-        defaultMessage: 'IN',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.inOperator.markdown',
-            {
-              defaultMessage: `### IN
-The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
-
-\`\`\` esql
-ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.stringOperators', {
-        defaultMessage: 'LIKE and RLIKE',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.stringOperators.markdown',
-            {
-              defaultMessage: `### LIKE and RLIKE
-For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
-
-Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
-
-* \`*\` matches zero or more characters.
-* \`?\` matches one character.
-
-\`\`\` esql
-FROM employees
-| WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
-\`\`\`
-
-Use \`RLIKE\` to match strings using regular expressions:
-
-\`\`\` esql
-FROM employees
-| WHERE first_name RLIKE ".leja.*"
-| KEEP first_name, last_name
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.predicates', {
-        defaultMessage: 'NULL values',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.predicates.markdown',
-            {
-              defaultMessage: `### NULL values
-For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
-
-\`\`\` esql
-FROM employees
-| WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
-\`\`\`
-
-\`\`\` esql
-FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS count(emp_no)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-  ],
-};
-
 export { functions as scalarFunctions } from './generated/scalar_functions';
 export { functions as aggregationFunctions } from './generated/aggregation_functions';
 export { functions as groupingFunctions } from './generated/grouping_functions';
+export { functions as operators } from './generated/operators';

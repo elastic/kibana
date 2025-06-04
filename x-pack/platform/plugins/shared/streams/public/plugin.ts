@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { ApplicationStart, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
@@ -35,15 +35,18 @@ export class Plugin implements StreamsPluginClass {
 
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
-    return {
-      status$: createStreamsStatusObservable(pluginSetup, this.repositoryClient, this.logger),
-    };
+    return {};
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(pluginsStart, this.repositoryClient, this.logger),
+      status$: createStreamsStatusObservable(
+        pluginsStart,
+        core.application,
+        this.repositoryClient,
+        this.logger
+      ),
     };
   }
 
@@ -57,11 +60,18 @@ const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
 const createStreamsStatusObservable = once(
   (
     deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
+    application: ApplicationStart,
     repositoryClient: StreamsRepositoryClient,
     logger: Logger
   ): Observable<StreamsStatus> => {
     const isObservabilityServerless =
       deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability';
+
+    const hasCapabilities = application.capabilities?.streams?.show;
+
+    if (!hasCapabilities) {
+      return from([DISABLED_STATUS]);
+    }
 
     if (isObservabilityServerless) {
       return from([ENABLED_STATUS]);

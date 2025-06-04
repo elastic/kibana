@@ -207,6 +207,7 @@ export function AddDashboardFlyout({
             loading={dashboardSuggestionsFetch.loading}
             selectedDashboards={selectedDashboards}
             setSelectedDashboards={setSelectedDashboards}
+            dataTestSubj="streamsAppAddDashboardFlyoutDashboardsTable"
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>

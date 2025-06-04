@@ -99,7 +99,7 @@ export const modeDescription = i18n.translate(
   }
 );
 
-export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.map(
+export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES?.map(
   ({ name, description }) => ({
     label: `_${name}`,
     text: `_${name}:$0`,

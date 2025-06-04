@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ONBOARDING_VIDEO_SOURCE } from '../../../common/constants';
-import { AddDataSourcePanel } from './add_data_source';
+import { AddDataSourcePanel } from './components/add_data_source';
 
 const VIDEO_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.videoTitle',

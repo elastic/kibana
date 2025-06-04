@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* TODO: (new data view picker) remove this after new picker is enabled */
+/* eslint-disable complexity  */
+
 import { css } from '@emotion/react';
 import type { SubsetDataTableModel, TableId } from '@kbn/securitysolution-data-table';
 import {
@@ -32,6 +35,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -51,10 +55,7 @@ import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
+import { useSessionViewNavigation } from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { EmptyTable, TableContext, TableLoading } from './shared';
@@ -67,6 +68,9 @@ import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
 import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
@@ -127,7 +131,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     graphEventId, // If truthy, the graph viewer (Resolver) is showing
     itemsPerPage,
     itemsPerPageOptions,
-    sessionViewConfig,
     showCheckboxes,
     sort,
     queryFields,
@@ -143,13 +146,27 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { uiSettings, data } = useKibana().services;
 
   const {
-    browserFields,
-    dataViewId,
-    selectedPatterns,
-    sourcererDataView,
-    dataViewId: selectedDataViewId,
-    loading: isLoadingIndexPattern,
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+    loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec, status } = useDataViewSpec(sourcererScope);
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
+  const dataViewId = newDataViewPickerEnabled ? dataViewSpec.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const getFieldSpec = useGetFieldSpec(sourcererScope);
 
@@ -183,16 +200,10 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
   });
-  const { SessionView } = useSessionView({
-    scopeId: tableId,
-  });
   const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+    const shouldShowOverlay = graphEventId != null && graphEventId.length > 0;
+    return shouldShowOverlay ? <GraphOverlay scopeId={tableId} Navigation={Navigation} /> : null;
+  }, [graphEventId, tableId, Navigation]);
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>

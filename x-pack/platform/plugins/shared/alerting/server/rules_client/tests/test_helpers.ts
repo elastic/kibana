@@ -457,6 +457,7 @@ export const returnedRuleForBulkOps1 = {
   alertTypeId: 'fakeType',
   artifacts: {
     dashboards: [],
+    investigation_guide: { blob: '' },
   },
   consumer: 'fakeConsumer',
   enabled: true,
@@ -486,6 +487,7 @@ export const returnedRuleForBulkOps2 = {
   alertTypeId: 'fakeType',
   artifacts: {
     dashboards: [],
+    investigation_guide: { blob: '' },
   },
   consumer: 'fakeConsumer',
   enabled: true,
@@ -516,6 +518,7 @@ export const returnedRuleForBulkOps3 = {
   apiKeyCreatedByUser: true,
   artifacts: {
     dashboards: [],
+    investigation_guide: { blob: '' },
   },
   consumer: 'fakeConsumer',
   enabled: true,

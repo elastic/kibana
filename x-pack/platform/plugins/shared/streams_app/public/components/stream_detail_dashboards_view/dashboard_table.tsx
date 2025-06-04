@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -27,6 +27,7 @@ export function DashboardsTable({
   setSelectedDashboards,
   loading,
   entityId,
+  dataTestSubj,
 }: {
   entityId?: string;
   loading: boolean;
@@ -34,6 +35,7 @@ export function DashboardsTable({
   compact?: boolean;
   selectedDashboards?: SanitizedDashboardAsset[];
   setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
+  dataTestSubj?: string;
 }) {
   const {
     core: { application },
@@ -58,7 +60,7 @@ export function DashboardsTable({
         }),
         render: (_, { title, id }) => (
           <EuiLink
-            data-test-subj="streamsAppColumnsLink"
+            data-test-subj="streamsAppDashboardColumnsLink"
             onClick={() => {
               if (entityId) {
                 telemetryClient.trackAssetClick({
@@ -117,6 +119,7 @@ export function DashboardsTable({
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false} />
       <EuiBasicTable
+        data-test-subj={dataTestSubj}
         columns={columns}
         itemId="id"
         items={items}

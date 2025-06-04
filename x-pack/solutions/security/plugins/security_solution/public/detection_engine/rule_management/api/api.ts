@@ -41,6 +41,7 @@ import type {
   BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
+  ImportRulesResponse,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -72,7 +73,6 @@ import type {
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
   ImportDataProps,
-  ImportDataResponse,
   PatchRuleProps,
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
@@ -453,11 +453,11 @@ export const importRules = async ({
   overwriteExceptions = false,
   overwriteActionConnectors = false,
   signal,
-}: ImportDataProps): Promise<ImportDataResponse> => {
+}: ImportDataProps): Promise<ImportRulesResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportDataResponse>(DETECTION_ENGINE_RULES_IMPORT_URL, {
+  return KibanaServices.get().http.fetch<ImportRulesResponse>(DETECTION_ENGINE_RULES_IMPORT_URL, {
     method: 'POST',
     version: '2023-10-31',
     headers: { 'Content-Type': undefined },

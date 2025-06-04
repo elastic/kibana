@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableImperativeApi,
+  AlertsTableProps,
+} from '@kbn/response-ops-alerts-table/types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -27,6 +30,9 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import styled from '@emotion/styled';
+import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
+import { APP_ID, CASES_FEATURE_ID } from '../../../../../common';
 import { ActionsCell } from './actions_cell';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
@@ -75,7 +81,7 @@ export const columns: EuiDataGridProps['columns'] = [
   },
 ];
 
-export const ACTION_COLUMN_WIDTH = 98; // px
+export const ACTION_COLUMN_WIDTH = 72; // px
 export const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 export const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
 export const ROW_HEIGHTS_OPTIONS = { defaultHeight: 40 };
@@ -85,6 +91,22 @@ export const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
   showFullScreenSelector: false,
 };
 export const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
+export const CASES_CONFIGURATION = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+  syncAlerts: true,
+};
+
+// This will guarantee that ALL cells will have their values vertically centered.
+// While these styles were originally applied in the RenderCell component, they were not applied to the bulk action checkboxes.
+// These are necessary because the ResponseOps alerts table is not centering values vertically, which is visible when using a custom row height.
+export const EuiDataGridStyleWrapper = styled.div`
+  div .euiDataGridRowCell__content {
+    align-items: center;
+    display: flex;
+    height: 100%;
+  }
+`;
 
 export interface AdditionalTableContext {
   /**
@@ -142,6 +164,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
   const {
     services: {
       application,
+      cases,
       data,
       fieldFormats,
       http,
@@ -153,6 +176,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
   } = useKibana();
   const services = useMemo(
     () => ({
+      cases,
       data,
       http,
       notifications,
@@ -161,7 +185,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
       licensing,
       settings,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings]
+    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
@@ -225,24 +249,36 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     [packages, ruleResponse]
   );
 
+  const refetchRef = useRef<AlertsTableImperativeApi>(null);
+  const refetch = useCallback(() => {
+    refetchRef.current?.refresh();
+  }, []);
+
+  const bulkActions = useAdditionalBulkActions({ refetch });
+
   return (
-    <AlertsTable
-      actionsColumnWidth={ACTION_COLUMN_WIDTH}
-      additionalContext={additionalContext}
-      browserFields={browserFields}
-      columns={columns}
-      consumers={ALERT_TABLE_CONSUMERS}
-      gridStyle={GRID_STYLE}
-      id={TableId.alertsOnAlertSummaryPage}
-      query={query}
-      renderActionsCell={ActionsCell}
-      renderAdditionalToolbarControls={renderAdditionalToolbarControls}
-      renderCellValue={CellValue}
-      rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
-      ruleTypeIds={RULE_TYPE_IDS}
-      services={services}
-      toolbarVisibility={TOOLBAR_VISIBILITY}
-    />
+    <EuiDataGridStyleWrapper>
+      <AlertsTable
+        actionsColumnWidth={ACTION_COLUMN_WIDTH}
+        additionalBulkActions={bulkActions}
+        additionalContext={additionalContext}
+        browserFields={browserFields}
+        casesConfiguration={CASES_CONFIGURATION}
+        columns={columns}
+        consumers={ALERT_TABLE_CONSUMERS}
+        gridStyle={GRID_STYLE}
+        id={TableId.alertsOnAlertSummaryPage}
+        query={query}
+        ref={refetchRef}
+        renderActionsCell={ActionsCell}
+        renderAdditionalToolbarControls={renderAdditionalToolbarControls}
+        renderCellValue={CellValue}
+        rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        ruleTypeIds={RULE_TYPE_IDS}
+        services={services}
+        toolbarVisibility={TOOLBAR_VISIBILITY}
+      />
+    </EuiDataGridStyleWrapper>
   );
 });
 

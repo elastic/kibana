@@ -473,7 +473,7 @@
               "\nnotifications service"
             ],
             "signature": [
-              "NotificationsSetup"
+              "NotificationsStart"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,

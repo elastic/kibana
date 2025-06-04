@@ -35,6 +35,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     canRead: true,
     canMonitor: true,
     canViewIntegrations: true,
+    canReadFailureStore: false,
   },
   dataStreamStats: [],
   degradedDocStats: [],

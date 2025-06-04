@@ -179,9 +179,7 @@ export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/s
 export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
 export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
 
-export {
-  AlertSummary,
-  Conversations,
-  SuggestedPrompts,
-  AttackDiscoveryWidget,
-} from './impl/alerts';
+export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_selected_prompt_context';
+export { getCombinedMessage } from './impl/assistant/prompt/helpers';
+export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
+export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

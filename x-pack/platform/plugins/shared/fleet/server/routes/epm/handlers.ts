@@ -34,6 +34,7 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
+  PackageSpecCategory,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -325,6 +326,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
       items: res.assets || [],
       _meta: {
         install_source: res.installSource ?? installSource,
+        name: pkgName,
       },
     };
     return response.ok({ body });
@@ -366,6 +368,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
         items: res.assets || [],
         _meta: {
           install_source: res.installSource ?? installSource,
+          name: integrationName,
         },
       };
       return response.ok({ body });
@@ -406,7 +409,7 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   >;
   const result = await updateCustomIntegration(esClient, soClient, pkgName, {
     readMeData,
-    categories,
+    categories: categories?.map((category) => category as PackageSpecCategory),
   });
 
   return response.ok({
@@ -492,6 +495,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       items: res.assets || [],
       _meta: {
         install_source: res.installSource ?? installSource,
+        name: res.pkgName,
       },
     };
     return response.ok({ body });

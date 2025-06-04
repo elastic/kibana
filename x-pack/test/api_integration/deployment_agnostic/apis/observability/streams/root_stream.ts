@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { get } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import {
@@ -14,8 +15,9 @@ import {
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 
-const rootStreamDefinition: WiredStreamDefinition = {
+const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
+  description: '',
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
@@ -25,13 +27,49 @@ const rootStreamDefinition: WiredStreamDefinition = {
         '@timestamp': {
           type: 'date',
         },
-        message: {
-          type: 'match_only_text',
+        'scope.dropped_attributes_count': {
+          type: 'long',
         },
-        'host.name': {
+        dropped_attributes_count: {
+          type: 'long',
+        },
+        'resource.dropped_attributes_count': {
+          type: 'long',
+        },
+        'resource.schema_url': {
           type: 'keyword',
         },
-        'log.level': {
+        'scope.name': {
+          type: 'keyword',
+        },
+        'scope.schema_url': {
+          type: 'keyword',
+        },
+        'scope.version': {
+          type: 'keyword',
+        },
+        observed_timestamp: {
+          type: 'date',
+        },
+        trace_id: {
+          type: 'keyword',
+        },
+        span_id: {
+          type: 'keyword',
+        },
+        event_name: {
+          type: 'keyword',
+        },
+        severity_text: {
+          type: 'keyword',
+        },
+        'body.text': {
+          type: 'match_only_text',
+        },
+        severity_number: {
+          type: 'long',
+        },
+        'resource.attributes.host.name': {
           type: 'keyword',
         },
         'stream.name': {
@@ -58,18 +96,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow processing changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: [
               {
                 grok: {
-                  field: 'message',
+                  field: 'body.text',
                   patterns: [
-                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
                   if: { always: {} },
                 },
@@ -79,17 +118,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property(
-        'message',
-        'Desired stream state is invalid: Root stream processing rules cannot be changed'
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
+        'Root stream processing rules cannot be changed'
       );
     });
 
     it('Should not allow fields changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
@@ -105,17 +146,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property(
-        'message',
-        'Desired stream state is invalid: Root stream fields cannot be changed'
+
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
+        'Root stream fields cannot be changed'
       );
     });
 
     it('Should allow routing changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {

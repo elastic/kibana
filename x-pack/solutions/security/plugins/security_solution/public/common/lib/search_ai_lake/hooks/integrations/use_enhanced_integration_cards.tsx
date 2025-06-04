@@ -9,18 +9,26 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiBadge } from '@elastic/eui';
 import { installationStatuses, type IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
 
-const FEATURED_INTEGRATION_SORT_ORDER = [
+export interface EnhancedCardOptions {
+  showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
+  returnPath?: string;
+  hasDataStreams?: boolean;
+}
+
+export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
   'epr:crowdstrike',
 ];
-const INTEGRATION_CARD_MAX_HEIGHT_PX = 88;
+const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
 const addPathParamToUrl = (url: string, path: string) => {
   const encodedPath = encodeURIComponent(path);
@@ -38,16 +46,20 @@ export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
 
 export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
-  callerView: IntegrationsFacets
+  callerView: IntegrationsFacets,
+  options?: EnhancedCardOptions
 ): IntegrationCardItem => {
-  const returnPath = `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
+  const returnPath = options?.returnPath ?? `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
   const url = addPathParamToUrl(card.url, returnPath);
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
     url,
+    showInstallationStatus: options?.showInstallationStatus,
+    showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
+    isUnverified: false, // temporarily hiding the 'unverified' badge from the integration card
     extraLabelsBadges: categoryBadge
       ? ([
           <EuiFlexItem grow={false}>
@@ -58,11 +70,14 @@ export const applyCategoryBadgeAndStyling = (
           </EuiFlexItem>,
         ] as React.ReactNode[])
       : [],
-    maxCardHeight: INTEGRATION_CARD_MAX_HEIGHT_PX,
+    minCardHeight: INTEGRATION_CARD_MIN_HEIGHT_PX,
+    hasDataStreams: options?.hasDataStreams,
   };
 };
 
-const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
+const applyCustomDisplayOrder = (
+  integrationsList: IntegrationCardItem[]
+): IntegrationCardItem[] => {
   return integrationsList.sort(
     (a, b) =>
       FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.id) - FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.id)
@@ -70,13 +85,21 @@ const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
 };
 
 export const useEnhancedIntegrationCards = (
-  integrationsList: IntegrationCardItem[]
+  integrationsList: IntegrationCardItem[],
+  activeIntegrations: GetInstalledPackagesResponse['items'] = [],
+  options?: EnhancedCardOptions
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
 
   const available = useMemo(
-    () => sorted.map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.available)),
-    [sorted]
+    () =>
+      sorted.map((card) =>
+        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, {
+          ...options,
+          hasDataStreams: activeIntegrations.some(({ name }) => name === card.name),
+        })
+      ),
+    [sorted, options, activeIntegrations]
   );
 
   const installed = useMemo(

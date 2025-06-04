@@ -32,6 +32,7 @@ SHARED_DEPS = [
   "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
+  "@npm//@elastic/monaco-esql",
 ]
 
 webpack_cli(

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -15,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const find = getService('find');
+  const log = getService('log');
 
   const inspectorTrendlineData = [
     ['2015-09-19 06:00', '-'],
@@ -369,6 +371,109 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Extract the numeric decimals from the value without any compact suffix like k or m
       const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[0];
       expect(decimals).have.length(3);
+    });
+
+    it('should show a badge for the secondary metric', async () => {
+      const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`;
+      const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';
+
+      async function getBackgroundColorForBadge(el: WebElementWrapper | null) {
+        if (!el) {
+          throw new Error('Element not found');
+        }
+        const style = await el.getAttribute('style');
+        if (!style) {
+          throw new Error('Element has no style attribute');
+        }
+
+        const backgroundColor = style
+          .split(';')
+          .find((styleProp: string) => styleProp.includes('--euiBadgeBackgroundColor'))
+          ?.split(':')[1]
+          .trim();
+
+        if (!backgroundColor) {
+          throw new Error('Element has no background color');
+        }
+        return backgroundColor;
+      }
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.switchToVisualization('lnsMetric', 'Metric');
+
+      // start with a numeric primary metric
+      await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      // now add a secondary metric
+      await lens.configureDimension({
+        dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+        keepOpen: true,
+      });
+
+      log.info('Checking badge in various configurations');
+
+      // make sure there's no badge
+      expect(await find.existsByCssSelector(BADGE_SELECTOR)).to.be(false);
+
+      /**
+       * Perform a smoke testing of the badge features
+       */
+
+      // now configure a static badge color
+      await testSubjects.click('lnsMetric_color_mode_static');
+
+      // get a reference to the badge element
+      const getBadge = async () => await find.byCssSelector(BADGE_SELECTOR);
+      const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      await colorPicker.clearValue();
+      await colorPicker.type(CUSTOM_STATIC_COLOR_HEX);
+      await lens.waitForVisualization('mtrVis');
+
+      expect(await getBackgroundColorForBadge(await getBadge())).to.be(CUSTOM_STATIC_COLOR_HEX);
+
+      // now change to dynamic badge color
+      await testSubjects.click('lnsMetric_color_mode_dynamic');
+
+      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
+
+      // now show icon only
+      await testSubjects.click('lnsMetric_secondary_trend_display_icon');
+      // badge is there but value is not there any more
+      expect(await (await getBadge()).getVisibleText()).to.be(`↑`);
+
+      // now show value only
+      await testSubjects.click('lnsMetric_secondary_trend_display_value');
+      // badge is there but icon is not there any more
+      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322`);
+
+      // enable the Primary metric baseline
+      await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
+      // and that the badge is still there
+      expect(await (await getBadge()).getVisibleText()).to.be(`0`);
+
+      /**
+       * Now check if the static and dynamic previous mode are correctly cached
+       */
+      log.info('Checking editor configuration caching');
+      // switch to none now
+      await testSubjects.click('lnsMetric_color_mode_none');
+
+      // and back to static
+      await testSubjects.click('lnsMetric_color_mode_static');
+      // and check again the color is the previously custom one
+      expect(await getBackgroundColorForBadge(await getBadge())).to.be(CUSTOM_STATIC_COLOR_HEX);
+
+      // now switch to dynamic
+      await testSubjects.click('lnsMetric_color_mode_dynamic');
+      // and check the content is still based on primary value-only
+      expect(await (await getBadge()).getVisibleText()).to.be(`0`);
     });
 
     it('should disable collapse by when the primary metric is not numeric', async () => {

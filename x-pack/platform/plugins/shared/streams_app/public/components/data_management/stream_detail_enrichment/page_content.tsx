@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -43,7 +43,7 @@ import {
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
@@ -98,6 +98,10 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
+  const isInitializing = useStreamsEnrichmentSelector((state) => {
+    return !state.matches('ready');
+  });
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
     history: appParams.history,
@@ -105,6 +109,10 @@ export function StreamDetailEnrichmentContentImpl() {
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
+
+  if (isInitializing) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>

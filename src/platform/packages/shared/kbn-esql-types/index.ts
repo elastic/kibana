@@ -9,9 +9,23 @@
 
 export {
   ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  type ControlWidthOptions,
+  type ESQLControlState,
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
 } from './src/variables_types';
+
+export {
+  type IndicesAutocompleteResult,
+  type IndexAutocompleteItem,
+} from './src/sources_autocomplete_types';
+
+export {
+  type RecommendedQuery,
+  type ResolveIndexResponse,
+} from './src/extensions_autocomplete_types';

@@ -23,7 +23,7 @@ import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
 import { appContextService } from '../../app_context';
 
-import type { PackageInstallContext } from '../../../../common/types';
+import type { PackageInstallContext, PackageSpecCategory } from '../../../../common/types';
 
 // Define a type for the integration attributes
 interface IntegrationAttributes {
@@ -43,7 +43,7 @@ export async function updateCustomIntegration(
   id: string,
   fields: {
     readMeData?: string;
-    categories?: string[];
+    categories?: PackageSpecCategory[];
   }
 ) {
   // Get the current integration using the id
@@ -73,6 +73,7 @@ export async function updateCustomIntegration(
   const res = await incrementVersionAndUpdate(soClient, esClient, id, {
     version: newVersionString,
     readme: fields.readMeData,
+    categories: fields.categories,
   });
   return {
     version: newVersionString,
@@ -87,6 +88,7 @@ export async function incrementVersionAndUpdate(
   data: {
     version: string;
     readme: string | undefined;
+    categories: PackageSpecCategory[] | undefined;
   }
 ) {
   const installedPkg = await getInstalledPackageWithAssets({
@@ -108,6 +110,19 @@ export async function incrementVersionAndUpdate(
     );
     return acc;
   }, new Map<string, Buffer | undefined>());
+
+  // update the categories asset as well by editing the manifest.yml, but only if categories is actually defined in the request as its optional and we dont want to replace categories if they dont pass any in
+  if (data.categories) {
+    const manifestPath = `${pkgName}-${data.version}/manifest.yml`;
+    const manifest = assetsMap.get(manifestPath);
+    if (manifest) {
+      const yaml = load(manifest?.toString());
+      if (yaml) {
+        yaml.categories = data.categories || [];
+        assetsMap.set(manifestPath, Buffer.from(dump(yaml)));
+      }
+    }
+  }
 
   assetsMap.set(
     `${pkgName}-${data.version}/docs/README.md`,

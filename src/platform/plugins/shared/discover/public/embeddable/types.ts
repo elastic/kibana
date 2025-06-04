@@ -17,6 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesDescription,
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
@@ -98,14 +99,12 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState
-> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritableTitle &
+  Required<PublishesWritableTitle> &
+  Required<PublishesDescription> &
   PublishesSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &

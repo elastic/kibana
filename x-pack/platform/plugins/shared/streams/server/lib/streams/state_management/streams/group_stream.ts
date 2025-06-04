@@ -6,12 +6,7 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
-import type { GroupStreamDefinition, StreamDefinition } from '@kbn/streams-schema';
-import {
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
 import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
@@ -23,17 +18,17 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 
-export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
-  constructor(definition: GroupStreamDefinition, dependencies: StateDependencies) {
+export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definition> {
+  constructor(definition: Streams.GroupStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<GroupStreamDefinition> {
+  clone(): StreamActiveRecord<Streams.GroupStream.Definition> {
     return new GroupStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(
-    definition: StreamDefinition,
+    definition: Streams.all.Definition,
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
@@ -44,13 +39,14 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       };
     }
 
-    if (!isGroupStreamDefinition(definition)) {
+    if (!Streams.GroupStream.Definition.is(definition)) {
       throw new StatusError('Cannot change stream types', 400);
     }
 
     // Deduplicate members
     this._definition = {
       name: definition.name,
+      description: definition.description,
       group: {
         ...definition.group,
         members: Array.from(new Set(definition.group.members)),
@@ -109,7 +105,9 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
           return {
             isValid: false,
             errors: [
-              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`,
+              new Error(
+                `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`
+              ),
             ],
           };
         }
@@ -117,7 +115,9 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
         return {
           isValid: false,
           errors: [
-            `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`,
+            new Error(
+              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`
+            ),
           ],
         };
       } catch (error) {
@@ -133,16 +133,13 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       if (!memberStream || memberStream.isDeleted()) {
         return {
           isValid: false,
-          errors: [`Member stream ${member} not found`],
+          errors: [new Error(`Member stream ${member} not found`)],
         };
       }
-      if (
-        !isWiredStreamDefinition(memberStream.definition) &&
-        !isUnwiredStreamDefinition(memberStream.definition)
-      ) {
+      if (!Streams.ingest.all.Definition.is(memberStream.definition)) {
         return {
           isValid: false,
-          errors: [`Member stream ${member} is neither a wired nor an unwired stream`],
+          errors: [new Error(`Member stream ${member} is neither a wired nor an unwired stream`)],
         };
       }
     }

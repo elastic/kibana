@@ -202,6 +202,9 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
             },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
@@ -320,6 +323,9 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
             },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
@@ -428,6 +434,9 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
             },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
@@ -719,6 +728,9 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
             },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
@@ -752,6 +764,9 @@ describe('find()', () => {
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
+              "investigation_guide": Object {
+                "blob": "",
+              },
             },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
@@ -1030,6 +1045,9 @@ describe('find()', () => {
               "actions": Array [],
               "artifacts": Object {
                 "dashboards": Array [],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
               },
               "id": "1",
               "notifyWhen": undefined,
@@ -1284,6 +1302,9 @@ describe('find()', () => {
                     "id": "dashboard-1",
                   },
                 ],
+                "investigation_guide": Object {
+                  "blob": "",
+                },
               },
               "createdAt": 2019-02-12T21:01:22.479Z,
               "executionStatus": Object {

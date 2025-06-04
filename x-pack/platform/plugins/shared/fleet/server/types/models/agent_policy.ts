@@ -266,15 +266,19 @@ const BaseSSLSchema = schema.object({
   renegotiation: schema.maybe(schema.string()),
 });
 
-const BaseSecretsSchema = schema.object({
-  ssl: schema.maybe(
-    schema.object({
-      key: schema.object({
-        id: schema.maybe(schema.string()),
-      }),
-    })
-  ),
-});
+const BaseSecretsSchema = schema
+  .object({
+    ssl: schema.maybe(
+      schema.object({
+        key: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      })
+    ),
+  })
+  .extendsDeep({
+    unknowns: 'allow',
+  });
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,

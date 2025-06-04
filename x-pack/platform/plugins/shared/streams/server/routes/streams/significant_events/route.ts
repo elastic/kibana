@@ -6,10 +6,10 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { readSignificantEvents } from './read_significant_events';
+import { SignificantEventsGetResponse, readSignificantEvents } from './read_significant_events';
 
 export const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
@@ -28,9 +28,7 @@ export const readSignificantEventsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {

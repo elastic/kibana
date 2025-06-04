@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EventReporter } from './event_reporter';
-export { eventTypes } from './event_types';
+export { ToastsTelemetry } from './toasts_telemetry';

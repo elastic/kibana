@@ -141,6 +141,7 @@ describe('updateCustomIntegration', () => {
       {
         readme: '# Updated Test Integration',
         version: '1.0.1',
+        categories: ['custom'],
       }
     );
     expect(result).toEqual({

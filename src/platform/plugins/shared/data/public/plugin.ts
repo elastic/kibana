@@ -167,26 +167,21 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      createSelectRangeActionDefinition(() => ({
-        uiActions,
-      }))
-    );
+    const rangeSelectAction = createSelectRangeActionDefinition(() => ({
+      uiActions,
+    }));
+    uiActions.addTriggerAction('SELECT_RANGE_TRIGGER', rangeSelectAction);
 
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      createValueClickActionDefinition(() => ({
-        uiActions,
-      }))
-    );
+    const valueClickAction = createValueClickActionDefinition(() => ({
+      uiActions,
+    }));
 
-    uiActions.addTriggerAction(
-      'MULTI_VALUE_CLICK_TRIGGER',
-      createMultiValueClickActionDefinition(() => ({
-        query,
-      }))
-    );
+    uiActions.addTriggerAction('VALUE_CLICK_TRIGGER', valueClickAction);
+
+    const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
+      query,
+    }));
+    uiActions.addTriggerAction('MULTI_VALUE_CLICK_TRIGGER', multiValueClickAction);
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {

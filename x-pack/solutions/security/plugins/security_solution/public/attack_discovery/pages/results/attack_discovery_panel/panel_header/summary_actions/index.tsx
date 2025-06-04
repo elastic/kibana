@@ -18,9 +18,14 @@ import * as i18n from './translations';
 interface Props {
   attackDiscovery: AttackDiscovery;
   replacements?: Replacements;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
-const SummaryActionsComponent: React.FC<Props> = ({ attackDiscovery, replacements }) => {
+const SummaryActionsComponent: React.FC<Props> = ({
+  attackDiscovery,
+  replacements,
+  setSelectedAttackDiscoveries,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const attackDiscoveries = useMemo(() => [attackDiscovery], [attackDiscovery]);
@@ -116,7 +121,11 @@ const SummaryActionsComponent: React.FC<Props> = ({ attackDiscovery, replacement
       <EuiFlexItem grow={false}>{nonInteractive}</EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <TakeAction attackDiscoveries={attackDiscoveries} replacements={replacements} />
+        <TakeAction
+          attackDiscoveries={attackDiscoveries}
+          replacements={replacements}
+          setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

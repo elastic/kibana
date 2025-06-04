@@ -12,14 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 
 import dateMath from '@kbn/datemath';
 import { TimeRange } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
-import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import { ControlApiRegistration } from '../types';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
-import { TimesliderControlApi, TimesliderControlState } from './types';
 
 describe('TimesliderControlApi', () => {
   const uuid = 'myControl1';
@@ -28,6 +25,8 @@ describe('TimesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = getMockedControlGroupApi(dashboardApi);
+  const factory = getTimesliderControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
@@ -36,24 +35,6 @@ describe('TimesliderControlApi', () => {
       max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: now }),
     };
   };
-  const factory = getTimesliderControlFactory();
-  let comparators: StateComparators<TimesliderControlState> | undefined;
-  function buildApiMock(
-    api: ControlApiRegistration<TimesliderControlApi>,
-    nextComparators: StateComparators<TimesliderControlState>
-  ) {
-    comparators = nextComparators;
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      unsavedChanges$: new BehaviorSubject<Partial<TimesliderControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
-      type: factory.type,
-    };
-  }
 
   beforeEach(() => {
     dashboardApi.timeRange$.next({
@@ -63,35 +44,40 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
-    const { api } = await factory.buildControl({}, buildApiMock, uuid, controlGroupApi);
+    const { api } = await factory.buildControl({
+      initialState: {},
+      finalizeApi,
+      uuid,
+      controlGroupApi,
+    });
     expect(api.timeslice$.value).toBe(undefined);
   });
 
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
 
     expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
     expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
   });
 
   test('Should update timeslice when time range changes', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
 
     // change time range to single hour
     dashboardApi.timeRange$.next({
@@ -107,15 +93,15 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking previous button should advance timeslice backward', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -129,15 +115,15 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -152,15 +138,15 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking next button should advance timeslice forward', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -174,15 +160,15 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Clicking next button should wrap when time range end is reached', async () => {
-    const { api } = await factory.buildControl(
-      {
+    const { api } = await factory.buildControl({
+      initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
@@ -197,28 +183,33 @@ describe('TimesliderControlApi', () => {
     expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
   });
 
-  test('Resetting state with comparators should reset timeslice', async () => {
-    const { api } = await factory.buildControl(
-      {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
-      },
-      buildApiMock,
+  test('Resetting state should reset timeslice', async () => {
+    const rawState = {
+      timesliceStartAsPercentageOfTimeRange: 0.25,
+      timesliceEndAsPercentageOfTimeRange: 0.5,
+    };
+    controlGroupApi.setLastSavedStateForChild(uuid, {
+      rawState,
+    });
+    const { api } = await factory.buildControl({
+      initialState: rawState,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
     }
 
+    // advance time by clicking next
     const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     await new Promise((resolve) => setTimeout(resolve, 0));
+    // ensure time advanced
     expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
     expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
 
-    comparators!.timesliceStartAsPercentageOfTimeRange[1](0.25);
-    comparators!.timesliceEndAsPercentageOfTimeRange[1](0.5);
+    api.resetUnsavedChanges();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');

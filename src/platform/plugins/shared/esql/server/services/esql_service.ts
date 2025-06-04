@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { JoinIndexAutocompleteItem, JoinIndicesAutocompleteResult } from '../../common';
+import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -44,7 +44,9 @@ export class EsqlService {
     return result;
   }
 
-  public async getJoinIndices(): Promise<JoinIndicesAutocompleteResult> {
+  public async getIndicesByIndexMode(
+    mode: 'lookup' | 'time_series'
+  ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
     // Execute: GET /_all/_settings/index.mode,aliases?flat_settings=true
@@ -60,13 +62,13 @@ export class EsqlService {
       flat_settings: true,
     })) as IndexModeResponse;
 
-    const indices: JoinIndexAutocompleteItem[] = [];
+    const indices: IndexAutocompleteItem[] = [];
     const indexNames: string[] = [];
 
     for (const [name, { settings }] of Object.entries(queryByIndexModeResponse)) {
-      if (settings['index.mode'] === 'lookup') {
+      if (settings['index.mode'] === mode) {
         indexNames.push(name);
-        indices.push({ name, mode: 'lookup', aliases: [] });
+        indices.push({ name, mode, aliases: [] });
       }
     }
 
@@ -76,7 +78,7 @@ export class EsqlService {
       index.aliases = aliases[index.name] ?? [];
     }
 
-    const result: JoinIndicesAutocompleteResult = {
+    const result: IndicesAutocompleteResult = {
       indices,
     };
 

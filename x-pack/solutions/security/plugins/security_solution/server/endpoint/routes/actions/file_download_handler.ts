@@ -74,6 +74,7 @@ export const getActionFileDownloadRouteHandler = (
   return async (context, req, res) => {
     const { action_id: actionId, file_id: fileId } = req.params;
     const coreContext = await context.core;
+    const spaceId = (await context.securitySolution).getSpaceId();
 
     try {
       const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -84,6 +85,7 @@ export const getActionFileDownloadRouteHandler = (
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
         esClient,
         casesClient,
+        spaceId,
         endpointService: endpointContext.service,
         username: user?.username || 'unknown',
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),

@@ -86,9 +86,9 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .send([
-          { rule_id: ruleId1, start: start1, end: end1 },
-          { rule_id: ruleId1, start: start2, end: end2 },
-          { rule_id: ruleId2, start: start1, end: end1 },
+          { rule_id: ruleId1, ranges: [{ start: start1, end: end1 }] },
+          { rule_id: ruleId1, ranges: [{ start: start2, end: end2 }] },
+          { rule_id: ruleId2, ranges: [{ start: start1, end: end1 }] },
         ])
         .expect(200);
 

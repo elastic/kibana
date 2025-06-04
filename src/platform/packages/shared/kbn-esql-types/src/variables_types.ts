@@ -11,11 +11,26 @@ import { BehaviorSubject } from 'rxjs';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
+export enum VariableNamePrefix {
+  IDENTIFIER = '??',
+  VALUE = '?',
+}
+
 export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
   VALUES = 'values',
   FUNCTIONS = 'functions',
+}
+
+/**
+ * Types of ES|QL controls
+ * - STATIC_VALUES: Static values that are not dependent on any query
+ * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
+ */
+export enum EsqlControlType {
+  STATIC_VALUES = 'STATIC_VALUES',
+  VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
 export interface ESQLControlVariable {
@@ -26,6 +41,20 @@ export interface ESQLControlVariable {
 
 export interface PublishesESQLVariable {
   esqlVariable$: PublishingSubject<ESQLControlVariable>;
+}
+
+export type ControlWidthOptions = 'small' | 'medium' | 'large';
+
+export interface ESQLControlState {
+  grow?: boolean;
+  width?: ControlWidthOptions;
+  title: string;
+  availableOptions: string[];
+  selectedOptions: string[];
+  variableName: string;
+  variableType: ESQLVariableType;
+  esqlQuery: string;
+  controlType: EsqlControlType;
 }
 
 export const apiPublishesESQLVariable = (

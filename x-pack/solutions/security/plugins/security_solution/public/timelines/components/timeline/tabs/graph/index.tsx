@@ -10,7 +10,7 @@ import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import type { TimelineId } from '../../../../../../common/types/timeline';
 import { GraphOverlay } from '../../../graph_overlay';
-import { useSessionViewNavigation, useSessionView } from '../session/use_session_view';
+import { useSessionViewNavigation } from '../session/use_session_view';
 
 interface GraphTabContentProps {
   timelineId: TimelineId;
@@ -26,17 +26,13 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
     scopeId: timelineId,
   });
 
-  const { SessionView } = useSessionView({
-    scopeId: timelineId,
-  });
-
   if (!graphEventId) {
     return null;
   }
 
   return (
     <>
-      <GraphOverlay scopeId={timelineId} Navigation={Navigation} SessionView={SessionView} />
+      <GraphOverlay scopeId={timelineId} Navigation={Navigation} />
     </>
   );
 };

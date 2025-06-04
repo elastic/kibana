@@ -8,8 +8,8 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import React, { useMemo } from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
 
 import { LastTimesPopover } from '../countdown/last_times_popover';
 import {
@@ -33,8 +33,7 @@ const InfoPopoverBodyComponent: React.FC<Props> = ({
   connectorIntervals,
   successfulGenerations,
 }) => {
-  const { theme } = useKibana().services;
-  const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
+  const isDarkMode = useKibanaIsDarkMode();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const averageIntervalSeconds = useMemo(() => {
     if (attackDiscoveryAlertsEnabled) {

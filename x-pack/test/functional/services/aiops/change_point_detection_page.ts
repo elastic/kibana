@@ -15,6 +15,8 @@ export interface DashboardAttachmentOptions {
   maxSeries: number;
 }
 
+type AttachAs = 'charts' | 'table';
+
 export function ChangePointDetectionPageProvider(
   { getService, getPageObject }: FtrProviderContext,
   tableService: MlTableService
@@ -162,11 +164,12 @@ export function ChangePointDetectionPageProvider(
       });
     },
 
-    async clickAttachCasesButton() {
+    async clickAttachCasesButton(attachAs: AttachAs) {
       await testSubjects.click('aiopsChangePointDetectionAttachToCaseButton');
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('aiopsChangePointDetectionCaseAttachmentForm');
       });
+      await testSubjects.click(attachAs);
     },
 
     async clickSubmitCaseAttachButton() {
@@ -295,14 +298,38 @@ export function ChangePointDetectionPageProvider(
       );
     },
 
-    async attachChartsToCases(panelIndex: number, params: CreateCaseParams) {
+    async attachChangePointToCases(
+      panelIndex: number,
+      attachAs: AttachAs,
+      params: CreateCaseParams
+    ) {
       await this.assertPanelExist(panelIndex);
       await this.openPanelContextMenu(panelIndex);
       await this.clickAttachChartsButton();
-      await this.clickAttachCasesButton();
+      await this.clickAttachCasesButton(attachAs);
       await this.clickSubmitCaseAttachButton();
 
       await cases.create.createCaseFromModal(params);
+    },
+
+    async assertNoDataFoundScreen() {
+      await testSubjects.existOrFail('aiopsNoDataFoundWarning');
+    },
+
+    async assertNoChangePointFoundCalloutWarning(expectedText?: string) {
+      // First check that the callout exists
+      await testSubjects.existOrFail('aiopsNoChangePointsWarningCallout');
+
+      // If expected text is provided, also check the text content
+      if (expectedText) {
+        const actualText = await testSubjects.getVisibleText(
+          'aiopsNoChangePointsWarningCalloutText'
+        );
+        expect(actualText).to.contain(
+          expectedText,
+          `Expected warning text to contain: "${expectedText}" but got: "${actualText}"`
+        );
+      }
     },
   };
 }

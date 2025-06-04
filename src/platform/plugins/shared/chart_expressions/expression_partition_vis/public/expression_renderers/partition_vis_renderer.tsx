@@ -20,6 +20,11 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   type ChartSizeEvent,
@@ -88,6 +93,13 @@ export const getPartitionVisRenderer: (
     { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
     handlers
   ) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: PARTITION_VIS_RENDERER_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -95,6 +107,8 @@ export const getPartitionVisRenderer: (
     });
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -129,6 +143,8 @@ export const getPartitionVisRenderer: (
 
     handlers.event(chartSizeEvent);
 
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
     render(
       <KibanaRenderContextProvider {...core}>
         <div css={partitionVisRenderer}>
@@ -140,6 +156,7 @@ export const getPartitionVisRenderer: (
             visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
             renderComplete={renderComplete}
             fireEvent={handlers.event}
+            hasCompatibleActions={handlers.hasCompatibleActions}
             interactive={handlers.isInteractive()}
             uiState={handlers.uiState as PersistedState}
             services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}

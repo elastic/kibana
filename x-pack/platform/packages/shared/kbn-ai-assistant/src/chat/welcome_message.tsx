@@ -12,12 +12,11 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
-import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
+import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -60,13 +59,6 @@ export function WelcomeMessage({
 
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
-    }
-
-    if (
-      !knowledgeBase.status.value ||
-      knowledgeBase.status.value?.kbState === KnowledgeBaseState.NOT_INSTALLED
-    ) {
-      knowledgeBase.install();
     }
   };
 

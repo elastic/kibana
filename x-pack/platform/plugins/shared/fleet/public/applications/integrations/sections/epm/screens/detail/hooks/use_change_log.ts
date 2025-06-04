@@ -19,9 +19,13 @@ export const useChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const { data, error, isLoading } = useGetFileByPathQuery(
-    `/package/${packageName}/${latestVersion}/changelog.yml`
-  );
+  const {
+    data,
+    error: getFileError,
+    isLoading,
+  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
+
+  const error = getFileError?.statusCode === 404 ? null : getFileError;
 
   const changelog = useMemo(() => {
     return parseYamlChangelog(data, latestVersion, currentVersion);
