@@ -18,7 +18,6 @@ import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoin
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
-import { createSupertestErrorLogger } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
@@ -244,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should not error if signer is set for a windows os entry item', async () => {
             const body = trustedAppApiCall.getBody();
-            
+
             // Match request version with artifact version
             if('_version' in body){
               body._version = trustedAppData.artifact._version
@@ -312,10 +311,10 @@ export default function ({ getService }: FtrProviderContext) {
             const getAdvancedModeBody = () => {
               const body = trustedAppApiCall.getBody();
               body.tags.push('form_mode:advanced');
-  
+
               // Match request version with artifact version
-              if('_version' in body){
-                body._version = trustedAppData.artifact._version
+              if ('_version' in body) {
+                body._version = trustedAppData.artifact._version;
               }
               return body;
             };
@@ -323,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
             it(`should NOT error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
               const body = getAdvancedModeBody();
               body.entries[0].field = 'some.invalid.field';
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -331,9 +330,9 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
             it(`should NOT error on [${trustedAppApiCall.method}] if a condition entry field is used more than once`, async () => {
-              const body = getAdvancedModeBody(); 
+              const body = getAdvancedModeBody();
               body.entries.push({ ...body.entries[0] });
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -342,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             it(`should NOT error on [${trustedAppApiCall.method}] if an invalid hash is used`, async () => {
               const body = getAdvancedModeBody();
-  
+
               body.entries = [
                 {
                   field: 'process.hash.md5',
@@ -351,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
                   value: '1',
                 },
               ];
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -360,10 +359,10 @@ export default function ({ getService }: FtrProviderContext) {
 
             it(`should NOT error on [${trustedAppApiCall.method}] if signer is set for a non windows os entry item`, async () => {
               const body = getAdvancedModeBody();
-  
+
               body.os_types = ['linux'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
@@ -372,34 +371,34 @@ export default function ({ getService }: FtrProviderContext) {
 
             it(`should NOT error on [${trustedAppApiCall.method} if Mac signer field is used for Windows entry`, async () => {
               const body = getAdvancedModeBody();
-  
+
               body.os_types = ['windows'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
                 .expect(200)
             });
-  
+
             it(`should NOT error on [${trustedAppApiCall.method} if Windows signer field is used for Mac entry`, async () => {
               const body = getAdvancedModeBody();
-  
+
               body.os_types = ['macos'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
                 .expect(200)
             });
-  
+
             it('should not error if signer is set for a windows os entry item', async () => {
               const body = getAdvancedModeBody();
-  
+
               body.os_types = ['windows'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
-  
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](
                 trustedAppApiCall.path
               )
@@ -407,10 +406,10 @@ export default function ({ getService }: FtrProviderContext) {
                 .send(body)
                 .expect(200)
             });
-  
+
             it('should not error if signer is set for a mac os entry item', async () => {
               const body = getAdvancedModeBody();
-  
+
               body.os_types = ['macos'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](
@@ -420,7 +419,7 @@ export default function ({ getService }: FtrProviderContext) {
                 .send(body)
                 .expect(200)
             });
-  
+
 
             it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
               const body = getAdvancedModeBody();
@@ -430,6 +429,7 @@ export default function ({ getService }: FtrProviderContext) {
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
+<<<<<<< HEAD
                 .expect(400)
                 .expect(anEndpointArtifactError)
                 .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
@@ -437,9 +437,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             it(`should error on [${trustedAppApiCall.method}] if policy id is invalid`, async () => {
               const body = getAdvancedModeBody();
-  
+
               body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
-  
+
               // Using superuser here as we need custom license for this action
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')

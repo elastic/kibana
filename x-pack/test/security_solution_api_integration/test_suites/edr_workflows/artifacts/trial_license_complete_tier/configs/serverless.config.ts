@@ -28,8 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs').filter(
           // Exclude Security solution experimental features
           // properties since we are overriding them here
-          (arg: string) =>
-            !arg.includes('xpack.securitySolution.enableExperimental')
+          (arg: string) => !arg.includes('xpack.securitySolution.enableExperimental')
         ),
         // SECURITY SOLUTION: set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
