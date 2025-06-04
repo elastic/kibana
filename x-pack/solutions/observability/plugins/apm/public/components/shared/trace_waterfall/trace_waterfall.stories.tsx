@@ -14,7 +14,7 @@ import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plu
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'new_traceWaterfall',
+  title: 'UnifiedTraceWaterfall',
   component: TraceWaterfall,
   decorators: [
     (StoryComponent) => (

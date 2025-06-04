@@ -14,11 +14,11 @@ import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plu
 type TraceItems = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
 
 const stories: Meta<any> = {
-  title: 'app/TransactionDetails/focusedTraceWaterfall',
+  title: 'FocusedTraceWaterfall',
   component: FocusedTraceWaterfall,
   decorators: [
     (StoryComponent) => (
-      <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName">
+      <MockApmPluginStorybook>
         <StoryComponent />
       </MockApmPluginStorybook>
     ),
@@ -26,46 +26,226 @@ const stories: Meta<any> = {
 };
 export default stories;
 
-export const Example: StoryFn<any> = () => {
-  return <FocusedTraceWaterfall items={data} />;
+export const FocusedIdIsRoot: StoryFn<any> = () => {
+  return (
+    <FocusedTraceWaterfall
+      items={{
+        traceItems: {
+          rootDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 50000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+
+          focusedTraceDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 5000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceTree: [
+            {
+              traceDoc: {
+                id: '41b4177551ba7b6d',
+                timestamp: '2025-05-21T18:35:26.190Z',
+                name: 'child',
+                traceId: '01d9ebaca760279d6d68d29ea5283c58',
+                duration: 5000,
+                hasError: false,
+                parentId: 'foo',
+                serviceName: 'flagd',
+              },
+              children: [],
+            },
+          ],
+        },
+        summary: { services: 2, traceEvents: 2, errors: 0 },
+      }}
+    />
+  );
 };
 
-const data: TraceItems = {
-  traceItems: {
-    rootDoc: {
-      id: 'foo',
-      timestamp: '2025-05-21T18:35:26.179Z',
-      name: 'root',
-      traceId: '01d9ebaca760279d6d68d29ea5283c58',
-      duration: 599997781083,
-      hasError: false,
-      serviceName: 'recommendation',
-    },
-
-    focusedTraceDoc: {
-      id: 'foo',
-      timestamp: '2025-05-21T18:35:26.179Z',
-      name: 'root',
-      traceId: '01d9ebaca760279d6d68d29ea5283c58',
-      duration: 599997781083,
-      hasError: false,
-      serviceName: 'recommendation',
-    },
-    focusedTraceTree: [
-      {
-        traceDoc: {
-          id: '41b4177551ba7b6d',
-          timestamp: '2025-05-21T18:35:26.179Z',
-          name: 'child',
-          traceId: '01d9ebaca760279d6d68d29ea5283c58',
-          duration: 600003407022,
-          hasError: false,
-          parentId: 'foo',
-          serviceName: 'flagd',
+export const ParentIdIsRoot: StoryFn<any> = () => {
+  return (
+    <FocusedTraceWaterfall
+      items={{
+        traceItems: {
+          rootDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 50000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          parentDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 50000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceDoc: {
+            id: 'bar',
+            timestamp: '2025-05-21T18:35:26.200Z',
+            name: 'focused',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 4000,
+            parentId: 'foo',
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceTree: [
+            {
+              traceDoc: {
+                id: '41b4177551ba7b6d',
+                timestamp: '2025-05-21T18:35:26.202Z',
+                name: 'child',
+                traceId: '01d9ebaca760279d6d68d29ea5283c58',
+                duration: 1000,
+                hasError: false,
+                parentId: 'bar',
+                serviceName: 'flagd',
+              },
+              children: [],
+            },
+          ],
         },
-        children: [],
-      },
-    ],
-  },
-  summary: { services: 2, traceEvents: 2, errors: 0 },
+        summary: { services: 2, traceEvents: 2, errors: 0 },
+      }}
+    />
+  );
+};
+
+export const FocusedWithParent: StoryFn<any> = () => {
+  return (
+    <FocusedTraceWaterfall
+      items={{
+        traceItems: {
+          rootDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 50000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          parentDoc: {
+            id: 'parent',
+            timestamp: '2025-05-21T18:35:26.190Z',
+            name: 'Parent',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 30000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceDoc: {
+            id: 'bar',
+            timestamp: '2025-05-21T18:35:26.195Z',
+            name: 'focused',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 25000,
+            parentId: 'foo',
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceTree: [
+            {
+              traceDoc: {
+                id: '41b4177551ba7b6d',
+                timestamp: '2025-05-21T18:35:26.200Z',
+                name: 'child',
+                traceId: '01d9ebaca760279d6d68d29ea5283c58',
+                duration: 10000,
+                hasError: false,
+                parentId: 'bar',
+                serviceName: 'flagd',
+              },
+              children: [],
+            },
+          ],
+        },
+        summary: { services: 2, traceEvents: 2, errors: 0 },
+      }}
+    />
+  );
+};
+
+export const FocusedWithMultipleChildren: StoryFn<any> = () => {
+  return (
+    <FocusedTraceWaterfall
+      items={{
+        traceItems: {
+          rootDoc: {
+            id: 'foo',
+            timestamp: '2025-05-21T18:35:26.179Z',
+            name: 'root',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 50000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          parentDoc: {
+            id: 'parent',
+            timestamp: '2025-05-21T18:35:26.185Z',
+            name: 'Parent',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 40000,
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceDoc: {
+            id: 'bar',
+            timestamp: '2025-05-21T18:35:26.185Z',
+            name: 'focused',
+            traceId: '01d9ebaca760279d6d68d29ea5283c58',
+            duration: 30000,
+            parentId: 'foo',
+            hasError: false,
+            serviceName: 'recommendation',
+          },
+          focusedTraceTree: [
+            {
+              traceDoc: {
+                id: 'child1',
+                timestamp: '2025-05-21T18:35:26.190Z',
+                name: 'child',
+                traceId: '01d9ebaca760279d6d68d29ea5283c58',
+                duration: 10000,
+                hasError: false,
+                parentId: 'bar',
+                serviceName: 'flagd',
+              },
+              children: [
+                {
+                  traceDoc: {
+                    id: 'child2',
+                    timestamp: '2025-05-21T18:35:26.195Z',
+                    name: 'child_2',
+                    traceId: '01d9ebaca760279d6d68d29ea5283c58',
+                    duration: 2000,
+                    hasError: false,
+                    parentId: 'child1',
+                    serviceName: 'flagd',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        summary: { services: 2, traceEvents: 2, errors: 0 },
+      }}
+    />
+  );
 };
