@@ -28,6 +28,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
+  - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
+    - [**Scenario: User can preview prebuilt rules having upgrades**](#scenario-user-can-preview-prebuilt-rules-having-upgrades)
+    - [**Scenario: User can switch between prebuilt rules previews having upgrades**](#scenario-user-can-switch-between-prebuilt-rules-previews-having-upgrades)
+    - [**Scenario: User can upgrade a prebuilt rule using the rule preview**](#scenario-user-can-upgrade-a-prebuilt-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in the preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-the-preview-before-upgrading)
+    - [**Scenario: Tabs and sections without content should be hidden in the preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-the-preview-before-upgrading)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
     - [Preview non-customized field that has an upgrade (AAB)](#preview-non-customized-field-that-has-an-upgrade-aab)
     - [Preview customized field that doesn't have an upgrade (ABA)](#preview-customized-field-that-doesnt-have-an-upgrade-aba)
@@ -133,6 +139,70 @@ What should be inside the Rule Upgrade flyout:
 
 ## Scenarios
 
+### Rule upgrade workflow: rule previews
+
+#### **Scenario: User can preview prebuilt rules having upgrades**
+
+```Gherkin
+Given at least one prebuilt rule is installed
+And this prebuilt rule has an upgrade
+When user opens the rule preview for the prebuilt rule
+Then the preview should open
+When user closes the preview
+Then it should disappear
+```
+
+#### **Scenario: User can switch between prebuilt rules previews having upgrades**
+
+```Gherkin
+Given multiple prebuilt rules are installed
+And these prebuilt rules have upgrades
+When user opens the rule preview for a prebuilt rule
+Then the preview should open
+When the user selects another prebuilt rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: User can upgrade a prebuilt rule using the rule preview**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given at least one prebuilt rule is installed
+And this prebuilt rule has an upgrade
+When user opens the rule preview for the prebuilt rule
+And upgrades the rule using a CTA in the rule preview
+Then the rule should be upgraded to the latest version
+And a success message should be displayed after upgrade
+And the rule should be removed from the Rule Updates table
+And user should see the number of rules available to upgrade as initial number minus 1
+```
+
+#### **Scenario: User can see correct rule information in the preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given at least one prebuilt rule is installed
+And this prebuilt rule has an upgrade
+When user opens a rule preview for the prebuilt rule
+Then the "Updates" tab should be active
+When user selects the "Overview" tab
+Then all properties of the new version of a rule should be displayed in the correct tab and section of the preview
+```
+
+#### **Scenario: Tabs and sections without content should be hidden in the preview before upgrading**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade where new version doesn't have Setup guide and Investigation guide
+When user opens a rule preview for the prebuilt rule
+Then the Setup Guide section should NOT be displayed in the Overview tab
+And the Investigation Guide tab should NOT be displayed
+```
+
 ### Rule upgrade field preview
 
 #### Preview non-customized field that has an upgrade (AAB)
@@ -140,9 +210,10 @@ What should be inside the Rule Upgrade flyout:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has no customizations
-And <field> has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule is non-customized
+And the <field> has an upgrade
 When user opens the Rule Update Flyout
 Then user should see <field> has no conflicts
 And <field> is shown collapsed
@@ -159,9 +230,10 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has no upgrades
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has no upgrades
 When user opens the Rule Update Flyout
 Then user should see <field> has a customized value
 And <field> has no conflicts
@@ -179,9 +251,10 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has an upgrade matching customization
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has an upgrade matching customization
 When user opens the Rule Update Flyout
 Then user should see <field> has matching upgrade
 And <field> has no conflicts
@@ -199,9 +272,10 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has an upgrade resulting in a solvable conflict
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
 Then user should see <field> has a customized value
 And <field> has a conflict
@@ -229,9 +303,10 @@ Examples: <field> whose diff algo supports values merging
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has an upgrade resulting in a non-solvable conflict
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has an upgrade resulting in a non-solvable conflict
 When user opens the Rule Update Flyout
 Then user should see <field> has a customized value
 And <field> has a conflict
@@ -254,9 +329,10 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> doesn't have an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> doesn't have an upgrade
 When user opens the Rule Update Flyout
 Then user should see <field> Diff View
 And it shows a diff between original and current <field> values
@@ -272,9 +348,10 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> isn't customized
-And <field> has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has no upgrades
 When user opens the Rule Update Flyout
 Then user should see <field> Diff View
 And it shows a diff between original and upgraded <field> values
@@ -294,9 +371,10 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has a matching upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has a matching upgrade
 When user opens the Rule Update Flyout
 Then user should see <field> Diff View
 And it shows a diff between original and customized <field> values
@@ -317,9 +395,10 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has an upgrade resulting in a solvable conflict
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
 Then user should see <field> Diff View
 And it shows a diff between original and merged (customization + upgrade) <field> values
@@ -341,9 +420,10 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> is customized
-And <field> has an upgrade resulting in a non-solvable conflict
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> is customized
+And the <field> has an upgrade resulting in a non-solvable conflict
 When user opens the Rule Update Flyout
 Then user should see <field> Diff View
 And it shows a diff between original and customized <field> values
@@ -370,9 +450,10 @@ Examples:
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> corresponds to a <diff case>
-And <field> appears in the Rule Update Flyout
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> corresponds to a <diff case>
+And the <field> appears in the Rule Update Flyout
 When user edits <field>'s in a <field> form
 And enters an invalid value
 Then Save button should be disabled
@@ -394,8 +475,9 @@ Examples:
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
 ```Gherkin
-Given an installed prebuilt rule
-And <field> corresponds to a <diff case>
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this prebuilt rule's <field> corresponds to a <diff case>
 And <field> appears in the Rule Update Flyout
 When user opens a <field> form
 And saves the form without changes
@@ -419,8 +501,9 @@ Examples:
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has customizations
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this rule is customized
 And it has an upgrade resulting to conflicts
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -435,8 +518,8 @@ Then the INACTIVE CTA becomes ACTIVE
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And it has an upgrade without conflicts
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade without conflicts
 When user opens the Rule Update Flyout
 Then user should see ACTIVE CTA to upgrade the prebuilt rule
 When user switch one or more fields to edit mode
@@ -452,8 +535,9 @@ Then the INACTIVE CTA becomes ACTIVE
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has customizations
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
+And this rule is customized
 And it has an upgrade resulting to conflicts
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -470,9 +554,9 @@ Then user should see INACTIVE CTA
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule does not have any customizations
-And <field> has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule is non-customized
+And this prebuilt rule's <field> has an upgrade
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
 And user should see <field> has no conflicts
@@ -491,9 +575,9 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule does not have any customizations
-And <field> has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule is non-customized
+And this prebuilt rule's <field> has an upgrade
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
 And user should see <field> has no conflicts
@@ -514,8 +598,8 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <field> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <fieldA> is customized
 And it has an upgrade for <fieldB> (<fieldB> != <fieldA>)
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
@@ -535,8 +619,8 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <fieldA> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <fieldA> is customized
 And it has an upgrade for <fieldB> (<fieldB> != <fieldA>)
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
@@ -558,8 +642,8 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <field> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
 And it has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -588,8 +672,8 @@ Examples: <field> is one of
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <field> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
 And it has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -622,8 +706,8 @@ Examples: <field> is one of
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <field> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
 And it has an upgrade resulting to a non-solvable conflict
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -647,8 +731,8 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has <field> customized
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
 And it has an upgrade resulting to a non-solvable conflict
 When user opens the Rule Update Flyout
 Then user should see INACTIVE CTA to upgrade the prebuilt rule
@@ -674,9 +758,9 @@ Examples:
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has no customizations
-And it has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule is non-customized
+And this prebuilt rule has an upgrade
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
 And a warning message saying rule upgrade changes its type
@@ -693,9 +777,9 @@ And has upgraded field values
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has customizations
-And it has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule is customized
+And this prebuilt rule has an upgrade
 When user opens the Rule Update Flyout
 Then user should see a CTA to upgrade the prebuilt rule
 And a warning message saying rule upgrade changes its type
@@ -729,8 +813,8 @@ And saved custom field values got discarded
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given an installed prebuilt rule
-And that rule has an upgrade
+Given a prebuilt rule is installed
+And this prebuilt rule has an upgrade
 And user opened Rule Update Preview
 And saved custom field values via field forms
 When a new version of the same rule gets available
@@ -747,7 +831,7 @@ And saved custom field values got discarded
 ```Gherkin
 Given a Kibana instance running under an insufficient license
 And a prebuilt rule is installed
-And this rule is outdated (a new version is available for this rule)
+And this prebuilt rule has an upgrade
 When user opens an upgrade preview for this rule
 Then user should see a preview of rule field updates
 And there should NOT be a possibility to edit any field values
@@ -760,9 +844,9 @@ And there should NOT be a possibility to edit any field values
 ```Gherkin
 Given a Kibana instance running under an insufficient license
 And a prebuilt rule is installed
-And a base version exists for this rule
-And this rule is customized
-And this rule is outdated (a new version is available for this rule)
+And the base version exists for this rule
+And this prebuilt rule is customized
+And this prebuilt rule has an upgrade
 When user opens an upgrade preview for this rule
 Then user should see a warning that their customizations will be lost on upgrade
 ```
@@ -775,12 +859,12 @@ Then user should see a warning that their customizations will be lost on upgrade
 Given a Kibana instance running under an insufficient license
 And a prebuilt rule is installed
 And a base version exists for this rule
-And this rule is outdated (a new version is available for this rule)
+And this prebuilt rule has an upgrade
 And this rule is <customization_state>
 When user opens an upgrade preview for this rule and clicks on CTA
 Then success message should be displayed after upgrade
 And the upgraded prebuilt rule should be removed from the table
 And all customizable rule fields should be equal to the target version
-
-<customization_state> = customized | not customized
 ```
+
+\<customization_state\> = `customized` | `not customized`
