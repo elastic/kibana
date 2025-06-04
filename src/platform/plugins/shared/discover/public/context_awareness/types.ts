@@ -57,6 +57,7 @@ export interface AppMenuExtensionParams {
   isEsqlMode: boolean;
   dataView: DataView | undefined;
   adHocDataViews: DataView[];
+  authorizedRuleTypeIds: string[];
   onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
 }
 

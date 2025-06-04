@@ -26,7 +26,6 @@ export const reportingCsvExportProvider = ({
   const getShareMenuItems = ({
     objectType,
     sharingData,
-    toasts,
   }: ShareContext): ReturnType<ExportShare['config']> => {
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
@@ -63,50 +62,56 @@ export const reportingCsvExportProvider = ({
         title: sharingData.title as string,
       });
 
-      return apiClient
-        .createReportingShareJob(reportType, decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+
+        return apiClient
+          .createReportingShareJob(reportType, decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: (
+                // eslint-disable-next-line react/no-danger
+                <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
+              ) as unknown as string,
+            });
           });
-        })
-        .catch((error) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
-            ) as unknown as string,
-          });
-        });
+      });
     };
 
     const panelTitle = i18n.translate('reporting.share.contextMenu.export.csvReportsButtonLabel', {
