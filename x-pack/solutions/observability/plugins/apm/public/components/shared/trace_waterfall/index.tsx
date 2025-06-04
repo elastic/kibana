@@ -7,7 +7,10 @@
 import type { EuiAccordionProps } from '@elastic/eui';
 import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { WindowScroller, AutoSizer } from 'react-virtualized';
+import type { ListChildComponentProps } from 'react-window';
+import { areEqual, VariableSizeList as List } from 'react-window';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_PADDING_LEFT, TraceItemRow } from './trace_item_row';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
@@ -162,12 +165,26 @@ function TraceTree({
   duration: number;
   onErrorClick: Props['onErrorClick'];
 }) {
+  const listRef = useRef<List>(null);
+  const rowSizeMapRef = useRef(new Map<number, number>());
   const [accordionStatesMap, setAccordionStateMap] = useState(
     flattenedTraceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
       acc[item.id] = 'open';
       return acc;
     }, {})
   );
+
+  const onRowLoad = (index: number, size: number) => {
+    rowSizeMapRef.current.set(index, size);
+  };
+
+  const getRowSize = (index: number) => {
+    return rowSizeMapRef.current.get(index) || 48 + 1;
+  };
+
+  const onScroll = ({ scrollTop }: { scrollTop: number }) => {
+    listRef.current?.scrollTo(scrollTop);
+  };
 
   const treeMap = groupByParent(flattenedTraceWaterfall);
 
@@ -178,27 +195,101 @@ function TraceTree({
     }));
   }
 
-  function renderTraceTree(item: FlattenedTraceItem) {
-    const children = treeMap[item.id] || [];
-    return (
-      <TraceItemRow
-        key={item.id}
-        item={item}
-        duration={duration}
-        state={accordionStatesMap[item.id] || 'open'}
-        onToggle={toggleAccordion}
-        onClick={onClick}
-        margin={margin}
-        showAccordion={showAccordion}
-        isHighlighted={item.id === highlightedTraceId}
-        onErrorClick={onErrorClick}
-      >
-        {children.map((child) => renderTraceTree(child))}
-      </TraceItemRow>
-    );
+  const VirtualRow = React.memo(
+    ({
+      index,
+      style,
+      data,
+    }: ListChildComponentProps<{
+      traceList: FlattenedTraceItem[];
+      onLoad: (index: number, size: number) => void;
+    }>) => {
+      const { onLoad, traceList } = data;
+
+      const ref = React.useRef<HTMLDivElement | null>(null);
+      useEffect(() => {
+        onLoad(index, ref.current?.getBoundingClientRect().height ?? 48);
+      }, [index, onLoad]);
+
+      const item = traceList[index];
+      const children = treeMap[item.id] || [];
+      return (
+        <div style={style} ref={ref}>
+          <TraceItemRow
+            key={item.id}
+            item={item}
+            duration={duration}
+            state={accordionStatesMap[item.id] || 'open'}
+            onToggle={toggleAccordion}
+            onClick={onClick}
+            margin={margin}
+            showAccordion={showAccordion}
+            isHighlighted={item.id === highlightedTraceId}
+            onErrorClick={onErrorClick}
+            childrenCount={children.length}
+          />
+        </div>
+      );
+    },
+    areEqual
+  );
+
+  const visibleList = useMemo(
+    () => convertTreeToList(treeMap, accordionStatesMap, flattenedTraceWaterfall[0]),
+    [accordionStatesMap, flattenedTraceWaterfall, treeMap]
+  );
+
+  return (
+    <WindowScroller onScroll={onScroll}>
+      {({ registerChild }) => (
+        <AutoSizer disableHeight>
+          {({ width }) => (
+            // @ts-expect-error @types/react@18 Type 'HTMLDivElement' is not assignable to type 'ReactNode'
+            <div data-test-subj="waterfall" ref={registerChild}>
+              <List
+                ref={listRef}
+                style={{ height: '100%' }}
+                itemCount={visibleList.length}
+                itemSize={getRowSize}
+                height={window.innerHeight}
+                width={width}
+                itemData={{ traceList: visibleList, onLoad: onRowLoad }}
+              >
+                {VirtualRow}
+              </List>
+            </div>
+          )}
+        </AutoSizer>
+      )}
+    </WindowScroller>
+  );
+}
+
+export function convertTreeToList(
+  treeMap: Record<string, FlattenedTraceItem[]>,
+  accordionsState: Record<string, EuiAccordionProps['forceState']>,
+  root?: FlattenedTraceItem
+) {
+  if (!root) {
+    return [];
   }
 
-  return <>{renderTraceTree(flattenedTraceWaterfall[0])}</>;
+  const result: FlattenedTraceItem[] = [];
+  const stack: FlattenedTraceItem[] = [root];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current) {
+      const children = treeMap[current.id] || [];
+      result.push(current);
+      const state = accordionsState[current.id] || 'open';
+      if (state === 'open') {
+        for (let i = children.length - 1; i >= 0; i--) {
+          stack.push(children[i]);
+        }
+      }
+    }
+  }
+  return result;
 }
 
 export interface FlattenedTraceItem extends TraceItem {

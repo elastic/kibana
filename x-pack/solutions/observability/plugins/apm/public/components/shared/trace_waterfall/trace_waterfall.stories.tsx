@@ -30,6 +30,10 @@ export default stories;
 export const ExampleClockSkew: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
+      onClick={(params) => {
+        // eslint-disable-next-line no-console
+        console.log('##### Clicked:', params);
+      }}
       onErrorClick={(params) => {
         // eslint-disable-next-line no-console
         console.log('##### Error clicked:', params);

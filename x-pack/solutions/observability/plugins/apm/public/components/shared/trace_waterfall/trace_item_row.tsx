@@ -18,12 +18,12 @@ export interface Props {
   duration: number;
   state: EuiAccordionProps['forceState'];
   onToggle: (id: string) => void;
-  children?: React.ReactNode[];
   onClick?: (id: string) => void;
   margin: { left: number; right: number };
   showAccordion: boolean;
   isHighlighted?: boolean;
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
+  childrenCount: number;
 }
 
 export const ACCORDION_PADDING_LEFT = 8; // px
@@ -31,7 +31,6 @@ const BORDER_THICKNESS = 1; // px
 
 export function TraceItemRow({
   item,
-  children,
   duration,
   state,
   onToggle,
@@ -40,10 +39,11 @@ export function TraceItemRow({
   showAccordion,
   isHighlighted = false,
   onErrorClick,
+  childrenCount,
 }: Props) {
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
-  const hasToggle = showAccordion && !!children?.length;
+  const hasToggle = showAccordion && childrenCount > 0;
   const accordionIndent = ACCORDION_PADDING_LEFT * item.depth;
   const { euiTheme } = useEuiTheme();
 
@@ -82,17 +82,15 @@ export function TraceItemRow({
           <EuiFlexItem grow={false}>
             <ToggleAccordionButton
               isOpen={state === 'open'}
-              childrenCount={children?.length || 0}
+              childrenCount={childrenCount}
               onClick={() => onToggle(item.id)}
             />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFlexGroup
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+          <div
             data-test-subj="trace-bar-row"
-            direction="column"
-            gutterSize="xs"
-            responsive={false}
             css={css`
               margin-left: ${calculateMarginLeft()}px;
             `}
@@ -103,24 +101,16 @@ export function TraceItemRow({
               }
             }}
           >
-            <EuiFlexItem>
-              <Bar width={widthPercent} left={leftPercent} color={item.color} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <Bar width={widthPercent} left={leftPercent} color={item.color} />
+            <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );
 
   if (!showAccordion) {
-    return (
-      <>
-        {content} {children}
-      </>
-    );
+    return <>{content}</>;
   }
 
   return (
@@ -139,7 +129,6 @@ export function TraceItemRow({
           }
         `}
       />
-      {state === 'open' ? children : null}
     </>
   );
 }

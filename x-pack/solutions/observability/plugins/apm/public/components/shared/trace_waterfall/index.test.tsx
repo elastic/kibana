@@ -14,9 +14,11 @@ import {
   getTraceMap,
   getTraceWaterfallDuration,
   TraceWaterfall,
+  convertTreeToList,
 } from '.';
 import type { Props as TraceItemRowProps } from './trace_item_row';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { EuiAccordionProps } from '@elastic/eui';
 
 jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: jest.fn(({ rotations }) => {
@@ -509,5 +511,105 @@ describe('TraceWaterfall', () => {
   it('returns null if there is no root item', () => {
     const { container } = render(<TraceWaterfall traceItems={[]} />);
     expect(container.firstChild).toBeNull();
+  });
+});
+
+describe('convertTreeToList', () => {
+  const itemA: FlattenedTraceItem = {
+    id: 'a',
+    parentId: undefined,
+    name: 'A',
+    timestamp: '',
+    traceId: 't1',
+    duration: 100,
+    serviceName: 'svcA',
+    depth: 0,
+    offset: 0,
+    skew: 0,
+    color: 'red',
+  };
+  const itemB: FlattenedTraceItem = {
+    id: 'b',
+    parentId: 'a',
+    name: 'B',
+    timestamp: '',
+    traceId: 't1',
+    duration: 50,
+    serviceName: 'svcB',
+    depth: 1,
+    offset: 10,
+    skew: 0,
+    color: 'blue',
+  };
+  const itemC: FlattenedTraceItem = {
+    id: 'c',
+    parentId: 'a',
+    name: 'C',
+    timestamp: '',
+    traceId: 't1',
+    duration: 30,
+    serviceName: 'svcC',
+    depth: 1,
+    offset: 20,
+    skew: 0,
+    color: 'green',
+  };
+  const itemD: FlattenedTraceItem = {
+    id: 'd',
+    parentId: 'b',
+    name: 'D',
+    timestamp: '',
+    traceId: 't1',
+    duration: 10,
+    serviceName: 'svcD',
+    depth: 2,
+    offset: 30,
+    skew: 0,
+    color: 'yellow',
+  };
+
+  const treeMap = {
+    a: [itemB, itemC],
+    b: [itemD],
+  };
+
+  it('returns an empty array if root is undefined', () => {
+    const result = convertTreeToList(treeMap, {}, undefined);
+    expect(result).toEqual([]);
+  });
+
+  it('returns only the root if there are no children', () => {
+    const result = convertTreeToList({}, {}, itemA);
+    expect(result).toEqual([itemA]);
+  });
+
+  it('returns all items in depth-first order when all accordions are open', () => {
+    const accordionsState: Record<string, EuiAccordionProps['forceState']> = {
+      a: 'open',
+      b: 'open',
+      c: 'open',
+      d: 'open',
+    };
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    // Should be: a, b, d, c
+    expect(result).toEqual([itemA, itemB, itemD, itemC]);
+  });
+
+  it('skips children if accordion is closed', () => {
+    const accordionsState: Record<string, EuiAccordionProps['forceState']> = {
+      a: 'open',
+      b: 'closed',
+      c: 'open',
+      d: 'open',
+    };
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    // Should be: a, b, c (d is not included because b is closed)
+    expect(result).toEqual([itemA, itemB, itemC]);
+  });
+
+  it('defaults to open if accordion state is missing', () => {
+    const accordionsState = {}; // No state provided, should default to open
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    expect(result).toEqual([itemA, itemB, itemD, itemC]);
   });
 });
