@@ -14,7 +14,6 @@ import {
   BulkActionEditTypeEnum,
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
@@ -23,7 +22,7 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import type { RuleAlertType } from '../../../rule_schema';
 import { throwDryRunError } from './dry_run';
-import { isIndexPatternsBulkEditAction, isAlertSuppressionBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction } from './utils';
 
 interface BulkActionsValidationArgs {
   rule: RuleAlertType;
@@ -130,7 +129,6 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -141,7 +139,6 @@ export const dryRunValidateBulkEditRule = async ({
   edit,
   mlAuthz,
   ruleCustomizationStatus,
-  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -171,16 +168,5 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN
-  );
-
-  // check whether "alert suppression" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(
-        experimentalFeatures.bulkEditAlertSuppressionEnabled ||
-          !edit.some((action) => isAlertSuppressionBulkEditAction(action.type)),
-        'Bulk alert_suppression action feature is disabled.'
-      ),
-    BulkActionsDryRunErrCodeEnum.ALERT_SUPPRESSION_FEATURE
   );
 };

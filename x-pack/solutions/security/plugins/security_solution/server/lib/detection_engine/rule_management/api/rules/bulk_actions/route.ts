@@ -337,7 +337,6 @@ export const performBulkActionRoute = (
                       rule,
                       edit: body.edit,
                       ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
-                      experimentalFeatures: config.experimentalFeatures,
                     });
 
                     return rule;
