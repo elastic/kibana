@@ -6,11 +6,8 @@
  */
 
 import expect from 'expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-const INITIAL_REST_VERSION = '1' as const;
 
 const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
 const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
@@ -222,7 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestViewerWithCookieCredentials
           .post('/internal/search_playground/search')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             elasticsearch_query: JSON.stringify({
               retriever: {

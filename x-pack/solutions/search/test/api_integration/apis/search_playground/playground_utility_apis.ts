@@ -6,13 +6,10 @@
  */
 
 import expect from 'expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ALL_USERS, USERS } from './common/users';
 import { ALL_ROLES } from './common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from './common/helpers';
-
-const INITIAL_REST_VERSION = '1' as const;
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -84,7 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .get('/internal/search_playground/indices')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .expect(200);
 
@@ -96,7 +92,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .send({ indices: ['books', 'users'] })
           .expect(200);
@@ -122,7 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/query_test')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -144,7 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/search')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -169,7 +162,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.ALL.username, USERS.ALL.password)
           .send({ indices: ['books', 'users'] })
           .expect(200);
@@ -187,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .get('/internal/search_playground/indices')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.READ.username, USERS.READ.password)
           .expect(403);
       });
@@ -196,7 +187,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.READ.username, USERS.READ.password)
           .send({ indices: ['books', 'users'] })
           .expect(400);
@@ -206,7 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/query_test')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.READ.username, USERS.READ.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -228,7 +217,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth
           .post('/internal/search_playground/search')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.READ.username, USERS.READ.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -253,7 +241,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.READ.username, USERS.READ.password)
           .send({ indices: ['books', 'users'] })
           .expect(403);
@@ -265,7 +252,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .get('/internal/search_playground/indices')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .expect(403);
       });
@@ -274,7 +260,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/mappings')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .send({ indices: ['books', 'users'] })
           .expect(403);
@@ -284,7 +269,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/query_test')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -303,7 +287,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/search')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .send({
             elasticsearch_query: JSON.stringify({
@@ -323,7 +306,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertestWithoutAuth
           .post('/internal/search_playground/query_source_fields')
           .set('kbn-xsrf', 'xxx')
-          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .send({ indices: ['books', 'users'] })
           .expect(403);
