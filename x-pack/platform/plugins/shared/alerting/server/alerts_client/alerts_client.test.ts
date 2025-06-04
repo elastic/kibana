@@ -634,9 +634,7 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
