@@ -218,6 +218,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.storageExplorerAvailable (boolean?|true?)',
+        // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean?)',
         'xpack.apm.serverless.enabled (true?|never)',
         'xpack.observability_onboarding.serverless.enabled (true?|never)',
@@ -288,6 +289,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (boolean?)',
         'xpack.infra.featureFlags.logsUIEnabled (boolean?)',
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
+        // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
