@@ -28,6 +28,7 @@ import type {
   RunRuleParams,
   TaskRunnerContext,
 } from './types';
+import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
 import type { ElasticsearchError } from '../lib';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
@@ -75,7 +76,12 @@ import {
   processRunResults,
   clearExpiredSnoozes,
 } from './lib';
-import { isClusterBlockError } from '../lib/error_with_type';
+import {
+  ErrorWithType,
+  isClusterBlockError,
+  isOutdatedTaskVersionError,
+  OUTDATED_TASK_VERSION,
+} from '../lib/error_with_type';
 import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
@@ -529,6 +535,15 @@ export class TaskRunner<
         getDecryptedRule(this.context, ruleId, spaceId)
       );
 
+      // Check that this task is current
+      const scheduledTaskId = ruleData.rawRule.scheduledTaskId;
+      if (this.taskInstance.id !== ruleId && this.taskInstance.id !== scheduledTaskId) {
+        throw new ErrorWithType({
+          message: 'The task ID does not match the rule ID',
+          type: OUTDATED_TASK_VERSION,
+        });
+      }
+
       const runRuleParams = validateRuleAndCreateFakeRequest({
         ruleData,
         paramValidator: this.ruleType.validate.params,
@@ -690,6 +705,13 @@ export class TaskRunner<
 
       schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
+      if (isOutdatedTaskVersionError(err)) {
+        this.logger.debug(
+          `Outdated task version: The task instance ID: ${this.taskInstance.id} does not match the rule ID: ${ruleId}.`
+        );
+        return getDeleteRuleTaskRunResult();
+      }
+
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
     }
