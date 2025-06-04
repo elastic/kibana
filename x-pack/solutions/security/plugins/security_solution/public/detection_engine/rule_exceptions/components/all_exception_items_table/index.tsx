@@ -30,6 +30,7 @@ import {
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { extractExceptionsCapabilities } from '../../../../common/utils/exceptions_capabilities';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -97,6 +98,7 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
+  const exceptionsCaps = extractExceptionsCapabilities(services.application.capabilities);
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
   const exceptionListsToQuery = useMemo(
     () =>
@@ -457,8 +459,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !exceptionsCaps.crud);
+  }, [setReadOnly, isViewReadOnly, exceptionsCaps.crud]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -534,7 +536,7 @@ const ExceptionsViewerComponent = ({
 
           <ExceptionsViewerItems
             isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
