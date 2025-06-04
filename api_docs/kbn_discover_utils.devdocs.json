@@ -4173,35 +4173,10 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.RowControlColumn.headerAriaLabel",
-            "type": "string",
-            "tags": [],
-            "label": "headerAriaLabel",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.RowControlColumn.headerCellRender",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "headerCellRender",
-            "description": [],
-            "signature": [
-              "React.ComponentType<{}> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.RowControlColumn.renderControl",
+            "id": "def-common.RowControlColumn.render",
             "type": "Function",
             "tags": [],
-            "label": "renderControl",
+            "label": "render",
             "description": [],
             "signature": [
               "(Control: ",
@@ -4228,7 +4203,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.RowControlColumn.renderControl.$1",
+                "id": "def-common.RowControlColumn.render.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "Control",
@@ -4249,7 +4224,7 @@
               },
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.RowControlColumn.renderControl.$2",
+                "id": "def-common.RowControlColumn.render.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
