@@ -29,7 +29,7 @@ is being formed. This can result in parts of the vis being cut out.
   .kbnGrid {
     display: block !important;
   }
-  .kbnGridSectionHeader {
+  .kbnGridSectionHeader, .kbnGridSectionFooter {
     display: none;
   }
   .kbnGridPanel {
