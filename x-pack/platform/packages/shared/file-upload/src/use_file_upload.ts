@@ -9,9 +9,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
-import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import useMountedState from 'react-use/lib/useMountedState';
 import { CLASH_ERROR_TYPE, FileUploadManager, STATUS } from '../file_upload_manager';
 
 export enum UPLOAD_TYPE {
@@ -23,9 +24,11 @@ export function useFileUpload(
   fileUploadManager: FileUploadManager,
   data: DataPublicPluginStart,
   application: ApplicationStart,
-  onUploadComplete?: (results: FileUploadResults | null) => void,
-  http?: HttpSetup
+  http: HttpSetup,
+  notifications: NotificationsStart,
+  onUploadComplete?: (results: FileUploadResults | null) => void
 ) {
+  const isMounted = useMountedState();
   const { dataViews } = data;
   const { navigateToApp } = application;
 
@@ -74,15 +77,21 @@ export function useFileUpload(
     }
 
     http.get<Index[]>('/api/index_management/indices').then((indx) => {
+      if (!isMounted()) {
+        return;
+      }
       setIndices(indx.filter((i) => i.hidden === false && i.isFrozen === false));
     });
-  }, [http, fileUploadManager]);
+  }, [http, fileUploadManager, isMounted]);
 
   useEffect(() => {
     dataViews.getTitles().then((titles) => {
+      if (!isMounted()) {
+        return;
+      }
       setExistingDataViewNames(titles);
     });
-  }, [dataViews]);
+  }, [dataViews, isMounted]);
 
   useEffect(() => {
     return () => {
@@ -99,22 +108,39 @@ export function useFileUpload(
     setDataViewNameError(isDataViewNameValid(dataViewName, existingDataViewNames, indexName));
   }, [dataViewName, existingDataViewNames, indexName]);
 
-  const uploadInProgress =
+  const uploadStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
     uploadStatus.overallImportStatus === STATUS.COMPLETED ||
     uploadStatus.overallImportStatus === STATUS.FAILED;
 
-  const onImportClick = useCallback(() => {
+  const onImportClick = useCallback(async () => {
     const existingIndex = fileUploadManager.getExistingIndexName();
     const index = existingIndex !== null ? existingIndex : indexName;
     const dv = dataViewName === '' ? undefined : dataViewName;
-    fileUploadManager.import(index, dv).then((res) => {
+    try {
+      const res = await fileUploadManager.import(index, dv);
+      if (!isMounted()) {
+        return;
+      }
       if (onUploadComplete && res) {
         onUploadComplete(res);
       }
       setImportResults(res);
-    });
-  }, [dataViewName, fileUploadManager, indexName, onUploadComplete]);
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.dataVisualizer.file.importView.importErrorNotificationTitle', {
+          defaultMessage: 'Error performing import',
+        }),
+      });
+    }
+  }, [
+    dataViewName,
+    fileUploadManager,
+    indexName,
+    isMounted,
+    notifications.toasts,
+    onUploadComplete,
+  ]);
 
   const existingIndexName = useObservable(
     fileUploadManager.existingIndexName$,
@@ -176,7 +202,7 @@ export function useFileUpload(
     uploadStatus,
     fileClashes,
     fullFileUpload,
-    uploadInProgress,
+    uploadStarted,
     onImportClick,
     canImport,
     mappings,

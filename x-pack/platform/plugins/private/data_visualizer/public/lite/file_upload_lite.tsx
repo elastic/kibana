@@ -37,7 +37,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
     ...coreStart,
     ...plugins,
   };
-  const { data, fileUpload, cloud } = services;
+  const { data, fileUpload, cloud, notifications } = services;
 
   const { existingIndex, autoAddInference, autoCreateDataView, indexSettings, onUploadComplete } =
     props;
@@ -47,6 +47,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
         fileUpload,
         coreStart.http,
         data.dataViews,
+        notifications,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
@@ -61,6 +62,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
       existingIndex,
       fileUpload,
       indexSettings,
+      notifications,
     ]
   );
 
@@ -68,8 +70,9 @@ export const FileDataVisualizerLite: FC<Props> = ({
     fileUploadManager,
     data,
     coreStart.application,
-    onUploadComplete,
-    coreStart.http
+    coreStart.http,
+    notifications,
+    onUploadComplete
   );
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;

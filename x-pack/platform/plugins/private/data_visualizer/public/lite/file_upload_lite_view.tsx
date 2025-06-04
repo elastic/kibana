@@ -50,7 +50,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
     uploadStatus,
     fileClashes,
     fullFileUpload,
-    uploadInProgress,
+    uploadStarted,
     onImportClick,
     canImport,
     setIndexName,
@@ -160,7 +160,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
               </>
             ) : null}
 
-            {uploadInProgress ? (
+            {uploadStarted ? (
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem />

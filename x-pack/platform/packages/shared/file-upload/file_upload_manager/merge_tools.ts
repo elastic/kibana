@@ -7,6 +7,7 @@
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
 import type { MappingPropertyBase, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { isEqual } from 'lodash';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';
 
 export enum CLASH_TYPE {
@@ -67,14 +68,9 @@ export function createMergedMappings(
 
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
 
-  // stringify each mappings and see if they are the same, if so return the first one.
-  // otherwise drill down and extract each field with it's type.
-  const mappingsString = mappings.map((m) => JSON.stringify(m));
-  const mappingComparator = checkExistingIndexMappings
-    ? JSON.stringify(existingIndexMappings)
-    : mappingsString[0];
-
-  if (mappingsString.every((m) => m === mappingComparator)) {
+  // compare the mappings of all files to see if they are all the same
+  // if they are, return early
+  if (mappings.every((m) => isEqual(m, mappings[0]))) {
     return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
@@ -167,7 +163,7 @@ export function createMergedMappings(
           const existingType = existingField.type;
           if (existingType !== field.value.type) {
             if (existingType === 'text' && field.value.type === 'keyword') {
-              // do nothing
+              // the existing field is text and the new field is keyword, we can keep the existing field type
             } else {
               existingIndexChecks.mappingClashes.push({
                 fieldName: field.name,

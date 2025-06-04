@@ -20,7 +20,7 @@ export class FileSizeChecker {
       : fileUpload.getMaxBytes();
   }
 
-  public check(): boolean {
+  public isValid(): boolean {
     return this._fileSize <= this._maxBytes;
   }
 

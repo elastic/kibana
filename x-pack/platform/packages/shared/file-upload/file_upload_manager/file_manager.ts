@@ -10,7 +10,7 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type {
@@ -26,6 +26,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import { FileUploadResults } from '@kbn/file-upload-common';
+import { isEqual } from 'lodash';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 
@@ -50,16 +51,8 @@ export enum STATUS {
 
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
   json: T;
-  string: string;
   valid: boolean;
-  count: number;
 }
-
-export const emptyConfig = {
-  json: {},
-  string: '',
-  valid: false,
-};
 
 export interface UploadStatus {
   analysisStatus: STATUS;
@@ -97,15 +90,11 @@ export class FileUploadManager {
   private mappingsCheckSubscription: Subscription;
   public readonly settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
     json: {},
-    string: '',
     valid: false,
-    count: 0,
   });
   public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
     json: {},
-    string: '',
     valid: false,
-    count: 0,
   });
   public readonly existingIndexName$ = new BehaviorSubject<string | null>(null);
 
@@ -137,6 +126,7 @@ export class FileUploadManager {
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
+    private notifications: NotificationsStart,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
@@ -166,7 +156,9 @@ export class FileUploadManager {
         if (uploadStatus.overallImportStatus === STATUS.STARTED) {
           return;
         }
-        if (this.getFiles().length === 0) {
+        const files = this.getFiles();
+
+        if (files.length === 0) {
           this.setStatus({
             fileClashes: [],
             analysisStatus: STATUS.NOT_STARTED,
@@ -175,7 +167,11 @@ export class FileUploadManager {
         }
 
         const { formatsOk, fileClashes } = this.getFormatClashes();
-        const { mappingClashes, mergedMappings, existingIndexChecks } = this.createMergedMappings();
+
+        const { mappingClashes, mergedMappings, existingIndexChecks } = createMergedMappings(
+          files,
+          this.existingIndexMappings$.getValue() as FindFileStructureResponse['mappings']
+        );
 
         let mappingsOk = mappingClashes.length === 0;
         if (existingIndexChecks !== undefined) {
@@ -319,14 +315,6 @@ export class FileUploadManager {
     };
   }
 
-  private createMergedMappings() {
-    const files = this.getFiles();
-    return createMergedMappings(
-      files,
-      this.existingIndexMappings$.getValue() as FindFileStructureResponse['mappings']
-    );
-  }
-
   private getPipelines(): Array<IngestPipeline | undefined> {
     const files = this.getFiles();
     return files.map((file) => file.getPipeline());
@@ -344,7 +332,7 @@ export class FileUploadManager {
     };
   }
 
-  public updatePipelines(pipelines: IngestPipeline[]) {
+  public updatePipelines(pipelines: Array<IngestPipeline | undefined>) {
     const files = this.getFiles();
     files.forEach((file, i) => {
       file.setPipeline(pipelines[i]);
@@ -377,22 +365,18 @@ export class FileUploadManager {
     if (typeof config === 'string') {
       try {
         const json = JSON.parse(config);
-        const currentConfigString = JSON.stringify(currentConfig.json);
-        const incomingConfigString = JSON.stringify(json);
 
         this.setStatus({
           [jsonValidKey]: true,
         });
 
-        if (currentConfigString === incomingConfigString) {
+        if (isEqual(currentConfig.json, json)) {
           return;
         }
 
         config$.next({
           json,
-          string: incomingConfigString,
           valid: true,
-          count: currentConfig.count + 1,
         });
       } catch (e) {
         this.setStatus({
@@ -403,9 +387,7 @@ export class FileUploadManager {
     } else {
       config$.next({
         json: config,
-        string: '',
         valid: true,
-        count: currentConfig.count + 1,
       });
     }
   }
@@ -669,6 +651,8 @@ export class FileUploadManager {
           },
         });
       });
+      this.updateMappings(mappings);
+      this.updatePipelines(pipelines);
     }
   }
 
@@ -689,6 +673,15 @@ export class FileUploadManager {
       this.existingIndexMappings$.next(mappings);
     } catch (e) {
       this.existingIndexMappings$.next(null);
+      this.notifications.toasts.addError(e, {
+        title: i18n.translate(
+          'xpack.dataVisualizer.file.fileManager.errorLoadingExistingMappings',
+          {
+            defaultMessage: 'Error loading existing index mappings for {indexName}',
+            values: { indexName: existingIndexName },
+          }
+        ),
+      });
     }
   }
 }
@@ -725,4 +718,8 @@ export function getInferenceId(mappings: MappingTypeMapping) {
     }
   }
   return null;
+}
+
+export function semanticTextFieldExists(mappings: MappingTypeMapping) {
+  return Object.values(mappings.properties ?? {}).some((value) => value.type === 'semantic_text');
 }

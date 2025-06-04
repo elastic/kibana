@@ -99,7 +99,7 @@ export class FileWrapper {
       ...this.analyzedFile$.getValue(),
       fileName: this.file.name,
       loaded: false,
-      fileTooLarge: !this.fileSizeChecker.check(),
+      fileTooLarge: !this.fileSizeChecker.isValid(),
       fileSizeInfo: {
         fileSize: this.file.size,
         fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
