@@ -90,5 +90,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(hasSetupTechnologySelector).to.be(true);
       expect(hasAgentBased).to.be(false);
     });
+
+    it.only(`should show an invalid form state when agentless is default and switching between cloud providers`, async () => {
+      await cisIntegration.navigateToAddIntegrationWithVersionPage(
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
+      );
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.clickAwsPolicyOption();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      expect(await cisIntegration.isSaveButtonEnabled()).to.be(false);
+
+      await cisIntegration.clickGcpPolicyOption();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      expect(await cisIntegration.isSaveButtonEnabled()).to.be(false);
+
+      await cisIntegration.clickAzurePolicyOption();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      expect(await cisIntegration.isSaveButtonEnabled()).to.be(false);
+    });
   });
 }
