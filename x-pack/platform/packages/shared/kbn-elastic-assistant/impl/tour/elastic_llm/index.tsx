@@ -28,6 +28,7 @@ interface Props {
   children?: EuiTourStepProps['children'];
   isDisabled: boolean;
   selectedConnectorId: string | undefined;
+  storageKey: NEW_FEATURES_TOUR_STORAGE_KEYS;
   zIndex?: number;
   wrapper?: boolean;
 }
@@ -36,12 +37,13 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   children,
   isDisabled,
   selectedConnectorId,
+  storageKey,
   zIndex,
   wrapper = true, // Whether to wrap the children in a div with padding
 }) => {
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-  const tourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM);
+  const tourStorageKey = useTourStorageKey(storageKey);
   const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
 
   const [showTour, setShowTour] = useState(!tourCompleted && !isDisabled);
