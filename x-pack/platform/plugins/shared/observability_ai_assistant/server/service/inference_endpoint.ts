@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
   InferenceInferenceEndpointInfo,
+  InferenceTaskType,
   MlGetTrainedModelsStatsResponse,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -74,6 +75,33 @@ async function getInferenceEndpoint({
     throw new Error('Inference endpoint not found');
   }
   return response.endpoints[0];
+}
+
+export async function deleteInferenceEndpoint({
+  esClient,
+  logger,
+  inferenceId,
+  taskType,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  inferenceId: string;
+  taskType: InferenceTaskType;
+}) {
+  try {
+    logger.info(
+      `Attempting to delete inference endpoint with ID: ${inferenceId} and task type: ${taskType}`
+    );
+    await esClient.asInternalUser.inference.delete({
+      inference_id: inferenceId,
+      task_type: taskType,
+    });
+    logger.info(`Successfully deleted inference endpoint with ID: ${inferenceId}`);
+  } catch (error) {
+    logger.error(
+      `Failed to delete inference endpoint with ID: ${inferenceId}. Error: ${error.message}`
+    );
+  }
 }
 
 export function isInferenceEndpointMissingOrUnavailable(error: Error) {
