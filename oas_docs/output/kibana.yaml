@@ -48910,6 +48910,12 @@ components:
           default: true
           description: Specify whether the monitor is enabled.
           type: boolean
+        labels:
+          additionalProperties:
+            type: string
+          description: |
+            Key-value pairs of labels to associate with the monitor. Labels can be used for filtering and grouping monitors.
+          type: object
         locations:
           description: |
             The location to deploy the monitor.
