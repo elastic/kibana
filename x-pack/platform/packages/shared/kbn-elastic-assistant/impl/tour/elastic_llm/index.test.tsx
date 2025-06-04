@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 jest.mock('../common/hooks/use_tour_storage_key');
@@ -60,7 +61,11 @@ describe('ElasticLLMCostAwarenessTour', () => {
     (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
 
     const { queryByTestId } = render(
-      <ElasticLLMCostAwarenessTour isDisabled={false} selectedConnectorId=".inference">
+      <ElasticLLMCostAwarenessTour
+        isDisabled={false}
+        selectedConnectorId=".inference"
+        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
+      >
         <div data-test-subj="target" />
       </ElasticLLMCostAwarenessTour>,
       {
@@ -81,7 +86,11 @@ describe('ElasticLLMCostAwarenessTour', () => {
     (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
 
     const { queryByTestId } = render(
-      <ElasticLLMCostAwarenessTour isDisabled={false} selectedConnectorId=".inference" />,
+      <ElasticLLMCostAwarenessTour
+        isDisabled={false}
+        selectedConnectorId=".inference"
+        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
+      />,
       {
         wrapper: Wrapper,
       }
@@ -100,7 +109,11 @@ describe('ElasticLLMCostAwarenessTour', () => {
     (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
 
     const { queryByTestId } = render(
-      <ElasticLLMCostAwarenessTour isDisabled={true} selectedConnectorId=".inference" />,
+      <ElasticLLMCostAwarenessTour
+        isDisabled={true}
+        selectedConnectorId=".inference"
+        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
+      />,
       {
         wrapper: Wrapper,
       }
