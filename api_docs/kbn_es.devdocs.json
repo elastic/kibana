@@ -935,7 +935,7 @@
         "label": "ServerlessProjectType",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\" | \"chat\""
+          "\"security\" | \"oblt\" | \"es\" | \"chat\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
         "deprecated": false,
