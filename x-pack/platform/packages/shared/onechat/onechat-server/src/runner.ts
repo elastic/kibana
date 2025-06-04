@@ -25,6 +25,10 @@ export interface RunToolReturn<TResult = unknown> {
    * The result value as returned by the tool.
    */
   result: TResult;
+  /**
+   * ID of this run
+   */
+  runId: string;
 }
 
 /**

@@ -33,6 +33,7 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
   const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
 
   return {
+    runId: manager.context.runId,
     result: toolResult as TResult,
   };
 };
