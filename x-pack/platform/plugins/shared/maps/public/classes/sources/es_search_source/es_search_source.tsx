@@ -489,7 +489,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const isTimeExtentForTimeslice =
       requestMeta.timeslice !== undefined && !useRequestMetaWithoutTimeslice;
     return {
-      hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
+      hits: [...resp.hits.hits].reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
         areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
