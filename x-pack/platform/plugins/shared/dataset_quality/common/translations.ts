@@ -725,5 +725,5 @@ export const readLess = i18n.translate(
 );
 
 export const createAlertText = i18n.translate('xpack.datasetQuality.createAlert', {
-  defaultMessage: 'Create alert',
+  defaultMessage: 'Create rule',
 });

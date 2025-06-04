@@ -72,7 +72,6 @@ export function DegradedDocsRuleType(): RuleType<
         {
           name: 'threshold',
           description: actionVariableContextThresholdLabel,
-          usesPublicBaseUrl: true,
         },
       ],
     },

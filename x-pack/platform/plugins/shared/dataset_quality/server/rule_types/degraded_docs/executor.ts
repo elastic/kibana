@@ -12,6 +12,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
+  ALERT_KEY_JOINER,
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
 import { INDEX, _IGNORED } from '../../../common/es_fields';
@@ -111,7 +112,7 @@ export const getRuleExecutor = () =>
       let generatedAlerts = 0;
       for (const groupResult of datasetQualityDegradedResults) {
         const { bucketKey, percentage } = groupResult;
-        const alertId = bucketKey.join('_');
+        const alertId = bucketKey.join(ALERT_KEY_JOINER);
         const met = compareFn(percentage, params.threshold);
 
         if (!met) {

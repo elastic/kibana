@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { KNOWN_TYPES } from '../../../common/constants';
 import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
-import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
+import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
 
@@ -84,7 +84,7 @@ export default function Header() {
                 >
                   {createAlertText}
                 </EuiButton>
-                <AlertingFlyout
+                <AlertFlyout
                   addFlyoutVisible={!!ruleType}
                   setAddFlyoutVisibility={(visible) => {
                     if (!visible) {

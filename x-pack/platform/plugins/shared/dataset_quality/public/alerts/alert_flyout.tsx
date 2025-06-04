@@ -16,7 +16,7 @@ interface Props {
   dataStream?: string;
 }
 
-export function AlertingFlyout(props: Props) {
+export function AlertFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, dataStream } = props;
 
   const {

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createAlertText, openInDiscoverText } from '../../../common/translations';
-import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
+import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -167,7 +167,7 @@ export function Header() {
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <AlertingFlyout
+      <AlertFlyout
         dataStream={rawName}
         addFlyoutVisible={!!ruleType}
         setAddFlyoutVisibility={(visible) => {
