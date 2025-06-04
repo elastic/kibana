@@ -11,6 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
 import { KbnPalette } from '../../../constants';
 
+/**
+ * (aka Compatibility)
+ */
 export const kibana4Palette = new KbnCategoricalPalette({
   id: KbnPalette.Kibana4,
   aliases: [

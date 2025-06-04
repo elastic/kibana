@@ -13,9 +13,6 @@ import { KbnPalette } from '../../../constants';
 
 export const elasticClassicPalette = new KbnCategoricalPalette({
   id: KbnPalette.ElasticClassic,
-  aliases: [
-    'kibana_palette', // to match legacy palette naming
-  ],
   name: i18n.translate('palettes.classic.name', {
     defaultMessage: 'Elastic classic',
   }),

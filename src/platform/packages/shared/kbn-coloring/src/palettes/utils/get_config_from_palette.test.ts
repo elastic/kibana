@@ -36,23 +36,23 @@ describe('getConfigFromPalette', () => {
       const gradientPalettes = [
         {
           id: KbnPalette.Cool,
-          steps: [{ ...commonStep, colorIndex: 2 }],
+          steps: [{ ...commonStep, colorIndex: 1 }],
         },
         {
           id: KbnPalette.Gray,
-          steps: [{ touched: false, type: 'colorCode' as const, colorCode: '#1d2a3e' }],
+          steps: [{ touched: false, type: 'colorCode' as const, colorCode: '#343741' }],
         },
         {
           id: KbnPalette.Red,
-          steps: [{ ...commonStep, colorIndex: 6 }],
+          steps: [{ touched: false, type: 'colorCode' as const, colorCode: '#cc5642' }],
         },
         {
           id: KbnPalette.Green,
-          steps: [{ touched: false, type: 'colorCode' as const, colorCode: '#24c292' }],
+          steps: [{ touched: false, type: 'colorCode' as const, colorCode: '#209280' }],
         },
         {
           id: KbnPalette.Warm,
-          steps: [{ ...commonStep, colorIndex: 6 }],
+          steps: [{ ...commonStep, colorIndex: 9 }],
         },
       ].map<[id: string, palette: IKbnPalette, steps: ColorMapping.ColorStep[]]>(
         ({ id, steps }) => [id, palettes.get(id), steps]
@@ -79,25 +79,25 @@ describe('getConfigFromPalette', () => {
         {
           id: KbnPalette.Temperature,
           steps: [
-            { ...commonStep, colorIndex: 6 },
+            { ...commonStep, colorIndex: 9 },
             { touched: false, type: 'colorCode' as const, colorCode: '#ebeff5' },
-            { ...commonStep, colorIndex: 2 },
+            { ...commonStep, colorIndex: 1 },
           ],
         },
         {
           id: KbnPalette.Complementary,
           steps: [
-            { ...commonStep, colorIndex: 8 },
+            { ...commonStep, colorIndex: 7 },
             { touched: false, type: 'colorCode' as const, colorCode: '#ebeff5' },
-            { ...commonStep, colorIndex: 2 },
+            { ...commonStep, colorIndex: 1 },
           ],
         },
         {
           id: KbnPalette.Status,
           steps: [
-            { ...commonStep, colorIndex: 6 },
-            { ...commonStep, colorIndex: 9 },
-            { touched: false, type: 'colorCode' as const, colorCode: '#24c292' },
+            { touched: false, type: 'colorCode' as const, colorCode: '#cc5642' },
+            { ...commonStep, colorIndex: 5 },
+            { touched: false, type: 'colorCode' as const, colorCode: '#209280' },
           ],
         },
       ].map<[id: string, palette: IKbnPalette, steps: ColorMapping.GradientColorMode['steps']]>(
