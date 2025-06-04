@@ -132,9 +132,13 @@ export const esqlAsyncSearchStrategyProvider = (
 
   function esqlAsyncSearch(
     { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
-    options: IAsyncSearchOptions,
+    searchOptions: IAsyncSearchOptions,
     deps: SearchStrategyDependencies
   ) {
+    // This abortSignal comes from getRequestAbortedSignal and fires if the HTTP request is aborted;
+    // in the case of these async APIs, we  don't want to cancel the async request if the HTTP
+    // request is aborted
+    const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
         ? submitEsqlSearch({ id, ...request }, options, deps)
