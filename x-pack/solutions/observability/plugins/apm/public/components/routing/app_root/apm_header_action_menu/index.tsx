@@ -6,7 +6,6 @@
  */
 
 import { EuiHeaderLink, EuiHeaderLinks, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
@@ -15,7 +14,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { Labs } from './labs';
 import { AddDataContextMenu } from './add_data_context_menu';
 import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
@@ -43,11 +41,8 @@ export function ApmHeaderActionMenu() {
     return basePath.prepend(path);
   }
 
-  const isLabsButtonEnabled = core.uiSettings.get<boolean>(apmLabsButton, false);
-
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {isLabsButtonEnabled && <Labs />}
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="text"

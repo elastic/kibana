@@ -149,7 +149,6 @@ export interface UsageStats {
   isDefaultIndexMigrated: boolean;
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
-  'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:entityCentricExperience': boolean;
