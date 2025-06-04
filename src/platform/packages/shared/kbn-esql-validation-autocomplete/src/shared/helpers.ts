@@ -821,88 +821,11 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
-export function transformMapToESQLFields(
-  inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLFieldWithMetadata[] {
-  const esqlFields: ESQLFieldWithMetadata[] = [];
-
-  for (const [, userDefinedColumns] of inputMap) {
-    for (const userDefinedColumn of userDefinedColumns) {
-      // Only include userDefinedColumns that have a known type
-      if (userDefinedColumn.type) {
-        esqlFields.push({
-          name: userDefinedColumn.name,
-          type: userDefinedColumn.type as FieldType,
-        });
-      }
-    }
-  }
-
-  return esqlFields;
-}
-
-async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
-  if (!resourceRetriever?.getFieldsMetadata) {
-    return undefined;
-  }
-  const client = await resourceRetriever?.getFieldsMetadata;
-  if (client.find) {
-    // Fetch full list of ECS field
-    // This list should be cached already by fieldsMetadataClient
-    const results = await client.find({ attributes: ['type'] });
-    return results?.fields;
-  }
-}
-// Get the fields from the FROM clause, enrich them with ECS metadata
-export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
-  const metadata = await getEcsMetadata();
-  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
-  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
-  return fieldsWithMetadata;
-}
-
-/**
- * @param query, the ES|QL query
- * @param commands, the AST commands
- * @param previousPipeFields, the fields from the previous pipe
- * @returns a list of fields that are available for the current pipe
- */
-export async function getCurrentQueryAvailableFields(
-  query: string,
-  commands: ESQLAstCommand[],
-  previousPipeFields: ESQLFieldWithMetadata[]
-) {
-  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
-  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
-  const lastCommand = commands[commands.length - 1];
-  const commandDef = getCommandDefinition(lastCommand.name);
-
-  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
-  if (commandDef.fieldsSuggestionsAfter) {
-    const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
-    );
-
-    return commandDef.fieldsSuggestionsAfter(
-      lastCommand,
-      previousPipeFields,
-      arrayOfUserDefinedColumns
-    );
-  } else {
-    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
-    const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
-    );
-    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
-    return allFields;
-  }
-}
-
 // --- Expression types helpers ---
 
-// Type guard to check if the type is 'param'
+/**
+ * Type guard to check if the type is 'param'
+ */
 export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
 
 /**
@@ -1034,4 +957,85 @@ export function getExpressionType(
   }
 
   return 'unknown';
+}
+
+// --- Fields helpers ---
+
+export function transformMapToESQLFields(
+  inputMap: Map<string, ESQLUserDefinedColumn[]>
+): ESQLFieldWithMetadata[] {
+  const esqlFields: ESQLFieldWithMetadata[] = [];
+
+  for (const [, userDefinedColumns] of inputMap) {
+    for (const userDefinedColumn of userDefinedColumns) {
+      // Only include userDefinedColumns that have a known type
+      if (userDefinedColumn.type) {
+        esqlFields.push({
+          name: userDefinedColumn.name,
+          type: userDefinedColumn.type as FieldType,
+        });
+      }
+    }
+  }
+
+  return esqlFields;
+}
+
+async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
+  if (!resourceRetriever?.getFieldsMetadata) {
+    return undefined;
+  }
+  const client = await resourceRetriever?.getFieldsMetadata;
+  if (client.find) {
+    // Fetch full list of ECS field
+    // This list should be cached already by fieldsMetadataClient
+    const results = await client.find({ attributes: ['type'] });
+    return results?.fields;
+  }
+}
+// Get the fields from the FROM clause, enrich them with ECS metadata
+export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
+  const metadata = await getEcsMetadata();
+  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
+  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
+  return fieldsWithMetadata;
+}
+
+/**
+ * @param query, the ES|QL query
+ * @param commands, the AST commands
+ * @param previousPipeFields, the fields from the previous pipe
+ * @returns a list of fields that are available for the current pipe
+ */
+export async function getCurrentQueryAvailableFields(
+  query: string,
+  commands: ESQLAstCommand[],
+  previousPipeFields: ESQLFieldWithMetadata[]
+) {
+  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
+  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
+  const lastCommand = commands[commands.length - 1];
+  const commandDef = getCommandDefinition(lastCommand.name);
+
+  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
+  if (commandDef.fieldsSuggestionsAfter) {
+    const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
+      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
+    );
+
+    return commandDef.fieldsSuggestionsAfter(
+      lastCommand,
+      previousPipeFields,
+      arrayOfUserDefinedColumns
+    );
+  } else {
+    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
+    const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
+      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
+    );
+    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
+    return allFields;
+  }
 }
