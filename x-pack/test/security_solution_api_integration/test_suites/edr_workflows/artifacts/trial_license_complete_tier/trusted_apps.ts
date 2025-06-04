@@ -429,7 +429,6 @@ export default function ({ getService }: FtrProviderContext) {
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)
-<<<<<<< HEAD
                 .expect(400)
                 .expect(anEndpointArtifactError)
                 .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
