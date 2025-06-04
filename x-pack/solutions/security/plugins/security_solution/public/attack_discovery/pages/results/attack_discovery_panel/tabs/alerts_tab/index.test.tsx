@@ -8,7 +8,7 @@
 // Mocks must be at the top, before imports that use them
 jest.mock('../../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../../../../../detections/components/alerts_table', () => ({
-  DetectionEngineAlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
+  AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
 }));
 jest.mock('./ai_for_soc/wrapper', () => ({
   AiForSOCAlertsTab: () => <div data-test-subj="ai4dsoc-alerts-table" />,
