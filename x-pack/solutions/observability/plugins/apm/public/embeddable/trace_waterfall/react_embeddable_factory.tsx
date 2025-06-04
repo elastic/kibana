@@ -25,6 +25,7 @@ interface BaseProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
+  onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }
 
 export interface ApmTraceWaterfallEmbeddableFocusedProps extends BaseProps, SerializedTitles {
@@ -57,6 +58,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
+      const onErrorClick$ = new BehaviorSubject(state.onErrorClick);
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
       const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
 
@@ -71,6 +73,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo: rangeTo$.getValue(),
             displayLimit: displayLimit$.getValue(),
             docId: docId$.getValue(),
+            onErrorClick: onErrorClick$.getValue(),
           },
         };
       }
@@ -99,6 +102,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo: 'referenceEquality',
             displayLimit: 'referenceEquality',
             docId: 'referenceEquality',
+            onErrorClick: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
@@ -138,6 +142,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo,
             displayLimit,
             docId,
+            onErrorClick,
           ] = useBatchedPublishingSubjects(
             serviceName$,
             traceId$,
@@ -145,7 +150,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeFrom$,
             rangeTo$,
             displayLimit$,
-            docId$
+            docId$,
+            onErrorClick$
           );
           const content = isEmpty(docId) ? (
             <TraceWaterfallEmbeddable
@@ -162,6 +168,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               docId={docId}
+              onErrorClick={onErrorClick}
             />
           );
 
