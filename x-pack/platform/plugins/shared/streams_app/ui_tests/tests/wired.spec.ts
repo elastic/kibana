@@ -75,7 +75,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
       .getByLabel('Open actions menu')
       .click();
 
-    await page.getByRole('button', { name: 'Map field' }).click();
+    await page.getByRole('button', { name: 'Map field' }).click({ force: true, delay: 100 });
     await page.getByRole('combobox').selectOption('keyword');
     await page.getByRole('button', { name: 'Save changes' }).click();
     await page.getByRole('heading', { name: 'logs.foo' }).waitFor({ state: 'hidden' });
