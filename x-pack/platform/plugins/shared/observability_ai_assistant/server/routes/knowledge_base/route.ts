@@ -20,7 +20,6 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseState,
 } from '../../../common/types';
-import { ConversationConfidenceEnum } from '@kbn/elastic-assistant-common';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -294,23 +293,18 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw new Error('Knowledge base is not ready');
     }
 
-    const entries = resources.params.body.entries.map(entry => ({
-      confidence: ConversationConfidenceEnum.high,
+    const entries = resources.params.body.entries.map((entry) => ({
+      confidence: 'high' as const,
       is_correction: false,
       public: true,
       labels: {},
       role: KnowledgeBaseEntryRole.UserEntry,
-      ...entry
+      ...entry,
     }));
 
-    await pRetry(
-      () => client.addKnowledgeBaseBulkEntries({ entries }),
-      { retries: 10 }
-    );
+    await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
 
-    resources.logger.info(
-      `Imported ${entries.length} knowledge base entries using bulk API`
-    );
+    resources.logger.info(`Imported ${entries.length} knowledge base entries using bulk API`);
   },
 });
 

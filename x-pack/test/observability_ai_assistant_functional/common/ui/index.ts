@@ -42,7 +42,7 @@ const pages = {
     bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
     bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
     bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
-    toastTitle: 'euiToastHeader__title'
+    toastTitle: 'euiToastHeader__title',
   },
   conversations: {
     setupGenAiConnectorsButtonSelector:

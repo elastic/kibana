@@ -462,7 +462,15 @@ export class KnowledgeBaseService {
     }
   };
 
-  addBulkEntries = async ({ entries, user, namespace }: { entries: Omit<KnowledgeBaseEntry, '@timestamp'>[]; user?: { name: string; id?: string }; namespace: string }): Promise<void> => {
+  addBulkEntries = async ({
+    entries,
+    user,
+    namespace,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+    user?: { name: string; id?: string };
+    namespace: string;
+  }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return;
     }
@@ -499,7 +507,7 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
-  }
+  };
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
