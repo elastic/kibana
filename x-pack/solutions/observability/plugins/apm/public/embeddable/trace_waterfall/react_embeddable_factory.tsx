@@ -36,6 +36,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   serviceName: string;
   entryTransactionId: string;
   displayLimit?: number;
+  scrollElement?: Element;
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
 }
 
@@ -61,6 +62,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
       const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
+      const scrollElement$ = new BehaviorSubject(
+        'scrollElement' in state ? state.scrollElement : undefined
+      );
       const onNodeClick$ = new BehaviorSubject(
         'onNodeClick' in state ? state.onNodeClick : undefined
       );
@@ -76,6 +80,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo: rangeTo$.getValue(),
             displayLimit: displayLimit$.getValue(),
             docId: docId$.getValue(),
+            scrollElement: scrollElement$.getValue(),
             onNodeClick: onNodeClick$.getValue(),
           },
         };
@@ -94,6 +99,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           rangeTo$,
           displayLimit$,
           docId$,
+          scrollElement$,
           onNodeClick$
         ).pipe(map(() => undefined)),
         getComparators: () => {
@@ -106,6 +112,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo: 'referenceEquality',
             displayLimit: 'referenceEquality',
             docId: 'referenceEquality',
+            scrollElement: 'referenceEquality',
             onNodeClick: 'referenceEquality',
           };
         },
@@ -122,6 +129,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           serviceName$.next(entryState?.serviceName ?? '');
           entryTransactionId$.next(entryState?.entryTransactionId ?? '');
           displayLimit$.next(entryState?.displayLimit ?? 0);
+          scrollElement$.next(entryState?.scrollElement ?? undefined);
           onNodeClick$.next(entryState?.onNodeClick ?? undefined);
 
           // reset focused state
@@ -147,6 +155,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo,
             displayLimit,
             docId,
+            scrollElement,
             onNodeClick,
           ] = useBatchedPublishingSubjects(
             serviceName$,
@@ -156,6 +165,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo$,
             displayLimit$,
             docId$,
+            scrollElement$,
             onNodeClick$
           );
           const content = isEmpty(docId) ? (
@@ -167,6 +177,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
               rangeTo={rangeTo}
               displayLimit={displayLimit}
               onNodeClick={onNodeClick}
+              scrollElement={scrollElement}
             />
           ) : (
             <FocusedTraceWaterfallEmbeddable

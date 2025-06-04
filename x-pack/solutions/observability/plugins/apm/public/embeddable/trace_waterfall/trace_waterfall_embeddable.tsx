@@ -20,6 +20,7 @@ export function TraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   displayLimit,
+  scrollElement,
   onNodeClick,
 }: ApmTraceWaterfallEmbeddableEntryProps) {
   const waterfallFetchResult = useWaterfallFetcher({
@@ -47,6 +48,7 @@ export function TraceWaterfallEmbeddable({
           displayLimit={displayLimit}
           onNodeClick={onNodeClick}
           isEmbeddable
+          scrollElement={scrollElement}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
