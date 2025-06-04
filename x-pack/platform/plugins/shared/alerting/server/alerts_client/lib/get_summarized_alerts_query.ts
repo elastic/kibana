@@ -10,7 +10,7 @@ import type {
   SearchRequest,
   SearchTotalHits,
   MsearchRequestItem,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BoolQuery } from '@kbn/es-query';
 
 import {
