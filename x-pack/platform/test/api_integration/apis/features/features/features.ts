@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
+            'onechat',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',

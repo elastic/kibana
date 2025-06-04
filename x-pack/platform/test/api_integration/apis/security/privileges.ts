@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cases_assign',
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],

@@ -95,6 +95,7 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'observabilityCases',
             'observabilityCasesV2',
             'observabilityCasesV3',
+            'onechat',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
             'securitySolutionCases',
