@@ -14,6 +14,9 @@ import {
 import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -199,10 +202,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     describe('Bulk import functionality', () => {
-      const fs = require('fs');
-      const path = require('path');
-      const os = require('os');
-      
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
@@ -282,7 +281,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
         const toastText = await toast.getVisibleText()
-        console.log(toastText)
         expect(toastText).to.eql("Successfully imported " + entries.length + " items")
 
         const finalCount = await getKnowledgeBaseEntryCount();
@@ -297,7 +295,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
         const toastText = await toast.getVisibleText()
-        console.log(toastText)
         expect(toastText).to.eql("Something went wrong")
 
         const count = await getKnowledgeBaseEntryCount();
