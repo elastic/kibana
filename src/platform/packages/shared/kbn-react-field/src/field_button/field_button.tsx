@@ -87,7 +87,7 @@ export function FieldButton({
   const classes = classNames(
     'kbnFieldButton',
     {
-      'kbnFieldButton-isActive': isActive,
+      kbnFieldButtonIsActive: isActive,
     },
     className
   );
@@ -183,8 +183,8 @@ const componentStyles = {
       alignItems: 'flex-start',
       transition: `box-shadow ${euiTheme.animation.fast} ${euiTheme.animation.resistance}, background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}`,
 
-      '&:focus-within': euiFocusRing(themeContext),
-      [`&.kbnFieldButton-isActive`]: euiFocusRing(themeContext),
+      '&:focusWithin': euiFocusRing(themeContext),
+      '&.kbnFieldButtonIsActive': euiFocusRing(themeContext),
     });
   },
   fieldButtonWrapperXs: ({ euiTheme }: UseEuiTheme) =>
