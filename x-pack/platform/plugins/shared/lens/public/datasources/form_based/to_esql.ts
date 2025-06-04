@@ -156,7 +156,6 @@ export function getESQLForLayer(
         return;
       }
     }
-  
 
     return metricESQL;
   });
