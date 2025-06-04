@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 

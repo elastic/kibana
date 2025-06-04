@@ -41,7 +41,6 @@ import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
-  ENABLE_ASSET_INVENTORY_SETTING,
   DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';

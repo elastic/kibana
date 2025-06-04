@@ -47,13 +47,6 @@ import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_a
 import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
-import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
-import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
-import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
-import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
-import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
-import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
-import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
 
 export const registerRoutes = (
