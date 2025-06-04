@@ -12,8 +12,14 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer, EuiSkipLink, useGeneratedHtmlId, euiOverflowScroll, type UseEuiTheme } from '@elastic/eui';
-import { EuiScreenReaderOnly, EuiSpacer, EuiSkipLink, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiSkipLink,
+  useGeneratedHtmlId,
+  euiOverflowScroll,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { useMemoizedStyles } from '@kbn/core/public';
 import { NoFieldsCallout } from './no_fields_callout';
