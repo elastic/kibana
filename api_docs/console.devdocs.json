@@ -391,7 +391,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
