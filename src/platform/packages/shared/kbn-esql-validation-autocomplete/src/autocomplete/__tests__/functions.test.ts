@@ -11,13 +11,14 @@ import { setTestFunctions } from '../../shared/test_functions';
 import { FunctionDefinitionTypes, Location } from '../../definitions/types';
 import { getFunctionSignaturesByReturnType, setup } from './helpers';
 import { uniq } from 'lodash';
+import { SuggestionRawDefinition } from '../types';
 
 describe('functions arg suggestions', () => {
   afterEach(() => {
     setTestFunctions([]);
   });
 
-  it('suggests based on available signatures', async () => {
+  it('suggests based on available signatures and existing params', async () => {
     setTestFunctions([
       {
         type: FunctionDefinitionTypes.SCALAR,
@@ -112,6 +113,100 @@ describe('functions arg suggestions', () => {
     );
     await assertSuggestions('FROM index | EVAL FUNC(doubleField, doubleField, /)', []);
     await assertSuggestions('FROM index | EVAL FUNC(doubleField, longField, /)', longSuggestions);
+  });
+
+  it('suggests accepted values or suggested literals', async () => {
+    setTestFunctions([
+      {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'func_with_accepted_values',
+        description: '',
+        signatures: [
+          {
+            params: [
+              {
+                name: 'arg',
+                type: 'keyword',
+                acceptedValues: ['value1', 'value2', 'value3'],
+              },
+            ],
+            returnType: 'double',
+          },
+        ],
+        locationsAvailable: [Location.EVAL],
+      },
+      {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'func_with_suggested_literals',
+        description: '',
+        signatures: [
+          {
+            params: [
+              {
+                name: 'arg',
+                type: 'keyword',
+                acceptedValues: ['value1', 'value2', 'value3'],
+                literalSuggestions: ['value1'],
+              },
+            ],
+            returnType: 'double',
+          },
+        ],
+        locationsAvailable: [Location.EVAL],
+      },
+    ]);
+
+    const { assertSuggestions } = await setup();
+
+    await assertSuggestions('FROM index | EVAL FUNC_WITH_ACCEPTED_VALUES(/)', [
+      '"value1"',
+      '"value2"',
+      '"value3"',
+    ]);
+    await assertSuggestions('FROM index | EVAL FUNC_WITH_SUGGESTED_LITERALS(/)', ['"value1"']);
+  });
+
+  it('respects constant-only', async () => {
+    setTestFunctions([
+      {
+        type: FunctionDefinitionTypes.SCALAR,
+        name: 'func_with_constant_only_param',
+        description: '',
+        signatures: [
+          {
+            params: [
+              {
+                name: 'arg',
+                type: 'keyword',
+                constantOnly: true,
+              },
+              {
+                name: 'arg2',
+                type: 'keyword',
+                constantOnly: false,
+              },
+            ],
+            returnType: 'double',
+          },
+        ],
+        locationsAvailable: [Location.EVAL],
+      },
+    ]);
+
+    const { suggest } = await setup();
+
+    const isColumn = (s: SuggestionRawDefinition) => s.kind === 'Variable';
+
+    const constantOnlySuggestions = await suggest(
+      'FROM index | EVAL FUNC_WITH_CONSTANT_ONLY_PARAM(/)'
+    );
+    expect(constantOnlySuggestions.every((s) => !isColumn(s))).toBe(true);
+
+    // negative test: make sure columns are correctly detected when present
+    const nonConstantOnlySuggestions = await suggest(
+      'FROM index | EVAL FUNC_WITH_CONSTANT_ONLY_PARAM("lolz", /)'
+    );
+    expect(nonConstantOnlySuggestions.every((s) => !isColumn(s))).toBe(false);
   });
 
   it('treats text and keyword as interchangeable', async () => {
