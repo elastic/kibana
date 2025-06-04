@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { ToolbarPopover } from '../../../../shared_components';
@@ -146,7 +147,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         {isHasNonBarSeries ? (
           <>
             <PointVisibilityOption
-              selectedPointVisibility={state?.pointVisibility ?? 'auto'}
+              selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
               onChange={(newValue) => {
                 setState({
                   ...state,
