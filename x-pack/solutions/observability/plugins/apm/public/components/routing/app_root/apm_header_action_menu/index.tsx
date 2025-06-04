@@ -24,7 +24,6 @@ export function ApmHeaderActionMenu() {
   const { capabilities } = application;
   const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
-  const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } = getAlertingCapabilities(
     plugins,
     capabilities
