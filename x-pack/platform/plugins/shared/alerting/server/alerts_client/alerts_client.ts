@@ -71,7 +71,6 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
-import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 
 // Term queries can take up to 10,000 terms
