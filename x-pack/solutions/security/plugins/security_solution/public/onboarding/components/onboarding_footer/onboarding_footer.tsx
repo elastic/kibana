@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { useFooterItems } from './footer_items';
-import { trackOnboardingLinkClick } from '../lib/telemetry';
 import type { OnboardingFooterLinkItemId } from './constants';
 import { TELEMETRY_FOOTER_LINK } from './constants';
+import { useOnboardingContext } from '../onboarding_context';
 
 export const OnboardingFooter = React.memo(() => {
   const styles = useFooterStyles();
@@ -52,9 +52,13 @@ interface FooterLinkItemProps {
 
 export const FooterLinkItem = React.memo<FooterLinkItemProps>(
   ({ id, title, icon, description, link }) => {
+    const {
+      telemetry: { reportLinkClick },
+    } = useOnboardingContext();
+
     const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
-      trackOnboardingLinkClick(`${TELEMETRY_FOOTER_LINK}_${id}`);
-    }, [id]);
+      reportLinkClick?.(`${TELEMETRY_FOOTER_LINK}_${id}`);
+    }, [id, reportLinkClick]);
 
     return (
       <EuiFlexItem>

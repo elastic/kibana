@@ -12,11 +12,6 @@ export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvi
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
-export const apmLabsButton = 'observability:apmLabsButton';
-export const enableInfrastructureProfilingIntegration =
-  'observability:enableInfrastructureProfilingIntegration';
-export const enableInfrastructureAssetCustomDashboards =
-  'observability:enableInfrastructureAssetCustomDashboards';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
@@ -25,7 +20,6 @@ export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
-export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';
 export const profilingShowErrorFrames = 'observability:profilingShowErrorFrames';
 export const profilingPervCPUWattX86 = 'observability:profilingPerVCPUWattX86';
 export const profilingPervCPUWattArm64 = 'observability:profilingPervCPUWattArm64';

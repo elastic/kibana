@@ -11418,12 +11418,6 @@
             "description": "Default value of the setting was changed."
           }
         },
-        "observability:apmLabsButton": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmProgressiveLoading": {
           "type": "keyword",
           "_meta": {
@@ -11432,12 +11426,6 @@
         },
         "observability:apmServiceGroupMaxNumberOfServices": {
           "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:apmEnableProfilingIntegration": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -11474,18 +11462,6 @@
         },
         "observability:profilingDatacenterPUE": {
           "type": "integer",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInfrastructureProfilingIntegration": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInfrastructureAssetCustomDashboards": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
