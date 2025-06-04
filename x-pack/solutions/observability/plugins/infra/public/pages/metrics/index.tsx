@@ -55,6 +55,7 @@ const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.
 const Kubernetes = dynamic(() =>
   import('./kubernetes').then((mod) => ({ default: mod.Kubernetes }))
 );
+const Dashboard = dynamic(() => import('./dashboard').then((mod) => ({ default: mod.Dashboard })));
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
@@ -129,8 +130,10 @@ export const InfrastructurePage = () => {
                 <Route path="/detail/:type/:node" component={NodeDetail} />
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
+                <Route strict path="/kubernetes/:dashboardId" component={Dashboard} />
                 <Route path="/kubernetes" component={Kubernetes} />
 
+                <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
                 <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
                 <RedirectWithQueryParams from="/" exact to="/inventory" />

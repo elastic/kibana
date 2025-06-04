@@ -183,6 +183,14 @@ export class Plugin implements InfraClientPluginClass {
                               label: 'Kubernetes',
                               app: 'metrics',
                               path: '/kubernetes',
+                              deepLinks: [
+                                {
+                                  id: 'dashboards',
+                                  title: 'Kubernetes Dashboards',
+                                  keywords: ['dashboards'],
+                                  path: '/kubernetes/:dashboardId',
+                                },
+                              ],
                             },
                           ]
                         : []),
@@ -244,7 +252,7 @@ export class Plugin implements InfraClientPluginClass {
       metricsExplorerEnabled: boolean;
       isKubernetesIntgegrationsInstalled: boolean;
     }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
+      const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'sideNav', 'home'];
 
       return [
         {
@@ -275,10 +283,18 @@ export class Plugin implements InfraClientPluginClass {
         ...(isKubernetesIntgegrationsInstalled
           ? [
               {
-                label: 'Kubernetes',
-                app: 'metrics',
+                id: 'kubernetes',
+                title: 'Kubernetes',
                 path: '/kubernetes',
                 visibleIn,
+                deepLinks: [
+                  {
+                    id: 'dashboards',
+                    title: 'Kubernetes Dashboards',
+                    keywords: ['dashboards'],
+                    path: '/kubernetes/:dashboardId',
+                  },
+                ],
               },
             ]
           : []),

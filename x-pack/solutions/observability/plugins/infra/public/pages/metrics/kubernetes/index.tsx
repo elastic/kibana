@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
+import { useLocation } from 'react-router-dom';
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const Kubernetes = () => {
@@ -16,8 +20,46 @@ export const Kubernetes = () => {
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      application: { navigateToApp, getUrlForApp },
     },
   } = useKibanaContextForPlugin();
+
+  useMetricsBreadcrumbs([
+    {
+      text: i18n.translate('xpack.infra.kubernetes.breadcrumbsTitle', {
+        defaultMessage: 'Kubernetes',
+      }),
+    },
+  ]);
+
+  const location = useLocation<RouteState>();
+
+  const getKubernetesPageUrl = useCallback(
+    ({ id }: { id: string }) => `kubernetes/${id}${location.search}`,
+
+    [location.search]
+  );
+
+  const getOtelKubernetesDashboardUrl = useCallback(
+    (id: string) =>
+      `${getUrlForApp('metrics', {
+        path: getKubernetesPageUrl({
+          id,
+        }),
+      })}`,
+    [getKubernetesPageUrl, getUrlForApp]
+  );
+
+  const goToDashboard = useCallback(
+    (dashboardId: string | undefined) => {
+      navigateToApp('metrics', {
+        replace: true,
+        path: getOtelKubernetesDashboardUrl(dashboardId ?? ''),
+      });
+    },
+    [getOtelKubernetesDashboardUrl, navigateToApp]
+  );
+
   return (
     <EuiErrorBoundary>
       <PageTemplate
@@ -33,6 +75,15 @@ export const Kubernetes = () => {
             defaultMessage: 'Dashboards:',
           })}
         </p>
+
+        <DashboardListingTable
+          disableCreateDashboardButton={false}
+          getDashboardUrl={getOtelKubernetesDashboardUrl}
+          goToDashboard={goToDashboard}
+          initialFilter='tag:("OpenTelemetry")'
+          urlStateEnabled={false}
+          showCreateDashboardButton={false}
+        />
       </PageTemplate>
     </EuiErrorBoundary>
   );
