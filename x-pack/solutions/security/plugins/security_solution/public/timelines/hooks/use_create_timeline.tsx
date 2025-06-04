@@ -99,7 +99,7 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: [DataViewManagerScopeName.timeline],
+        scope: DataViewManagerScopeName.timeline,
       });
 
       dispatch(

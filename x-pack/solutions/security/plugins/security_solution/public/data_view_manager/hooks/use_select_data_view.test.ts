@@ -29,10 +29,10 @@ describe('useSelectDataView', () => {
       { wrapper: TestProviders }
     );
 
-    result.current({ id: 'test', scope: [DataViewManagerScopeName.default] });
+    result.current({ id: 'test', scope: DataViewManagerScopeName.default });
 
     expect(useDispatch()).toHaveBeenCalledWith({
-      payload: { id: 'test', scope: ['default'] },
+      payload: { id: 'test', scope: 'default' },
       type: 'x-pack/security_solution/dataViewManager/selectDataView',
     });
   });

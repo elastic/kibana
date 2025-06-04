@@ -14,6 +14,7 @@ import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/a
 import type {
   CrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeGetScriptsResponse,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,6 +23,7 @@ import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -547,6 +549,33 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     await this.writeActionResponseToEndpointIndex(options);
+  }
+
+  async getCustomScripts(): Promise<CustomScriptsResponse> {
+    try {
+      const customScriptsResponse = (await this.sendAction(
+        SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
+        {}
+      )) as ActionTypeExecutorResult<CrowdstrikeGetScriptsResponse>;
+
+      const resources = customScriptsResponse.data?.resources || [];
+      // Transform CrowdStrike script resources to CustomScriptsResponse format
+      const data = resources.map((script) => ({
+        // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
+        id: script.id || '',
+        name: script.name || '',
+        description: script.description || '',
+      }));
+      return { data } as CustomScriptsResponse;
+    } catch (err) {
+      const error = new ResponseActionsClientError(
+        `Failed to fetch Crowdstrike scripts, failed with: ${err.message}`,
+        500,
+        err
+      );
+      this.log.error(error);
+      throw error;
+    }
   }
 
   async processPendingActions({
