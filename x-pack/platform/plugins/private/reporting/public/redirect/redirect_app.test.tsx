@@ -108,13 +108,17 @@ describe('RedirectApp', () => {
 
       // Before async effect, error should not be shown
       expect(
-        screen.queryByText('Analytics app locator is required for reporting jobs')
+        screen.queryByText(
+          'Report job execution can only redirect using a locator for an expected analytical app'
+        )
       ).not.toBeInTheDocument();
 
       // Wait for error message to appear
       await waitFor(() =>
         expect(
-          screen.getByText('Analytics app locator is required for reporting jobs')
+          screen.getByText(
+            'Report job execution can only redirect using a locator for an expected analytical app'
+          )
         ).toBeInTheDocument()
       );
 
@@ -124,7 +128,7 @@ describe('RedirectApp', () => {
       expect(mockShare.navigate).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Redirect page error:'),
-        'Analytics app locator is required for reporting jobs'
+        'Report job execution can only redirect using a locator for an expected analytical app'
       );
       consoleErrorSpy.mockRestore();
     });
@@ -150,7 +154,9 @@ describe('RedirectApp', () => {
 
       await waitFor(() =>
         expect(
-          screen.getByText('Analytics app locator is required for reporting jobs')
+          screen.getByText(
+            'Report job execution can only redirect using a locator for an expected analytical app'
+          )
         ).toBeInTheDocument()
       );
 
@@ -158,7 +164,7 @@ describe('RedirectApp', () => {
       expect(mockShare.navigate).not.toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Redirect page error:'),
-        'Analytics app locator is required for reporting jobs'
+        'Report job execution can only redirect using a locator for an expected analytical app'
       );
       consoleErrorSpy.mockRestore();
     });
