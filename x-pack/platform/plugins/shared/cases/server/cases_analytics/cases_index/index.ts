@@ -10,6 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AnalyticsIndex } from '../analytics_index';
 import {
   CAI_CASES_INDEX_NAME,
+  CAI_CASES_INDEX_VERSION,
   CAI_CASES_SOURCE_INDEX,
   CAI_CASES_SOURCE_QUERY,
   CAI_CASES_BACKFILL_TASK_ID,
@@ -34,6 +35,7 @@ export const createCasesAnalyticsIndex = ({
     isServerless,
     taskManager,
     indexName: CAI_CASES_INDEX_NAME,
+    indexVersion: CAI_CASES_INDEX_VERSION,
     mappings: CAI_CASES_INDEX_MAPPINGS,
     painlessScriptId: CAI_CASES_INDEX_SCRIPT_ID,
     painlessScript: CAI_CASES_INDEX_SCRIPT,

@@ -32,6 +32,7 @@ describe('AnalyticsIndex', () => {
   const taskManager = taskManagerMock.createStart();
   const isServerless = false;
   const indexName = '.test-index-name';
+  const indexVersion = 1;
   const painlessScriptId = 'painless_script_id';
   const taskId = 'foobar_task_id';
   const sourceIndex = '.source-index';
@@ -42,15 +43,15 @@ describe('AnalyticsIndex', () => {
   };
   const mappings: MappingTypeMapping = {
     dynamic: false,
-    _meta: {
-      mapping_version: 1,
-      painless_script_id: painlessScriptId,
-    },
     properties: {
       title: {
         type: 'keyword',
       },
     },
+  };
+  const mappingsMeta = {
+    mapping_version: indexVersion,
+    painless_script_id: painlessScriptId,
   };
   const sourceQuery: QueryDslQueryContainer = {
     term: {
@@ -76,6 +77,7 @@ describe('AnalyticsIndex', () => {
       esClient,
       logger,
       indexName,
+      indexVersion,
       isServerless,
       mappings,
       painlessScript,
@@ -103,7 +105,10 @@ describe('AnalyticsIndex', () => {
     expect(esClient.indices.create).toBeCalledWith({
       index: indexName,
       timeout: '300s',
-      mappings,
+      mappings: {
+        ...mappings,
+        _meta: mappingsMeta,
+      },
       settings: {
         index: {
           auto_expand_replicas: '0-1',
@@ -146,6 +151,7 @@ describe('AnalyticsIndex', () => {
     expect(esClient.indices.putMapping).toBeCalledWith({
       index: indexName,
       ...mappings,
+      _meta: mappingsMeta,
     });
     expect(scheduleCAIBackfillTaskMock).toBeCalledWith({
       taskId,
@@ -267,6 +273,7 @@ describe('AnalyticsIndex', () => {
       expect(esClient.indices.putMapping).toBeCalledWith({
         index: indexName,
         ...mappings,
+        _meta: mappingsMeta,
       });
 
       expect(scheduleCAIBackfillTaskMock).toBeCalledWith({

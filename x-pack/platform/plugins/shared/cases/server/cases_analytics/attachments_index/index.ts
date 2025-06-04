@@ -10,6 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AnalyticsIndex } from '../analytics_index';
 import {
   CAI_ATTACHMENTS_INDEX_NAME,
+  CAI_ATTACHMENTS_INDEX_VERSION,
   CAI_ATTACHMENTS_SOURCE_INDEX,
   CAI_ATTACHMENTS_SOURCE_QUERY,
   CAI_ATTACHMENTS_BACKFILL_TASK_ID,
@@ -34,6 +35,7 @@ export const createAttachmentsAnalyticsIndex = ({
     isServerless,
     taskManager,
     indexName: CAI_ATTACHMENTS_INDEX_NAME,
+    indexVersion: CAI_ATTACHMENTS_INDEX_VERSION,
     mappings: CAI_ATTACHMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_ATTACHMENTS_INDEX_SCRIPT,

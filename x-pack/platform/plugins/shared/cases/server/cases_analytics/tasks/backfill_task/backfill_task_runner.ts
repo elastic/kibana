@@ -80,13 +80,17 @@ export class BackfillTaskRunner implements CancellableTask {
 
     if (painlessScript.found) {
       this.logger.debug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
+      const painlessScriptId = await this.getPainlessScriptId(esClient);
+
       await esClient.reindex({
         source: {
           index: this.sourceIndex,
           query: this.sourceQuery,
         },
         dest: { index: this.destIndex },
-        script: painlessScript.script,
+        script: {
+          id: painlessScriptId,
+        },
         /** If `true`, the request refreshes affected shards to make this operation visible to search. */
         refresh: true,
       });

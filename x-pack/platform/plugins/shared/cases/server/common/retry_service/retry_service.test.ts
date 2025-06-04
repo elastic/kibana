@@ -10,6 +10,12 @@ import type { Logger } from '@kbn/core/server';
 import { RetryService } from './retry_service';
 import type { BackoffFactory } from './types';
 
+class RetryServiceTestClass extends RetryService {
+  protected isRetryableError(error: Error) {
+    return true;
+  }
+}
+
 describe('RetryService', () => {
   const nextBackOff = jest.fn();
   const cb = jest.fn();
@@ -26,12 +32,12 @@ describe('RetryService', () => {
     jest.clearAllMocks();
 
     nextBackOff.mockReturnValue(1);
-    service = new RetryService(mockLogger, backOffFactory, 'foobar');
+    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar');
   });
 
   it('should not retry after trying more than the max attempts', async () => {
     const maxAttempts = 3;
-    service = new RetryService(mockLogger, backOffFactory, 'foobar', maxAttempts);
+    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', maxAttempts);
 
     cb.mockRejectedValue(new Error('My transient error'));
 
@@ -47,7 +53,7 @@ describe('RetryService', () => {
     'should retry and succeed retryable status code: %s',
     async (statusCode) => {
       const maxAttempts = 3;
-      service = new RetryService(mockLogger, backOffFactory, 'foobar', maxAttempts);
+      service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', maxAttempts);
 
       const error = new Error('My transient error');
       cb.mockRejectedValueOnce(error)
@@ -63,7 +69,7 @@ describe('RetryService', () => {
   );
 
   it('should succeed if cb does not throw', async () => {
-    service = new RetryService(mockLogger, backOffFactory, 'foobar');
+    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar');
 
     cb.mockResolvedValue({ status: 'ok' });
 
@@ -76,7 +82,7 @@ describe('RetryService', () => {
 
   describe('Logging', () => {
     it('should log a warning when retrying', async () => {
-      service = new RetryService(mockLogger, backOffFactory, 'foobar', 2);
+      service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', 2);
 
       cb.mockRejectedValue(new Error('My transient error'));
 

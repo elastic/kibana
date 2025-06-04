@@ -29,6 +29,7 @@ interface AnalyticsIndexParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   indexName: string;
+  indexVersion: number;
   isServerless: boolean;
   mappings: MappingTypeMapping;
   painlessScript: StoredScript;
@@ -39,9 +40,15 @@ interface AnalyticsIndexParams {
   taskManager: TaskManagerStartContract;
 }
 
+interface MappingMeta {
+  mapping_version: number;
+  painless_script_id: string;
+}
+
 export class AnalyticsIndex {
   private readonly logger: Logger;
   private readonly indexName: string;
+  private readonly indexVersion: number;
   private readonly esClient: ElasticsearchClient;
   private readonly mappings: MappingTypeMapping;
   private readonly indexSettings?: IndicesIndexSettings;
@@ -58,6 +65,7 @@ export class AnalyticsIndex {
     esClient,
     isServerless,
     indexName,
+    indexVersion,
     mappings,
     painlessScriptId,
     painlessScript,
@@ -69,7 +77,11 @@ export class AnalyticsIndex {
     this.logger = logger;
     this.esClient = esClient;
     this.indexName = indexName;
+    this.indexVersion = indexVersion;
+
     this.mappings = mappings;
+    this.mappings._meta = this.getMappingMeta({ indexVersion, painlessScriptId });
+
     this.painlessScriptId = painlessScriptId;
     this.painlessScript = painlessScript;
     this.taskManager = taskManager;
@@ -182,15 +194,11 @@ export class AnalyticsIndex {
 
   private async shouldUpdateMapping(): Promise<boolean> {
     const currentMapping = await this.getCurrentMapping();
-    return (
-      currentMapping[this.indexName].mappings._meta?.mapping_version <
-      this.mappings._meta?.mapping_version
-    );
+    return currentMapping[this.indexName].mappings._meta?.mapping_version < this.indexVersion;
   }
 
   private handleError(message: string, error: EsErrors.ElasticsearchClientError) {
     this.logger.error(`[${this.indexName}] ${message} Error message: ${error.message}`);
-    this.logger.error(error.message);
 
     throw error;
   }
@@ -200,6 +208,23 @@ export class AnalyticsIndex {
       id: this.painlessScriptId,
       script: this.painlessScript,
     });
+  }
+
+  private getMappingMeta({
+    indexVersion,
+    painlessScriptId,
+  }: {
+    indexVersion: number;
+    painlessScriptId: string;
+  }): MappingMeta {
+    this.logger.debug(
+      `[${this.indexName}] Construction mapping._meta. Index version: ${indexVersion}. Painless script: ${painlessScriptId}.`
+    );
+
+    return {
+      mapping_version: indexVersion,
+      painless_script_id: painlessScriptId,
+    };
   }
 
   private async scheduleBackfillTask() {

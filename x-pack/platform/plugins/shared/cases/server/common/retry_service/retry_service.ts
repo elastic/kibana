@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { BackoffFactory, BackoffStrategy } from './types';
 
-export class RetryService {
+export abstract class RetryService {
   protected logger: Logger;
   protected readonly serviceName: string;
   private maxAttempts: number;
@@ -83,9 +83,7 @@ export class RetryService {
     return this.attempt < this.maxAttempts;
   }
 
-  protected isRetryableError(error: Error) {
-    return true;
-  }
+  protected abstract isRetryableError(error: Error): boolean;
 
   private async delay() {
     const ms = this.backOffStrategy.nextBackOff();

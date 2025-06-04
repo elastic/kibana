@@ -6,15 +6,9 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { CAI_CASES_INDEX_SCRIPT_ID } from './painless_scripts';
-import { CAI_CASES_INDEX_VERSION } from './constants';
 
 export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
-  _meta: {
-    mapping_version: CAI_CASES_INDEX_VERSION,
-    painless_script_id: CAI_CASES_INDEX_SCRIPT_ID,
-  },
   properties: {
     '@timestamp': {
       type: 'date',
