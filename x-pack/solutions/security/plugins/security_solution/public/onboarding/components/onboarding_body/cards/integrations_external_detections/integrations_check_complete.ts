@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
-import type { StartServices } from '../../../../../../types';
-import type { OnboardingCardCheckComplete } from '../../../../../types';
+import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
+import type { StartServices } from '../../../../../types';
+import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
   getCompleteBadgeText,
   getAgentsData,
   getIntegrationList,
-} from '../../common/integrations/integrations_check_complete';
+} from '../common/integrations/integrations_check_complete';
 import { INTEGRATION_TABS } from './integration_tabs_configs';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<

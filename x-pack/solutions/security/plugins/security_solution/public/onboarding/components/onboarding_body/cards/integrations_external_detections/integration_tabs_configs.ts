@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { INTEGRATION_CARD_HEIGHT } from '../../common/integrations/constants';
-import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../../../../../common/lib/search_ai_lake/integrations';
-import { IntegrationTabId, type Tab } from '../../../../../../common/lib/integrations/types';
+import type { Tab } from '../../../../../common/lib/integrations/types';
+import { IntegrationTabId } from '../../../../../common/lib/integrations/types';
+import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../../../../common/lib/search_ai_lake/integrations';
+import { INTEGRATION_CARD_HEIGHT } from '../common/integrations/constants';
 
 export const INTEGRATION_TABS: Tab[] = [
   {
