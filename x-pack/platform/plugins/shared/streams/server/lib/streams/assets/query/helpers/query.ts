@@ -7,10 +7,14 @@
 
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
-import { QueryLink } from '../../../../../common/assets';
-import { ASSET_UUID } from '../fields';
+import { QueryLink } from '../../../../../../common/assets';
+import { ASSET_UUID } from '../../fields';
 
 export function getRuleIdFromQueryLink(query: QueryLink) {
   const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
   return v5(queryHash, v5.DNS);
 }
+
+export const escapeQuotes = (str: string): string => {
+  return str.replace(/[\\"]/g, '\\$&');
+};
