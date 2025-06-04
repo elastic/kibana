@@ -17,6 +17,7 @@ export type {
   LinkType,
 } from './types';
 export type LinksItem = LinksCrudTypes['Item'];
+export type LinksSearchOut = LinksCrudTypes['SearchOut'];
 export {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
