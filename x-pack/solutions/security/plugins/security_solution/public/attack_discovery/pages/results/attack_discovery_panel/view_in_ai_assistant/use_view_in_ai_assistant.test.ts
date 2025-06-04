@@ -7,15 +7,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
 
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
-import { getAttackDiscoveryMarkdown } from '../get_attack_discovery_markdown/get_attack_discovery_markdown';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 
 jest.mock('@kbn/elastic-assistant');
+jest.mock('@kbn/elastic-assistant-common');
 jest.mock('../../../../../assistant/use_assistant_availability');
-jest.mock('../get_attack_discovery_markdown/get_attack_discovery_markdown');
 const mockUseAssistantOverlay = useAssistantOverlay as jest.Mock;
 describe('useViewInAiAssistant', () => {
   beforeEach(() => {

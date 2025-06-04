@@ -20,3 +20,5 @@ export const VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS: Record<
   [CustomFieldTypes.TOGGLE]: false,
   [CustomFieldTypes.NUMBER]: 0,
 };
+
+export const ATTACK_DISCOVERY_GROUPING_KEY = 'attack-discovery' as const;

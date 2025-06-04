@@ -144,6 +144,7 @@ export class SystemActionScheduler<
           name: this.context.rule.name,
           consumer: this.context.rule.consumer,
           producer: this.context.ruleType.producer,
+          alertTypeId: this.context.rule.alertTypeId,
         },
         ruleUrl: ruleUrl?.absoluteUrl,
         spaceId: this.context.taskInstance.params.spaceId,

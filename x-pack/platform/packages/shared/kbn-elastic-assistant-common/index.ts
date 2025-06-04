@@ -70,6 +70,13 @@ export {
 export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';
 
 export {
+  getAttackChainMarkdown,
+  getAttackDiscoveryMarkdown,
+  getMarkdownFields,
+  getMarkdownWithOriginalValues,
+} from './impl/utils/get_attack_discovery_markdown';
+
+export {
   getTacticLabel,
   getTacticMetadata,
   replaceNewlineLiterals,

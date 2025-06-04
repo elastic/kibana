@@ -106,7 +106,13 @@ export const getCasesConnectorAdapter = ({
 
       const subActionParams = {
         alerts: caseAlerts,
-        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+        rule: {
+          id: rule.id,
+          name: rule.name,
+          tags: rule.tags,
+          type: rule.alertTypeId,
+          ruleUrl: ruleUrl ?? null,
+        },
         groupingBy: params.subActionParams.groupingBy,
         owner,
         reopenClosedCases: params.subActionParams.reopenClosedCases,

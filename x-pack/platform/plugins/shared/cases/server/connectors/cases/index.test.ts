@@ -68,6 +68,7 @@ describe('getCasesConnectorType', () => {
       tags: ['my-tag'],
       consumer: 'test-consumer',
       producer: 'test-producer',
+      alertTypeId: 'test-rule-1',
     };
 
     const getParams = (overrides = {}) => ({
@@ -157,6 +158,7 @@ describe('getCasesConnectorType', () => {
                 "tags": Array [
                   "my-tag",
                 ],
+                "type": "test-rule-1",
               },
               "templateId": null,
               "timeWindow": "7d",
@@ -202,6 +204,7 @@ describe('getCasesConnectorType', () => {
                 "tags": Array [
                   "my-tag",
                 ],
+                "type": "test-rule-1",
               },
               "templateId": "template_key_1",
               "timeWindow": "7d",
@@ -245,6 +248,7 @@ describe('getCasesConnectorType', () => {
                 "tags": Array [
                   "my-tag",
                 ],
+                "type": "test-rule-1",
               },
               "templateId": null,
               "timeWindow": "7d",
