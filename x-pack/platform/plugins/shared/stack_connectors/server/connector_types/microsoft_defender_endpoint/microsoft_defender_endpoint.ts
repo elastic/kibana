@@ -41,7 +41,6 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointMachineActionResult,
-  MicrosoftDefenderRunscriptResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -389,10 +388,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async runScript(
     payload: MicrosoftDefenderEndpointRunScriptParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderRunscriptResponse> {
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
     // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response
 
-    return this.fetchFromMicrosoft<MicrosoftDefenderRunscriptResponse>(
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
       {
         url: `${this.urls.machines}/${payload.id}/runliveresponse`,
         method: 'POST',

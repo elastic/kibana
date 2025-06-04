@@ -20,6 +20,7 @@ import type {
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../service/response_actions/constants';
+import { CrowdStrikeRunScriptActionParameters, MicrosoftDefenderEndpointRunScriptActionParameters } from '@kbn/security-solution-plugin/public/management/components/endpoint_responder/command_render_components/run_script_action';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -250,20 +251,8 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-// Currently reflecting CrowdStrike's RunScript parameters
-interface ActionsRunScriptParametersBase {
-  Raw?: string;
-  HostPath?: string;
-  CloudFile?: string;
-  CommandLine?: string;
-  Timeout?: number;
-}
+export type ResponseActionRunScriptParameters = CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters;
 
-// Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
 
 export type EndpointActionDataParameterTypes =
   | undefined

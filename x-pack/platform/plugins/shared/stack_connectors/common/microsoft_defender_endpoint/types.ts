@@ -20,7 +20,6 @@ import type {
   AgentListParamsSchema,
   GetLibraryFilesResponse,
   RunScriptParamsSchema,
-  RunScriptResponseSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -199,5 +198,3 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
 }
 
 export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;
-
-export type MicrosoftDefenderRunscriptResponse = TypeOf<typeof RunScriptResponseSchema>;

@@ -18,7 +18,7 @@ import type {
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
-const getSchema = (agentType: ResponseActionAgentType) => {
+const getSchema = (agentType: ResponseActionAgentType | undefined) => {
   if (agentType === 'crowdstrike') {
     return CrowdStrikeRunScriptActionRequestSchema;
   }

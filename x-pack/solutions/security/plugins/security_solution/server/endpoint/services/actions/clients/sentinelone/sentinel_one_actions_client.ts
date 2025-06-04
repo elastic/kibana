@@ -914,7 +914,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
                 processName: reqIndexOptions.parameters.process_name,
               }),
             },

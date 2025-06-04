@@ -248,35 +248,6 @@ export const GetLibraryFilesResponse = schema.object(
   { unknowns: 'allow' }
 );
 
-export const RunScriptResponseSchema = schema.object({
-  '@odata.context': schema.maybe(schema.string()),
-  '@odata.count': schema.maybe(schema.number()),
-  value: schema.arrayOf(
-    schema.object({
-      id: schema.maybe(schema.string({ minLength: 1 })),
-      type: schema.maybe(schema.string({ minLength: 1 })),
-      title: schema.maybe(schema.string()),
-      requestor: schema.maybe(schema.string({ minLength: 1 })),
-      requestorComment: schema.maybe(schema.string({ minLength: 1 })),
-      status: schema.maybe(schema.string({ minLength: 1 })),
-      machineId: schema.maybe(schema.string({ minLength: 1 })),
-      computerDnsName: schema.maybe(schema.string({ minLength: 1 })),
-      creationDateTimeUtc: schema.maybe(schema.string({ minLength: 1 })),
-      lastUpdateDateTimeUtc: schema.maybe(schema.string({ minLength: 1 })),
-      cancellationRequestor: schema.maybe(schema.string()),
-      cancellationComment: schema.maybe(schema.string()),
-      cancellationDateTimeUtc: schema.maybe(schema.string()),
-      errorHResult: schema.maybe(schema.number()),
-      scope: schema.maybe(schema.string()),
-      externalId: schema.maybe(schema.string()),
-      requestSource: schema.maybe(schema.string({ minLength: 1 })),
-      relatedFileInfo: schema.maybe(schema.any()),
-      commands: schema.maybe(schema.arrayOf(schema.any())),
-      troubleshootInfo: schema.maybe(schema.any()),
-    })
-  ),
-});
-
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------

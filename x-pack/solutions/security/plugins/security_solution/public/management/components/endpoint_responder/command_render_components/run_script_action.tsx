@@ -28,7 +28,6 @@ export interface CrowdStrikeRunScriptActionParameters {
 export interface MicrosoftDefenderEndpointRunScriptActionParameters {
   ScriptName: string[];
   Args?: string[];
-  comment?: string[];
 }
 
 export const RunScriptActionResult = memo<
@@ -55,7 +54,6 @@ export const RunScriptActionResult = memo<
         return {
           scriptName: msDefenderArgs.ScriptName?.[0],
           args: msDefenderArgs.Args?.[0],
-          comment: msDefenderArgs.comment?.[0],
         };
       }
 
@@ -70,11 +68,20 @@ export const RunScriptActionResult = memo<
           timeout: csArgs.Timeout?.[0],
         };
       }
+
+      return {};
     };
+
+    const parameters = getParams();
+    // Early return if we have no parameters
+    if (Object.keys(parameters).length === 0) {
+      return;
+    }
+
     return {
       agent_type: agentType,
       endpoint_ids: [endpointId],
-      parameters: getParams(),
+      parameters,
       comment: command.args.args?.comment?.[0],
     };
   }, [command]);
