@@ -62,6 +62,11 @@ export function dashboardAttributesOut(
     tags = getTagNamesFromReferences(references);
   }
 
+  console.log(
+    'PANELS',
+    panelsJSON && JSON.stringify(transformPanelsOut(panelsJSON, embeddable, references), null, 4)
+  );
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
