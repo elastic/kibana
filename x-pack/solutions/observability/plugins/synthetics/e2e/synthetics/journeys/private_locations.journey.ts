@@ -15,6 +15,7 @@ import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const services = new SyntheticsServices(params);
+  const NEW_LOCATION_LABEL = 'Updated Test Location';
 
   page.setDefaultTimeout(2 * 30000);
 
@@ -100,20 +101,20 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     // Verify that spaces selector is disabled
     expect(await page.locator('[aria-label="Spaces "]').isDisabled()).toBe(true);
 
-    await page.fill('[aria-label="Location name"]', 'Updated Test Location');
+    await page.fill('[aria-label="Location name"]', NEW_LOCATION_LABEL);
 
     // Save the changes
     await page.click('[data-test-subj="syntheticsLocationFlyoutSaveButton"]');
 
     // Wait for the save to complete and verify the updated label appears in the table
-    await page.waitForSelector('td:has-text("Updated Test Location")');
+    await page.waitForSelector(`td:has-text("${NEW_LOCATION_LABEL}")`);
   });
 
   step('Integration cannot be edited in Fleet', async () => {
     await page.goto(`${params.kibanaUrl}/app/integrations/detail/synthetics/policies`);
     await page.waitForSelector('h1:has-text("Elastic Synthetics")');
 
-    await page.click('text="test-monitor-Test private-default"');
+    await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}-default"`);
     await page.waitForSelector('h1:has-text("Edit Elastic Synthetics integration")');
     await page.waitForSelector('text="This package policy is managed by the Synthetics app."');
   });
@@ -133,14 +134,14 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('h1:has-text("Settings")');
     await page.click('text=Private Locations');
     await page.waitForSelector('td:has-text("1")');
-    await page.waitForSelector('td:has-text("Updated Test Location")');
+    await page.waitForSelector(`td:has-text("${NEW_LOCATION_LABEL}")`);
     await page.click('.euiTableRowCell .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');
     await page.click(
       'main div:has-text("Private locations allow you to run monitors from your own premises. They require")'
     );
-    await page.click('text=Updated Test Location');
+    await page.click(`text=${NEW_LOCATION_LABEL}`);
 
     await page.click('.euiTableRowCell .euiToolTipAnchor');
 
