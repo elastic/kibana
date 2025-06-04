@@ -52,137 +52,147 @@ export class ProductInterceptPublicPlugin implements Plugin {
         }.call(null, cloud.serverless.projectType || '')}`
       : 'Kibana';
 
-    this.interceptSubscription = intercepts
-      .registerIntercept?.({
-        id: TRIGGER_DEF_ID,
-        steps: [
-          {
-            id: 'start',
-            title: i18n.translate('productIntercept.prompter.step.start.title', {
-              defaultMessage: 'Help us improve {productOffering}',
-              values: {
-                productOffering,
-              },
-            }),
-            content: () =>
-              React.createElement(
-                EuiText,
-                { key: 'productInterceptPrompterStartContent', size: 's' },
-                i18n.translate('productIntercept.prompter.step.start.content', {
-                  defaultMessage:
-                    'We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us.',
-                  values: {
-                    productOffering,
-                  },
-                })
-              ),
-          },
-          {
-            id: 'satisfaction',
-            title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
-              defaultMessage:
-                'Overall, how satisfied or dissatisfied are you with {productOffering}?',
-              values: {
-                productOffering,
-              },
-            }),
-            content: ({ onValue }) => {
-              return React.createElement(NPSScoreInput, {
-                lowerBoundHelpText: i18n.translate(
-                  'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
-                  {
-                    defaultMessage: 'Very dissatisfied',
-                  }
+    void (async () => {
+      const currentUser = await core.security.authc.getCurrentUser();
+
+      const feedbackUrl = new URL('https://www.elastic.co/feedback');
+
+      feedbackUrl.searchParams.set('userId', currentUser.profile_uid || '');
+      feedbackUrl.searchParams.set('projectId', cloud.serverless.projectId || '');
+      feedbackUrl.searchParams.set('projectType', cloud.serverless.projectType || '');
+
+      this.interceptSubscription = intercepts
+        .registerIntercept?.({
+          id: TRIGGER_DEF_ID,
+          steps: [
+            {
+              id: 'start',
+              title: i18n.translate('productIntercept.prompter.step.start.title', {
+                defaultMessage: 'Help us improve {productOffering}',
+                values: {
+                  productOffering,
+                },
+              }),
+              content: () =>
+                React.createElement(
+                  EuiText,
+                  { key: 'productInterceptPrompterStartContent', size: 's' },
+                  i18n.translate('productIntercept.prompter.step.start.content', {
+                    defaultMessage:
+                      'We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us.',
+                    values: {
+                      productOffering,
+                    },
+                  })
                 ),
-                upperBoundHelpText: i18n.translate(
-                  'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
-                  {
-                    defaultMessage: 'Very satisfied',
-                  }
-                ),
-                onChange: onValue,
-              });
             },
-          },
-          {
-            id: 'ease',
-            title: i18n.translate('productIntercept.prompter.step.ease.title', {
-              defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
-              values: {
-                productOffering,
+            {
+              id: 'satisfaction',
+              title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
+                defaultMessage:
+                  'Overall, how satisfied or dissatisfied are you with {productOffering}?',
+                values: {
+                  productOffering,
+                },
+              }),
+              content: ({ onValue }) => {
+                return React.createElement(NPSScoreInput, {
+                  lowerBoundHelpText: i18n.translate(
+                    'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
+                    {
+                      defaultMessage: 'Very dissatisfied',
+                    }
+                  ),
+                  upperBoundHelpText: i18n.translate(
+                    'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
+                    {
+                      defaultMessage: 'Very satisfied',
+                    }
+                  ),
+                  onChange: onValue,
+                });
               },
-            }),
-            content: ({ onValue }) => {
-              return React.createElement(NPSScoreInput, {
-                lowerBoundHelpText: i18n.translate(
-                  'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
-                  {
-                    defaultMessage: 'Very difficult',
-                  }
-                ),
-                upperBoundHelpText: i18n.translate(
-                  'productIntercept.prompter.step.ease.upperBoundDescriptionText',
-                  {
-                    defaultMessage: 'Very easy',
-                  }
-                ),
-                onChange: onValue,
-              });
             },
-          },
-          {
-            id: 'completion',
-            title: i18n.translate('productIntercept.prompter.step.completion.title', {
-              defaultMessage: 'Thanks for the feedback!',
-            }),
-            content: () => {
-              return React.createElement(
-                EuiText,
-                { size: 's' },
-                React.createElement(FormattedMessage, {
-                  id: 'productIntercept.prompter.step.completion.content',
-                  defaultMessage:
-                    "If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>.",
-                  values: {
-                    productOffering,
-                    link: (chunks) =>
-                      React.createElement(
-                        EuiLink,
-                        {
-                          external: true,
-                          href: 'https://www.elastic.co/feedback',
-                          target: '_blank',
-                        },
-                        chunks
-                      ),
-                  },
-                })
-              );
+            {
+              id: 'ease',
+              title: i18n.translate('productIntercept.prompter.step.ease.title', {
+                defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
+                values: {
+                  productOffering,
+                },
+              }),
+              content: ({ onValue }) => {
+                return React.createElement(NPSScoreInput, {
+                  lowerBoundHelpText: i18n.translate(
+                    'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
+                    {
+                      defaultMessage: 'Very difficult',
+                    }
+                  ),
+                  upperBoundHelpText: i18n.translate(
+                    'productIntercept.prompter.step.ease.upperBoundDescriptionText',
+                    {
+                      defaultMessage: 'Very easy',
+                    }
+                  ),
+                  onChange: onValue,
+                });
+              },
             },
+            {
+              id: 'completion',
+              title: i18n.translate('productIntercept.prompter.step.completion.title', {
+                defaultMessage: 'Thanks for the feedback!',
+              }),
+              content: () => {
+                return React.createElement(
+                  EuiText,
+                  { size: 's' },
+                  React.createElement(FormattedMessage, {
+                    id: 'productIntercept.prompter.step.completion.content',
+                    defaultMessage:
+                      "If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>.",
+                    values: {
+                      productOffering,
+                      link: (chunks) =>
+                        React.createElement(
+                          EuiLink,
+                          {
+                            external: true,
+                            href: feedbackUrl.toString(),
+                            target: '_blank',
+                          },
+                          chunks
+                        ),
+                    },
+                  })
+                );
+              },
+            },
+          ],
+          onProgress: ({ stepId, stepResponse, runId }) => {
+            eventReporter.reportInterceptInteractionProgress({
+              interceptRunId: runId,
+              metricId: stepId,
+              value: Number(stepResponse),
+            });
           },
-        ],
-        onProgress: ({ stepId, stepResponse, runId }) => {
-          eventReporter.reportInterceptInteractionProgress({
-            interceptRunId: runId,
-            metricId: stepId,
-            value: Number(stepResponse),
-          });
-        },
-        onFinish: ({ response: feedbackResponse, runId }) => {
-          eventReporter.reportInterceptInteraction({
-            interactionType: 'completion',
-            interceptRunId: runId,
-          });
-        },
-        onDismiss: ({ runId }) => {
-          // still update user profile run count, a dismissal is still an interaction
-          eventReporter.reportInterceptInteraction({
-            interactionType: 'dismissal',
-            interceptRunId: runId,
-          });
-        },
-      })
-      .subscribe();
+          onFinish: ({ response: feedbackResponse, runId }) => {
+            eventReporter.reportInterceptInteraction({
+              interactionType: 'completion',
+              interceptRunId: runId,
+            });
+          },
+          onDismiss: ({ runId }) => {
+            // still update user profile run count, a dismissal is still an interaction
+            eventReporter.reportInterceptInteraction({
+              interactionType: 'dismissal',
+              interceptRunId: runId,
+            });
+          },
+        })
+        .subscribe();
+    })();
 
     return {};
   }
