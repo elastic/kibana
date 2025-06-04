@@ -275,10 +275,6 @@ const RESTRICTED_IMPORTS = [
     message:
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
-  {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
-  },
   ...[
     'Alt',
     'Alternative',
