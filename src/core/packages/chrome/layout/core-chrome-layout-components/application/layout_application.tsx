@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { ReactNode } from 'react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+import { useEuiOverflowScroll } from '@elastic/eui';
+
+import { styles } from './layout_application.styles';
+
+export const LayoutApplication = ({ children }: { children: ReactNode }) => {
+  const overflow = useEuiOverflowScroll('y');
+
+  return (
+    <main css={styles.root}>
+      <div css={styles.content(overflow)}>{children}</div>
+    </main>
+  );
 };
