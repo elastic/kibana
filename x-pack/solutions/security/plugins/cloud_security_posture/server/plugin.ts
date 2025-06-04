@@ -214,10 +214,10 @@ export class CspPlugin
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    await this.intializeIndexAlias(esClient, this.logger);
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    await this.intializeIndexAlias(esClient, this.logger);
     this.#isInitialized = true;
   }
 
