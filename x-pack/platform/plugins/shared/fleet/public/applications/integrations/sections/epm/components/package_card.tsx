@@ -78,6 +78,7 @@ export function PackageCard({
   titleLineClamp,
   descriptionLineClamp,
   maxCardHeight,
+  minCardHeight,
   showDescription = true,
   showReleaseBadge = true,
 }: PackageCardProps) {
@@ -227,6 +228,8 @@ export function PackageCard({
             [class*='euiCard__titleButton'] {
               ${getLineClampStyles(titleLineClamp)}
             }
+
+            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
           `}
           data-test-subj={testid}
           isquickstart={isQuickstart}
