@@ -111,7 +111,6 @@ export const QueryRulesetDetail: React.FC = () => {
       }
       return tourConfig;
     } catch (e) {
-      // Handle localStorage access errors (e.g., in private browsing mode)
       return {
         ...tourConfig,
         isTourActive: false,
