@@ -512,7 +512,7 @@ export const postEvaluateRoute = (
               maxConcurrency: 3,
             })
               .then((output) => {
-                createOrUpdateEvaluationResults({
+                void createOrUpdateEvaluationResults({
                   evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
                   esClient,
                   logger,
