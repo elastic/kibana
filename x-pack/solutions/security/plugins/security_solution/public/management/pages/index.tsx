@@ -82,7 +82,7 @@ const ResponseActionsTelemetry = () => (
 );
 
 const Notes = () => (
-  <SecurityRoutePageWrapper pageName={SecurityPageName.notes} redirectOnMissing>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.notes}>
     <NotesContainer />
   </SecurityRoutePageWrapper>
 );

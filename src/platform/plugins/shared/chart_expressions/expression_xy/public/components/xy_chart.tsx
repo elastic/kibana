@@ -58,6 +58,7 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
@@ -237,7 +238,7 @@ export function XYChart({
 
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
-  const darkMode = chartsThemeService.useDarkMode();
+  const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
@@ -660,12 +661,16 @@ export function XYChart({
         ? getAccessorByDimension(dataLayers[0].xAccessor, table.columns)
         : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
-
     const context: BrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(isEsqlMode ? { timeFieldName: table.columns[xAxisColumnIndex].name } : {}),
+      ...(isEsqlMode
+        ? {
+            timeFieldName:
+              table.columns[xAxisColumnIndex].meta.sourceParams?.sourceField?.toString(),
+          }
+        : {}),
     };
     onSelectRange(context);
   };

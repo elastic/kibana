@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -85,6 +85,8 @@ const previouslyRegisteredTypes = [
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',

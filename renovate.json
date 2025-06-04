@@ -2169,12 +2169,7 @@
       "groupName": "@elastic/kibana-visualizations Color related modules",
       "matchDepNames": [
         "chroma-js",
-        "color",
-        "tinycolor2",
-        "tinygradient",
-        "@types/chroma-js",
-        "@types/color",
-        "@types/tinycolor2"
+        "@types/chroma-js"
       ],
       "reviewers": [
         "team:kibana-visualizations"
@@ -2215,6 +2210,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
+      "recreateWhen": "never",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },

@@ -9,7 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Streams Endpoints', () => {
-    loadTestFile(require.resolve('./full_flow'));
+    loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
@@ -25,5 +25,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./content'));
     loadTestFile(require.resolve('./migration_on_read'));
+    loadTestFile(require.resolve('./meta_data'));
   });
 }

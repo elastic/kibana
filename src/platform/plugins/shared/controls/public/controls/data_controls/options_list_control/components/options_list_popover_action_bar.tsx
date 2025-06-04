@@ -37,11 +37,11 @@ export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  const { api, stateManager, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
-  const searchString = useStateFromPublishingSubject(stateManager.searchString);
+  const searchString = useStateFromPublishingSubject(componentApi.searchString$);
 
   const [
     searchTechnique,
@@ -51,12 +51,12 @@ export const OptionsListPopoverActionBar = ({
     field,
     allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
-    stateManager.searchTechnique,
-    stateManager.searchStringValid,
-    api.invalidSelections$,
-    api.totalCardinality$,
-    api.field$,
-    api.parentApi.allowExpensiveQueries$
+    componentApi.searchTechnique$,
+    componentApi.searchStringValid$,
+    componentApi.invalidSelections$,
+    componentApi.totalCardinality$,
+    componentApi.field$,
+    componentApi.parentApi.allowExpensiveQueries$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -79,7 +79,7 @@ export const OptionsListPopoverActionBar = ({
             disabled={showOnlySelected}
             fullWidth
             onChange={(event) => {
-              stateManager.searchString.next(event.target.value);
+              componentApi.setSearchString(event.target.value);
             }}
             value={searchString}
             data-test-subj="optionsList-control-search-input"

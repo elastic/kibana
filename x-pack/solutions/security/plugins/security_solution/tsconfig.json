@@ -17,7 +17,11 @@
     "../../../../../typings/**/*",
     "emotion.d.ts"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -49,7 +53,6 @@
     "@kbn/session-view-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/threat-intelligence-plugin",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
     "@kbn/utility-types",
@@ -245,9 +248,11 @@
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/core-ui-settings-browser",
     "@kbn/core-chrome-browser",
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
     "@kbn/unified-histogram",
+    "@kbn/react-kibana-context-theme"
   ]
 }

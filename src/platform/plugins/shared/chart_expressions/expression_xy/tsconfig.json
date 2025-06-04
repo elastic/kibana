@@ -41,6 +41,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

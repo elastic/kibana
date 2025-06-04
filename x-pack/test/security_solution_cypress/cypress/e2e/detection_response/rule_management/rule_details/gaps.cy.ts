@@ -36,6 +36,15 @@ describe(
   'Rule gaps',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'storeGapsInEventLogEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   function () {
     before(() => {

@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
-import type { UpdateRuleMigrationData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { UpdateRuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
@@ -31,7 +31,7 @@ const installPrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   detectionRulesClient: IDetectionRulesClient
-): Promise<{ rulesToUpdate: UpdateRuleMigrationData[]; errors: Error[] }> => {
+): Promise<{ rulesToUpdate: UpdateRuleMigrationRule[]; errors: Error[] }> => {
   // Get required prebuilt rules
   const prebuiltRulesIds = getUniquePrebuiltRuleIds(rulesToInstall);
   const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
@@ -68,7 +68,7 @@ const installPrebuiltRules = async (
   ];
 
   // Create migration rules updates templates
-  const rulesToUpdate: UpdateRuleMigrationData[] = [];
+  const rulesToUpdate: UpdateRuleMigrationRule[] = [];
   installedRules.forEach((installedRule) => {
     const filteredRules = rulesToInstall.filter(
       (rule) => rule.elastic_rule?.prebuilt_rule_id === installedRule.rule_id
@@ -91,11 +91,11 @@ export const installCustomRules = async (
   enabled: boolean,
   detectionRulesClient: IDetectionRulesClient
 ): Promise<{
-  rulesToUpdate: UpdateRuleMigrationData[];
+  rulesToUpdate: UpdateRuleMigrationRule[];
   errors: Error[];
 }> => {
   const errors: Error[] = [];
-  const rulesToUpdate: UpdateRuleMigrationData[] = [];
+  const rulesToUpdate: UpdateRuleMigrationRule[] = [];
   const createCustomRulesOutcome = await initPromisePool({
     concurrency: MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
     items: rulesToInstall,
