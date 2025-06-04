@@ -108,28 +108,12 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
         hasBorder
         betaBadgeProps={betaBadgeProps}
         titleElement="p"
-        footer={
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="center"
-            direction="column"
-            gutterSize="none"
-          >
-            <EuiFlexItem grow={false}>
-              <ConnectorSelector
-                connectors={connectorOptions}
-                selectedId={selectedConnectorId}
-                onChange={onConnectorSelectionChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
         title={
           <EuiFlexGroup
             alignItems="center"
             justifyContent="center"
             direction="column"
-            gutterSize="m"
+            gutterSize={selectedConnector ? 'xl' : 'l'}
           >
             <EuiFlexItem grow={false} justifyContent="center">
               <EuiText>{i18n.SELECTED_PROVIDER}</EuiText>
@@ -154,6 +138,13 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
                     />
                   </EuiFlexItem>
                 )}
+                <EuiFlexItem grow={false}>
+                  <ConnectorSelector
+                    connectors={connectorOptions}
+                    selectedId={selectedConnectorId}
+                    onChange={onConnectorSelectionChange}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
