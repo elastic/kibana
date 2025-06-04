@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
@@ -34,8 +28,6 @@ import { useTimelineDataFilters } from '../../containers/use_timeline_data_filte
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { isFullScreen } from '../timeline/helpers';
-
-const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
 const OverlayStyle = css`
   display: flex;
@@ -66,27 +58,12 @@ const StyledResolver = styled(Resolver)`
   height: 100%;
 `;
 
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`}
-  overflow: hidden;
-  width: 100%;
-
-  &.${SESSION_VIEW_FULL_SCREEN} {
-    ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM}`}
-  }
-`;
-
 interface GraphOverlayProps {
   scopeId: string;
-  SessionView: JSX.Element | null;
   Navigation: JSX.Element | null;
 }
 
-const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
-  SessionView,
-  Navigation,
-  scopeId,
-}) => {
+const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({ Navigation, scopeId }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
@@ -101,7 +78,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   const defaults = isInTableScope(scopeId) ? tableDefaults : timelineDefaults;
 
-  const { graphEventId, sessionViewConfig } = useDeepEqualSelector(
+  const { graphEventId } = useDeepEqualSelector(
     (state) => (getScope && getScope(state, scopeId)) ?? defaults
   );
 
@@ -136,16 +113,6 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     return { from, to };
   }, [from, to]);
 
-  const sessionContainerRef = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    if (fullScreen && sessionContainerRef.current) {
-      sessionContainerRef.current.setAttribute('style', FullScreenOverlayStyles.join(''));
-    } else if (sessionContainerRef.current) {
-      sessionContainerRef.current.setAttribute('style', OverlayStyle.join(''));
-    }
-  }, [fullScreen]);
-
   const resolver = useMemo(
     () =>
       graphEventId !== undefined ? (
@@ -157,28 +124,14 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           filters={filters}
         />
       ) : (
-        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+        <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexGroup>
       ),
     [graphEventId, scopeId, selectedPatterns, shouldUpdate, filters]
   );
 
-  if (!isActiveTimeline(scopeId) && sessionViewConfig !== null) {
-    return (
-      <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-          <EuiHorizontalRule margin="none" />
-          <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="m" />
-          <ScrollableFlexItem grow={2} className={fullScreen ? SESSION_VIEW_FULL_SCREEN : ''}>
-            {SessionView}
-          </ScrollableFlexItem>
-        </EuiFlexGroup>
-      </OverlayContainer>
-    );
-  } else if (fullScreen && !isActiveTimeline(scopeId)) {
+  if (fullScreen && !isActiveTimeline(scopeId)) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />

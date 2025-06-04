@@ -13,6 +13,7 @@ import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../common';
 import { createPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
+import { ensureLatestRulesPackageInstalled } from './ensure_latest_rules_package_installed';
 
 export interface InstallEndpointSecurityPrebuiltRuleProps {
   logger: Logger;
@@ -64,6 +65,11 @@ export const installEndpointSecurityPrebuiltRule = async ({
 
     // This will create the endpoint list if it does not exist yet
     await exceptionsListClient?.createEndpointList();
+
+    // Make sure the latest prebuilt rules package is installed (in case the
+    // user installs Elastic Defend integration without visiting Security
+    // Solution first)
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, context);
 
     const latestRuleVersion = await ruleAssetsClient.fetchLatestVersions([
       ELASTIC_SECURITY_RULE_ID,
