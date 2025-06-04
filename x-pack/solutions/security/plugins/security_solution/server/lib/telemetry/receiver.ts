@@ -765,16 +765,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const timeFrom = `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`;
     const enabledCustomRules =
-      'alert.attributes.params.immutable: false AND alert.attributes.consumer: "siem"';
+      'alert.attributes.enabled: true AND ' +
+      'alert.attributes.params.immutable: false AND ' +
+      'alert.attributes.consumer: "siem"';
     const responseActionsRules =
-      'alert.attributes.params.responseActions.actionTypeId: .endpoint OR ' +
-      'alert.attributes.params.responseActions.actionTypeId: .osquery';
+      '(alert.attributes.params.responseActions.actionTypeId: .endpoint OR ' +
+      'alert.attributes.params.responseActions.actionTypeId: .osquery)';
     const combinedFilters = [enabledCustomRules, responseActionsRules, timeFrom].join(' AND ');
 
     return findRulesSo({
       savedObjectsClient: this.soClient,
       savedObjectsFindOptions: {
         fields: [
+          'alert.updated_at',
+          'alert.attributes.enabled',
           'alert.attributes.consumer',
           'alert.attributes.params.immutable',
           'alert.attributes.params.responseActions.actionTypeId',
