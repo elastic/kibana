@@ -395,7 +395,6 @@ export const getTopNavConfig = (
           },
         },
         isDirty: hasUnappliedChanges || hasUnsavedChanges,
-        toasts: toastNotifications,
       });
     }
   };

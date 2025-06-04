@@ -20,13 +20,10 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-tabbed-modal",
-    "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-notifications-browser-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
     "@kbn/licensing-plugin",
+    "@kbn/core-rendering-browser",
   ],
   "exclude": ["target/**/*"]
 }
