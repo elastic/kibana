@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -342,6 +343,11 @@ function RelatedErrors({
     '/traces/explorer',
     '/dependencies/operation'
   );
+  const {
+    core: {
+      application: { navigateToUrl },
+    },
+  } = useApmPluginContext();
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
   const transactionId = item.doc.transaction?.id;
@@ -371,22 +377,29 @@ function RelatedErrors({
     },
   });
 
+  const viewRelatedErrorsLabel = i18n.translate('xpack.apm.waterfall.errorCount', {
+    defaultMessage: '{errorCount, plural, one {View related error} other {View # related errors}}',
+    values: { errorCount },
+  });
+
+  const onClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    navigateToUrl(isMobileAgentName(item.doc.agent.name) ? mobileHref : href);
+  };
+
   if (errorCount > 0) {
     return (
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <EuiBadge
-          href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={euiTheme.colors.danger}
-          iconType="arrowRight"
-        >
-          {i18n.translate('xpack.apm.waterfall.errorCount', {
-            defaultMessage:
-              '{errorCount, plural, one {View related error} other {View # related errors}}',
-            values: { errorCount },
-          })}
-        </EuiBadge>
-      </div>
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
+        onClick={onClick}
+        tabIndex={0}
+        role="button"
+        aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
+      >
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
     );
   }
 
