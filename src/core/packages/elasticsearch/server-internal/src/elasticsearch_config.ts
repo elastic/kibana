@@ -192,9 +192,9 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
-  serverMode: schema.maybe(
-    schema.oneOf([schema.literal('stack'), schema.literal('serverless')], { defaultValue: 'stack' })
-  ),
+  serverMode: schema.oneOf([schema.literal('stack'), schema.literal('serverless')], {
+    defaultValue: 'stack',
+  }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -459,7 +459,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * Setting to "serverless" changes some default behavior,
    * like enabling compression and disabling features that assume the possibility of multiple Elasticsearch nodes.
    */
-  public readonly serverMode?: 'stack' | 'serverless';
+  public readonly serverMode: 'stack' | 'serverless';
 
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
