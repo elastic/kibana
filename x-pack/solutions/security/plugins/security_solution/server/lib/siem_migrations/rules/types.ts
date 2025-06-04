@@ -23,6 +23,7 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 import type { Stored } from '../types';
 
 export type StoredSiemMigration = Stored<RuleMigration>;
+
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
