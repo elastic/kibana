@@ -15,6 +15,7 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
@@ -256,6 +257,29 @@ export function KnowledgeBaseTab() {
     return (
       <>
         <EuiFlexGroup direction="column">
+          {knowledgeBase.status.value?.isReIndexing && (
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutTitle',
+                  {
+                    defaultMessage: 'Re-indexing in progress.',
+                  }
+                )}
+                color="warning"
+                iconType="alert"
+                data-test-subj="knowledgeBaseReindexingCallOut"
+              >
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutBody',
+                  {
+                    defaultMessage:
+                      'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
+                  }
+                )}
+              </EuiCallOut>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow>

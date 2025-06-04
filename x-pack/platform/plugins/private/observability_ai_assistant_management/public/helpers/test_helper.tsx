@@ -76,7 +76,7 @@ export const render = (
     },
   };
 
-  return testLibRender(
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     // @ts-ignore
     <IntlProvider locale="en-US">
       <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
@@ -87,7 +87,7 @@ export const render = (
                 history={history}
                 router={aIAssistantManagementObservabilityRouter as any}
               >
-                {component}
+                {children}
               </RouterProvider>
             </QueryClientProvider>
           </AppContextProvider>
@@ -95,4 +95,13 @@ export const render = (
       </RedirectToHomeIfUnauthorized>
     </IntlProvider>
   );
+
+  const renderResult = testLibRender(component, { wrapper: TestWrapper });
+
+  return {
+    ...renderResult,
+    rerender: (newComponent: React.ReactNode) => {
+      renderResult.rerender(newComponent);
+    },
+  };
 };
