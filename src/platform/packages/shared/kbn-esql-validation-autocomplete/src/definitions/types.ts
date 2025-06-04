@@ -272,6 +272,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
+  completion: Location.COMPLETION,
 };
 
 /**
