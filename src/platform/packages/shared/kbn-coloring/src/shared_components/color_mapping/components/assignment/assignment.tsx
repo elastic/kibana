@@ -13,43 +13,49 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   removeAssignment,
   updateAssignmentColor,
-  updateAssignmentRule,
+  updateAssignmentRules,
 } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
-import { getPalette } from '../../palettes';
 
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
+import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignment({
   data,
   assignment,
+  assignments,
   disableDelete,
   index,
-  total,
   palette,
+  palettes,
   colorMode,
-  getPaletteFn,
   isDarkMode,
   specialTokens,
-  assignmentValuesCounter,
+  formatter,
+  allowCustomMatch,
+  assignmentMatcher,
 }: {
   data: ColorMappingInputData;
   index: number;
-  total: number;
   colorMode: ColorMapping.Config['colorMode'];
-  assignment: ColorMapping.Config['assignments'][number];
+  assignment: ColorMapping.Assignment;
+  assignments: ColorMapping.Assignment[];
   disableDelete: boolean;
-  palette: ColorMapping.CategoricalPalette;
-  getPaletteFn: ReturnType<typeof getPalette>;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
-  assignmentValuesCounter: Map<string | string[], number>;
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
+  assignmentMatcher: ColorAssignmentMatcher;
 }) {
   const dispatch = useDispatch();
 
@@ -62,37 +68,24 @@ export function Assignment({
           swatchShape="square"
           colorMode={colorMode}
           assignmentColor={assignment.color}
-          getPaletteFn={getPaletteFn}
           index={index}
           palette={palette}
-          total={total}
+          palettes={palettes}
+          total={assignments.length}
           onColorChange={(color) => {
-            dispatch(updateAssignmentColor({ assignmentIndex: index, color }));
+            dispatch(
+              updateAssignmentColor({
+                assignmentIndex: index,
+                color,
+              })
+            );
           }}
         />
       </EuiFlexItem>
 
-      {assignment.rule.type === 'auto' ||
-      assignment.rule.type === 'matchExactly' ||
-      assignment.rule.type === 'matchExactlyCI' ? (
-        <Match
-          index={index}
-          rule={assignment.rule}
-          options={data.type === 'categories' ? data.categories : []}
-          specialTokens={specialTokens}
-          updateValue={(values: Array<string | string[]>) => {
-            dispatch(
-              updateAssignmentRule({
-                assignmentIndex: index,
-                rule: values.length === 0 ? { type: 'auto' } : { type: 'matchExactly', values },
-              })
-            );
-          }}
-          assignmentValuesCounter={assignmentValuesCounter}
-        />
-      ) : assignment.rule.type === 'range' ? (
+      {assignment.rules[0]?.type === 'range' ? (
         <Range
-          rule={assignment.rule}
+          rule={assignment.rules[0]}
           updateValue={(min, max, minInclusive, maxInclusive) => {
             const rule: ColorMapping.RuleRange = {
               type: 'range',
@@ -101,10 +94,33 @@ export function Assignment({
               minInclusive,
               maxInclusive,
             };
-            dispatch(updateAssignmentRule({ assignmentIndex: index, rule }));
+            dispatch(
+              updateAssignmentRules({
+                assignmentIndex: index,
+                rules: [rule],
+              })
+            );
           }}
         />
-      ) : null}
+      ) : (
+        <Match
+          index={index}
+          rules={assignment.rules}
+          categories={data.type === 'categories' ? data.categories : []}
+          specialTokens={specialTokens}
+          formatter={formatter}
+          allowCustomMatch={allowCustomMatch}
+          assignmentMatcher={assignmentMatcher}
+          updateRules={(rules) => {
+            dispatch(
+              updateAssignmentRules({
+                assignmentIndex: index,
+                rules,
+              })
+            );
+          }}
+        />
+      )}
 
       <EuiFlexItem grow={0}>
         <EuiButtonIcon

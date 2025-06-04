@@ -9,7 +9,7 @@ import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { getLensApiMock, getLensRuntimeStateMock, makeEmbeddableServices } from '../mocks';
 import { LensApi, LensEmbeddableStartServices, LensPublicCallbacks } from '../types';
 import { prepareEventHandler } from './on_event';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import {
   LENS_EDIT_PAGESIZE_ACTION,
   LENS_EDIT_RESIZE_ACTION,
@@ -109,7 +109,7 @@ describe('Embeddable interaction event handlers', () => {
     const event = {
       name: 'filter',
       data: {
-        data: [{ value: faker.random.number(), row: 1, column: 'test', table: getTable() }],
+        data: [{ value: faker.number.int(), row: 1, column: 'test', table: getTable() }],
       },
     };
     const { callbacks } = await submitEvent(event);
@@ -119,7 +119,7 @@ describe('Embeddable interaction event handlers', () => {
     const event = {
       name: 'filter',
       data: {
-        data: [{ value: faker.random.number(), row: 1, column: 'test', table: getTable() }],
+        data: [{ value: faker.number.int(), row: 1, column: 'test', table: getTable() }],
       },
     };
     const { getTrigger } = await submitEvent(event, true);
@@ -171,7 +171,7 @@ describe('Embeddable interaction event handlers', () => {
     await reSubmit({
       name: 'filter',
       data: {
-        data: [{ value: faker.random.number(), row: 1, column: 'test', table: getTable() }],
+        data: [{ value: faker.number.int(), row: 1, column: 'test', table: getTable() }],
       },
     });
 

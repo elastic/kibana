@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import type { IntegrationCardMetadata } from './types';
-import integrationsIcon from './images/integrations_icon.png';
-import integrationsDarkIcon from './images/integrations_icon_dark.png';
+import integrationsIcon from '../common/integrations/images/integrations_icon.png';
+import integrationsDarkIcon from '../common/integrations/images/integrations_icon_dark.png';
+import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrations,

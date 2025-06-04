@@ -18,10 +18,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';
@@ -30,23 +30,24 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
-  getPaletteFn: ReturnType<typeof getPalette>;
+  assignmentColor: ColorMapping.Assignment['color'];
   index: number;
   total: number;
-  palette: ColorMapping.CategoricalPalette;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   onColorChange: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
   swatchShape: 'square' | 'round';
   isDarkMode: boolean;
   forType: 'assignment' | 'specialAssignment' | 'gradient';
 }
+
 export const ColorSwatch = ({
   colorMode,
   assignmentColor,
-  getPaletteFn,
   index,
   total,
   palette,
+  palettes,
   onColorChange,
   swatchShape,
   isDarkMode,
@@ -61,7 +62,7 @@ export const ColorSwatch = ({
   const colorHex = getAssignmentColor(
     colorMode,
     assignmentColor,
-    getPaletteFn,
+    palettes,
     isDarkMode,
     index,
     total
@@ -147,11 +148,9 @@ export const ColorSwatch = ({
         }
         color={assignmentColor}
         palette={palette}
-        getPaletteFn={getPaletteFn}
+        palettes={palettes}
         close={() => dispatch(hideColorPickerVisibility())}
-        isDarkMode={isDarkMode}
         selectColor={(color) => {
-          // dispatch update
           onColorChange(color);
         }}
         deleteStep={
@@ -164,8 +163,11 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
-        defaultMessage: 'Select a new color',
+      aria-label={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
+      })}
+      title={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
       })}
       disabled
       style={{

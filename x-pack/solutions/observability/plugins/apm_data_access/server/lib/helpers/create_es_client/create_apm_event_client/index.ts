@@ -25,12 +25,12 @@ import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { withApmSpan } from '../../../../utils';
 import type { ApmDataSource } from '../../../../../common/data_source';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import type { ProcessorEventOfDocumentType } from '../document_type';
-import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
 import { getDataTierFilterCombined } from '../../tier_filter';
 

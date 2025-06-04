@@ -28,6 +28,10 @@ export const command = {
     await Bazel.watch(log, {
       offline: args.getBooleanValue('offline') ?? true,
       reactVersion: process.env.REACT_18 ? '18' : '17',
+      // Default to true when EUI_AMSTERDAM is not set on 8.19
+      // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
+      // https://github.com/elastic/kibana/issues/221593
+      euiAmsterdam: !process.env.EUI_AMSTERDAM || process.env.EUI_AMSTERDAM === 'true',
     });
   },
 };

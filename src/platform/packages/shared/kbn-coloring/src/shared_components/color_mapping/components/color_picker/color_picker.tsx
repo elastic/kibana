@@ -10,32 +10,29 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopoverTitle, EuiTab, EuiTabs, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
-import { NeutralPalette } from '../../palettes/neutral';
 
 export function ColorPicker({
-  palette,
-  getPaletteFn,
   color,
+  palette,
+  palettes,
   close,
   selectColor,
-  isDarkMode,
   deleteStep,
 }: {
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  getPaletteFn: ReturnType<typeof getPalette>;
-  palette: ColorMapping.CategoricalPalette;
-  isDarkMode: boolean;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   close: () => void;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
   deleteStep?: () => void;
 }) {
   const [tab, setTab] = useState(
     color.type === 'categorical' &&
-      (color.paletteId === palette.id || color.paletteId === NeutralPalette.id)
+      (color.paletteId === palette.id || color.paletteId === KbnPalette.Neutral)
       ? 'palette'
       : 'custom'
   );
@@ -49,12 +46,20 @@ export function ColorPicker({
         }}
       >
         <EuiTabs size="m" expand>
-          <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-colors"
+            onClick={() => setTab('palette')}
+            isSelected={tab === 'palette'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
               defaultMessage: 'Colors',
             })}
           </EuiTab>
-          <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
+          <EuiTab
+            data-test-subj="lns-colorMapping-colorPicker-tab-custom"
+            onClick={() => setTab('custom')}
+            isSelected={tab === 'custom'}
+          >
             {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
               defaultMessage: 'Custom',
             })}
@@ -64,20 +69,12 @@ export function ColorPicker({
       {tab === 'palette' ? (
         <PaletteColors
           color={color}
-          getPaletteFn={getPaletteFn}
           palette={palette}
+          palettes={palettes}
           selectColor={selectColor}
-          isDarkMode={isDarkMode}
         />
       ) : (
-        <RGBPicker
-          color={color}
-          getPaletteFn={getPaletteFn}
-          isDarkMode={isDarkMode}
-          selectColor={selectColor}
-          palette={palette}
-          close={close}
-        />
+        <RGBPicker color={color} selectColor={selectColor} palettes={palettes} />
       )}
       {deleteStep ? (
         <>

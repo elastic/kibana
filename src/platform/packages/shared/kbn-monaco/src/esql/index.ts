@@ -9,4 +9,3 @@
 
 export { ESQL_LANG_ID, ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID } from './lib/constants';
 export { ESQLLang } from './language';
-export { buildESQLTheme } from './lib/esql_theme';

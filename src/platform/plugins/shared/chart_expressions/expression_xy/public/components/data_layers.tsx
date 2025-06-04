@@ -20,6 +20,7 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { KbnPalettes } from '@kbn/palettes';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -49,6 +50,7 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
+  palettes: KbnPalettes;
   formattedDatatables: DatatablesWithFormatInfo;
   syncColors: boolean;
   timeZone: string;
@@ -75,6 +77,7 @@ export const DataLayers: FC<Props> = ({
   minBarHeight,
   formatFactory,
   paletteService,
+  palettes,
   fittingFunction,
   emphasizeFitting,
   yAxesConfiguration,
@@ -141,9 +144,6 @@ export const DataLayers: FC<Props> = ({
             ? JSON.parse(columnToLabel)
             : {};
 
-          // what if row values are not primitive? That is the case of, for instance, Ranges
-          // remaps them to their serialized version with the formatHint metadata
-          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
@@ -163,6 +163,7 @@ export const DataLayers: FC<Props> = ({
             formatFactory,
             columnToLabelMap,
             paletteService,
+            palettes,
             formattedDatatableInfo,
             syncColors,
             yAxis,

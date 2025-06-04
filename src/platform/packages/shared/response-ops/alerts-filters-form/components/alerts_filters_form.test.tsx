@@ -14,9 +14,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsFiltersForm, AlertsFiltersFormProps } from './alerts_filters_form';
 import { AlertsFilter, AlertsFiltersExpression } from '../types';
 import {
+  ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,
   DELETE_OPERAND_BUTTON_SUBJ,
-  FORM_ITEM_SUBJ,
+  FILTERS_FORM_ITEM_SUBJ,
 } from '../constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -26,7 +27,6 @@ import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TYPES_FILTER_LABEL,
 } from '../translations';
-import { alertsFiltersMetadata } from '../filters';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -59,11 +59,11 @@ mockUseGetInternalRuleTypesQuery.mockReturnValue({
 });
 
 const testExpression: AlertsFiltersExpression = [
-  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_1] } },
+  { filter: { type: 'ruleTags', value: [TAG_1] } },
   { operator: 'and' },
-  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_2] } },
+  { filter: { type: 'ruleTags', value: [TAG_2] } },
   { operator: 'or' },
-  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_3] } },
+  { filter: { type: 'ruleTags', value: [TAG_3] } },
 ];
 
 const mockOnChange = jest.fn();
@@ -117,11 +117,11 @@ describe('AlertsFiltersForm', () => {
   it('should correctly add a new operand', async () => {
     render(<TestComponent />);
 
-    expect(screen.getAllByTestId(FORM_ITEM_SUBJ)).toHaveLength(3);
+    expect(screen.getAllByTestId(FILTERS_FORM_ITEM_SUBJ)).toHaveLength(3);
 
     await userEvent.click(screen.getByTestId(ADD_OR_OPERATION_BUTTON_SUBJ));
 
-    const formItems = screen.getAllByTestId(FORM_ITEM_SUBJ);
+    const formItems = screen.getAllByTestId(FILTERS_FORM_ITEM_SUBJ);
     expect(formItems).toHaveLength(4);
     // New operands should be empty
     expect(formItems[3]).toHaveTextContent(FORM_ITEM_FILTER_BY_PLACEHOLDER);
@@ -141,7 +141,7 @@ describe('AlertsFiltersForm', () => {
     await userEvent.click(filterTypeSelectors[0]);
     await userEvent.click(screen.getByRole('option', { name: RULE_TYPES_FILTER_LABEL }));
     expect(mockOnChange).toHaveBeenCalledWith([
-      { filter: { type: alertsFiltersMetadata.ruleTypes.id } },
+      { filter: { type: 'ruleTypes' } },
       ...testExpression.slice(1),
     ]);
   });
@@ -163,5 +163,31 @@ describe('AlertsFiltersForm', () => {
       },
       ...testExpression.slice(1),
     ]);
+  });
+
+  it('should prevent the user from adding more filters than `maxFilters`', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AlertsFiltersForm
+          ruleTypeIds={[]}
+          value={[
+            { filter: { type: 'ruleTypes', value: 'filter1' } },
+            { operator: 'or' },
+            { filter: { type: 'ruleTypes', value: 'filter2' } },
+            { operator: 'or' },
+            { filter: { type: 'ruleTypes', value: 'filter3' } },
+            { operator: 'or' },
+            { filter: { type: 'ruleTypes', value: 'filter4' } },
+            { operator: 'or' },
+            { filter: { type: 'ruleTypes', value: 'filter5' } },
+          ]}
+          onChange={jest.fn()}
+          services={{ http, notifications }}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId(ADD_OR_OPERATION_BUTTON_SUBJ)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_AND_OPERATION_BUTTON_SUBJ)).not.toBeInTheDocument();
   });
 });

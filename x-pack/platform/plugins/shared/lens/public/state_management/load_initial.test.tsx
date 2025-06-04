@@ -17,7 +17,7 @@ import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { InitialAppState, loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 
 const history = {
@@ -234,7 +234,14 @@ describe('Initializing the store', () => {
 
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
-          persistedDoc: { ...defaultDoc, type: DOC_TYPE },
+          persistedDoc: expect.objectContaining({
+            ...defaultDoc,
+            type: DOC_TYPE,
+            state: {
+              ...defaultDoc.state,
+              visualization: 'testVis initial state',
+            },
+          }),
           query: defaultDoc.state.query,
           isLoading: false,
           activeDatasourceId: 'testDatasource',

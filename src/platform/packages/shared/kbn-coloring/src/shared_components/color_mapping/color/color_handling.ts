@@ -8,24 +8,27 @@
  */
 
 import chroma from 'chroma-js';
-import { findLast } from 'lodash';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { getPalette, NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
-import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../config/default_color_mapping';
+import { getColorAssignmentMatcher } from './color_assignment_matcher';
+import { getValueKey } from './utils';
+
+const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
-    | ColorMapping.Config['assignments'][number]['color']
+    | ColorMapping.Assignment['color']
     | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
   total: number
@@ -34,14 +37,20 @@ export function getAssignmentColor(
     case 'colorCode':
     case 'categorical':
     case 'loop':
-      return getColor(color, getPaletteFn, isDarkMode);
+      return getColor(color, palettes);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
-        return 'red';
+        return FALLBACK_ASSIGNMENT_COLOR;
       }
-      const colorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
-      return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
+      const colorScale = getGradientColorScale(colorMode, palettes, isDarkMode);
+      return total === 0
+        ? FALLBACK_ASSIGNMENT_COLOR
+        : total === 1
+        ? colorScale(0)
+        : colorScale(index / (total - 1));
     }
+    default:
+      return FALLBACK_ASSIGNMENT_COLOR;
   }
 }
 
@@ -50,103 +59,108 @@ export function getColor(
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
     | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
-  getPaletteFn: ReturnType<typeof getPalette>,
-  isDarkMode: boolean
+  palettes: KbnPalettes
 ): string {
   return color.type === 'colorCode'
     ? color.colorCode
-    : getValidColor(
-        getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, true)
-      ).hex();
+    : getValidColor(palettes.get(color.paletteId).getColor(color.colorIndex)).hex();
 }
+
+/**
+ * Returns a color given a raw value
+ */
+export type ColorHandlingFn = (rawValue: RawValue) => string;
 
 export function getColorFactory(
   { assignments, specialAssignments, colorMode, paletteId }: ColorMapping.Config,
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   data: ColorMappingInputData
-): (category: string | string[]) => string {
-  // find auto-assigned colors
-  const autoByOrderAssignments =
-    data.type === 'categories'
-      ? assignments.filter((a) => {
-          return (
-            a.rule.type === 'auto' || (a.rule.type === 'matchExactly' && a.rule.values.length === 0)
-          );
-        })
-      : [];
-
-  // find all categories that don't match with an assignment
-  const notAssignedCategories =
-    data.type === 'categories'
-      ? data.categories.filter((category) => {
-          return !assignments.some(({ rule }) => ruleMatch(rule, category));
-        })
-      : [];
-
-  const lastCategorical = findLast(assignments, (d) => {
-    return d.color.type === 'categorical';
-  });
+): ColorHandlingFn {
+  const lastCategorical = assignments.findLast(({ color }) => color.type === 'categorical');
   const nextCategoricalIndex =
     lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
 
-  return (category: string | string[]) => {
-    if (typeof category === 'string' || Array.isArray(category)) {
-      const nonAssignedCategoryIndex = notAssignedCategories.indexOf(category);
+  const autoAssignments = assignments
+    .filter(({ rules }) => rules.length === 0)
+    .map((assignment, i) => ({
+      assignment,
+      assignmentIndex: i,
+    }));
 
-      // this category is not assigned to a specific color
-      if (nonAssignedCategoryIndex > -1) {
-        // if the category order is within current number of auto-assigned items pick the defined color
-        if (nonAssignedCategoryIndex < autoByOrderAssignments.length) {
-          const autoAssignmentIndex = assignments.findIndex(
-            (d) => d === autoByOrderAssignments[nonAssignedCategoryIndex]
-          );
-          return getAssignmentColor(
-            colorMode,
-            autoByOrderAssignments[nonAssignedCategoryIndex].color,
-            getPaletteFn,
-            isDarkMode,
-            autoAssignmentIndex,
-            assignments.length
-          );
-        }
-        const totalColorsIfGradient = assignments.length || notAssignedCategories.length;
-        const indexIfGradient =
-          (nonAssignedCategoryIndex - autoByOrderAssignments.length) % totalColorsIfGradient;
+  const assignmentMatcher = getColorAssignmentMatcher(assignments);
+  // find all categories that don't match with an assignment
+  const unassignedAutoAssignmentsMap = new Map(
+    data.type === 'categories'
+      ? data.categories
+          .map((category: SerializedValue) => deserializeField(category))
+          .filter((category: RawValue) => {
+            return !assignmentMatcher.hasMatch(category);
+          })
+          .map((category: RawValue, i) => {
+            const key = getValueKey(category);
+            const autoAssignment = autoAssignments[i];
+            return [key, { ...autoAssignment, categoryIndex: i }];
+          })
+      : []
+  );
 
-        // if no auto-assign color rule/color is available then use the color looping palette
+  return (rawValue: RawValue) => {
+    const key = getValueKey(rawValue);
+
+    if (unassignedAutoAssignmentsMap.has(key)) {
+      const {
+        assignment,
+        assignmentIndex = -1,
+        categoryIndex = -1,
+      } = unassignedAutoAssignmentsMap.get(key) ?? {};
+
+      if (assignment) {
+        // the category is within the number of available auto-assignments
         return getAssignmentColor(
           colorMode,
-          // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-          specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
-            ? colorMode.type === 'gradient'
-              ? { type: 'gradient' }
-              : {
-                  type: 'loop',
-                  // those are applied here and depends on the current non-assigned category - auto-assignment list
-                  colorIndex:
-                    nonAssignedCategoryIndex - autoByOrderAssignments.length + nextCategoricalIndex,
-                  paletteId,
-                }
-            : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
-          getPaletteFn,
+          assignment.color,
+          palettes,
           isDarkMode,
-          indexIfGradient,
-          totalColorsIfGradient
+          assignmentIndex,
+          assignments.length
         );
       }
+
+      // the category is not assigned to a specific color
+      const totalColorsIfGradient = assignments.length || unassignedAutoAssignmentsMap.size;
+      const indexIfGradient = (categoryIndex - autoAssignments.length) % totalColorsIfGradient;
+
+      // if no auto-assign color rule/color is available then use the color looping palette
+      return getAssignmentColor(
+        colorMode,
+        // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
+        specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
+          ? colorMode.type === 'gradient'
+            ? { type: 'gradient' }
+            : {
+                type: 'loop',
+                // those are applied here and depends on the current non-assigned category - auto-assignment list
+                colorIndex: categoryIndex - autoAssignments.length + nextCategoricalIndex,
+                paletteId,
+              }
+          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
+        palettes,
+        isDarkMode,
+        indexIfGradient,
+        totalColorsIfGradient
+      );
     }
+
     // find the assignment where the category matches the rule
-    const matchingAssignmentIndex = assignments.findIndex(({ rule }) => {
-      return ruleMatch(rule, category);
-    });
+    const matchingAssignmentIndex = assignmentMatcher.getIndex(rawValue);
 
     if (matchingAssignmentIndex > -1) {
       const assignment = assignments[matchingAssignmentIndex];
       return getAssignmentColor(
         colorMode,
         assignment.color,
-        getPaletteFn,
+        palettes,
         isDarkMode,
         matchingAssignmentIndex,
         assignments.length
@@ -155,30 +169,29 @@ export function getColorFactory(
     return getColor(
       {
         type: 'categorical',
-        paletteId: NeutralPalette.id,
+        paletteId: KbnPalette.Neutral,
         colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
       },
-      getPaletteFn,
-      isDarkMode
+      palettes
     );
   };
 }
 
 export function getGradientColorScale(
   colorMode: GradientColorMode,
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean
 ): (value: number) => string {
   const steps =
     colorMode.steps.length === 1
       ? [
-          getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+          getColor(colorMode.steps[0], palettes),
           combineColors(
-            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+            changeAlpha(getColor(colorMode.steps[0], palettes), 0.3),
             isDarkMode ? 'black' : 'white'
           ),
         ]
-      : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
+      : colorMode.steps.map((d) => getColor(d, palettes));
   steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
   const scale = chroma.scale(steps).mode('lab');
   return (value: number) => scale(value).hex();

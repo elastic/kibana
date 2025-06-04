@@ -16,6 +16,7 @@ import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -37,6 +38,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -171,6 +173,8 @@ interface PluginsStart {
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPublicStart;
+  share: SharePluginStart;
 }
 
 export class Plugin
@@ -259,59 +263,63 @@ export class Plugin
       });
     }
 
-    plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: PLUGIN_ID,
-      title: featureTitle,
-      order: 1,
-      async mount(params: ManagementAppMountParams) {
-        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-          CoreStart,
-          PluginsStart,
-          unknown
-        ];
+    if (this.config.rules.enabled) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: PLUGIN_ID,
+        title: featureTitle,
+        order: 1,
+        async mount(params: ManagementAppMountParams) {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
 
-        const { renderApp } = await import('./application/rules_app');
+          const { renderApp } = await import('./application/rules_app');
 
-        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-        // subset of this privilege are not authorized to access this endpoint and will receive a 404
-        // error that causes the Alerting view to fail to load.
-        let kibanaFeatures: KibanaFeature[];
-        try {
-          kibanaFeatures = await pluginsStart.features.getFeatures();
-        } catch (err) {
-          kibanaFeatures = [];
-        }
+          // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+          // subset of this privilege are not authorized to access this endpoint and will receive a 404
+          // error that causes the Alerting view to fail to load.
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
 
-        return renderApp({
-          ...coreStart,
-          actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
-          cloud: plugins.cloud,
-          data: pluginsStart.data,
-          dataViews: pluginsStart.dataViews,
-          dataViewEditor: pluginsStart.dataViewEditor,
-          charts: pluginsStart.charts,
-          alerting: pluginsStart.alerting,
-          spaces: pluginsStart.spaces,
-          unifiedSearch: pluginsStart.unifiedSearch,
-          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
-          element: params.element,
-          theme: params.theme,
-          storage: new Storage(window.localStorage),
-          setBreadcrumbs: params.setBreadcrumbs,
-          history: params.history,
-          actionTypeRegistry,
-          ruleTypeRegistry,
-          kibanaFeatures,
-          licensing: pluginsStart.licensing,
-          expressions: pluginsStart.expressions,
-          isServerless: !!pluginsStart.serverless,
-          fieldFormats: pluginsStart.fieldFormats,
-          lens: pluginsStart.lens,
-          fieldsMetadata: pluginsStart.fieldsMetadata,
-        });
-      },
-    });
+          return renderApp({
+            ...coreStart,
+            actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
+            cloud: plugins.cloud,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme: params.theme,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless: !!pluginsStart.serverless,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
+            contentManagement: pluginsStart.contentManagement,
+            share: pluginsStart.share,
+          });
+        },
+      });
+    }
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: CONNECTORS_PLUGIN_ID,
@@ -355,6 +363,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          share: pluginsStart.share,
           kibanaFeatures,
         });
       },
@@ -430,7 +439,10 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
       return action;
     };
 

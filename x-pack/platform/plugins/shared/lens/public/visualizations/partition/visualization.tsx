@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -14,13 +15,15 @@ import {
   PaletteRegistry,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
+import { getKbnPalettes } from '@kbn/palettes';
+
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -53,12 +56,12 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 import {
   PIE_RENDER_ARRAY_VALUES,
   PIE_TOO_MANY_DIMENSIONS,
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
+import { convertToRuntimeState } from './runtime_state';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -126,10 +129,12 @@ export const getDefaultColorForMultiMetricDimension = ({
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
+  formatFactory: FormatFactory;
+}): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -160,10 +165,9 @@ export const getPieVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette) {
-    if (state) {
-      return convertToRuntime(state);
-    }
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
     return {
       shape: PieChartTypes.DONUT,
       layers: [
@@ -174,6 +178,10 @@ export const getPieVisualization = ({
       ],
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   getMainPalette: (state) => {
@@ -201,8 +209,10 @@ export const getPieVisualization = ({
     kibanaTheme.theme$
       .subscribe({
         next(theme) {
+          const palettes = getKbnPalettes(theme);
+
           colors = state.layers[0]?.colorMapping
-            ? getColorsFromMapping(theme.darkMode, state.layers[0].colorMapping)
+            ? getColorsFromMapping(palettes, theme.darkMode, state.layers[0].colorMapping)
             : paletteService
                 .get(state.palette?.name || 'default')
                 .getCategoricalColors(10, state.palette?.params);
@@ -495,8 +505,17 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
-    return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
+    const palettes = getKbnPalettes(theme);
+    return (
+      <DimensionEditor
+        {...props}
+        paletteService={paletteService}
+        palettes={palettes}
+        isDarkMode={theme.darkMode}
+        formatFactory={formatFactory}
+      />
+    );
   },
   DimensionEditorDataExtraComponent(props) {
     return <DimensionDataExtraEditor {...props} paletteService={paletteService} />;

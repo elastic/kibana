@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ArtifactsSchema, TutorialSchema } from '@kbn/home-plugin/server';
 import { TutorialsCategory } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APMConfig } from '..';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';

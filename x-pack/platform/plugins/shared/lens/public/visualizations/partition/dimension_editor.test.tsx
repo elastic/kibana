@@ -12,9 +12,12 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { PieVisualizationState } from '../../../common/types';
 import { DimensionEditor, DimensionEditorProps } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { getKbnPalettes } from '@kbn/palettes';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 const darkMode = false;
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
+const palettes = getKbnPalettes({ darkMode });
 
 describe('DimensionEditor', () => {
   let defaultState: PieVisualizationState;
@@ -37,7 +40,7 @@ describe('DimensionEditor', () => {
           colorMapping: {
             assignments: [],
             specialAssignments: [
-              { rule: { type: 'other' }, color: { type: 'loop' }, touched: false },
+              { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
             ],
             paletteId: 'default',
             colorMode: { type: 'categorical' },
@@ -47,6 +50,7 @@ describe('DimensionEditor', () => {
     };
 
     const mockFrame = createMockFramePublicAPI();
+    const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
     mockFrame.datasourceLayers = Object.fromEntries(
       defaultState.layers.map(({ layerId: id }) => [id, createMockDatasource(id).publicAPIMock])
     );
@@ -63,7 +67,9 @@ describe('DimensionEditor', () => {
       removeLayer: jest.fn(),
       panelRef: { current: null },
       isDarkMode: darkMode,
+      palettes,
       paletteService: paletteServiceMock,
+      formatFactory: fieldFormatsMock.deserialize,
     };
 
     buildProps = (props = {}) => {

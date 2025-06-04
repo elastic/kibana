@@ -7,31 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KbnPalettes } from '@kbn/palettes';
 import type { ColorMapping } from '.';
-import { getPalette } from '../palettes';
 
 export function updateAssignmentsPalette(
   assignments: ColorMapping.Config['assignments'],
   colorMode: ColorMapping.Config['colorMode'],
   paletteId: string,
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   preserveColorChanges: boolean
 ): ColorMapping.Config['assignments'] {
-  const palette = getPaletteFn(paletteId);
-  return assignments.map(({ rule, color, touched }, index) => {
+  const palette = palettes.get(paletteId);
+  return assignments.map(({ rules, color, touched }, index) => {
     if (preserveColorChanges && touched) {
-      return { rule, color, touched };
+      return { rules, color, touched };
     } else {
-      const newColor: ColorMapping.Config['assignments'][number]['color'] =
+      const newColor: ColorMapping.Assignment['color'] =
         colorMode.type === 'categorical'
           ? {
               type: 'categorical',
               paletteId,
-              colorIndex: index % palette.colorCount,
+              colorIndex: index % palette.colors().length,
             }
           : { type: 'gradient' };
       return {
-        rule,
+        rules,
         color: newColor,
         touched: false,
       };

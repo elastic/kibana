@@ -9,10 +9,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import {
-  enableInfrastructureContainerAssetView,
-  enableInfrastructureProfilingIntegration,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -141,13 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
-    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
-    await browser.refresh();
-    await pageObjects.header.waitUntilLoadingHasFinished();
-  };
-
-  // Failing: See https://github.com/elastic/kibana/issues/192891
+  // Failing: See https://github.com/elastic/kibana/issues/222073
   describe.skip('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
@@ -806,25 +797,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(() => synthEsClient.clean());
 
-      describe('when container asset view is disabled', () => {
+      describe('when navigating to container asset view', () => {
         before(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(false);
-          await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await pageObjects.timePicker.setAbsoluteRange(
-            START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
-            END_CONTAINER_DATE.format(DATE_PICKER_FORMAT)
-          );
-        });
-
-        it('should show old view of container details', async () => {
-          await testSubjects.find('metricsEmptyViewState');
-        });
-      });
-
-      describe('when container asset view is enabled', () => {
-        before(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(true);
           await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(

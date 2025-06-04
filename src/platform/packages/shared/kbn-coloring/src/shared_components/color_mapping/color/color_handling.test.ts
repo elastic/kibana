@@ -12,64 +12,52 @@ import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
 } from '../config/default_color_mapping';
 import { getColorFactory } from './color_handling';
-import { getPalette, AVAILABLE_PALETTES } from '../palettes';
-import {
-  EUIAmsterdamColorBlindPalette,
-  EUI_AMSTERDAM_PALETTE_COLORS,
-} from '../palettes/eui_amsterdam';
-import { NeutralPalette, NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
 import { toHex } from './color_math';
 
-import { ColorMapping } from '../config';
+import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 
 describe('Color mapping - color generation', () => {
-  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
+  const palettes = getKbnPalettes({ darkMode: false });
+  const neutralPaletteColors = palettes
+    .get(KbnPalette.Neutral)
+    .colors()
+    .map((c) => c.toLowerCase());
+  const elasticPaletteColors = palettes
+    .get(KbnPalette.Default)
+    .colors()
+    .map((c) => c.toLowerCase());
 
   it('returns EUI light colors from default config', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, false, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
-    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
-    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
-    expect(colorFactory('catC')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
+    expect(colorFactory('catA')).toBe(elasticPaletteColors[0]);
+    expect(colorFactory('catB')).toBe(elasticPaletteColors[1]);
+    expect(colorFactory('catC')).toBe(elasticPaletteColors[2]);
     // if the category is not available in the `categories` list then a default netural is used
     // this is an edge case and ideally never happen
     expect(colorFactory('not_available_1')).toBe(
-      NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]
+      neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]
     );
   });
 
   // currently there is no difference in the two colors, but this could change in the future
   // this test will catch the change
   it('returns EUI dark colors from default config', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, true, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, true, {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
-    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
-    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
-    expect(colorFactory('catC')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
+    expect(colorFactory('catA')).toBe(elasticPaletteColors[0]);
+    expect(colorFactory('catB')).toBe(elasticPaletteColors[1]);
+    expect(colorFactory('catC')).toBe(elasticPaletteColors[2]);
     // if the category is not available in the `categories` list then a default netural is used
     // this is an edge case and ideally never happen
-    expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_DARK[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
   it('by default loops colors defined in palette', () => {
-    const twoColorPalette: ColorMapping.CategoricalPalette = {
-      id: 'twoColors',
-      name: 'twoColors',
-      colorCount: 2,
-      type: 'categorical',
-      getColor(indexInRange, isDarkMode, loop) {
-        return ['red', 'blue'][loop ? indexInRange % 2 : indexInRange];
-      },
-    };
-
-    const simplifiedGetPaletteGn = getPalette(
-      new Map([[twoColorPalette.id, twoColorPalette]]),
-      NeutralPalette
-    );
     const colorFactory = getColorFactory(
       {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
@@ -78,43 +66,34 @@ describe('Color mapping - color generation', () => {
             color: {
               type: 'loop',
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],
-        paletteId: twoColorPalette.id,
+        paletteId: KbnPalette.Neutral,
       },
-      simplifiedGetPaletteGn,
+      palettes,
       false,
       {
         type: 'categories',
-        categories: ['cat1', 'cat2', 'cat3', 'cat4'],
+        categories: ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat7'],
       }
     );
-    expect(colorFactory('cat1')).toBe('#ff0000');
-    expect(colorFactory('cat2')).toBe('#0000ff');
+    expect(colorFactory('cat1')).toBe(neutralPaletteColors[0]);
+    expect(colorFactory('cat2')).toBe(neutralPaletteColors[1]);
+    expect(colorFactory('cat3')).toBe(neutralPaletteColors[2]);
+    expect(colorFactory('cat4')).toBe(neutralPaletteColors[3]);
+    expect(colorFactory('cat5')).toBe(neutralPaletteColors[4]);
     // the palette will loop depending on the number of colors available
-    expect(colorFactory('cat3')).toBe('#ff0000');
-    expect(colorFactory('cat4')).toBe('#0000ff');
+    expect(colorFactory('cat6')).toBe(neutralPaletteColors[0]);
+    expect(colorFactory('cat7')).toBe(neutralPaletteColors[1]);
   });
 
   it('returns the unassigned color if configured statically', () => {
-    const twoColorPalette: ColorMapping.CategoricalPalette = {
-      id: 'twoColors',
-      name: 'twoColors',
-      colorCount: 2,
-      type: 'categorical',
-      getColor(indexInRange, darkMode, loop) {
-        return ['red', 'blue'][loop ? indexInRange % 2 : indexInRange];
-      },
-    };
-
-    const simplifiedGetPaletteGn = getPalette(
-      new Map([[twoColorPalette.id, twoColorPalette]]),
-      NeutralPalette
-    );
     const colorFactory = getColorFactory(
       {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
@@ -122,42 +101,43 @@ describe('Color mapping - color generation', () => {
           {
             color: {
               type: 'categorical',
-              paletteId: NeutralPalette.id,
+              paletteId: KbnPalette.Neutral,
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],
-        paletteId: twoColorPalette.id,
       },
-      simplifiedGetPaletteGn,
+      palettes,
       false,
       {
         type: 'categories',
         categories: ['cat1', 'cat2', 'cat3', 'cat4'],
       }
     );
-    expect(colorFactory('cat1')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
-    expect(colorFactory('cat2')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
-    expect(colorFactory('cat3')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
-    expect(colorFactory('cat4')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('cat1')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('cat2')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('cat3')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('cat4')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
     // if the category is not available in the `categories` list then a default netural is used
     // this is an edge case and ideally never happen
-    expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
   it('handles special tokens, multi-field categories and non-trimmed whitespaces', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, false, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
       type: 'categories',
       categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     });
-    expect(colorFactory('__other__')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
-    // expect(colorFactory(['fieldA', 'fieldB'])).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
-    expect(colorFactory('__empty__')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
-    expect(colorFactory('   with-whitespaces   ')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[3]);
+    expect(colorFactory('__other__')).toBe(elasticPaletteColors[0]);
+    // expect(colorFactory(['fieldA', 'fieldB'])).toBe(elasticPaletteColors[1]);
+    expect(colorFactory('__empty__')).toBe(elasticPaletteColors[2]);
+    expect(colorFactory('   with-whitespaces   ')).toBe(elasticPaletteColors[3]);
   });
 
   it('ignores configured assignments in loop mode', () => {
@@ -167,22 +147,22 @@ describe('Color mapping - color generation', () => {
         assignments: [
           {
             color: { type: 'colorCode', colorCode: 'red' },
-            rule: { type: 'matchExactly', values: ['configuredAssignment'] },
+            rules: [{ type: 'raw', value: 'configuredAssignment' }],
             touched: false,
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
         categories: ['catA', 'catB', 'configuredAssignment', 'nextCat'],
       }
     );
-    expect(colorFactory('catA')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
-    expect(colorFactory('catB')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[1]);
+    expect(colorFactory('catA')).toBe(elasticPaletteColors[0]);
+    expect(colorFactory('catB')).toBe(elasticPaletteColors[1]);
     expect(colorFactory('configuredAssignment')).toBe('red');
-    expect(colorFactory('nextCat')).toBe(EUI_AMSTERDAM_PALETTE_COLORS[2]);
+    expect(colorFactory('nextCat')).toBe(elasticPaletteColors[2]);
   });
 
   it('color with auto rule are assigned in order of the configured data input', () => {
@@ -192,22 +172,22 @@ describe('Color mapping - color generation', () => {
         assignments: [
           {
             color: { type: 'colorCode', colorCode: 'red' },
-            rule: { type: 'auto' },
+            rules: [], // auto
             touched: false,
           },
           {
             color: { type: 'colorCode', colorCode: 'blue' },
-            rule: { type: 'matchExactly', values: ['blueCat'] },
+            rules: [{ type: 'raw', value: 'blueCat' }],
             touched: false,
           },
           {
             color: { type: 'colorCode', colorCode: 'green' },
-            rule: { type: 'auto' },
+            rules: [], // auto
             touched: false,
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -222,7 +202,7 @@ describe('Color mapping - color generation', () => {
     expect(colorFactory('greenCat')).toBe('green');
     // if the category is not available in the `categories` list then a default netural is used
     // this is an edge case and ideally never happen
-    expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
   it('returns sequential gradient colors from darker to lighter [desc, lightMode]', () => {
@@ -234,7 +214,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -242,7 +222,7 @@ describe('Color mapping - color generation', () => {
           sort: 'desc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -250,7 +230,7 @@ describe('Color mapping - color generation', () => {
       }
     );
     // this matches exactly with the initial step selected
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0]));
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
     expect(toHex(colorFactory('cat2'))).toBe('#93cebc');
     expect(toHex(colorFactory('cat3'))).toBe('#cce8e0');
   });
@@ -264,7 +244,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -272,7 +252,7 @@ describe('Color mapping - color generation', () => {
           sort: 'asc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -284,15 +264,15 @@ describe('Color mapping - color generation', () => {
     // mid green point
     expect(toHex(colorFactory('cat2'))).toBe('#93cebc');
     // initial gradient color
-    expect(toHex(colorFactory('cat3'))).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(toHex(colorFactory('cat3'))).toBe(elasticPaletteColors[0]);
   });
   it('sequential gradients and static color from lighter to darker [asc, lightMode]', () => {
     const colorFactory = getColorFactory(
       {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
         assignments: [
-          { color: { type: 'gradient' }, rule: { type: 'auto' }, touched: false },
-          { color: { type: 'gradient' }, rule: { type: 'auto' }, touched: false },
+          { color: { type: 'gradient' }, rules: [], touched: false },
+          { color: { type: 'gradient' }, rules: [], touched: false },
         ],
 
         colorMode: {
@@ -300,7 +280,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -312,16 +292,18 @@ describe('Color mapping - color generation', () => {
             color: {
               type: 'categorical',
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
-              paletteId: NeutralPalette.id,
+              paletteId: KbnPalette.Neutral,
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -329,9 +311,9 @@ describe('Color mapping - color generation', () => {
       }
     );
     expect(toHex(colorFactory('cat1'))).toBe('#cce8e0');
-    expect(toHex(colorFactory('cat2'))).toBe(EUI_AMSTERDAM_PALETTE_COLORS[0]);
+    expect(toHex(colorFactory('cat2'))).toBe(elasticPaletteColors[0]);
     // this matches exactly with the initial step selected
-    expect(toHex(colorFactory('cat3'))).toBe(NEUTRAL_COLOR_LIGHT[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(toHex(colorFactory('cat3'))).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
   it('returns 2 colors gradient [desc, lightMode]', () => {
@@ -343,13 +325,13 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 2,
               touched: false,
             },
@@ -357,16 +339,16 @@ describe('Color mapping - color generation', () => {
           sort: 'desc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0])); // EUI green
-    expect(toHex(colorFactory('cat2'))).toBe('#a4908f'); // red gray green
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[2])); // EUI pink
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
+    expect(toHex(colorFactory('cat2'))).toBe('#a4908f');
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2]));
   });
 
   it('returns divergent gradient [asc, darkMode]', () => {
@@ -378,14 +360,14 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
-            { type: 'categorical', paletteId: NeutralPalette.id, colorIndex: 0, touched: false },
+            { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 0, touched: false },
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 2,
               touched: false,
             },
@@ -393,18 +375,18 @@ describe('Color mapping - color generation', () => {
           sort: 'asc', // testing in ascending order
         },
       },
-      getPaletteFn,
+      palettes,
       true, // testing in dark mode
       {
         type: 'categories',
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[2])); // EUI pink
-    expect(toHex(colorFactory('cat2'))).toBe(NEUTRAL_COLOR_DARK[0]); // NEUTRAL LIGHT GRAY
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_AMSTERDAM_PALETTE_COLORS[0])); // EUI green
-    // if the category is not available in the `categories` list then a default netural is used
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[2]));
+    expect(toHex(colorFactory('cat2'))).toBe(neutralPaletteColors[0]);
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[0]));
+    // if the category is not available in the `categories` list then a default neutral is used
     // this is an edge case and ideally never happen
-    expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_DARK[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 });
