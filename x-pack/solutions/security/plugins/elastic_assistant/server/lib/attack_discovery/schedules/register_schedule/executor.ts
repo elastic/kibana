@@ -61,6 +61,11 @@ export const attackDiscoveryScheduleExecutor = async ({
   const { query, filters, combinedFilter, ...restParams } = params;
 
   const startTime = moment(); // start timing the generation
+  const scheduleInfo = {
+    id: rule.id,
+    interval: rule.schedule.interval,
+    actions: rule.actions.map(({ actionTypeId }) => actionTypeId),
+  };
 
   try {
     const { anonymizedAlerts, attackDiscoveries, replacements } = await generateAttackDiscoveries({
@@ -92,7 +97,7 @@ export const attackDiscoveryScheduleExecutor = async ({
       durationMs,
       end: restParams.end,
       hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
-      schedule: { id: rule.id, interval: rule.schedule.interval },
+      scheduleInfo,
       size: restParams.size,
       start: restParams.start,
       telemetry,
@@ -126,7 +131,7 @@ export const attackDiscoveryScheduleExecutor = async ({
     reportAttackDiscoveryGenerationFailure({
       apiConfig: params.apiConfig,
       errorMessage: transformedError.message,
-      schedule: { id: rule.id, interval: rule.schedule.interval },
+      scheduleInfo,
       telemetry,
     });
     throw error;
