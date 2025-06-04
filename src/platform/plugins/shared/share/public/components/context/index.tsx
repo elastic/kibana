@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
@@ -16,8 +14,6 @@ import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types
 export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
-  theme: ThemeServiceSetup;
-  i18n: I18nStart;
 }
 
 const ShareTabsContext = createContext<IShareContext | null>(null);

@@ -6,12 +6,42 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { AttackDiscoveryScheduleDataClient, AttackDiscoveryScheduleDataClientParams } from '.';
 import {
   getAttackDiscoveryCreateScheduleMock,
   getAttackDiscoveryUpdateScheduleMock,
+  getInternalAttackDiscoveryScheduleMock,
 } from '../../../../__mocks__/attack_discovery_schedules.mock';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+
+const mockApiConfig = {
+  connectorId: 'connector-id',
+  actionTypeId: '.bedrock',
+  model: 'model',
+  name: 'Test Bedrock',
+  provider: OpenAiProviderType.OpenAi,
+};
+const mockBasicScheduleParams = {
+  name: 'Test Schedule 1',
+  schedule: {
+    interval: '10m',
+  },
+  params: {
+    alertsIndexPattern: '.alerts-security.alerts-default',
+    apiConfig: mockApiConfig,
+    end: 'now',
+    size: 25,
+    start: 'now-24h',
+  },
+  enabled: true,
+};
+const mockInternalAttackDiscovery = getInternalAttackDiscoveryScheduleMock(
+  getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams)
+);
 
 describe('AttackDiscoveryScheduleDataClient', () => {
   let scheduleDataClientParams: AttackDiscoveryScheduleDataClientParams;
@@ -19,8 +49,24 @@ describe('AttackDiscoveryScheduleDataClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     scheduleDataClientParams = {
+      actionsClient: actionsClientMock.create(),
+      logger: loggerMock.create(),
       rulesClient: rulesClientMock.create(),
     };
+
+    (scheduleDataClientParams.rulesClient.find as jest.Mock).mockResolvedValue({
+      total: 1,
+      data: [mockInternalAttackDiscovery],
+    });
+    (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(
+      mockInternalAttackDiscovery
+    );
+    (scheduleDataClientParams.rulesClient.create as jest.Mock).mockResolvedValue(
+      mockInternalAttackDiscovery
+    );
+    (scheduleDataClientParams.rulesClient.update as jest.Mock).mockResolvedValue(
+      mockInternalAttackDiscovery
+    );
   });
 
   describe('findSchedules', () => {
@@ -106,7 +152,13 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       await scheduleDataClient.createSchedule(scheduleCreateData);
 
       expect(scheduleDataClientParams.rulesClient.create).toHaveBeenCalledWith({
-        data: scheduleCreateData,
+        data: {
+          actions: [],
+          alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+          consumer: 'siem',
+          tags: [],
+          ...scheduleCreateData,
+        },
       });
     });
   });
@@ -123,7 +175,12 @@ describe('AttackDiscoveryScheduleDataClient', () => {
 
       expect(scheduleDataClientParams.rulesClient.update).toHaveBeenCalledWith({
         id: scheduleId,
-        data: { ...getAttackDiscoveryCreateScheduleMock(), name: 'Updated schedule 5' },
+        data: {
+          actions: [],
+          tags: [],
+          ...getAttackDiscoveryCreateScheduleMock(),
+          name: 'Updated schedule 5',
+        },
       });
     });
   });
