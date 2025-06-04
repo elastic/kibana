@@ -9,7 +9,7 @@
 
 import { Command } from '@kbn/dev-cli-runner';
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
-import { SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
+import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
 import yaml from 'js-yaml';
 import { readFileSync } from 'node:fs';
 import { z } from '@kbn/zod';
@@ -154,7 +154,7 @@ export const createTestTrack: Command<void> = {
     string: ['configManifest', 'targetRuntimeMinutes', 'minRuntimeMinutes', 'maxLaneCount'],
     boolean: ['noSummary'],
     default: {
-      outputPath: `./scout_test_track_${Date.now()}.json`,
+      outputPath: `${SCOUT_OUTPUT_ROOT}/test_track_${Date.now()}.json`,
     },
     help: `
     --configManifest        (required)  Path to config manifest; can be specified multiple times
