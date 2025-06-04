@@ -74,7 +74,7 @@ export const ConsoleSemanticIngestDataExample: IngestDataCodeDefinition = {
   ...ConsoleIngestDataExample,
   ingestCommand: ({ indexName, sampleDocuments }) => {
     let result = `# The initial bulk ingestion request could take longer than the default request timeout.
-# If this request times out, you should retry the request after allowing time for the ML node allocation to complete.
+# If this request times out, you should retry the request after allowing time for the ML node allocation to complete (typically 1-5 minutes).
 POST /_bulk?pretty\n`;
     sampleDocuments.forEach((document) => {
       result += `{ "index": { "_index": "${indexName}" } }
