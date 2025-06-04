@@ -33,7 +33,6 @@ export const validateCommandRequest = (
   logger: Logger,
   res: KibanaResponseFactory
 ) => {
-  console.log({ reqBody });
   switch (command) {
     case 'runscript':
       try {

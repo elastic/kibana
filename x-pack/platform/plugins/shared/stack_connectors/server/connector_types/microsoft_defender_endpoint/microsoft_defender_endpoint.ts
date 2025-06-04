@@ -150,8 +150,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     try {
       response = await this.request<R>(requestOptions, connectorUsageCollector);
-
-      console.log({ response: JSON.stringify(response.data, null, 2) });
     } catch (err) {
       if (was401RetryDone) {
         throw err;
