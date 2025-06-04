@@ -9,7 +9,6 @@
 
 export type {
   DashboardAttributes,
-  GridData,
   SavedDashboardPanel,
   SavedDashboardSection,
   DashboardSavedObjectCrudTypes,

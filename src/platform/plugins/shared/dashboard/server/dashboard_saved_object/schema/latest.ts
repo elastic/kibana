@@ -11,7 +11,6 @@
 export {
   dashboardAttributesSchema as dashboardSavedObjectSchema,
   type DashboardAttributes as DashboardSavedObjectAttributes,
-  type GridData,
   type SavedDashboardPanel,
   type SavedDashboardSection,
 } from './v2';

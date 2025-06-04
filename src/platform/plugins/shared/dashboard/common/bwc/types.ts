@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
-import type { GridData } from '../../server/dashboard_saved_object';
+import type { SavedDashboardPanel } from '../../server';
 
 interface KibanaAttributes {
   kibanaSavedObjectMeta: {
@@ -123,7 +123,7 @@ export type RawSavedDashboardPanel620 = RawSavedDashboardPanel610 & {
 export type RawSavedDashboardPanel610 = Pick<
   RawSavedDashboardPanelTo60,
   Exclude<keyof RawSavedDashboardPanelTo60, 'size_x' | 'size_y' | 'col' | 'row'>
-> & { gridData: GridData; version: string };
+> & { gridData: SavedDashboardPanel['gridData']; version: string };
 
 export interface RawSavedDashboardPanelTo60 {
   readonly columns?: string[];

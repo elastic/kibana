@@ -23,7 +23,6 @@ import {
 import { DashboardSavedObjectContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
-export type GridData = TypeOf<typeof gridDataSchema>;
 
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
@@ -33,7 +32,7 @@ export interface SavedDashboardPanel {
   id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type
   panelRefName?: string;
-  gridData: GridData;
+  gridData: TypeOf<typeof gridDataSchema>;
   panelIndex: string;
   title?: string;
 
