@@ -19,10 +19,15 @@ import {
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
 
-export const useSelectedMonitor = (
-  monId?: string,
-  { refetchMonitorEnabled }: { refetchMonitorEnabled: boolean } = { refetchMonitorEnabled: true }
-) => {
+interface UseSelectedMonitorOptions {
+  monId?: string;
+  refetchMonitorEnabled?: boolean;
+}
+
+export const useSelectedMonitor = ({
+  monId = undefined,
+  refetchMonitorEnabled = true,
+}: UseSelectedMonitorOptions = {}) => {
   let monitorId = monId;
   const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
