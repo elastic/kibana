@@ -53,7 +53,7 @@ export class DataStreamStat {
     this.hasFailureStore = dataStreamStat.hasFailureStore;
   }
 
-  public static create(dataStreamStat: DataStreamStatType & { hasFailureStore?: boolean }) {
+  public static create(dataStreamStat: DataStreamStatType) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(dataStreamStat.name);
 
     const dataStreamStatProps = {
