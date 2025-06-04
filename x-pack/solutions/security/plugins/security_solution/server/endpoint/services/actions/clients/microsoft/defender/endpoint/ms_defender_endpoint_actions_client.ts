@@ -499,7 +499,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-    MSDefenderRunScriptActionRequestBody['parameters'],
+      MSDefenderRunScriptActionRequestBody['parameters'],
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
     > = {
@@ -546,7 +546,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
-    return actionDetails as ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>;
+    return actionDetails as ActionDetails<
+      ResponseActionRunScriptOutputContent,
+      ResponseActionRunScriptParameters
+    >;
   }
 
   async processPendingActions({
