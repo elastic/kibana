@@ -12,6 +12,12 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
+import { METADATA_FIELDS } from '../shared/constants';
+
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
+  name: field,
+  type: 'keyword',
+}));
 
 export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
@@ -90,6 +96,13 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const editorExtensions = [
+  {
+    name: 'Logs Count by Host',
+    query: 'from logs* | STATS count(*) by host',
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -107,6 +120,9 @@ export function getCallbackMocks(): ESQLCallbacks {
         };
         return [field];
       }
+      if (/METADATA/i.test(query)) {
+        return [...fields, ...metadataFields];
+      }
       return fields;
     }),
     getSources: jest.fn(async () =>
@@ -119,5 +135,11 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
   };
 }
