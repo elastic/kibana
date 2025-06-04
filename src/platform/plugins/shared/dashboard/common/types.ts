@@ -82,8 +82,7 @@ export type DashboardLocatorParams = Partial<
     references?: DashboardState['references'] & SerializableRecord;
 
     /**
-     * If given, the dashboard saved object with this id will be loaded. If not given,
-     * a new, unsaved dashboard will be loaded up.
+     * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
      */
     dashboardId?: string;
 
