@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// todo not sure why this is seen as browser code
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ResolveIndexResponseFromES } from './types';
 import { getIndexState } from './get_index_state';

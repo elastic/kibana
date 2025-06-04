@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Version } from '@kbn/upgrade-assistant-pkg-server';
+const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
 
-const versionService = new Version();
-
-export { versionService };
+export { ML_UPGRADE_OP_TYPE };

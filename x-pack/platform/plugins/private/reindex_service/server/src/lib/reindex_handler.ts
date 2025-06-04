@@ -36,7 +36,7 @@ interface ReindexHandlerArgs {
     enqueue?: boolean;
   };
   security?: SecurityPluginStart;
-  versionService: Version;
+  version: Version;
 }
 
 export const reindexHandler = async ({
@@ -49,16 +49,17 @@ export const reindexHandler = async ({
   savedObjects,
   reindexOptions,
   security,
-  versionService,
+  version,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
-  const reindexActions = reindexActionsFactory(
-    savedObjects,
+  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log, version);
+  const reindexService = reindexServiceFactory(
     callAsCurrentUser,
+    reindexActions,
     log,
-    versionService
+    licensing,
+    version
   );
-  const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 
   if (!(await reindexService.hasRequiredPrivileges(indexName))) {
     throw error.accessForbidden(

@@ -21,11 +21,15 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import { getMockVersionInfo } from '../__fixtures__/version'; // this will need to be addressed
-import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
-import { versionService } from './version';
+import { getMockVersionInfo } from '../__fixtures__/version';
+import { esIndicesStateCheck, type Version } from '@kbn/upgrade-assistant-pkg-server';
 
 import { ReindexService, reindexServiceFactory } from './reindex_service';
+
+const versionMock = {
+  getMajorVersion: jest.fn().mockReturnValue(8),
+  getPrevMajorVersion: jest.fn().mockReturnValue(7),
+} as unknown as Version;
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
@@ -75,10 +79,9 @@ describe('reindexService', () => {
       clusterClient.asCurrentUser,
       actions,
       log,
-      licensingPluginSetup
+      licensingPluginSetup,
+      versionMock
     );
-
-    versionService.setup('8.0.0');
   });
 
   describe('hasRequiredPrivileges', () => {

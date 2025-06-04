@@ -9,7 +9,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import SemVer from 'semver/classes/semver';
+import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 import { CredentialStore } from './lib/credential_store';
 
 export interface RouteDependencies {
@@ -21,5 +21,5 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
-  current: SemVer;
+  version: Version;
 }

@@ -11,11 +11,11 @@ import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { Version } from '@kbn/upgrade-assistant-pkg-server';
 import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
-import { versionService } from './version';
 
 const POLL_INTERVAL = 30000;
 const PAUSE_THRESHOLD_MULTIPLIER = 4;
@@ -52,6 +52,7 @@ const MAX_WORKER_PADDING_MS = Math.floor(PAUSE_WINDOW / PAUSE_THRESHOLD_MULTIPLI
  * the lock for this reindex operation.
  */
 export class ReindexWorker {
+  private static version: Version;
   private static workerSingleton?: ReindexWorker;
   private readonly stop$ = new Subject<void>();
   private updateOperationLoopRunning: boolean = false;
@@ -78,7 +79,8 @@ export class ReindexWorker {
         clusterClient,
         log,
         licensing,
-        security
+        security,
+        this.version
       );
     }
 
@@ -91,18 +93,21 @@ export class ReindexWorker {
     private clusterClient: IClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup,
-    security: SecurityPluginStart
+    security: SecurityPluginStart,
+    version: Version
   ) {
     this.log = log.get('reindex_worker');
     this.security = security;
+    ReindexWorker.version = version;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log, versionService),
+      reindexActionsFactory(this.client, callAsInternalUser, this.log, version),
       log,
-      this.licensing
+      this.licensing,
+      version
     );
   }
 
@@ -196,8 +201,19 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log, versionService);
-    return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
+    const actions = reindexActionsFactory(
+      this.client,
+      callAsCurrentUser,
+      this.log,
+      ReindexWorker.version
+    );
+    return reindexServiceFactory(
+      callAsCurrentUser,
+      actions,
+      this.log,
+      this.licensing,
+      ReindexWorker.version
+    );
   };
 
   private updateInProgressOps = async () => {

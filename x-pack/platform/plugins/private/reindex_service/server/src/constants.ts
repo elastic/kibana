@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// todo rename path
-export const API_BASE_PATH = '/api/upgrade_assistant';
+//
+export const API_BASE_PATH_UPRGRADE_ASSISTANT = '/api/upgrade_assistant';

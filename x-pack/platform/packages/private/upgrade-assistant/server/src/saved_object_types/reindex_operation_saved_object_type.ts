@@ -7,10 +7,8 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 
-// import { REINDEX_OP_TYPE } from '../../common/types';
-
 export const reindexOperationSavedObjectType: SavedObjectsType = {
-  // todo place in common package
+  // todo does this need to be shared?
   name: 'upgrade-assistant-reindex-operation',
   hidden: true,
   namespaceType: 'agnostic',

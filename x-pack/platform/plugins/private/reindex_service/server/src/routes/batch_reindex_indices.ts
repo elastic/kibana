@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { API_BASE_PATH } from '../constants';
+import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
 import { ReindexWorker } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { sortAndOrderReindexOperations } from '../lib/op_utils';
@@ -18,7 +18,6 @@ import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from '../lib/reindex_handler';
 import { GetBatchQueueResponse, PostBatchResponse } from './types';
-import { versionService } from '../lib/version';
 
 export function registerBatchReindexIndicesRoutes(
   {
@@ -28,11 +27,11 @@ export function registerBatchReindexIndicesRoutes(
     log,
     getSecurityPlugin,
     lib: { handleEsError },
-    current,
+    version,
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = `${API_BASE_PATH}/reindex`;
+  const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
 
   // Get the current batch queue
   router.get(
@@ -50,7 +49,7 @@ export function registerBatchReindexIndicesRoutes(
       },
       validate: {},
     },
-    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
         savedObjects,
@@ -61,7 +60,7 @@ export function registerBatchReindexIndicesRoutes(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         callAsCurrentUser,
         log,
-        versionService
+        version
       );
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
@@ -101,7 +100,7 @@ export function registerBatchReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
       const {
         savedObjects: { getClient },
         elasticsearch: { client: esClient },
@@ -125,7 +124,7 @@ export function registerBatchReindexIndicesRoutes(
               enqueue: true,
             },
             security: getSecurityPlugin(),
-            versionService,
+            version,
           });
           results.enqueued.push(result);
         } catch (e) {

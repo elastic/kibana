@@ -11,8 +11,7 @@ import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-ser
 import moment from 'moment';
 
 import { ReindexSavedObject, ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { versionService } from './version';
+import { REINDEX_OP_TYPE, type Version } from '@kbn/upgrade-assistant-pkg-server';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
@@ -21,6 +20,11 @@ const { currentMajor, prevMajor } = getMockVersionInfo();
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getRollupJobByIndexName: jest.fn(),
 }));
+
+const versionMock = {
+  getMajorVersion: jest.fn().mockReturnValue(8),
+  getPrevMajorVersion: jest.fn().mockReturnValue(7),
+} as unknown as Version;
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -46,12 +50,11 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionService);
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionMock);
   });
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup('8.0.0');
       client.create.mockResolvedValue();
     });
 

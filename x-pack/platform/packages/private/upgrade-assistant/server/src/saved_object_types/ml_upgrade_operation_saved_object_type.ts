@@ -7,11 +7,11 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 
-// import { ML_UPGRADE_OP_TYPE } from '../../common/types';
+import { ML_UPGRADE_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 
+// todo not sure if this needs to be shared
 export const mlSavedObjectType: SavedObjectsType = {
-  // todo place in common package
-  name: 'upgrade-assistant-ml-upgrade-operation',
+  name: ML_UPGRADE_OP_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { versionService } from './version';
+import { Version } from '@kbn/upgrade-assistant-pkg-server';
+
 import { getMockVersionInfo } from '../__fixtures__/version';
 
 import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
+
+const versionService = new Version();
+versionService.setup('8.0.0');
 
 describe('index settings', () => {
   describe('sourceNameForIndex', () => {

@@ -18,16 +18,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-// import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
-// import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-// import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
-// import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
-// import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
-
-import { reindexOperationSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
-import { versionService } from './src/lib/version';
-// import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
+import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
 import { RouteDependencies } from './src/types';
 
 import { ReindexWorker } from './src/lib';
@@ -52,12 +44,15 @@ export class ReindexServiceServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
   private securityPluginStart?: SecurityPluginStart;
+  private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
     // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
-    versionService.setup(env.packageInfo.version);
+    // versionService.setup(env.packageInfo.version);
+    this.version = new Version();
+    this.version.setup(env.packageInfo.version);
   }
 
   public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
@@ -73,15 +68,13 @@ export class ReindexServiceServerPlugin implements Plugin {
       lib: {
         handleEsError,
       },
-      current: versionService.getCurrentVersion(),
+      version: this.version,
     };
 
     savedObjects.registerType(reindexOperationSavedObjectType);
 
     registerReindexIndicesRoutes(dependencies, () => this.getWorker());
     registerBatchReindexIndicesRoutes(dependencies, () => this.getWorker());
-    // eslint-disable-next-line no-console
-    console.log('Reindex Service Setup completed');
   }
 
   public start(
@@ -104,7 +97,6 @@ export class ReindexServiceServerPlugin implements Plugin {
       security: this.securityPluginStart,
     });
 
-    // todo its annoying it wants to see the conditional. look at removing later
     this.reindexWorker?.start();
   }
 

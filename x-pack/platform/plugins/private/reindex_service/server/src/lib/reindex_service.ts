@@ -11,14 +11,17 @@ import { firstValueFrom } from 'rxjs';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
+import {
+  esIndicesStateCheck,
+  getReindexWarnings,
+  type Version,
+} from '@kbn/upgrade-assistant-pkg-server';
 import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   IndexWarning,
 } from '@kbn/upgrade-assistant-pkg-common';
-import { versionService } from './version';
 
 import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
@@ -128,7 +131,8 @@ export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
-  licensing: LicensingPluginSetup
+  licensing: LicensingPluginSetup,
+  kibanaVersion: Version
 ): ReindexService => {
   // ------ Utility functions
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
@@ -405,7 +409,7 @@ export const reindexServiceFactory = (
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = await actions.getFlatSettings(indexName);
     const warnings = flatSettings
-      ? getReindexWarnings(flatSettings, versionService.getMajorVersion())
+      ? getReindexWarnings(flatSettings, kibanaVersion.getMajorVersion())
       : undefined;
     const indexSettingsWarning = warnings?.find(
       (warning) =>
@@ -507,8 +511,8 @@ export const reindexServiceFactory = (
         return true;
       }
 
-      const names = [indexName, generateNewIndexName(indexName, versionService)];
-      const sourceName = sourceNameForIndex(indexName, versionService);
+      const names = [indexName, generateNewIndexName(indexName, kibanaVersion)];
+      const sourceName = sourceNameForIndex(indexName, kibanaVersion);
 
       // if we have re-indexed this in the past, there will be an
       // underlying alias we will also need to update.
@@ -551,7 +555,7 @@ export const reindexServiceFactory = (
             warningType: 'replaceIndexWithAlias',
             flow: 'reindex',
           },
-          ...getReindexWarnings(flatSettings, versionService.getMajorVersion()),
+          ...getReindexWarnings(flatSettings, kibanaVersion.getMajorVersion()),
         ];
       }
     },
