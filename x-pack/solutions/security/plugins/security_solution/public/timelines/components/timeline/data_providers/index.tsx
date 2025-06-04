@@ -42,11 +42,11 @@ const DropTargetDataProvidersContainer = styled.div`
     border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseSuccess};
 
     & .timeline-drop-area-empty__text {
-      color: ${({ theme }) => theme.euiTheme.colors.success};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
 
     & .euiFormHelpText {
-      color: ${({ theme }) => theme.euiTheme.colors.success};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
   }
 `;
