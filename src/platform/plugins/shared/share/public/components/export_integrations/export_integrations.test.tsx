@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { ExportMenu } from './export_popover';
+import { ExportMenu } from './export_integrations';
 import type { IShareContext } from '../context';
 
 const mockShareContext: IShareContext = {
