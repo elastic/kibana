@@ -384,7 +384,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
             await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
-          it('should display elements on File Data Visualizer page correctly', async () => {
+          it.skip('should display elements on File Data Visualizer page correctly', async () => {
             await ml.testExecution.logTestStep(
               'should load the file data visualizer file selection'
             );

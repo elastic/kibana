@@ -85,6 +85,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-ui-settings-browser",
     "@kbn/file-upload-common",
+    "@kbn/shared-ux-prompt-no-data-views",
+    "@kbn/index-management-shared-types",
     "@kbn/charts-theme"
   ],
   "exclude": [

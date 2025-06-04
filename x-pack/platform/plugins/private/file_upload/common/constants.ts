@@ -25,3 +25,5 @@ export const FILE_FORMATS = {
 };
 
 export const TIKA_PREVIEW_CHARS = 100000;
+
+// move all of these to package!!!!!!!!!!!!!!!!!!!!!!!!

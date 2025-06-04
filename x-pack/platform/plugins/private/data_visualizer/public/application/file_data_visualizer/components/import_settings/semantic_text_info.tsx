@@ -11,13 +11,14 @@ import React from 'react';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
 
 interface Props {
   results: FindFileStructureResponse;
 }
 
 export const SemanticTextInfo: FC<Props> = ({ results }) => {
+  // TBD: this may be needed after review of UX
   return results.format === FILE_FORMATS.TIKA ? (
     <>
       <EuiSpacer size="m" />
