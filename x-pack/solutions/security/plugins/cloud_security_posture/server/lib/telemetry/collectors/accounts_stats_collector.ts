@@ -10,10 +10,10 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface Value {
   value: number;
@@ -57,7 +57,7 @@ interface AccountEntity {
 }
 
 const getAccountsStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
@@ -234,7 +234,7 @@ export const getAccountsStats = async (
 ): Promise<CspmAccountsStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
     if (isIndexExists) {

@@ -16,7 +16,7 @@ import type {
   GetComplianceDashboardRequest,
   ComplianceDashboardDataV2,
 } from '../../../common/types_old';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -25,6 +25,7 @@ import { getTrends, Trends } from './get_trends';
 import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -88,7 +89,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const esClient = cspContext.esClient.asCurrentUser;
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 
@@ -162,7 +163,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 

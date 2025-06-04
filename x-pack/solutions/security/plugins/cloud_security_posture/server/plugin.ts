@@ -52,6 +52,10 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 
 export class CspPlugin
   implements
@@ -208,7 +212,50 @@ export class CspPlugin
    */
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
+    console.log('*****************************');
+    console.log('*****************************');
+    console.log('*****************************');
     const esClient = core.elasticsearch.client.asInternalUser;
+
+    // Check if index alias is already created
+    const isAliasExists = await esClient.indices.existsAlias({
+      name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+
+    const isIndexExists = await esClient.indices.exists({
+      index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+    });
+
+    if (!isAliasExists && isIndexExists) {
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+      try {
+        const res = await esClient.indices.updateAliases({
+          actions: [
+            {
+              add: {
+                index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+                alias: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+                is_write_index: true,
+              },
+            },
+          ],
+        });
+        console.log(JSON.stringify(res, null, 2));
+        this.logger.debug(
+          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} already exists, skipping initialization`
+        );
+      } catch (error) {
+        console.error(
+          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}: ${error}`
+        );
+        this.logger.error(
+          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}: ${error}`
+        );
+        throw error;
+      }
+    }
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);

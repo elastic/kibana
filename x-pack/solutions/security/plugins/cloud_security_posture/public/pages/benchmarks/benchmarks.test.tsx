@@ -38,7 +38,10 @@ describe('<Benchmarks />', () => {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
