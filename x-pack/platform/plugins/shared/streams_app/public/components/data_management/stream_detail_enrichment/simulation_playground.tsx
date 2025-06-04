@@ -12,6 +12,7 @@ import {
   EuiCheckbox,
   EuiPanel,
   EuiText,
+  EuiSkeletonText,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -119,15 +120,17 @@ const DataSourcesList = () => {
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={manageDataSourcesLabel}>
-          <EuiButtonIcon
-            display="base"
-            size="m"
-            iconType="advancedSettingsApp"
-            aria-label={manageDataSourcesLabel}
-            onClick={manageDataSources}
-          />
-        </EuiToolTip>
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+          <EuiToolTip content={manageDataSourcesLabel}>
+            <EuiButtonIcon
+              size="m"
+              iconSize="l"
+              iconType="advancedSettingsApp"
+              aria-label={manageDataSourcesLabel}
+              onClick={manageDataSources}
+            />
+          </EuiToolTip>
+        </EuiPanel>
       </EuiFlexItem>
       {isManagingDataSources && <DataSourcesFlyout onClose={closeDataSourcesManagement} />}
     </EuiFlexGroup>
@@ -143,19 +146,36 @@ const DataSourceListItem = ({ dataSourceRef }: { dataSourceRef: DataSourceActorR
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
   const isEnabled = dataSourceState.matches('enabled');
+  const isLoading = dataSourceState.matches({ enabled: 'loadingData' });
   const toggleActivity = () => {
     dataSourceRef.send({ type: 'dataSource.toggleActivity' });
   };
 
   const content = (
-    <EuiFlexGroup gutterSize="s">
+    <div>
       <strong>
         {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
       </strong>
-      <EuiText size="xs" color="subdued">
-        {dataSourceState.context.data.length}
-      </EuiText>
-    </EuiFlexGroup>
+      <EuiSkeletonText
+        size="xs"
+        lines={1}
+        isLoading={isLoading}
+        contentAriaLabel={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataSources.loadingSamplesCount',
+          { defaultMessage: 'Loading samples count' }
+        )}
+      >
+        <EuiText size="xs" color="subdued">
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataSources.samplesCount',
+            {
+              defaultMessage: '{count, plural, one {# sample} other {# samples}}',
+              values: { count: dataSourceState.context.data.length },
+            }
+          )}
+        </EuiText>
+      </EuiSkeletonText>
+    </div>
   );
 
   return (

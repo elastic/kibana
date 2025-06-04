@@ -89,7 +89,21 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
           )}
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        banner={
+          <EuiCallOut
+            size="s"
+            title={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoDescription',
+              {
+                defaultMessage:
+                  'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
+              }
+            )}
+            iconType="pin"
+          />
+        }
+      >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiTitle size="s">
             <h3>
@@ -101,19 +115,7 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
           </EuiTitle>
           <DataSourcesContextMenu onAddDataSource={addDataSource} />
         </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiCallOut
-          size="s"
-          title={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoDescription',
-            {
-              defaultMessage:
-                'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
-            }
-          )}
-          iconType="pin"
-        />
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         <EuiFlexGroup component="ul" direction="column" gutterSize="m">
           {dataSourcesActorRefs.map((dataSourceRef) => (
             <EuiFlexItem key={dataSourceRef.id} component="li">

@@ -79,7 +79,7 @@ export const dataSourceMachine = setup({
     streamName: input.streamName,
     data: [],
   }),
-  initial: 'unresolved',
+  initial: 'determining',
   on: {
     'dataSource.delete': {
       guard: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
@@ -87,12 +87,20 @@ export const dataSourceMachine = setup({
     },
   },
   states: {
-    unresolved: {
+    determining: {
       always: [{ target: 'enabled', guard: 'isEnabled' }, { target: 'disabled' }],
     },
     enabled: {
       initial: 'loadingData',
       on: {
+        'dataSource.change': {
+          target: '.debouncingChanges',
+          reenter: true,
+          actions: [
+            { type: 'storeDataSource', params: ({ event }) => event },
+            { type: 'notifyChangeEventToParent' },
+          ],
+        },
         'dataSource.toggleActivity': {
           target: 'disabled',
           actions: [
@@ -103,43 +111,13 @@ export const dataSourceMachine = setup({
             { type: 'notifyChangeEventToParent' },
           ],
         },
-        'dataSource.change': {
-          target: '.debouncingChanges',
-          actions: [
-            { type: 'storeDataSource', params: ({ event }) => event },
-            { type: 'notifyChangeEventToParent' },
-          ],
-        },
       },
       exit: [{ type: 'notifyDataChangeToParent' }],
       states: {
-        idle: {
-          on: {
-            'dataSource.change': {
-              target: 'debouncingChanges',
-              actions: [
-                { type: 'storeDataSource', params: ({ event }) => event },
-                { type: 'notifyChangeEventToParent' },
-              ],
-            },
-          },
-        },
+        idle: {},
         debouncingChanges: {
-          on: {
-            'dataSource.change': {
-              target: 'debouncingChanges',
-              actions: [
-                { type: 'storeDataSource', params: ({ event }) => event },
-                { type: 'notifyChangeEventToParent' },
-              ],
-              description: 'Re-enter debouncing state.',
-              reenter: true,
-            },
-          },
           after: {
-            dataSourceChangeDebounceTime: {
-              target: 'loadingData',
-            },
+            dataSourceChangeDebounceTime: 'loadingData',
           },
         },
         loadingData: {
