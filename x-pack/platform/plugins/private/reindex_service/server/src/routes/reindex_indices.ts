@@ -51,40 +51,38 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getCurrentVersion().major)(
-      async ({ core }, request, response) => {
-        const {
-          savedObjects: { getClient },
-          elasticsearch: { client: esClient },
-        } = await core;
-        const { indexName } = request.params;
-        try {
-          const result = await reindexHandler({
-            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-            dataClient: esClient,
-            indexName,
-            log,
-            licensing,
-            request,
-            credentialStore,
-            security: getSecurityPlugin(),
-            version,
-          });
+    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+      const {
+        savedObjects: { getClient },
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
+      try {
+        const result = await reindexHandler({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          indexName,
+          log,
+          licensing,
+          request,
+          credentialStore,
+          security: getSecurityPlugin(),
+          version,
+        });
 
-          // Kick the worker on this node to immediately pickup the new reindex operation.
-          getWorker().forceRefresh();
+        // Kick the worker on this node to immediately pickup the new reindex operation.
+        getWorker().forceRefresh();
 
-          return response.ok({
-            body: result,
-          });
-        } catch (error) {
-          if (error instanceof errors.ResponseError) {
-            return handleEsError({ error, response });
-          }
-          return mapAnyErrorToKibanaHttpResponse(error);
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 
   // Get status
@@ -107,68 +105,65 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getCurrentVersion().major)(
-      async ({ core }, request, response) => {
-        const {
-          savedObjects,
-          elasticsearch: { client: esClient },
-        } = await core;
-        const { getClient } = savedObjects;
-        const { indexName } = request.params;
-        const asCurrentUser = esClient.asCurrentUser;
-        const reindexActions = reindexActionsFactory(
-          getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-          asCurrentUser,
-          log,
-          version
-        );
-        const reindexService = reindexServiceFactory(
-          asCurrentUser,
-          reindexActions,
-          log,
-          licensing,
-          version
-        );
+    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+      const {
+        savedObjects,
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { getClient } = savedObjects;
+      const { indexName } = request.params;
+      const asCurrentUser = esClient.asCurrentUser;
+      const reindexActions = reindexActionsFactory(
+        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+        asCurrentUser,
+        log,
+        version
+      );
+      const reindexService = reindexServiceFactory(
+        asCurrentUser,
+        reindexActions,
+        log,
+        licensing,
+        version
+      );
 
-        try {
-          const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
-          const reindexOp = await reindexService.findReindexOperation(indexName);
-          // If the user doesn't have privileges than querying for warnings is going to fail.
-          const warnings = hasRequiredPrivileges
-            ? await reindexService.detectReindexWarnings(indexName)
-            : [];
+      try {
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
+        const reindexOp = await reindexService.findReindexOperation(indexName);
+        // If the user doesn't have privileges than querying for warnings is going to fail.
+        const warnings = hasRequiredPrivileges
+          ? await reindexService.detectReindexWarnings(indexName)
+          : [];
 
-          const isTruthy = (value?: string | boolean): boolean =>
-            value === true || value === 'true';
-          const { aliases, settings, isInDataStream, isFollowerIndex } =
-            await reindexService.getIndexInfo(indexName);
+        const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
+        const { aliases, settings, isInDataStream, isFollowerIndex } =
+          await reindexService.getIndexInfo(indexName);
 
-          const body: ReindexStatusResponse = {
-            reindexOp: reindexOp ? reindexOp.attributes : undefined,
-            warnings,
-            hasRequiredPrivileges,
-            meta: {
-              indexName,
-              reindexName: generateNewIndexName(indexName, version),
-              aliases: Object.keys(aliases),
-              isFrozen: isTruthy(settings?.frozen),
-              isReadonly: isTruthy(settings?.verified_read_only),
-              isInDataStream,
-              isFollowerIndex,
-            },
-          };
+        const body: ReindexStatusResponse = {
+          reindexOp: reindexOp ? reindexOp.attributes : undefined,
+          warnings,
+          hasRequiredPrivileges,
+          meta: {
+            indexName,
+            reindexName: generateNewIndexName(indexName, version),
+            aliases: Object.keys(aliases),
+            isFrozen: isTruthy(settings?.frozen),
+            isReadonly: isTruthy(settings?.verified_read_only),
+            isInDataStream,
+            isFollowerIndex,
+          },
+        };
 
-          return response.ok({
-            body,
-          });
-        } catch (error) {
-          if (error instanceof errors.ResponseError) {
-            return handleEsError({ error, response });
-          }
-          return mapAnyErrorToKibanaHttpResponse(error);
+        return response.ok({
+          body,
+        });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 
   // Cancel reindex
@@ -191,41 +186,39 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getCurrentVersion().major)(
-      async ({ core }, request, response) => {
-        const {
-          savedObjects,
-          elasticsearch: { client: esClient },
-        } = await core;
-        const { indexName } = request.params;
-        const { getClient } = savedObjects;
-        const callAsCurrentUser = esClient.asCurrentUser;
-        const reindexActions = reindexActionsFactory(
-          getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-          callAsCurrentUser,
-          log,
-          version
-        );
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing,
-          version
-        );
+    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+      const {
+        savedObjects,
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
+      const { getClient } = savedObjects;
+      const callAsCurrentUser = esClient.asCurrentUser;
+      const reindexActions = reindexActionsFactory(
+        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+        callAsCurrentUser,
+        log,
+        version
+      );
+      const reindexService = reindexServiceFactory(
+        callAsCurrentUser,
+        reindexActions,
+        log,
+        licensing,
+        version
+      );
 
-        try {
-          await reindexService.cancelReindexing(indexName);
+      try {
+        await reindexService.cancelReindexing(indexName);
 
-          return response.ok({ body: { acknowledged: true } });
-        } catch (error) {
-          if (error instanceof errors.ResponseError) {
-            return handleEsError({ error, response });
-          }
-
-          return mapAnyErrorToKibanaHttpResponse(error);
+        return response.ok({ body: { acknowledged: true } });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
+
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 }
