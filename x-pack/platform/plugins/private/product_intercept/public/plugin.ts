@@ -9,12 +9,7 @@ import { Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
-import {
-  type CoreSetup,
-  type CoreStart,
-  Plugin,
-  type PluginInitializerContext,
-} from '@kbn/core/public';
+import { type CoreSetup, type CoreStart, Plugin } from '@kbn/core/public';
 import { InterceptsStart } from '@kbn/intercepts-plugin/public';
 import { type CloudStart } from '@kbn/cloud-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,11 +26,6 @@ interface ProductInterceptPluginStartDeps {
 export class ProductInterceptPublicPlugin implements Plugin {
   private readonly telemetry = new PromptTelemetry();
   private interceptSubscription?: Subscription;
-  private readonly isServerless: boolean;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.isServerless = initializerContext.env?.packageInfo?.buildFlavor === 'serverless';
-  }
 
   setup(core: CoreSetup) {
     return this.telemetry.setup({ analytics: core.analytics });
@@ -46,11 +36,9 @@ export class ProductInterceptPublicPlugin implements Plugin {
       analytics: core.analytics,
     });
 
-    const productOffering = this.isServerless
-      ? `Elastic ${function (string: string) {
-          return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-        }.call(null, cloud.serverless.projectType || '')}`
-      : 'Kibana';
+    const productOffering = `Elastic ${function (string: string) {
+      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }.call(null, cloud.serverless?.projectType || '')}`.trim();
 
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
