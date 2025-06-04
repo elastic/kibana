@@ -33,6 +33,7 @@
     "@kbn/core-rendering-browser",
     "@kbn/ebt-tools",
     "@kbn/palettes",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*",

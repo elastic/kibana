@@ -31,7 +31,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
 
   // Failing: See https://github.com/elastic/kibana/issues/202337
-  describe.skip('SyntheticsCustomStatusRule', () => {
+  describe.skip('SyntheticsCustomStatusRule', function () {
+    // Test failing on MKI and ECH
+    this.tags(['skipCloud']);
+
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {

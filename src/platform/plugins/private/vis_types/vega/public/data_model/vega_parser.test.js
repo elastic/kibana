@@ -17,7 +17,7 @@ import { VegaThemeColors } from './utils';
 
 jest.mock('../services');
 
-const theme = { name: 'borealis', darkMode: false };
+const theme = { darkMode: false };
 
 describe(`VegaParser.parseAsync`, () => {
   function check(spec, useResize, expectedSpec, warnCount) {

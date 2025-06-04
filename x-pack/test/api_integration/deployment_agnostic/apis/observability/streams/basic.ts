@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
+import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { get, omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -141,10 +143,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result._index).to.match(/^\.ds\-logs-.*/);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs',
+          body: {
+            text: 'test',
+          },
+          severity_text: 'info',
+          attributes: { 'log.logger': 'nginx' },
+          stream: { name: 'logs' },
         });
       });
 
@@ -161,11 +165,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs',
-          stream: 'somethingelse',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+            stream: 'somethingelse',
+          },
+          stream: { name: 'logs' },
         });
       });
 
@@ -175,7 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx',
           },
           if: {
-            field: 'log.logger',
+            field: 'attributes.log.logger',
             operator: 'eq' as const,
             value: 'nginx',
           },
@@ -211,10 +217,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
         });
       });
 
@@ -223,7 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          if: { field: 'log.level', operator: 'eq' as const, value: 'info' },
+          if: { field: 'severity_text', operator: 'eq' as const, value: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -241,10 +249,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: 'test',
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx.access',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx.access' },
         });
       });
 
@@ -253,7 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          if: { field: 'log', operator: 'eq' as const, value: 'error' },
+          if: { field: 'attributes.log', operator: 'eq' as const, value: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -271,10 +281,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
-          message: 'test',
-          'log.level': 'error',
-          'log.logger': 'nginx',
-          'stream.name': 'logs.nginx',
+          body: { text: 'test' },
+          severity_text: 'error',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: 'logs.nginx' },
         });
       });
 
@@ -283,7 +295,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          if: { field: 'code', operator: 'gte' as const, value: '500' },
+          if: { field: 'attributes.code', operator: 'gte' as const, value: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -315,8 +327,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             or: [
-              { field: 'message', operator: 'contains' as const, value: '500' },
-              { field: 'message', operator: 'contains' as const, value: 400 },
+              { field: 'body.text', operator: 'contains' as const, value: '500' },
+              { field: 'body.text', operator: 'contains' as const, value: 400 },
             ],
           },
         };
@@ -348,7 +360,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           if: {
             or: [
-              { field: '@abc.weird fieldname', operator: 'contains' as const, value: 'route_it' },
+              {
+                field: 'attributes.@abc.weird fieldname',
+                operator: 'contains' as const,
+                value: 'route_it',
+              },
             ],
           },
         };
@@ -384,7 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: [],
               wired: {
                 fields: {
-                  myfield: {
+                  'attributes.myfield': {
                     type: 'boolean',
                   },
                 },
@@ -406,7 +422,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 wired: {
                   ...body.stream.ingest.wired,
                   fields: {
-                    myfield: {
+                    'attributes.myfield': {
                       type: 'keyword',
                     },
                   },
@@ -429,7 +445,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: [],
               wired: {
                 fields: {
-                  myfield: {
+                  'attributes.myfield': {
                     type: 'system',
                   },
                 },
@@ -478,7 +494,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             destination: 'logs.nginx.error',
             if: {
-              field: 'log',
+              field: 'attributes.log',
               operator: 'eq',
               value: 'error',
             },
@@ -501,6 +517,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    async function expectFields(streams: string[], expectedFields: InheritedFieldDefinition) {
+      const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
+      for (const definition of definitions) {
+        const inherited = Streams.WiredStream.GetResponse.parse(definition).inherited_fields;
+        for (const [field, config] of Object.entries(expectedFields)) {
+          expect(inherited[field]).to.eql(config);
+        }
+      }
+
+      const mappingsResponse = await esClient.indices.getMapping({ index: streams });
+      for (const { mappings } of Object.values(mappingsResponse)) {
+        for (const [field, config] of Object.entries(expectedFields)) {
+          const fieldPath = field.split('.').join('.properties.');
+          expect(get(mappings.properties, fieldPath)).to.eql(omit(config, ['from']));
+        }
+      }
+    }
+
     describe('Basic setup', () => {
       before(async () => {
         await enableStreams(apiClient);
@@ -508,6 +542,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
+      });
+
+      it('inherit fields', async () => {
+        const fields: FieldDefinition = {
+          'attributes.foo': { type: 'keyword' },
+          'attributes.bar': { type: 'long' },
+        };
+        await putStream(apiClient, 'logs.one', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields, routing: [] },
+            },
+          },
+        });
+
+        await putStream(apiClient, 'logs.one.two.three', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields: {}, routing: [] },
+            },
+          },
+        });
+
+        const inheritedFields = Object.entries(fields).reduce((acc, field) => {
+          acc[field[0]] = { ...field[1], from: 'logs.one' };
+          return acc;
+        }, {} as InheritedFieldDefinition);
+
+        await expectFields(['logs.one.two', 'logs.one.two.three'], inheritedFields);
       });
 
       it('fails to create a stream if an existing template takes precedence', async () => {
@@ -529,10 +602,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                wired: {
-                  fields: {},
-                  routing: [],
-                },
+                wired: { fields: {}, routing: [] },
               },
             },
           },

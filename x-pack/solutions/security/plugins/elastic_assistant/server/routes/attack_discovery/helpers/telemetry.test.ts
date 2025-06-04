@@ -51,7 +51,7 @@ describe('telemetry', () => {
       reportAttackDiscoveryGenerationFailure({
         apiConfig: mockApiConfig,
         errorMessage: 'Epic fail!',
-        schedule: { id: 'fake-id-1', interval: '21d' },
+        scheduleInfo: { id: 'fake-id-1', interval: '21d', actions: ['.slack', '.jest'] },
         telemetry: mockTelemetry,
       });
 
@@ -59,10 +59,7 @@ describe('telemetry', () => {
         actionTypeId: '.gen-ai',
         errorMessage: 'Epic fail!',
         model: 'gpt-4',
-        schedule: {
-          id: 'fake-id-1',
-          interval: '21d',
-        },
+        scheduleInfo: { id: 'fake-id-1', interval: '21d', actions: ['.slack', '.jest'] },
       });
     });
   });
@@ -114,7 +111,7 @@ describe('telemetry', () => {
         durationMs: 456000,
         end: 'now',
         hasFilter: false,
-        schedule: { id: 'fake-id-2', interval: '32m' },
+        scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
         size: 10,
         start: 'now-24h',
         telemetry: mockTelemetry,
@@ -131,10 +128,7 @@ describe('telemetry', () => {
         hasFilter: false,
         isDefaultDateRange: true,
         model: 'gpt-4',
-        schedule: {
-          id: 'fake-id-2',
-          interval: '32m',
-        },
+        scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
       });
     });
   });

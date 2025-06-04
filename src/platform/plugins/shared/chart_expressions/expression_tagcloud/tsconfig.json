@@ -26,11 +26,11 @@
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
     "@kbn/chart-icons",
-    "@kbn/data-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/charts-theme",
     "@kbn/ebt-tools",
-    "@kbn/palettes"
+    "@kbn/palettes",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*",

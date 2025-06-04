@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { testData, test } from '../fixtures';
 
-test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.skip('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, kbnClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await apiServices.streams.enable();

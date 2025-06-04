@@ -400,6 +400,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/private\/kbn-scout-info/,
         /^src\/platform\/packages\/private\/kbn-scout-reporting/,
         /^x-pack\/platform\/plugins\/shared\/maps/,
+        /^x-pack\/platform\/plugins\/shared\/streams_app/,
         /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
         /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,

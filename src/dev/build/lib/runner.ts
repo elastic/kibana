@@ -17,12 +17,13 @@ import { Config } from './config';
 interface Options {
   config: Config;
   log: ToolingLog;
+  bufferLogs?: boolean;
 }
 
 export interface GlobalTask {
   global: true;
   description: string;
-  run(config: Config, log: ToolingLog, builds: Build[]): Promise<void>;
+  run(config: Config, log: ToolingLog): Promise<void>;
 }
 
 export interface Task {
@@ -31,11 +32,18 @@ export interface Task {
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
-export function createRunner({ config, log }: Options) {
-  async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
-    log.info(desc);
+export function createRunner({ config, log, bufferLogs = false }: Options) {
+  async function execTask(desc: string, task: GlobalTask): Promise<void>;
+  async function execTask(desc: string, task: Task, build: Build): Promise<void>;
+  async function execTask(desc: string, task: GlobalTask | Task, build?: Build): Promise<void> {
+    if (!task.global && build && bufferLogs) {
+      log.info(`Buffering logs for Task: ${desc}`);
+    } else {
+      log.info(desc);
+    }
+
     try {
-      await log.indent(4, async () => {
+      await log.indent(bufferLogs ? 0 : 4, async () => {
         const start = Date.now();
         const time = () => {
           const secs = Math.round((Date.now() - start) / 1000);
@@ -45,7 +53,15 @@ export function createRunner({ config, log }: Options) {
         };
 
         try {
-          await task.run(config, log, lastArg);
+          if (task.global) {
+            await task.run(config, log);
+          } else {
+            // This shouldn't ever happen since we're passing the builds in below, but needed for TS
+            if (!build) {
+              throw new Error('Task is not global, but no build was provided');
+            }
+            await task.run(config, log, build);
+          }
           log.success(chalk.green('✓'), time());
         } catch (error) {
           if (!isErrorLogged(error)) {
@@ -63,7 +79,7 @@ export function createRunner({ config, log }: Options) {
   }
 
   const builds: Build[] = [];
-  builds.push(new Build(config));
+  builds.push(new Build(config, bufferLogs));
 
   /**
    * Run a task by calling its `run()` method with three arguments:
@@ -73,10 +89,13 @@ export function createRunner({ config, log }: Options) {
    */
   return async function run(task: Task | GlobalTask) {
     if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task, builds);
+      await execTask(chalk`{dim [  global  ]} ${task.description}`, task);
     } else {
       for (const build of builds) {
-        await execTask(`${build.getLogTag()} ${task.description}`, task, build);
+        const desc = `${build.getLogTag()} ${task.description}`;
+        build.setBuildDesc(desc);
+
+        await execTask(desc, task, build);
       }
     }
   };

@@ -16,6 +16,7 @@
       "apm"
     ],
     "requiredPlugins": [
+      "apmSourcesAccess",
       "apmDataAccess",
       "data",
       "dashboard",

@@ -120,6 +120,10 @@ export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
 });
 
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.configurations', {
+  defaultMessage: 'Configurations',
+});
+
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
   defaultMessage: 'Administration',
 });

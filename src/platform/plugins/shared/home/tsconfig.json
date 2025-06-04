@@ -35,6 +35,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-kibana-context-render",
     "@kbn/deeplinks-observability",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",
