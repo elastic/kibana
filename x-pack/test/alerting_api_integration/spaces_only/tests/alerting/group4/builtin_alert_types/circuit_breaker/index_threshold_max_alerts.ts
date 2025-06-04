@@ -24,7 +24,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('index threshold rule that hits max alerts circuit breaker', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/193876
+  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
