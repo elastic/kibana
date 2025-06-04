@@ -30,7 +30,7 @@ const baseRecord: TableItemType = {
   group_name: 'admin',
   command_process: 'bash',
   source: 'console',
-  type: 'login',
+  url: 'login',
   method: 'password',
   result: 'success',
   destination: 'server1',
@@ -166,8 +166,8 @@ describe('columns', () => {
 
     it('renders type column as original value for unmatched string', () => {
       const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('customType', baseRecord)}</>, { wrapper: TestProviders });
-      expect(screen.getByText('customType')).toBeInTheDocument();
+      render(<>{col.render?.('/api/v1/authn', baseRecord)}</>, { wrapper: TestProviders });
+      expect(screen.getByText('Direct')).toBeInTheDocument();
     });
 
     it('renders result column with badge', () => {

@@ -24,6 +24,10 @@ jest.mock(
   })
 );
 
+jest.mock('../../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
+
 describe('UserActivityPrivilegedUsersPanel', () => {
   it('renders panel title', () => {
     render(<UserActivityPrivilegedUsersPanel />, { wrapper: TestProviders });
