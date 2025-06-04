@@ -33,6 +33,7 @@ import { dashboardUrlParams } from '../../dashboard_router';
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
+  asExport?: boolean;
   isDirty: boolean;
   savedObjectId?: string;
   dashboardTitle?: string;
@@ -49,6 +50,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   isDirty,
+  asExport,
   anchorElement,
   savedObjectId,
   dashboardTitle,
@@ -163,6 +165,7 @@ export function ShowShareModal({
     anchorElement,
     allowShortUrl,
     shareableUrl,
+    asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
     objectTypeMeta: {
@@ -214,6 +217,48 @@ export function ShowShareModal({
             },
           ],
           computeAnonymousCapabilities: showPublicUrlSwitch,
+        },
+        integration: {
+          export: {
+            pdfReports: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.pdfReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.pdfReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
+            },
+            imageReports: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.imageReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.imageReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
+            },
+          },
         },
       },
     },

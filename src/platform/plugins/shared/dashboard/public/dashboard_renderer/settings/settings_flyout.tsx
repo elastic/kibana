@@ -282,7 +282,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         content={
                           <FormattedMessage
                             id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
-                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            defaultMessage="Only valid for legacy {default} and {compatibility} palettes"
                             values={{
                               default: (
                                 <strong>
