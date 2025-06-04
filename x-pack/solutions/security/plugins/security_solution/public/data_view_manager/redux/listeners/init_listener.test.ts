@@ -41,7 +41,7 @@ describe('createInitListener', () => {
   });
 
   it('should load the data views and dispatch further actions', async () => {
-    await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 
@@ -51,12 +51,25 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [
-          DataViewManagerScopeName.default,
-          DataViewManagerScopeName.detections,
-          DataViewManagerScopeName.timeline,
-          DataViewManagerScopeName.analyzer,
-        ],
+        scope: DataViewManagerScopeName.default,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.timeline,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
       })
     );
   });
@@ -69,7 +82,7 @@ describe('createInitListener', () => {
     });
 
     it('should dispatch error correctly', async () => {
-      await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
+      await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
       expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
         sharedDataViewManagerSlice.actions.error()
