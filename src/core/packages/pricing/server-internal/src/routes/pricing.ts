@@ -24,11 +24,13 @@ export function registerPricingRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route does not require authorization',
+          reason:
+            'Pricing information does not require authorization and should be always accessible.',
         },
         authc: {
           enabled: false,
-          reason: 'This route does not require authentication',
+          reason:
+            'Pricing information does not require authentication and should be always accessible at Kibana startup.',
         },
       },
       options: { access: 'internal' },
