@@ -8,6 +8,7 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorError } from '../types';
 
@@ -43,13 +44,7 @@ export interface ReferenceMaps {
   fields: Map<string, ESQLFieldWithMetadata>;
   policies: Map<string, ESQLPolicy>;
   query: string;
-  joinIndices: JoinIndexAutocompleteItem[];
-}
-
-export interface JoinIndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | string;
-  aliases: string[];
+  joinIndices: IndexAutocompleteItem[];
 }
 
 export interface ValidationErrors {

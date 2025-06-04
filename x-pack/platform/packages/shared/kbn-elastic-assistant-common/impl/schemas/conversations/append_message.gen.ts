@@ -24,7 +24,7 @@ export type AppendConversationMessageRequestParams = z.infer<
 >;
 export const AppendConversationMessageRequestParams = z.object({
   /**
-   * The conversation's `id` value.
+   * The unique identifier (`id`) of the conversation to which the message will be appended.
    */
   id: NonEmptyString,
 });

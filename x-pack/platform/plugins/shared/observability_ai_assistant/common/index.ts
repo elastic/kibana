@@ -52,3 +52,11 @@ export {
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
 export { ShortIdTable } from './utils/short_id_table';
+
+export {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
+} from './preconfigured_inference_ids';

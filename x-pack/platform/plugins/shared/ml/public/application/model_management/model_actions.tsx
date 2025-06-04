@@ -62,7 +62,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi, httpService, trainedModelsService },
+      mlServices: { mlApi, httpService, trainedModelsService, mlCapabilities },
       ...startServices
     },
   } = useMlKibana();
@@ -128,7 +128,8 @@ export function useModelActions({
         showNodeInfo,
         nlpSettings,
         httpService,
-        trainedModelsService
+        trainedModelsService,
+        mlCapabilities
       ),
     [
       overlays,
@@ -139,6 +140,7 @@ export function useModelActions({
       nlpSettings,
       httpService,
       trainedModelsService,
+      mlCapabilities,
     ]
   );
 
@@ -222,6 +224,13 @@ export function useModelActions({
             (deployment) => deployment.modelId === item.model_id
           );
 
+          if (
+            isModelDownloadItem(item) &&
+            item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+          ) {
+            return false;
+          }
+
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
@@ -229,7 +238,8 @@ export function useModelActions({
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
               isModelDownloadItem(item) &&
-              item.state === MODEL_STATE.NOT_DOWNLOADED)
+              (item.state === MODEL_STATE.NOT_DOWNLOADED ||
+                item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE))
           );
         },
         onClick: async (item) => {
