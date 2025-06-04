@@ -551,7 +551,7 @@ export const countValidationErrors = (
 
   // Flatten validation results and map to retrieve required var group errors vs other errors
   // because required var groups should only count as 1 error
-  const flattenedValidation = getFlattenedObject(validationResults);
+  const flattenedValidation = getFlattenedObject(validationResults ?? {});
   Object.entries(flattenedValidation).forEach(([key, value]) => {
     if (key.startsWith('required_vars.')) {
       requiredVarGroupErrorKeys.required_vars = true;

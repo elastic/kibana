@@ -40,6 +40,8 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             '.siem-signals-*',
             '.preview.alerts-security*',
             '.internal.preview.alerts-security*',
+            '.adhoc.alerts-security*',
+            '.internal.adhoc.alerts-security*',
           ],
           privileges: ['read', 'write'],
         },
