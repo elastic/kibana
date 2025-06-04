@@ -11,10 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { ExportMenu } from './export_popover';
 import type { IShareContext } from '../context';
 
@@ -40,7 +37,6 @@ const mockShareContext: IShareContext = {
     },
   ],
   allowShortUrl: true,
-  theme: themeServiceMock.createStartContract(),
   objectTypeMeta: {
     title: 'title',
     config: {
@@ -53,8 +49,6 @@ const mockShareContext: IShareContext = {
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
-  toasts: toastsServiceMock.createStartContract(),
-  i18n: i18nServiceMock.createStartContract(),
 };
 
 function ExportPopoverRender() {
