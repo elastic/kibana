@@ -1279,7 +1279,7 @@
     "tinycolor2": "1.4.1",
     "tinygradient": "0.4.3",
     "ts-easing": "^0.2.0",
-    "tslib": "^2.0.0",
+    "tslib": "^2.8.1",
     "type-detect": "^4.0.8",
     "type-fest": "^4.17.0",
     "typescript-fsa": "^3.0.0",
