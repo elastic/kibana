@@ -120,6 +120,7 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-variables-types",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": ["target/**/*"]
 }
