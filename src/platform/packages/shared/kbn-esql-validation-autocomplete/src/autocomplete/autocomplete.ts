@@ -534,8 +534,6 @@ async function getFunctionArgsSuggestions(
       (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
-    console.log(constantOnlyParamDefs);
-
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
