@@ -43,11 +43,11 @@ export class ProductInterceptPublicPlugin implements Plugin {
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
 
-      const feedbackUrl = new URL('https://www.elastic.co/feedback');
+      const surveyUrl = new URL('https://elastic.eu.qualtrics.com/jfe/form/SV_4OfUp18saHW14Mu');
 
-      feedbackUrl.searchParams.set('userId', currentUser.profile_uid || '');
-      feedbackUrl.searchParams.set('projectId', cloud.serverless.projectId || '');
-      feedbackUrl.searchParams.set('projectType', cloud.serverless.projectType || '');
+      surveyUrl.searchParams.set('uid', String(currentUser.profile_uid || null));
+      surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));
+      surveyUrl.searchParams.set('solution', String(cloud.serverless.projectType || null));
 
       this.interceptSubscription = intercepts
         .registerIntercept?.({
@@ -147,7 +147,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
                           EuiLink,
                           {
                             external: true,
-                            href: feedbackUrl.toString(),
+                            href: surveyUrl.toString(),
                             target: '_blank',
                           },
                           chunks
