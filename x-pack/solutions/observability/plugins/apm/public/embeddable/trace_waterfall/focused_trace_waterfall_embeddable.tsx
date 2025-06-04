@@ -16,7 +16,6 @@ export function FocusedTraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   docId,
-  onErrorClick,
 }: ApmTraceWaterfallEmbeddableFocusedProps) {
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -45,5 +44,5 @@ export function FocusedTraceWaterfallEmbeddable({
     );
   }
 
-  return <FocusedTraceWaterfall items={data} onErrorClick={onErrorClick} />;
+  return <FocusedTraceWaterfall items={data} />;
 }
