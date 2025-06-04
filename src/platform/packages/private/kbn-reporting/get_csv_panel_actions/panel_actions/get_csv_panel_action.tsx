@@ -79,8 +79,6 @@ interface ExecutionParamsOld {
   searchSource: SerializedSearchSourceFields;
   columns: string[] | undefined;
   title: string;
-  analytics: AnalyticsServiceStart;
-  i18nStart: I18nStart;
 }
 
 interface ExecutionParams {
@@ -180,7 +178,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
    */
   private executeDownload = async (params: ExecutionParamsOld) => {
     // Deprecated and does not support ES|QL mode
-    const [startServices] = await firstValueFrom(this.startServices$);
+    const [{ rendering }] = await firstValueFrom(this.startServices$);
     const { searchSource, columns, title } = params;
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
       searchSource,
@@ -193,7 +191,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
 
     this.notifications.toasts.addSuccess({
       title: this.i18nStrings.download.toasts.success.title,
-      text: toMountPoint(this.i18nStrings.download.toasts.success.body, startServices),
+      text: toMountPoint(this.i18nStrings.download.toasts.success.body, rendering),
       'data-test-subj': 'csvDownloadStarted',
     });
 
@@ -304,7 +302,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     });
 
     if (this.enablePanelActionDownload) {
-      const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
+      const executionParams = { searchSource, columns, title, savedSearch };
       return this.executeDownload(executionParams);
     }
     if (this.isEsqlMode(savedSearch)) {
