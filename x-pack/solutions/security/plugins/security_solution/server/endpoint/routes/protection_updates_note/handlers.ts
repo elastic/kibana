@@ -17,6 +17,8 @@ import type {
   CreateUpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
 } from '../../../../common/api/endpoint/protection_updates_note';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 
 const getProtectionNote = async (SOClient: SavedObjectsClientContract, packagePolicyId: string) => {
   return SOClient.find<{ note: string }>({
@@ -61,14 +63,41 @@ const createProtectionNote = async (
   );
 };
 
-export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
+async function getSavedObjectClient(
+  context: SecuritySolutionRequestHandlerContext,
+  endpointContext: EndpointAppContext,
+  packagePolicyId: string
+): Promise<SavedObjectsClientContract> {
+  const { endpointManagementSpaceAwarenessEnabled } = endpointContext.experimentalFeatures;
+  if (!endpointManagementSpaceAwarenessEnabled) {
+    return (await context.core).savedObjects.client;
+  }
+
+  const spaceId = (await context.securitySolution).getSpaceId();
+  const scopedFleetService = endpointContext.service.getInternalFleetServices(spaceId);
+  const soClient = scopedFleetService.getSoClient();
+  const packagePolicy = await scopedFleetService.packagePolicy.get(soClient, packagePolicyId);
+  const agentPolicyId = packagePolicy?.policy_ids[0];
+  if (agentPolicyId) {
+    await scopedFleetService.ensureInCurrentSpace({ agentPolicyIds: [agentPolicyId] });
+  } else {
+    await scopedFleetService.ensureInCurrentSpace({ integrationPolicyIds: [packagePolicyId] });
+  }
+  const unscopedFleetService = endpointContext.service.getInternalFleetServices(undefined, true);
+  return unscopedFleetService.getSoClient();
+}
+
+export const postProtectionUpdatesNoteHandler = function (
+  endpointContext: EndpointAppContext
+): RequestHandler<
   TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.params>,
   undefined,
-  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.body>
+  TypeOf<typeof CreateUpdateProtectionUpdatesNoteSchema.body>,
+  SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const SOClient = (await context.core).savedObjects.client;
     const { package_policy_id: packagePolicyId } = request.params;
+    const SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
     const { note } = request.body;
 
     const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
@@ -104,14 +133,17 @@ export const postProtectionUpdatesNoteHandler = function (): RequestHandler<
   };
 };
 
-export const getProtectionUpdatesNoteHandler = function (): RequestHandler<
+export const getProtectionUpdatesNoteHandler = function (
+  endpointContext: EndpointAppContext
+): RequestHandler<
   TypeOf<typeof GetProtectionUpdatesNoteSchema.params>,
   undefined,
-  undefined
+  undefined,
+  SecuritySolutionRequestHandlerContext
 > {
   return async (context, request, response) => {
-    const SOClient = (await context.core).savedObjects.client;
     const { package_policy_id: packagePolicyId } = request.params;
+    const SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
 
     const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
 
