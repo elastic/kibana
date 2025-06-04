@@ -202,7 +202,7 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\" | \"chat\""
+          "\"security\" | \"oblt\" | \"es\" | \"chat\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/index.ts",
         "deprecated": false,
