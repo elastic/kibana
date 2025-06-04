@@ -9,9 +9,9 @@ import {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
-  AggregationsAggregationContainer,
+  MsearchRequestItem,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -33,11 +33,10 @@ import {
   GetQueryByTimeRangeParams,
   GetQueryByScopedQueriesParams,
   GetMaintenanceWindowAlertsQueryParams,
-  ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
+import type { SummarizedAlertsChunk } from '../..';
+import type { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
@@ -46,6 +45,8 @@ enum AlertTypes {
   ONGOING,
   RECOVERED,
 }
+
+export const RUNTIME_MAINTENANCE_WINDOW_ID_FIELD = 'runtime_maintenance_window_id';
 
 const getLifecycleAlertsQueryByExecutionUuid = ({
   executionUuid,
@@ -292,7 +293,7 @@ export const getQueryByScopedQueries = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+}: GetQueryByScopedQueriesParams): MsearchRequestItem[] => {
   const filters: QueryDslQueryContainer[] = [
     {
       term: {
@@ -314,7 +315,7 @@ export const getQueryByScopedQueries = ({
     });
   }
 
-  const aggs: Record<string, AggregationsAggregationContainer> = {};
+  const searches: MsearchRequestItem[] = [];
 
   maintenanceWindows.forEach(({ id, scopedQuery }) => {
     if (!scopedQuery) {
@@ -330,31 +331,30 @@ export const getQueryByScopedQueries = ({
       }
     )[0] as { bool: BoolQuery };
 
-    aggs[id] = {
-      filter: {
+    searches.push({});
+    searches.push({
+      query: {
         bool: {
           ...scopedQueryFilter.bool,
           filter: [...(scopedQueryFilter.bool?.filter || []), ...filters],
         },
       },
-      aggs: {
-        alertId: {
-          top_hits: {
-            size: 100,
-            _source: {
-              includes: [ALERT_UUID],
-            },
+      runtime_mappings: {
+        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: {
+          script: {
+            source: `emit('${id}');`,
           },
+          type: 'keyword',
         },
       },
-    };
+      fields: [ALERT_UUID, RUNTIME_MAINTENANCE_WINDOW_ID_FIELD],
+      _source: false,
+      size: maxAlertLimit,
+      track_total_hits: true,
+    });
   });
 
-  return {
-    size: 0,
-    track_total_hits: true,
-    aggs: { ...aggs },
-  };
+  return searches;
 };
 
 const generateAlertsFilterDSL = (
@@ -449,20 +449,6 @@ const getHitsWithCount = <AlertData extends RuleAlertData>(
   };
 };
 
-const getScopedQueryHitsWithIds = <AlertData extends RuleAlertData>(
-  aggregationsResult: SearchResult<AlertData, ScopedQueryAggregationResult>['aggregations']
-): ScopedQueryAlerts => {
-  return Object.entries(aggregationsResult || {}).reduce<ScopedQueryAlerts>(
-    (result, [maintenanceWindowId, aggregation]) => {
-      result[maintenanceWindowId] = (aggregation.alertId?.hits?.hits || []).map(
-        (hit) => hit._source[ALERT_UUID]
-      );
-      return result;
-    },
-    {}
-  );
-};
-
 const getLifecycleAlertsQueries = ({
   executionUuid,
   start,
@@ -533,7 +519,7 @@ const getMaintenanceWindowAlertsQuery = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+}: GetMaintenanceWindowAlertsQueryParams): MsearchRequestItem[] => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,
@@ -548,5 +534,4 @@ export {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
   getMaintenanceWindowAlertsQuery,
-  getScopedQueryHitsWithIds,
 };
