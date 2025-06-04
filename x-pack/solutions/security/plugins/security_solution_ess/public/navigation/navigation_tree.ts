@@ -118,6 +118,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:cross_cluster_replication' },
                     { link: 'management:remote_clusters' },
                     { link: 'management:migrate_data' },
+                    { link: 'management:content_connectors' },
                   ],
                 },
                 {

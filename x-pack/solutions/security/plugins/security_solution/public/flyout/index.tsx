@@ -9,9 +9,10 @@ import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type {
-  FindingVulnerabilityPanelExpandableFlyoutProps,
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
@@ -77,7 +78,10 @@ import {
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
-import { VulnerabilityFindingsPanelKey } from './csp_details/vulnerabilities_flyout/constants';
+import {
+  VulnerabilityFindingsPanelKey,
+  VulnerabilityFindingsPreviewPanelKey,
+} from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 
 /**
@@ -242,7 +246,15 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: VulnerabilityFindingsPanelKey,
     component: (props) => (
       <FindingsVulnerabilityPanel
-        {...(props as FindingVulnerabilityPanelExpandableFlyoutProps).params}
+        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview).params}
+      />
+    ),
+  },
+  {
+    key: VulnerabilityFindingsPreviewPanelKey,
+    component: (props) => (
+      <FindingsVulnerabilityPanel
+        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
     ),
   },

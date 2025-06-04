@@ -2210,6 +2210,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
+      "recreateWhen": "never",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },

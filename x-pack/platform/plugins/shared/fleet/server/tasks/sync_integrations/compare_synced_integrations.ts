@@ -34,6 +34,8 @@ import type {
 } from '../../../common/types';
 import { SyncStatus } from '../../../common/types';
 
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
+
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
 import { getPipeline, getComponentTemplate, CUSTOM_ASSETS_PREFIX } from './custom_assets';
 import { getFollowerIndex } from './sync_integrations_on_remote';
@@ -500,10 +502,9 @@ export const getRemoteSyncedIntegrationsStatus = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
 
