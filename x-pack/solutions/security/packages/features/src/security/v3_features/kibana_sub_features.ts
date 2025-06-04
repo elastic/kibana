@@ -688,10 +688,16 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           includeIn: 'all',
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [],
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
           },
-          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          api: [
+            'lists-all',
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+            `${APP_ID}-crudEndpointExceptions`,
+          ],
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
         },
         {
@@ -702,7 +708,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          api: [`${APP_ID}-showEndpointExceptions`],
+          api: ['lists-read', 'lists-summary', `${APP_ID}-showEndpointExceptions`],
           ui: ['showEndpointExceptions'],
         },
       ],
