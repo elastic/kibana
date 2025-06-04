@@ -14800,10 +14800,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^136.0.0:
-  version "136.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-136.0.0.tgz#b777a33ea50b8c775b522317175379d8c79e84ab"
-  integrity sha512-21LxtGIqRLkafi0aOLKxIyQ3uRklgdmhuihzAkoL3Er5QtC74UDuu2OeTDdh58LM7WDbiuTXjdoIQARUekL8DA==
+chromedriver@^137.0.0:
+  version "137.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-137.0.1.tgz#a7c1eeb0c0b091a1e2505b384b4df8aaceb133fb"
+  integrity sha512-H4amLfsU3zubwD9X7me9Ajd8z3+MARfJ90gLV6PEKdad0Jgmh3fAGnCuz8Ew8yeuoSJ5ycb/vGEvyqgGVFAjJQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -25997,7 +25997,7 @@ prismjs@^1.29.0:
 
 prismjs@~1.27.0:
   version "1.27.0"
-  resolved "https://registry.npmjs.org/prismjs/-/prismjs-1.27.0.tgz"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.27.0.tgz#bb6ee3138a0b438a3653dd4d6ce0cc6510a45057"
   integrity sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==
 
 process-nextick-args@^2.0.0, process-nextick-args@~2.0.0:
@@ -28051,10 +28051,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.32.0:
-  version "4.32.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.32.0.tgz#9bfe160cdac14d2d2876bba6eb369a09e9bd13ed"
-  integrity sha512-dG48JJnB96Aea1iVaZOKGmd6yT6aemeI1heWI/i8DtfD3pDX7uIlwpDBoGauNhtXAaFaamP+U4hIab8zZkg3Ag==
+selenium-webdriver@^4.33.0:
+  version "4.33.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.33.0.tgz#6587a9eab09bf30ad27cf27bc8d0b944457252da"
+  integrity sha512-5vRhk4iI0B9nYbEitfnCjPDXBfG6o9DNhj5DG2355eQo8idETknhj1tigqqlkHsGephSZwLZqEm/d+3e1stGUA==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
