@@ -6,9 +6,9 @@
  */
 
 import type {
-  DashboardAttributes,
+  DashboardSavedObjectAttributes,
   SavedDashboardPanel,
-} from '@kbn/dashboard-plugin/common/content_management/v2';
+} from '@kbn/dashboard-plugin/server';
 import { cloneDeep, mapValues } from 'lodash';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
@@ -19,6 +19,7 @@ import type {
   GenericIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import { Writable } from '@kbn/utility-types';
 import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
@@ -110,7 +111,7 @@ function locateConfiguration(
   }
 
   if (content.type === 'dashboard') {
-    const attributes = content.attributes as DashboardAttributes;
+    const attributes = content.attributes as Writable<DashboardSavedObjectAttributes>;
     const panels = (JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[]).map((panel) =>
       traversePanel(panel, options)
     );
