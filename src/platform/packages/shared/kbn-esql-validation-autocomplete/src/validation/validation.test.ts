@@ -454,9 +454,7 @@ describe('validation logic', () => {
           testErrorsAndWarnings(`row var = now() - 1 ${timeLiteral.name.toUpperCase()}`, []);
           testErrorsAndWarnings(`row var = now() - 1 ${capitalize(timeLiteral.name)}`, []);
           testErrorsAndWarnings(`row var = now() + 1 ${timeLiteral.name}`, []);
-          testErrorsAndWarnings(`row 1 ${timeLiteral.name} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 year] type [duration]`,
-          ]);
+          testErrorsAndWarnings(`row 1 ${timeLiteral.name} + 1 year`, []);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`row var = now() ${op} 1 ${timeLiteral.name}`, [
               `Argument of [${op}] must be [double], found value [now()] type [date]`,
@@ -1288,9 +1286,7 @@ describe('validation logic', () => {
           );
           testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${capitalize(unit)}`, []);
           testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${unit}`, []);
-          testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 year] type [duration]`,
-          ]);
+          testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, []);
           for (const op of ['*', '/', '%']) {
             testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
               `Argument of [${op}] must be [double], found value [now()] type [date]`,
