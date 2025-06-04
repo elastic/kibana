@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, cleanup } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
@@ -82,7 +82,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
+          <GraphOverlay Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -102,7 +102,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
+          <GraphOverlay Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -126,7 +126,7 @@ describe('GraphOverlay', () => {
             },
           })}
         >
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
+          <GraphOverlay Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -145,7 +145,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
+          <GraphOverlay Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -165,52 +165,12 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
+          <GraphOverlay Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
       const overlayContainer = wrapper.getByTestId('overlayContainer');
       expect(overlayContainer).toHaveStyleRule('width', '100%');
-    });
-
-    test('it renders session view controls', () => {
-      (useGlobalFullScreen as jest.Mock).mockReturnValue({
-        globalFullScreen: false,
-        setGlobalFullScreen: jest.fn(),
-      });
-      (useTimelineFullScreen as jest.Mock).mockReturnValue({
-        timelineFullScreen: true,
-        setTimelineFullScreen: jest.fn(),
-      });
-
-      const wrapper = render(
-        <TestProviders
-          store={createMockStore({
-            ...mockGlobalState,
-            timeline: {
-              ...mockGlobalState.timeline,
-              timelineById: {
-                [timelineId]: {
-                  ...mockGlobalState.timeline.timelineById[timelineId],
-                  sessionViewConfig: {
-                    index: 'logs-endpoint.events.process*',
-                    sessionEntityId: 'testId',
-                    sessionStartTime: '2021-10-14T08:05:34.853Z',
-                  },
-                },
-              },
-            },
-          })}
-        >
-          <GraphOverlay
-            SessionView={<div />}
-            Navigation={<div>{'Close Session'}</div>}
-            scopeId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.getByText('Close Session')).toBeTruthy();
     });
 
     test('it clears the graph event id on unmount', () => {
@@ -238,7 +198,7 @@ describe('GraphOverlay', () => {
             },
           })}
         >
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
+          <GraphOverlay Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
       wrapper.unmount();

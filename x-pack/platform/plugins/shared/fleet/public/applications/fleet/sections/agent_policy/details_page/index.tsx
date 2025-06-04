@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useRouteMatch, useLocation } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,7 @@ import {
   useStartServices,
   useFleetStatus,
   useIntraAppState,
+  useUrlParams,
 } from '../../../hooks';
 import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
@@ -40,12 +41,20 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     params: { policyId, tabId = '' },
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { urlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
+
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
-  const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
+  // If the agent policy is agentless, hide it by default unless `showAgentless` url param is true
+  const agentPolicy =
+    agentPolicyRequest.data?.item &&
+    (!agentPolicyRequest.data.item.supports_agentless || showAgentless)
+      ? agentPolicyRequest.data.item
+      : null;
   const { isLoading, error, sendRequest: refreshAgentPolicy } = agentPolicyRequest;
-  const queryParams = new URLSearchParams(useLocation().search);
-  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
-  const openAddAgentHelpPopoverOpenByDefault = queryParams.get('showAddAgentHelp') === 'true';
+
+  const openEnrollmentFlyoutOpenByDefault = urlParams.openEnrollmentFlyout === 'true';
+  const openAddAgentHelpPopoverOpenByDefault = urlParams.showAddAgentHelp === 'true';
   const [redirectToAgentPolicyList] = useState<boolean>(false);
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
     openEnrollmentFlyoutOpenByDefault
@@ -149,7 +158,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           </EuiPortal>
         )}
-        <AgentPolicyDetailsContent agentPolicy={agentPolicy} />
+        <AgentPolicyDetailsContent
+          agentPolicy={agentPolicy}
+          refreshAgentPolicy={refreshAgentPolicy}
+        />
       </>
     );
   }, [
@@ -160,6 +172,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     isEnrollmentFlyoutOpen,
     onCancelEnrollment,
     policyId,
+    refreshAgentPolicy,
   ]);
   const headerLeftContent = (
     <HeaderLeftContent agentPolicy={agentPolicy} policyId={policyId} isLoading={isLoading} />
@@ -188,9 +201,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   );
 };
 
-const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
-  agentPolicy,
-}) => {
+const AgentPolicyDetailsContent: React.FunctionComponent<{
+  agentPolicy: AgentPolicy;
+  refreshAgentPolicy: () => void;
+}> = ({ agentPolicy, refreshAgentPolicy }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Routes>
@@ -203,7 +217,12 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
       <Route
         path={FLEET_ROUTING_PATHS.policy_details}
         render={() => {
-          return <PackagePoliciesView agentPolicy={agentPolicy} />;
+          return (
+            <PackagePoliciesView
+              agentPolicy={agentPolicy}
+              refreshAgentPolicy={refreshAgentPolicy}
+            />
+          );
         }}
       />
     </Routes>
