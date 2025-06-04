@@ -19,13 +19,15 @@ import {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import { createHttpService } from '@kbn/core-http-server-mocks';
+import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import type { PricingProductFeature, PricingProduct } from '@kbn/core-pricing-common';
 
 const coreId = Symbol('core');
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+const configService = createConfigService();
 
 describe('PricingService', () => {
   let server: HttpService;
@@ -46,7 +48,7 @@ describe('PricingService', () => {
       coreId,
       env,
       logger: loggingSystemMock.create(),
-      configService: {} as any,
+      configService,
     });
     await service.preboot({ http: httpPreboot });
     serviceSetup = service.setup({ http: httpSetup });
@@ -78,7 +80,7 @@ describe('PricingService', () => {
         Object {
           "product_features": Object {},
           "tiers": Object {
-            "enabled": false,
+            "enabled": true,
             "products": Array [],
           },
         }
