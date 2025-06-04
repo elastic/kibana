@@ -10,6 +10,7 @@ import { RulesClient } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
@@ -80,7 +81,7 @@ export class AttackDiscoveryScheduleDataClient {
         actions,
         ...(systemActions.length ? { systemActions } : {}),
         alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-        consumer: 'siem',
+        consumer: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
         enabled,
         tags: [],
         ...restScheduleAttributes,
