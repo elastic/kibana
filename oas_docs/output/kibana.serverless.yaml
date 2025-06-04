@@ -23026,6 +23026,12 @@ paths:
           schema:
             type: string
         - in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
+        - in: query
           name: showInactive
           required: false
           schema:
@@ -42557,7 +42563,7 @@ paths:
       summary: Create a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}:
     delete:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -42588,7 +42594,7 @@ paths:
       summary: Delete a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     get:
       description: '[Required authorization] Route required privileges: read-maintenance-window.'
       operationId: get-maintenance-window-id
@@ -42729,7 +42735,7 @@ paths:
       summary: Get maintenance window details.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     patch:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
       operationId: patch-maintenance-window-id
@@ -42970,7 +42976,7 @@ paths:
       summary: Update a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_archive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43119,7 +43125,7 @@ paths:
       summary: Archive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_unarchive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43268,7 +43274,7 @@ paths:
       summary: Unarchive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -43955,7 +43961,7 @@ paths:
   /api/saved_objects/_export:
     post:
       description: |-
-        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.
+        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
@@ -44102,7 +44108,10 @@ paths:
         - saved objects
   /api/saved_objects/_import:
     post:
-      description: Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+      description: |-
+        Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks
