@@ -75,6 +75,8 @@ const mockGetState = jest.fn(() => mockedState);
 const mockListenerApi = {
   dispatch: mockDispatch,
   getState: mockGetState,
+  cancelActiveListeners: jest.fn(),
+  signal: { aborted: false },
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
 describe('createDataViewSelectedListener', () => {
@@ -82,12 +84,24 @@ describe('createDataViewSelectedListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    listener = createDataViewSelectedListener({ dataViews: mockDataViewsService });
+    listener = createDataViewSelectedListener({
+      dataViews: mockDataViewsService,
+      scope: DataViewManagerScopeName.default,
+    });
+  });
+
+  it('should cancel previous effects that would set the data view for given scope', async () => {
+    await listener.effect(
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
+      mockListenerApi
+    );
+
+    expect(mockListenerApi.cancelActiveListeners).toHaveBeenCalled();
   });
 
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
-      selectDataViewAsync({ id: 'adhoc_test-*', scope: [DataViewManagerScopeName.default] }),
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
       mockListenerApi
     );
 
@@ -99,7 +113,7 @@ describe('createDataViewSelectedListener', () => {
       selectDataViewAsync({
         id: 'fetched-id',
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );
@@ -126,7 +140,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );
@@ -156,7 +170,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: [DataViewManagerScopeName.default],
+        scope: DataViewManagerScopeName.default,
       }),
       mockListenerApi
     );

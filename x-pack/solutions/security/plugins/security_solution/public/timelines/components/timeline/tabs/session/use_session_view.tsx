@@ -17,33 +17,24 @@ import {
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import {
   getScopedActions,
   isActiveTimeline,
   isInTableScope,
   isTimelineScope,
 } from '../../../../../helpers';
-import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { isFullScreen } from '../../helpers';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface NavigationProps {
   fullScreen: boolean;
@@ -132,13 +123,11 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
-  const { graphEventId, sessionViewConfig, activeTab, prevActiveTab } = useDeepEqualSelector(
-    (state) => ({
-      activeTab: timelineDefaults.activeTab,
-      prevActiveTab: timelineDefaults.prevActiveTab,
-      ...((getScope && getScope(state, scopeId)) ?? defaults),
-    })
-  );
+  const { graphEventId, activeTab } = useDeepEqualSelector((state) => ({
+    activeTab: timelineDefaults.activeTab,
+    prevActiveTab: timelineDefaults.prevActiveTab,
+    ...((getScope && getScope(state, scopeId)) ?? defaults),
+  }));
 
   const scopedActions = getScopedActions(scopeId);
   const onCloseOverlay = useCallback(() => {
@@ -160,51 +149,16 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
     if (isActiveTimeline(scopeId) === false) {
       if (scopedActions) {
         dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
-        dispatch(scopedActions.updateSessionViewConfig({ id: scopeId, sessionViewConfig: null }));
       }
     } else {
       if (activeTab === TimelineTabs.graph) {
         if (scopedActions) {
           dispatch(scopedActions.updateGraphEventId({ id: scopeId, graphEventId: '' }));
         }
-        if (prevActiveTab === TimelineTabs.session && !sessionViewConfig) {
-          dispatch(
-            timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
-          );
-        }
-      } else if (activeTab === TimelineTabs.session) {
-        if (isTimelineScope(scopeId)) {
-          if (prevActiveTab === TimelineTabs.graph && !graphEventId) {
-            dispatch(
-              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: TimelineTabs.query })
-            );
-          } else {
-            dispatch(
-              timelineActions.setActiveTabTimeline({ id: scopeId, activeTab: prevActiveTab })
-            );
-          }
-        }
-        if (scopedActions) {
-          dispatch(
-            scopedActions.updateSessionViewConfig({
-              id: scopeId,
-              sessionViewConfig: null,
-            })
-          );
-        }
       }
     }
-  }, [
-    setTimelineFullScreen,
-    setGlobalFullScreen,
-    scopedActions,
-    dispatch,
-    scopeId,
-    activeTab,
-    prevActiveTab,
-    sessionViewConfig,
-    graphEventId,
-  ]);
+  }, [setTimelineFullScreen, setGlobalFullScreen, scopedActions, dispatch, scopeId, activeTab]);
+
   const fullScreen = useMemo(
     () =>
       isFullScreen({
@@ -214,6 +168,7 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
       }),
     [globalFullScreen, scopeId, timelineFullScreen]
   );
+
   const toggleFullScreen = useCallback(() => {
     if (isActiveTimeline(scopeId)) {
       setTimelineFullScreen(!timelineFullScreen);
@@ -221,6 +176,7 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
       setGlobalFullScreen(!globalFullScreen);
     }
   }, [scopeId, setTimelineFullScreen, timelineFullScreen, setGlobalFullScreen, globalFullScreen]);
+
   const navigation = useMemo(() => {
     return (
       <Navigation
@@ -248,94 +204,5 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
   return {
     onCloseOverlay,
     Navigation: navigation,
-  };
-};
-
-export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: number }) => {
-  const { sessionView, telemetry } = useKibana().services;
-  const getScope = useMemo(() => {
-    if (isTimelineScope(scopeId)) {
-      return timelineSelectors.getTimelineByIdSelector();
-    } else if (isInTableScope(scopeId)) {
-      return dataTableSelectors.getTableByIdSelector();
-    }
-  }, [scopeId]);
-  const { globalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen } = useTimelineFullScreen();
-  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
-
-  const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
-  const { sessionViewConfig } = useDeepEqualSelector((state) => ({
-    activeTab: timelineDefaults.activeTab,
-    prevActiveTab: timelineDefaults.prevActiveTab,
-    ...((getScope && getScope(state, scopeId)) ?? defaults),
-  }));
-
-  const fullScreen = useMemo(
-    () =>
-      isFullScreen({
-        globalFullScreen,
-        isActiveTimelines: isActiveTimeline(scopeId),
-        timelineFullScreen,
-      }),
-    [globalFullScreen, scopeId, timelineFullScreen]
-  );
-
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
-
-  const { openFlyout } = useExpandableFlyoutApi();
-  const openAlertDetailsFlyout = useCallback(
-    (eventId?: string, onClose?: () => void) => {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName: alertsIndex,
-            scopeId,
-          },
-        },
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: scopeId,
-        panel: 'right',
-      });
-    },
-    [openFlyout, alertsIndex, scopeId, telemetry]
-  );
-
-  const sessionViewComponent = useMemo(() => {
-    const sessionViewSearchBarHeight = 118;
-    const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
-    return sessionViewConfig !== null
-      ? sessionView.getSessionView({
-          ...sessionViewConfig,
-          loadAlertDetails: openAlertDetailsFlyout,
-          isFullScreen: fullScreen,
-          height: heightMinusSearchBar,
-          canReadPolicyManagement,
-        })
-      : null;
-  }, [
-    height,
-    sessionViewConfig,
-    sessionView,
-    openAlertDetailsFlyout,
-    fullScreen,
-    canReadPolicyManagement,
-  ]);
-
-  return {
-    openEventDetailsPanel: openAlertDetailsFlyout,
-    SessionView: sessionViewComponent,
   };
 };
