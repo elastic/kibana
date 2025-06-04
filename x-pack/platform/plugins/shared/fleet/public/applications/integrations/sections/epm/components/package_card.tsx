@@ -69,6 +69,7 @@ export function PackageCard({
   isUpdateAvailable,
   showLabels = true,
   showInstallationStatus,
+  showCompressedInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
   installStatus,
@@ -258,6 +259,7 @@ export function PackageCard({
             <InstallationStatus
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
+              compressed={showCompressedInstallationStatus}
             />
           </EuiFlexGroup>
         </Card>

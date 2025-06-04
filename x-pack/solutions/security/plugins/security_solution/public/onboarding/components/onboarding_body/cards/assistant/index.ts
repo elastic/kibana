@@ -10,7 +10,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ASSISTANT_CARD_TITLE } from './translations';
-import { checkAssistantCardComplete } from './assistant_check_complete';
+import { checkAssistantCardComplete } from '../common/connectors/assistant_check_complete';
 import type { AssistantCardMetadata } from './types';
 
 export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
@@ -25,6 +25,6 @@ export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = 
       )
   ),
   checkComplete: checkAssistantCardComplete,
-  capabilitiesRequired: ['securitySolutionAssistant.ai-assistant'],
+  capabilitiesRequired: [['securitySolutionAssistant.ai-assistant']],
   licenseTypeRequired: 'enterprise',
 };
