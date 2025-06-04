@@ -24,7 +24,7 @@ import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { coreServices, dataService, shareService } from '../../../services/kibana_services';
+import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -33,6 +33,7 @@ import { dashboardUrlParams } from '../../dashboard_router';
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
+  asExport?: boolean;
   isDirty: boolean;
   savedObjectId?: string;
   dashboardTitle?: string;
@@ -49,6 +50,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   isDirty,
+  asExport,
   anchorElement,
   savedObjectId,
   dashboardTitle,
@@ -163,6 +165,7 @@ export function ShowShareModal({
     anchorElement,
     allowShortUrl,
     shareableUrl,
+    asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
     objectTypeMeta: {
@@ -215,6 +218,48 @@ export function ShowShareModal({
           ],
           computeAnonymousCapabilities: showPublicUrlSwitch,
         },
+        integration: {
+          export: {
+            pdfReports: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.pdfReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.pdfReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
+            },
+            imageReports: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.imageReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.imageReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
+            },
+          },
+        },
       },
     },
     sharingData: {
@@ -229,7 +274,6 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    toasts: coreServices.notifications.toasts,
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
