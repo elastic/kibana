@@ -161,7 +161,7 @@ export interface IElasticsearchConfig {
    * Setting to "serverless" changes some default behavior,
    * like enabling compression and disabling features that assume the possibility of multiple Elasticsearch nodes.
    */
-  readonly serverMode?: 'stack' | 'serverless';
+  readonly serverMode: 'stack' | 'serverless';
 }
 
 /**
