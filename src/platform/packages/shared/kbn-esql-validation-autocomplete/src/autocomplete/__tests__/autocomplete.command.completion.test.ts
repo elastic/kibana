@@ -23,6 +23,7 @@ describe('autocomplete.suggest', () => {
 
     it('suggests columns of STRING types and functions with STRING or UNKNOWN types for the prompt', async () => {
       await assertSuggestions(`from a | completion /`, [
+        '"$0"',
         ...getFieldNamesByType(ESQL_STRING_TYPES),
         ...getFunctionSuggestions({
           location: Location.COMPLETION,

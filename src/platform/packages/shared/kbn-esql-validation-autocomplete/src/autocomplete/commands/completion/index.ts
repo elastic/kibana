@@ -72,10 +72,13 @@ export async function suggest(
 
   switch (position) {
     case CompletionPosition.PROMPT:
-      return await suggestFieldsOrFunctionsByType(
-        ['text', 'keyword', 'unknown'],
-        Location.COMPLETION
-      );
+      return [
+        ...(await suggestFieldsOrFunctionsByType(
+          ['text', 'keyword', 'unknown'],
+          Location.COMPLETION
+        )),
+        emptyText,
+      ];
 
     case CompletionPosition.AFTER_PROMPT:
       return [withCompletionItem];
@@ -97,6 +100,17 @@ export async function suggest(
       return [];
   }
 }
+
+const emptyText: SuggestionRawDefinition = {
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.promptDoc', {
+    defaultMessage: 'Prompt',
+  }),
+  kind: 'Snippet',
+  asSnippet: true,
+  label: '""',
+  sortText: '1',
+  text: '"$0"',
+};
 
 const withCompletionItem: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionWithDoc', {
@@ -123,7 +137,7 @@ const targetIdCompletionItem: SuggestionRawDefinition = {
   detail: i18n.translate(
     'kbn-esql-validation-autocomplete.esql.definitions.completionTargetIdDoc',
     {
-      defaultMessage: 'Target ID',
+      defaultMessage: 'Default target column',
     }
   ),
   command: TRIGGER_SUGGESTION_COMMAND,
