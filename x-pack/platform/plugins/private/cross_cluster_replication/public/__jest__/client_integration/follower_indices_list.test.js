@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
+import { getFollowerIndexMock } from './fixtures/follower_index';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.followerIndexList;
