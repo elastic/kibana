@@ -93,7 +93,8 @@ describe('loadDashboardApi', () => {
       });
     });
 
-    test('should overwrite saved object state and unsaved state with URL state', async () => {
+    // dashboard app passes URL state as override state
+    test('should overwrite saved object state and unsaved state with override state', async () => {
       const queryFromUrl = { query: 'memory:>5000', language: 'kuery' };
       await loadDashboardApi({
         getCreationOptions: async () => ({
