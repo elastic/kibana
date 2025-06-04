@@ -8,3 +8,5 @@
 export const ONECHAT_FRAMEWORK_FEATURE_ID = 'onechat_framework';
 export const ONECHAT_FRAMEWORK_FEATURE_NAME = 'onechat_framework';
 export const ONECHAT_FRAMEWORK_APP_ID = 'onechat_framework';
+export const ONECHAT_PATH = '/app/onechat/chat';
+export const ONECHAT_TITLE = 'Chat';

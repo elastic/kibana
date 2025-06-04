@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  DEFAULT_APP_CATEGORIES,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+  AppMountParameters,
+} from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type {
   ConfigSchema,
@@ -15,6 +22,7 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { AgentService, ChatService, OnechatInternalService } from './services';
+import { ONECHAT_FRAMEWORK_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
 
 export class OnechatPlugin
   implements
@@ -36,6 +44,21 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    coreSetup.application.register({
+      id: ONECHAT_FRAMEWORK_APP_ID,
+      appRoute: ONECHAT_PATH,
+      category: DEFAULT_APP_CATEGORIES.chat,
+      title: ONECHAT_TITLE,
+      euiIconType: 'logoElasticsearch',
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart, _depsStart] = await coreSetup.getStartServices();
+
+        coreStart.chrome.docTitle.change(ONECHAT_TITLE);
+
+        return renderApp({ core: coreStart, element, history });
+      },
+    });
     return {};
   }
 
@@ -47,7 +70,6 @@ export class OnechatPlugin
       agentService,
       chatService,
     };
-
 
     /*
     // TODO: remove
