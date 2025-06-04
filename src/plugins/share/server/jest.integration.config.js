@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DASHBOARD_APP_ID,
-  DISCOVER_APP_ID,
-  VISUALIZE_APP_ID,
-  VISUALIZE_APP_LOCATOR,
-  LENS_APP_LOCATOR,
-  DISCOVER_ESQL_LOCATOR,
-  DASHBOARD_APP_LOCATOR,
-} from './constants';
-
-export type { AppId, DeepLinkId } from './deep_links';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/plugins/share/server'],
+};
