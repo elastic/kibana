@@ -48,8 +48,7 @@ test.each([
 ])(
   'renders sample data link empty prompt with link when showWriteControls is true only',
   async (showWriteControls, shouldBeInDocument) => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls =
-      showWriteControls;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = showWriteControls;
     renderDashboardListingEmptyPrompt();
     const button = screen.queryByRole('button', { name: /add some sample data/i });
     if (shouldBeInDocument) {
