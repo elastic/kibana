@@ -712,7 +712,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
   {
-    hidden: false, // //HD
+    hidden: true,
     name: 'completion',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
