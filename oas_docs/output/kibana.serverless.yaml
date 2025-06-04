@@ -42557,7 +42557,7 @@ paths:
       summary: Create a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}:
     delete:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -42588,7 +42588,7 @@ paths:
       summary: Delete a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     get:
       description: '[Required authorization] Route required privileges: read-maintenance-window.'
       operationId: get-maintenance-window-id
@@ -42729,7 +42729,7 @@ paths:
       summary: Get maintenance window details.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     patch:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
       operationId: patch-maintenance-window-id
@@ -42970,7 +42970,7 @@ paths:
       summary: Update a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_archive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43119,7 +43119,7 @@ paths:
       summary: Archive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_unarchive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43268,7 +43268,7 @@ paths:
       summary: Unarchive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -60065,13 +60065,16 @@ components:
         value:
           type: object
           properties:
+            duration:
+              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
+              nullable: true
             group_by:
               items:
                 type: string
               maxItems: 3
               type: array
-            suppression_config:
-              $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig'
+            missing_fields_strategy:
+              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:
@@ -60081,13 +60084,6 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAddSetAlertSuppression'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
-    Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig:
-      type: object
-      properties:
-        duration:
-          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
-        missing_fields_strategy:
-          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
     Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
       type: object
       properties:
@@ -60098,12 +60094,15 @@ components:
         value:
           type: object
           properties:
+            duration:
+              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
+              nullable: true
             group_by:
               items:
                 type: string
               type: array
-            suppression_config:
-              $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig'
+            missing_fields_strategy:
+              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
           required:
             - group_by
       required:
@@ -60265,7 +60264,6 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
-        - ALERT_SUPPRESSION_FEATURE
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
       type: string
