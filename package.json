@@ -281,6 +281,7 @@
     "@kbn/core-capabilities-server-internal": "link:src/core/packages/capabilities/server-internal",
     "@kbn/core-chrome-browser": "link:src/core/packages/chrome/browser",
     "@kbn/core-chrome-browser-internal": "link:src/core/packages/chrome/browser-internal",
+    "@kbn/core-chrome-layout-components": "link:src/core/packages/chrome/layout/core-chrome-layout-components",
     "@kbn/core-config-server-internal": "link:src/core/packages/config/server-internal",
     "@kbn/core-custom-branding-browser": "link:src/core/packages/custom-branding/browser",
     "@kbn/core-custom-branding-browser-internal": "link:src/core/packages/custom-branding/browser-internal",
