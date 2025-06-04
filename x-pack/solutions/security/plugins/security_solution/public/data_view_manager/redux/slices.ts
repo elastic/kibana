@@ -11,7 +11,7 @@ import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type { ScopedDataViewSelectionState, SharedDataViewSelectionState } from './types';
-import { selectDataViewAsync } from './actions';
+import { selectDataViewAsync, type SelectDataViewAsyncPayload } from './actions';
 
 export const initialScopeState: ScopedDataViewSelectionState = {
   dataViewId: null,
@@ -49,7 +49,7 @@ export const sharedDataViewManagerSlice = createSlice({
         state.adhocDataViews.push(dataViewSpec);
       }
     },
-    init: (state) => {
+    init: (state, _: PayloadAction<SelectDataViewAsyncPayload[]>) => {
       state.status = 'loading';
     },
     error: (state) => {

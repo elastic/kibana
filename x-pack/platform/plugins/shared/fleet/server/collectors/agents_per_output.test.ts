@@ -78,7 +78,13 @@ jest.mock('../services', () => {
           { id: 'elasticsearch2', type: 'elasticsearch', preset: 'custom' },
           { id: 'elasticsearch3', type: 'elasticsearch', preset: 'balanced' },
           { id: 'es-containerhost', type: 'elasticsearch', preset: 'throughput' },
-          { id: 'remote-es', type: 'remote_elasticsearch', preset: 'scale' },
+          {
+            id: 'remote-es',
+            type: 'remote_elasticsearch',
+            preset: 'scale',
+            sync_integrations: false,
+          },
+          { id: 'remote-es-1', type: 'remote_elasticsearch', sync_integrations: true },
         ],
       }),
     },
@@ -116,6 +122,7 @@ describe('agents_per_output', () => {
           scale: 1,
           latency: 0,
         },
+        sync_integrations: true,
       },
     ]);
   });
