@@ -15,25 +15,25 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 
 import {
-  sendAlertToTimelineAction,
-  sendBulkEventsToTimelineAction,
   determineToAndFrom,
   getNewTermsData,
+  sendAlertToTimelineAction,
+  sendBulkEventsToTimelineAction,
 } from './actions';
 import {
   defaultTimelineProps,
   getThresholdDetectionAlertAADMock,
-  mockEcsDataWithAlert,
-  mockTimelineDetails,
   mockAADEcsDataWithAlert,
+  mockEcsDataWithAlert,
   mockGetOneTimelineResult,
   mockTimelineData,
+  mockTimelineDetails,
 } from '../../../common/mock';
 import type { CreateTimeline } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
@@ -408,7 +408,6 @@ describe('alert actions', () => {
             savedObjectId: null,
             selectAll: false,
             selectedEventIds: {},
-            sessionViewConfig: null,
             show: true,
             sort: [
               {
