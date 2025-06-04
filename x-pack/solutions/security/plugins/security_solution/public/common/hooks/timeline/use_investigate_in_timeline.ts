@@ -131,7 +131,7 @@ export const useInvestigateInTimeline = () => {
         if (!keepDataView) {
           if (newDataViewPickerEnabled) {
             setSelectedDataView({
-              scope: [SourcererScopeName.timeline],
+              scope: SourcererScopeName.timeline,
               id: defaultDataView.id,
               fallbackPatterns: [signalIndexName || ''],
             });
