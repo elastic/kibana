@@ -34,9 +34,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
+import { DocumentSelector } from './document_selector/document_selector';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
-import { DocumentSelector } from './document_selector/document_selector';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
 
 export interface QueryRuleFlyoutProps {
@@ -78,9 +78,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     name: 'actions.ids',
   });
 
-  const { euiTheme } = useEuiTheme();
-
   const { data: indexNames } = useFetchIndexNames('');
+
+  const { euiTheme } = useEuiTheme();
 
   const ruleFromRuleset = rules.find((rule) => rule.rule_id === ruleId);
   const [isAlways, setIsAlways] = useState<boolean>(
@@ -104,7 +104,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       );
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
-
   const handleAddCriteria = () => {
     append({
       type: 'exact',
@@ -274,6 +273,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   />
                 </b>
               </EuiText>
+
               <EuiDragDropContext
                 onDragEnd={({ source, destination }) => {
                   if (source && destination && ruleFromRuleset) {
@@ -369,6 +369,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       )) || <></>}
                 </EuiDroppable>
               </EuiDragDropContext>
+
               <EuiButton
                 data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
                 iconType="plusInCircle"
