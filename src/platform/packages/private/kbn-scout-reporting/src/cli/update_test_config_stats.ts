@@ -35,7 +35,7 @@ export const updateTestConfigStats: Command<void> = {
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays    (optional)  How many days to look back when aggregating stats (default: 1)
-    --branch          (optional)  Only look at events from a particular branch (default: main)
+    --branch          (optional)  Only look at events from a particular branch
     --pipelineSlug    (optional)  Only look at events from a particular pipeline (default: kibana-pull-request)
     `,
   },
