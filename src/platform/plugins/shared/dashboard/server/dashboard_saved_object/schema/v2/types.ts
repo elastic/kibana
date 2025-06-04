@@ -9,7 +9,9 @@
 
 import { Serializable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
-import { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v2';
+import { controlGroupInputSchema, dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v2';
+import { ContentManagementCrudTypes, SavedObjectCreateOptions, SavedObjectUpdateOptions } from '@kbn/content-management-utils';
+import { DashboardContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;
@@ -38,3 +40,17 @@ export interface SavedDashboardPanel {
  * A saved dashboard section parsed directly from the Dashboard Attributes
  */
 export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
+
+export type DashboardSavedObjectControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
+
+export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
+  DashboardContentType,
+  DashboardAttributes,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
+  Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;
+

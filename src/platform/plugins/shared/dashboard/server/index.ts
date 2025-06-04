@@ -10,6 +10,8 @@
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export type { GridData } from './content_management/latest';
+
 export const configSchema = schema.object({
   /**
    * this config is unused, but cannot be removed as removing a yml setting is a breaking change.

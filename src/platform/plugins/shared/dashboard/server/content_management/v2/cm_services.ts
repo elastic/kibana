@@ -13,7 +13,7 @@ import {
   savedObjectSchema,
 } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import type { DashboardCrudTypes } from '../../../common/content_management/v2';
+import type { DashboardSavedObjectCrudTypes } from '../../dashboard_saved_object/schema/v2';
 import { serviceDefinition as serviceDefinitionV1 } from '../v1';
 import { dashboardAttributesOut as attributesTov3 } from '../v3';
 import { dashboardAttributesSchema } from '../../dashboard_saved_object/schema/v2';
@@ -37,7 +37,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1?.create?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardCrudTypes['CreateIn']['data']) => attributesTov3(data),
+        up: (data: DashboardSavedObjectCrudTypes['CreateIn']['data']) => attributesTov3(data),
       },
     },
     out: {
@@ -51,7 +51,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data, [], () => []),
+        up: (data: DashboardSavedObjectCrudTypes['UpdateIn']['data']) => attributesTov3(data, [], () => []),
       },
     },
   },

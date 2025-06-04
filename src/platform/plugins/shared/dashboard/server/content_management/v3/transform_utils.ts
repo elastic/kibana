@@ -11,9 +11,9 @@ import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
-  ControlGroupAttributes as ControlGroupAttributesV2,
-  DashboardCrudTypes as DashboardCrudTypesV2,
-} from '../../../common/content_management/v2';
+  DashboardSavedObjectControlGroupInput as DashboardSavedObjectControlGroupInputV2,
+  DashboardSavedObjectCrudTypes as DashboardSavedObjectCrudTypesV2,
+} from '../../dashboard_saved_object/schema/v2';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
   transformControlGroupIn,
@@ -81,7 +81,7 @@ export function dashboardAttributesOut(
   };
 }
 
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
+export const getResultV3ToV2 = (result: DashboardGetOut): DashboardSavedObjectCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
@@ -100,7 +100,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
 
   const v2Attributes = {
     ...(controlGroupInput && {
-      controlGroupInput: transformControlGroupIn(controlGroupInput) as ControlGroupAttributesV2,
+      controlGroupInput: transformControlGroupIn(controlGroupInput) as DashboardSavedObjectControlGroupInputV2,
     }),
     description,
     ...(kibanaSavedObjectMeta && {
