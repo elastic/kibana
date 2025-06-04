@@ -39,7 +39,7 @@ const DropTargetDataProvidersContainer = styled.div`
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSuccess};
-    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseSuccess};
+    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderStrongSuccess};
 
     & .timeline-drop-area-empty__text {
       color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
@@ -56,7 +56,7 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseSubdued};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
   border-radius: 5px;
   padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
