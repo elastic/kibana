@@ -9,8 +9,14 @@ import { Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
 import { InterceptsStart } from '@kbn/intercepts-plugin/public';
+import { type CloudStart } from '@kbn/cloud-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NPSScoreInput } from './components';
@@ -19,20 +25,32 @@ import { TRIGGER_DEF_ID } from '../common/constants';
 
 interface ProductInterceptPluginStartDeps {
   intercepts: InterceptsStart;
+  cloud: CloudStart;
 }
 
 export class ProductInterceptPublicPlugin implements Plugin {
   private readonly telemetry = new PromptTelemetry();
   private interceptSubscription?: Subscription;
+  private readonly isServerless: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env?.packageInfo?.buildFlavor === 'serverless';
+  }
 
   setup(core: CoreSetup) {
     return this.telemetry.setup({ analytics: core.analytics });
   }
 
-  start(core: CoreStart, { intercepts }: ProductInterceptPluginStartDeps) {
+  start(core: CoreStart, { intercepts, cloud }: ProductInterceptPluginStartDeps) {
     const eventReporter = this.telemetry.start({
       analytics: core.analytics,
     });
+
+    const productOffering = this.isServerless
+      ? `Elastic ${function (string: string) {
+          return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+        }.call(null, cloud.serverless.projectType || '')}`
+      : 'Kibana';
 
     this.interceptSubscription = intercepts
       .registerIntercept?.({
@@ -41,7 +59,10 @@ export class ProductInterceptPublicPlugin implements Plugin {
           {
             id: 'start',
             title: i18n.translate('productIntercept.prompter.step.start.title', {
-              defaultMessage: 'Help us improve Kibana',
+              defaultMessage: 'Help us improve {productOffering}',
+              values: {
+                productOffering,
+              },
             }),
             content: () =>
               React.createElement(
@@ -49,14 +70,21 @@ export class ProductInterceptPublicPlugin implements Plugin {
                 { key: 'productInterceptPrompterStartContent', size: 's' },
                 i18n.translate('productIntercept.prompter.step.start.content', {
                   defaultMessage:
-                    'We are always looking for ways to improve Kibana. Please take a moment to share your feedback with us.',
+                    'We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us.',
+                  values: {
+                    productOffering,
+                  },
                 })
               ),
           },
           {
             id: 'satisfaction',
             title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
-              defaultMessage: 'Overall, how satisfied or dissatisfied are you with Kibana?',
+              defaultMessage:
+                'Overall, how satisfied or dissatisfied are you with {productOffering}?',
+              values: {
+                productOffering,
+              },
             }),
             content: ({ onValue }) => {
               return React.createElement(NPSScoreInput, {
@@ -79,7 +107,10 @@ export class ProductInterceptPublicPlugin implements Plugin {
           {
             id: 'ease',
             title: i18n.translate('productIntercept.prompter.step.ease.title', {
-              defaultMessage: 'Overall, how difficult or easy is it to use Kibana?',
+              defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
+              values: {
+                productOffering,
+              },
             }),
             content: ({ onValue }) => {
               return React.createElement(NPSScoreInput, {
@@ -111,8 +142,9 @@ export class ProductInterceptPublicPlugin implements Plugin {
                 React.createElement(FormattedMessage, {
                   id: 'productIntercept.prompter.step.completion.content',
                   defaultMessage:
-                    "If you'd like to participate in future research to help improve kibana, <link>click here</link>.",
+                    "If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>.",
                   values: {
+                    productOffering,
                     link: (chunks) =>
                       React.createElement(
                         EuiLink,
