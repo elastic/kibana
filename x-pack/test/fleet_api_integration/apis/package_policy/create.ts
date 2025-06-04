@@ -1268,6 +1268,13 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
+      const deletableTestPolicyRes = await apiClient.createAgentPolicy(undefined, {
+        name: `Test policy ${uuidv4()}`,
+        namespace: 'default',
+      });
+
+      const deletableTestPolicyId = deletableTestPolicyRes.item.id;
+
       const res = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -1275,7 +1282,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test agentless custom package',
           description: '',
           namespace: 'default',
-          policy_ids: [agentPolicyId],
+          policy_ids: [deletableTestPolicyId],
           enabled: true,
           inputs: [],
           package: {
@@ -1292,7 +1299,7 @@ export default function (providerContext: FtrProviderContext) {
       );
 
       // Associated agent policy that was created for agentless deployment should be deleted
-      await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}`).expect(404);
+      await supertest.get(`/api/fleet/agent_policies/${deletableTestPolicyId}`).expect(404);
     });
   });
 }
