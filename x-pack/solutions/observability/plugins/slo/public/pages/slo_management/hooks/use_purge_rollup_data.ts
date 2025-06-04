@@ -36,17 +36,26 @@ export function usePurgeRollupData({ name, onConfirm }: { name: string; onConfir
     },
     {
       onError: (error) => {
-        toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.bulkPurge.errorNotification', {
-            defaultMessage: 'Failed to schedule bulk purge of rollup data for {name}',
+        let errorMessage = error.body?.message ?? error.message;
+        if (errorMessage.includes('At least one SLO')) {
+          errorMessage = i18n.translate('xpack.slo.purge.successNotification', {
+            defaultMessage:
+              'The provided purge policy is invalid. {name} has a time window that is longer than the provided purge policy.',
+            values: { name },
+          });
+        }
+
+        toasts.addError(new Error(errorMessage), {
+          title: i18n.translate('xpack.slo.purge.errorNotification', {
+            defaultMessage: 'Failed to schedule purge of rollup data for {name}',
             values: { name },
           }),
         });
       },
       onSuccess: () => {
         toasts.addSuccess(
-          i18n.translate('xpack.slo.bulkPurge.successNotification', {
-            defaultMessage: 'Bulk purge of rollup data scheduled for {name}',
+          i18n.translate('xpack.slo.purge.successNotification', {
+            defaultMessage: 'Purge of rollup data scheduled for {name}',
             values: { name },
           })
         );
