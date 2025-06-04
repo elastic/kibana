@@ -72,6 +72,14 @@ export const shallowMockedFields = [
     filterable: true,
     aggregatable: true,
   },
+  {
+    name: 'time.duration.us',
+    type: 'number',
+    displayName: 'duration',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as DataView['fields'];
 
 export const deepMockedFields = shallowMockedFields.map(

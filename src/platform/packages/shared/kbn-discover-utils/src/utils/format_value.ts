@@ -10,12 +10,21 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type {
-  FieldFormatsContentType,
-  HtmlContextTypeOptions,
-  TextContextTypeOptions,
+import {
+  type FieldFormatsContentType,
+  type HtmlContextTypeOptions,
+  type TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
 import { EsHitRecord } from '../types';
+
+const DURATION_CONFIG = {
+  inputFormat: 'microseconds',
+  outputFormat: 'humanizePrecise',
+  showSuffix: true,
+  useShortSuffix: true,
+  outputPrecision: 2,
+  includeSpaceWithSuffix: true,
+};
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -51,6 +60,13 @@ export function formatFieldValue(
     // string formatter to format that field.
     return fieldFormats
       .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      .convert(value, usedContentType, converterOptions);
+  }
+
+  // If we have a duration field, override config and provide our own formatter
+  if (field.name.includes('duration.us')) {
+    return fieldFormats
+      .getInstance('duration', DURATION_CONFIG)
       .convert(value, usedContentType, converterOptions);
   }
 

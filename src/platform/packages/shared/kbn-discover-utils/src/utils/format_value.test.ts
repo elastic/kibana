@@ -17,6 +17,9 @@ const services = {
     getDefaultInstance: jest.fn<FieldFormat, [string]>(
       () => ({ convert: (value: unknown) => value } as FieldFormat)
     ),
+    getInstance: jest.fn<FieldFormat, [string, string]>(
+      () => ({ convert: (value: unknown) => value } as FieldFormat)
+    ),
   } as unknown as FieldFormatsStart,
 };
 
@@ -63,5 +66,18 @@ describe('formatFieldValue', () => {
     expect(formatFieldValue('foo', hit, services.fieldFormats)).toBe('formatted:foo');
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
     expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
+  });
+
+  it('should call duration formatter if matching field is specified', () => {
+    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
+    (services.fieldFormats.getInstance as jest.Mock).mockReturnValue({
+      convert: convertMock,
+    });
+    const field = dataViewMock.fields.getByName('time.duration.us');
+    expect(formatFieldValue(19000, hit, services.fieldFormats, dataViewMock, field)).toBe(
+      'formatted:19000'
+    );
+    expect(services.fieldFormats.getInstance).toHaveBeenCalledWith('duration', expect.any(Object));
+    expect(convertMock).toHaveBeenCalledWith(19000, 'html', { field, hit });
   });
 });
