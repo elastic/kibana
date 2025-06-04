@@ -31,7 +31,7 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(),
+  useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
 const useAssistantContextMock = useAssistantContext as jest.Mock;

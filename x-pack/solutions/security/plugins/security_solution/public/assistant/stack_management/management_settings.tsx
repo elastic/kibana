@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
-import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
+
+import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
 import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
