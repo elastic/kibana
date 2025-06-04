@@ -23,6 +23,7 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
+  useUrlParams,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -40,6 +41,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { urlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const {
     isLoading,
     isInitialRequest,
@@ -71,7 +74,12 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
-  const host = agentData?.item?.local_metadata?.host;
+  const agent =
+    agentData?.item &&
+    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
+      ? agentData.item
+      : null;
+  const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
@@ -110,14 +118,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const headerRightContent = useMemo(
     () =>
-      agentData && agentData.item ? (
+      agent ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
             {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
-                  agent={agentData.item}
+                  agent={agent}
                   agentPolicy={agentPolicyData?.item}
                   assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                   onCancelReassign={
@@ -199,8 +207,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             }
             error={error}
           />
-        ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
+        ) : agent ? (
+          <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
         ) : (
           <Error
             title={

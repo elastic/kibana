@@ -14,6 +14,7 @@ import type { AgentPolicy } from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../../common';
 import { agentPolicyService, outputService } from '../services';
+import { outputType } from '../../common/constants';
 
 export interface AgentsPerOutputType {
   output_type: string;
@@ -26,6 +27,7 @@ export interface AgentsPerOutputType {
     scale: number;
     throughput: number;
   };
+  sync_integrations?: boolean;
 }
 
 export async function getAgentsPerOutput(
@@ -102,6 +104,9 @@ export async function getAgentsPerOutput(
       outputTelemetryRecord.preset_counts[
         output.preset as keyof typeof outputTelemetryRecord.preset_counts
       ] += 1;
+    }
+    if (output.type === outputType.RemoteElasticsearch && output.sync_integrations) {
+      outputTelemetryRecord.sync_integrations = output.sync_integrations;
     }
   });
 
