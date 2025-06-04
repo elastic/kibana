@@ -27,6 +27,8 @@ import { routeWithNamespace } from '../../../../../common/utils/security_solutio
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
 
+const TEST_TIMOUT = 30 * 60 * 1000;
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
@@ -107,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(evalPayload)
             .expect(200);
           await waitForEvaluationComplete({ evaluationId, supertest, log });
-        });
+        }).timeout(TEST_TIMOUT);
 
         // Uses attack discovery alerts from episodes 1-8
         it('should successfully run the "Alerts RAG Regression (Episodes 1-8)" dataset', async () => {
@@ -124,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(evalPayload)
             .expect(200);
           await waitForEvaluationComplete({ evaluationId, supertest, log });
-        });
+        }).timeout(TEST_TIMOUT);
 
         it('should successfully run the "Assistant Eval: Custom Knowledge" dataset', async () => {
           await loadEvalKnowledgeBaseEntries(supertest, log);
@@ -141,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(evalPayload)
             .expect(200);
           await waitForEvaluationComplete({ evaluationId, supertest, log });
-        });
+        }).timeout(TEST_TIMOUT);
       });
 
       describe('Attack Discovery', () => {
@@ -160,8 +162,8 @@ export default ({ getService }: FtrProviderContext) => {
             .send(evalPayload)
             .expect(200);
           await waitForEvaluationComplete({ evaluationId, supertest, log });
-        });
+        }).timeout(TEST_TIMOUT);
       });
     });
-  }).timeout('60m');
+  });
 };
