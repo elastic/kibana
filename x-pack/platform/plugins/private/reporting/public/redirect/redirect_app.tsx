@@ -15,11 +15,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { ScopedHistory } from '@kbn/core/public';
 import {
-  DASHBOARD_APP_LOCATOR,
-  LENS_APP_LOCATOR,
-  VISUALIZE_APP_LOCATOR,
-} from '@kbn/deeplinks-analytics';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
+} from '@kbn/reporting-common';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -68,15 +66,12 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           throw new Error('Could not find locator params for report');
         }
 
-        // Reporting job params should only contain locator for analytical apps, not for for short URLs.
-        if (
-          ![DASHBOARD_APP_LOCATOR, LENS_APP_LOCATOR, VISUALIZE_APP_LOCATOR].includes(
-            locatorParams.id
-          )
-        ) {
+        if (!REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES.includes(locatorParams.id)) {
           // eslint-disable-next-line no-console
-          console.error(`Can not allow locator type "${locatorParams.id}" for reporting jobs`);
-          throw new Error('Analytics app locator is required for reporting jobs');
+          console.error(`Report job execution cannot redirect using ${locatorParams.id}`);
+          throw new Error(
+            'Report job execution can only redirect using a locator for an expected analytical app'
+          );
         }
 
         share.navigate(locatorParams);
