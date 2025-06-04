@@ -19,7 +19,10 @@ import {
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
 
-export const useSelectedMonitor = (monId?: string) => {
+export const useSelectedMonitor = (
+  monId?: string,
+  { refetchMonitorEnabled }: { refetchMonitorEnabled: boolean } = { refetchMonitorEnabled: true }
+) => {
   let monitorId = monId;
   const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
@@ -81,7 +84,8 @@ export const useSelectedMonitor = (monId?: string) => {
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
       syntheticsMonitorDispatchedAt > 0 &&
-      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000 &&
+      refetchMonitorEnabled
     ) {
       dispatch(
         getMonitorAction.get({
@@ -100,6 +104,7 @@ export const useSelectedMonitor = (monId?: string) => {
     syntheticsMonitorDispatchedAt,
     spaceId,
     space?.id,
+    refetchMonitorEnabled,
   ]);
 
   return {
