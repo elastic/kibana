@@ -14,8 +14,6 @@ export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS =
 
 export const DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
   'logs-cloud_security_posture.findings_latest-default';
-// export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
-//   'logs-cloud_security_posture.findings_latest-default';
 
 export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
   'security_solution-*.misconfiguration_latest';

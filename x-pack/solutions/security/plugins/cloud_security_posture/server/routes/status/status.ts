@@ -17,6 +17,7 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import type {
   CspSetupStatus,
@@ -36,7 +37,6 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
   POSTURE_TYPES,

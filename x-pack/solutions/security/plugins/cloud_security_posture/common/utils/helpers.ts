@@ -96,15 +96,15 @@ export const calculatePostureScore = (passed: number, failed: number): Score => 
 };
 
 export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupStatus) => {
-  // if (status) {
-  //   const indexDetail = status.indicesDetails.find(
-  //     (details) => details.index.indexOf(indexName) !== -1
-  //   );
+  if (status) {
+    const indexDetail = status.indicesDetails.find(
+      (details) => details.index.indexOf(indexName) !== -1
+    );
 
-  //   if (indexDetail) {
-  //     return indexDetail.status;
-  //   }
-  // }
+    if (indexDetail) {
+      return indexDetail.status;
+    }
+  }
 
   return 'unknown';
 };

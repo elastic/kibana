@@ -212,24 +212,30 @@ export class CspPlugin
    */
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
-    console.log('*****************************');
-    console.log('*****************************');
-    console.log('*****************************');
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Check if index alias is already created
+    await this.intializeIndexAlias(esClient, this.logger);
+    await initializeCspIndices(esClient, this.config, this.logger);
+    await initializeCspTransforms(esClient, this.logger);
+    await scheduleFindingsStatsTask(taskManager, this.logger);
+    this.#isInitialized = true;
+  }
+
+  // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
+  // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
+  intializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
-    const isIndexExists = await esClient.indices.exists({
+    const isIDeprecatedLatestIndexExists = await esClient.indices.exists({
       index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     });
 
-    if (!isAliasExists && isIndexExists) {
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+    // This handles the following scenarios:
+    // 1. A customer using an older integration version (pre-2.00) who has upgraded their Kibana stack.
+    // 2. A customer with a new Kibana stack who installs an integration version earlier than 2.00 for the first time (e.g., in a serverless environment).
+    if (isIDeprecatedLatestIndexExists && !isAliasExists) {
       try {
         const res = await esClient.indices.updateAliases({
           actions: [
@@ -242,25 +248,17 @@ export class CspPlugin
             },
           ],
         });
-        console.log(JSON.stringify(res, null, 2));
-        this.logger.debug(
-          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} already exists, skipping initialization`
+        this.logger.info(
+          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} created successfully}`
         );
       } catch (error) {
-        console.error(
-          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}: ${error}`
-        );
         this.logger.error(
           `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}: ${error}`
         );
         throw error;
       }
     }
-    await initializeCspIndices(esClient, this.config, this.logger);
-    await initializeCspTransforms(esClient, this.logger);
-    await scheduleFindingsStatsTask(taskManager, this.logger);
-    this.#isInitialized = true;
-  }
+  };
 
   async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
     await removeFindingsStatsTask(taskManager, logger);
