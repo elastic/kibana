@@ -119,6 +119,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               to: ['kibana-action-test@elastic.co'],
             },
             message: {
+              attachments: [],
               from: { address: 'bob@example.com', name: '' },
               to: [
                 {
@@ -150,7 +151,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           });
 
           const executeEvent = events[1];
-          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(350);
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(367);
         });
     });
 
@@ -358,6 +359,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               to: ['kibana-action-test@elastic.co'],
             },
             message: {
+              attachments: [],
               from: { address: 'jim@example.com', name: '' },
               to: [
                 {
