@@ -19,7 +19,6 @@ export const AwsInputVarFields = ({
   onChange,
   packageInfo,
   hasInvalidRequiredVars = false,
-  disabled = false,
 }: {
   fields: Array<
     AwsOptions[keyof AwsOptions]['fields'][number] & {
@@ -31,7 +30,6 @@ export const AwsInputVarFields = ({
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars?: boolean;
-  disabled?: boolean;
 }) => {
   return (
     <div>
@@ -71,7 +69,6 @@ export const AwsInputVarFields = ({
                       onChange={(value) => {
                         onChange(field.id, value);
                       }}
-                      frozen={disabled}
                       errors={invalid ? [invalidError] : []}
                       forceShowErrors={invalid}
                       isEditPage={true}
@@ -95,7 +92,6 @@ export const AwsInputVarFields = ({
                 <EuiFieldText
                   id={field.id}
                   fullWidth
-                  disabled={disabled}
                   value={field.value || ''}
                   isInvalid={invalid}
                   onChange={(event) => onChange(field.id, event.target.value)}

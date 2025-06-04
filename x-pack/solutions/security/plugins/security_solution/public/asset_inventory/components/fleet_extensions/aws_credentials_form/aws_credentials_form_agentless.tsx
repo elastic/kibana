@@ -323,13 +323,12 @@ export const AwsCredentialsFormAgentless = ({
     ? semverCompare(packageInfo.version, ASSET_INVENTORY_CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
     : false;
 
-  const disabledForm =
+  const disabled =
     isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     showCloudConnectors;
 
-  const showCloudFormationAccordion =
-    isCloudFormationSupported && showCloudCredentialsButton && !disabledForm;
+  const showCloudFormationAccordion = isCloudFormationSupported && showCloudCredentialsButton;
 
   const selectorOptions = () => {
     if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
@@ -372,7 +371,7 @@ export const AwsCredentialsFormAgentless = ({
         )}
         type={awsCredentialsType}
         options={selectorOptions()}
-        disabled={disabledForm}
+        disabled={disabled}
         onChange={(optionId) => {
           updatePolicy(
             getAssetPolicy(
@@ -433,7 +432,6 @@ export const AwsCredentialsFormAgentless = ({
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}
-        disabled={disabledForm}
         onChange={(key, value) => {
           updatePolicy(getAssetPolicy(newPolicy, input.type, { [key]: { value } }));
         }}
