@@ -119,7 +119,6 @@ export function generateDatasets(
   return dataStreamStats?.map((dataStream) => {
     const dataset = DataStreamStat.create({
       ...dataStream,
-      hasFailureStore: datasetsWithFailureStore.has(dataStream.name),
     });
     const degradedDocs = degradedMap[dataset.rawName] || dataset.degradedDocs;
     const failedDocs = failedMap[dataset.rawName] || dataset.failedDocs;

@@ -34,6 +34,7 @@ export const dataStreamStatRt = rt.intersection([
     integration: rt.string,
     totalDocs: rt.number,
     creationDate: rt.number,
+    hasFailureStore: rt.boolean,
   }),
 ]);
 

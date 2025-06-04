@@ -17,7 +17,6 @@ interface QualityStat {
 }
 
 export class DataStreamStat {
-  hasFailureStore: boolean;
   rawName: string;
   type: DataStreamType;
   name: DataStreamStatType['name'];
@@ -33,9 +32,9 @@ export class DataStreamStat {
   docsInTimeRange?: number;
   degradedDocs: QualityStat;
   failedDocs: QualityStat;
+  hasFailureStore?: DataStreamStatType['hasFailureStore'];
 
   private constructor(dataStreamStat: DataStreamStat) {
-    this.hasFailureStore = dataStreamStat.hasFailureStore ?? false;
     this.rawName = dataStreamStat.rawName;
     this.type = dataStreamStat.type;
     this.name = dataStreamStat.name;
@@ -51,6 +50,7 @@ export class DataStreamStat {
     this.docsInTimeRange = dataStreamStat.docsInTimeRange;
     this.degradedDocs = dataStreamStat.degradedDocs;
     this.failedDocs = dataStreamStat.failedDocs;
+    this.hasFailureStore = dataStreamStat.hasFailureStore;
   }
 
   public static create(dataStreamStat: DataStreamStatType & { hasFailureStore?: boolean }) {
@@ -95,7 +95,7 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       rawName: datasetName,
-      hasFailureStore: hasFailureStore ?? true,
+      hasFailureStore,
       type,
       name: dataset,
       title: datasetIntegrationMap[dataset]?.title || dataset,

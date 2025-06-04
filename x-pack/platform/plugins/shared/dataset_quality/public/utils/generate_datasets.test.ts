@@ -36,6 +36,7 @@ describe('generateDatasets', () => {
 
   const dataStreamStats: DataStreamStatType[] = [
     {
+      hasFailureStore: true,
       name: 'logs-system.application-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
@@ -48,6 +49,7 @@ describe('generateDatasets', () => {
       },
     },
     {
+      hasFailureStore: true,
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
@@ -150,7 +152,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
-        hasFailureStore: false,
+        hasFailureStore: true,
       },
     ]);
   });
@@ -217,7 +219,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
-        hasFailureStore: false,
+        hasFailureStore: true,
       },
     ]);
   });
@@ -388,7 +390,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
-        hasFailureStore: false,
+        hasFailureStore: true,
       },
       {
         name: 'synth',
@@ -415,7 +417,7 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
-        hasFailureStore: false,
+        hasFailureStore: true,
       },
     ]);
   });
