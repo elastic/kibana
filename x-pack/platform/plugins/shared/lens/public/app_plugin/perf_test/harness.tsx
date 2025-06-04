@@ -119,7 +119,7 @@ function Harness({
       <div className={'perfTest__harness'}>
         <div className={'perfTest__harnessGrid'}>
           {Array.from({ length: rowCount }).map((__, i) => (
-            <RowComponent key={i} disabled={disabled} index={Math.random()} />
+            <RowComponent key={i} disabled={disabled} index={i} />
           ))}
         </div>
         <Stats

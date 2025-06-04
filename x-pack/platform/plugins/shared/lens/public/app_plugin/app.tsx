@@ -48,6 +48,7 @@ import {
   useNavigateBackToApp,
   useShortUrlService,
 } from './app_helpers';
+import { PerfTest } from './perf_test/perf_test';
 
 export type SaveProps = Simplify<
   Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -76,6 +77,7 @@ export function App({
   initialContext,
   coreStart,
 }: LensAppProps) {
+  return <PerfTest />;
   const lensAppServices = useKibana<LensAppServices>().services;
 
   const {
