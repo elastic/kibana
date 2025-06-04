@@ -12,7 +12,6 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, waitFor } from '@testing-library/react';
 
-import { DashboardState } from '../../../common';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { buildMockDashboardApi, getMockDashboardPanels } from '../../mocks';
