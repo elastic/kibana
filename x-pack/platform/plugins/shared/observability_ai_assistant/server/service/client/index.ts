@@ -811,16 +811,20 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  addKnowledgeBaseBulkEntries = async ({ entries }: { entries: Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>[] }): Promise<void> => {
+  addKnowledgeBaseBulkEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>>;
+  }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addBulkEntries({
-      entries: entries.map(entry => ({
+      entries: entries.map((entry) => ({
         ...entry,
-        type: KnowledgeBaseType.Contextual
+        type: KnowledgeBaseType.Contextual,
       })),
       user: this.dependencies.user,
       namespace: this.dependencies.namespace,
     });
-  }
+  };
 
   getKnowledgeBaseEntries = async ({
     query,

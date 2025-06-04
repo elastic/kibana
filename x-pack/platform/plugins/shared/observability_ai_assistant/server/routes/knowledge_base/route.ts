@@ -13,6 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
+import { ConversationConfidenceEnum } from '@kbn/elastic-assistant-common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -20,7 +21,6 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseState,
 } from '../../../common/types';
-import { ConversationConfidenceEnum } from '@kbn/elastic-assistant-common';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -294,23 +294,18 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw new Error('Knowledge base is not ready');
     }
 
-    const entries = resources.params.body.entries.map(entry => ({
+    const entries = resources.params.body.entries.map((entry) => ({
       confidence: ConversationConfidenceEnum.high,
       is_correction: false,
       public: true,
       labels: {},
       role: KnowledgeBaseEntryRole.UserEntry,
-      ...entry
+      ...entry,
     }));
 
-    await pRetry(
-      () => client.addKnowledgeBaseBulkEntries({ entries }),
-      { retries: 10 }
-    );
+    await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
 
-    resources.logger.info(
-      `Imported ${entries.length} knowledge base entries using bulk API`
-    );
+    resources.logger.info(`Imported ${entries.length} knowledge base entries using bulk API`);
   },
 });
 

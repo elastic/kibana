@@ -7,6 +7,9 @@
 
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
@@ -14,9 +17,6 @@ import {
 import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import os from 'os';
-import fs from 'fs';
-import path from 'path';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -206,10 +206,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
       async function prepareBulkImportData() {
-        const entries = [{"id":"12233","title":"Testing 4","text":"Contents of item"},
-        {"id":"6775","title":"Testing 2","text":"Contents of second item"},
-        {"id":"6573","title":"Testing","text":"Contents of third item"}]
-        
+        const entries = [
+          { id: '12233', title: 'Testing 4', text: 'Contents of item' },
+          { id: '6775', title: 'Testing 2', text: 'Contents of second item' },
+          { id: '6573', title: 'Testing', text: 'Contents of third item' },
+        ];
+
         return entries;
       }
 
@@ -232,9 +234,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function uploadBulkImportFile(content: string) {
         fs.writeFileSync(tempFilePath, content, 'utf8');
-        
+
         log.debug(`File saved to: ${tempFilePath}`);
-        
+
         try {
           await common.setFileInputPath(tempFilePath);
         } catch (error) {
@@ -273,15 +275,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(initialCount).to.eql(0);
 
         await openBulkImportFlyout();
-        
+
         const entries = await prepareBulkImportData();
-        await uploadBulkImportFile(entries.map(entry => JSON.stringify(entry)).join('\n'));
-        
+        await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
         const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText()
-        expect(toastText).to.eql("Successfully imported " + entries.length + " items")
+        const toastText = await toast.getVisibleText();
+        expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
         const finalCount = await getKnowledgeBaseEntryCount();
         expect(finalCount).to.eql(entries.length);
@@ -290,12 +292,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('displays validation errors for invalid import data', async () => {
         await openBulkImportFlyout();
         await uploadBulkImportFile("{ title: 'Invalid Entry' ");
-        
+
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
         const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText()
-        expect(toastText).to.eql("Something went wrong")
+        const toastText = await toast.getVisibleText();
+        expect(toastText).to.eql('Something went wrong');
 
         const count = await getKnowledgeBaseEntryCount();
         expect(count).to.eql(0);
@@ -303,12 +305,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       it('cancels import without saving entries', async () => {
         await openBulkImportFlyout();
-        
+
         const entries = await prepareBulkImportData();
         await uploadBulkImportFile(JSON.stringify(entries));
-        
+
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportCancelButton);
-        
+
         await testSubjects.missingOrFail(ui.pages.kbManagementTab.bulkImportFlyout);
         const count = await getKnowledgeBaseEntryCount();
         expect(count).to.eql(0);
