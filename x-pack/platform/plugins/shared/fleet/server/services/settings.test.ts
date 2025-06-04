@@ -107,6 +107,14 @@ describe('settingsSetup', () => {
   });
 
   it('should update prerelease_integrations_enabled if settings exist and prereleaseEnabledByDefault is true', async () => {
+    // First mock for the getSettings call in settingsSetup
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [],
+      page: 1,
+      perPage: 10,
+      total: 0
+    });
+    
     const soClientMock = savedObjectsClientMock.create();
 
     mockedAppContextService.getConfig.mockReturnValue({
@@ -145,12 +153,26 @@ describe('settingsSetup', () => {
       references: [],
     });
 
+    // Second mock for the getSettings call in saveSettings
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [],
+      page: 1,
+      perPage: 10,
+      total: 0
+    });
+
     await settingsSetup(soClientMock);
 
     expect(soClientMock.update).toHaveBeenCalled();
   });
 
   it('should not update settings if prereleaseEnabledByDefault is false', async () => {
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [],
+      page: 1,
+      perPage: 10,
+      total: 0
+    });
     const soClientMock = savedObjectsClientMock.create();
     mockedAppContextService.getConfig.mockReturnValue({
       prereleaseEnabledByDefault: false,
