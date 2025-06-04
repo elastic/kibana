@@ -7,6 +7,10 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
+import {
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
 
@@ -15,12 +19,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
-  const daysToMillisecond = (days: number) => days * 24 * 60 * 60 * 1000;
-  const RETENTION = 90;
+  const convertTimeToMillisecond = (time: string): number => {
+    const match = time.match(/^(\d+)(d|h)$/);
+    if (!match) {
+      throw new Error('Invalid time format. Use "Xd" for days or "Xh" for hours.');
+    }
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+
+    if (unit === 'd') {
+      return value * 24 * 60 * 60 * 1000; // Convert days to milliseconds
+    } else if (unit === 'h') {
+      return value * 60 * 60 * 1000; // Convert hours to milliseconds
+    }
+
+    throw new Error('Unsupported time unit. Use "d" for days or "h" for hours.');
+  };
 
   const dataOldKspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(LATEST_FINDINGS_RETENTION_POLICY) -
+        convertTimeToMillisecond('1d')
+      ).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -39,7 +62,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ];
   const dataWithinRetentionKspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION - 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(LATEST_FINDINGS_RETENTION_POLICY) +
+        convertTimeToMillisecond('1d')
+      ).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -59,7 +86,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const dataOldCspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(LATEST_FINDINGS_RETENTION_POLICY) -
+        convertTimeToMillisecond('1d')
+      ).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -78,7 +109,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ];
   const dataWithinRetentionCspm = [
     {
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION - 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(LATEST_FINDINGS_RETENTION_POLICY) +
+        convertTimeToMillisecond('1d')
+      ).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -99,13 +134,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dataOldCnvm = [
     {
       ...vulnerabilitiesLatestMock[0],
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION + 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(CDR_EXTENDED_VULN_RETENTION_POLICY) -
+        convertTimeToMillisecond('1d')
+      ).toString(),
     },
   ];
   const dataWithinRetentionCnvm = [
     {
       ...vulnerabilitiesLatestMock[0],
-      '@timestamp': (Date.now() - daysToMillisecond(RETENTION - 1)).toString(),
+      '@timestamp': (
+        Date.now() -
+        convertTimeToMillisecond(CDR_EXTENDED_VULN_RETENTION_POLICY) +
+        convertTimeToMillisecond('1d')
+      ).toString(),
     },
   ];
 
