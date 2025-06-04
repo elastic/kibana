@@ -31,12 +31,14 @@ export function FieldsTable({
   fields,
   stream,
   withTableActions,
+  withToolbar,
 }: {
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
+  withToolbar: boolean;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -75,7 +77,7 @@ export function FieldsTable({
         canDragAndDropColumns: false,
       }}
       sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
-      toolbarVisibility={true}
+      toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
       trailingControlColumns={trailingColumns}
@@ -102,6 +104,14 @@ const createCellRenderer =
     if (columnId === 'type') {
       if (!field.type) return EMPTY_CONTENT;
       return <FieldType type={field.type} aliasFor={field.alias_for} />;
+    }
+
+    if (columnId === 'esType') {
+      if (field.status === 'unmapped' && field.esType) {
+        return field.esType;
+      }
+      if (!field.type || field.type === 'system') return EMPTY_CONTENT;
+      return field.type;
     }
 
     if (columnId === 'parent') {
