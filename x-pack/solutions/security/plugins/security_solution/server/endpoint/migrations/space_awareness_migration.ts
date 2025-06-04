@@ -82,9 +82,9 @@ const migrateArtifactsToSpaceAware = async (
           } catch (err) {
             migrationStats.failedUpdates++;
             migrationStats.artifacts[listId].failed++;
-            migrationStats.artifacts[listId].errors.push(err.message);
-
-            // TODO:PT if failure is a version miss-match, then try again.
+            migrationStats.artifacts[listId].errors.push(
+              `Update to [${listId}] item ID [${artifactUpdate.itemId}] failed with: ${err.message}`
+            );
           }
         },
         { stopOnError: false, concurrency: 10 }
@@ -103,13 +103,17 @@ const migrateArtifactsToSpaceAware = async (
       maxSize: undefined,
       executeFunctionOnStream: ({ page, total, data }) => {
         logger.debug(
-          `Building updates for page [${page}] with [${data.length}] items out of a total of [${total}] artifact entries`
+          `Checking page [${page}] with [${data.length}] items out of a total of [${total}] artifact entries need updates`
         );
+
+        if (migrationStats.totalItems < total) {
+          migrationStats.totalItems = total;
+        }
 
         for (const artifact of data) {
           if (!hasArtifactOwnerSpaceId(artifact)) {
             updateProcessor.addToQueue({
-              _version: artifact._version,
+              _version: undefined,
               comments: artifact.comments,
               description: artifact.description,
               entries: artifact.entries,
