@@ -367,7 +367,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
   /**
    * The AST for the query behind the cursor.
    */
