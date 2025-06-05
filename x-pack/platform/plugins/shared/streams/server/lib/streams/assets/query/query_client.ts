@@ -43,11 +43,10 @@ export class QueryClient {
     }
   ) {
     this.isSignificantEventsEnabled =
-      dependencies.config.experimental?.significantEventsEnabled ?? false;
+      dependencies.config.experimental.significantEventsEnabled ?? false;
   }
 
   public async syncQueries(stream: string, queries: StreamQuery[]) {
-    console.log(`isSignificantEventsEnabled=${this.isSignificantEventsEnabled}`);
     if (!this.isSignificantEventsEnabled) {
       return;
     }

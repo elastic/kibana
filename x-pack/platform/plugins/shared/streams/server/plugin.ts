@@ -29,6 +29,7 @@ import {
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
@@ -38,7 +39,6 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { QueryService } from './lib/streams/assets/query/query_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}

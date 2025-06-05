@@ -8,14 +8,12 @@
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  experimental: schema.maybe(
-    schema.object({
-      significantEventsEnabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: true }),
-      }),
-    })
-  ),
+  experimental: schema.object({
+    significantEventsEnabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+  }),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
