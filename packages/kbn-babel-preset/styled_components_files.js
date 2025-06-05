@@ -431,7 +431,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]cell_rendering[\/\\]default_cell_renderer.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]add_data_provider_popover.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]empty.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]provider_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]provider_item_actions.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]data_providers[\/\\]providers.tsx/,
