@@ -11,26 +11,24 @@ import { readdirSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
-import type { RecursivePartial } from '@kbn/utility-types';
 import {
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
-  Signature,
   FunctionDefinitionTypes,
   Location,
 } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
-const aliasTable: Record<string, string[]> = {
-  to_version: ['to_ver'],
-  to_unsigned_long: ['to_ul', 'to_ulong'],
-  to_boolean: ['to_bool'],
-  to_string: ['to_str'],
-  to_datetime: ['to_dt'],
-  to_double: ['to_dbl'],
-  to_integer: ['to_int'],
-};
-const aliases = new Set(Object.values(aliasTable).flat());
+import { mathValidators } from './validators';
+import {
+  aliasTable,
+  aliases,
+  defaultScalarFunctionLocations,
+  defaultAggFunctionLocations,
+  MATH_OPERATORS,
+  COMPARISON_OPERATORS,
+} from './constants';
+import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
 
 const bucketParameterTypes: Array<
   [
@@ -84,227 +82,6 @@ const bucketParameterTypes: Array<
   ['long', 'integer', 'long', 'integer', 'double'],
   ['long', 'integer', 'long', 'long', 'double'],
 ];
-
-const defaultScalarFunctionLocations: Location[] = [
-  Location.EVAL,
-  Location.ROW,
-  Location.SORT,
-  Location.WHERE,
-  Location.STATS,
-  Location.STATS_BY,
-  Location.STATS_WHERE,
-];
-
-const defaultAggFunctionLocations: Location[] = [Location.STATS];
-
-// coalesce can be removed when a test is added for version type
-// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['case', 'cast']);
-
-const extraFunctions: FunctionDefinition[] = [
-  {
-    type: FunctionDefinitionTypes.SCALAR,
-    name: 'case',
-    description:
-      'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    locationsAvailable: defaultScalarFunctionLocations,
-    signatures: [
-      {
-        params: [
-          { name: 'condition', type: 'boolean' },
-          { name: 'value', type: 'any' },
-        ],
-        minParams: 2,
-        returnType: 'unknown',
-      },
-    ],
-    examples: [
-      `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
-    ],
-  },
-];
-
-const validateLogFunctions = `(fnDef: ESQLFunction) => {
-  const messages = [];
-  // do not really care here about the base and field
-  // just need to check both values are not negative
-  for (const arg of fnDef.args) {
-    if (isLiteralItem(arg) && Number(arg.value) < 0) {
-      messages.push({
-        type: 'warning' as const,
-        code: 'logOfNegativeValue',
-        text: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue',
-          {
-            defaultMessage: 'Log of a negative number results in null: {value}',
-            values: {
-              value: arg.value,
-            },
-          }
-        ),
-        location: arg.location,
-      });
-    }
-  }
-  return messages;
-}`;
-
-const dateDiffSuggestions = [
-  'year',
-  'quarter',
-  'month',
-  'week',
-  'day',
-  'hour',
-  'minute',
-  'second',
-  'millisecond',
-  'microsecond',
-  'nanosecond',
-];
-
-const dateDiffOptions = [
-  'year',
-  'years',
-  'yy',
-  'yyyy',
-  'quarter',
-  'quarters',
-  'qq',
-  'q',
-  'month',
-  'months',
-  'mm',
-  'm',
-  'dayofyear',
-  'dy',
-  'y',
-  'day',
-  'days',
-  'dd',
-  'd',
-  'week',
-  'weeks',
-  'wk',
-  'ww',
-  'weekday',
-  'weekdays',
-  'dw',
-  'hour',
-  'hours',
-  'hh',
-  'minute',
-  'minutes',
-  'mi',
-  'n',
-  'second',
-  'seconds',
-  'ss',
-  's',
-  'millisecond',
-  'milliseconds',
-  'ms',
-  'microsecond',
-  'microseconds',
-  'mcs',
-  'nanosecond',
-  'nanoseconds',
-  'ns',
-];
-
-const dateExtractOptions = [
-  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
-  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
-  'ALIGNED_WEEK_OF_MONTH',
-  'ALIGNED_WEEK_OF_YEAR',
-  'AMPM_OF_DAY',
-  'CLOCK_HOUR_OF_AMPM',
-  'CLOCK_HOUR_OF_DAY',
-  'DAY_OF_MONTH',
-  'DAY_OF_WEEK',
-  'DAY_OF_YEAR',
-  'EPOCH_DAY',
-  'ERA',
-  'HOUR_OF_AMPM',
-  'HOUR_OF_DAY',
-  'INSTANT_SECONDS',
-  'MICRO_OF_DAY',
-  'MICRO_OF_SECOND',
-  'MILLI_OF_DAY',
-  'MILLI_OF_SECOND',
-  'MINUTE_OF_DAY',
-  'MINUTE_OF_HOUR',
-  'MONTH_OF_YEAR',
-  'NANO_OF_DAY',
-  'NANO_OF_SECOND',
-  'OFFSET_SECONDS',
-  'PROLEPTIC_MONTH',
-  'SECOND_OF_DAY',
-  'SECOND_OF_MINUTE',
-  'YEAR',
-  'YEAR_OF_ERA',
-];
-
-/**
- * Enrichments for function definitions
- *
- * This is the place to put information that is not provided by Elasticsearch
- * and, hence, won't be present in the JSON file.
- */
-const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
-  log10: {
-    validate: validateLogFunctions,
-  },
-  log: {
-    validate: validateLogFunctions,
-  },
-  date_diff: {
-    signatures: [
-      {
-        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
-      },
-    ],
-  },
-  date_extract: {
-    signatures: [
-      {
-        params: [{ acceptedValues: dateExtractOptions }],
-      },
-    ],
-  },
-  date_trunc: {
-    signatures: [
-      {
-        // override the first param to be of type time_literal
-        params: [{ type: 'time_literal' }],
-      },
-    ],
-  },
-  mv_sort: {
-    signatures: new Array(10).fill({
-      params: [{}, { acceptedValues: ['asc', 'desc'] }],
-    }),
-  },
-  percentile: {
-    signatures: new Array(9).fill({
-      params: [{}, { constantOnly: true }],
-    }),
-  },
-  top: {
-    signatures: new Array(6).fill({
-      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
-    }),
-  },
-  count: {
-    signatures: [{ params: [{ supportsWildcard: true }] }],
-  },
-  qstr: {
-    customParametersSnippet: `"""$0"""`,
-  },
-  kql: {
-    customParametersSnippet: `"""$0"""`,
-  },
-};
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
@@ -364,292 +141,6 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   return ret as FunctionDefinition;
 }
-
-const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type) => [
-  {
-    params: [
-      { name: 'left', type },
-      { name: 'right', type: 'text' as const, constantOnly: true },
-    ],
-    returnType: 'boolean' as const,
-  },
-  {
-    params: [
-      { name: 'left', type: 'text' as const, constantOnly: true },
-      { name: 'right', type },
-    ],
-    returnType: 'boolean' as const,
-  },
-]);
-const operatorsMeta: Record<
-  string,
-  {
-    name: string;
-    isMathOperator: boolean;
-    isComparisonOperator: boolean;
-    extraSignatures?: Signature[];
-  }
-> = {
-  add: {
-    name: '+',
-    isMathOperator: true,
-    isComparisonOperator: false,
-    extraSignatures: [
-      {
-        params: [
-          { name: 'left', type: 'time_literal' as const },
-          { name: 'right', type: 'date' as const },
-        ],
-        returnType: 'date' as const,
-      },
-      {
-        params: [
-          { name: 'left', type: 'date' as const },
-          { name: 'right', type: 'time_literal' as const },
-        ],
-        returnType: 'date' as const,
-      },
-    ],
-  },
-  sub: {
-    name: '-',
-    isMathOperator: true,
-    isComparisonOperator: false,
-    extraSignatures: [
-      {
-        params: [
-          { name: 'left', type: 'time_literal' as const },
-          { name: 'right', type: 'date' as const },
-        ],
-        returnType: 'date' as const,
-      },
-      {
-        params: [
-          { name: 'left', type: 'date' as const },
-          { name: 'right', type: 'time_literal' as const },
-        ],
-        returnType: 'date' as const,
-      },
-    ],
-  },
-  div: { name: '/', isMathOperator: true, isComparisonOperator: false },
-  equals: {
-    name: '==',
-    isMathOperator: false,
-    isComparisonOperator: true,
-    extraSignatures: [
-      ...comparisonOperatorSignatures,
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-      // constant strings okay because of implicit casting
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'keyword' as const, constantOnly: true },
-        ],
-        returnType: 'boolean' as const,
-      },
-      {
-        params: [
-          { name: 'left', type: 'keyword' as const, constantOnly: true },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-    ],
-  },
-  greater_than: {
-    name: '>',
-    isMathOperator: false,
-    isComparisonOperator: true,
-    extraSignatures: comparisonOperatorSignatures,
-  },
-  greater_than_or_equal: {
-    name: '>=',
-    isMathOperator: false,
-    isComparisonOperator: true,
-    extraSignatures: comparisonOperatorSignatures,
-  },
-  less_than: {
-    name: '<',
-    isMathOperator: false,
-    isComparisonOperator: true,
-    extraSignatures: comparisonOperatorSignatures,
-  },
-  less_than_or_equal: { name: '<=', isMathOperator: false, isComparisonOperator: true },
-  not_equals: {
-    name: '!=',
-    isMathOperator: false,
-    isComparisonOperator: true,
-    extraSignatures: [
-      ...comparisonOperatorSignatures,
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-      // constant strings okay because of implicit casting
-      {
-        params: [
-          { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'keyword' as const, constantOnly: true },
-        ],
-        returnType: 'boolean' as const,
-      },
-      {
-        params: [
-          { name: 'left', type: 'keyword' as const, constantOnly: true },
-          { name: 'right', type: 'boolean' as const },
-        ],
-        returnType: 'boolean' as const,
-      },
-    ],
-  },
-  mod: { name: '%', isMathOperator: true, isComparisonOperator: false },
-  mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
-  like: {
-    name: 'like',
-    isMathOperator: false,
-    isComparisonOperator: false,
-    extraSignatures: [
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'text',
-            optional: false,
-          },
-          {
-            name: 'pattern',
-            type: 'keyword',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'keyword',
-            optional: false,
-          },
-          {
-            name: 'pattern',
-            type: 'text',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-        minParams: 2,
-      },
-    ],
-  },
-
-  rlike: {
-    name: 'rlike',
-    isMathOperator: false,
-    isComparisonOperator: false,
-    extraSignatures: [
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'text',
-            optional: false,
-          },
-          {
-            name: 'pattern',
-            type: 'keyword',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'keyword',
-            optional: false,
-          },
-          {
-            name: 'pattern',
-            type: 'text',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-        minParams: 2,
-      },
-    ],
-  },
-};
-
-const validators: Record<string, string> = {
-  div: `(fnDef) => {
-    const [left, right] = fnDef.args;
-    const messages = [];
-    if (!Array.isArray(left) && !Array.isArray(right)) {
-      if (right.type === 'literal' && isNumericType(right.literalType)) {
-        if (right.value === 0) {
-          messages.push({
-            type: 'warning' as const,
-            code: 'divideByZero',
-            text: i18n.translate(
-              'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
-              {
-                defaultMessage: 'Cannot divide by zero: {left}/{right}',
-                values: {
-                  left: left.text,
-                  right: right.value,
-                },
-              }
-            ),
-            location: fnDef.location,
-          });
-        }
-      }
-    }
-    return messages;
-  }`,
-  mod: `(fnDef) => {
-    const [left, right] = fnDef.args;
-    const messages = [];
-    if (!Array.isArray(left) && !Array.isArray(right)) {
-      if (right.type === 'literal' && isNumericType(right.literalType)) {
-        if (right.value === 0) {
-          messages.push({
-            type: 'warning' as const,
-            code: 'moduleByZero',
-            text: i18n.translate(
-              'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
-              {
-                defaultMessage: 'Module by zero can return null value: {left}%{right}',
-                values: {
-                  left: left.text,
-                  right: right.value,
-                },
-              }
-            ),
-            location: fnDef.location,
-          });
-        }
-      }
-    }
-    return messages;
-  }`,
-};
-
 /**
  * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
  * @param str
@@ -709,10 +200,8 @@ const enrichOperators = (
 ): FunctionDefinition[] => {
   // @ts-expect-error Stringified version of the validator function
   return operatorsFunctionDefinitions.map((op) => {
-    const isMathOperator =
-      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isMathOperator;
-    const isComparisonOperator =
-      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
+    const isMathOperator = MATH_OPERATORS.includes(op.name);
+    const isComparisonOperator = COMPARISON_OPERATORS.includes(op.name);
 
     // IS NULL | IS NOT NULL
     const arePredicates =
@@ -775,12 +264,6 @@ const enrichOperators = (
         })),
       }));
     }
-    if (
-      Object.hasOwn(operatorsMeta, op.name) &&
-      Array.isArray(operatorsMeta[op.name]?.extraSignatures)
-    ) {
-      signatures.push(...(operatorsMeta[op.name].extraSignatures ?? []));
-    }
 
     return {
       ...op,
@@ -789,7 +272,7 @@ const enrichOperators = (
       // so we are overriding to add proper support
       locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
-      validate: validators[op.name],
+      validate: mathValidators[op.name],
       ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
     };
   });

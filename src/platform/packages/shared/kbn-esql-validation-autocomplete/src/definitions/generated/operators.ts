@@ -342,32 +342,6 @@ const addDefinition: FunctionDefinition = {
       ],
       returnType: 'unsigned_long',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'time_literal',
-        },
-        {
-          name: 'right',
-          type: 'date',
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'date',
-        },
-        {
-          name: 'right',
-          type: 'time_literal',
-        },
-      ],
-      returnType: 'date',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -968,103 +942,6 @@ const equalsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'ip',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'version',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -1386,62 +1263,6 @@ const greaterThanDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'ip',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'version',
         },
       ],
       returnType: 'boolean',
@@ -1770,62 +1591,6 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'ip',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'version',
         },
       ],
       returnType: 'boolean',
@@ -2746,62 +2511,6 @@ const lessThanDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'ip',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'version',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -3181,38 +2890,6 @@ const likeDefinition: FunctionDefinition = {
         {
           name: 'pattern',
           type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
           optional: false,
         },
       ],
@@ -4928,103 +4605,6 @@ const notEqualsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'ip',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-        },
-        {
-          name: 'right',
-          type: 'text',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'version',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -5076,38 +4656,6 @@ const rlikeDefinition: FunctionDefinition = {
         {
           name: 'pattern',
           type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
           optional: false,
         },
       ],
@@ -5408,32 +4956,6 @@ const subDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'unsigned_long',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'time_literal',
-        },
-        {
-          name: 'right',
-          type: 'date',
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'date',
-        },
-        {
-          name: 'right',
-          type: 'time_literal',
-        },
-      ],
-      returnType: 'date',
     },
   ],
   locationsAvailable: [
