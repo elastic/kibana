@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const createTestSpaces = async ({ getService }: FtrProviderContext) => {
   const spaceService = getService('spaces');
@@ -30,10 +30,10 @@ export const deleteTestSpaces = async ({ getService }: FtrProviderContext) => {
 export const createData = async ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   await kibanaServer.importExport.load(
-    'x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json'
+    'x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json'
   );
   await kibanaServer.importExport.load(
-    'x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json',
+    'x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json',
     { space: 'space_1' }
   );
 };
@@ -41,10 +41,10 @@ export const createData = async ({ getService }: FtrProviderContext) => {
 export const deleteData = async ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   await kibanaServer.importExport.unload(
-    'x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json'
+    'x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json'
   );
   await kibanaServer.importExport.unload(
-    'x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json',
+    'x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json',
     { space: 'space_1' }
   );
 };

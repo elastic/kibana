@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services as apiIntegrationServices } from '../../api_integration/services';
+import { services as xpackApiIntegrationServices } from '../api_integration/services';
 
 export const services = {
-  ...apiIntegrationServices,
+  ...xpackApiIntegrationServices,
 };
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

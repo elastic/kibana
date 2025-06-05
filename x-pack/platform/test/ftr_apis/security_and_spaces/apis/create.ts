@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 import { USERS, User, ExpectedResponse } from '../../common/lib';
-import { FtrProviderContext } from '../services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { createTestSpaces, deleteTestSpaces, createData, deleteData } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('DELETE /internal/ftr/kbn_client_so/{type}/{id}', () => {
+  describe('POST /internal/ftr/kbn_client_so/{type}', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -35,7 +35,11 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body).to.eql({});
+          expect(body.attributes).to.eql({
+            name: 'My new tag',
+            description: 'I just created that',
+            color: '#009000',
+          });
         },
       },
       unauthorized: {
@@ -45,7 +49,7 @@ export default function (ftrContext: FtrProviderContext) {
             statusCode: 403,
             error: 'Forbidden',
             message:
-              'API [DELETE /internal/ftr/kbn_client_so/visualization/vis-area-1] is unauthorized for user, this action is granted by the Kibana privileges [ftrApis]',
+              'API [POST /internal/ftr/kbn_client_so/tag] is unauthorized for user, this action is granted by the Kibana privileges [ftrApis]',
           });
         },
       },
@@ -72,7 +76,14 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .delete(`/internal/ftr/kbn_client_so/visualization/vis-area-1`)
+          .post(`/internal/ftr/kbn_client_so/tag`)
+          .send({
+            attributes: {
+              name: 'My new tag',
+              description: 'I just created that',
+              color: '#009000',
+            },
+          })
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

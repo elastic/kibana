@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 import { USERS, User, ExpectedResponse } from '../../common/lib';
-import { FtrProviderContext } from '../services';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { createTestSpaces, deleteTestSpaces, createData, deleteData } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('POST /internal/ftr/kbn_client_so/_bulk_delete', () => {
+  describe('DELETE /internal/ftr/kbn_client_so/{type}/{id}', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -35,7 +35,7 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body.statuses.length).to.eql(1);
+          expect(body).to.eql({});
         },
       },
       unauthorized: {
@@ -45,7 +45,7 @@ export default function (ftrContext: FtrProviderContext) {
             statusCode: 403,
             error: 'Forbidden',
             message:
-              'API [POST /internal/ftr/kbn_client_so/_bulk_delete] is unauthorized for user, this action is granted by the Kibana privileges [ftrApis]',
+              'API [DELETE /internal/ftr/kbn_client_so/visualization/vis-area-1] is unauthorized for user, this action is granted by the Kibana privileges [ftrApis]',
           });
         },
       },
@@ -61,6 +61,7 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
+        USERS.DEFAULT_SPACE_MAPS_READ_USER,
         USERS.NOT_A_KIBANA_USER,
       ],
     };
@@ -71,8 +72,7 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .post(`/internal/ftr/kbn_client_so/_bulk_delete`)
-          .send([{ type: 'tag', id: 'tag-1' }])
+          .delete(`/internal/ftr/kbn_client_so/visualization/vis-area-1`)
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);
