@@ -215,83 +215,38 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
     });
 
-    it('alerts triggered within a MW should fire actions if still active or recoveres after the MW expired', async () => {
+    it('alerts triggered within a MW should fire actions if still active or recovers after the MW expired', async () => {
       const pattern = {
         instance: [true, true, false, true],
       };
 
       // Create active maintenance window
-      const maintenanceWindow = await createMaintenanceWindow({
-        supertest,
-        objectRemover,
-      });
-      const activeMaintenanceWindows = await getActiveMaintenanceWindows({
-        supertest,
-      });
+      const maintenanceWindow = await createMaintenanceWindow({ supertest, objectRemover });
+      const activeMaintenanceWindows = await getActiveMaintenanceWindows({ supertest });
       expect(activeMaintenanceWindows[0].id).eql(maintenanceWindow.id);
 
       // Create action and rule
-      const action = await createAction({
-        supertest,
-        objectRemover,
-      });
-      const rule = await createRule({
-        actionId: action.id,
-        pattern,
-        supertest,
-        objectRemover,
-      });
+      const action = await createAction({ supertest, objectRemover });
+      const rule = await createRule({ actionId: action.id, pattern, supertest, objectRemover });
 
       // Run the first time - active
-      await getRuleEvents({
-        id: rule.id,
-        activeInstance: 1,
-        retry,
-        getService,
-      });
+      await getRuleEvents({ id: rule.id, activeInstance: 1, retry, getService });
 
-      await expectNoActionsFired({
-        id: rule.id,
-        supertest,
-        retry,
-      });
+      await expectNoActionsFired({ id: rule.id, supertest, retry });
 
       // End the maintenance window
-      await finishMaintenanceWindow({
-        id: maintenanceWindow.id,
-        supertest,
-      });
-      const empty = await getActiveMaintenanceWindows({
-        supertest,
-      });
-      expect(empty).eql([]);
+      await finishMaintenanceWindow({ id: maintenanceWindow.id, supertest });
+      const maintenanceWindows = await getActiveMaintenanceWindows({ supertest });
+      expect(maintenanceWindows).eql([]);
 
       // Run again - active
-      await runSoon({
-        id: rule.id,
-        supertest,
-        retry,
-      });
-      await getRuleEvents({
-        id: rule.id,
-        activeInstance: 2,
-        retry,
-        getService,
-      });
+      await runSoon({ id: rule.id, supertest, retry });
+      await getRuleEvents({ id: rule.id, activeInstance: 2, retry, getService });
 
-      await expectActionsFired({
-        id: rule.id,
-        supertest,
-        retry,
-        expectedNumberOfActions: 1,
-      });
+      await expectActionsFired({ id: rule.id, supertest, retry, expectedNumberOfActions: 1 });
 
       // Run again - recovered
-      await runSoon({
-        id: rule.id,
-        supertest,
-        retry,
-      });
+      await runSoon({ id: rule.id, supertest, retry });
       await getRuleEvents({
         id: rule.id,
         activeInstance: 2,
@@ -300,19 +255,10 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
         getService,
       });
 
-      await expectActionsFired({
-        id: rule.id,
-        supertest,
-        retry,
-        expectedNumberOfActions: 2,
-      });
+      await expectActionsFired({ id: rule.id, supertest, retry, expectedNumberOfActions: 2 });
 
       // Run again - active again, this time fire the action since its a new alert instance
-      await runSoon({
-        id: rule.id,
-        supertest,
-        retry,
-      });
+      await runSoon({ id: rule.id, supertest, retry });
       await getRuleEvents({
         id: rule.id,
         action: 3,

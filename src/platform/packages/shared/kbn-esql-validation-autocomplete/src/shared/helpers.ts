@@ -18,6 +18,7 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   type ESQLAstCommand,
+  lastItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -236,6 +237,11 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
+  if (bothStringTypes(argType, item.literalType)) {
+    // all functions accept keyword literals for text parameters
+    return true;
+  }
+
   if (item.literalType === 'null') {
     // all parameters accept null, but this is not yet reflected
     // in our function definitions so we let it through here
@@ -444,6 +450,18 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
 }
 
 /**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+/**
  * Checks if an AST function argument is of the correct type
  * given the definition.
  */
@@ -468,7 +486,10 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
+        (signature) =>
+          signature.returnType === 'unknown' ||
+          argType === signature.returnType ||
+          bothStringTypes(argType, signature.returnType)
       );
     }
   }
@@ -485,7 +506,9 @@ export function checkFunctionArgMatchesDefinition(
       ? validHit.type
       : [validHit.type];
 
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some(
+      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
+    );
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
@@ -593,8 +616,11 @@ export function getColumnExists(
   return false;
 }
 
+const removeSourceNameQuotes = (sourceName: string) =>
+  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
+
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index) || index.startsWith('-')) {
+  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));
@@ -635,6 +661,11 @@ export function isRestartingExpression(text: string) {
 export function findPreviousWord(text: string) {
   const words = text.split(/\s+/);
   return words[words.length - 2];
+}
+
+export function withinQuotes(text: string) {
+  const quoteCount = (text.match(/"/g) || []).length;
+  return quoteCount % 2 === 1;
 }
 
 export function endsInWhitespace(text: string) {
@@ -716,11 +747,11 @@ export function getBracketsToClose(text: string) {
       }
 
       const substr = text.slice(i, i + openBracket.length);
-      if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
         break;
       }
     }
@@ -812,6 +843,13 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+// --- Expression types helpers ---
+
+/**
+ * Type guard to check if the type is 'param'
+ */
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
 /**
  * Determines the type of the expression
  */
@@ -831,7 +869,7 @@ export function getExpressionType(
     return getExpressionType(root[0], fields, userDefinedColumns);
   }
 
-  if (isLiteralItem(root) && root.literalType !== 'param') {
+  if (isLiteralItem(root)) {
     return root.literalType;
   }
 
@@ -859,6 +897,12 @@ export function getExpressionType(
 
   if (isColumnItem(root) && fields && userDefinedColumns) {
     const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+    const lastArg = lastItem(root.args);
+    // If the last argument is a param, we return its type (param literal type)
+    // This is useful for cases like `where ??field`
+    if (isParam(lastArg)) {
+      return lastArg.literalType;
+    }
     if (!column) {
       return 'unknown';
     }
@@ -908,7 +952,6 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
 
     // When functions are passed null for any argument, they generally return null
@@ -922,7 +965,8 @@ export function getExpressionType(
           param &&
           (param.type === 'any' ||
             param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
+            isParamExpressionType(argType))
         );
       });
     });
@@ -936,6 +980,8 @@ export function getExpressionType(
 
   return 'unknown';
 }
+
+// --- Fields helpers ---
 
 export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>

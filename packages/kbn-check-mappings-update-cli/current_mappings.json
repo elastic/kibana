@@ -600,6 +600,9 @@
           }
         }
       },
+      "incremental_id": {
+        "type": "unsigned_long"
+      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -730,6 +733,20 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-incrementing-id": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "last_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },
@@ -981,6 +998,10 @@
             "type": "integer"
           }
         }
+      },
+      "sections": {
+        "dynamic": false,
+        "properties": {}
       },
       "timeFrom": {
         "doc_values": false,
@@ -2481,6 +2502,27 @@
       "use_space_awareness_migration_status": {
         "index": false,
         "type": "keyword"
+      }
+    }
+  },
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "intercept_trigger_record": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
+        "type": "text"
       }
     }
   },

@@ -13,13 +13,12 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import type { TemporaryProcessingPluginsType } from './types';
-import { KibanaServices, useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
-  const { services } = useKibana();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const appCapabilities = useApplicationCapabilities();
 
@@ -39,7 +38,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     }
 
     if (
-      services.lens !== undefined &&
       kibanaConfig?.markdownPlugins?.lens &&
       !disabledPlugins?.includes(LensPluginId) &&
       appCapabilities?.visualize.crud
@@ -60,7 +58,6 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     appCapabilities?.visualize.crud,
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
-    services.lens,
     timelinePlugins,
   ]);
 };

@@ -11,7 +11,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
@@ -91,7 +91,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewSpec: experimentalDataView, status: sourcererStatus } = useDataViewSpec(
+  const { dataViewSpec: experimentalDataViewSpec, status: sourcererStatus } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
@@ -104,18 +104,29 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const loadingSourcerer = newDataViewPickerEnabled
-    ? sourcererStatus !== 'ready'
-    : oldLoadingSourcerer;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const loadingSourcerer = useMemo(
+    () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),
+    [newDataViewPickerEnabled, oldLoadingSourcerer, sourcererStatus]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const browserFields = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
+    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+  );
 
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
@@ -151,13 +162,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      dataViewSpec: sourcererDataView,
+      dataViewSpec,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, dataViewSpec, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -207,7 +218,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: kqlQuery.language,
       limit: sampleSize,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: dataViewSpec.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
       startDate: start,

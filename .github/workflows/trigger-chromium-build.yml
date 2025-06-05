@@ -10,14 +10,15 @@ permissions:
 
 jobs:
   matches_label:
-    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["MEMBER", "COLLABORATOR"]'), github.event.issue.author_association) }}
+    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association) }}
     runs-on: ubuntu-latest
     outputs:
       version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
     steps:
       - name: Install Dependencies
         run: |
-          apt-get update && apt-get install jq wget -y
+          sudo apt-get update
+          sudo apt-get install jq wget -y
       - name: Install mdsh
         run: |
           wget https://github.com/bashup/mdsh/raw/master/bin/mdsh && \
@@ -61,7 +62,7 @@ jobs:
               local block_content=$3
               if [[ $lang == "json" ]]; then
                 # Remove leading and trailing whitespace from the block content
-                block_content=$(echo "$block_content" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                block_content=$(echo "$block_content" | jq -c .)
 
                 # Check for puppeteer_version property
                 if echo "$block_content" | jq -e 'has("puppeteer_version")' > /dev/null; then
@@ -81,12 +82,11 @@ jobs:
               mdsh-parse handle_code_block
               # Output the upgrade config if found
               if [[ -n "$UPGRADE_CONFIG" ]]; then
-                  echo "version_bump_config=$UPGRADE_CONFIG" >> $GITHUB_OUTPUT
+                  echo "result=$UPGRADE_CONFIG" >> $GITHUB_OUTPUT
               fi
           }
 
-          # attempt extracting puppeteer version bump config from the issue body, 
-          # single quote is very much intentional here so it's not escaped by bash
+          # attempt extracting puppeteer version bump config from the issue body
           echo "$ISSUE_BODY" | extract_code_blocks
       - name: Report multiple puppeteer_version properties
         if: ${{ steps.extract_version_bump_config.outputs.multiple_puppeteer_version_properties == 'true' }}
@@ -121,9 +121,8 @@ jobs:
           token: ${{ secrets.SHAREDUX_BUILDKITE_TOKEN }}
           pipeline: 'kibana-chromium-linux-build'
           env-vars: |
-            GITHUB_ISSUE_BASE_OWNER=${{ github.event.repository.owner.name }}
-            GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}/
+            GITHUB_ISSUE_BASE_OWNER=${{ github.event.repository.owner.login }}
+            GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}
             GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
-            GITHUB_ISSUE_LABELS=${{ github.event.issue.labels }} | jq -r '. | map(.name) | join(",")'
             GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.login }}
-            PUPPETEER_VERSION=$(echo ${{ needs.matches_label.outputs.version_bump_config }} | jq -r '.puppeteer_version')
+            PUPPETEER_VERSION=$(echo ${{ fromJSON(needs.matches_label.outputs.version_bump_config) }} | jq -r '.puppeteer_version')
