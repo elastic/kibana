@@ -151,7 +151,7 @@ index_name = "${indexName}"
 
 docs = ${JSON.stringify(sampleDocuments, null, 4)}
 
-# Timeout to allow ML node allocation and semantic ingestion to complete
+# Timeout to allow machine learning model loading and semantic ingestion to complete
 ingestion_timeout=300
 
 bulk_response = helpers.bulk(

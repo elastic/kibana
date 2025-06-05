@@ -151,7 +151,7 @@ export const JSSemanticIngestDataExample: IngestDataCodeDefinition = {
 
 ${createClientSnippet(args)}
 
-// Timeout to allow ML node allocation and semantic ingestion to complete
+// Timeout to allow machine learning model loading and semantic ingestion to complete
 const timeout = '5m';
 
 const index = '${args.indexName}';
