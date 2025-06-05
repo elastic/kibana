@@ -162,7 +162,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const [tableOptions, setTableOptions] = useState(getStateFromUrl());
 
   // update table options state when url params change
-  useEffect(() => setTableOptions(getStateFromUrl()), [getStateFromUrl]);
+  useEffect(() => {
+    // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
+    if (!isLoading) {
+      setTableOptions(getStateFromUrl());
+    }
+  }, [getStateFromUrl, isLoading]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -176,7 +181,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
     (newTableOptions: Partial<TableOptions<T>>) => {
       setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
-      if (saveTableOptionsToUrl) {
+      if (saveTableOptionsToUrl && !isLoading) {
         history.push({
           ...history.location,
           search: fromQuery({
@@ -189,7 +194,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
       }
     },
-    [history, saveTableOptionsToUrl, setTableOptions]
+    [history, saveTableOptionsToUrl, setTableOptions, isLoading]
   );
 
   const filteredItems = useMemo(() => {
