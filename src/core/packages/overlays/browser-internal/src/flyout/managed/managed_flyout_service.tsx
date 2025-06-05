@@ -9,7 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -17,7 +17,6 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 import type { ManagedFlyoutApi, ManagedFlyoutEntry } from '@kbn/core-overlays-browser';
-import type { StateManager } from '@kbn/presentation-publishing-types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FlyoutContainer } from './flyout_container';
 
@@ -46,8 +45,7 @@ interface HistoryEntry {
   child: ManagedFlyoutEntry | null;
 }
 
-export class ManagedFlyoutService implements ManagedFlyoutApi<any> {
-  private stateManager$ = new Subject<StateManager<any>>();
+export class ManagedFlyoutService implements ManagedFlyoutApi {
   private flyout$ = new Subject<FlyoutState>();
   private isOpen$ = new BehaviorSubject<boolean>(false);
   private targetElement: HTMLElement | null = null;
@@ -88,10 +86,7 @@ export class ManagedFlyoutService implements ManagedFlyoutApi<any> {
     this.isStarted = true;
   }
 
-  public openFlyout(entry: ManagedFlyoutEntry, stateManager?: StateManager<any>): void {
-    if (stateManager) {
-      this.stateManager$.next(stateManager);
-    }
+  public openFlyout(entry: ManagedFlyoutEntry): void {
     this.initializeFlyout(entry);
   }
 
@@ -162,10 +157,6 @@ export class ManagedFlyoutService implements ManagedFlyoutApi<any> {
     this._childFlyoutEntry = null;
     this._currentMainEntry = entry;
     this._emitFlyoutState();
-  }
-
-  public getStateManager$<StateType extends object>(): Observable<StateManager<StateType>> {
-    return this.stateManager$ as Observable<StateManager<StateType>>;
   }
 
   /**

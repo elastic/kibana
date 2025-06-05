@@ -14,7 +14,6 @@ export type {
   OverlayFlyoutOpenOptions,
   OverlayFlyoutStart,
   ManagedFlyoutApi,
-  UseManagedFlyoutApi,
 } from './src/flyout';
 export type {
   OverlayModalConfirmOptions,

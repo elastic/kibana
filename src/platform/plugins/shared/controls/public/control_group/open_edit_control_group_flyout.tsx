@@ -14,7 +14,7 @@ import { apiHasParentApi } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 
-import type { StateManager } from '@kbn/presentation-publishing-types';
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';

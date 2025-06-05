@@ -16,9 +16,13 @@ import {
   initializeUnsavedChanges,
   type PresentationContainer,
 } from '@kbn/presentation-containers';
-import type { PublishingSubject, StateManager } from '@kbn/presentation-publishing-types';
-import { apiPublishesUnsavedChanges, SerializedPanelState } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  PublishingSubject,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { ControlGroupSerializedState, ControlPanelsState } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';

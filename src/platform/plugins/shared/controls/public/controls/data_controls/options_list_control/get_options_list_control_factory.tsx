@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { OPTIONS_LIST_CONTROL } from '../../../../common';

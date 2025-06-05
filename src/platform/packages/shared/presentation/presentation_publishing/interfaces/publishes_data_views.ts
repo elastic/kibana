@@ -8,7 +8,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataViews {
   dataViews$: PublishingSubject<DataView[] | undefined>;

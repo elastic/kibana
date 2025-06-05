@@ -10,10 +10,10 @@
 import {
   PublishesUnsavedChanges,
   SerializedPanelState,
+  StateComparators,
   areComparatorsEqual,
   getTitle,
 } from '@kbn/presentation-publishing';
-import type { StateComparators } from '@kbn/presentation-publishing-types';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable, combineLatestWith, debounceTime, map, of } from 'rxjs';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';

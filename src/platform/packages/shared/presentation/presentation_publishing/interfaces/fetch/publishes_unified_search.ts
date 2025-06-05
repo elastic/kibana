@@ -15,10 +15,10 @@ import {
   TimeRange,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import fastIsEqual from 'fast-deep-equal';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeslice {
   timeslice$: PublishingSubject<[number, number] | undefined>;

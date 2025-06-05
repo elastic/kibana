@@ -8,11 +8,7 @@
  */
 
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type {
-  StateComparators,
-  StateManager,
-  WithAllKeys,
-} from '@kbn/presentation-publishing-types';
+import { StateComparators, StateManager, WithAllKeys } from './types';
 import { runComparator } from './state_comparators';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;

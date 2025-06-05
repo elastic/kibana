@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
-import type { RangeValue, RangesliderControlState } from './types';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { RangeValue, RangesliderControlState } from './types';
 
 export function initializeRangeControlSelections(
   initialState: RangesliderControlState,

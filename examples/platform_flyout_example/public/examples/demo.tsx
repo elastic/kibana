@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, type FC } from 'react';
+import React, { useCallback, type FC, useState } from 'react';
 
 import {
   EuiButton,
@@ -21,65 +21,38 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ManagedFlyoutEntry, OverlayStart } from '@kbn/core-overlays-browser';
-import {
-  initializeStateManager,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
-import type { StateManager } from '@kbn/presentation-publishing-types';
 
 interface DemoDeps {
   overlays: OverlayStart;
 }
 
-interface StateType {
-  username: string;
-  isPushMode: boolean;
-}
-
-interface StepProps {
-  stateManager: StateManager<StateType>;
-}
-
-const DataList: FC<StepProps> = ({ stateManager }) => {
-  const { username$, isPushMode$ } = stateManager.api;
-  const username = useStateFromPublishingSubject(username$);
-  const isPushMode = useStateFromPublishingSubject(isPushMode$);
-
-  return (
-    <EuiListGroup
-      listItems={[
-        { label: `Username: ${username}`, size: 's' },
-        { label: `Push Mode: ${isPushMode ? 'Enabled' : 'Disabled'}`, size: 's' },
-      ]}
-      color="subdued"
-      flush={true}
-    />
-  );
+const DataList: FC = () => {
+  return <>Hello world</>;
 };
 
-const childFlyoutConfig: ManagedFlyoutEntry<StateType> = {
-  renderBody: ({ getStateManager }) => {
+const childFlyoutConfig: ManagedFlyoutEntry = {
+  renderBody: () => {
     return (
       <EuiText>
         <h4>Child Flyout Content!</h4>
         <p>This panel is aligned to the left of the main flyout.</p>
-        <DataList stateManager={getStateManager()} />
+        <DataList />
       </EuiText>
     );
   },
 };
 
-const step1Config: ManagedFlyoutEntry<StateType> = {
-  flyoutProps: ({ getStateManager }) => ({
+const step1Config: ManagedFlyoutEntry = {
+  flyoutProps: () => ({
     size: 400,
-    type: getStateManager().getLatestState().isPushMode ? 'push' : 'overlay',
+    type: 'push',
   }),
   renderHeader: () => (
     <EuiTitle size="m">
       <h2>Step 1: The initial flyout</h2>
     </EuiTitle>
   ),
-  renderBody: ({ nextFlyout, getStateManager }) => {
+  renderBody: ({ nextFlyout }) => {
     const handleGoToStep2 = () => {
       nextFlyout(step2Config);
     };
@@ -87,7 +60,7 @@ const step1Config: ManagedFlyoutEntry<StateType> = {
     return (
       <EuiText>
         <p>This is the first step in the flyout sequence.</p>
-        <DataList stateManager={getStateManager()} />
+        <DataList />
         <p>
           <EuiButton onClick={handleGoToStep2}>Go to Step 2</EuiButton>
         </p>
@@ -107,21 +80,21 @@ const step1Config: ManagedFlyoutEntry<StateType> = {
   }),
 };
 
-const step2Config: ManagedFlyoutEntry<StateType> = {
-  flyoutProps: ({ getStateManager }) => ({
+const step2Config: ManagedFlyoutEntry = {
+  flyoutProps: () => ({
     size: 600,
-    type: getStateManager().getLatestState().isPushMode ? 'push' : 'overlay',
+    type: 'push',
   }),
   renderHeader: () => (
     <EuiTitle size="m">
       <h2>Step 2: The second flyout</h2>
     </EuiTitle>
   ),
-  renderBody: ({ getStateManager }) => {
+  renderBody: () => {
     return (
       <EuiText>
         <p>This is the second step in the flyout sequence.</p>
-        <DataList stateManager={getStateManager()} />
+        <DataList />
       </EuiText>
     );
   },
@@ -149,9 +122,9 @@ const step2Config: ManagedFlyoutEntry<StateType> = {
   }),
 };
 
-const complexFlyoutConfig: ManagedFlyoutEntry<StateType> = {
-  flyoutProps: ({ getStateManager }) => ({
-    type: getStateManager().getLatestState().isPushMode ? 'push' : 'overlay',
+const complexFlyoutConfig: ManagedFlyoutEntry = {
+  flyoutProps: () => ({
+    type: 'push',
     size: 800,
   }),
   renderBody: () => {
@@ -180,28 +153,18 @@ const complexFlyoutConfig: ManagedFlyoutEntry<StateType> = {
 };
 
 export const Demo: FC<DemoDeps> = ({ overlays }) => {
-  const { openFlyout, closeFlyout, isFlyoutOpen } = overlays.useManagedFlyout<StateType>();
+  const { openFlyout, closeFlyout, isFlyoutOpen } = overlays.useManagedFlyout();
 
-  const stateManager = useMemo(
-    () =>
-      initializeStateManager<StateType>(
-        { username: 'Guest', isPushMode: true }, // initial state
-        { username: '', isPushMode: true } // default state
-      ),
-    []
-  );
-
-  const { username$, isPushMode$, setUsername, setIsPushMode } = stateManager.api;
-  const username = useStateFromPublishingSubject(username$);
-  const isPushMode = useStateFromPublishingSubject(isPushMode$);
+  const [username, setUsername] = useState('');
+  const [isPushMode, setIsPushMode] = useState(true);
 
   const handleOpenInitialFlyout = useCallback(() => {
-    openFlyout(step1Config, stateManager);
-  }, [openFlyout, stateManager]);
+    openFlyout(step1Config);
+  }, [openFlyout]);
 
   const handleOpenComplexFlyout = useCallback(() => {
-    openFlyout(complexFlyoutConfig, stateManager);
-  }, [openFlyout, stateManager]);
+    openFlyout(complexFlyoutConfig);
+  }, [openFlyout]);
 
   const handleCheckFlyoutStatus = useCallback(() => {
     alert(`The flyout is currently ${isFlyoutOpen() ? 'open' : 'closed'}. (Synchronous check)`);

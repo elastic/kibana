@@ -12,10 +12,9 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-mount-utils-browser",
-    "@kbn/presentation-publishing-types"
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

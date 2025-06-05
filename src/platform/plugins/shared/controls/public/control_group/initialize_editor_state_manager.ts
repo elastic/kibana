@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing-types';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import { StateComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlGroupEditorState } from './types';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,

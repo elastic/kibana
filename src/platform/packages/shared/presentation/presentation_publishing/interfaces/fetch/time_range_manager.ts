@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  StateComparators,
-  StateManager,
-  WithAllKeys,
-} from '@kbn/presentation-publishing-types';
-
 import { TimeRange } from '@kbn/es-query';
-import { initializeStateManager } from '../../state_manager';
+import { StateManager } from '../../state_manager/types';
+import { StateComparators, WithAllKeys, initializeStateManager } from '../../state_manager';
 
 export interface SerializedTimeRange {
   timeRange?: TimeRange | undefined;

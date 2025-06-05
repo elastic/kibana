@@ -11,7 +11,6 @@ import React from 'react';
 
 import type { EuiFlyoutProps, EuiFlyoutResizableProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { StateManager } from '@kbn/presentation-publishing-types';
 
 /**
  * APIs to open and manage fly-out dialogs.
@@ -45,23 +44,15 @@ export type OverlayFlyoutOpenOptions = Omit<
   isResizable?: boolean;
 };
 
-export interface ManagedFlyoutApi<StateType extends object = {}> {
-  openFlyout: (
-    entry: ManagedFlyoutEntry<StateType>,
-    stateManager?: StateManager<StateType>
-  ) => void;
-  nextFlyout: (entry: ManagedFlyoutEntry<StateType>) => void;
-  openChildFlyout: (entry: ManagedFlyoutEntry<StateType>) => void;
+export interface ManagedFlyoutApi {
+  openFlyout: (entry: ManagedFlyoutEntry) => void;
+  nextFlyout: (entry: ManagedFlyoutEntry) => void;
+  openChildFlyout: (entry: ManagedFlyoutEntry) => void;
   closeFlyout: () => void;
   isFlyoutOpen: () => boolean;
   goBack: () => void;
   canGoBack: () => boolean;
   closeChildFlyout: () => void;
-}
-
-export interface UseManagedFlyoutApi<StateType extends object = {}>
-  extends ManagedFlyoutApi<StateType> {
-  getStateManager: () => StateManager<StateType>;
 }
 
 export type FlyoutPropsEnhanced = Omit<EuiFlyoutProps, 'onClose' | 'hideCloseButton' | 'size'> & {
@@ -70,9 +61,9 @@ export type FlyoutPropsEnhanced = Omit<EuiFlyoutProps, 'onClose' | 'hideCloseBut
 
 type FooterActions = Record<string, React.ReactElement>;
 
-export interface ManagedFlyoutEntry<StateType extends object = any> {
-  flyoutProps?: (managedFlyoutApi: UseManagedFlyoutApi<StateType>) => FlyoutPropsEnhanced;
-  renderBody: (managedFlyoutApi: UseManagedFlyoutApi<StateType>) => React.ReactElement;
-  renderHeader?: (managedFlyoutApi: UseManagedFlyoutApi<StateType>) => React.ReactElement;
-  footerActions?: (managedFlyoutApi: UseManagedFlyoutApi<StateType>) => FooterActions;
+export interface ManagedFlyoutEntry {
+  flyoutProps?: (managedFlyoutApi: ManagedFlyoutApi) => FlyoutPropsEnhanced;
+  renderBody: (managedFlyoutApi: ManagedFlyoutApi) => React.ReactElement;
+  renderHeader?: (managedFlyoutApi: ManagedFlyoutApi) => React.ReactElement;
+  footerActions?: (managedFlyoutApi: ManagedFlyoutApi) => FooterActions;
 }

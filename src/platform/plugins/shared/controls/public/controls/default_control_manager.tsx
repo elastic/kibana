@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing-types';
+import { StateComparators } from '@kbn/presentation-publishing';
 
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { BehaviorSubject } from 'rxjs';

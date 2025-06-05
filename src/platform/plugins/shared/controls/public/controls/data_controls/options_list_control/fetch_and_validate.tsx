@@ -18,7 +18,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,

@@ -10,10 +10,10 @@
 import {
   HasUniqueId,
   PublishesUnsavedChanges,
+  PublishingSubject,
   apiHasUniqueId,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 
 export const DEBOUNCE_TIME = 100;

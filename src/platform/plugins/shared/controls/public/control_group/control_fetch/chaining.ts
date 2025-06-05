@@ -18,8 +18,11 @@ import {
 } from 'rxjs';
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
-import { apiPublishesFilters, apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import {
+  type PublishingSubject,
+  apiPublishesFilters,
+  apiPublishesTimeslice,
+} from '@kbn/presentation-publishing';
 
 import type { ControlGroupChainingSystem } from '../../../common';
 

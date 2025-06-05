@@ -12,8 +12,8 @@ import { BehaviorSubject, debounceTime, first, map, merge } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import {
+  PublishingSubject,
   ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,

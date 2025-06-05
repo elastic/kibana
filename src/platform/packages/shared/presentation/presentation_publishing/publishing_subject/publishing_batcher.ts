@@ -9,8 +9,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
-import type { AnyPublishingSubject, UnwrapPublishingSubjectTuple } from './types';
+import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
   subjectsA: AnyPublishingSubject[],

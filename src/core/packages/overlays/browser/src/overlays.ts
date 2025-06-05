@@ -8,7 +8,7 @@
  */
 
 import type { OverlayBannersStart } from './banners';
-import type { OverlayFlyoutStart, UseManagedFlyoutApi } from './flyout';
+import type { OverlayFlyoutStart, ManagedFlyoutApi } from './flyout';
 import type { OverlayModalStart } from './modal';
 
 /** @public */
@@ -22,5 +22,5 @@ export interface OverlayStart {
   /** {@link OverlayModalStart#openConfirm} */
   openConfirm: OverlayModalStart['openConfirm'];
 
-  useManagedFlyout: <StateType extends object>() => UseManagedFlyoutApi<StateType>;
+  useManagedFlyout: () => ManagedFlyoutApi;
 }

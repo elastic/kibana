@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import { BehaviorSubject } from 'rxjs';
+
+/**
+ * A publishing subject is a RxJS subject that can be used to listen to value changes, but does not allow pushing values via the Next method.
+ */
+export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
 // Usage of any required here. We want to build functionalities that can work with a publishing subject of any type.
 type AnyValue = any;

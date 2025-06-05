@@ -23,7 +23,7 @@ import {
 import type {
   FlyoutPropsEnhanced,
   ManagedFlyoutEntry,
-  UseManagedFlyoutApi,
+  ManagedFlyoutApi,
 } from '@kbn/core-overlays-browser';
 
 import { managedFlyoutService } from './managed_flyout_service';
@@ -33,7 +33,7 @@ interface FlyoutPanelProps {
   entry: ManagedFlyoutEntry | null;
   level: 'main' | 'child';
   positionRight: number;
-  managedFlyoutApi: UseManagedFlyoutApi;
+  managedFlyoutApi: ManagedFlyoutApi;
 }
 
 const FlyoutPanel = React.memo(
@@ -125,7 +125,7 @@ const FlyoutPanel = React.memo(
 );
 
 export const FlyoutContainer: React.FC = () => {
-  const managedFlyoutApi = useManagedFlyout<any>();
+  const managedFlyoutApi = useManagedFlyout();
   const flyout$ = managedFlyoutService.getFlyout$();
   const flyoutState = useObservable(flyout$, { main: null, child: null });
 

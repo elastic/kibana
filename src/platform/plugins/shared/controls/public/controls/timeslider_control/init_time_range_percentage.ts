@@ -8,8 +8,8 @@
  */
 
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type { StateComparators } from '@kbn/presentation-publishing-types';
-import type { TimeRangeMeta } from './get_time_range_meta';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
 import { Timeslice, TimesliderControlState } from './types';
 

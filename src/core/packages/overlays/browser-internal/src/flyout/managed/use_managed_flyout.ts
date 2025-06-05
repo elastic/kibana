@@ -8,37 +8,24 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { filter } from 'rxjs';
 
-import type { UseManagedFlyoutApi } from '@kbn/core-overlays-browser';
-import type { StateManager } from '@kbn/presentation-publishing-types';
+import type { ManagedFlyoutApi } from '@kbn/core-overlays-browser';
 
 // Get the singleton service instance
 import { managedFlyoutService as service } from './managed_flyout_service';
 
-export function useManagedFlyout<StateType extends object>(): UseManagedFlyoutApi<StateType> {
-  const stateManager = useObservable(
-    service.getStateManager$().pipe(filter(Boolean))
-  ) as StateManager<StateType> | null;
-
+export function useManagedFlyout(): ManagedFlyoutApi {
   return useMemo(
     () => ({
-      openFlyout: service.openFlyout.bind(service) as any,
-      closeFlyout: service.closeFlyout.bind(service) as any,
-      nextFlyout: service.nextFlyout.bind(service) as any,
-      openChildFlyout: service.openChildFlyout.bind(service) as any,
+      openFlyout: service.openFlyout.bind(service),
+      closeFlyout: service.closeFlyout.bind(service),
+      nextFlyout: service.nextFlyout.bind(service),
+      openChildFlyout: service.openChildFlyout.bind(service),
       isFlyoutOpen: service.isFlyoutOpen.bind(service),
       goBack: service.goBack.bind(service),
       canGoBack: service.canGoBack.bind(service),
       closeChildFlyout: service.closeChildFlyout.bind(service),
-      getStateManager: () => {
-        if (!stateManager) {
-          throw new Error('State manager not initialized');
-        }
-        return stateManager;
-      },
     }),
-    [stateManager]
+    []
   );
 }

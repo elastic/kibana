@@ -10,9 +10,9 @@
 import {
   apiHasParentApi,
   apiHasUniqueId,
+  PublishingSubject,
   SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
