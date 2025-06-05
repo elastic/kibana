@@ -10,9 +10,7 @@
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -45,8 +43,12 @@
     "@kbn/content-packs-schema",
     "@kbn/cloud-plugin",
     "@kbn/es-types",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/rule-data-utils",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/inference-common"
   ]
 }

@@ -20,6 +20,13 @@ jest.mock('../../kibana', () => ({
   }),
 }));
 
+const mockUseSelectedTab = jest.fn().mockReturnValue({
+  selectedTab: { id: 'test', featuredCardIds: [] },
+});
+jest.mock('./use_selected_tab', () => ({
+  useSelectedTab: () => mockUseSelectedTab(),
+}));
+
 describe('useIntegrationCardList', () => {
   const mockIntegrationsList = [
     {
@@ -36,7 +43,7 @@ describe('useIntegrationCardList', () => {
       descriptionLineClamp: 3,
       showInstallationStatus: true,
       title: 'Security Integration',
-      url: '/app/integrations/security',
+      url: '/app/integrations/security?returnAppId=securitySolutionUI&returnPath=%2Fget_started',
       version: '1.0.0',
     },
     {
@@ -53,7 +60,7 @@ describe('useIntegrationCardList', () => {
       descriptionLineClamp: 3,
       showInstallationStatus: true,
       title: 'Security Integration',
-      url: '/app/integrations/security',
+      url: '/app/integrations/security?returnAppId=securitySolutionUI&returnPath=%2Fget_started',
       version: '1.0.0',
     },
   ];
@@ -96,13 +103,14 @@ describe('useIntegrationCardList', () => {
   });
 
   it('returns featured cards when featuredCardIds are provided', () => {
-    const featuredCardIds = ['epr:endpoint'];
+    mockUseSelectedTab.mockReturnValue({
+      selectedTab: { id: 'test', featuredCardIds: ['epr:endpoint'] },
+    });
 
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
-        featuredCardIds,
       })
     );
 

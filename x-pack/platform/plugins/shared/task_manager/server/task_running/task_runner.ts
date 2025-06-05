@@ -25,7 +25,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';

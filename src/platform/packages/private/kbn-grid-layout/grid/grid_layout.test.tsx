@@ -38,6 +38,11 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
 
   const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
+  const gridLayout = screen.getByTestId('kbnGridLayout');
+  jest.spyOn(gridLayout, 'getBoundingClientRect').mockImplementation(() => {
+    return { top: 0, bottom: 500 } as DOMRect;
+  });
+
   return {
     ...rtlRest,
     rerender: (overrides: Partial<GridLayoutProps>) => {

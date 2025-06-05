@@ -61,6 +61,11 @@ const actionNames: {
     completedText: 'input action completed',
     cancelledText: 'input action',
   },
+  MIGRATE: {
+    inProgressText: 'Migrating',
+    completedText: 'migrated',
+    cancelledText: 'migration',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 

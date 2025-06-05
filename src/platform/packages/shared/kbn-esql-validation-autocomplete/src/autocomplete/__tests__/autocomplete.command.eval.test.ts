@@ -148,6 +148,12 @@ describe('autocomplete.suggest', () => {
       ]);
     });
 
+    test('after column after assignment', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('from a | eval col = doubleField /');
+      expect(suggestions.map((s) => s.text)).toContain('| ');
+    });
+
     test('after NOT', async () => {
       await assertSuggestions('from index | EVAL keywordField not /', [
         'LIKE $0',

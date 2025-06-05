@@ -31,8 +31,8 @@ export async function resetPreconfiguredAgentPolicies(
   esClient: ElasticsearchClient,
   agentPolicyId?: string
 ) {
-  const logger = appContextService.getLogger();
-  logger.warn('Reseting Fleet preconfigured agent policies');
+  const logger = appContextService.getLogger().get('resetPreconfiguredAgentPolicies');
+  logger.warn(`Reseting Fleet preconfigured agent policy id [${agentPolicyId}]`);
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
   await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);

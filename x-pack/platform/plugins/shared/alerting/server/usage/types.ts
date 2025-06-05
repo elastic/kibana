@@ -103,4 +103,5 @@ export interface AlertingUsage {
   count_alerts_by_rule_type: Record<string, number>;
   count_rules_snoozed_by_type: Record<string, number>;
   count_rules_muted_by_type: Record<string, number>;
+  count_ignored_fields_by_rule_type: Record<string, number>;
 }

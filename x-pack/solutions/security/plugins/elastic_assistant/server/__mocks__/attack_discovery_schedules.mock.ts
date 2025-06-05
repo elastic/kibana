@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
-import { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
 import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoverySchedule,
+  AttackDiscoveryScheduleAction,
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleParams,
+  AttackDiscoveryScheduleUpdateProps,
 } from '@kbn/elastic-assistant-common';
 
 import { SanitizedRule, SanitizedRuleAction } from '@kbn/alerting-types';
 
 export const getAttackDiscoveryCreateScheduleMock = (
   enabled = true
-): CreateRuleData<AttackDiscoveryScheduleParams> => {
+): AttackDiscoveryScheduleCreateProps => {
   return {
     name: 'Test Schedule 1',
     schedule: {
@@ -35,20 +34,17 @@ export const getAttackDiscoveryCreateScheduleMock = (
       size: 100,
       start: 'now-24h',
     },
-    actions: [],
-    alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-    consumer: 'siem',
     enabled,
-    tags: [],
   };
 };
 
 export const getAttackDiscoveryUpdateScheduleMock = (
   id: string,
-  overrides: Partial<CreateRuleData<AttackDiscoveryScheduleParams>>
-): UpdateRuleData<AttackDiscoveryScheduleParams> & { id: string } => {
+  overrides: Partial<AttackDiscoveryScheduleUpdateProps>
+): AttackDiscoveryScheduleUpdateProps & { id: string } => {
   return {
     id,
+    actions: [],
     ...getAttackDiscoveryCreateScheduleMock(),
     ...overrides,
   };
@@ -119,13 +115,55 @@ export const getAttackDiscoveryScheduleMock = (
   };
 };
 
-export const getInternalFindAttackDiscoverySchedulesMock = (
-  schedules: Array<SanitizedRule<AttackDiscoveryScheduleParams>>
-) => {
+export const getFindAttackDiscoverySchedulesMock = (schedules: AttackDiscoverySchedule[]) => {
   return {
-    page: 1,
-    perPage: 20,
     total: schedules.length,
     data: schedules,
   };
+};
+
+export const getScheduleActions = (): AttackDiscoveryScheduleAction[] => {
+  return [
+    {
+      id: 'ab81485e-3685-4215-9804-7693d0271d1b',
+      actionTypeId: '.email',
+      group: 'default',
+      params: {
+        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+        to: ['test2@elastic.co'],
+        subject: 'Hello there',
+      },
+      frequency: {
+        summary: true,
+        notifyWhen: 'onActiveAlert',
+        throttle: null,
+      },
+    },
+    {
+      id: 'a6c9e92a-b701-41f3-9e26-aca7563e6908',
+      actionTypeId: '.slack',
+      group: 'default',
+      params: {
+        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+      },
+      frequency: {
+        summary: true,
+        notifyWhen: 'onActiveAlert',
+        throttle: null,
+      },
+    },
+    {
+      id: '74ad56aa-cc3d-45a4-a944-654b625ed054',
+      actionTypeId: '.cases',
+      params: {
+        subAction: 'run',
+        subActionParams: {
+          timeWindow: '5m',
+          reopenClosedCases: false,
+          groupingBy: ['kibana.alert.attack_discovery.alert_ids'],
+          templateId: null,
+        },
+      },
+    },
+  ];
 };
