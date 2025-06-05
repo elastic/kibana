@@ -49,7 +49,7 @@ export const bulkUpdateAnonymizationFields = async (
         'xpack.elasticAssistant.anonymizationFields.bulkActionsAnonymizationFieldsError',
         {
           defaultMessage: 'Error updating anonymization fields {error}',
-          values: { error },
+          values: { error: error.body?.message || JSON.stringify(error) },
         }
       ),
     });
