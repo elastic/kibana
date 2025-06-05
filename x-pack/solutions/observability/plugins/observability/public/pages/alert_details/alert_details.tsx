@@ -20,6 +20,7 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
 } from '@elastic/eui';
 import {
@@ -37,7 +38,6 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import { BetaBadge } from '../../components/experimental_badge';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -59,6 +59,8 @@ import { AlertDetailContextualInsights } from './alert_details_contextual_insigh
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
+import { getAlertTitle } from '../../utils/format_alert_title';
+import { AlertSubtitle } from './components/alert_subtitle';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -76,19 +78,14 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
+const INVESTIGATION_GUIDE_TAB_ID = 'investigation_guide';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
-type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
-
-export const getPageTitle = (ruleCategory: string) => {
-  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
-    defaultMessage:
-      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
-    values: {
-      ruleCategory,
-    },
-  });
-};
+type TabId =
+  | typeof OVERVIEW_TAB_ID
+  | typeof METADATA_TAB_ID
+  | typeof RELATED_ALERTS_TAB_ID
+  | typeof INVESTIGATION_GUIDE_TAB_ID;
 
 export function AlertDetails() {
   const {
@@ -124,7 +121,13 @@ export function AlertDetails() {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
 
-    return urlTabId && [OVERVIEW_TAB_ID, METADATA_TAB_ID, RELATED_ALERTS_TAB_ID].includes(urlTabId)
+    return urlTabId &&
+      [
+        OVERVIEW_TAB_ID,
+        METADATA_TAB_ID,
+        RELATED_ALERTS_TAB_ID,
+        INVESTIGATION_GUIDE_TAB_ID,
+      ].includes(urlTabId)
       ? (urlTabId as TabId)
       : OVERVIEW_TAB_ID;
   });
@@ -166,6 +169,7 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      setActiveTabId(OVERVIEW_TAB_ID);
     }
   }, [alertDetail, ruleTypeRegistry]);
 
@@ -180,7 +184,7 @@ export function AlertDetails() {
       },
       {
         text: alertDetail
-          ? getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
           : defaultBreadcrumb,
       },
     ],
@@ -319,6 +323,29 @@ export function AlertDetails() {
       content: metadataTab,
     },
     {
+      id: 'investigation_guide',
+      name: (
+        <FormattedMessage
+          id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+          defaultMessage="Investigation guide"
+        />
+      ),
+      'data-test-subj': 'investigationGuideTab',
+      disabled: !rule?.artifacts?.investigation_guide?.blob,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiMarkdownFormat
+            css={css`
+              word-wrap: break-word;
+            `}
+          >
+            {rule?.artifacts?.investigation_guide?.blob ?? ''}
+          </EuiMarkdownFormat>
+        </>
+      ),
+    },
+    {
       id: RELATED_ALERTS_TAB_ID,
       name: (
         <>
@@ -326,8 +353,6 @@ export function AlertDetails() {
             id="xpack.observability.alertDetails.tab.relatedAlertsLabe"
             defaultMessage="Related alerts"
           />
-          &nbsp;
-          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
@@ -359,7 +384,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: alertDetail?.formatted ? (
-          getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          <>
+            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
+            <EuiSpacer size="xs" />
+            <AlertSubtitle alert={alertDetail.formatted} />
+          </>
         ) : (
           <EuiLoadingSpinner />
         ),

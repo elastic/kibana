@@ -24,6 +24,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -74,6 +75,7 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+  density?: DataGridDensity;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -651,6 +653,7 @@ export const getDatatableVisualization = ({
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
+      density: state.density ?? DataGridDensity.NORMAL,
     }).toAst();
 
     return {
