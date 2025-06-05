@@ -59,6 +59,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   function deleteJobs(jobIds: string[]) {
+    console.log('Deleting jobs:', jobIds.length);
     return Promise.allSettled(jobIds.map((jobId) => ml.deleteAnomalyDetectionJobES(jobId)));
   }
 
@@ -83,8 +84,10 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
     describe('when there are only v2 jobs', () => {
       before(async () => {
+        // await ml.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
       });
+
       it('creates a new job for each environment that has a v2 job', async () => {
         await callUpdateEndpoint();
 
@@ -98,20 +101,13 @@ export default function apiTest({ getService }: FtrProviderContext) {
             .sort()
         ).to.eql(['development', 'production']);
       });
-
-      after(async () => {
-        await ml.cleanMlIndices();
-      });
     });
 
     describe('when there are both v2 and v3 jobs', () => {
       before(async () => {
+        // await ml.cleanMlIndices();
         await createV2Jobs(['production', 'development']);
         await createV3Jobs(['production']);
-      });
-
-      after(async () => {
-        await ml.cleanMlIndices();
       });
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {

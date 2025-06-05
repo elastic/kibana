@@ -944,8 +944,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const { body, status } = await esSupertest
         .delete(`/_ml/datafeeds/${datafeedId}`)
         .query({ force: true });
+      log.info(body, status);
       this.assertResponseStatusCode(200, status, body);
-      console.log('acabao datafeed');
+      log.info('acabao datafeed');
 
       await this.waitForDatafeedToNotExist(datafeedId);
       log.debug('> Datafeed deleted.');
