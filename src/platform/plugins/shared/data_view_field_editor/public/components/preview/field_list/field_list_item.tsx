@@ -18,7 +18,9 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
@@ -29,7 +31,10 @@ import { useStateSelector } from '../../../state_utils';
 
 export interface PreviewListItemProps {
   field: DocumentField;
-  toggleIsPinned?: (name: string) => void;
+  toggleIsPinned?: (
+    name: string,
+    keyboardEvent: { isKeyboardEvent: boolean; buttonId: string }
+  ) => void;
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
@@ -43,10 +48,18 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
+  const pinButtonId = `fieldPreview.pinFieldButtonLabel.${key}`;
+
+  const { euiTheme } = useEuiTheme();
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
+
+  const [isPinHovered, setIsPinHovered] = useState(false);
+  const [isPinFocused, setIsPinFocused] = useState(false);
+
+  const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
     'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
@@ -143,7 +156,22 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   return (
     <>
-      <EuiFlexGroup className={classes} gutterSize="none" data-test-subj="listItem">
+      <EuiFlexGroup
+        className={classes}
+        // highlights the field using token, TODO: migrate whole SCSS file to emotions
+        css={
+          isFromScript
+            ? css`
+                background-color: ${euiTheme.colors.backgroundBasePrimary};
+                font-weight: ${euiTheme.font.weight.bold};
+              `
+            : undefined
+        }
+        gutterSize="none"
+        data-test-subj="listItem"
+        onMouseEnter={() => setIsPinHovered(true)}
+        onMouseLeave={() => setIsPinHovered(false)}
+      >
         <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
           <div
             className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
@@ -165,11 +193,15 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         >
           {toggleIsPinned && (
             <EuiButtonIcon
-              onClick={() => {
-                toggleIsPinned(key);
+              onClick={(e: { detail: number }) => {
+                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
               }}
+              id={pinButtonId}
+              onFocus={() => setIsPinFocused(true)}
+              onBlur={() => setIsPinFocused(false)}
               color="text"
-              iconType="pinFilled"
+              iconType={showPinIcon ? 'pinFilled' : 'empty'}
               data-test-subj="pinFieldButton"
               aria-label={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
@@ -177,7 +209,6 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
                   defaultMessage: 'Pin field',
                 }
               )}
-              className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
             />
           )}
         </EuiFlexItem>

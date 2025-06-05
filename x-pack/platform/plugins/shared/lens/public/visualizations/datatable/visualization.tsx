@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import {
   PaletteRegistry,
   CUSTOM_PALETTE,
@@ -22,9 +23,10 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -61,6 +63,8 @@ import {
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
 import { getSimpleColumnType } from './components/table_actions';
+import { convertToRuntimeState } from './runtime_state';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -71,6 +75,7 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+  density?: DataGridDensity;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -126,14 +131,18 @@ export const getDatatableVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
-  initialize(addNewLayer, state) {
-    return (
-      state || {
-        columns: [],
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
+    return {
+      columns: [],
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+    };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   onDatasourceUpdate(state, frame) {
@@ -486,15 +495,16 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
 
     return (
       <TableDimensionEditor
         {...props}
-        isDarkMode={theme.darkMode}
+        isDarkMode={isDarkMode}
         palettes={palettes}
         paletteService={paletteService}
+        formatFactory={formatFactory}
       />
     );
   },
@@ -643,6 +653,7 @@ export const getDatatableVisualization = ({
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
+      density: state.density ?? DataGridDensity.NORMAL,
     }).toAst();
 
     return {

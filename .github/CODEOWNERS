@@ -47,9 +47,12 @@ x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_ser
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -280,6 +283,13 @@ src/core/packages/plugins/server-mocks @elastic/kibana-core
 src/core/packages/preboot/server @elastic/kibana-core
 src/core/packages/preboot/server-internal @elastic/kibana-core
 src/core/packages/preboot/server-mocks @elastic/kibana-core
+src/core/packages/pricing/browser @elastic/kibana-core
+src/core/packages/pricing/browser-internal @elastic/kibana-core
+src/core/packages/pricing/browser-mocks @elastic/kibana-core
+src/core/packages/pricing/common @elastic/kibana-core
+src/core/packages/pricing/server @elastic/kibana-core
+src/core/packages/pricing/server-internal @elastic/kibana-core
+src/core/packages/pricing/server-mocks @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
@@ -952,6 +962,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/kibana-management
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
@@ -1821,9 +1832,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
@@ -2179,6 +2193,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-explore
+
 
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
@@ -2411,8 +2428,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management

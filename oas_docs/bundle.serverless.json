@@ -6559,104 +6559,247 @@
                             "panels": {
                               "default": [],
                               "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "gridData": {
+                                "anyOf": [
+                                  {
                                     "additionalProperties": false,
                                     "properties": {
-                                      "h": {
-                                        "default": 15,
-                                        "description": "The height of the panel in grid units",
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "i": {
-                                        "type": "string"
-                                      },
-                                      "w": {
-                                        "default": 24,
-                                        "description": "The width of the panel in grid units",
-                                        "maximum": 48,
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "x": {
-                                        "description": "The x coordinate of the panel in grid units",
-                                        "type": "number"
-                                      },
-                                      "y": {
-                                        "description": "The y coordinate of the panel in grid units",
-                                        "type": "number"
-                                      }
-                                    },
-                                    "required": [
-                                      "x",
-                                      "y",
-                                      "i"
-                                    ],
-                                    "type": "object"
-                                  },
-                                  "id": {
-                                    "description": "The saved object id for by reference panels",
-                                    "type": "string"
-                                  },
-                                  "panelConfig": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "description": {
-                                        "description": "The description of the panel",
-                                        "type": "string"
-                                      },
-                                      "enhancements": {
-                                        "additionalProperties": {},
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "h": {
+                                            "default": 15,
+                                            "description": "The height of the panel in grid units",
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "w": {
+                                            "default": 24,
+                                            "description": "The width of the panel in grid units",
+                                            "maximum": 48,
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "x": {
+                                            "description": "The x coordinate of the panel in grid units",
+                                            "type": "number"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the panel in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "x",
+                                          "y",
+                                          "i"
+                                        ],
                                         "type": "object"
                                       },
-                                      "hidePanelTitles": {
-                                        "description": "Set to true to hide the panel title in its container.",
-                                        "type": "boolean"
+                                      "id": {
+                                        "description": "The saved object id for by reference panels",
+                                        "type": "string"
                                       },
-                                      "savedObjectId": {
-                                        "description": "The unique id of the library item to construct the embeddable.",
+                                      "panelConfig": {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "description": {
+                                            "description": "The description of the panel",
+                                            "type": "string"
+                                          },
+                                          "enhancements": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          },
+                                          "hidePanelTitles": {
+                                            "description": "Set to true to hide the panel title in its container.",
+                                            "type": "boolean"
+                                          },
+                                          "savedObjectId": {
+                                            "description": "The unique id of the library item to construct the embeddable.",
+                                            "type": "string"
+                                          },
+                                          "title": {
+                                            "description": "The title of the panel",
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "description": "The version of the embeddable in the panel.",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "panelIndex": {
+                                        "type": "string"
+                                      },
+                                      "panelRefName": {
                                         "type": "string"
                                       },
                                       "title": {
                                         "description": "The title of the panel",
                                         "type": "string"
                                       },
+                                      "type": {
+                                        "description": "The embeddable type",
+                                        "type": "string"
+                                      },
                                       "version": {
-                                        "description": "The version of the embeddable in the panel.",
+                                        "deprecated": true,
+                                        "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
                                         "type": "string"
                                       }
                                     },
+                                    "required": [
+                                      "panelConfig",
+                                      "type",
+                                      "gridData",
+                                      "panelIndex"
+                                    ],
                                     "type": "object"
                                   },
-                                  "panelIndex": {
-                                    "type": "string"
-                                  },
-                                  "panelRefName": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "description": "The title of the panel",
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "description": "The embeddable type",
-                                    "type": "string"
-                                  },
-                                  "version": {
-                                    "deprecated": true,
-                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-                                    "type": "string"
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "collapsed": {
+                                        "description": "The collapsed state of the section.",
+                                        "type": "boolean"
+                                      },
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the section in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "y",
+                                          "i"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "panels": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "gridData": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "h": {
+                                                  "default": 15,
+                                                  "description": "The height of the panel in grid units",
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "i": {
+                                                  "type": "string"
+                                                },
+                                                "w": {
+                                                  "default": 24,
+                                                  "description": "The width of the panel in grid units",
+                                                  "maximum": 48,
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "x": {
+                                                  "description": "The x coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                },
+                                                "y": {
+                                                  "description": "The y coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                }
+                                              },
+                                              "required": [
+                                                "x",
+                                                "y",
+                                                "i"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "id": {
+                                              "description": "The saved object id for by reference panels",
+                                              "type": "string"
+                                            },
+                                            "panelConfig": {
+                                              "additionalProperties": true,
+                                              "properties": {
+                                                "description": {
+                                                  "description": "The description of the panel",
+                                                  "type": "string"
+                                                },
+                                                "enhancements": {
+                                                  "additionalProperties": {},
+                                                  "type": "object"
+                                                },
+                                                "hidePanelTitles": {
+                                                  "description": "Set to true to hide the panel title in its container.",
+                                                  "type": "boolean"
+                                                },
+                                                "savedObjectId": {
+                                                  "description": "The unique id of the library item to construct the embeddable.",
+                                                  "type": "string"
+                                                },
+                                                "title": {
+                                                  "description": "The title of the panel",
+                                                  "type": "string"
+                                                },
+                                                "version": {
+                                                  "description": "The version of the embeddable in the panel.",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            "panelIndex": {
+                                              "type": "string"
+                                            },
+                                            "panelRefName": {
+                                              "type": "string"
+                                            },
+                                            "title": {
+                                              "description": "The title of the panel",
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "description": "The embeddable type",
+                                              "type": "string"
+                                            },
+                                            "version": {
+                                              "deprecated": true,
+                                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "panelConfig",
+                                            "type",
+                                            "gridData",
+                                            "panelIndex"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "title": {
+                                        "description": "The title of the section.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "title",
+                                      "gridData",
+                                      "panels"
+                                    ],
+                                    "type": "object"
                                   }
-                                },
-                                "required": [
-                                  "panelConfig",
-                                  "type",
-                                  "gridData",
-                                  "panelIndex"
-                                ],
-                                "type": "object"
+                                ]
                               },
                               "type": "array"
                             },
@@ -7220,104 +7363,248 @@
                       "panels": {
                         "default": [],
                         "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "gridData": {
+                          "anyOf": [
+                            {
                               "additionalProperties": false,
                               "properties": {
-                                "h": {
-                                  "default": 15,
-                                  "description": "The height of the panel in grid units",
-                                  "minimum": 1,
-                                  "type": "number"
-                                },
-                                "i": {
-                                  "description": "The unique identifier of the panel",
-                                  "type": "string"
-                                },
-                                "w": {
-                                  "default": 24,
-                                  "description": "The width of the panel in grid units",
-                                  "maximum": 48,
-                                  "minimum": 1,
-                                  "type": "number"
-                                },
-                                "x": {
-                                  "description": "The x coordinate of the panel in grid units",
-                                  "type": "number"
-                                },
-                                "y": {
-                                  "description": "The y coordinate of the panel in grid units",
-                                  "type": "number"
-                                }
-                              },
-                              "required": [
-                                "x",
-                                "y"
-                              ],
-                              "type": "object"
-                            },
-                            "id": {
-                              "description": "The saved object id for by reference panels",
-                              "type": "string"
-                            },
-                            "panelConfig": {
-                              "additionalProperties": true,
-                              "properties": {
-                                "description": {
-                                  "description": "The description of the panel",
-                                  "type": "string"
-                                },
-                                "enhancements": {
-                                  "additionalProperties": {},
+                                "gridData": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "h": {
+                                      "default": 15,
+                                      "description": "The height of the panel in grid units",
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "i": {
+                                      "description": "The unique identifier of the panel",
+                                      "type": "string"
+                                    },
+                                    "w": {
+                                      "default": 24,
+                                      "description": "The width of the panel in grid units",
+                                      "maximum": 48,
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "x": {
+                                      "description": "The x coordinate of the panel in grid units",
+                                      "type": "number"
+                                    },
+                                    "y": {
+                                      "description": "The y coordinate of the panel in grid units",
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "x",
+                                    "y"
+                                  ],
                                   "type": "object"
                                 },
-                                "hidePanelTitles": {
-                                  "description": "Set to true to hide the panel title in its container.",
-                                  "type": "boolean"
+                                "id": {
+                                  "description": "The saved object id for by reference panels",
+                                  "type": "string"
                                 },
-                                "savedObjectId": {
-                                  "description": "The unique id of the library item to construct the embeddable.",
+                                "panelConfig": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "description": {
+                                      "description": "The description of the panel",
+                                      "type": "string"
+                                    },
+                                    "enhancements": {
+                                      "additionalProperties": {},
+                                      "type": "object"
+                                    },
+                                    "hidePanelTitles": {
+                                      "description": "Set to true to hide the panel title in its container.",
+                                      "type": "boolean"
+                                    },
+                                    "savedObjectId": {
+                                      "description": "The unique id of the library item to construct the embeddable.",
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "description": "The title of the panel",
+                                      "type": "string"
+                                    },
+                                    "version": {
+                                      "description": "The version of the embeddable in the panel.",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "panelIndex": {
+                                  "description": "The unique ID of the panel.",
+                                  "type": "string"
+                                },
+                                "panelRefName": {
                                   "type": "string"
                                 },
                                 "title": {
                                   "description": "The title of the panel",
                                   "type": "string"
                                 },
+                                "type": {
+                                  "description": "The embeddable type",
+                                  "type": "string"
+                                },
                                 "version": {
-                                  "description": "The version of the embeddable in the panel.",
+                                  "deprecated": true,
+                                  "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
                                   "type": "string"
                                 }
                               },
+                              "required": [
+                                "panelConfig",
+                                "type",
+                                "gridData"
+                              ],
                               "type": "object"
                             },
-                            "panelIndex": {
-                              "description": "The unique ID of the panel.",
-                              "type": "string"
-                            },
-                            "panelRefName": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "description": "The title of the panel",
-                              "type": "string"
-                            },
-                            "type": {
-                              "description": "The embeddable type",
-                              "type": "string"
-                            },
-                            "version": {
-                              "deprecated": true,
-                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-                              "type": "string"
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "collapsed": {
+                                  "description": "The collapsed state of the section.",
+                                  "type": "boolean"
+                                },
+                                "gridData": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "i": {
+                                      "description": "The unique identifier of the section",
+                                      "type": "string"
+                                    },
+                                    "y": {
+                                      "description": "The y coordinate of the section in grid units",
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "y"
+                                  ],
+                                  "type": "object"
+                                },
+                                "panels": {
+                                  "default": [],
+                                  "description": "The panels that belong to the section.",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "h": {
+                                            "default": 15,
+                                            "description": "The height of the panel in grid units",
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "i": {
+                                            "description": "The unique identifier of the panel",
+                                            "type": "string"
+                                          },
+                                          "w": {
+                                            "default": 24,
+                                            "description": "The width of the panel in grid units",
+                                            "maximum": 48,
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "x": {
+                                            "description": "The x coordinate of the panel in grid units",
+                                            "type": "number"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the panel in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "x",
+                                          "y"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "id": {
+                                        "description": "The saved object id for by reference panels",
+                                        "type": "string"
+                                      },
+                                      "panelConfig": {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "description": {
+                                            "description": "The description of the panel",
+                                            "type": "string"
+                                          },
+                                          "enhancements": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          },
+                                          "hidePanelTitles": {
+                                            "description": "Set to true to hide the panel title in its container.",
+                                            "type": "boolean"
+                                          },
+                                          "savedObjectId": {
+                                            "description": "The unique id of the library item to construct the embeddable.",
+                                            "type": "string"
+                                          },
+                                          "title": {
+                                            "description": "The title of the panel",
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "description": "The version of the embeddable in the panel.",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "panelIndex": {
+                                        "description": "The unique ID of the panel.",
+                                        "type": "string"
+                                      },
+                                      "panelRefName": {
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "description": "The title of the panel",
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "description": "The embeddable type",
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "deprecated": true,
+                                        "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "panelConfig",
+                                      "type",
+                                      "gridData"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "title": {
+                                  "description": "The title of the section.",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "title",
+                                "gridData"
+                              ],
+                              "type": "object"
                             }
-                          },
-                          "required": [
-                            "panelConfig",
-                            "type",
-                            "gridData"
-                          ],
-                          "type": "object"
+                          ]
                         },
                         "type": "array"
                       },
@@ -7765,104 +8052,247 @@
                             "panels": {
                               "default": [],
                               "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "gridData": {
+                                "anyOf": [
+                                  {
                                     "additionalProperties": false,
                                     "properties": {
-                                      "h": {
-                                        "default": 15,
-                                        "description": "The height of the panel in grid units",
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "i": {
-                                        "type": "string"
-                                      },
-                                      "w": {
-                                        "default": 24,
-                                        "description": "The width of the panel in grid units",
-                                        "maximum": 48,
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "x": {
-                                        "description": "The x coordinate of the panel in grid units",
-                                        "type": "number"
-                                      },
-                                      "y": {
-                                        "description": "The y coordinate of the panel in grid units",
-                                        "type": "number"
-                                      }
-                                    },
-                                    "required": [
-                                      "x",
-                                      "y",
-                                      "i"
-                                    ],
-                                    "type": "object"
-                                  },
-                                  "id": {
-                                    "description": "The saved object id for by reference panels",
-                                    "type": "string"
-                                  },
-                                  "panelConfig": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "description": {
-                                        "description": "The description of the panel",
-                                        "type": "string"
-                                      },
-                                      "enhancements": {
-                                        "additionalProperties": {},
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "h": {
+                                            "default": 15,
+                                            "description": "The height of the panel in grid units",
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "w": {
+                                            "default": 24,
+                                            "description": "The width of the panel in grid units",
+                                            "maximum": 48,
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "x": {
+                                            "description": "The x coordinate of the panel in grid units",
+                                            "type": "number"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the panel in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "x",
+                                          "y",
+                                          "i"
+                                        ],
                                         "type": "object"
                                       },
-                                      "hidePanelTitles": {
-                                        "description": "Set to true to hide the panel title in its container.",
-                                        "type": "boolean"
+                                      "id": {
+                                        "description": "The saved object id for by reference panels",
+                                        "type": "string"
                                       },
-                                      "savedObjectId": {
-                                        "description": "The unique id of the library item to construct the embeddable.",
+                                      "panelConfig": {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "description": {
+                                            "description": "The description of the panel",
+                                            "type": "string"
+                                          },
+                                          "enhancements": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          },
+                                          "hidePanelTitles": {
+                                            "description": "Set to true to hide the panel title in its container.",
+                                            "type": "boolean"
+                                          },
+                                          "savedObjectId": {
+                                            "description": "The unique id of the library item to construct the embeddable.",
+                                            "type": "string"
+                                          },
+                                          "title": {
+                                            "description": "The title of the panel",
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "description": "The version of the embeddable in the panel.",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "panelIndex": {
+                                        "type": "string"
+                                      },
+                                      "panelRefName": {
                                         "type": "string"
                                       },
                                       "title": {
                                         "description": "The title of the panel",
                                         "type": "string"
                                       },
+                                      "type": {
+                                        "description": "The embeddable type",
+                                        "type": "string"
+                                      },
                                       "version": {
-                                        "description": "The version of the embeddable in the panel.",
+                                        "deprecated": true,
+                                        "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
                                         "type": "string"
                                       }
                                     },
+                                    "required": [
+                                      "panelConfig",
+                                      "type",
+                                      "gridData",
+                                      "panelIndex"
+                                    ],
                                     "type": "object"
                                   },
-                                  "panelIndex": {
-                                    "type": "string"
-                                  },
-                                  "panelRefName": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "description": "The title of the panel",
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "description": "The embeddable type",
-                                    "type": "string"
-                                  },
-                                  "version": {
-                                    "deprecated": true,
-                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-                                    "type": "string"
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "collapsed": {
+                                        "description": "The collapsed state of the section.",
+                                        "type": "boolean"
+                                      },
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the section in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "y",
+                                          "i"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "panels": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "gridData": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "h": {
+                                                  "default": 15,
+                                                  "description": "The height of the panel in grid units",
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "i": {
+                                                  "type": "string"
+                                                },
+                                                "w": {
+                                                  "default": 24,
+                                                  "description": "The width of the panel in grid units",
+                                                  "maximum": 48,
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "x": {
+                                                  "description": "The x coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                },
+                                                "y": {
+                                                  "description": "The y coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                }
+                                              },
+                                              "required": [
+                                                "x",
+                                                "y",
+                                                "i"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "id": {
+                                              "description": "The saved object id for by reference panels",
+                                              "type": "string"
+                                            },
+                                            "panelConfig": {
+                                              "additionalProperties": true,
+                                              "properties": {
+                                                "description": {
+                                                  "description": "The description of the panel",
+                                                  "type": "string"
+                                                },
+                                                "enhancements": {
+                                                  "additionalProperties": {},
+                                                  "type": "object"
+                                                },
+                                                "hidePanelTitles": {
+                                                  "description": "Set to true to hide the panel title in its container.",
+                                                  "type": "boolean"
+                                                },
+                                                "savedObjectId": {
+                                                  "description": "The unique id of the library item to construct the embeddable.",
+                                                  "type": "string"
+                                                },
+                                                "title": {
+                                                  "description": "The title of the panel",
+                                                  "type": "string"
+                                                },
+                                                "version": {
+                                                  "description": "The version of the embeddable in the panel.",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            "panelIndex": {
+                                              "type": "string"
+                                            },
+                                            "panelRefName": {
+                                              "type": "string"
+                                            },
+                                            "title": {
+                                              "description": "The title of the panel",
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "description": "The embeddable type",
+                                              "type": "string"
+                                            },
+                                            "version": {
+                                              "deprecated": true,
+                                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "panelConfig",
+                                            "type",
+                                            "gridData",
+                                            "panelIndex"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "title": {
+                                        "description": "The title of the section.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "title",
+                                      "gridData",
+                                      "panels"
+                                    ],
+                                    "type": "object"
                                   }
-                                },
-                                "required": [
-                                  "panelConfig",
-                                  "type",
-                                  "gridData",
-                                  "panelIndex"
-                                ],
-                                "type": "object"
+                                ]
                               },
                               "type": "array"
                             },
@@ -8398,104 +8828,248 @@
                       "panels": {
                         "default": [],
                         "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "gridData": {
+                          "anyOf": [
+                            {
                               "additionalProperties": false,
                               "properties": {
-                                "h": {
-                                  "default": 15,
-                                  "description": "The height of the panel in grid units",
-                                  "minimum": 1,
-                                  "type": "number"
-                                },
-                                "i": {
-                                  "description": "The unique identifier of the panel",
-                                  "type": "string"
-                                },
-                                "w": {
-                                  "default": 24,
-                                  "description": "The width of the panel in grid units",
-                                  "maximum": 48,
-                                  "minimum": 1,
-                                  "type": "number"
-                                },
-                                "x": {
-                                  "description": "The x coordinate of the panel in grid units",
-                                  "type": "number"
-                                },
-                                "y": {
-                                  "description": "The y coordinate of the panel in grid units",
-                                  "type": "number"
-                                }
-                              },
-                              "required": [
-                                "x",
-                                "y"
-                              ],
-                              "type": "object"
-                            },
-                            "id": {
-                              "description": "The saved object id for by reference panels",
-                              "type": "string"
-                            },
-                            "panelConfig": {
-                              "additionalProperties": true,
-                              "properties": {
-                                "description": {
-                                  "description": "The description of the panel",
-                                  "type": "string"
-                                },
-                                "enhancements": {
-                                  "additionalProperties": {},
+                                "gridData": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "h": {
+                                      "default": 15,
+                                      "description": "The height of the panel in grid units",
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "i": {
+                                      "description": "The unique identifier of the panel",
+                                      "type": "string"
+                                    },
+                                    "w": {
+                                      "default": 24,
+                                      "description": "The width of the panel in grid units",
+                                      "maximum": 48,
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "x": {
+                                      "description": "The x coordinate of the panel in grid units",
+                                      "type": "number"
+                                    },
+                                    "y": {
+                                      "description": "The y coordinate of the panel in grid units",
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "x",
+                                    "y"
+                                  ],
                                   "type": "object"
                                 },
-                                "hidePanelTitles": {
-                                  "description": "Set to true to hide the panel title in its container.",
-                                  "type": "boolean"
+                                "id": {
+                                  "description": "The saved object id for by reference panels",
+                                  "type": "string"
                                 },
-                                "savedObjectId": {
-                                  "description": "The unique id of the library item to construct the embeddable.",
+                                "panelConfig": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "description": {
+                                      "description": "The description of the panel",
+                                      "type": "string"
+                                    },
+                                    "enhancements": {
+                                      "additionalProperties": {},
+                                      "type": "object"
+                                    },
+                                    "hidePanelTitles": {
+                                      "description": "Set to true to hide the panel title in its container.",
+                                      "type": "boolean"
+                                    },
+                                    "savedObjectId": {
+                                      "description": "The unique id of the library item to construct the embeddable.",
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "description": "The title of the panel",
+                                      "type": "string"
+                                    },
+                                    "version": {
+                                      "description": "The version of the embeddable in the panel.",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "panelIndex": {
+                                  "description": "The unique ID of the panel.",
+                                  "type": "string"
+                                },
+                                "panelRefName": {
                                   "type": "string"
                                 },
                                 "title": {
                                   "description": "The title of the panel",
                                   "type": "string"
                                 },
+                                "type": {
+                                  "description": "The embeddable type",
+                                  "type": "string"
+                                },
                                 "version": {
-                                  "description": "The version of the embeddable in the panel.",
+                                  "deprecated": true,
+                                  "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
                                   "type": "string"
                                 }
                               },
+                              "required": [
+                                "panelConfig",
+                                "type",
+                                "gridData"
+                              ],
                               "type": "object"
                             },
-                            "panelIndex": {
-                              "description": "The unique ID of the panel.",
-                              "type": "string"
-                            },
-                            "panelRefName": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "description": "The title of the panel",
-                              "type": "string"
-                            },
-                            "type": {
-                              "description": "The embeddable type",
-                              "type": "string"
-                            },
-                            "version": {
-                              "deprecated": true,
-                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-                              "type": "string"
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "collapsed": {
+                                  "description": "The collapsed state of the section.",
+                                  "type": "boolean"
+                                },
+                                "gridData": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "i": {
+                                      "description": "The unique identifier of the section",
+                                      "type": "string"
+                                    },
+                                    "y": {
+                                      "description": "The y coordinate of the section in grid units",
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "y"
+                                  ],
+                                  "type": "object"
+                                },
+                                "panels": {
+                                  "default": [],
+                                  "description": "The panels that belong to the section.",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "h": {
+                                            "default": 15,
+                                            "description": "The height of the panel in grid units",
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "i": {
+                                            "description": "The unique identifier of the panel",
+                                            "type": "string"
+                                          },
+                                          "w": {
+                                            "default": 24,
+                                            "description": "The width of the panel in grid units",
+                                            "maximum": 48,
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "x": {
+                                            "description": "The x coordinate of the panel in grid units",
+                                            "type": "number"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the panel in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "x",
+                                          "y"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "id": {
+                                        "description": "The saved object id for by reference panels",
+                                        "type": "string"
+                                      },
+                                      "panelConfig": {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "description": {
+                                            "description": "The description of the panel",
+                                            "type": "string"
+                                          },
+                                          "enhancements": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          },
+                                          "hidePanelTitles": {
+                                            "description": "Set to true to hide the panel title in its container.",
+                                            "type": "boolean"
+                                          },
+                                          "savedObjectId": {
+                                            "description": "The unique id of the library item to construct the embeddable.",
+                                            "type": "string"
+                                          },
+                                          "title": {
+                                            "description": "The title of the panel",
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "description": "The version of the embeddable in the panel.",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "panelIndex": {
+                                        "description": "The unique ID of the panel.",
+                                        "type": "string"
+                                      },
+                                      "panelRefName": {
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "description": "The title of the panel",
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "description": "The embeddable type",
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "deprecated": true,
+                                        "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "panelConfig",
+                                      "type",
+                                      "gridData"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "title": {
+                                  "description": "The title of the section.",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "title",
+                                "gridData"
+                              ],
+                              "type": "object"
                             }
-                          },
-                          "required": [
-                            "panelConfig",
-                            "type",
-                            "gridData"
-                          ],
-                          "type": "object"
+                          ]
                         },
                         "type": "array"
                       },
@@ -8937,104 +9511,247 @@
                             "panels": {
                               "default": [],
                               "items": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "gridData": {
+                                "anyOf": [
+                                  {
                                     "additionalProperties": false,
                                     "properties": {
-                                      "h": {
-                                        "default": 15,
-                                        "description": "The height of the panel in grid units",
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "i": {
-                                        "type": "string"
-                                      },
-                                      "w": {
-                                        "default": 24,
-                                        "description": "The width of the panel in grid units",
-                                        "maximum": 48,
-                                        "minimum": 1,
-                                        "type": "number"
-                                      },
-                                      "x": {
-                                        "description": "The x coordinate of the panel in grid units",
-                                        "type": "number"
-                                      },
-                                      "y": {
-                                        "description": "The y coordinate of the panel in grid units",
-                                        "type": "number"
-                                      }
-                                    },
-                                    "required": [
-                                      "x",
-                                      "y",
-                                      "i"
-                                    ],
-                                    "type": "object"
-                                  },
-                                  "id": {
-                                    "description": "The saved object id for by reference panels",
-                                    "type": "string"
-                                  },
-                                  "panelConfig": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "description": {
-                                        "description": "The description of the panel",
-                                        "type": "string"
-                                      },
-                                      "enhancements": {
-                                        "additionalProperties": {},
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "h": {
+                                            "default": 15,
+                                            "description": "The height of the panel in grid units",
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "w": {
+                                            "default": 24,
+                                            "description": "The width of the panel in grid units",
+                                            "maximum": 48,
+                                            "minimum": 1,
+                                            "type": "number"
+                                          },
+                                          "x": {
+                                            "description": "The x coordinate of the panel in grid units",
+                                            "type": "number"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the panel in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "x",
+                                          "y",
+                                          "i"
+                                        ],
                                         "type": "object"
                                       },
-                                      "hidePanelTitles": {
-                                        "description": "Set to true to hide the panel title in its container.",
-                                        "type": "boolean"
+                                      "id": {
+                                        "description": "The saved object id for by reference panels",
+                                        "type": "string"
                                       },
-                                      "savedObjectId": {
-                                        "description": "The unique id of the library item to construct the embeddable.",
+                                      "panelConfig": {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "description": {
+                                            "description": "The description of the panel",
+                                            "type": "string"
+                                          },
+                                          "enhancements": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          },
+                                          "hidePanelTitles": {
+                                            "description": "Set to true to hide the panel title in its container.",
+                                            "type": "boolean"
+                                          },
+                                          "savedObjectId": {
+                                            "description": "The unique id of the library item to construct the embeddable.",
+                                            "type": "string"
+                                          },
+                                          "title": {
+                                            "description": "The title of the panel",
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "description": "The version of the embeddable in the panel.",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "panelIndex": {
+                                        "type": "string"
+                                      },
+                                      "panelRefName": {
                                         "type": "string"
                                       },
                                       "title": {
                                         "description": "The title of the panel",
                                         "type": "string"
                                       },
+                                      "type": {
+                                        "description": "The embeddable type",
+                                        "type": "string"
+                                      },
                                       "version": {
-                                        "description": "The version of the embeddable in the panel.",
+                                        "deprecated": true,
+                                        "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
                                         "type": "string"
                                       }
                                     },
+                                    "required": [
+                                      "panelConfig",
+                                      "type",
+                                      "gridData",
+                                      "panelIndex"
+                                    ],
                                     "type": "object"
                                   },
-                                  "panelIndex": {
-                                    "type": "string"
-                                  },
-                                  "panelRefName": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "description": "The title of the panel",
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "description": "The embeddable type",
-                                    "type": "string"
-                                  },
-                                  "version": {
-                                    "deprecated": true,
-                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-                                    "type": "string"
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "collapsed": {
+                                        "description": "The collapsed state of the section.",
+                                        "type": "boolean"
+                                      },
+                                      "gridData": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "i": {
+                                            "type": "string"
+                                          },
+                                          "y": {
+                                            "description": "The y coordinate of the section in grid units",
+                                            "type": "number"
+                                          }
+                                        },
+                                        "required": [
+                                          "y",
+                                          "i"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "panels": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "gridData": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "h": {
+                                                  "default": 15,
+                                                  "description": "The height of the panel in grid units",
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "i": {
+                                                  "type": "string"
+                                                },
+                                                "w": {
+                                                  "default": 24,
+                                                  "description": "The width of the panel in grid units",
+                                                  "maximum": 48,
+                                                  "minimum": 1,
+                                                  "type": "number"
+                                                },
+                                                "x": {
+                                                  "description": "The x coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                },
+                                                "y": {
+                                                  "description": "The y coordinate of the panel in grid units",
+                                                  "type": "number"
+                                                }
+                                              },
+                                              "required": [
+                                                "x",
+                                                "y",
+                                                "i"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "id": {
+                                              "description": "The saved object id for by reference panels",
+                                              "type": "string"
+                                            },
+                                            "panelConfig": {
+                                              "additionalProperties": true,
+                                              "properties": {
+                                                "description": {
+                                                  "description": "The description of the panel",
+                                                  "type": "string"
+                                                },
+                                                "enhancements": {
+                                                  "additionalProperties": {},
+                                                  "type": "object"
+                                                },
+                                                "hidePanelTitles": {
+                                                  "description": "Set to true to hide the panel title in its container.",
+                                                  "type": "boolean"
+                                                },
+                                                "savedObjectId": {
+                                                  "description": "The unique id of the library item to construct the embeddable.",
+                                                  "type": "string"
+                                                },
+                                                "title": {
+                                                  "description": "The title of the panel",
+                                                  "type": "string"
+                                                },
+                                                "version": {
+                                                  "description": "The version of the embeddable in the panel.",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            "panelIndex": {
+                                              "type": "string"
+                                            },
+                                            "panelRefName": {
+                                              "type": "string"
+                                            },
+                                            "title": {
+                                              "description": "The title of the panel",
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "description": "The embeddable type",
+                                              "type": "string"
+                                            },
+                                            "version": {
+                                              "deprecated": true,
+                                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "panelConfig",
+                                            "type",
+                                            "gridData",
+                                            "panelIndex"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "title": {
+                                        "description": "The title of the section.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "title",
+                                      "gridData",
+                                      "panels"
+                                    ],
+                                    "type": "object"
                                   }
-                                },
-                                "required": [
-                                  "panelConfig",
-                                  "type",
-                                  "gridData",
-                                  "panelIndex"
-                                ],
-                                "type": "object"
+                                ]
                               },
                               "type": "array"
                             },

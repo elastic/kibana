@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+
 import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
@@ -14,15 +18,12 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { omit } from 'lodash';
-import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+
 import { DashboardLocatorParams } from '../../../../common';
-import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
-import { SharedDashboardState } from '../../../../common/types';
+import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { coreServices, dataService, shareService } from '../../../services/kibana_services';
+import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -110,19 +111,25 @@ export function ShowShareModal({
     );
   };
 
-  const { panels: allUnsavedPanelsMap, ...unsavedDashboardState } =
-    getDashboardBackupService().getState(savedObjectId) ?? {};
+  const {
+    panels: allUnsavedPanelsMap,
+    sections: allUnsavedSectionsMap,
+    ...unsavedDashboardState
+  } = getDashboardBackupService().getState(savedObjectId) ?? {};
 
   const hasPanelChanges = allUnsavedPanelsMap !== undefined;
 
-  const unsavedDashboardStateForLocator: SharedDashboardState = {
+  const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
     controlGroupInput:
-      unsavedDashboardState.controlGroupInput as SharedDashboardState['controlGroupInput'],
-    references: unsavedDashboardState.references as SharedDashboardState['references'],
+      unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
+    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
-  if (allUnsavedPanelsMap) {
-    unsavedDashboardStateForLocator.panels = convertPanelMapToPanelsArray(allUnsavedPanelsMap);
+  if (allUnsavedPanelsMap || allUnsavedSectionsMap) {
+    unsavedDashboardStateForLocator.panels = convertPanelSectionMapsToPanelsArray(
+      allUnsavedPanelsMap ?? {},
+      allUnsavedSectionsMap ?? {}
+    );
   }
 
   const locatorParams: DashboardLocatorParams = {
@@ -221,7 +228,6 @@ export function ShowShareModal({
       },
     ],
     snapshotShareWarning: hasPanelChanges ? shareModalStrings.getSnapshotShareWarning() : undefined,
-    toasts: coreServices.notifications.toasts,
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR

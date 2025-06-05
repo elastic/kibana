@@ -105,6 +105,10 @@ export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts',
   defaultMessage: 'Alerts',
 });
 
+export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.navigation.alertSummary', {
+  defaultMessage: 'Alert summary',
+});
+
 export const ATTACK_DISCOVERY = i18n.translate(
   'xpack.securitySolution.navigation.attackDiscovery',
   {
@@ -118,6 +122,10 @@ export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timel
 
 export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
+});
+
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.configurations', {
+  defaultMessage: 'Configurations',
 });
 
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {

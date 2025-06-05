@@ -23,6 +23,8 @@ import { workoutColorForValue } from './helpers';
 import { decreaseOpacity } from './decrease_opacity';
 import { LegacyColorsService } from '../legacy_colors';
 
+export const COMPATIBILITY_PALETTE_ID = 'kibana_palette';
+
 function buildRoundRobinCategoricalWithMappedColors(
   id: string,
   colors: string[],
@@ -134,7 +136,7 @@ function buildSyncedKibanaPalette(
     return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
-    id: 'kibana_palette',
+    id: COMPATIBILITY_PALETTE_ID,
     getCategoricalColor: getColor,
     getCategoricalColors: () => colors.seedColors.slice(0, 10),
     toExpression: () => ({
@@ -144,7 +146,7 @@ function buildSyncedKibanaPalette(
           type: 'function',
           function: 'system_palette',
           arguments: {
-            name: ['kibana_palette'],
+            name: [COMPATIBILITY_PALETTE_ID],
           },
         },
       ],
@@ -276,7 +278,7 @@ export const buildPalettes = (
     cool: buildGradient('cool', kbnPalettes.get('cool')),
     warm: buildGradient('warm', kbnPalettes.get('warm')),
     gray: buildGradient('gray', kbnPalettes.get('gray')),
-    kibana_palette: {
+    [COMPATIBILITY_PALETTE_ID]: {
       title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
         defaultMessage: 'Compatibility',
       }),

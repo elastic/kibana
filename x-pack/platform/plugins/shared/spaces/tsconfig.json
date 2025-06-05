@@ -55,6 +55,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/spaces-utils"
   ],
   "exclude": [
     "target/**/*",

@@ -253,6 +253,7 @@
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/react-kibana-context-theme",
     "@kbn/core-chrome-browser",
     "@kbn/security-plugin-types-common",
   ]

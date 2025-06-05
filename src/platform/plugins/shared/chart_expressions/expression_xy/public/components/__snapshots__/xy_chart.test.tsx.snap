@@ -453,6 +453,15 @@ exports[`XYChart component it renders area 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -1549,6 +1558,15 @@ exports[`XYChart component it renders area 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -1733,7 +1751,10 @@ exports[`XYChart component it renders area 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -1747,7 +1768,7 @@ exports[`XYChart component it renders area 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -1764,7 +1785,7 @@ exports[`XYChart component it renders area 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -1777,14 +1798,29 @@ exports[`XYChart component it renders area 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -1797,7 +1833,7 @@ exports[`XYChart component it renders area 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -1822,7 +1858,9 @@ exports[`XYChart component it renders area 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -1861,7 +1899,9 @@ exports[`XYChart component it renders area 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -1874,7 +1914,9 @@ exports[`XYChart component it renders area 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -1932,9 +1974,7 @@ exports[`XYChart component it renders area 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -1943,6 +1983,19 @@ exports[`XYChart component it renders area 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -2208,6 +2261,15 @@ exports[`XYChart component it renders bar 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -3304,6 +3366,15 @@ exports[`XYChart component it renders bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -3488,7 +3559,10 @@ exports[`XYChart component it renders bar 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -3502,7 +3576,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -3519,7 +3593,7 @@ exports[`XYChart component it renders bar 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -3532,14 +3606,29 @@ exports[`XYChart component it renders bar 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -3552,7 +3641,7 @@ exports[`XYChart component it renders bar 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -3577,7 +3666,9 @@ exports[`XYChart component it renders bar 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -3616,7 +3707,9 @@ exports[`XYChart component it renders bar 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -3629,7 +3722,9 @@ exports[`XYChart component it renders bar 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -3687,9 +3782,7 @@ exports[`XYChart component it renders bar 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -3698,6 +3791,19 @@ exports[`XYChart component it renders bar 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -3963,6 +4069,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -5059,6 +5174,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -5243,7 +5367,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -5257,7 +5384,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -5274,7 +5401,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -5287,14 +5414,29 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -5307,7 +5449,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -5332,7 +5474,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -5371,7 +5515,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -5384,7 +5530,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -5442,9 +5590,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -5453,6 +5599,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -5718,6 +5877,15 @@ exports[`XYChart component it renders line 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -6814,6 +6982,15 @@ exports[`XYChart component it renders line 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -6998,7 +7175,10 @@ exports[`XYChart component it renders line 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -7012,7 +7192,7 @@ exports[`XYChart component it renders line 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -7029,7 +7209,7 @@ exports[`XYChart component it renders line 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -7042,14 +7222,29 @@ exports[`XYChart component it renders line 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -7062,7 +7257,7 @@ exports[`XYChart component it renders line 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -7087,7 +7282,9 @@ exports[`XYChart component it renders line 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -7126,7 +7323,9 @@ exports[`XYChart component it renders line 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -7139,7 +7338,9 @@ exports[`XYChart component it renders line 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -7197,9 +7398,7 @@ exports[`XYChart component it renders line 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -7208,6 +7407,19 @@ exports[`XYChart component it renders line 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -7473,6 +7685,15 @@ exports[`XYChart component it renders stacked area 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -8569,6 +8790,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -8753,7 +8983,10 @@ exports[`XYChart component it renders stacked area 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -8767,7 +9000,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -8784,7 +9017,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -8797,14 +9030,29 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -8817,7 +9065,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -8842,7 +9090,9 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -8881,7 +9131,9 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -8894,7 +9146,9 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -8952,9 +9206,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -8963,6 +9215,19 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -9227,6 +9492,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -10324,6 +10598,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -10508,7 +10791,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -10522,7 +10808,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -10539,7 +10825,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -10552,14 +10838,29 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -10572,7 +10873,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -10597,7 +10898,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -10636,7 +10939,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -10649,7 +10954,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -10707,9 +11014,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -10718,6 +11023,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -10982,6 +11300,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -12079,6 +12406,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -12263,7 +12599,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -12277,7 +12616,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -12294,7 +12633,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -12307,14 +12646,29 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -12327,7 +12681,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -12352,7 +12706,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -12391,7 +12747,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -12404,7 +12762,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -12462,9 +12822,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -12473,6 +12831,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -12763,6 +13134,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -14060,6 +14443,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -14244,7 +14639,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -14258,7 +14656,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -14275,7 +14673,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -14288,14 +14686,29 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -14308,7 +14721,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -14333,7 +14746,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -14372,7 +14787,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -14385,7 +14802,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -14443,9 +14862,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -14454,6 +14871,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -14758,6 +15188,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -16048,6 +16490,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -16232,7 +16686,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -16246,7 +16703,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -16263,7 +16720,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -16276,14 +16733,29 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -16296,7 +16768,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -16321,7 +16793,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -16360,7 +16834,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -16373,7 +16849,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -16431,9 +16909,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -16442,6 +16918,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],
@@ -16744,6 +17233,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -18034,6 +18535,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -18218,7 +18731,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "_aliasMappings": Map {
                 "default" => "eui_amsterdam",
                 "eui_amsterdam_color_blind" => "eui_amsterdam",
-                "kibana_palette" => "elastic_brand_2023",
+                "kibana_palette" => "kibana_v7_legacy",
+                "complimentary" => "complementary",
+                "positive" => "green",
+                "negative" => "red",
               },
               "_defaultPalette": KbnColorFnPalette {
                 "_colorFn": [Function],
@@ -18232,7 +18748,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "getColor": [Function],
                 "id": "eui_amsterdam",
                 "legacy": false,
-                "name": "Kibana 7",
+                "name": "Kibana 7.0",
                 "standalone": false,
                 "type": "categorical",
               },
@@ -18249,7 +18765,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "getColor": [Function],
                   "id": "eui_amsterdam",
                   "legacy": false,
-                  "name": "Kibana 7",
+                  "name": "Kibana 7.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -18262,14 +18778,29 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "#bc52bc",
                     "#9e3533",
                     "#daa05d",
+                    "#bfaf40",
+                    "#4050bf",
+                    "#bf5040",
+                    "#40afbf",
+                    "#70bf40",
+                    "#8f40bf",
+                    "#bf40a7",
+                    "#40bf58",
+                    "#bf9740",
+                    "#4068bf",
+                    "#bf4048",
+                    "#40bfb7",
+                    "#87bf40",
                   ],
-                  "aliases": Array [],
-                  "colorCount": 7,
+                  "aliases": Array [
+                    "kibana_palette",
+                  ],
+                  "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
                   "id": "kibana_v7_legacy",
                   "legacy": false,
-                  "name": "Kibana 4",
+                  "name": "Kibana 4.0",
                   "standalone": false,
                   "type": "categorical",
                 },
@@ -18282,7 +18813,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "getColor": [Function],
                   "id": "behind_text",
                   "legacy": false,
-                  "name": "Kibana 7 (behind text)",
+                  "name": "Kibana 7.0 (behind text)",
                   "standalone": true,
                   "type": "categorical",
                 },
@@ -18307,7 +18838,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "complementary" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "complimentary",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -18346,7 +18879,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "green" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "positive",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -18359,7 +18894,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "red" => KbnColorFnPalette {
                   "_colorFn": [Function],
                   "_defaultNumberOfColors": 10,
-                  "aliases": Array [],
+                  "aliases": Array [
+                    "negative",
+                  ],
                   "colorCount": 10,
                   "colors": [Function],
                   "getColor": [Function],
@@ -18417,9 +18954,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "#0077cc",
                     "#fec514",
                   ],
-                  "aliases": Array [
-                    "kibana_palette",
-                  ],
+                  "aliases": Array [],
                   "colorCount": 6,
                   "colors": [Function],
                   "getColor": [Function],
@@ -18428,6 +18963,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "name": "Elastic classic",
                   "standalone": false,
                   "type": "categorical",
+                },
+                "compare_to" => KbnColorFnPalette {
+                  "_colorFn": [Function],
+                  "_defaultNumberOfColors": 10,
+                  "aliases": Array [],
+                  "colorCount": 10,
+                  "colors": [Function],
+                  "getColor": [Function],
+                  "id": "compare_to",
+                  "legacy": false,
+                  "name": "Trend",
+                  "standalone": true,
+                  "type": "gradient",
                 },
               },
               "get": [Function],

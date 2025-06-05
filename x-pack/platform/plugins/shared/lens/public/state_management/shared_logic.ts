@@ -73,7 +73,11 @@ export function mergeToNewDoc(
   let persistibleVisualizationState = visualization.state;
   if (activeVisualization.getPersistableState) {
     const { state: persistableState, savedObjectReferences } =
-      activeVisualization.getPersistableState(visualization.state);
+      activeVisualization.getPersistableState(
+        visualization.state,
+        activeDatasource,
+        datasourceStates[activeDatasource.id]
+      );
     persistibleVisualizationState = persistableState;
     savedObjectReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
+import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../..';
 
 export function createTheme(
-  euiTheme: typeof darkTheme | typeof lightTheme,
-  selectionBackgroundColor: string,
+  { euiTheme }: UseEuiTheme,
   backgroundColor?: string
 ): monaco.editor.IStandaloneThemeData {
   return {
@@ -21,92 +20,90 @@ export function createTheme(
     rules: [
       {
         token: '',
-        foreground: euiTheme.euiColorDarkestShade,
-        background: euiTheme.euiFormBackgroundColor,
+        foreground: euiTheme.colors.textParagraph,
+        background: euiTheme.colors.backgroundBaseSubdued,
       },
-      { token: 'invalid', foreground: euiTheme.euiColorAccentText },
+      { token: 'invalid', foreground: euiTheme.colors.textAccent },
       { token: 'emphasis', fontStyle: 'italic' },
       { token: 'strong', fontStyle: 'bold' },
 
-      { token: 'variable', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'variable.predefined', foreground: euiTheme.euiColorSuccessText },
-      { token: 'constant', foreground: euiTheme.euiColorAccentText },
-      { token: 'comment', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'number', foreground: euiTheme.euiColorAccentText },
-      { token: 'number.hex', foreground: euiTheme.euiColorAccentText },
-      { token: 'regexp', foreground: euiTheme.euiColorDangerText },
-      { token: 'annotation', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'type', foreground: euiTheme.euiColorSuccessText },
+      { token: 'variable', foreground: euiTheme.colors.textPrimary },
+      { token: 'variable.predefined', foreground: euiTheme.colors.textSuccess },
+      { token: 'constant', foreground: euiTheme.colors.textAccent },
+      { token: 'comment', foreground: euiTheme.colors.textSubdued },
+      { token: 'number', foreground: euiTheme.colors.textAccent },
+      { token: 'number.hex', foreground: euiTheme.colors.textAccent },
+      { token: 'regexp', foreground: euiTheme.colors.textDanger },
+      { token: 'annotation', foreground: euiTheme.colors.textSubdued },
+      { token: 'type', foreground: euiTheme.colors.textSuccess },
 
-      { token: 'delimiter', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'delimiter.html', foreground: euiTheme.euiColorDarkShade },
-      { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'delimiter', foreground: euiTheme.colors.textSubdued },
+      { token: 'delimiter.html', foreground: euiTheme.colors.textParagraph },
+      { token: 'delimiter.xml', foreground: euiTheme.colors.textPrimary },
 
-      { token: 'tag', foreground: euiTheme.euiColorDangerText },
-      { token: 'tag.id.jade', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'tag.class.jade', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'meta.scss', foreground: euiTheme.euiColorAccentText },
-      { token: 'metatag', foreground: euiTheme.euiColorSuccessText },
-      { token: 'metatag.content.html', foreground: euiTheme.euiColorDangerText },
-      { token: 'metatag.html', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'metatag.xml', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'tag', foreground: euiTheme.colors.textDanger },
+      { token: 'tag.id.jade', foreground: euiTheme.colors.textPrimary },
+      { token: 'tag.class.jade', foreground: euiTheme.colors.textPrimary },
+      { token: 'meta.scss', foreground: euiTheme.colors.textAccent },
+      { token: 'metatag', foreground: euiTheme.colors.textSuccess },
+      { token: 'metatag.content.html', foreground: euiTheme.colors.textDanger },
+      { token: 'metatag.html', foreground: euiTheme.colors.textDanger },
+      { token: 'metatag.xml', foreground: euiTheme.colors.textSubdued },
       { token: 'metatag.php', fontStyle: 'bold' },
 
-      { token: 'key', foreground: euiTheme.euiColorWarningText },
-      { token: 'string.key.json', foreground: euiTheme.euiColorDangerText },
-      { token: 'string.value.json', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'key', foreground: euiTheme.colors.textWarning },
+      { token: 'string.key.json', foreground: euiTheme.colors.textDanger },
+      { token: 'string.value.json', foreground: euiTheme.colors.textPrimary },
 
-      { token: 'attribute.name', foreground: euiTheme.euiColorDangerText },
-      { token: 'attribute.name.css', foreground: euiTheme.euiColorSuccessText },
-      { token: 'attribute.value', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'attribute.value.number', foreground: euiTheme.euiColorWarningText },
-      { token: 'attribute.value.unit', foreground: euiTheme.euiColorWarningText },
-      { token: 'attribute.value.html', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'attribute.value.xml', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'attribute.name', foreground: euiTheme.colors.textDanger },
+      { token: 'attribute.name.css', foreground: euiTheme.colors.textSuccess },
+      { token: 'attribute.value', foreground: euiTheme.colors.textPrimary },
+      { token: 'attribute.value.number', foreground: euiTheme.colors.textWarning },
+      { token: 'attribute.value.unit', foreground: euiTheme.colors.textWarning },
+      { token: 'attribute.value.html', foreground: euiTheme.colors.textPrimary },
+      { token: 'attribute.value.xml', foreground: euiTheme.colors.textPrimary },
 
-      { token: 'string', foreground: euiTheme.euiColorDangerText },
-      { token: 'string.html', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'string.sql', foreground: euiTheme.euiColorDangerText },
-      { token: 'string.yaml', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'string', foreground: euiTheme.colors.textDanger },
+      { token: 'string.html', foreground: euiTheme.colors.textPrimary },
+      { token: 'string.sql', foreground: euiTheme.colors.textDanger },
+      { token: 'string.yaml', foreground: euiTheme.colors.textPrimary },
 
-      { token: 'keyword', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'keyword.json', foreground: euiTheme.euiColorPrimaryText },
-      { token: 'keyword.flow', foreground: euiTheme.euiColorWarningText },
-      { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'keyword', foreground: euiTheme.colors.textPrimary },
+      { token: 'keyword.json', foreground: euiTheme.colors.textPrimary },
+      { token: 'keyword.flow', foreground: euiTheme.colors.textWarning },
+      { token: 'keyword.flow.scss', foreground: euiTheme.colors.textPrimary },
       // Monaco editor supports strikethrough font style only starting from 0.32.0.
-      { token: 'keyword.deprecated', foreground: euiTheme.euiColorAccentText },
+      { token: 'keyword.deprecated', foreground: euiTheme.colors.textAccent },
 
-      { token: 'operator.scss', foreground: euiTheme.euiColorDarkShade },
-      { token: 'operator.sql', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'operator.swift', foreground: euiTheme.euiTextSubduedColor },
-      { token: 'predefined.sql', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'operator.scss', foreground: euiTheme.colors.textParagraph },
+      { token: 'operator.sql', foreground: euiTheme.colors.textSubdued },
+      { token: 'operator.swift', foreground: euiTheme.colors.textSubdued },
+      { token: 'predefined.sql', foreground: euiTheme.colors.textSubdued },
 
-      { token: 'text', foreground: euiTheme.euiTitleColor },
-      { token: 'label', foreground: euiTheme.euiColorVis9 },
+      { token: 'text', foreground: euiTheme.colors.textHeading },
+      { token: 'label', foreground: euiTheme.colors.vis.euiColorVis9 },
     ],
     colors: {
-      'editor.foreground': euiTheme.euiColorDarkestShade,
-      'editor.background': backgroundColor ?? euiTheme.euiFormBackgroundColor,
-      'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
-      'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
-      'editorIndentGuide.background1': euiTheme.euiColorLightShade,
-      'editor.selectionBackground': selectionBackgroundColor,
-      'editorWidget.border': euiTheme.euiColorLightShade,
-      'editorWidget.background': euiTheme.euiColorLightestShade,
-      'editorCursor.foreground': euiTheme.euiColorDarkestShade,
-      'editorSuggestWidget.selectedForeground': euiTheme.euiColorDarkestShade,
-      'editorSuggestWidget.focusHighlightForeground': euiTheme.euiColorPrimary,
-      'editorSuggestWidget.selectedBackground': euiTheme.euiColorLightShade,
-      'list.hoverBackground': euiTheme.euiColorLightShade,
-      'list.highlightForeground': euiTheme.euiColorPrimary,
-      'editor.lineHighlightBorder': euiTheme.euiColorLightestShade,
-      'editorHoverWidget.foreground': euiTheme.euiColorDarkestShade,
-      'editorHoverWidget.background': euiTheme.euiFormBackgroundColor,
+      'editor.foreground': euiTheme.colors.textParagraph,
+      'editor.background': backgroundColor ?? euiTheme.colors.backgroundBasePlain,
+      'editorLineNumber.foreground': euiTheme.colors.textSubdued,
+      'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
+      'editorIndentGuide.background1': euiTheme.colors.lightShade,
+      'editor.selectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+      'editorWidget.border': euiTheme.colors.borderBasePlain,
+      'editorWidget.background': euiTheme.colors.backgroundBaseSubdued,
+      'editorCursor.foreground': euiTheme.colors.darkestShade,
+      'editorSuggestWidget.selectedForeground': euiTheme.colors.darkestShade,
+      'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
+      'editorSuggestWidget.selectedBackground': euiTheme.colors.lightShade,
+      'list.hoverBackground': euiTheme.colors.backgroundBaseSubdued,
+      'list.highlightForeground': euiTheme.colors.primary,
+      'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
+      'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
+      'editorHoverWidget.background': euiTheme.colors.backgroundBaseSubdued,
     },
   };
 }
 
-export const buildDarkTheme = () => createTheme(darkTheme, '#343551');
-export const buildLightTheme = () => createTheme(lightTheme, '#E3E4ED');
-export const buildDarkTransparentTheme = () => createTheme(darkTheme, '#343551', '#00000000');
-export const buildLightTransparentTheme = () => createTheme(lightTheme, '#E3E4ED', '#00000000');
+export const buildTheme = createTheme;
+export const buildTransparentTheme = (euiTheme: UseEuiTheme) => createTheme(euiTheme, '#00000000');

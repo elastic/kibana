@@ -85,6 +85,8 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
     disabledRuleTypes: true,
+    rulesSettings: { enabled: true },
+    maintenanceWindow: { enabled: true },
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),

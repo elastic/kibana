@@ -84,6 +84,7 @@ import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
 import type { SiemMigrations } from './siem_migrations';
+import type { Configurations } from './configurations';
 
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
@@ -245,6 +246,7 @@ export interface SubPlugins {
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
   siemMigrations: SiemMigrations;
+  configurations: Configurations;
 }
 
 // TODO: find a better way to defined these types
@@ -266,4 +268,5 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  configurations: ReturnType<Configurations['start']>;
 }
