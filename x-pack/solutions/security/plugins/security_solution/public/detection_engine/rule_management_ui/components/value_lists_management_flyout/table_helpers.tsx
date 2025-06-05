@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ShowValueListModal } from '../../../value_list/components/show_value_list_modal';
-import { FormattedDate } from '../../../common/components/formatted_date';
+import { ShowValueListModal } from '../../../../value_list/components/show_value_list_modal';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 import type { TableItemCallback, TableProps } from './types';
 import { listFormOptions } from './form';

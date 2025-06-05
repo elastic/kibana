@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
 import type {
@@ -22,11 +22,11 @@ import type {
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
-import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const listFormOptions: EuiSelectOption[] = [
   {

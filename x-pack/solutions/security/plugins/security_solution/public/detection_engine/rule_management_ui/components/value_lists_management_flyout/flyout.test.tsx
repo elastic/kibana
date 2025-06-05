@@ -14,7 +14,7 @@ import { useDeleteList, useFindLists } from '@kbn/securitysolution-list-hooks';
 import { exportList } from '@kbn/securitysolution-list-api';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { ValueListsFlyout } from './flyout';
 
 jest.mock('@kbn/securitysolution-list-hooks', () => {
