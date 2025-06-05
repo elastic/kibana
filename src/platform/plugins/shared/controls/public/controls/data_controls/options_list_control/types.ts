@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { PublishingSubject, StateManager } from '@kbn/presentation-publishing-types';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -19,10 +18,10 @@ import type {
   OptionsListSuggestions,
 } from '../../../../common/options_list';
 import type { DataControlApi } from '../types';
-import { SelectionsState } from './selections_manager';
-import { DefaultDataControlState } from '../../../../common';
-import { TemporaryState } from './temporay_state_manager';
-import { EditorState } from './editor_state_manager';
+import type { SelectionsState } from './selections_manager';
+import type { DefaultDataControlState } from '../../../../common';
+import type { TemporaryState } from './temporay_state_manager';
+import type { EditorState } from './editor_state_manager';
 
 export type OptionsListControlApi = DataControlApi & {
   setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;

@@ -10,7 +10,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import { PublishesDataViews } from '@kbn/presentation-publishing';
 import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
 import { ControlFetchContext } from '../../../control_group/control_fetch';

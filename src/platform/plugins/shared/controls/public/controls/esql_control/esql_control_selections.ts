@@ -10,7 +10,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import type { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing-types';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);

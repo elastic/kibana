@@ -10,8 +10,9 @@
 import React from 'react';
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
-import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { ControlGroupRendererApi } from '.';

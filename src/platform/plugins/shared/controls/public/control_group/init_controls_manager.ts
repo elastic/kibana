@@ -16,7 +16,7 @@ import type {
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
   ControlGroupSerializedState,

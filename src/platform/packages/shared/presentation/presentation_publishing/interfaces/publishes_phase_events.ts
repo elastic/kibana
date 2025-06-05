@@ -8,7 +8,7 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 
 /** ------------------------------------------------------------------------------------------
  * Performance Tracking Types

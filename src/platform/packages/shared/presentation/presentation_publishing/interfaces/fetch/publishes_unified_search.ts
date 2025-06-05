@@ -15,7 +15,7 @@ import {
   TimeRange,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import fastIsEqual from 'fast-deep-equal';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';

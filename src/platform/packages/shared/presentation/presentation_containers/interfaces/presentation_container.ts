@@ -12,7 +12,7 @@ import {
   apiHasUniqueId,
   SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 

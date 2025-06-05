@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 
 export interface PublishesSearchSession {
   searchSessionId$: PublishingSubject<string | undefined>;

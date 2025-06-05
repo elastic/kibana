@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import {
+import type { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type {
   HasParentApi,
   HasType,
   HasUniqueId,
@@ -18,12 +19,11 @@ import {
   PublishesDisabledActionIds,
   PublishesTitle,
   PublishesUnsavedChanges,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { ControlWidth, DefaultControlState } from '../../common/types';
-import { ControlGroupApi } from '../control_group/types';
-import { CanClearSelections } from '../types';
+import type { ControlWidth, DefaultControlState } from '../../common/types';
+import type { ControlGroupApi } from '../control_group/types';
+import type { CanClearSelections } from '../types';
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;

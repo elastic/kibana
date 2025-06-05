@@ -13,7 +13,7 @@ import {
   apiHasUniqueId,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import { PublishingSubject } from '@kbn/presentation-publishing-types';
+import type { PublishingSubject } from '@kbn/presentation-publishing-types';
 import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 
 export const DEBOUNCE_TIME = 100;

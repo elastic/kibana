@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'react-fast-compare';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing-types';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { OptionsListControlState } from '../../../../common/options_list';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';

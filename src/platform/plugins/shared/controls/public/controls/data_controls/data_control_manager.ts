@@ -25,11 +25,10 @@ import {
 } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import { Filter } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators, StateManager } from '@kbn/presentation-publishing-types';
 
 import { i18n } from '@kbn/i18n';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
