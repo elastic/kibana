@@ -8,12 +8,14 @@
  */
 
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
 export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
+  toasts: NotificationsStart['toasts'];
 }
 
 const ShareContext = createContext<IShareContext | null>(null);

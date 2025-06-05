@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ShowShareMenuOptions } from '../types';
 import type { ShareRegistry } from './share_menu_registry';
 import type { ShareConfigs } from '../types';
@@ -52,6 +53,7 @@ export class ShareMenuManager {
             ...options,
             onClose,
             menuItems,
+            toasts: core.notifications.toasts,
             publicAPIEnabled: !isServerless,
           },
           core.rendering
@@ -81,9 +83,11 @@ export class ShareMenuManager {
       isDirty,
       asExport,
       publicAPIEnabled,
+      toasts,
     }: ShowShareMenuOptions & {
       menuItems: ShareConfigs[];
       onClose: () => void;
+      toasts: NotificationsStart['toasts'];
     },
     rendering: RenderingService
   ) {
@@ -116,6 +120,7 @@ export class ShareMenuManager {
             onClose();
             unmount();
           },
+          toasts,
         },
       }),
       rendering

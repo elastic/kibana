@@ -31,6 +31,8 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

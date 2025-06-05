@@ -12,8 +12,11 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ExportMenu } from './export_integrations';
 import type { IShareContext } from '../context';
+
+const toasts = notificationServiceMock.createStartContract().toasts;
 
 const mockShareContext: IShareContext = {
   shareMenuItems: [
@@ -49,6 +52,7 @@ const mockShareContext: IShareContext = {
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
+  toasts,
 };
 
 function ExportPopoverRender() {

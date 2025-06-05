@@ -12,6 +12,7 @@ import { ShareMenuTabs } from './share_tabs';
 import { ShareProvider, type IShareContext } from './context';
 import { screen, render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
 import {
   BrowserShortUrlClient,
@@ -85,6 +86,7 @@ const mockShareContext: IShareContext = {
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
+  toasts: notificationServiceMock.createStartContract().toasts,
 };
 
 describe('Share modal tabs', () => {
