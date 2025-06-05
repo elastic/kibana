@@ -141,7 +141,7 @@ export class RuleMigrationsTaskClient {
     }
     const dataStats = await this.data.rules.getStats(migrationId);
     const taskStats = this.getTaskStats(migration, dataStats.rules);
-    return { ...taskStats, ...dataStats, last_execution: migration.last_execution };
+    return { ...taskStats, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
@@ -158,7 +158,7 @@ export class RuleMigrationsTaskClient {
       const migration = allMigrationsMap.get(dataStats.id);
       if (migration) {
         const taksStats = this.getTaskStats(migration, dataStats.rules);
-        allStats.push({ ...taksStats, ...dataStats, last_execution: migration.last_execution });
+        allStats.push({ ...taksStats, ...dataStats });
       }
     }
     return allStats;
@@ -167,9 +167,10 @@ export class RuleMigrationsTaskClient {
   private getTaskStats(
     migration: StoredSiemMigration,
     dataStats: RuleMigrationDataStats['rules']
-  ): Pick<RuleMigrationTaskStats, 'status'> {
+  ): Pick<RuleMigrationTaskStats, 'status' | 'last_execution'> {
     return {
       status: this.getTaskStatus(migration, dataStats),
+      last_execution: migration.last_execution,
     };
   }
 

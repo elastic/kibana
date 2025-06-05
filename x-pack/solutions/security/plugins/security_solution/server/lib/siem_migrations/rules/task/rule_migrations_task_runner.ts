@@ -12,7 +12,7 @@ import { type ElasticRule } from '../../../../../common/siem_migrations/model/ru
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { GraphConfig, MigrateRuleState } from './agent/types';
+import type { MigrateRuleGraphConfig, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
@@ -119,7 +119,7 @@ export class RuleMigrationTaskRunner {
     await this.retriever.initialize();
   }
 
-  public async run(invocationConfig: GraphConfig): Promise<void> {
+  public async run(invocationConfig: MigrateRuleGraphConfig): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
     const { telemetry, migrationId } = this;
 
@@ -207,10 +207,10 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  protected createMigrateRuleTask(invocationConfig?: GraphConfig) {
+  protected createMigrateRuleTask(invocationConfig?: MigrateRuleGraphConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
-    const config: GraphConfig = {
+    const config: MigrateRuleGraphConfig = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
       // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       ...invocationConfig,

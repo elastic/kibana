@@ -8,9 +8,9 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
-import { configAnnotation, migrateRuleState } from './state';
+import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
-import type { GraphConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
+import type { MigrateRuleGraphConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
 
 export function getRuleMigrationAgent({
   model,
@@ -35,14 +35,14 @@ export function getRuleMigrationAgent({
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 
-  const siemMigrationAgentGraph = new StateGraph(migrateRuleState, configAnnotation)
+  const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
     .addNode('createSemanticQuery', createSemanticQueryNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addEdge(START, 'createSemanticQuery')
-    .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleCoditional, [
+    .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
       'matchPrebuiltRule',
       'translationSubGraph',
     ])
@@ -57,7 +57,7 @@ export function getRuleMigrationAgent({
   return graph;
 }
 
-const skipPrebuiltRuleCoditional = (_state: MigrateRuleState, config: GraphConfig) => {
+const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRuleGraphConfig) => {
   if (config.configurable?.skipPrebuiltRulesMatching) {
     return 'translationSubGraph';
   }

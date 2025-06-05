@@ -13,12 +13,12 @@ import { Client } from 'langsmith';
 import { distance } from 'fastest-levenshtein';
 import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { GraphConfig, MigrateRuleState } from './agent/types';
+import type { MigrateRuleGraphConfig, MigrateRuleState } from './agent/types';
 
 export interface EvaluateParams {
   connectorId: string;
   langsmithSettings: LangSmithEvaluationSettings;
-  invocationConfig?: GraphConfig;
+  invocationConfig?: MigrateRuleGraphConfig;
 }
 
 export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;

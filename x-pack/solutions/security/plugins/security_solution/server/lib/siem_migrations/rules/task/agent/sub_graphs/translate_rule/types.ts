@@ -12,10 +12,10 @@ import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { translateRuleState } from './state';
-import type { configAnnotation } from '../../state';
+import type { migrateRuleConfigSchema } from '../../state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
-export type TranslateRuleGraphConfig = RunnableConfig<(typeof configAnnotation)['State']>;
+export type TranslateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
 export type GraphNode = (
   state: TranslateRuleState,
   config: TranslateRuleGraphConfig

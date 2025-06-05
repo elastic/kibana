@@ -14,7 +14,7 @@ import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_c
 import type { ChatModel } from './util/actions_client_chat';
 import type { RuleMigrationResources } from './retrievers/rule_resource_retriever';
 import type { RuleMigrationsRetriever } from './retrievers';
-import type { GraphConfig } from './agent/types';
+import type { MigrateRuleGraphConfig } from './agent/types';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
@@ -31,7 +31,7 @@ export interface RuleMigrationTaskCreateClientParams {
 export interface RuleMigrationTaskStartParams {
   migrationId: string;
   connectorId: string;
-  invocationConfig: GraphConfig;
+  invocationConfig: MigrateRuleGraphConfig;
 }
 
 export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams {
@@ -60,6 +60,6 @@ export interface RuleMigrationTaskEvaluateParams {
   evaluationId: string;
   connectorId: string;
   langsmithSettings: LangSmithEvaluationSettings;
-  invocationConfig: GraphConfig;
+  invocationConfig: MigrateRuleGraphConfig;
   abortController: AbortController;
 }
