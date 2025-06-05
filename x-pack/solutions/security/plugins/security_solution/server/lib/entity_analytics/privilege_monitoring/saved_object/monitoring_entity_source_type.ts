@@ -22,10 +22,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     managed: {
       type: 'boolean',
     },
-    indexPattern: {
-      type: 'keyword',
-      dynamic: false,
-    },
     enabled: {
       type: 'boolean',
     },

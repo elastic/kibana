@@ -1055,10 +1055,6 @@
         "dynamic": false,
         "type": "object"
       },
-      "indexPattern": {
-        "dynamic": false,
-        "type": "keyword"
-      },
       "integrationName": {
         "type": "keyword"
       },
