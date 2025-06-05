@@ -16,6 +16,7 @@ import { AssetClient } from '../lib/streams/assets/asset_client';
 import { StreamsClient } from '../lib/streams/client';
 import { StreamsTelemetryClient } from '../lib/telemetry/client';
 import { ContentClient } from '../lib/content/content_client';
+import { QueryClient } from '../lib/streams/assets/query/query_client';
 
 type GetScopedClients = ({
   request,
@@ -30,6 +31,7 @@ export interface RouteHandlerScopedClients {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
+  queryClient: QueryClient;
 }
 
 export interface RouteDependencies {

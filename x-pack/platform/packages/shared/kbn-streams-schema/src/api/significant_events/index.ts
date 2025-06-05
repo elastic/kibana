@@ -19,10 +19,17 @@ type ChangePointsType =
   | 'step_change'
   | 'trend_change';
 
+type ChangePointsValue = Partial<{
+  p_value: number;
+  r_value: number;
+  change_point: number;
+  trend: string;
+}>;
+
 type SignificantEventsResponse = StreamQueryKql & {
   occurrences: Array<{ date: string; count: number }>;
   change_points: {
-    type: Record<ChangePointsType, { p_value: number; change_point: number }>;
+    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
 };
 
