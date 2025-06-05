@@ -72,7 +72,14 @@ const LayoutExample = ({
     <ChromeLayout {...props}>
       {{
         Application: () => (
-          <Box label="Application" color={colors.textWarning} backgroundColor={colors.warning} />
+          <Box
+            label="Application"
+            color={colors.textWarning}
+            backgroundColor={colors.warning}
+            rootCSS={css`
+              height: 1000px;
+            `}
+          />
         ),
         Banner: !includeBanner
           ? null
