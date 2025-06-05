@@ -188,7 +188,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
               isPreviewMode={isPreviewMode}
               isLinkEnabled={isLinkEnabled}
             />
-            {assetInventoryEnabled && <UserPanelFooter userName={userName} />}
+            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
             {isPreviewMode && (
               <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}

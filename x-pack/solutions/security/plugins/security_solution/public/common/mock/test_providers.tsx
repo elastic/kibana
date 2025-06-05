@@ -47,9 +47,6 @@ interface Props {
 
 export const kibanaMock = createStartServicesMock();
 
-const mockRef = {
-  current: null,
-};
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
