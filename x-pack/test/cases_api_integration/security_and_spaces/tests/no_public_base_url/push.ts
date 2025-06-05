@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
   postCommentUserReq,
@@ -18,7 +19,6 @@ import {
   persistableStateAttachment,
 } from '../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 
 import {
   pushCase,
