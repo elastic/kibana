@@ -15,8 +15,8 @@ import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { of } from 'rxjs';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
@@ -29,7 +29,6 @@ interface Props {
 
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
-const ELASTIC_DOCS = 'https://www.elastic.co/docs/';
 
 export const mockAssistantAvailability: AssistantAvailability = {
   hasSearchAILakeConfigurations: false,
@@ -83,21 +82,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             assistantAvailability={assistantAvailability}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             basePath={'https://localhost:5601/kbn'}
-            docLinks={{
-              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-              links: {
-                securitySolution: {
-                  elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
-                  thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
-                  llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
-                },
-                alerting: {
-                  elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
-                  elasticManagedLlmUsageCost: `https://www.elastic.co/pricing`,
-                },
-              } as DocLinksStart['links'],
-              DOC_LINK_VERSION: 'current',
-            }}
+            docLinks={docLinksServiceMock.createStartContract()}
             getComments={mockGetComments}
             getUrlForApp={mockGetUrlForApp}
             http={mockHttp}

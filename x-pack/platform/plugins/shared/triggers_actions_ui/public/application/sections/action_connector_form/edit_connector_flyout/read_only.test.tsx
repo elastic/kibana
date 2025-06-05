@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { ReadOnlyConnectorMessage } from './read_only';
 import { ActionTypeModel } from '../../../..';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../..', () => {
   const original = jest.requireActual('../../../..');
@@ -17,13 +18,7 @@ jest.mock('../../../..', () => {
     ...original,
     useKibana: jest.fn(() => ({
       services: {
-        docLinks: {
-          links: {
-            alerting: {
-              elasticManagedLlmUsageCost: 'https://example.com/usage-cost',
-            },
-          },
-        },
+        docLinks: docLinksServiceMock.createStartContract(),
       },
     })),
   };

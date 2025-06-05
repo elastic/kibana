@@ -14,6 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 jest.mock('../common/hooks/use_tour_storage_key');
@@ -37,14 +38,7 @@ describe('ElasticLLMCostAwarenessTour', () => {
     jest.useFakeTimers();
     (useAssistantContext as jest.Mock).mockReturnValue({
       inferenceEnabled: true,
-      docLinks: {
-        links: {
-          alerting: {
-            elasticManagedLlm: `/reference/kibana/connectors-kibana/elastic-managed-llm`,
-            elasticManagedLlmUsageCost: `https://www.elastic.co/pricing`,
-          },
-        },
-      },
+      docLinks: docLinksServiceMock.createStartContract(),
     });
     (useLoadConnectors as jest.Mock).mockReturnValue({
       data: [
