@@ -36,7 +36,7 @@ import { FormattedCount } from '../../../common/components/formatted_number';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import type { SeverityCount } from '../severity/types';
-import type { EntityAnalyticsComponentProps } from '../../hooks/use_entity_analytics_components';
+import type { EntityAnalyticsComponentProps } from '../../../../common/entity_analytics/types';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};

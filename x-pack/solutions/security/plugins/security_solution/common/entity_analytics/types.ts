@@ -31,3 +31,7 @@ export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFie
   [EntityType.service]: EntityIdentifierFields.serviceName,
   [EntityType.generic]: EntityIdentifierFields.generic,
 };
+
+export interface EntityAnalyticsComponentProps {
+  isRiskAnalytics?: boolean;
+}

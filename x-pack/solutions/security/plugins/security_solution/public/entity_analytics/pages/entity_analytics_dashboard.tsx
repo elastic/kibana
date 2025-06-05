@@ -26,7 +26,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
-import type { EntityAnalyticsComponentProps } from '../hooks/use_entity_analytics_components';
+import type { EntityAnalyticsComponentProps } from '../../../common/entity_analytics/types';
 
 const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
   isRiskAnalytics = false,
