@@ -69,7 +69,7 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'esType']}
+        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'type']}
         fields={detectedFields}
         stream={definition.stream}
         onFieldUnmap={unmapField}

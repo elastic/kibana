@@ -96,11 +96,6 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Type',
     }),
   },
-  esType: {
-    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableesTypeHeader', {
-      defaultMessage: 'Elasticsearch Field Type',
-    }),
-  },
   format: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableformatHeader', {
       defaultMessage: 'Format',
@@ -120,10 +115,4 @@ export const TABLE_COLUMNS = {
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;
 
-export const SUPPORTED_TABLE_COLUMN_NAMES = [
-  'name',
-  'type',
-  'format',
-  'parent',
-  'status',
-] as TableColumnName[];
+export const SUPPORTED_TABLE_COLUMN_NAMES = Object.keys(TABLE_COLUMNS) as TableColumnName[];
