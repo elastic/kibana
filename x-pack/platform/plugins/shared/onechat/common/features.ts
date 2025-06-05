@@ -15,6 +15,6 @@ export const uiPrivileges = {
 };
 
 export const apiPrivileges = {
-  useOnechat: 'read_onechat',
+  readOnechat: 'read_onechat',
   manageOnechat: 'manage_onechat',
 };

@@ -29,7 +29,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
     {
       path: '/internal/onechat/chat',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: {
         query: schema.object({

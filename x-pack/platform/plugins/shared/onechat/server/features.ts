@@ -29,7 +29,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: ['kibana', ONECHAT_APP_ID],
-        api: [apiPrivileges.useOnechat, apiPrivileges.manageOnechat],
+        api: [apiPrivileges.readOnechat, apiPrivileges.manageOnechat],
         catalogue: [ONECHAT_FEATURE_ID],
         savedObject: {
           all: [],
@@ -39,7 +39,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       },
       read: {
         app: ['kibana', ONECHAT_APP_ID],
-        api: [apiPrivileges.useOnechat],
+        api: [apiPrivileges.readOnechat],
         catalogue: [ONECHAT_FEATURE_ID],
         savedObject: {
           all: [],

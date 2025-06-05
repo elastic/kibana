@@ -22,7 +22,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/agents/invoke',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: {
         body: schema.object({
@@ -52,7 +52,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/agents/stream',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: {
         body: schema.object({

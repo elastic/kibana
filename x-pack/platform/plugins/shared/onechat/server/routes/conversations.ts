@@ -22,7 +22,7 @@ export function registerConversationRoutes({
     {
       path: '/internal/onechat/conversations',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: {
         body: schema.object({

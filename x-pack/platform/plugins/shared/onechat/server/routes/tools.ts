@@ -18,7 +18,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     {
       path: '/internal/onechat/tools',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: false,
     },
