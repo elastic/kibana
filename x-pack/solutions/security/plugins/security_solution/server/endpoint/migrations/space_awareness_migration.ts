@@ -61,10 +61,7 @@ const getMigrationState = async (
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
 ): Promise<ReferenceDataSavedObject<MigrationState>> => {
   return soClient
-    .get<ReferenceDataSavedObject<MigrationState>>(
-      REFERENCE_DATA_SAVED_OBJECT_TYPE,
-      ARTIFACTS_MIGRATION_REF_DATA_ID
-    )
+    .get<ReferenceDataSavedObject<MigrationState>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id)
     .then((response) => {
       logger.debug(`Retrieved migration state for [${id}]\n${stringify(response)}`);
       return response.attributes;
@@ -262,7 +259,7 @@ const migrateResponseActionsToSpaceAware = async (
     return;
   }
 
-  logger.info(`starting migration of endpoint respnose actions in support of spaces`);
+  logger.info(`starting migration of endpoint response actions in support of spaces`);
 
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
