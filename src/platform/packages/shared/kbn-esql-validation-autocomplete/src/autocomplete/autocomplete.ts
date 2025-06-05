@@ -80,6 +80,7 @@ import {
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  FunctionParameterType,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
@@ -551,8 +552,17 @@ async function getFunctionArgsSuggestions(
       )
     );
 
-    // Fields
+    const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+      if (types.includes('keyword') && !types.includes('text')) {
+        types.push('text');
+      }
+      if (types.includes('text') && !types.includes('keyword')) {
+        types.push('keyword');
+      }
+      return types;
+    };
 
+    // Fields
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
@@ -561,9 +571,11 @@ async function getFunctionArgsSuggestions(
           canBeBooleanCondition
             ? ['any']
             : // @TODO: have a way to better suggest constant only params
-              (getTypesFromParamDefs(
-                typesToSuggestNext.filter((d) => !d.constantOnly)
-              ) as string[]),
+              ensureKeywordAndText(
+                getTypesFromParamDefs(
+                  typesToSuggestNext.filter((d) => !d.constantOnly)
+                ) as FunctionParameterType[]
+              ),
           [],
           {
             addComma: shouldAddComma,
@@ -582,7 +594,9 @@ async function getFunctionArgsSuggestions(
           location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
-            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+            : (ensureKeywordAndText(
+                getTypesFromParamDefs(typesToSuggestNext)
+              ) as FunctionParameterType[]),
           ignored: fnToIgnore,
         }).map((suggestion) => ({
           ...suggestion,
