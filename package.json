@@ -99,6 +99,7 @@
     "@aws-sdk/client-kendra": "3.744.0",
     "@aws-sdk/credential-provider-node": "3.744.0",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
+    // blocked by anton
     "@types/react": "~19.1.6",
     "@types/react-dom": "~19.1.6",
     "@xstate5/react/**/xstate": "^5.19.2",
