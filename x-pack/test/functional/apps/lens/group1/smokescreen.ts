@@ -818,5 +818,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       expect(await lens.getWorkspaceErrorCount()).to.eql(0);
     });
+
+    it('should keep suggestions up to date with the current configuration', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      // duplicate the layer
+      await lens.duplicateLayer();
+
+      // now make the first layer bar percentage to lead it in an broken rendering state
+      await lens.switchToVisualizationSubtype('Percentage');
+
+      // now check that both the main visualization and the current visualization suggestion are in error state
+      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await testSubjects.existOrFail(
+        'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
+      );
+
+      // revert the subtype to stacked and everything should be fine again
+      await lens.switchToVisualizationSubtype('Stacked');
+
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
+      await testSubjects.missingOrFail(
+        'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
+      );
+    });
   });
 }

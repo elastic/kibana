@@ -27,6 +27,7 @@ import { createIntervalBasedFormatter } from '../../lib/create_interval_based_fo
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { visStyles } from '../_vis_types';
 
 class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -258,7 +259,7 @@ class TimeseriesVisualization extends Component {
     });
 
     return (
-      <div className="tvbVis">
+      <div className="tvbVis" css={visStyles}>
         <div className="tvbVisTimeSeries">
           <TimeSeries
             series={series}

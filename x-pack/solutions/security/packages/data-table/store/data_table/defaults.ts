@@ -83,7 +83,6 @@ export const tableDefaults: SubsetDataTableModel = {
   ],
   selectAll: false,
   graphEventId: '',
-  sessionViewConfig: null,
   columns: defaultHeaders,
   queryFields: [],
   title: '',

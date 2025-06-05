@@ -16,6 +16,7 @@ import {
   GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
+  MigrateSingleAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
@@ -34,6 +35,7 @@ import {
   PostRetrieveAgentsByActionsRequestSchema,
   DeleteAgentUploadFileRequestSchema,
   GetTagsResponseSchema,
+  MigrateSingleAgentResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -88,6 +90,7 @@ import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
+import { migrateSingleAgentHandler } from './migrate_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -123,6 +126,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgentHandler
     );
 
+  // Migrate
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Migrate a single agent`,
+      description: `Migrate a single agent to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: MigrateSingleAgentRequestSchema,
+          response: {
+            200: {
+              body: () => MigrateSingleAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      migrateSingleAgentHandler
+    );
   // Update
   router.versioned
     .put({
