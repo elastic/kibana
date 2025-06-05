@@ -6,10 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Observable } from 'rxjs';
+import { Observable, firstValueFrom, toArray } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { OneChatDefaultAgentId } from '@kbn/onechat-common';
+import {
+  OneChatDefaultAgentId,
+  isRoundCompleteEvent,
+  isConversationUpdatedEvent,
+  isConversationCreatedEvent,
+  ConversationUpdatedEvent,
+  ConversationCreatedEvent,
+} from '@kbn/onechat-common';
+import type { ChatResponse } from '../../common/http_api/chat';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -24,6 +32,9 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
       },
       validate: {
+        query: schema.object({
+          stream: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.object({
           agentId: schema.string({ defaultValue: OneChatDefaultAgentId }),
           connectorId: schema.maybe(schema.string()),
@@ -35,6 +46,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
     wrapHandler(async (ctx, request, response) => {
       const { chat: chatService } = getInternalServices();
       const { agentId, connectorId, conversationId, nextMessage } = request.body;
+      const { stream } = request.query;
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -49,15 +61,35 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         request,
       });
 
-      return response.ok({
-        body: observableIntoEventSourceStream(
-          chatEvents$ as unknown as Observable<ServerSentEvent>,
-          {
-            signal: abortController.signal,
-            logger,
-          }
-        ),
-      });
+      if (stream) {
+        return response.ok({
+          body: observableIntoEventSourceStream(
+            chatEvents$ as unknown as Observable<ServerSentEvent>,
+            {
+              signal: abortController.signal,
+              logger,
+            }
+          ),
+        });
+      } else {
+        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const {
+          data: { round },
+        } = events.find(isRoundCompleteEvent)!;
+        const {
+          data: { conversationId: convId },
+        } = events.find(
+          (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
+            isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
+        )!;
+        return response.ok<ChatResponse>({
+          body: {
+            conversationId: convId,
+            steps: round.steps,
+            response: round.assistantResponse,
+          },
+        });
+      }
     })
   );
 }
