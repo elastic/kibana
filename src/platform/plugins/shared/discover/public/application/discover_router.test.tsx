@@ -11,12 +11,25 @@
  * This test file was converted from Enzyme to React Testing Library.
  * The tests maintain the same structure and assertions as the original Enzyme tests,
  * but use React Testing Library's approach for rendering and querying elements.
- * Note: The redirect test for /doc/:dataView/:index/:type route has been commented out
- * since testing redirects with React Testing Library requires a different approach.
+ *
+ * For testing redirects, we mock the Redirect component from react-router-dom
+ * to render an element with data attributes that we can query to verify the redirection.
  */
 
 // Import React before any other imports
 import React from 'react';
+
+// Mock react-router-dom Redirect component to capture redirects
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    Redirect: ({ to }: { to: string }) => {
+      // Store the redirect location in a data attribute for testing
+      return <div data-test-subj="redirect" data-redirect-to={to} />;
+    },
+  };
+});
 
 // Mock dependencies to avoid issues with external modules like monaco
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -70,10 +83,13 @@ describe('DiscoverRouter', () => {
   });
 
   it('should redirect from /doc/:dataView/:index/:type to /doc/:dataView/:index', () => {
-    // We can't easily test React Router redirects with React Testing Library
-    // In a real implementation, we would use a mocked history object
-    // This test is included to maintain test structure coverage
-    expect(true).toBeTruthy();
+    // Render with a path that should trigger the redirect
+    renderWithRouter('/doc/123/456/type');
+
+    // Check that a redirect component was rendered with the correct "to" prop
+    const redirectElement = screen.getByTestId('redirect');
+    expect(redirectElement).toBeInTheDocument();
+    expect(redirectElement.getAttribute('data-redirect-to')).toBe('/doc/123/456');
   });
 
   it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
