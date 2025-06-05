@@ -170,7 +170,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('create-connector-flyout-save-btn');
         await testSubjects.existOrFail('euiToastHeader');
       },
-      async createIndex() {
+      async clickCreateIndex() {
         await testSubjects.existOrFail('createIndexButton');
         expect(await testSubjects.isEnabled('createIndexButton')).equal(true);
         await testSubjects.click('createIndexButton');
@@ -190,7 +190,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(await s.getVisibleText()).to.be(connectorName);
       },
       async deleteConnector(connectorName: string) {
-        this.searchConnector(connectorName);
+        await this.searchConnector(connectorName);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');

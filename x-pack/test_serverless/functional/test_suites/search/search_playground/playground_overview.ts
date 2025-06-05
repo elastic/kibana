@@ -176,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('should be able to create index from UI', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.createIndex();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
           await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
           await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
           await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
