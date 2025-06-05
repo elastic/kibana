@@ -101,7 +101,12 @@ export const esqlExecutor = async ({
           exceptionFilter,
           ruleExecutionTimeout,
         });
-        const esqlQueryString = { drop_null_columns: true };
+        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+
+        const esqlQueryString = {
+          drop_null_columns: true,
+          allow_partial_results: !isRuleAggregating,
+        };
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -124,8 +129,6 @@ export const esqlExecutor = async ({
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
         ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
-
-        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
         const results = response.values
           // slicing already processed results in previous iterations
