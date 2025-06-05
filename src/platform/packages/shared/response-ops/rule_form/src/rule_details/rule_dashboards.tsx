@@ -131,7 +131,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
       const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 1000, text: `${searchValue}*` })
+        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
         .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
