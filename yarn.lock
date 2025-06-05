@@ -4346,6 +4346,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core-chrome-layout-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
