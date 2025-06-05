@@ -114,16 +114,40 @@ export class ManagedFlyoutService implements ManagedFlyoutApi {
   }
 
   // Main flyout navigation methods
-  public openFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
+  public openFlyout<TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ): void {
     this.initializeFlyout(entry, props);
+
+    // If a child flyout is provided, open it after initializing the main flyout
+    if (childEntry) {
+      this._childFlyoutEntry = childEntry;
+      this._childFlyoutProps = childProps;
+      this._emitFlyoutState();
+    }
   }
 
   public closeFlyout(): void {
     this.initializeFlyout(null);
   }
 
-  public nextFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
+  public nextFlyout<TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ): void {
     this.navigateToFlyout(entry, props);
+
+    // If a child flyout is provided, open it after navigating to the main flyout
+    if (childEntry) {
+      this._childFlyoutEntry = childEntry;
+      this._childFlyoutProps = childProps;
+      this._emitFlyoutState();
+    }
   }
 
   public goBack(): void {

@@ -45,8 +45,18 @@ export type OverlayFlyoutOpenOptions = Omit<
 };
 
 export interface ManagedFlyoutApi {
-  openFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
-  nextFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
+  openFlyout: <TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ) => void;
+  nextFlyout: <TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ) => void;
   openChildFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
   closeFlyout: () => void;
   isFlyoutOpen: () => boolean;

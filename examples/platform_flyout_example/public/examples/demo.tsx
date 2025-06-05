@@ -196,6 +196,10 @@ export const Demo: FC<DemoDeps> = ({ overlays }) => {
     openFlyout(complexFlyoutConfig, props);
   }, [openFlyout, props]);
 
+  const handleOpenInitialFlyoutWithChildFlyoutOpen = useCallback(() => {
+    openFlyout(step1Config, props, childFlyoutConfig, props);
+  }, [openFlyout, props]);
+
   const handleCheckFlyoutStatus = useCallback(() => {
     alert(`The flyout is currently ${isFlyoutOpen() ? 'open' : 'closed'}. (Synchronous check)`);
   }, [isFlyoutOpen]);
@@ -237,6 +241,11 @@ export const Demo: FC<DemoDeps> = ({ overlays }) => {
               label: 'Open complex flyout (no header)',
               href: '#',
               onClick: handleOpenComplexFlyout,
+            },
+            {
+              label: 'Open flyout with child flyout already open',
+              href: '#',
+              onClick: handleOpenInitialFlyoutWithChildFlyoutOpen,
             },
             {
               label: 'Close flyout',
