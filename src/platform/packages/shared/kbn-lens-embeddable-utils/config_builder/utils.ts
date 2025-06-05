@@ -29,10 +29,12 @@ import {
   LensBaseConfig,
   LensBaseLayer,
   LensBaseXYLayer,
+  LensConfig,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
+import { AnyColumnWithSourceField } from '@kbn/visualizations-plugin/common';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -276,6 +278,36 @@ export const buildDatasourceStates = async (
 
   return layers;
 };
+
+export function fromDatasourceStates(
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): (LensConfig) {
+  const formBased = datasourceStates.formBased;
+  
+  const dataset = {
+    index: '',
+    timeFieldName: undefined,
+  }
+
+  const layers: any = {};
+  if (formBased) {
+    Object.entries(formBased.layers).forEach(([layerId, layer]) => {
+      layers[layerId] = {
+        columns: layer.columns,
+        columnOrder: layer.columnOrder,
+        indexPatternId: '',
+        timeFieldName: '',
+      };
+    });
+  }
+
+  return {
+    chartType: 'xy',
+    title: '',
+    dataset,
+    layers,
+  }
+}
 
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,

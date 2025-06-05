@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DateHistogramIndexPatternColumn, FieldBasedIndexPatternColumn, FiltersIndexPatternColumn, GenericIndexPatternColumn, RangeIndexPatternColumn, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import {
   LensBreakdownConfig,
   LensBreakdownDateHistogramConfig,
@@ -16,10 +16,10 @@ import {
   LensBreakdownIntervalsConfig,
   LensBreakdownTopValuesConfig,
 } from '../types';
-import { getHistogramColumn } from './date_histogram';
-import { getTopValuesColumn } from './top_values';
-import { getIntervalsColumn } from './intervals';
-import { getFiltersColumn } from './filters';
+import { fromHistogramColumn, getHistogramColumn } from './date_histogram';
+import { fromTopValuesColumn, getTopValuesColumn } from './top_values';
+import { fromIntervalsColumn, getIntervalsColumn } from './intervals';
+import { fromFiltersColumn, getFiltersColumn } from './filters';
 
 const DEFAULT_BREAKDOWN_SIZE = 5;
 
@@ -107,4 +107,19 @@ export const getBreakdownColumn = ({
         },
       });
   }
+};
+
+export const fromBreakdownColumn = (
+  column: FieldBasedIndexPatternColumn
+): LensBreakdownConfig => {
+  if (column.operationType === 'date_histogram') {
+    return fromHistogramColumn(column as DateHistogramIndexPatternColumn);
+  } else if (column.operationType === 'top_values') {
+    return fromTopValuesColumn(column as TermsIndexPatternColumn);
+  } else if (column.operationType === 'intervals') {
+    return fromIntervalsColumn(column as RangeIndexPatternColumn);
+  } else if (column.operationType === 'filters') {
+    return fromFiltersColumn(column as unknown as FiltersIndexPatternColumn);
+  }
+  throw new Error(`Unsupported breakdown column type: ${column.operationType}`);
 };

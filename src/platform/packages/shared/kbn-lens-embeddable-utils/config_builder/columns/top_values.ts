@@ -9,6 +9,7 @@
 
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { TopValuesColumnParams } from '../../attribute_builder/utils';
+import { LensBreakdownTopValuesConfig } from '../types';
 
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
@@ -45,5 +46,16 @@ export const getTopValuesColumn = ({
       excludeIsRegex: false,
       ...params,
     },
+  };
+};
+
+export const fromTopValuesColumn = (
+  column: TermsIndexPatternColumn
+): LensBreakdownTopValuesConfig => {
+  const { params } = column;
+  return {
+    type: 'topValues',
+    field: column.sourceField,
+    size: params.size ?? DEFAULT_BREAKDOWN_SIZE,
   };
 };

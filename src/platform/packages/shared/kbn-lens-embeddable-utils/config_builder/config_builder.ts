@@ -20,7 +20,9 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
+  reverseBuildMetric
 } from './charts';
+import { FatalErrorsService } from '@kbn/core/packages/fatal-errors/browser-internal';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -38,6 +40,11 @@ export class LensConfigBuilder {
     xy: buildXY,
     table: buildTable,
   };
+
+  private reverseCharts = {
+    metric: reverseBuildMetric,
+  };
+
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
 
@@ -77,4 +84,25 @@ export class LensConfigBuilder {
 
     return chartState as LensAttributes;
   }
+
+  async reverseBuild(
+    attributes: LensAttributes): Promise<{ config: LensConfig; options: LensConfigOptions }> {
+    const chartType = attributes.visualizationType;
+    const chartBuilder = this.reverseCharts[chartType as 'metric'];
+
+    // todo: handle options.embeddable
+
+    const config: LensConfig = await chartBuilder(attributes);
+    const options: LensConfigOptions = {
+      filters: attributes.state?.filters || [],
+      query: attributes.state?.query || { language: 'kuery', query: '' },
+      embeddable: false,
+    };
+    return {
+      config,
+      options,
+    };
+  }
+
 }
+

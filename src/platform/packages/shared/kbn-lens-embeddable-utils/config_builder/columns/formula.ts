@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { FormulaIndexPatternColumn, FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FormulaValueConfig } from '../types';
 
@@ -31,4 +31,22 @@ export function getFormulaColumn(
   }
 
   return formulaLayer;
+}
+
+export function fromFormulaColumn(
+  layer: PersistedIndexPatternLayer,
+  columnId: string
+): FormulaValueConfig {
+  const column = layer.columns[columnId] as FormulaIndexPatternColumn;
+  if (!column || column.operationType !== 'formula') {
+    throw new Error(`Column with id ${columnId} is not a formula column`);
+  }
+
+  const { label, params } = column;
+
+  return {
+    label,
+    format: params?.format,
+    formula: params?.formula || '',
+  };
 }

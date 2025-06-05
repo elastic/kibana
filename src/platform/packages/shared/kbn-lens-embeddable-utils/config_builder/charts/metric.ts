@@ -20,6 +20,7 @@ import {
   addLayerFormulaColumns,
   buildDatasourceStates,
   buildReferences,
+  fromDatasourceStates,
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
@@ -92,6 +93,53 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
             : {}),
         }
       : {}),
+  };
+}
+
+function reverseBuildVisualizationState(
+  visualization: MetricVisualizationState
+): LensMetricConfig {
+
+  if (visualization.metricAccessor === undefined) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
+
+  // parse all accessors into apropriate configs (dataset + query)
+  const accessorName = visualization.metricAccessor;
+  const breakdownAccessor = visualization.breakdownByAccessor;
+  const secondaryAccessor = visualization.secondaryMetricAccessor;
+  const maxAccessor = visualization.maxAccessor;
+
+  const dataset = {
+    index: visualization.layerId,
+    timeFieldName: visualization.trendlineTimeAccessor,
+  } as LensMetricConfig['dataset'];
+
+  const breakdown = buildBreakdownConfig();
+  const querySecondaryMetric = buildQuery();
+  const queryMaxValue = buildQuery();
+  const query = buildQuery();
+
+  return {
+    chartType: 'metric',    
+    title: '',
+    label: '',
+    value: '',
+    dataset,
+    seriesColor: visualization.color,
+    subtitle: visualization.subtitle,
+    breakdown,
+    querySecondaryMetric,
+    queryMaxValue,
+    compactValues: true,
+    decimals: 2,
+    normalizeByUnit: 's',
+    randomSampling: 1,
+    useGlobalFilter: true,
+    format: 'number',
+    filter: '',
+    trendLine: Boolean(visualization.trendlineLayerId),
+
   };
 }
 
@@ -189,6 +237,41 @@ function buildFormulaLayer(
   return layers;
 }
 
+function reverseBuildFormulaLayer(
+  layer: FormBasedPersistedState['layers'][typeof DEFAULT_LAYER_ID],
+  dataView: DataView
+): LensMetricConfig {
+  const formulaColumn = layer.columns[ACCESSOR];
+  if (!formulaColumn || formulaColumn.operationType !== 'formula') {
+    throw new Error('Metric formula column is missing or invalid');
+  }
+  const visualization = reverseBuildVisualizationState(
+    layer.visualization as MetricVisualizationState
+  );
+  const breakdownColumn = layer.columns[visualization.breakdownByAccessor!];
+  const secondaryColumn = layer.columns[visualization.secondaryMetricAccessor!];
+  const maxColumn = layer.columns[visualization.maxAccessor!];  
+  return {
+    chartType: 'metric',
+    title: layer.title || '',
+    value: formulaColumn.params.formula,
+    seriesColor: visualization.color,
+    subtitle: visualization.subtitle,
+    breakdown:
+      breakdownColumn && typeof breakdownColumn.sourceField === 'string'
+        ? breakdownColumn.sourceField
+        : undefined,
+    querySecondaryMetric:
+      secondaryColumn && typeof secondaryColumn.formula === 'string'
+        ? secondaryColumn.formula
+        : undefined,
+    queryMaxValue:
+      maxColumn && typeof maxColumn.formula === 'string' ? maxColumn.formula : undefined,
+    trendLine: Boolean(layer.linkToLayers?.includes(TRENDLINE_LAYER_ID)),
+  };
+}
+
+
 function getValueColumns(layer: LensMetricConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
@@ -235,4 +318,29 @@ export async function buildMetric(
       adHocDataViews: getAdhocDataviews(dataviews),
     },
   };
+}
+
+export async function reverseBuildMetric(
+  attributes: LensAttributes
+): Promise<LensMetricConfig> {
+  const { state } = attributes;
+  const visualization = state.visualization as MetricVisualizationState;
+  const layers = Object.values(datasourceStates)[0].layers;
+
+  const layer = layers[DEFAULT_LAYER_ID] as FormBasedPersistedState['layers'][typeof DEFAULT_LAYER_ID];
+  const formulaColumn = layer.columns[ACCESSOR];
+
+  if (!formulaColumn) {
+    throw new Error('Metric formula column is missing');
+  }
+
+  
+  const visualizationState = reverseBuildVisualizationState(visualization);
+  const dataViews = parseReferences(attributes.references, state.adHocDataViews);
+  const datasourceStates = fromDatasourceStates(state.datasourceStates);
+
+  return {
+    ...visualizationState,
+    ...datasourceStates,
+  }
 }
