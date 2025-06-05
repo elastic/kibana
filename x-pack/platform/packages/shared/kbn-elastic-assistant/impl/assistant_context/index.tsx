@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ApplicationStart, ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
@@ -61,16 +61,7 @@ type ShowAssistantOverlay = ({
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
 
-type GetUrlForApp = (
-  appId: string,
-  options?:
-    | {
-        path?: string | undefined;
-        absolute?: boolean | undefined;
-        deepLinkId?: string | undefined;
-      }
-    | undefined
-) => string;
+type GetUrlForApp = ApplicationStart['getUrlForApp'];
 
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -90,7 +81,7 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
