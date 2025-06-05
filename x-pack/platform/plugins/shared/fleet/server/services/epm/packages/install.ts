@@ -1136,6 +1136,36 @@ export async function restartInstallation(options: {
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
+  if (appContextService.getExperimentalFeatures().enablePackageRollback) {
+    const currentInstallation = await savedObjectsClient.get<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName
+    );
+    const previousVersionSO = {
+      ...currentInstallation,
+      id: `${pkgName}:prev`,
+    };
+    try {
+      await savedObjectsClient.update<Installation>(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        `${pkgName}:prev`,
+        previousVersionSO.attributes
+      );
+    } catch (e) {
+      if (e.output.statusCode === 404) {
+        await savedObjectsClient.create<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          previousVersionSO.attributes,
+          {
+            id: `${pkgName}:prev`,
+          }
+        );
+      } else {
+        throw e;
+      }
+    }
+  }
+
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
 
