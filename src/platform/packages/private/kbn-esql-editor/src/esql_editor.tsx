@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -126,6 +127,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiActions,
     data,
   } = kibana.services;
+
+  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -513,15 +516,25 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+      getEditorExtensions: async (queryString: string) => {
+        if (activeSolutionId) {
+          return (
+            (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+              queryString,
+              activeSolutionId
+            )) ?? []
+          );
+        }
+        return [];
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
-    license,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
-    kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+    kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
+    license,
     memoizedSources,
     dataViews,
     core,
@@ -530,10 +543,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     memoizedFieldsFromESQL,
     expressions,
     abortController,
-    indexManagementApiService,
-    histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    indexManagementApiService,
+    histogramBarTarget,
+    activeSolutionId,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -704,7 +718,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       hover: {
         above: false,
       },
-      accessibilitySupport: 'off',
+      accessibilitySupport: 'auto',
       autoIndent: 'keep',
       automaticLayout: true,
       fixedOverflowWidgets: true,
