@@ -87,7 +87,12 @@ export class RedirectManager {
           const { hashUrl } = await import('@kbn/kibana-utils-plugin/public');
           redirectUrl = hashUrl(redirectUrl);
         }
+
         const url = core.http.basePath.prepend(redirectUrl);
+        if (!core.http.externalUrl.isInternalUrl(url)) {
+          throw new Error(`Can not redirect to external URL: ${url}`);
+        }
+
         location.href = url;
         return () => {};
       },
