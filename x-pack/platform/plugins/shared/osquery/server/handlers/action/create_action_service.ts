@@ -13,7 +13,7 @@ import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';
 
-interface CreateActionOptions {
+export interface CreateActionOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
   space?: { id: string };
 }
