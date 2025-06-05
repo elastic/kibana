@@ -15,6 +15,7 @@ groups:
       The APM app uses data views to query APM indices. To change the default APM indices that the APM app queries, open the APM app and select **Settings** > **Indices**. Index settings in the APM app take precedence over those set in `kibana.yml`.
 
       APM indices are {{kib}} space-aware; changes to APM index settings will only apply to the currently enabled space.
+    # example: |
 
   - group: General APM settings
     id: general-apm-settings-kb
@@ -22,6 +23,7 @@ groups:
       If you'd like to change any of the default values, copy and paste the relevant settings into your `kibana.yml` configuration file. Changing these settings may disable features of the APM App.
 
     tip: More settings are available in the [Observability advanced settings](/reference/advanced-settings.md#observability-advanced-settings).
+    # example: |
     settings:
 
       - setting: xpack.apm.maxSuggestions
@@ -512,6 +514,7 @@ groups:
     id: logging-settings
     description: |
       The following APM logging (legacy) settings are a subset of the valid settings.
+    # example: |
     settings:
 
       - setting: logging.level
