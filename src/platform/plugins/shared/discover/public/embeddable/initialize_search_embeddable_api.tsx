@@ -170,6 +170,10 @@ export const initializeSearchEmbeddableApi = async (
     searchSource$.next(searchSource);
   };
 
+  const setColumns = (columns: string[] | undefined) => {
+    stateManager.columns.next(columns);
+  };
+
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
@@ -197,6 +201,7 @@ export const initializeSearchEmbeddableApi = async (
       query$,
       setQuery,
       canEditUnifiedSearch,
+      setColumns,
     },
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),

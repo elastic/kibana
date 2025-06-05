@@ -117,6 +117,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
+  setColumns: (columns: string[] | undefined) => void;
 }
 
 export const apiPublishesSavedSearch = (

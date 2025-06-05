@@ -36,6 +36,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     filters,
     index,
     timestampField,
+    columns,
     height,
   } = props;
 
@@ -74,6 +75,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
             rawState: {
               attributes: { ...attributes, references },
               timeRange,
+              columns,
               nonPersistedDisplayOptions: {
                 solutionNavIdOverride,
                 enableDocumentViewer: documentViewerEnabled,
@@ -94,6 +96,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
       abortController.abort();
     };
   }, [
+    columns,
     dataViews,
     documentViewerEnabled,
     filters,
@@ -137,6 +140,7 @@ const SavedSearchComponentTable: React.FC<
     timeRange,
     timestampField,
     index,
+    columns,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
 
@@ -196,6 +200,14 @@ const SavedSearchComponentTable: React.FC<
       embeddableApi.current.setTimeRange(timeRange);
     },
     [timeRange]
+  );
+
+  useEffect(
+    function syncColumns() {
+      if (!embeddableApi.current) return;
+      embeddableApi.current.setColumns(columns);
+    },
+    [columns]
   );
 
   return (
