@@ -56,23 +56,41 @@ export const bulkFillGapsByRuleIds = async (
   const eventLogClient = await context.getEventLogClient();
   const maxBackfillConcurrency =
     options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY;
-  await pMap(
-    rules,
-    async (rule) => {
-      const { id, name, alertTypeId, consumer } = rule;
-      try {
-        // Make sure user has access to this rule
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: alertTypeId,
-          consumer,
-          operation: WriteOperations.FillGaps,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        logProcessedAsAuditEvent(context, { id, name }, error);
+
+  // Make sure user has access to these rules
+  const alertTypes = mapValues(
+    groupBy(rules, (rule) => `${rule.alertTypeId}<>${rule.consumer}`),
+    (groupedRules) => ({
+      alertTypeId: groupedRules[0].alertTypeId,
+      consumer: groupedRules[0].consumer,
+      rules: groupedRules,
+    })
+  );
+
+  const authorizedRules: typeof rules = [];
+  for (const { alertTypeId, consumer, rules: rulesBatch } of Object.values(alertTypes)) {
+    try {
+      await context.authorization.ensureAuthorized({
+        ruleTypeId: alertTypeId,
+        consumer,
+        operation: WriteOperations.FillGaps,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      authorizedRules.push(...rulesBatch);
+    } catch (error) {
+      rulesBatch.forEach((rule) => {
+        logProcessedAsAuditEvent(context, { id: rule.id, name: rule.name }, error);
         errored.push(toBulkGapFillError(rule, 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION', error));
         return;
-      }
+      });
+    }
+  }
+
+  await pMap(
+    authorizedRules,
+    async (rule) => {
+      const { id, name } = rule;
 
       let payload: ScheduleBackfillParams[0];
       let gaps: Gap[];
