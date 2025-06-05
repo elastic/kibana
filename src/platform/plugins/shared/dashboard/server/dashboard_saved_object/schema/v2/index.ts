@@ -10,7 +10,6 @@
 export type {
   DashboardAttributes,
   SavedDashboardPanel,
-  SavedDashboardSection,
   DashboardSavedObjectCrudTypes,
   DashboardSavedObjectControlGroupInput,
 } from './types';

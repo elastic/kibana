@@ -14,15 +14,23 @@ import {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import {
-  controlGroupInputSchema,
-  dashboardAttributesSchema,
-  gridDataSchema,
-  sectionSchema,
-} from './v2';
+import { controlGroupInputSchema, dashboardAttributesSchema, gridDataSchema } from './v2';
 import { DashboardSavedObjectContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+
+export type DashboardSavedObjectControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
+
+export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
+  DashboardSavedObjectContentType,
+  DashboardAttributes,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
+  Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;
 
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
@@ -43,21 +51,3 @@ export interface SavedDashboardPanel {
    */
   version?: string;
 }
-
-/**
- * A saved dashboard section parsed directly from the Dashboard Attributes
- */
-export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
-
-export type DashboardSavedObjectControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
-
-export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
-  DashboardSavedObjectContentType,
-  DashboardAttributes,
-  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
-  Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
-  {
-    /** Flag to indicate to only search the text on the "title" field */
-    onlyTitle?: boolean;
-  }
->;

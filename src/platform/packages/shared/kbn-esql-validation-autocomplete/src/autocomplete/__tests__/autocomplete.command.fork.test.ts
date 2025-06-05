@@ -121,8 +121,6 @@ describe('autocomplete.suggest', () => {
                   [...AVG_TYPES, 'unsigned_long'],
                   {
                     scalar: true,
-                    // grouping functions are a bug: https://github.com/elastic/kibana/issues/218319
-                    grouping: true,
                   },
                   undefined,
                   ['acos']
