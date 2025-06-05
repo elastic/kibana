@@ -159,9 +159,9 @@ export const SpanFlyout = ({
                   index={documentAsHit.raw._index}
                   dataView={dataView}
                   esqlHit={documentAsHit}
-                  onRefresh={function (): void {
-                    throw new Error('onRefresh: Function not implemented.');
-                  }}
+                  onRefresh={() => {}}
+                  /* We're already passing the document in this case, so this refresh won't have a chance to run.
+                  It's handled the same way in src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx */
                 />
               )}
             </EuiSkeletonText>
