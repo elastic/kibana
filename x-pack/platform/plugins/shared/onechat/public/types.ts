@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core/public';
-
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
 export interface OnechatSetupDependencies {}
 
-export interface OnechatStartDependencies {
-  history: AppMountParameters['history'];
-}
+export interface OnechatStartDependencies {}
 
 export interface OnechatPluginSetup {}
 
