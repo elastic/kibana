@@ -56,8 +56,11 @@ export class RelatedDashboardsClient {
       this.fetchSuggestedDashboards(),
       this.getLinkedDashboards(),
     ]);
+    const filteredSuggestedDashboards = suggestedDashboards.filter(
+      (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
+    );
     return {
-      suggestedDashboards,
+      suggestedDashboards: filteredSuggestedDashboards,
       linkedDashboards,
     };
   }
@@ -75,7 +78,7 @@ export class RelatedDashboardsClient {
       const { dashboards } = this.getDashboardsByIndex(index);
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
-    if (allRelevantFields.size > 0) {
+    if (allRelevantFields.length > 0) {
       const { dashboards } = this.getDashboardsByField(Array.from(allRelevantFields));
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
@@ -99,7 +102,7 @@ export class RelatedDashboardsClient {
     const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
       return b.score - a.score;
     });
-    return { suggestedDashboards: sortedDashboards.slice(0, 10) };
+    return sortedDashboards.slice(0, 10);
   }
 
   async fetchDashboards({
@@ -271,7 +274,7 @@ export class RelatedDashboardsClient {
 
   getRuleQueryIndex(): string | null {
     if (!this.alert) {
-      throw new Error('Alert not found. Could not get the rule query index.');
+      throw new Error('Alert not found. Could not get rule query index.');
     }
     const index = this.alert.getRuleQueryIndex();
     return index;
@@ -310,7 +313,7 @@ export class RelatedDashboardsClient {
     }
     const ruleId = this.alert.getRuleId();
     if (!ruleId) {
-      this.logger.warn(`Rule with id ${ruleId} not found. No linked dashboards available.`);
+      this.logger.warn(`Rule id not found. No linked dashboards available.`);
       return [];
     }
     const rule = await this.alertsClient.getRuleById(ruleId);
@@ -327,7 +330,9 @@ export class RelatedDashboardsClient {
 
   async getLinkedDashboardsByIds(ids: string[]): Promise<RelatedDashboard[]> {
     const dashboardsResponse = await Promise.all(ids.map((id) => this.dashboardClient.get(id)));
-    const linkedDashboards: Dashboard[] = dashboardsResponse.map((d) => d.result.item);
+    const linkedDashboards: Dashboard[] = dashboardsResponse.map((d) => {
+      return d.result.item;
+    });
     return linkedDashboards.map((d) => ({
       id: d.id,
       title: d.attributes.title,
