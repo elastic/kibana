@@ -22,6 +22,12 @@ import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const processors = [
   {
+    fail: {
+      if: "ctx['log.level'] == null",
+      message: 'Log level is required',
+    },
+  },
+  {
     script: {
       tag: 'normalize log level',
       lang: 'painless',
@@ -81,7 +87,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     teardown: async ({ logsEsClient }) => {
       await logsEsClient.deleteIndexTemplate(IndexTemplateName.SomeFailureStore);
       await logsEsClient.deleteComponentTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
-      await logsEsClient.deleteCustomPipeline(`${IndexTemplateName.SomeFailureStore}@pipeline`);
       if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {
@@ -170,12 +175,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .create({ isLogsDb })
           .dataset('synth.3')
           .message(message)
-          .logLevel(level)
+          .logLevel(isFailed ? null : level) // "fail_processor_exception": Log level is required
           .service(serviceName)
           .defaults({
             ...commonLongEntryFields,
             'cloud.availability_zone': `${cloudRegion}a`,
-            'foo.bar': i !== 0 && isFailed ? { baz: 123 } : 'baz', // document_parsing_exception
           })
           .timestamp(timestamp);
       };
