@@ -12,7 +12,7 @@ import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { AIConnector } from './types';
 import * as i18n from './translations';
-import { getConnectorDescription } from '../../../../../../common/utils/get_connector_description';
+import { getConnectorDescription } from '../../../../../../common/utils/connectors/get_connector_description';
 
 interface ConnectorSelectorPanelProps {
   connectors: AIConnector[];

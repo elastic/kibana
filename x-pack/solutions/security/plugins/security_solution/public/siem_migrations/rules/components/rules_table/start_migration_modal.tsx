@@ -28,7 +28,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { getConnectorDescription } from '../../../../common/utils/get_connector_description';
+import { getConnectorDescription } from '../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import * as i18n from './translations';
