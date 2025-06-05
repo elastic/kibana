@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import React, { memo } from 'react';
-<<<<<<<< HEAD:x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/attack_discovery/attack_discovery_details.tsx
-import { MiniAttackChain } from './mini_attack_chain';
-import * as i18n from './translations';
-========
 import { MiniAttackChain } from '../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/summary_actions/mini_attack_chain';
->>>>>>>> 8d7178638c76 ([AI4DSOC] Alert flyout code cleanup (#219810)):x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components/attack_discovery_details.tsx
 
 export const ATTACK_DISCOVERY_DETAILS_CONTAINER_TEST_ID =
   'ai-for-soc-alert-flyout-attack-discovery-details-container';

@@ -15,19 +15,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { ConnectorMissingCallout } from './connector_missing_callout';
-<<<<<<<< HEAD:x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/alert_summary/index.tsx
-import { useAlertSummary } from './use_alert_summary';
-import type { PromptContext } from '../../..';
-import { MessageText } from '../message_text';
-import * as i18n from '../translations';
-========
 import { useAlertSummary } from '../hooks/use_alert_summary';
 import { MessageText } from './message_text';
->>>>>>>> 8d7178638c76 ([AI4DSOC] Alert flyout code cleanup (#219810)):x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components/alert_summary.tsx
 
 export const ALERT_SUMMARY_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary';
 export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'ai-for-soc-alert-flyout-generate-insights-button';

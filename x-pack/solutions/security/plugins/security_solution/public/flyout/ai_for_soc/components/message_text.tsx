@@ -17,13 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-<<<<<<<< HEAD:x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/message_text/index.tsx
-import { customCodeBlockLanguagePlugin } from './custom_codeblock_markdown_plugin';
-import { CustomCodeBlock } from './custom_code_block';
-========
 import { CustomCodeBlock } from '../../../assistant/get_comments/custom_codeblock/custom_code_block';
 import { customCodeBlockLanguagePlugin } from '../../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
->>>>>>>> 8d7178638c76 ([AI4DSOC] Alert flyout code cleanup (#219810)):x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components/message_text.tsx
 
 export const MESSAGE_TEXT_TEST_ID = 'ai-for-soc-alert-flyout-message-text';
 

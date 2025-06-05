@@ -7,13 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-<<<<<<<< HEAD:x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/alert_summary/index.test.tsx
-import { AlertSummary } from '.';
-import type { PromptContext } from '../../..';
-import { useAlertSummary } from './use_alert_summary';
-
-jest.mock('./use_alert_summary');
-========
 import {
   ALERT_SUMMARY_TEST_ID,
   AlertSummary,
@@ -26,7 +19,6 @@ import { MESSAGE_TEXT_TEST_ID } from './message_text';
 
 jest.mock('../hooks/use_alert_summary');
 
->>>>>>>> 8d7178638c76 ([AI4DSOC] Alert flyout code cleanup (#219810)):x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components/alert_summary.test.tsx
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
