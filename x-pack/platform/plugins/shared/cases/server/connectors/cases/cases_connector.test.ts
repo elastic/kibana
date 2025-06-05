@@ -35,6 +35,7 @@ describe('CasesConnector', () => {
     id: 'rule-test-id',
     name: 'Test rule',
     tags: ['rule', 'test'],
+    type: 'test-rule-1',
     ruleUrl: 'https://example.com/rules/rule-test-id',
   };
 
