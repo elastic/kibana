@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ManagedFlyoutEntry, OverlayStart } from '@kbn/core-overlays-browser';
+import { dataListCss } from './styles';
 
 interface DemoDeps {
   overlays: OverlayStart;
@@ -31,8 +32,27 @@ interface FlyoutProps {
   isPushMode: boolean;
 }
 
-const DataList: FC<{ username: string }> = ({ username }) => {
-  return <p>{username ? `Hello ${username}` : 'Hello world'}</p>;
+const DemoContext = React.createContext<FlyoutProps | undefined>(undefined);
+
+const useDemoContext = () => {
+  const context = React.useContext(DemoContext);
+  if (context === undefined) {
+    throw new Error('useDemoContext must be used within a DemoContextProvider');
+  }
+  return context;
+};
+
+const DataList: FC = () => {
+  const { username, isPushMode } = useDemoContext();
+  return (
+    <>
+      <p>Provided data:</p>
+      <ul css={dataListCss}>
+        <li>Username: {username}</li>
+        <li>Overlay type: {isPushMode ? 'push' : 'overlay'}</li>
+      </ul>
+    </>
+  );
 };
 
 type DemoFlyoutEntry = ManagedFlyoutEntry<FlyoutProps>;
@@ -40,11 +60,13 @@ type DemoFlyoutEntry = ManagedFlyoutEntry<FlyoutProps>;
 const childFlyoutConfig: DemoFlyoutEntry = {
   renderBody: (_api, props) => {
     return (
-      <EuiText>
-        <h4>Child Flyout Content!</h4>
-        <p>This panel is aligned to the left of the main flyout.</p>
-        <DataList username={props.username} />
-      </EuiText>
+      <DemoContext.Provider value={props}>
+        <EuiText>
+          <h4>Child Flyout Content!</h4>
+          <p>This panel is aligned to the left of the main flyout.</p>
+          <DataList />
+        </EuiText>
+      </DemoContext.Provider>
     );
   },
 };
@@ -59,27 +81,30 @@ const step1Config: DemoFlyoutEntry = {
       <h2>Step 1: The initial flyout</h2>
     </EuiTitle>
   ),
-  renderBody: ({ nextFlyout }, renderProps) => {
+  renderBody: ({ nextFlyout }, props) => {
     const handleGoToStep2 = () => {
-      nextFlyout(step2Config, renderProps);
+      nextFlyout(step2Config, props);
     };
 
     return (
-      <EuiText>
-        <p>This is the first step in the flyout sequence.</p>
-        <DataList username={renderProps.username} />
-        <p>
-          <EuiButton onClick={handleGoToStep2}>Go to Step 2</EuiButton>
-        </p>
-      </EuiText>
+      <DemoContext.Provider value={props}>
+        <EuiText>
+          <p>This is the first step in the flyout sequence.</p>
+          <DataList />
+
+          <p>
+            <EuiButton onClick={handleGoToStep2}>Go to Step 2</EuiButton>
+          </p>
+        </EuiText>
+      </DemoContext.Provider>
     );
   },
-  footerActions: ({ openChildFlyout }, renderProps) => ({
+  footerActions: ({ openChildFlyout }, props) => ({
     openChildFlyout: (
       <EuiButton
         key="openChildFlyout"
         onClick={() => {
-          openChildFlyout(childFlyoutConfig, renderProps);
+          openChildFlyout(childFlyoutConfig, props);
         }}
         color="primary"
       >
@@ -99,15 +124,17 @@ const step2Config: DemoFlyoutEntry = {
       <h2>Step 2: The second flyout</h2>
     </EuiTitle>
   ),
-  renderBody: (_, { username }) => {
+  renderBody: (_, props) => {
     return (
-      <EuiText>
-        <p>This is the second step in the flyout sequence.</p>
-        <DataList username={username} />
-      </EuiText>
+      <DemoContext.Provider value={props}>
+        <EuiText>
+          <p>This is the second step in the flyout sequence.</p>
+          <DataList />
+        </EuiText>
+      </DemoContext.Provider>
     );
   },
-  footerActions: ({ goBack, openChildFlyout }, renderProps) => ({
+  footerActions: ({ goBack, openChildFlyout }, props) => ({
     goBack: (
       <EuiButton
         key="goBack"
@@ -123,7 +150,7 @@ const step2Config: DemoFlyoutEntry = {
       <EuiButton
         key="openChildFlyout"
         onClick={() => {
-          openChildFlyout(childFlyoutConfig, renderProps);
+          openChildFlyout(childFlyoutConfig, props);
         }}
         color="primary"
       >
@@ -138,18 +165,18 @@ const complexFlyoutConfig: DemoFlyoutEntry = {
     type: isPushMode ? 'push' : 'overlay',
     size: 800,
   }),
-  renderBody: ({ openChildFlyout }, renderProps) => {
+  renderBody: ({ openChildFlyout }, props) => {
     const ComplexComponent: FC = () => {
       const [localState, setLocalState] = useState<string | null>(null);
 
       const handleClickOpenChildFlyout = useCallback(() => {
-        openChildFlyout(childFlyoutConfig, renderProps);
+        openChildFlyout(childFlyoutConfig, props);
       }, []);
 
       return (
-        <>
-          <EuiPanel>
-            <EuiText>
+        <DemoContext.Provider value={props}>
+          <EuiText>
+            <EuiPanel>
               <p>This flyout manages its own local state.</p>
               <EuiFormRow label="Local state example">
                 <EuiFieldText
@@ -159,20 +186,19 @@ const complexFlyoutConfig: DemoFlyoutEntry = {
                 />
               </EuiFormRow>
               <p>You typed: {localState ?? 'nothing'}</p>
-            </EuiText>
-          </EuiPanel>
+            </EuiPanel>
 
-          <EuiSpacer />
+            <EuiSpacer />
 
-          <EuiText>
-            <DataList username={renderProps.username} />
+            <DataList />
+
             <p>
               <a href="#" onClick={handleClickOpenChildFlyout}>
                 Would you like to open a child flyout?
               </a>
             </p>
           </EuiText>
-        </>
+        </DemoContext.Provider>
       );
     };
 
