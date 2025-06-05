@@ -35,5 +35,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test-subj-selector",
     "@kbn/std",
+    "@kbn/fleet-plugin",
   ]
 }
