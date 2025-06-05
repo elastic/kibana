@@ -40,7 +40,7 @@ import type {
   MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
-  MicrosoftDefenderEndpointMachineActionResult,
+  MicrosoftDefenderEndpointGetActionResultsResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -449,10 +449,10 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async getActionResults(
     { id }: MicrosoftDefenderEndpointGetActionsParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderEndpointMachineActionResult> {
+  ): Promise<MicrosoftDefenderEndpointGetActionResultsResponse> {
     // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
 
-    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineActionResult>(
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
       {
         url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
         method: 'GET',
