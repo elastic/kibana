@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
    * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
-  describe('@ess @serverless @serverlessQA timestamp tests', () => {
+  describe.only('@ess @serverless @serverlessQA timestamp tests', () => {
     describe('alerts generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL', () => {
-        it.only('should generate 2 alerts with @timestamp', async () => {
+        it('should generate 2 alerts with @timestamp', async () => {
           const rule: EqlRuleCreateProps = getEqlRuleForAlertTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
