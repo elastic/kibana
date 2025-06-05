@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EDOT_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
 import { loggingLevelRt } from '../runtime_types/logging_level_rt';
@@ -66,7 +67,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       { text: 'fatal', value: 'fatal' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: [...EDOT_AGENT_NAMES],
   },
   {
     key: 'send_traces',
