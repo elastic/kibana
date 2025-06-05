@@ -8,6 +8,7 @@
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import { createCompletionCommand } from './factories/completion';
 import {
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -32,11 +33,13 @@ import {
   type TimeSeriesCommandContext,
   type WhereCommandContext,
   RerankCommandContext,
+  CompletionCommandContext,
   RrfCommandContext,
+  SampleCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import type { ESQLAst } from '../types';
-import { createCommand, createFunction, textExistsAndIsValid } from './factories';
+import { createCommand, createFunction, createLiteral, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createEvalCommand } from './factories/eval';
@@ -350,6 +353,32 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const command = createRerankCommand(ctx);
 
     this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.completionCommand`.
+   *
+   * Parse the COMPLETION command:
+   *
+   * COMPLETION <prompt> WITH <inferenceId> [ AS <targetField> ]
+   *
+   * @param ctx the parse tree
+   */
+  exitCompletionCommand(ctx: CompletionCommandContext): void {
+    const command = createCompletionCommand(ctx);
+    this.ast.push(command);
+  }
+
+  exitSampleCommand(ctx: SampleCommandContext): void {
+    const command = createCommand('sample', ctx);
+    this.ast.push(command);
+
+    if (ctx._probability) {
+      command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
+    }
+    if (ctx._seed) {
+      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
+    }
   }
 
   /**
