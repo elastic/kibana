@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
-import type { EuiAccordionProps } from '@elastic/eui';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { useTraceWaterfall } from './use_trace_waterfall';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { useTraceWaterfall } from './use_trace_waterfall';
 
 interface TraceWaterfallContextProps {
   duration: number;
@@ -20,8 +19,6 @@ interface TraceWaterfallContextProps {
   rootItem?: TraceItem;
   margin: { left: number; right: number };
   traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
-  accordionStatesMap: Record<string, EuiAccordionProps['forceState']>;
-  toggleAccordionState: (id: string) => void;
   showAccordion: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
@@ -35,8 +32,6 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   rootItem: undefined,
   margin: { left: 0, right: 0 },
   traceWaterfallMap: {},
-  accordionStatesMap: {},
-  toggleAccordionState: () => {},
   showAccordion: true,
 });
 
@@ -67,20 +62,6 @@ export function TraceWaterfallContextProvider({
 
   const traceWaterfallMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
 
-  const [accordionStatesMap, setAccordionStateMap] = useState(
-    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = 'open';
-      return acc;
-    }, {})
-  );
-
-  function toggleAccordionState(id: string) {
-    setAccordionStateMap((prevStates) => ({
-      ...prevStates,
-      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
-    }));
-  }
-
   return (
     <TraceWaterfallContext.Provider
       value={{
@@ -89,8 +70,6 @@ export function TraceWaterfallContextProvider({
         traceWaterfall,
         margin: { left, right },
         traceWaterfallMap,
-        accordionStatesMap,
-        toggleAccordionState,
         showAccordion,
         onClick,
         onErrorClick,

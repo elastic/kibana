@@ -15,6 +15,9 @@ jest.mock('../../../../common/utils/formatters', () => ({
 }));
 
 describe('BarDetails', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   const mockItem = {
     name: 'Test Span',
     duration: 1234,

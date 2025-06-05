@@ -118,5 +118,4 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
   );
 }
 
-// TODO check this
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

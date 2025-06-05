@@ -22,6 +22,9 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 describe('getFlattenedTraceWaterfall', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   const root: TraceItem = {
     id: '1',
     timestamp: '2024-01-01T00:00:00.000Z',
@@ -126,6 +129,9 @@ describe('getFlattenedTraceWaterfall', () => {
 });
 
 describe('getServiceColors', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   it('assigns a unique color to each serviceName', () => {
     const traceItems: TraceItem[] = [
       { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
@@ -180,6 +186,9 @@ describe('getServiceColors', () => {
 });
 
 describe('getTraceMap', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
       { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
@@ -251,6 +260,9 @@ describe('getTraceMap', () => {
 });
 
 describe('getTraceWaterfallDuration', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   it('returns the max sum of offset + skew + duration', () => {
     const items: TraceWaterfallItem[] = [
       {
@@ -299,6 +311,9 @@ describe('getTraceWaterfallDuration', () => {
 });
 
 describe('getclockSkew', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   const parent = {
     timestamp: '2024-01-01T00:00:00.000Z',
     duration: 1000,
