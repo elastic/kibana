@@ -221,7 +221,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                         onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
                         iconType={isActive ? 'bellSlash' : 'calendar'}
                         iconSide="left"
-                        css={{
+                        style={{
                           paddingLeft: '9px',
                           paddingRight: '9px',
                           color: isActive
@@ -464,7 +464,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           title={i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
             defaultMessage: 'Cancel snooze',
           })}
-          css={{ maxWidth: '420px' }}
+          style={{ maxWidth: '420px' }}
           onCancel={() => setIsCancelModalVisible(false)}
           onConfirm={onCancelSnooze}
           cancelButtonText={i18n.translate(

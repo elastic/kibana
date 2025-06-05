@@ -88,7 +88,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
               <EuiIcon type="arrowLeft" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink color="text" css={{ fontWeight: 'bold' }} onClick={onClose}>
+              <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>
                 {title}
               </EuiLink>
             </EuiFlexItem>
@@ -331,7 +331,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} css={{ width: '400px' }}>
+          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} style={{ width: '400px' }}>
             <EuiSplitPanel.Inner paddingSize="s">
               <EuiDatePicker
                 inline
@@ -349,7 +349,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             <EuiSplitPanel.Inner paddingSize="m">
               <EuiFormRow
                 display="columnCompressed"
-                css={{ alignItems: 'center' }}
+                style={{ alignItems: 'center' }}
                 fullWidth
                 label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel', {
                   defaultMessage: 'Timezone',
@@ -406,7 +406,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           {!inPopover && <EuiSpacer size="s" />}
           <EuiPopoverFooter
             paddingSize="m"
-            css={
+            style={
               /* FIXME https://github.com/elastic/eui/issues/6695 */
               {
                 marginBlock: '16px -16px',
