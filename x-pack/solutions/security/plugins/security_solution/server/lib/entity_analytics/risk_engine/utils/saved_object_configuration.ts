@@ -122,6 +122,7 @@ export const getAllConfigurations = async ({
 }: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskEngineConfiguration>>> => {
   const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
+    namespaces: ['*'],
   });
 
   return savedObjectsResponse.saved_objects;
