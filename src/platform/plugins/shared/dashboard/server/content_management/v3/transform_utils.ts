@@ -161,9 +161,7 @@ export const itemToSavedObject = ({
       ...(options && {
         optionsJSON: JSON.stringify(options),
       }),
-      ...(panels && {
-        panelsJSON,
-      }),
+      panelsJSON,
       ...(sections?.length && { sections }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),

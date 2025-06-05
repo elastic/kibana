@@ -18,6 +18,8 @@ jest.mock('uuid', () => {
 
 const embeddableStartMock = createEmbeddableStartMock();
 
+const embeddableStartMock = createEmbeddableStartMock();
+
 describe('transformPanelsIn', () => {
   beforeEach(() => {
     jest.clearAllMocks();
