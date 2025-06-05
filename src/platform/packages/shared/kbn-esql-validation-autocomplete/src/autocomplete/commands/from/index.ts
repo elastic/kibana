@@ -50,7 +50,7 @@ export async function suggest({
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
-    suggestions.push(...(await getRecommendedQueriesSuggestions()));
+    suggestions.push(...(await getRecommendedQueriesSuggestions(innerText)));
   }
   // FROM something MET/
   else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
@@ -62,7 +62,7 @@ export async function suggest({
   else if (indexes.length) {
     const sources = await getSources();
 
-    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions();
+    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions(innerText);
     const additionalSuggestions = await additionalSourcesSuggestions(
       innerText,
       sources,
