@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { Agent } from 'supertest';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 import { EmailDomainsAllowed } from '../../config';
@@ -184,7 +185,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
 }
 
 async function createConnector(
-  supertest: ReturnType<FtrProviderContext['getService']>,
+  supertest: Agent,
   objectRemover: ObjectRemover,
   from: string
 ): Promise<{ status: number; body: any }> {
