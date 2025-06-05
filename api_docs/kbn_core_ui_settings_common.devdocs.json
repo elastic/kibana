@@ -785,7 +785,7 @@
         "label": "UiSettingsSolution",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\""
+          "\"security\" | \"oblt\" | \"es\""
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
