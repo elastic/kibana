@@ -64,7 +64,7 @@ export const migrateLegacyPrivateLocations = async (
         {}
       );
     }
-  } catch (e) {
-    logger.error(`Error migrating legacy private locations: ${e}`, { error: e });
+  } catch (error) {
+    logger.error(`Error migrating legacy private locations: ${error.message}`, { error });
   }
 };

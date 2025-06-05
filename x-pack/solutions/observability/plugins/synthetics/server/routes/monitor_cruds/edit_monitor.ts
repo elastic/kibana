@@ -184,21 +184,24 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
           created_at: previousMonitor.created_at,
         },
       });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
-      if (e instanceof InvalidLocationError || e instanceof InvalidScheduleError) {
-        return response.badRequest({ body: { message: e.message } });
+      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+        return response.badRequest({ body: { message: error.message } });
       }
-      if (e instanceof MonitorValidationError) {
-        const { reason: message, details, payload } = e.result;
+      if (error instanceof MonitorValidationError) {
+        const { reason: message, details, payload } = error.result;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
 
-      logger.error(`Unable to update Synthetics monitor with id ${monitorId}`, { error: e });
+      logger.error(
+        `Unable to update Synthetics monitor with id ${monitorId}, Error: ${error.message}`,
+        { error }
+      );
       return response.customError({
-        body: { message: e.message },
+        body: { message: error.message },
         statusCode: 500,
       });
     }
@@ -217,10 +220,13 @@ const rollbackUpdate = async ({
   const { savedObjectsClient, server } = routeContext;
   try {
     await savedObjectsClient.update<MonitorFields>(syntheticsMonitorType, configId, attributes);
-  } catch (e) {
-    server.logger.error(`Unable to rollback edit for Synthetics monitor with id ${configId}`, {
-      error: e,
-    });
+  } catch (error) {
+    server.logger.error(
+      `Unable to rollback edit for Synthetics monitor with id ${configId}, Error: ${error.message}`,
+      {
+        error,
+      }
+    );
   }
 };
 

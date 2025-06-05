@@ -37,8 +37,10 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         statusRule: statusRule || null,
         tlsRule: tlsRule || null,
       };
-    } catch (e) {
-      server.logger.error(`Error updating default alerting rules`, { error: e });
+    } catch (error) {
+      server.logger.error(`Error updating default alerting rules, Error: ${error.message}`, {
+        error,
+      });
       return {
         statusRule: null,
         tlsRule: null,

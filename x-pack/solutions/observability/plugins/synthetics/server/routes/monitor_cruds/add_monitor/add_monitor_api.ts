@@ -249,9 +249,12 @@ export class AddEditMonitorAPI {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
           .catch((error) => {
-            server.logger.error(`Error while triggering test for monitor: ${configId}`, {
-              error,
-            });
+            server.logger.error(
+              `Error triggering test for monitor: ${configId}, Error: ${error.message}`,
+              {
+                error,
+              }
+            );
           });
       }
     } catch (error) {
@@ -311,9 +314,12 @@ export class AddEditMonitorAPI {
       }
     } catch (error) {
       // ignore errors here
-      server.logger.error(`Unable to revert monitor with id ${newMonitorId}`, {
-        error,
-      });
+      server.logger.error(
+        `Unable to revert monitor with id ${newMonitorId}, Error: ${error.message}`,
+        {
+          error,
+        }
+      );
     }
   }
 }

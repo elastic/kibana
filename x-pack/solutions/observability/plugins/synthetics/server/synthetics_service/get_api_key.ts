@@ -70,8 +70,8 @@ export const getAPIKeyForSyntheticsService = async ({
 
       return { apiKey, isValid };
     }
-  } catch (err) {
-    server.logger.error('API key is invalid', { error: err });
+  } catch (error) {
+    server.logger.error(`API key is invalid, ${error.message}`, { error });
   }
 
   return { isValid: false };

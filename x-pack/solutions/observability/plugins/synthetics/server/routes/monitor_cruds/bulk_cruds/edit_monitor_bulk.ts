@@ -139,9 +139,9 @@ export const rollbackCompletely = async ({
         attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
       })),
     });
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit`, {
-      error: e,
+  } catch (error) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit, Error: ${error.message}`, {
+      error,
     });
   }
 };
@@ -190,7 +190,10 @@ export const rollbackFailedUpdates = async ({
       await monitorConfigRepository.bulkUpdate({ monitors: monitorsToRevert });
     }
     return failedConfigs;
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitor failed updates`, { error: e });
+  } catch (error) {
+    server.logger.error(
+      `Unable to rollback Synthetics monitor failed updates, Error: ${error.message}`,
+      { error }
+    );
   }
 };

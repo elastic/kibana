@@ -156,8 +156,8 @@ export class SyntheticsService {
           .map((loc) => loc.id)
           .join(',')} Synthetics service locations from manifest: ${this.config.manifestUrl}`
       );
-    } catch (e) {
-      this.logger.error(`Error registering service locations`, { error: e });
+    } catch (error) {
+      this.logger.error(`Error registering service locations, Error: ${error.message}`, { error });
     }
   }
 
@@ -191,6 +191,7 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
+                    // TODO is this log needed?
                     service.logger.error(
                       'User is not allowed to access Synthetics service. Please contact support.'
                     );
@@ -477,17 +478,17 @@ export class SyntheticsService {
           });
 
           await syncAllLocations(PER_PAGE);
-        } catch (e) {
-          this.logger.error(`Failed to run Synthetics sync task with error: ${e.message}`, {
-            error: e,
+        } catch (error) {
+          this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
+            error,
           });
 
           sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
             reason: 'Failed to push configs to service',
-            message: e?.message,
+            message: error?.message,
             type: 'pushConfigsError',
-            code: e?.code,
-            status: e.status,
+            code: error?.code,
+            status: error.status,
             stackVersion: service.server.stackVersion,
           });
         }

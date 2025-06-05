@@ -120,11 +120,11 @@ export class DeleteMonitorAPI {
       });
 
       return { errors, result: this.result };
-    } catch (e) {
-      server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`, {
-        error: e,
+    } catch (error) {
+      server.logger.error(`Unable to delete Synthetics monitor with error ${error.message}`, {
+        error,
       });
-      throw e;
+      throw error;
     }
   }
 
