@@ -314,6 +314,8 @@ export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
 export {
   kibanaFullBodyHeightCss,
   fullScreenGraphicsMixinStyles,
+  removeEuiFocusRing,
+  passDownFocusRing,
   useMemoizedStyles,
   type EmotionStyles,
 } from './css_utils';

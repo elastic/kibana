@@ -105,6 +105,11 @@ const componentStyles = {
     css({
       minWidth: `calc(${euiTheme.size.xxl} * 6.5) !important`,
       maxWidth: `calc(${euiTheme.size.xxl} * 10) !important`,
+
+      '.unifiedFieldListItemButton': {
+        boxShadow: 'none',
+        background: 'none',
+      },
     }),
   popoverContentContainer: css({ maxHeight: '90vh' }),
   popoverContent: ({ euiTheme }: UseEuiTheme) =>
