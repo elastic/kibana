@@ -55,7 +55,7 @@ describe('FieldButton', () => {
     render(<FieldButton {...commonProps} isActive />);
 
     const wrapper = screen.getByRole('button').closest('.kbnFieldButton');
-    expect(wrapper).toHaveClass('kbnFieldButton-isActive');
+    expect(wrapper).toHaveClass('kbnFieldButtonIsActive');
   });
 
   it('calls onClick when button is clicked', async () => {
