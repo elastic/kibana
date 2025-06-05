@@ -230,7 +230,7 @@ const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-const sectionGridDataSchema = schema.object({
+export const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
   i: schema.maybe(
     schema.string({
