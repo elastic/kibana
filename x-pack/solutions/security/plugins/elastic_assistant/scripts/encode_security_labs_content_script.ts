@@ -12,7 +12,11 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import globby from 'globby';
 import { existsSync } from 'fs';
-import { ENCODED_FILE_MICROMATCH_PATTERN, PLAIN_TEXT_FILE_MICROMATCH_PATTERN, encryptSecurityLabsContent } from '@kbn/ai-security-labs-content';
+import {
+  ENCODED_FILE_MICROMATCH_PATTERN,
+  PLAIN_TEXT_FILE_MICROMATCH_PATTERN,
+  encryptSecurityLabsContent,
+} from '@kbn/ai-security-labs-content';
 
 // Path to the security labs markdown files
 export const SECURITY_LABS_DIR = path.resolve(__dirname, '../server/knowledge_base/security_labs');
