@@ -267,7 +267,7 @@ describe('EQL Tab', () => {
 
           expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
           expect(fetchNotesMock).toHaveBeenCalledWith(['1']);
 
           // Page : 2
@@ -280,7 +280,7 @@ describe('EQL Tab', () => {
           await waitFor(() => {
             expect(screen.getByTestId('pagination-button-1')).toHaveAttribute(
               'aria-current',
-              'true'
+              'page'
             );
 
             expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
@@ -295,7 +295,7 @@ describe('EQL Tab', () => {
           await waitFor(() => {
             expect(screen.getByTestId('pagination-button-2')).toHaveAttribute(
               'aria-current',
-              'true'
+              'page'
             );
 
             expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
@@ -339,7 +339,7 @@ describe('EQL Tab', () => {
 
           expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
           expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
             'Rows per page: 1'
           );

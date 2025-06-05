@@ -22,7 +22,6 @@ import type {
 } from '@kbn/controls-plugin/public';
 import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { Subscription } from 'rxjs';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { FilterGroupProps, FilterControlConfig } from './types';
 import { FilterGroupLoading } from './loading';
@@ -62,8 +61,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     disableLocalStorageSync = false,
   } = props;
 
-  const filterChangedSubscription = useRef<Subscription>();
-  const inputChangedSubscription = useRef<Subscription>();
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
@@ -121,14 +118,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const urlDataApplied = useRef<boolean>(false);
 
-  useEffect(() => {
-    return () => {
-      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
-        if (sub) sub.unsubscribe();
-      });
-    };
-  }, []);
-
   const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
     try {
       buildEsQuery(
@@ -179,7 +168,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const handleOutputFilterUpdates = useCallback(
-    (newFilters: Filter[] = []) => {
+    (newFilters: Filter[] | undefined) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFiltersChange) onFiltersChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
@@ -222,37 +211,34 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [controlsUrlState, getStoredControlState, switchToEditMode]);
 
   useEffect(() => {
-    if (controlsUrlState && !urlStateInitialized) {
-      initializeUrlState();
+    if (!controlGroup) {
+      return;
     }
+    const filterSubscription = controlGroup.filters$.subscribe({ next: debouncedFilterUpdates });
+    return () => {
+      filterSubscription.unsubscribe();
+    };
+  }, [controlGroup, debouncedFilterUpdates]);
 
+  useEffect(() => {
     if (!controlGroup) {
       return;
     }
 
-    filterChangedSubscription.current = controlGroup.filters$.subscribe({
-      next: debouncedFilterUpdates,
-    });
-
-    inputChangedSubscription.current = controlGroup.getInput$().subscribe({
+    const inputSubscription = controlGroup.getInput$().subscribe({
       next: handleStateUpdates,
     });
 
     return () => {
-      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
-        if (sub) sub.unsubscribe();
-      });
+      inputSubscription.unsubscribe();
     };
-  }, [
-    controlGroup,
-    controlsUrlState,
-    debouncedFilterUpdates,
-    getStoredControlState,
-    handleStateUpdates,
-    initializeUrlState,
-    switchToEditMode,
-    urlStateInitialized,
-  ]);
+  }, [controlGroup, handleStateUpdates]);
+
+  useEffect(() => {
+    if (controlsUrlState && !urlStateInitialized) {
+      initializeUrlState();
+    }
+  }, [controlsUrlState, initializeUrlState, urlStateInitialized]);
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupRendererApi: ControlGroupRendererApi | undefined) => {
@@ -356,7 +342,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const upsertPersistableControls = useCallback(async () => {
     if (!controlGroup) return;
-    const currentPanels = getFilterItemObjListFromControlState(controlGroup.snapshotRuntimeState());
+    const currentPanels = getFilterItemObjListFromControlState(controlGroup.getInput());
 
     const reorderedControls = reorderControlsWithDefaultControls({
       controls: currentPanels,

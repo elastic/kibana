@@ -45,6 +45,7 @@ export type {
   RuleSystemActionKey,
   SanitizedRuleConfig,
   RuleMonitoringLastRunMetrics,
+  Artifacts,
 } from './rule';
 export {
   RuleExecutionStatusValues,
@@ -149,6 +150,7 @@ export {
   executionLogSortableColumns,
   actionErrorLogSortableColumns,
   EMPTY_EXECUTION_KPI_RESULT,
+  EMPTY_EXECUTION_SUMMARY_RESULT,
 } from './execution_log_types';
 export type { RuleSnoozeSchedule, RuleSnooze } from './rule_snooze_type';
 export type { RRuleParams, RRuleRecord } from './rrule_type';
@@ -245,6 +247,9 @@ export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
 export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
 
+export const INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_summary` as const;
+
 // External
 export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
 export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;
@@ -255,4 +260,3 @@ export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = true;

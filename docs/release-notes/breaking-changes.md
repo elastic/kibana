@@ -9,7 +9,7 @@ Breaking changes can impact your Elastic applications, potentially disrupting no
 
 If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
-% ## Next version [kibana-nextversion-breaking-changes]
+% ## Next version [kibana-X.X.X-breaking-changes]
 
 % Use the following template to add entries to this document.
 
@@ -238,6 +238,20 @@ $$$kibana-162389$$$
 
 The `visualization:colorMapping` advanced setting for TSVB and Visualize charts has been removed. You can switch to Lens charts, which offer a more advanced, per-chart color mapping feature with enhanced configuration options. View [#162389](https://github.com/elastic/kibana/pull/162389).
 ::::
+
+**Elasticsearch solution**
+
+$$$kibana-212031$$$
+::::{dropdown} Removed Behavioral Analytics
+:name: breaking-212031
+
+**Details**
+
+The Behavioral Analytics feature is removed from the Kibana interface in 9.0 and its associated [APIs are deprecated](https://www.elastic.co/docs/release-notes/elasticsearch/deprecations#elasticsearch-900-deprecations).
+
+View [#212031]({{kib-pull}}212031).
+::::
+
 
 **Elastic Observability solution**
 

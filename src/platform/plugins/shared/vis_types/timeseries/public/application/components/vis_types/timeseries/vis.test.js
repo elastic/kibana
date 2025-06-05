@@ -53,7 +53,9 @@ describe('TimeseriesVisualization', () => {
     });
 
     setUISettings({
-      get: () => ({}),
+      get: (key) => {
+        key === 'dateFormat:tz' ? 'Browser' : {};
+      },
       isDefault: () => true,
     });
 

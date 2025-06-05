@@ -41,7 +41,7 @@ export function registerESDeprecationRoutes({
           dataSourceExclusions,
         });
         const asCurrentUser = client.asCurrentUser;
-        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
+        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
         const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
         const indexNames = [...status.migrationsDeprecations, ...status.enrichedHealthIndicators]
           .filter(({ index }) => typeof index !== 'undefined')

@@ -94,6 +94,10 @@ describe('getExpressionType', () => {
         expression: '1 day',
         expectedType: 'time_literal',
       },
+      {
+        expression: '?value',
+        expectedType: 'param',
+      },
     ];
     test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
       const ast = getASTForExpression(expression);
@@ -135,8 +139,8 @@ describe('getExpressionType', () => {
     );
   });
 
-  describe('fields and variables', () => {
-    it('detects the type of fields and variables which exist', () => {
+  describe('fields and userDefinedColumns', () => {
+    it('detects the type of fields and userDefinedColumns which exist', () => {
       expect(
         getExpressionType(
           getASTForExpression('fieldName'),
@@ -155,14 +159,14 @@ describe('getExpressionType', () => {
 
       expect(
         getExpressionType(
-          getASTForExpression('var0'),
+          getASTForExpression('col0'),
           new Map(),
           new Map([
             [
-              'var0',
+              'col0',
               [
                 {
-                  name: 'var0',
+                  name: 'col0',
                   type: 'long',
                   location: { min: 0, max: 0 },
                 },
@@ -173,10 +177,14 @@ describe('getExpressionType', () => {
       ).toBe('long');
     });
 
-    it('handles fields and variables which do not exist', () => {
+    it('handles fields and userDefinedColumns which do not exist', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
+    });
+
+    it('handles fields defined by a named param', () => {
+      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
     });
   });
 
@@ -352,5 +360,6 @@ describe('getBracketsToClose', () => {
         'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
       )
     ).toEqual([')']);
+    expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
   });
 });

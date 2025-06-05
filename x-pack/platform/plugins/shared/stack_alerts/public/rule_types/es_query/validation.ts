@@ -17,10 +17,12 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,
-  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
-  ES_QUERY_MAX_HITS_PER_EXECUTION,
   MAX_HITS_FOR_GROUP_BY,
 } from '../../../common/constants';
+import {
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+} from '../../../common/es_query';
 import type { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
@@ -93,6 +95,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
 
   if (
     groupBy &&
+    builtInGroupByTypes[groupBy] &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
     (!termField || termField.length <= 0)
@@ -106,6 +109,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
 
   if (
     groupBy &&
+    builtInGroupByTypes[groupBy] &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
     termField &&
@@ -311,6 +315,14 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold is required to be 0.',
+      })
+    );
+  }
+
+  if (ruleParams.groupBy && ruleParams.groupBy === 'top') {
+    errors.groupBy.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredGroupByText', {
+        defaultMessage: 'Group by is required.',
       })
     );
   }

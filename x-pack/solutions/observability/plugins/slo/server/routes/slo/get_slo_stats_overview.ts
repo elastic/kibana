@@ -9,7 +9,6 @@ import { getSLOStatsOverviewParamsSchema } from '@kbn/slo-schema';
 import { GetSLOStatsOverview } from '../../services/get_slo_stats_overview';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { getSpaceId } from './utils/get_space_id';
 
 export const getSLOStatsOverview = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/overview',
@@ -20,23 +19,17 @@ export const getSLOStatsOverview = createSloServerRoute({
     },
   },
   params: getSLOStatsOverviewParamsSchema,
-  handler: async ({ context, params, request, logger, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-    const ruleRegistry = await plugins.ruleRegistry.start();
-    const racClient = await ruleRegistry.getRacClientWithRequest(request);
-
-    const spaceId = await getSpaceId(plugins, request);
-
-    const alerting = await plugins.alerting.start();
-    const rulesClient = await alerting.getRulesClientWithRequest(request);
+    const { scopedClusterClient, spaceId, soClient, rulesClient, racClient } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
     const slosOverview = new GetSLOStatsOverview(
       soClient,
-      esClient,
+      scopedClusterClient.asCurrentUser,
       spaceId,
       logger,
       rulesClient,

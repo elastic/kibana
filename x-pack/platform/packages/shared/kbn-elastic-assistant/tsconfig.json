@@ -44,5 +44,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/datemath",
     "@kbn/alerts-ui-shared",
+    "@kbn/deeplinks-security"
   ]
 }

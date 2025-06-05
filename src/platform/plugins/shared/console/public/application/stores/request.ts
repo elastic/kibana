@@ -9,7 +9,7 @@
 
 import { Reducer } from 'react';
 import { produce } from 'immer';
-import { identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/function';
 import { BaseResponseType } from '../../types/common';
 import { RequestResult } from '../hooks/use_send_current_request/send_request';
 

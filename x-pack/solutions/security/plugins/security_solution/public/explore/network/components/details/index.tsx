@@ -8,8 +8,8 @@
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { useDarkMode } from '../../../../common/lib/kibana';
 import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
@@ -79,7 +79,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {

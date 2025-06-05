@@ -42,7 +42,7 @@ export function createAddAlertsPanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_ALERTS_EMBEDDABLE_ID,
-            initialState,
+            serializedState: { rawState: initialState },
           },
           true
         );

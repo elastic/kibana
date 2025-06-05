@@ -16,6 +16,13 @@ export const ALERTS_WILL_BE_ANALYZED = (alertsCount: number) =>
     }
   );
 
+export const EXPAND_THE_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.expandTheTimeRangeLabel',
+  {
+    defaultMessage: 'Expand the time range',
+  }
+);
+
 export const GENERATE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.generateLabel',
   {
@@ -23,10 +30,31 @@ export const GENERATE = i18n.translate(
   }
 );
 
+export const GENERATE_NEW_ATTACK_DISCOVERIES = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.generateNewAttackDiscoveriesLabel',
+  {
+    defaultMessage: 'Generate new attack discoveries',
+  }
+);
+
+export const HERE_ARE_SOME_THINGS_TO_TRY = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.hereAreSomeThingsToTryTitle',
+  {
+    defaultMessage: 'Here are some things to try:',
+  }
+);
+
 export const LEARN_MORE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.learnMoreLabel',
   {
     defaultMessage: 'Learn more',
+  }
+);
+
+export const NO_RESULTS_MATCH_YOUR_SEARCH = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.noResultsMatchYourSearchTitle',
+  {
+    defaultMessage: 'No results match your search criteria',
   }
 );
 

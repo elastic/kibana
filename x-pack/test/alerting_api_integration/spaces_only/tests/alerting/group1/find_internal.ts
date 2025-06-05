@@ -119,6 +119,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           params: {},
           created_by: null,
           api_key_owner: null,
+          artifacts: {
+            dashboards: [],
+            investigation_guide: { blob: '' },
+          },
           api_key_created_by_user: null,
           scheduled_task_id: match.scheduled_task_id,
           updated_by: null,

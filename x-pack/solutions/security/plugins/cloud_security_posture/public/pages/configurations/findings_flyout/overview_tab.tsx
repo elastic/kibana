@@ -8,9 +8,11 @@
 import {
   EuiAccordion,
   EuiBasicTable,
+  EuiCopy,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -32,14 +34,64 @@ import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view
 import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { MultiValueCellPopover, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { css } from '@emotion/css';
+import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { TruncatedCopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const columns: Array<EuiBasicTableColumn<any>> = [
+const renderValue = (item: string) => (
+  <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="flexStart" alignItems="center">
+    <EuiFlexItem>
+      <EuiText
+        size="s"
+        css={{
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {item}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiCopy textToCopy={item}>
+        {(copy) => (
+          <EuiIcon
+            aria-label={COPY_ARIA_LABEL}
+            className={css`
+              &:hover {
+                cursor: pointer;
+              }
+            `}
+            onClick={copy}
+            type="copy"
+          />
+        )}
+      </EuiCopy>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const renderTableField = (value: string) => {
+  if (!value) {
+    return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
+  }
+
+  return Array.isArray(value) ? (
+    <MultiValueCellPopover<unknown> items={value} field="" object={{}} renderItem={renderValue} />
+  ) : (
+    <>
+      <TruncatedCopyableText textToCopy={value} />
+    </>
+  );
+};
+
+export const columns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'field',
     name: 'Field',
@@ -49,10 +101,11 @@ const columns: Array<EuiBasicTableColumn<any>> = [
     field: 'value',
     name: 'Value',
     truncateText: true,
+    render: (value: string) => renderTableField(value),
   },
 ];
 
-const convertObjectToArray = (obj: { [key: string]: any }) => {
+export const convertObjectToArray = (obj: { [key: string]: any }) => {
   if (obj === undefined) return null;
   return Object.keys(obj)
     .filter((key) => key !== 'raw')
@@ -92,10 +145,12 @@ const getDetailsList = (
       <>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem>
-            <b>Rule Description</b>
+            {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleDescription', {
+              defaultMessage: 'Rule Description',
+            })}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={ruleFlyoutLink} target="_blank" style={{ textAlign: 'right' }}>
+            <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
               <EuiIcon type="expand" />
               {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
                 defaultMessage: 'Show rule details',
@@ -259,7 +314,7 @@ export const OverviewTab = ({
             <EuiSpacer size="m" />
             <EuiDescriptionList listItems={accordion.listItems} />
           </EuiAccordion>
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
         </React.Fragment>
       ))}
     </>

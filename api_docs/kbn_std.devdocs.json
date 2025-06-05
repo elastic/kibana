@@ -1653,6 +1653,118 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.safeJsonParse",
+        "type": "Function",
+        "tags": [],
+        "label": "safeJsonParse",
+        "description": [
+          "\nSafely parses a JSON string. If the string cannot be parsed, for instance\nif it is not valid JSON, it will return `undefined`. If `handleError` is\ndefined, it will be called with the error, and the response from the callback\nwill be returned. This allows consumers to wrap the JSON.parse error.\n"
+        ],
+        "signature": [
+          "(value: string, handleError: (error: Error) => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonParse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The JSON string to parse."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonParse.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [
+              "Optional callback that is called when an error\nduring parsing. Its return value is returned from the\nfunction."
+            ],
+            "signature": [
+              "(error: Error) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The parsed object, or `undefined` if an error occurs."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.safeJsonStringify",
+        "type": "Function",
+        "tags": [],
+        "label": "safeJsonStringify",
+        "description": [
+          "\nSafely stringifies a value to JSON. If the value cannot be stringified,\nfor instance if it contains circular references, it will return `undefined`.\nIf `handleError` is defined, it will be called with the error, and the\nresponse will be returned. This allows consumers to wrap the JSON.stringify\nerror.\n"
+        ],
+        "signature": [
+          "(value: unknown, handleError: (error: Error) => string | undefined) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonStringify.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The value to stringify."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.safeJsonStringify.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [
+              "Optional callback that is called when an error occurs during\nstringifying."
+            ],
+            "signature": [
+              "(error: Error) => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The JSON string representation of the value, or `undefined`\nif an error occurs."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.stripVersionQualifier",
         "type": "Function",
         "tags": [],

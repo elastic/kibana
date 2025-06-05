@@ -1,0 +1,31 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/response-ops-rules-apis",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/alerting-types",
+    "@kbn/es-query",
+    "@kbn/rule-data-utils",
+  ]
+}

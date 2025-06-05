@@ -10,11 +10,11 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
+import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
-import { type ESQLControlState, EsqlControlType, VariableNamePrefix } from '../types';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
@@ -156,6 +156,8 @@ export function ESQLControlsFlyout({
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
           await onSaveControl?.(controlState, query);
+        } else {
+          await onSaveControl?.(controlState, queryString);
         }
       } else {
         await onSaveControl?.(controlState, '');

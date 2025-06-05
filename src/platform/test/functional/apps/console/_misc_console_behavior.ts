@@ -19,10 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/218255
-  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
+  describe('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
-      await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
@@ -114,7 +112,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
       });
 
-      describe('open documentation', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/218255
+      describe.skip('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {
@@ -129,7 +128,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Retry until the documentation is loaded
             await retry.try(async () => {
               const url = await browser.getCurrentUrl();
-              expect(url).to.contain('search-search.html');
+              // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
+              // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
+              expect(url).to.contain('operation-search');
             });
           });
         });

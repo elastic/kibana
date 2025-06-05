@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -54,6 +55,7 @@ import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
+import { AlertsLoader } from './components/alerts_loader';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -61,7 +63,7 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-const DEFAULT_FILTERS: Filter[] = [];
+const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
 const tableColumns = getColumns({ showRuleName: true });
 
@@ -92,12 +94,26 @@ function InternalAlertsPage() {
     },
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const [filterControls, setFilterControls] = useState<Filter[]>([]);
+  const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
-
+  const hasInitialControlLoadingFinished = useMemo(
+    () => controlApi && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
   const filteredRuleTypes = useGetFilteredRuleTypes();
+  const themeOverrides = charts.theme.useChartsBaseTheme();
+  const globalFilters = useMemo(() => {
+    return [
+      ...(alertSearchBarStateProps.filters ?? DEFAULT_EMPTY_FILTERS),
+      ...(filterControls ?? DEFAULT_EMPTY_FILTERS),
+    ];
+  }, [alertSearchBarStateProps.filters, filterControls]);
+  const globalQuery = useMemo(() => {
+    return { query: alertSearchBarStateProps.kuery, language: 'kuery' };
+  }, [alertSearchBarStateProps.kuery]);
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -117,6 +133,13 @@ function InternalAlertsPage() {
       });
     }
   };
+
+  const onGroupingsChange = useCallback(
+    ({ activeGroups }: { activeGroups: string[] }) => {
+      alertSearchBarStateProps.onGroupingsChange(activeGroups);
+    },
+    [alertSearchBarStateProps]
+  );
 
   useEffect(() => {
     return setScreenContext?.({
@@ -270,6 +293,7 @@ function InternalAlertsPage() {
               onEsQueryChange={setEsQuery}
               filterControls={filterControls}
               onFilterControlsChange={setFilterControls}
+              onControlApiAvailable={setControlApi}
               showFilterBar
               services={{
                 timeFilterService,
@@ -286,32 +310,39 @@ function InternalAlertsPage() {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
-              filter={esQuery}
-              fullSize
-              timeRange={alertSummaryTimeRange}
-              chartProps={{
-                themeOverrides: charts.theme.useChartsBaseTheme(),
-                onBrushEnd,
-              }}
-            />
+            {hasInitialControlLoadingFinished ? (
+              <AlertSummaryWidget
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                consumers={observabilityAlertFeatureIds}
+                filter={esQuery}
+                fullSize
+                timeRange={alertSummaryTimeRange}
+                chartProps={{
+                  themeOverrides,
+                  onBrushEnd,
+                }}
+              />
+            ) : (
+              <AlertsLoader />
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
-            {esQuery && (
+            {esQuery && hasInitialControlLoadingFinished && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                 consumers={observabilityAlertFeatureIds}
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={[
-                  ...(alertSearchBarStateProps.filters ?? DEFAULT_FILTERS),
-                  ...filterControls,
-                ]}
-                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
+                globalFilters={globalFilters}
+                globalQuery={globalQuery}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                initialGroupings={
+                  alertSearchBarStateProps?.groupings?.length
+                    ? alertSearchBarStateProps.groupings
+                    : undefined
+                }
+                onGroupingsChange={onGroupingsChange}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
                 renderGroupPanel={renderGroupPanel}
                 getGroupStats={getGroupStats}

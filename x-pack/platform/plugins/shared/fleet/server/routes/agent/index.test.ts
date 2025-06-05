@@ -20,6 +20,7 @@ import {
   GetAgentsResponseSchema,
   GetAvailableAgentVersionsResponseSchema,
   ListAgentUploadsResponseSchema,
+  MigrateSingleAgentResponseSchema,
   PostBulkActionResponseSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
@@ -56,6 +57,7 @@ import {
 
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
+import { migrateSingleAgentHandler } from './migrate_handlers';
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
   getAgentHandler: jest.fn(),
@@ -73,6 +75,10 @@ jest.mock('./handlers', () => ({
   deleteAgentUploadFileHandler: jest.fn(),
   postAgentReassignHandler: jest.fn(),
   postRetrieveAgentsByActionsHandler: jest.fn(),
+}));
+
+jest.mock('./migrate_handlers', () => ({
+  migrateSingleAgentHandler: jest.fn(),
 }));
 
 jest.mock('./actions_handlers', () => ({
@@ -474,6 +480,22 @@ describe('schema validation', () => {
       body: expectedResponse,
     });
     const validationResp = GetAvailableAgentVersionsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('migrate single agent should return valid response', async () => {
+    const expectedResponse = {
+      actionId: 'migrate-action-123',
+    };
+    (migrateSingleAgentHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await migrateSingleAgentHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = MigrateSingleAgentResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 });

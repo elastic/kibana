@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useStreamsAppFetch } from '../hooks/use_streams_app_fetch';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { StreamsAppLocator } from '../app_locator';
 
 export interface DiscoverStreamsLinkProps {
@@ -78,7 +78,7 @@ function DiscoverStreamsLinkContent({
   const flattenedDoc = doc.flattened;
   const index = doc.raw._index;
   const fallbackStreamName = getFallbackStreamName(flattenedDoc);
-  const { value, loading, error } = useStreamsAppFetch(
+  const { value, loading, error } = useAbortableAsync(
     async ({ signal }) => {
       if (!index) {
         return fallbackStreamName;
@@ -96,8 +96,7 @@ function DiscoverStreamsLinkContent({
       );
       return definition?.stream?.name;
     },
-    [streamsRepositoryClient, index, fallbackStreamName],
-    { disableToastOnError: true }
+    [streamsRepositoryClient, index, fallbackStreamName]
   );
   const params = useMemo(() => ({ name: value }), [value]);
   const redirectUrl = useMemo(() => locator.getRedirectUrl(params), [locator, params]);

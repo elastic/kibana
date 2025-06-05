@@ -45,11 +45,11 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | stats count(`doubleField`)', []);
             await expectErrors('from a_index | stats count(*)', []);
             await expectErrors('from a_index | stats count()', []);
-            await expectErrors('from a_index | stats var0 = count(*)', []);
-            await expectErrors('from a_index | stats var0 = count()', []);
-            await expectErrors('from a_index | stats var0 = avg(doubleField), count(*)', []);
+            await expectErrors('from a_index | stats col0 = count(*)', []);
+            await expectErrors('from a_index | stats col0 = count()', []);
+            await expectErrors('from a_index | stats col0 = avg(doubleField), count(*)', []);
             await expectErrors(`from a_index | stats sum(case(false, 0, 1))`, []);
-            await expectErrors(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
+            await expectErrors(`from a_index | stats col0 = sum( case(false, 0, 1))`, []);
             await expectErrors('from a_index | stats ??func(doubleField)', []);
             await expectErrors('from a_index | stats avg(??field)', []);
 
@@ -130,10 +130,10 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | stats avg(doubleField) by wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('from a_index | stats avg(doubleField) by var0 = wrongField + 1', [
+            await expectErrors('from a_index | stats avg(doubleField) by col0 = wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('from a_index | stats var0 = avg(fn(number)), count(*)', [
+            await expectErrors('from a_index | stats col0 = avg(fn(number)), count(*)', [
               'Unknown function [fn]',
             ]);
           });
@@ -152,7 +152,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
           test('allows WHERE clause', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('FROM a_index | STATS var0 = avg(doubleField) WHERE 123', []);
+            await expectErrors('FROM a_index | STATS col0 = avg(doubleField) WHERE 123', []);
           });
         });
 
@@ -301,7 +301,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                     `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                   ]);
                   await expectErrors(
-                    `from a_index | stats 5 + doubleField ${operatorsWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | stats 5 + doubleField ${operatorsWrapping}, col0 = sum(doubleField)`,
                     [
                       `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
@@ -356,13 +356,13 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                     ]
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, col0 = sum(doubleField)`,
                     [
                       `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | stats var0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var1 = sum(doubleField)`,
+                    `from a_index | stats col0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, col1 = sum(doubleField)`,
                     [
                       `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]

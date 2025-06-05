@@ -11,6 +11,7 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
 import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
@@ -62,24 +63,31 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const eqlOptions = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  let {
-    loading: indexPatternsLoading,
-    sourcererDataView,
-    selectedPatterns,
+  const {
+    loading: oldIndexPatternsLoading,
+    sourcererDataView: oldSourcererDataViewSpec,
+    selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
+  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-  if (newDataViewPickerEnabled) {
-    indexPatternsLoading = status !== 'ready';
-    sourcererDataView = experimentalDataView;
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const indexPatternsLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIndexPatternsLoading),
+    [newDataViewPickerEnabled, oldIndexPatternsLoading, status]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const initialState = useMemo(
     () => ({
@@ -172,14 +180,14 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const dataView = useMemo(
     () => ({
-      ...sourcererDataView,
-      title: sourcererDataView.title ?? '',
-      fields: Object.values(sourcererDataView.fields || {}),
+      ...dataViewSpec,
+      title: dataViewSpec.title ?? '',
+      fields: Object.values(dataViewSpec.fields || {}),
     }),
-    [sourcererDataView]
+    [dataViewSpec]
   );
 
-  /* Force casting `sourcererDataView` to `DataViewBase` is required since EqlQueryEdit
+  /* Force casting `dataViewSpec` to `DataViewBase` is required since EqlQueryEdit
      accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
 
      When using `UseField` with `EqlQueryBar` such casting isn't required by TS since

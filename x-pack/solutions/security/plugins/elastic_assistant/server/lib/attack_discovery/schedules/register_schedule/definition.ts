@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES, Logger } from '@kbn/core/server';
+import { AnalyticsServiceSetup, DEFAULT_APP_CATEGORIES, Logger } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
@@ -17,18 +17,21 @@ import { attackDiscoveryScheduleExecutor } from './executor';
 
 export interface GetAttackDiscoveryScheduleParams {
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export const getAttackDiscoveryScheduleType = ({
   logger,
+  telemetry,
 }: GetAttackDiscoveryScheduleParams): AttackDiscoveryScheduleType => {
   return {
     id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
     name: 'Attack Discovery Schedule',
+    ruleTaskTimeout: '10m',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     category: DEFAULT_APP_CATEGORIES.security.id,
-    producer: 'assistant',
+    producer: 'siem',
     solution: 'security',
     validate: {
       params: {
@@ -51,6 +54,7 @@ export const getAttackDiscoveryScheduleType = ({
       return attackDiscoveryScheduleExecutor({
         options,
         logger,
+        telemetry,
       });
     },
   };

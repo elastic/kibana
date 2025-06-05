@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
-import { flow } from 'fp-ts/lib/function';
+import * as TaskEither from 'fp-ts/TaskEither';
+import * as Option from 'fp-ts/Option';
+import { flow } from 'fp-ts/function';
 import {
   waitForTask,
   WaitForTaskCompletionTimeout,
   TaskCompletedWithRetriableError,
 } from './wait_for_task';
+
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
 
 export const waitForPickupUpdatedMappingsTask = flow(

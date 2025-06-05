@@ -48,6 +48,8 @@ import {
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
   OutputInvalidError,
+  AgentlessAgentCreateOverProvisionnedError,
+  FleetErrorWithStatusCode,
 } from '.';
 
 type IngestErrorHandler = (
@@ -152,14 +154,26 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 502;
   }
 
+  if (error instanceof FleetErrorWithStatusCode && error.statusCode) {
+    return error.statusCode;
+  }
+
   return 400; // Bad Request
 };
 
 function shouldRespondWithErrorType(error: FleetError) {
   if (error instanceof OutputInvalidError) {
     return true;
+  } else if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return true;
   }
   return false;
+}
+
+function getErrorExtraAttributes(error: FleetError) {
+  if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return { limit: error.meta?.limit };
+  }
 }
 
 export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
@@ -167,13 +181,17 @@ export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['err
   // our "expected" errors
   if (error instanceof FleetError) {
     // only log the message
+    const extraAttributes = getErrorExtraAttributes(error);
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
       body: {
         message: error.message,
-        ...(shouldRespondWithErrorType(error) ? { attributes: { type: error.name } } : {}),
-        ...(error.attributes && { attributes: error.attributes }),
+        ...(extraAttributes ? { attributes: extraAttributes } : {}),
+        ...(shouldRespondWithErrorType(error)
+          ? { attributes: { type: error.name, ...extraAttributes } }
+          : {}),
+        ...(error.attributes && { attributes: { ...error.attributes, ...extraAttributes } }),
       },
     };
   }

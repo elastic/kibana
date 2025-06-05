@@ -50,7 +50,6 @@ interface Context {
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
-  isInUse: boolean;
   options: TagOptionItem[];
   totalActiveFilters: number;
   onFilterButtonClick: () => void;
@@ -76,7 +75,6 @@ export const TagFilterPanel: FC<{}> = ({}) => {
     throw new Error('TagFilterPanel must be used within a TagFilterContextProvider');
   const {
     isPopoverOpen,
-    isInUse,
     options,
     totalActiveFilters,
     onFilterButtonClick,
@@ -140,7 +138,6 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         panelPaddingSize="none"
         anchorPosition="downCenter"
         panelProps={{ css: { width: euiTheme.base * 18 } }}
-        panelStyle={isInUse ? { transition: 'none' } : undefined}
       >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>

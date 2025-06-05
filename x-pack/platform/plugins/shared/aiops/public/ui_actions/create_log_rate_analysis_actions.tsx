@@ -63,7 +63,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
           LogRateAnalysisEmbeddableApi
         >({
           panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
 
         if (!embeddable) {

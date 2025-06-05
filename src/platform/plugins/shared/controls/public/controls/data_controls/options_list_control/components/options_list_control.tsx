@@ -20,11 +20,9 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -40,7 +38,7 @@ export const OptionsListControl = ({
   controlPanelClassName: string;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const { api, stateManager, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
@@ -52,18 +50,18 @@ export const OptionsListControl = ({
     loading,
     panelTitle,
     fieldFormatter,
+    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
-    stateManager.exclude,
-    stateManager.existsSelected,
-    stateManager.selectedOptions,
-    api.invalidSelections$,
-    api.field$,
-    api.dataLoading$,
-    api.title$,
-    api.fieldFormatter
+    componentApi.exclude$,
+    componentApi.existsSelected$,
+    componentApi.selectedOptions$,
+    componentApi.invalidSelections$,
+    componentApi.field$,
+    componentApi.dataLoading$,
+    componentApi.title$,
+    componentApi.fieldFormatter,
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
-
-  const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultTitle$);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 
@@ -131,7 +129,7 @@ export const OptionsListControl = ({
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}
-                  data-test-subj={`optionsList__invalidSelectionsToken-${api.uuid}`}
+                  data-test-subj={`optionsList__invalidSelectionsToken-${componentApi.uuid}`}
                   css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
                 />
               </EuiToolTip>
@@ -147,7 +145,7 @@ export const OptionsListControl = ({
     fieldFormatter,
     delimiter,
     invalidSelections,
-    api.uuid,
+    componentApi.uuid,
   ]);
 
   const button = (
@@ -156,7 +154,7 @@ export const OptionsListControl = ({
         badgeColor="success"
         iconType={loading ? 'empty' : 'arrowDown'}
         className={'optionsList--filterBtn'}
-        data-test-subj={`optionsList-control-${api.uuid}`}
+        data-test-subj={`optionsList-control-${componentApi.uuid}`}
         onClick={() => setPopoverOpen(!isPopoverOpen)}
         isSelected={isPopoverOpen}
         numActiveFilters={selectedOptionsCount}
@@ -175,7 +173,11 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed={isCompressed(api)} className={controlPanelClassName}>
+    <EuiFilterGroup
+      fullWidth
+      compressed={isCompressed(componentApi)}
+      className={controlPanelClassName}
+    >
       <EuiInputPopover
         id={popoverId}
         ownFocus

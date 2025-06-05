@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import {
   IRouter,
   KibanaRequest,
@@ -23,6 +24,7 @@ type PayloadType = 'params' | 'query' | 'body';
 interface IMockRouter {
   method: MethodType;
   path: string;
+  version?: string;
   context?: jest.Mocked<RequestHandlerContext>;
 }
 interface IMockRouterRequest {
@@ -36,14 +38,21 @@ export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
   public path: string;
+  public version?: string;
   public context: jest.Mocked<RequestHandlerContext>;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, path, context = {} as jest.Mocked<RequestHandlerContext> }: IMockRouter) {
+  constructor({
+    method,
+    path,
+    version,
+    context = {} as jest.Mocked<RequestHandlerContext>,
+  }: IMockRouter) {
     this.createRouter();
     this.method = method;
     this.path = path;
+    this.version = version;
     this.context = context;
   }
 
@@ -84,6 +93,20 @@ export class MockRouter {
   };
 
   private findRouteRegistration = () => {
+    if (this.version) {
+      const mockedRoute = (this.router.versioned as MockedVersionedRouter).getRoute(
+        this.method,
+        this.path
+      );
+      if (mockedRoute.versions[this.version]) {
+        return [
+          mockedRoute.versions[this.version].config,
+          mockedRoute.versions[this.version].handler,
+        ];
+      }
+      throw new Error('No matching version routes registered.');
+    }
+
     const routerCalls = this.router[this.method].mock.calls as any[];
     if (!routerCalls.length) throw new Error('No routes registered.');
 

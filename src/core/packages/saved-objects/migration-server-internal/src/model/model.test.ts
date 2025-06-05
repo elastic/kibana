@@ -8,8 +8,8 @@
  */
 
 import { chain } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -1343,9 +1343,18 @@ describe('migrations v2 model', () => {
             unknownDocs: [],
             errorsByType: {},
           });
-          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+          const newState = model(cleanupUnknownAndExcluded, res);
 
           expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        });
+
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_not_needed' as const,
+          });
+          const newState = model(cleanupUnknownAndExcluded, res);
+
+          expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
         });
       });
 

@@ -14,6 +14,7 @@ export const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_T
 export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRecord {
   rangeFrom?: string;
   rangeTo?: string;
+  waterfallItemId?: string;
   traceId: string;
 }
 
