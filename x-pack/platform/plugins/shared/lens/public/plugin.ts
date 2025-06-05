@@ -518,15 +518,7 @@ export class LensPlugin {
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
+        getSearchProvider(core.getStartServices().then(([{ application }]) => application))
       );
     }
 

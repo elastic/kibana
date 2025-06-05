@@ -5,12 +5,51 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
-import { from, of } from 'rxjs';
+import { ApplicationStart } from '@kbn/core/public';
+import { from, of, firstValueFrom } from 'rxjs';
+import { AppStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { getFullPath } from '../common/constants';
+
+/**
+ * Checks if the Lens feature should be available in global search.
+ * Lens availability depends on the visualize app being accessible.
+ */
+const isLensSearchAvailable = async (
+  capabilities: ApplicationStart['capabilities'],
+  applications$: ApplicationStart['applications$']
+): Promise<boolean> => {
+  // Early exit if visualize capability is disabled
+  if (!capabilities.navLinks?.visualize) {
+    return false;
+  }
+
+  const currentAppsMap = await firstValueFrom(applications$);
+  const visualizeApp = currentAppsMap.get('visualize');
+
+  // Exit if visualize app is inaccessible
+  if (visualizeApp?.status === AppStatus.inaccessible) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Calculates search relevance score for the given term.
+ * Uses the same scoring logic as the default Kibana application search provider.
+ */
+const calculateSearchScore = (searchableTitle: string, term: string): number => {
+  const normalizedTerm = term.toLowerCase();
+
+  if (searchableTitle === normalizedTerm) return 100;
+  if (searchableTitle.startsWith(normalizedTerm)) return 90;
+  if (searchableTitle.includes(normalizedTerm)) return 75;
+
+  return 0;
+};
 
 /**
  * Global search provider adding a Lens entry.
@@ -23,36 +62,34 @@ import { getFullPath } from '../common/constants';
  * of apps. In this case, Lens should be considered a feature of Visualize.
  */
 export const getSearchProvider: (
-  uiCapabilities: Promise<ApplicationStart['capabilities']>
-) => GlobalSearchResultProvider = (uiCapabilities) => ({
+  applicationPromise: Promise<ApplicationStart>
+) => GlobalSearchResultProvider = (applicationPromise) => ({
   id: 'lens',
   find: ({ term = '', types, tags }) => {
     if (tags || (types && !types.includes('application'))) {
       return of([]);
     }
+
     return from(
-      uiCapabilities.then(({ navLinks: { visualize: visualizeNavLink } }) => {
-        if (!visualizeNavLink) {
+      applicationPromise.then(async (application) => {
+        const { capabilities, applications$ } = application;
+
+        // Check if Lens should be available in search
+        const isAvailable = await isLensSearchAvailable(capabilities, applications$);
+        if (!isAvailable) {
           return [];
         }
+
         const title = i18n.translate('xpack.lens.searchTitle', {
           defaultMessage: 'Lens: create visualizations',
           description: 'Lens is a product name and should not be translated',
         });
-        const searchableTitle = title.toLowerCase();
 
-        term = term.toLowerCase();
-        let score = 0;
-
-        // shortcuts to avoid calculating the distance when there is an exact match somewhere.
-        if (searchableTitle === term) {
-          score = 100;
-        } else if (searchableTitle.startsWith(term)) {
-          score = 90;
-        } else if (searchableTitle.includes(term)) {
-          score = 75;
+        const score = calculateSearchScore(title.toLowerCase(), term);
+        if (score === 0) {
+          return [];
         }
-        if (score === 0) return [];
+
         return [
           {
             id: 'lens',
