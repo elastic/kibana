@@ -786,15 +786,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          inputType === CLOUDBEAT_AWS && isAgentlessAvailable
-            ? SetupTechnology.AGENTLESS
-            : SetupTechnology.AGENT_BASED,
+          setupTechnology,
           showCloudConnectors
         );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [packageInfo, newPolicy, updatePolicy, isAgentlessAvailable, showCloudConnectors]
+      [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
