@@ -22,7 +22,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
-import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -122,11 +121,11 @@ export function ShowShareModal({
 
   const hasPanelChanges = allUnsavedPanelsMap !== undefined;
 
-  const unsavedDashboardStateForLocator: SharedDashboardState = {
+  const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
     controlGroupInput:
-      unsavedDashboardState.controlGroupInput as SharedDashboardState['controlGroupInput'],
-    references: unsavedDashboardState.references as SharedDashboardState['references'],
+      unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
+    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
   if (allUnsavedPanelsMap || allUnsavedSectionsMap) {
     unsavedDashboardStateForLocator.panels = convertPanelSectionMapsToPanelsArray(
