@@ -1835,6 +1835,9 @@
       "is_managed": {
         "type": "boolean"
       },
+      "latest_revision": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
@@ -2436,6 +2439,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {

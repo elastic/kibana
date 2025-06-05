@@ -695,6 +695,7 @@ export const getSavedObjectTypes = (
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -938,6 +939,7 @@ export const getSavedObjectTypes = (
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {

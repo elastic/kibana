@@ -25,6 +25,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
+import semverGt from 'semver/functions/gt';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -453,6 +454,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch: { privileges: elasticsearchPrivileges },
           }),
           ...(secretReferences?.length && { secret_references: secretReferences }),
+          latest_revision: true,
           revision: 1,
           created_at: isoDate,
           created_by: options?.user?.username ?? 'system',
@@ -653,6 +655,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            latest_revision: true,
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -844,12 +847,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const packagePolicyLatestRevisionKuery = `(${savedObjectType}.attributes.latest_revision:true OR NOT ${savedObjectType}.attributes.latest_revision:*)`;
     const packagePolicySO = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
         filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
           agentPolicyId
-        )}`,
+        )} AND ${packagePolicyLatestRevisionKuery}`,
         perPage: SO_SEARCH_LIMIT,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
@@ -969,6 +973,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}`
     );
 
+    const packagePolicyLatestRevisionKuery = `${savedObjectType}.attributes.latest_revision:true OR NOT ${savedObjectType}.attributes.latest_revision:*`;
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `(${packagePolicyLatestRevisionKuery}) AND ${kuery}`
+        : packagePolicyLatestRevisionKuery
+    );
+
     const packagePolicies = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
@@ -977,7 +989,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         page,
         perPage,
         fields,
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
       })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies'));
@@ -1013,6 +1025,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<ListResult<string>> {
     const logger = this.getLogger('listIds');
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
 
     logger.debug(
       () =>
@@ -1021,8 +1035,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}]`
     );
 
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const packagePolicyLatestRevisionKuery = `${savedObjectType}.attributes.latest_revision:true OR NOT ${savedObjectType}.attributes.latest_revision:*`;
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `(${packagePolicyLatestRevisionKuery}) AND ${kuery}`
+        : packagePolicyLatestRevisionKuery
+    );
+
     const packagePolicies = await soClient
       .find<{ name: string }>({
         type: savedObjectType,
@@ -1031,7 +1051,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         page,
         perPage,
         fields: ['name'],
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies IDs'));
@@ -1209,6 +1229,51 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       esClient,
       packagePolicy: restOfPackagePolicy,
     });
+
+    // If the package version has increased, save the previous package policy revision.
+    if (
+      appContextService.getExperimentalFeatures().enablePackageRollback &&
+      packagePolicy.package &&
+      oldPackagePolicy.package &&
+      semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
+    ) {
+      logger.debug(
+        `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+      );
+      const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+        savedObjectType,
+        id
+      );
+      const previousRevisionSO = {
+        ...currentPackagePolicySO,
+        id: `${id}:prev`,
+        attributes: {
+          ...currentPackagePolicySO.attributes,
+          latest_revision: false,
+        },
+      };
+      try {
+        await soClient.get<PackagePolicySOAttributes>(savedObjectType, `${id}:prev`);
+        await soClient.update<PackagePolicySOAttributes>(
+          savedObjectType,
+          `${id}:prev`,
+          previousRevisionSO.attributes
+        );
+      } catch (error) {
+        if (error.output.statusCode === 404) {
+          await soClient.create<PackagePolicySOAttributes>(
+            savedObjectType,
+            previousRevisionSO.attributes,
+            {
+              id: `${id}:prev`,
+              references: currentPackagePolicySO.references,
+            }
+          );
+        } else {
+          throw error;
+        }
+      }
+    }
 
     logger.debug(`Updating SO with revision ${oldPackagePolicy.revision + 1}`);
     await soClient
@@ -1391,6 +1456,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }> = [];
+    const previousPolicyRevisionsToCreate: Array<
+      SavedObjectsBulkCreateObject<PackagePolicySOAttributes>
+    > = [];
+    const previousPolicyRevisionsToUpdate: Array<
+      SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>
+    > = [];
 
     const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
 
@@ -1428,6 +1499,40 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         } else {
           this.keepPolicyIdInSync(oldPackagePolicy);
+        }
+
+        // If the package version has increased, save the previous package policy revision.
+        if (
+          appContextService.getExperimentalFeatures().enablePackageRollback &&
+          packagePolicy.package &&
+          oldPackagePolicy.package &&
+          semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
+        ) {
+          logger.debug(
+            `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+          );
+          const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+            savedObjectType,
+            id
+          );
+          const previousRevisionSO = {
+            ...currentPackagePolicySO,
+            id: `${id}:prev`,
+            attributes: {
+              ...currentPackagePolicySO.attributes,
+              latest_revision: false,
+            },
+          };
+          try {
+            await soClient.get<PackagePolicySOAttributes>(savedObjectType, `${id}:prev`);
+            previousPolicyRevisionsToUpdate.push(previousRevisionSO);
+          } catch (error) {
+            if (error.output.statusCode === 404) {
+              previousPolicyRevisionsToCreate.push(previousRevisionSO);
+            } else {
+              throw error;
+            }
+          }
         }
 
         let secretReferences: PolicySecretReference[] | undefined;
@@ -1555,6 +1660,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    // Store previous revision.
+    if (appContextService.getExperimentalFeatures().enablePackageRollback) {
+      await soClient
+        .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'Saved objects bulk create of previous package policy revisions failed'
+          )
+        );
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'Saved objects bulk update of previous package policy revisions failed'
+          )
+        );
+    }
+
+    // Update package policies SO.
     const { saved_objects: updatedPolicies } = await soClient
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
