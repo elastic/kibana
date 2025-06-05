@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useGetAIConnectors } from '../../../../common/hooks/use_get_ai_connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
@@ -42,7 +43,6 @@ import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 import { StartMigrationModal } from './start_migration_modal';
-import { useGetAIConnectors } from './use_get_ai_connectors';
 import { useStartMigrationModal } from './use_start_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
