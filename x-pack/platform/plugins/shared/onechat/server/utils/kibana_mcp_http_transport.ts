@@ -76,7 +76,7 @@ export class KibanaMcpHttpTransport implements Transport {
     if (req.route.method === 'post') {
       return await this.handlePostRequest(req, res);
     } else {
-      return this.handleUnsupportedRequest(res);
+      return await this.handleUnsupportedRequest(res);
     }
   }
 

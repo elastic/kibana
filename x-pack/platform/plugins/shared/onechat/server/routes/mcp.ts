@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -186,7 +186,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
       },
-      wrapHandler(async (_, request, response) => {
+      wrapHandler(async (_, __, response) => {
         return response.customError({
           statusCode: 405,
           body: {
