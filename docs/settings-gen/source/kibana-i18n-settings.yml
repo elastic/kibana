@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: i18n settings in Kibana
+id: i18n-settings-kb
 page_description: |
   You do not need to configure any settings to run Kibana in English.
 
