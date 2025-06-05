@@ -70,7 +70,7 @@ function termsQuery<T extends string>(
   return [{ terms: { [field]: filteredValues } }];
 }
 
-export function getUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
+export function getAssetLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
     [ASSET_ID]: asset[ASSET_ID],
@@ -84,7 +84,7 @@ function toAssetLink<TAssetLink extends AssetLinkRequest>(
 ): TAssetLink & { [ASSET_UUID]: string } {
   return {
     ...asset,
-    [ASSET_UUID]: getUuid(name, asset),
+    [ASSET_UUID]: getAssetLinkUuid(name, asset),
   };
 }
 
@@ -237,7 +237,7 @@ export class AssetClient {
   }
 
   async unlinkAsset(name: string, asset: AssetUnlinkRequest): Promise<void> {
-    const id = getUuid(name, asset);
+    const id = getAssetLinkUuid(name, asset);
 
     const { result } = await this.clients.storageClient.delete({ id });
     if (result === 'not_found') {
@@ -288,7 +288,7 @@ export class AssetClient {
             ...termQuery(ASSET_TYPE, assetType),
             ...termsQuery(
               '_id',
-              ids.map((id) => getUuid(name, { [ASSET_TYPE]: assetType, [ASSET_ID]: id }))
+              ids.map((id) => getAssetLinkUuid(name, { [ASSET_TYPE]: assetType, [ASSET_ID]: id }))
             ),
           ],
         },
@@ -313,7 +313,7 @@ export class AssetClient {
           };
         }
 
-        const id = getUuid(name, operation.delete.asset);
+        const id = getAssetLinkUuid(name, operation.delete.asset);
         return {
           delete: {
             _id: id,
@@ -400,7 +400,7 @@ export class AssetClient {
     const savedObjectAssetsWithUuids = [...dashboards, ...rules, ...slos].map((asset) => {
       return {
         ...asset,
-        [ASSET_UUID]: getUuid(name, asset),
+        [ASSET_UUID]: getAssetLinkUuid(name, asset),
       };
     });
 

@@ -12,7 +12,7 @@ import { StreamQuery } from '@kbn/streams-schema';
 import { QueryLink } from '../../../../../common/assets';
 import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
-import { AssetClient, getUuid } from '../asset_client';
+import { AssetClient, getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
 import { getKqlAsCommandArg, getRuleIdFromQueryLink } from './helpers/query';
 
@@ -22,7 +22,7 @@ function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): b
 
 function toQueryLink(query: StreamQuery, stream: string): QueryLink {
   return {
-    'asset.uuid': getUuid(stream, { 'asset.type': 'query', 'asset.id': query.id }),
+    'asset.uuid': getAssetLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id }),
     'asset.type': 'query',
     'asset.id': query.id,
     query,
