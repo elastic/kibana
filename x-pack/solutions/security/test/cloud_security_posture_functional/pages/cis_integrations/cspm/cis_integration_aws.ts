@@ -356,23 +356,26 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
     });
-    describe('Namespace Edit', () => {
-      it('should receive a non-default namespace field', async () => {
+    describe('Change namespace default value', () => {
+      it('should allow editing of the namespace field', async () => {
         const namespace = 'foo';
         await pageObjects.header.waitUntilLoadingHasFinished();
+
         await cisIntegration.clickOptionButton(ADVANCED_OPTION_ACCORDION);
         await cisIntegration.fillInTextField(NAMESPACE_INPUT, namespace);
         await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          const parsedUrl = (await browser.getCurrentUrl()).split('/');
-          const packagePolicyId = parsedUrl[parsedUrl.length - 1];
-          const { body } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
-          expect(body.namespace).to.be(namespace);
-        });
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+
+        await cisIntegration.navigateToIntegrationCspList();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const parsedUrl = (await browser.getCurrentUrl()).split('/');
+        const packagePolicyId = parsedUrl[parsedUrl.length - 1];
+        const { body } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+        expect(body.item.namespace).to.be(namespace);
       });
     });
   });
