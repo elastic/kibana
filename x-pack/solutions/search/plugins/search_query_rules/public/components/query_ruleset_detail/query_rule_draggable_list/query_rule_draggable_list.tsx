@@ -289,6 +289,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
               queryRule={queryRule}
               deleteRule={deleteRule} // Pass down the delete function
               rulesetId={rulesetId} // Pass down the ruleset ID
+              tourInfo={tourInfo}
               index={index}
               rules={rules}
               data-test-subj={`searchQueryRulesDraggableItem-${queryRule.rule_id}`}

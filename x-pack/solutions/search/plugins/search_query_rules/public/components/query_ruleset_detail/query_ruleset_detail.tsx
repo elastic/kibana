@@ -317,7 +317,7 @@ export const QueryRulesetDetail: React.FC = () => {
             tourInfo={tourStepsInfo[1]}
           />
 
-          {tourStepsInfo[1]?.tourTargetRef?.current && (
+          {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
             <EuiTourStep
               anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
               content={<p>{tourStepsInfo[1].content}</p>}
