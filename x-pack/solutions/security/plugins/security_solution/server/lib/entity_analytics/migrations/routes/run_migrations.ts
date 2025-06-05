@@ -19,8 +19,8 @@ import { scheduleEntityAnalyticsMigration } from '..';
 
 export const entityAnalyticsRunMigrationsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  logger: EntityAnalyticsRoutesDeps['logger']
+  logger: EntityAnalyticsRoutesDeps['logger'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({

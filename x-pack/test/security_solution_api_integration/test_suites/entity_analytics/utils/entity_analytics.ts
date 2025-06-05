@@ -22,7 +22,7 @@ export const entityAnalyticsRouteHelpersFactory = (
 ) => ({
   runMigrations: async () =>
     await supertest
-      .get(routeWithNamespace(ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE, namespace))
+      .post(routeWithNamespace(ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

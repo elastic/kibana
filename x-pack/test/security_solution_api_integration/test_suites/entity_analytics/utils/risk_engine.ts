@@ -678,14 +678,28 @@ const getBackingIndexFromDataStream = async ({
 };
 
 const removeDefaultPipelineFromIndex = async ({ es, index }: { es: Client; index: string }) => {
-  await es.indices.putSettings({
-    index,
-    settings: {
-      index: {
-        default_pipeline: null,
+  try {
+    const exists = await es.indices.exists({ index });
+    if (!exists) {
+      return; // Return early if index doesn't exist
+    }
+
+    await es.indices.putSettings({
+      index,
+      settings: {
+        index: {
+          // @ts-ignore this works but typescript doesn't like it, undefined doesnt work
+          default_pipeline: null,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    // Handle any other errors that might occur
+    if (error.meta?.statusCode === 404) {
+      return; // Index not found, return early
+    }
+    throw error; // Re-throw other errors
+  }
 };
 
 const addDefaultPipelineToIndex = async ({
@@ -698,34 +712,73 @@ const addDefaultPipelineToIndex = async ({
   space?: string;
 }) => {
   const pipelineId = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${space}`;
-  await es.indices.putSettings({
-    index,
-    settings: {
-      index: {
-        default_pipeline: pipelineId,
+  try {
+    const exists = await es.indices.exists({ index });
+    if (!exists) {
+      return; // Return early if index doesn't exist
+    }
+
+    await es.indices.putSettings({
+      index,
+      settings: {
+        index: {
+          default_pipeline: pipelineId,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      return; // Index not found, return early
+    }
+    throw error; // Re-throw other errors
+  }
+};
+
+const removeDefaultPipelineFromAssetCriticalityIndex = async ({
+  es,
+  log,
+  space = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  space?: string;
+}): Promise<void> => {
+  const assetCriticalityIndex = `.asset-criticality.asset-criticality-${space}`;
+
+  await removeDefaultPipelineFromIndex({ es, index: assetCriticalityIndex });
+  log.info(`Removed default pipeline from asset criticality index: ${assetCriticalityIndex}`);
 };
 
 const removeDefaultPipelineFromRiskScoreIndices = async ({
   es,
   log,
-  namespace = 'default',
+  space = 'default',
 }: {
   es: Client;
   log: ToolingLog;
-  namespace?: string;
+  space?: string;
 }): Promise<void> => {
-  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
-  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+  const riskScoreIndex = `risk-score.risk-score-${space}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${space}`;
 
-  const riskScoreBackingIndex = await getBackingIndexFromDataStream({
-    es,
-    datastreamName: riskScoreIndex,
-  });
+  try {
+    const indexExists = await es.indices.exists({ index: riskScoreIndex });
+    if (indexExists) {
+      const riskScoreBackingIndex = await getBackingIndexFromDataStream({
+        es,
+        datastreamName: riskScoreIndex,
+      });
 
-  await removeDefaultPipelineFromIndex({ es, index: riskScoreBackingIndex });
+      await removeDefaultPipelineFromIndex({ es, index: riskScoreBackingIndex });
+    } else {
+      log.info(
+        `Risk score index ${riskScoreIndex} does not exist, skipping backing index operation`
+      );
+    }
+  } catch (error) {
+    log.error(`Error checking or processing risk score index ${riskScoreIndex}: ${error.message}`);
+  }
+
   await removeDefaultPipelineFromIndex({ es, index: riskScoreLatestIndex });
 
   log.info(
@@ -736,22 +789,33 @@ const removeDefaultPipelineFromRiskScoreIndices = async ({
 const addDefaultPipelineToRiskScoreIndices = async ({
   es,
   log,
-  namespace = 'default',
+  space = 'default',
 }: {
   es: Client;
   log: ToolingLog;
-  namespace?: string;
+  space?: string;
 }): Promise<void> => {
-  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
-  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+  const riskScoreIndex = `risk-score.risk-score-${space}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${space}`;
 
-  const riskScoreBackingIndex = await getBackingIndexFromDataStream({
-    es,
-    datastreamName: riskScoreIndex,
-  });
+  try {
+    const indexExists = await es.indices.exists({ index: riskScoreIndex });
+    if (indexExists) {
+      const riskScoreBackingIndex = await getBackingIndexFromDataStream({
+        es,
+        datastreamName: riskScoreIndex,
+      });
 
-  await addDefaultPipelineToIndex({ es, index: riskScoreBackingIndex, space: namespace });
-  await addDefaultPipelineToIndex({ es, index: riskScoreLatestIndex, space: namespace });
+      await addDefaultPipelineToIndex({ es, index: riskScoreBackingIndex, space });
+    } else {
+      log.info(
+        `Risk score index ${riskScoreIndex} does not exist, skipping backing index operation`
+      );
+    }
+  } catch (error) {
+    log.error(`Error checking or processing risk score index ${riskScoreIndex}: ${error.message}`);
+  }
+  await addDefaultPipelineToIndex({ es, index: riskScoreLatestIndex, space });
 
   log.info(
     `Added default pipeline to risk score indices: ${riskScoreIndex}, ${riskScoreLatestIndex}`
@@ -770,7 +834,8 @@ export const simulateMissingPipelineBug = async ({
   log.info(
     'Simulating missing pipeline bug by removing default pipeline from risk score indices so pipeline can be deleted'
   );
-  await removeDefaultPipelineFromRiskScoreIndices({ es, log, namespace: space });
+  await removeDefaultPipelineFromRiskScoreIndices({ es, log, space });
+  await removeDefaultPipelineFromAssetCriticalityIndex({ es, log, space });
 
   log.info('Simulating missing pipeline bug by deleting eventIngested pipeline');
   await deleteEventIngestedPipeline({ es, log, space });
@@ -778,5 +843,5 @@ export const simulateMissingPipelineBug = async ({
   log.info(
     'Simulating missing pipeline bug by re-adding default pipeline back to risk score indices'
   );
-  await addDefaultPipelineToRiskScoreIndices({ es, log, namespace: space });
+  await addDefaultPipelineToRiskScoreIndices({ es, log, space });
 };
