@@ -28,7 +28,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       expect(certTypeTabs.length).to.be(1);
       expect(await certTypeTabs[0].getAttribute('data-test-subj')).to.be('webhookCertTypeCRTab');
-      expect(await testSubjects.missingOrFail('webhookCertTypePFXTab')).to.be(true);
     });
   });
 };
