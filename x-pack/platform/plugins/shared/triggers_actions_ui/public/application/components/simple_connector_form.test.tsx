@@ -14,6 +14,7 @@ import {
   SimpleConnectorForm,
 } from './simple_connector_form';
 import userEvent from '@testing-library/user-event';
+
 import { validateURL } from '@kbn/stack-connectors-plugin/public/connector_types/openai/validators';
 
 const fillForm = async ({ getByTestId }: RenderResult) => {
@@ -187,7 +188,7 @@ describe('SimpleConnectorForm', () => {
       },
     ];
 
-    const urlTests = [
+    const urlTests: Array<[string, boolean]> = [
       ['http://example.com', true],
       ['http://localhost:9200', true],
       ['http://example:1234/path', true],
