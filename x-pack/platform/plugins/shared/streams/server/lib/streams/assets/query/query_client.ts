@@ -47,16 +47,9 @@ export class QueryClient {
   }
 
   public async syncQueries(stream: string, queries: StreamQuery[]) {
+    console.log(`isSignificantEventsEnabled=${this.isSignificantEventsEnabled}`);
     if (!this.isSignificantEventsEnabled) {
-      return await this.dependencies.assetClient.syncAssetList(
-        stream,
-        queries.map((query) => ({
-          [ASSET_ID]: query.id,
-          [ASSET_TYPE]: 'query' as const,
-          query,
-        })),
-        'query'
-      );
+      return;
     }
 
     /**
@@ -112,27 +105,16 @@ export class QueryClient {
   }
 
   public async upsert(stream: string, query: StreamQuery) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.linkAsset(stream, {
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query',
-        query,
-      });
+      return;
     }
 
     await this.bulk(stream, [{ index: query }]);
   }
 
   public async delete(stream: string, queryId: string) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.unlinkAsset(stream, {
-        [ASSET_TYPE]: 'query',
-        [ASSET_ID]: queryId,
-      });
+      return;
     }
 
     await this.bulk(stream, [{ delete: { id: queryId } }]);
@@ -142,33 +124,8 @@ export class QueryClient {
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.bulk(
-        stream,
-        operations.map((operation) => {
-          if (operation.index) {
-            return {
-              index: {
-                asset: {
-                  [ASSET_TYPE]: 'query',
-                  [ASSET_ID]: operation.index.id,
-                  query: operation.index,
-                },
-              },
-            };
-          }
-          return {
-            delete: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.delete!.id,
-              },
-            },
-          };
-        })
-      );
+      return;
     }
 
     const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
