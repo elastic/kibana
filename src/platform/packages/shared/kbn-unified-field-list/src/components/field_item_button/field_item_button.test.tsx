@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -17,163 +19,191 @@ import { FieldItemButton } from './field_item_button';
 const bytesField = dataView.getFieldByName('bytes')!;
 const scriptedField = dataView.getFieldByName('script date')!;
 const conflictField = dataView.getFieldByName('custom_user_field')!;
+const dataTestSubj = 'field-bytes-showDetails';
 
-describe('UnifiedFieldList FieldItemButton', () => {
-  test('renders properly', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={bytesField}
-        fieldSearchHighlight="by"
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={jest.fn()}
-      />
-    );
-    expect(component).toMatchSnapshot();
+const commonProps = {
+  field: bytesField,
+  isEmpty: false,
+  isSelected: false,
+  isActive: false,
+  fieldSearchHighlight: undefined,
+  onClick: () => {},
+};
+
+describe('UnifiedFieldList <FieldItemButton />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('renders properly when empty', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={scriptedField}
-        fieldSearchHighlight={undefined}
-        isEmpty={true}
-        isSelected={true}
-        isActive={false}
-        onClick={jest.fn()}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  it('renders properly', async () => {
+    await act(async () => {
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} />);
+    });
+
+    expect(screen.getByTestId('field-bytes')).toBeInTheDocument();
+    expect(screen.getByTestId(dataTestSubj)).toBeInTheDocument();
   });
 
-  test('renders properly when a conflict field', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={conflictField}
-        fieldSearchHighlight={undefined}
-        isEmpty={false}
-        isSelected={false}
-        isActive={true}
-        onClick={jest.fn()}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  it('should call onClick when clicked', async () => {
+    const onClick = jest.fn();
+    await act(async () => {
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} onClick={onClick} />);
+    });
+
+    const button = screen.getByTestId(dataTestSubj);
+    await userEvent.click(button);
+
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  test('renders properly for Records (Lens field)', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={
-          new DataViewField({
-            name: '___records___',
-            customLabel: 'Records',
-            type: 'document',
-            searchable: false,
-            aggregatable: true,
-          })
-        }
-        fieldSearchHighlight="re"
-        isEmpty={false}
-        isSelected={false}
-        isActive={true}
-        onClick={jest.fn()}
-      />
+  it('should render with add to workspace button when onAddFieldToWorkspace is provided', async () => {
+    const onAddFieldToWorkspace = jest.fn();
+
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton {...commonProps} onAddFieldToWorkspace={onAddFieldToWorkspace} />
+      )
     );
-    expect(component).toMatchSnapshot();
+
+    const addButton = screen.getByTestId('fieldToggle-bytes');
+    expect(addButton).toHaveAttribute('aria-label', 'Add "bytes" field');
+    await userEvent.click(addButton);
+
+    expect(onAddFieldToWorkspace).toHaveBeenCalledWith(bytesField);
   });
 
-  test('renders properly with an action when selected', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={bytesField}
-        fieldSearchHighlight={undefined}
-        isEmpty={false}
-        isSelected={true}
-        isActive={false}
-        onClick={jest.fn().mockName('click')}
-        onAddFieldToWorkspace={jest.fn().mockName('add')}
-        onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
-      />
+  it('should render with remove from workspace button when onRemoveFieldFromWorkspace is provided and isSelected is true', async () => {
+    const onRemoveFieldFromWorkspace = jest.fn();
+
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton
+          {...commonProps}
+          isSelected={true}
+          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+        />
+      )
     );
-    expect(component).toMatchSnapshot();
+
+    const removeButton = screen.getByTestId('fieldToggle-bytes');
+    expect(removeButton).toHaveAttribute('aria-label', 'Remove "bytes" field');
+    await userEvent.click(removeButton);
+
+    expect(onRemoveFieldFromWorkspace).toHaveBeenCalledWith(bytesField);
   });
 
-  test('renders properly with an action when deselected', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={bytesField}
-        fieldSearchHighlight={undefined}
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={undefined}
-        shouldAlwaysShowAction
-        onAddFieldToWorkspace={jest.fn().mockName('add')}
-        onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
-      />
+  it('should render correctly with drag icon', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} withDragIcon={true} />)
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByTestId('fieldItemButton-dragIcon')).toBeInTheDocument();
   });
 
-  test('renders properly with a drag icon', () => {
-    const component = shallow(
-      <FieldItemButton
-        size="xs"
-        className="custom"
-        dataTestSubj="test-subj"
-        withDragIcon={true}
-        field={bytesField}
-        fieldSearchHighlight={undefined}
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={undefined}
-      />
+  it('should highlight text when fieldSearchHighlight is provided', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} fieldSearchHighlight="by" />)
     );
-    expect(component).toMatchSnapshot();
+
+    // Check for highlight elements
+    const markElement = screen.getByText('by');
+    expect(markElement.tagName).toBe('MARK');
+
+    // Check that the full field name content is available
+    const fieldNameElement = screen.getByTestId('field-bytes');
+    expect(fieldNameElement).toHaveTextContent('bytes');
   });
 
-  test('renders properly for text-based column field', () => {
-    const component = shallow(
-      <FieldItemButton<DatatableColumn>
-        field={{ id: 'test', name: 'agent', meta: { type: 'string' } }}
-        fieldSearchHighlight="ag"
-        getCustomFieldType={(f) => f.meta.type}
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={undefined}
-      />
+  it('should render scripted field correctly', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} field={scriptedField} />)
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByTestId('field-script date')).toBeInTheDocument();
   });
 
-  test('renders properly for wildcard search', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={scriptedField}
-        fieldSearchHighlight="sc*te"
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={undefined}
-      />
+  it('should render conflict field correctly', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(<FieldItemButton {...commonProps} field={conflictField} />)
     );
-    expect(component).toMatchSnapshot();
+
+    expect(screen.getByTestId('field-custom_user_field')).toBeInTheDocument();
   });
 
-  test('renders properly for search with spaces', () => {
-    const component = shallow(
-      <FieldItemButton
-        field={scriptedField}
-        fieldSearchHighlight="sc te"
-        isEmpty={false}
-        isSelected={false}
-        isActive={false}
-        onClick={undefined}
-      />
+  it('renders properly for Records (Lens field)', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton
+          {...commonProps}
+          field={
+            new DataViewField({
+              name: '___records___',
+              customLabel: 'Records',
+              type: 'document',
+              searchable: false,
+              aggregatable: true,
+            })
+          }
+          fieldSearchHighlight="cor"
+        />
+      )
     );
-    expect(component).toMatchSnapshot();
+
+    // Check that the Records field is rendered with custom label
+    expect(screen.getByTestId('field-___records___')).toBeInTheDocument();
+    expect(screen.getByText('Records')).toBeInTheDocument();
+
+    // Check highlight is applied
+    const highlightedText = screen.getByText('cor');
+    expect(highlightedText.tagName).toBe('MARK');
+  });
+
+  it('renders properly for text-based column field', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton<DatatableColumn>
+          {...commonProps}
+          field={{ id: 'test', name: 'agent', meta: { type: 'string' } }}
+          fieldSearchHighlight="ag"
+          getCustomFieldType={(f) => f.meta.type}
+        />
+      )
+    );
+
+    // Check that the field is rendered using the data-test-subj attribute
+    const fieldElement = screen.getByTestId('field-agent');
+    expect(fieldElement).toBeInTheDocument();
+
+    // Check highlight is applied
+    const highlightedText = screen.getByText('ag');
+    expect(highlightedText.tagName).toBe('MARK');
+  });
+
+  it('renders properly for wildcard search', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton {...commonProps} field={scriptedField} fieldSearchHighlight="sc*te" />
+      )
+    );
+
+    expect(screen.getByTestId('field-script date')).toBeInTheDocument();
+
+    const markElement = screen.getByTestId('field-script date').querySelector('mark');
+    expect(markElement).toBeInTheDocument();
+    expect(markElement).toHaveTextContent('script date');
+  });
+
+  it('renders properly for search with spaces', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton {...commonProps} field={scriptedField} fieldSearchHighlight="sc te" />
+      )
+    );
+
+    expect(screen.getByTestId('field-script date')).toBeInTheDocument();
+
+    const markElement = screen.getByTestId('field-script date').querySelector('mark');
+    expect(markElement).toBeInTheDocument();
+    expect(markElement).toHaveTextContent('script date');
   });
 });

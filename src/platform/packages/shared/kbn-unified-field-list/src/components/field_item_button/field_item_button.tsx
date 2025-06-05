@@ -228,7 +228,11 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
             <FieldIcon {...iconProps} />
           </div>
           {withDragIcon && (
-            <div className="unifiedFieldListItemButton__fieldIconDrag" css={styles.fieldIconDrag}>
+            <div
+              className="unifiedFieldListItemButton__fieldIconDrag"
+              css={styles.fieldIconDrag}
+              data-test-subj="fieldItemButton-dragIcon"
+            >
               {DRAG_ICON}
             </div>
           )}
