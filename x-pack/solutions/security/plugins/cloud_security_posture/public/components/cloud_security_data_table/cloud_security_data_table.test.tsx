@@ -21,7 +21,7 @@ const mockDataView = {
       { id: 'field1', name: 'field1', customLabel: 'Label 1', visualizable: true },
       { id: 'field2', name: 'field2', customLabel: 'Label 2', visualizable: true },
     ],
-    getByName: (name: string) => ({ id: name }),
+    getByName: (name: string) => ({ id: name, name }),
   },
   getFieldByName: (name: string) => ({ id: name }),
   getFormatterForField: (name: string) => ({

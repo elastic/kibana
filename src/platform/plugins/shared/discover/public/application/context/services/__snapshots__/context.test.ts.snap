@@ -28,6 +28,9 @@ Object {
     Object {
       "field": "@timestamp",
     },
+    Object {
+      "field": "time.duration.us",
+    },
   ],
   "query": Object {
     "bool": Object {
