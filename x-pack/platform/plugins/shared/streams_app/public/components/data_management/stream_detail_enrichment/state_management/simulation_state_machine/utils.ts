@@ -111,6 +111,7 @@ export function getSchemaFieldsFromSimulation(
     // Detected field still unmapped
     return {
       status: 'unmapped',
+      esType: field.esType,
       name: field.name,
       parent: streamName,
     };
