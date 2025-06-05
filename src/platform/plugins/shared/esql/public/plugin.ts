@@ -21,6 +21,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
 import {
+  InferenceEndpointsAutocompleteResult,
+  InferenceTaskType,
+} from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
+import {
   esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
 } from './triggers/esql_controls/esql_control_trigger';
@@ -51,6 +55,9 @@ interface EsqlPluginStartDependencies {
 export interface EsqlPluginStart {
   getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getInferenceEndpointsAutocomplete?: (
+    taskType: InferenceTaskType
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
 }
 
@@ -137,6 +144,19 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       return result;
     };
 
+    const getInferenceEndpointsAutocomplete = cacheParametrizedAsyncFunction(
+      async (taskType: InferenceTaskType) => {
+        const result = await core.http.get<InferenceEndpointsAutocompleteResult>(
+          `/internal/esql/autocomplete/inference_endpoints/${taskType}`
+        );
+
+        return result;
+      },
+      (taskType: InferenceTaskType) => taskType,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
     // Create a cached version of getEditorExtensionsAutocomplete
     const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
       getEditorExtensionsAutocomplete,
@@ -149,6 +169,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
+      getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };

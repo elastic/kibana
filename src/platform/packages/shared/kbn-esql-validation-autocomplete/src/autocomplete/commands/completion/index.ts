@@ -66,7 +66,7 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const { suggestFieldsOrFunctionsByType } = params;
+  const { suggestFieldsOrFunctionsByType, callbacks } = params;
 
   const position = getPosition(params);
 
@@ -84,7 +84,7 @@ export async function suggest(
       return [withCompletionItem];
 
     case CompletionPosition.AFTER_WITH:
-      // Must fetch inference endpoints from API.
+      const inferenceEndpoints = await callbacks?.getInferenceEndpoints?.('completion');
       return [];
 
     case CompletionPosition.AFTER_INFERENCE_ID:
