@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: Banner settings in Kibana
+id: banners-settings-kb
 page_description: |
   Banners are disabled by default. You need to manually configure them in order to use the feature.
 
