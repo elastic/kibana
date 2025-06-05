@@ -45,7 +45,7 @@ export function WelcomeMessageKnowledgeBase({
           <EuiFlexItem grow>
             <EuiCallOut
               title={i18n.translate(
-                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutTitle',
+                'xpack.aiAssistant.welcomeMessage.knowledgeBaseReindexingCalloutTitle',
                 {
                   defaultMessage: 'Re-indexing in progress.',
                 }
@@ -55,7 +55,7 @@ export function WelcomeMessageKnowledgeBase({
               data-test-subj="welcomeMessageKnowledgeBaseReindexingCallOut"
             >
               {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutBody',
+                'xpack.aiAssistant.welcomeMessage.knowledgeBaseReindexingCalloutBody',
                 {
                   defaultMessage:
                     'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
