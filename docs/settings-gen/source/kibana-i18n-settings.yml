@@ -1,0 +1,40 @@
+---
+# This file is used to generate "Alert and action settings" page in the product docs
+
+product: Kibana
+collection: i18n settings in Kibana
+page_description: |
+  You do not need to configure any settings to run Kibana in English.
+
+groups:
+  - group: General settings
+    id: general-i18n-settings
+    # description: |
+    #  - ""
+    # example: example-group-name.asciidoc
+    settings:
+
+      - setting: i18n.locale
+        # id:
+        description: |
+          Set the Kibana interface language.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: en
+        options:
+           - option: en
+           - option: zh-CN
+           - option: ja-JP
+           - option: fr-FR
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
