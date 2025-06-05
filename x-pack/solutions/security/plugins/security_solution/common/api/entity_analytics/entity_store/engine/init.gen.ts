@@ -79,7 +79,7 @@ export const InitEntityEngineRequestBody = z.object({
   /**
    * Defines the initial page size to use for the composite aggregation for each checkpoint
    */
-  maxPageSearchSize: z.number().int().optional().default(20000),
+  maxPageSearchSize: z.number().int().optional().default(500),
 });
 export type InitEntityEngineRequestBodyInput = z.input<typeof InitEntityEngineRequestBody>;
 

@@ -63,7 +63,7 @@ paths:
                   description: The number of documents per second to process.
                 maxPageSearchSize:
                   type: integer
-                  default: 20000
+                  default: 500
                   description: Defines the initial page size to use for the composite aggregation for each checkpoint
       responses:
         '200':
