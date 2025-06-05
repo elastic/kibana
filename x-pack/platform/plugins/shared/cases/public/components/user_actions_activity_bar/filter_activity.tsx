@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
