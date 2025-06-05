@@ -11,6 +11,9 @@ import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { LogsEndpointAction } from '../../../common/endpoint/types';
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { stringify } from '../utils/stringify';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
 import {
@@ -21,6 +24,7 @@ import { catchAndWrapError, wrapErrorIfNeeded } from '../utils';
 import { QueueProcessor } from '../utils/queue_processor';
 import type { EndpointAppContextService } from '../endpoint_app_context_services';
 import type { ReferenceDataSavedObject } from '../lib/reference_data/types';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
 const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
 const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
@@ -243,5 +247,82 @@ const migrateArtifactsToSpaceAware = async (
 const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  //
+  const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
+  const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
+  const migrationState = await getMigrationState(
+    soClient,
+    logger,
+    RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
+  );
+
+  if (migrationState.metadata.status !== 'not-started') {
+    logger.debug(
+      `Migration for endpoint response actions in support of spaces has a status of [${migrationState.metadata.status}]. Nothing to do.`
+    );
+    return;
+  }
+
+  logger.info(`starting migration of endpoint respnose actions in support of spaces`);
+
+  migrationState.metadata.status = 'pending';
+  migrationState.metadata.started = new Date().toISOString();
+  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+  const migrationStats = {
+    totalItems: 0,
+    itemsNeedingUpdates: 0,
+    successUpdates: 0,
+    failedUpdates: 0,
+  };
+  const esClient = endpointService.getInternalEsClient();
+  const updateProcessor = new QueueProcessor<{
+    index: string;
+    itemId: string;
+    actionId: string;
+    update: Pick<LogsEndpointAction, 'originSpaceId'> & Pick<LogsEndpointAction['agent'], 'policy'>;
+  }>({
+    batchSize: 50,
+    logger,
+    batchHandler: async ({ data: actionUpdates }) => {
+      //
+    },
+  });
+
+  const responseActionsFetcher = createEsSearchIterable<LogsEndpointAction>({
+    esClient,
+    searchRequest: {
+      index: ENDPOINT_ACTIONS_INDEX,
+      sort: '@timestamp',
+      size: 50,
+      query: {
+        bool: { must_not: { exists: { field: 'originSpaceId' } } },
+      },
+    },
+  });
+
+  for await (const actionRequestSearchResults of responseActionsFetcher) {
+    const actionRequests = actionRequestSearchResults.hits.hits;
+    const totalItems = (actionRequestSearchResults.hits.total as SearchTotalHits).value ?? 0;
+
+    if (migrationStats.totalItems !== totalItems) {
+      migrationStats.totalItems = totalItems;
+    }
+
+    //
+  }
+
+  await updateProcessor.complete();
+
+  migrationState.metadata.status = 'complete';
+  migrationState.metadata.finished = new Date().toISOString();
+  migrationState.metadata.data = migrationStats;
+  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+  logger.info(
+    `migration of endpoint response actions in support of space done.\n${JSON.stringify(
+      migrationStats,
+      null,
+      2
+    )}`
+  );
 };
