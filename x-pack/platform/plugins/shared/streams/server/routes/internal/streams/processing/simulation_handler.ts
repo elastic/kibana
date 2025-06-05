@@ -151,7 +151,7 @@ export const simulateProcessing = async ({
   streamsClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { mapping: streamIndexMapping, fieldCaps: streamIndexFieldCaps }] =
+  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
       getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
@@ -162,7 +162,7 @@ export const simulateProcessing = async ({
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
-    streamIndexMapping,
+    streamIndexState,
     params
   );
   /**
@@ -756,27 +756,27 @@ const getStreamIndex = async (
   streamsClient: StreamsClient,
   streamName: string
 ): Promise<{
-  mapping: IndicesIndexState;
+  indexState: IndicesIndexState;
   fieldCaps: FieldCapsResponse['fields'];
 }> => {
   const dataStream = await streamsClient.getDataStream(streamName);
-  const lastIndex = dataStream.indices.at(-1);
-  if (!lastIndex) {
+  const lastIndexRef = dataStream.indices.at(-1);
+  if (!lastIndexRef) {
     throw new Error(`No writing index found for stream ${streamName}`);
   }
 
-  const [lastIndexMapping, lastIndexFieldCaps] = await Promise.all([
+  const [lastIndex, lastIndexFieldCaps] = await Promise.all([
     scopedClusterClient.asCurrentUser.indices.get({
-      index: lastIndex.index_name,
+      index: lastIndexRef.index_name,
     }),
     scopedClusterClient.asCurrentUser.fieldCaps({
-      index: lastIndex.index_name,
+      index: lastIndexRef.index_name,
       fields: '*',
     }),
   ]);
 
   return {
-    mapping: lastIndexMapping[lastIndex.index_name],
+    indexState: lastIndex[lastIndexRef.index_name],
     fieldCaps: lastIndexFieldCaps.fields,
   };
 };
