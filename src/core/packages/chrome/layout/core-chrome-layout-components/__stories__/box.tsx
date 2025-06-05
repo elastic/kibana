@@ -16,18 +16,11 @@ interface BoxProps {
   backgroundColor: string;
   children?: ReactNode;
   label?: string;
-  css?: SerializedStyles;
+  rootCSS?: SerializedStyles;
   labelCSS?: SerializedStyles;
 }
 
-export const Box = ({
-  color,
-  backgroundColor,
-  css: cssProp,
-  label,
-  children,
-  labelCSS,
-}: BoxProps) => {
+export const Box = ({ color, backgroundColor, rootCSS, label, children, labelCSS }: BoxProps) => {
   const { euiTheme } = useEuiTheme();
 
   const rootStyle = css`
@@ -76,7 +69,7 @@ export const Box = ({
     & > * {
       z-index: 1;
     }
-    ${cssProp}
+    ${rootCSS}
   `;
 
   const labelStyle = css`
