@@ -312,6 +312,7 @@ export const QueryRulesetDetail: React.FC = () => {
             addNewRule={addNewRule}
             updateRule={updateRule}
             rules={rules}
+            tourInfo={tourStepsInfo[1]}
           />
 
           {tourStepsInfo[1]?.tourTargetRef?.current && (
