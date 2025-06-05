@@ -28,6 +28,7 @@ export const postCaseRoute = createCasesRoute({
       const theCase = request.body as caseApiV1.CasePostRequest;
 
       const res: caseDomainV1.Case = await casesClient.cases.create({ ...theCase });
+      caseContext.scheduleIdCrementerTask();
 
       return response.ok({
         body: res,

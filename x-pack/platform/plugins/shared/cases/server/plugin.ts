@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 
 export class CasePlugin
   implements
@@ -66,6 +67,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private incrementalIdTaskManager?: IncrementalIdTaskManager;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -117,14 +119,21 @@ export class CasePlugin
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
+    if (plugins.taskManager) {
+      this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+        plugins.taskManager,
+        this.logger
+      );
+
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -188,6 +197,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
     }
 
     this.userProfileService.initialize({
@@ -251,6 +261,9 @@ export class CasePlugin
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
+        },
+        scheduleIdCrementerTask: () => {
+          this.incrementalIdTaskManager?.scheduleIdCrementerTask();
         },
       };
     };
