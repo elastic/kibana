@@ -34,7 +34,7 @@ import {
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlinePanel } from '../inline_editing/mount';
+import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
@@ -211,10 +211,10 @@ export function initializeEditApi(
       return false;
     }
     return (
-      Boolean(capabilities.visualize_v2?.save) ||
+      Boolean(capabilities.visualize_v2.save) ||
       (!getState().savedObjectId &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
-        Boolean(capabilities.visualize_v2?.show))
+        Boolean(capabilities.visualize_v2.show))
     );
   };
 

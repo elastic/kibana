@@ -58,4 +58,5 @@ export {
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
 } from './preconfigured_inference_ids';

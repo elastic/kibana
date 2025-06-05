@@ -236,7 +236,7 @@ describe('<RepositoryAdd />', () => {
               type: fsRepository.type,
               settings: {
                 location: fsRepository.settings.location,
-                compress: true,
+                compress: false,
                 chunkSize: fsRepository.settings.chunkSize,
                 maxSnapshotBytesPerSec: fsRepository.settings.maxSnapshotBytesPerSec,
                 maxRestoreBytesPerSec: fsRepository.settings.maxRestoreBytesPerSec,

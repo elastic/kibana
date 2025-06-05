@@ -167,7 +167,7 @@ export class ProxyHandler extends ProjectHandler {
         if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
           this.log.info('Project is not reachable. A retry will be triggered soon...');
         } else {
-          this.log.error(`${error.message}`);
+          this.log.warning(`${error.message}`);
         }
       },
       retries: 100,

@@ -28,15 +28,15 @@
       "searchprofiler",
       "security",
       "serverless",
-      "share"
+      "share",
+      "visualizations"
     ],
     "optionalPlugins": [
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
-      "usageCollection",
-      "visualizations"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"
