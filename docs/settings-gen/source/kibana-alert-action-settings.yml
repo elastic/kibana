@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: logs-ui-settings-kb
 page_description: |
   Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
