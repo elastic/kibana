@@ -103,6 +103,7 @@ import {
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
+import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 
 /*
  * Saved object types and mappings
@@ -876,6 +877,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '19': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -976,6 +991,20 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
             },
           ],
         },
