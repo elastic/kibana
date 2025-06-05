@@ -121,15 +121,13 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   isEdit,
   isPreconfigured,
 }) => {
-  const { isValid, value, default_value: defaultValue, key, range, updatable } = configEntry;
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? defaultValue);
   useEffect(() => {
     setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
   }, [defaultValue, value]);
   return (
     <EuiFieldNumber
-      min={range?.min}
-      max={range?.max}
       fullWidth
       disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
       data-test-subj={`${key}-number`}

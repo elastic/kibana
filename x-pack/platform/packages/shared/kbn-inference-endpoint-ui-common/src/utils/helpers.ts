@@ -6,10 +6,11 @@
  */
 
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, cloneDeep } from 'lodash/fp';
 import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration } from '../types/types';
+import type { FieldsConfiguration, InferenceEndpoint } from '../types/types';
 import * as LABELS from '../translations';
+import { MIN_ALLOCATIONS, ServiceProviderKeys } from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -114,7 +115,24 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-        range: newProvider.configurations[k].range,
       })
     );
+};
+
+export const getInferenceApiParams = (data: InferenceEndpoint, isServerless: boolean) => {
+  if (
+    isServerless &&
+    data?.config?.provider === ServiceProviderKeys.elasticsearch &&
+    data?.config?.providerConfig
+  ) {
+    const dataToSend = cloneDeep(data);
+    dataToSend.config.providerConfig!.adaptive_allocations = {
+      enabled: true,
+      min_number_of_allocations: MIN_ALLOCATIONS,
+      max_number_of_allocations: data.config.providerConfig.max_number_of_allocations,
+    };
+    delete dataToSend?.config?.providerConfig?.max_number_of_allocations;
+
+    return dataToSend;
+  }
 };

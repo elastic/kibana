@@ -8,9 +8,6 @@
 import type { FieldsConfiguration } from './types/types';
 import { FieldType } from './types/types';
 
-const MAX_ALLOCATIONS_MAX = 32;
-const MAX_ALLOCATIONS_MIN = 1;
-
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
@@ -33,6 +30,7 @@ export enum ServiceProviderKeys {
 }
 
 export const DEFAULT_TASK_TYPE = 'completion';
+export const MIN_ALLOCATIONS = 0;
 
 type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
 type InternalOverrideFieldsType = {
@@ -53,7 +51,6 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
           description: 'Maximum number of allocations for the inference endpoint.',
           label: 'Max Allocations',
           required: true,
-          range: { min: MAX_ALLOCATIONS_MIN, max: MAX_ALLOCATIONS_MAX },
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,

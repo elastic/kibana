@@ -19,13 +19,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { cloneDeep } from 'lodash';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { getInferenceApiParams } from '../utils/helpers';
 
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
@@ -76,25 +76,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     if (!isValid) {
       return;
     }
-    let dataToSend = data;
-    if (isServerless && data.config.provider === 'elasticsearch' && data.config?.providerConfig) {
-      // TODO: Create helper class/function to get adaptive allocations config and num_threads for high search-optimized for serverless based on max_number_of_allocations set by the user
-      // should return something like = { adaptive_allocations: { enabled: true, min_number_of_allocations: 0, max_number_of_allocations: <set-by-user> } } - we can set this in the provider config
-      // those values can then be added to the providerConfig before sending to the server
-      // Once this is working, review if this is the best place to do it or if it can be done when provider is first selected
-      dataToSend = cloneDeep(data);
-      if (dataToSend?.config?.providerConfig) {
-        dataToSend.config.providerConfig.adaptive_allocations = {
-          enabled: true,
-          min_number_of_allocations: 0,
-          max_number_of_allocations: data.config.providerConfig.max_number_of_allocations,
-        };
-        dataToSend.config.providerConfig.num_threads = 16; // Needs to be calculated properly
-      }
-      delete dataToSend?.config?.providerConfig?.max_number_of_allocations;
-    }
 
-    mutate(dataToSend, !!isEdit);
+    mutate(getInferenceApiParams(data, isServerless) ?? data, !!isEdit);
   }, [form, isEdit, isServerless, mutate]);
 
   const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');

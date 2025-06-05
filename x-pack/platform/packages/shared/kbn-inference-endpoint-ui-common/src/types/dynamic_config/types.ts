@@ -37,7 +37,6 @@ export interface ConfigProperties {
   default_value: string | number | boolean | null;
   description: string | null;
   label: string;
-  range?: { min: number; max: number };
   required: boolean;
   sensitive: boolean;
   updatable: boolean;
