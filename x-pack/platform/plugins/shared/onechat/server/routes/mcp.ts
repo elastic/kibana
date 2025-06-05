@@ -16,7 +16,7 @@ const TECHNICAL_PREVIEW_WARNING =
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/mcp';
+const MCP_SERVER_PATH = '/api/onechat/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
