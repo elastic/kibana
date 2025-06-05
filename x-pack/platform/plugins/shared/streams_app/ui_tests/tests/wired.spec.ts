@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { testData, test } from '../fixtures';
 
-test.describe.skip('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, kbnClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await apiServices.streams.enable();
@@ -58,9 +58,8 @@ test.describe.skip('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByText('Add a processor').click();
 
     await page.locator('input[name="field"]').fill('body.text');
-    await page
-      .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:attributes.method} %{URIPATH:attributes.request}');
+    await page.getByTestId('streamsAppPatternExpression').click();
+    await page.keyboard.type('%{WORD:attributes.method}', { delay: 150 }); // Simulate real typing
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
@@ -71,10 +70,12 @@ test.describe.skip('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByPlaceholder('Search...').fill('attributes');
     await page.getByTestId('streamsAppContentRefreshButton').click();
 
-    await page
+    const actionsButtons = page
       .getByRole('row', { name: 'attributes.custom_field' })
-      .getByLabel('Open actions menu')
-      .click();
+      .getByTestId('streamsAppActionsButton');
+
+    await actionsButtons.focus();
+    await actionsButtons.click();
 
     await page.getByRole('button', { name: 'Map field' }).click();
     await page.getByRole('combobox').selectOption('keyword');
