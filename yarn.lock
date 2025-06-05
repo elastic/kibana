@@ -7682,7 +7682,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/task-manager-performance-plugin@link:x-pack/test/plugin_api_perf/plugins/task_manager_performance":
+"@kbn/task-manager-performance-plugin@link:x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance":
   version "0.0.0"
   uid ""
 

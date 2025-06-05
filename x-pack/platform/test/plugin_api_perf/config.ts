@@ -6,10 +6,10 @@
  */
 
 import path from 'path';
-import { findTestPluginPaths } from '@kbn/test';
+import { findTestPluginPaths, FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {
