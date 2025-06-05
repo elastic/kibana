@@ -30,13 +30,17 @@ export function transformPanelsOut({
   const panels = JSON.parse(panelsJSON);
 
   // Step 2: Inject sections into panels and transform properties
-  const panelsWithSections = injectSections(panels, sections);
+  const panelsWithSections = injectSections(panels, sections, embeddable);
 
   // Step 3: Inject panel references
   return injectPanelReferences(panelsWithSections, embeddable, references);
 }
 
-function injectSections(panels: SavedDashboardPanel[], sections: SavedDashboardSection[]) {
+function injectSections(
+  panels: SavedDashboardPanel[],
+  sections: SavedDashboardSection[],
+  embeddable: EmbeddableStart
+): Array<DashboardPanel | DashboardSection> {
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
     (prev, section) => {
       const sectionId = section.gridData.i;
@@ -47,7 +51,9 @@ function injectSections(panels: SavedDashboardPanel[], sections: SavedDashboardS
   panels.forEach((panel: SavedDashboardPanel) => {
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel));
+      (sectionsMap[sectionId] as DashboardSection).panels.push(
+        transformPanelProperties(panel, embeddable)
+      );
     } else {
       sectionsMap[panel.panelIndex] = transformPanelProperties(panel, embeddable);
     }
