@@ -133,15 +133,13 @@ export const CloudAssetInventoryPolicyTemplateForm =
           const inputVars = getAssetInputHiddenVars(
             inputType,
             packageInfo,
-            inputType === CLOUDBEAT_AWS && isAgentlessAvailable
-              ? SetupTechnology.AGENTLESS
-              : SetupTechnology.AGENT_BASED,
+            setupTechnology,
             showCloudConnectors
           );
           const policy = getAssetPolicy(newPolicy, inputType, inputVars);
           updatePolicy(policy);
         },
-        [packageInfo, isAgentlessAvailable, showCloudConnectors, newPolicy, updatePolicy]
+        [packageInfo, setupTechnology, showCloudConnectors, newPolicy, updatePolicy]
       );
 
       // // search for non null fields of the validation?.vars object
