@@ -38,7 +38,7 @@ export function resultsServiceProvider(mlApi) {
       intervalMs,
       perPage = 10,
       fromPage = 1,
-      swimLaneSeverity = [{ min: 0, max: 3 }]
+      swimLaneSeverity = [{ min: 0 }]
     ) {
       return new Promise((resolve, reject) => {
         const obj = {
