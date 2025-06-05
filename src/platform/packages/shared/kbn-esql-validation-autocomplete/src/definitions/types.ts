@@ -6,13 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
+import {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
   ESQLAstCommand,
+  ESQLAst,
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
@@ -67,6 +68,7 @@ export const dataTypes = [
   'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
+  'param', // Defines a named param such as ?value or ??field
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -168,6 +170,8 @@ export interface Signature {
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export enum FunctionDefinitionTypes {
@@ -287,6 +291,8 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -362,7 +368,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
   /**
    * The AST for the query behind the cursor.
    */
@@ -415,7 +424,11 @@ export interface CommandDefinition<CommandName extends string> {
    * prevent the default behavior. If you need a full override, we are currently
    * doing those directly in the validateCommand function in the validation module.
    */
-  validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
+  validate?: (
+    command: ESQLCommand<CommandName>,
+    references: ReferenceMaps,
+    ast: ESQLAst
+  ) => ESQLMessage[];
 
   /**
    * This method is called to load suggestions when the cursor is within this command.

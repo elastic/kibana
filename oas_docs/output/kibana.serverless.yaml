@@ -93,6 +93,13 @@ tags:
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
+  - name: maintenance-window
+    description: |
+      You can schedule single or recurring maintenance windows to temporarily reduce rule notifications. For example, a maintenance window prevents false alarms during planned outages.
+    externalDocs:
+      description: Maintenance window documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
+    x-displayName: Maintenance windows
   - name: Message Signing Service
   - description: Machine learning
     name: ml
@@ -4219,6 +4226,7 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
+      x-state: Generally available
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -4324,6 +4332,7 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
+      x-state: Generally available
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
@@ -6731,80 +6740,183 @@ paths:
                           panels:
                             default: []
                             items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                gridData:
-                                  additionalProperties: false
+                              anyOf:
+                                - additionalProperties: false
                                   type: object
                                   properties:
-                                    h:
-                                      default: 15
-                                      description: The height of the panel in grid units
-                                      minimum: 1
-                                      type: number
-                                    i:
-                                      type: string
-                                    w:
-                                      default: 24
-                                      description: The width of the panel in grid units
-                                      maximum: 48
-                                      minimum: 1
-                                      type: number
-                                    x:
-                                      description: The x coordinate of the panel in grid units
-                                      type: number
-                                    'y':
-                                      description: The y coordinate of the panel in grid units
-                                      type: number
-                                  required:
-                                    - x
-                                    - 'y'
-                                    - i
-                                id:
-                                  description: The saved object id for by reference panels
-                                  type: string
-                                panelConfig:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    description:
-                                      description: The description of the panel
-                                      type: string
-                                    enhancements:
-                                      additionalProperties: {}
+                                    gridData:
+                                      additionalProperties: false
                                       type: object
-                                    hidePanelTitles:
-                                      description: Set to true to hide the panel title in its container.
-                                      type: boolean
-                                    savedObjectId:
-                                      description: The unique id of the library item to construct the embeddable.
+                                      properties:
+                                        h:
+                                          default: 15
+                                          description: The height of the panel in grid units
+                                          minimum: 1
+                                          type: number
+                                        i:
+                                          type: string
+                                        w:
+                                          default: 24
+                                          description: The width of the panel in grid units
+                                          maximum: 48
+                                          minimum: 1
+                                          type: number
+                                        x:
+                                          description: The x coordinate of the panel in grid units
+                                          type: number
+                                        'y':
+                                          description: The y coordinate of the panel in grid units
+                                          type: number
+                                      required:
+                                        - x
+                                        - 'y'
+                                        - i
+                                    id:
+                                      description: The saved object id for by reference panels
+                                      type: string
+                                    panelConfig:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        description:
+                                          description: The description of the panel
+                                          type: string
+                                        enhancements:
+                                          additionalProperties: {}
+                                          type: object
+                                        hidePanelTitles:
+                                          description: Set to true to hide the panel title in its container.
+                                          type: boolean
+                                        savedObjectId:
+                                          description: The unique id of the library item to construct the embeddable.
+                                          type: string
+                                        title:
+                                          description: The title of the panel
+                                          type: string
+                                        version:
+                                          description: The version of the embeddable in the panel.
+                                          type: string
+                                    panelIndex:
+                                      type: string
+                                    panelRefName:
                                       type: string
                                     title:
                                       description: The title of the panel
                                       type: string
-                                    version:
-                                      description: The version of the embeddable in the panel.
+                                    type:
+                                      description: The embeddable type
                                       type: string
-                                panelIndex:
-                                  type: string
-                                panelRefName:
-                                  type: string
-                                title:
-                                  description: The title of the panel
-                                  type: string
-                                type:
-                                  description: The embeddable type
-                                  type: string
-                                version:
-                                  deprecated: true
-                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
-                                  type: string
-                              required:
-                                - panelConfig
-                                - type
-                                - gridData
-                                - panelIndex
+                                    version:
+                                      deprecated: true
+                                      description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                      type: string
+                                  required:
+                                    - panelConfig
+                                    - type
+                                    - gridData
+                                    - panelIndex
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    collapsed:
+                                      description: The collapsed state of the section.
+                                      type: boolean
+                                    gridData:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        i:
+                                          type: string
+                                        'y':
+                                          description: The y coordinate of the section in grid units
+                                          type: number
+                                      required:
+                                        - 'y'
+                                        - i
+                                    panels:
+                                      items:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          gridData:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              h:
+                                                default: 15
+                                                description: The height of the panel in grid units
+                                                minimum: 1
+                                                type: number
+                                              i:
+                                                type: string
+                                              w:
+                                                default: 24
+                                                description: The width of the panel in grid units
+                                                maximum: 48
+                                                minimum: 1
+                                                type: number
+                                              x:
+                                                description: The x coordinate of the panel in grid units
+                                                type: number
+                                              'y':
+                                                description: The y coordinate of the panel in grid units
+                                                type: number
+                                            required:
+                                              - x
+                                              - 'y'
+                                              - i
+                                          id:
+                                            description: The saved object id for by reference panels
+                                            type: string
+                                          panelConfig:
+                                            additionalProperties: true
+                                            type: object
+                                            properties:
+                                              description:
+                                                description: The description of the panel
+                                                type: string
+                                              enhancements:
+                                                additionalProperties: {}
+                                                type: object
+                                              hidePanelTitles:
+                                                description: Set to true to hide the panel title in its container.
+                                                type: boolean
+                                              savedObjectId:
+                                                description: The unique id of the library item to construct the embeddable.
+                                                type: string
+                                              title:
+                                                description: The title of the panel
+                                                type: string
+                                              version:
+                                                description: The version of the embeddable in the panel.
+                                                type: string
+                                          panelIndex:
+                                            type: string
+                                          panelRefName:
+                                            type: string
+                                          title:
+                                            description: The title of the panel
+                                            type: string
+                                          type:
+                                            description: The embeddable type
+                                            type: string
+                                          version:
+                                            deprecated: true
+                                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                            type: string
+                                        required:
+                                          - panelConfig
+                                          - type
+                                          - gridData
+                                          - panelIndex
+                                      type: array
+                                    title:
+                                      description: The title of the section.
+                                      type: string
+                                  required:
+                                    - title
+                                    - gridData
+                                    - panels
                             type: array
                           refreshInterval:
                             additionalProperties: false
@@ -7201,80 +7313,184 @@ paths:
                     panels:
                       default: []
                       items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          gridData:
-                            additionalProperties: false
+                        anyOf:
+                          - additionalProperties: false
                             type: object
                             properties:
-                              h:
-                                default: 15
-                                description: The height of the panel in grid units
-                                minimum: 1
-                                type: number
-                              i:
-                                description: The unique identifier of the panel
-                                type: string
-                              w:
-                                default: 24
-                                description: The width of the panel in grid units
-                                maximum: 48
-                                minimum: 1
-                                type: number
-                              x:
-                                description: The x coordinate of the panel in grid units
-                                type: number
-                              'y':
-                                description: The y coordinate of the panel in grid units
-                                type: number
-                            required:
-                              - x
-                              - 'y'
-                          id:
-                            description: The saved object id for by reference panels
-                            type: string
-                          panelConfig:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              description:
-                                description: The description of the panel
-                                type: string
-                              enhancements:
-                                additionalProperties: {}
+                              gridData:
+                                additionalProperties: false
                                 type: object
-                              hidePanelTitles:
-                                description: Set to true to hide the panel title in its container.
-                                type: boolean
-                              savedObjectId:
-                                description: The unique id of the library item to construct the embeddable.
+                                properties:
+                                  h:
+                                    default: 15
+                                    description: The height of the panel in grid units
+                                    minimum: 1
+                                    type: number
+                                  i:
+                                    description: The unique identifier of the panel
+                                    type: string
+                                  w:
+                                    default: 24
+                                    description: The width of the panel in grid units
+                                    maximum: 48
+                                    minimum: 1
+                                    type: number
+                                  x:
+                                    description: The x coordinate of the panel in grid units
+                                    type: number
+                                  'y':
+                                    description: The y coordinate of the panel in grid units
+                                    type: number
+                                required:
+                                  - x
+                                  - 'y'
+                              id:
+                                description: The saved object id for by reference panels
+                                type: string
+                              panelConfig:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    description: The description of the panel
+                                    type: string
+                                  enhancements:
+                                    additionalProperties: {}
+                                    type: object
+                                  hidePanelTitles:
+                                    description: Set to true to hide the panel title in its container.
+                                    type: boolean
+                                  savedObjectId:
+                                    description: The unique id of the library item to construct the embeddable.
+                                    type: string
+                                  title:
+                                    description: The title of the panel
+                                    type: string
+                                  version:
+                                    description: The version of the embeddable in the panel.
+                                    type: string
+                              panelIndex:
+                                description: The unique ID of the panel.
+                                type: string
+                              panelRefName:
                                 type: string
                               title:
                                 description: The title of the panel
                                 type: string
-                              version:
-                                description: The version of the embeddable in the panel.
+                              type:
+                                description: The embeddable type
                                 type: string
-                          panelIndex:
-                            description: The unique ID of the panel.
-                            type: string
-                          panelRefName:
-                            type: string
-                          title:
-                            description: The title of the panel
-                            type: string
-                          type:
-                            description: The embeddable type
-                            type: string
-                          version:
-                            deprecated: true
-                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
-                            type: string
-                        required:
-                          - panelConfig
-                          - type
-                          - gridData
+                              version:
+                                deprecated: true
+                                description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                type: string
+                            required:
+                              - panelConfig
+                              - type
+                              - gridData
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              collapsed:
+                                description: The collapsed state of the section.
+                                type: boolean
+                              gridData:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  i:
+                                    description: The unique identifier of the section
+                                    type: string
+                                  'y':
+                                    description: The y coordinate of the section in grid units
+                                    type: number
+                                required:
+                                  - 'y'
+                              panels:
+                                default: []
+                                description: The panels that belong to the section.
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    gridData:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        h:
+                                          default: 15
+                                          description: The height of the panel in grid units
+                                          minimum: 1
+                                          type: number
+                                        i:
+                                          description: The unique identifier of the panel
+                                          type: string
+                                        w:
+                                          default: 24
+                                          description: The width of the panel in grid units
+                                          maximum: 48
+                                          minimum: 1
+                                          type: number
+                                        x:
+                                          description: The x coordinate of the panel in grid units
+                                          type: number
+                                        'y':
+                                          description: The y coordinate of the panel in grid units
+                                          type: number
+                                      required:
+                                        - x
+                                        - 'y'
+                                    id:
+                                      description: The saved object id for by reference panels
+                                      type: string
+                                    panelConfig:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        description:
+                                          description: The description of the panel
+                                          type: string
+                                        enhancements:
+                                          additionalProperties: {}
+                                          type: object
+                                        hidePanelTitles:
+                                          description: Set to true to hide the panel title in its container.
+                                          type: boolean
+                                        savedObjectId:
+                                          description: The unique id of the library item to construct the embeddable.
+                                          type: string
+                                        title:
+                                          description: The title of the panel
+                                          type: string
+                                        version:
+                                          description: The version of the embeddable in the panel.
+                                          type: string
+                                    panelIndex:
+                                      description: The unique ID of the panel.
+                                      type: string
+                                    panelRefName:
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    type:
+                                      description: The embeddable type
+                                      type: string
+                                    version:
+                                      deprecated: true
+                                      description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                      type: string
+                                  required:
+                                    - panelConfig
+                                    - type
+                                    - gridData
+                                type: array
+                              title:
+                                description: The title of the section.
+                                type: string
+                            required:
+                              - title
+                              - gridData
                       type: array
                     refreshInterval:
                       additionalProperties: false
@@ -7594,80 +7810,183 @@ paths:
                           panels:
                             default: []
                             items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                gridData:
-                                  additionalProperties: false
+                              anyOf:
+                                - additionalProperties: false
                                   type: object
                                   properties:
-                                    h:
-                                      default: 15
-                                      description: The height of the panel in grid units
-                                      minimum: 1
-                                      type: number
-                                    i:
-                                      type: string
-                                    w:
-                                      default: 24
-                                      description: The width of the panel in grid units
-                                      maximum: 48
-                                      minimum: 1
-                                      type: number
-                                    x:
-                                      description: The x coordinate of the panel in grid units
-                                      type: number
-                                    'y':
-                                      description: The y coordinate of the panel in grid units
-                                      type: number
-                                  required:
-                                    - x
-                                    - 'y'
-                                    - i
-                                id:
-                                  description: The saved object id for by reference panels
-                                  type: string
-                                panelConfig:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    description:
-                                      description: The description of the panel
-                                      type: string
-                                    enhancements:
-                                      additionalProperties: {}
+                                    gridData:
+                                      additionalProperties: false
                                       type: object
-                                    hidePanelTitles:
-                                      description: Set to true to hide the panel title in its container.
-                                      type: boolean
-                                    savedObjectId:
-                                      description: The unique id of the library item to construct the embeddable.
+                                      properties:
+                                        h:
+                                          default: 15
+                                          description: The height of the panel in grid units
+                                          minimum: 1
+                                          type: number
+                                        i:
+                                          type: string
+                                        w:
+                                          default: 24
+                                          description: The width of the panel in grid units
+                                          maximum: 48
+                                          minimum: 1
+                                          type: number
+                                        x:
+                                          description: The x coordinate of the panel in grid units
+                                          type: number
+                                        'y':
+                                          description: The y coordinate of the panel in grid units
+                                          type: number
+                                      required:
+                                        - x
+                                        - 'y'
+                                        - i
+                                    id:
+                                      description: The saved object id for by reference panels
+                                      type: string
+                                    panelConfig:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        description:
+                                          description: The description of the panel
+                                          type: string
+                                        enhancements:
+                                          additionalProperties: {}
+                                          type: object
+                                        hidePanelTitles:
+                                          description: Set to true to hide the panel title in its container.
+                                          type: boolean
+                                        savedObjectId:
+                                          description: The unique id of the library item to construct the embeddable.
+                                          type: string
+                                        title:
+                                          description: The title of the panel
+                                          type: string
+                                        version:
+                                          description: The version of the embeddable in the panel.
+                                          type: string
+                                    panelIndex:
+                                      type: string
+                                    panelRefName:
                                       type: string
                                     title:
                                       description: The title of the panel
                                       type: string
-                                    version:
-                                      description: The version of the embeddable in the panel.
+                                    type:
+                                      description: The embeddable type
                                       type: string
-                                panelIndex:
-                                  type: string
-                                panelRefName:
-                                  type: string
-                                title:
-                                  description: The title of the panel
-                                  type: string
-                                type:
-                                  description: The embeddable type
-                                  type: string
-                                version:
-                                  deprecated: true
-                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
-                                  type: string
-                              required:
-                                - panelConfig
-                                - type
-                                - gridData
-                                - panelIndex
+                                    version:
+                                      deprecated: true
+                                      description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                      type: string
+                                  required:
+                                    - panelConfig
+                                    - type
+                                    - gridData
+                                    - panelIndex
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    collapsed:
+                                      description: The collapsed state of the section.
+                                      type: boolean
+                                    gridData:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        i:
+                                          type: string
+                                        'y':
+                                          description: The y coordinate of the section in grid units
+                                          type: number
+                                      required:
+                                        - 'y'
+                                        - i
+                                    panels:
+                                      items:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          gridData:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              h:
+                                                default: 15
+                                                description: The height of the panel in grid units
+                                                minimum: 1
+                                                type: number
+                                              i:
+                                                type: string
+                                              w:
+                                                default: 24
+                                                description: The width of the panel in grid units
+                                                maximum: 48
+                                                minimum: 1
+                                                type: number
+                                              x:
+                                                description: The x coordinate of the panel in grid units
+                                                type: number
+                                              'y':
+                                                description: The y coordinate of the panel in grid units
+                                                type: number
+                                            required:
+                                              - x
+                                              - 'y'
+                                              - i
+                                          id:
+                                            description: The saved object id for by reference panels
+                                            type: string
+                                          panelConfig:
+                                            additionalProperties: true
+                                            type: object
+                                            properties:
+                                              description:
+                                                description: The description of the panel
+                                                type: string
+                                              enhancements:
+                                                additionalProperties: {}
+                                                type: object
+                                              hidePanelTitles:
+                                                description: Set to true to hide the panel title in its container.
+                                                type: boolean
+                                              savedObjectId:
+                                                description: The unique id of the library item to construct the embeddable.
+                                                type: string
+                                              title:
+                                                description: The title of the panel
+                                                type: string
+                                              version:
+                                                description: The version of the embeddable in the panel.
+                                                type: string
+                                          panelIndex:
+                                            type: string
+                                          panelRefName:
+                                            type: string
+                                          title:
+                                            description: The title of the panel
+                                            type: string
+                                          type:
+                                            description: The embeddable type
+                                            type: string
+                                          version:
+                                            deprecated: true
+                                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                            type: string
+                                        required:
+                                          - panelConfig
+                                          - type
+                                          - gridData
+                                          - panelIndex
+                                      type: array
+                                    title:
+                                      description: The title of the section.
+                                      type: string
+                                  required:
+                                    - title
+                                    - gridData
+                                    - panels
                             type: array
                           refreshInterval:
                             additionalProperties: false
@@ -8044,80 +8363,184 @@ paths:
                     panels:
                       default: []
                       items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          gridData:
-                            additionalProperties: false
+                        anyOf:
+                          - additionalProperties: false
                             type: object
                             properties:
-                              h:
-                                default: 15
-                                description: The height of the panel in grid units
-                                minimum: 1
-                                type: number
-                              i:
-                                description: The unique identifier of the panel
-                                type: string
-                              w:
-                                default: 24
-                                description: The width of the panel in grid units
-                                maximum: 48
-                                minimum: 1
-                                type: number
-                              x:
-                                description: The x coordinate of the panel in grid units
-                                type: number
-                              'y':
-                                description: The y coordinate of the panel in grid units
-                                type: number
-                            required:
-                              - x
-                              - 'y'
-                          id:
-                            description: The saved object id for by reference panels
-                            type: string
-                          panelConfig:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              description:
-                                description: The description of the panel
-                                type: string
-                              enhancements:
-                                additionalProperties: {}
+                              gridData:
+                                additionalProperties: false
                                 type: object
-                              hidePanelTitles:
-                                description: Set to true to hide the panel title in its container.
-                                type: boolean
-                              savedObjectId:
-                                description: The unique id of the library item to construct the embeddable.
+                                properties:
+                                  h:
+                                    default: 15
+                                    description: The height of the panel in grid units
+                                    minimum: 1
+                                    type: number
+                                  i:
+                                    description: The unique identifier of the panel
+                                    type: string
+                                  w:
+                                    default: 24
+                                    description: The width of the panel in grid units
+                                    maximum: 48
+                                    minimum: 1
+                                    type: number
+                                  x:
+                                    description: The x coordinate of the panel in grid units
+                                    type: number
+                                  'y':
+                                    description: The y coordinate of the panel in grid units
+                                    type: number
+                                required:
+                                  - x
+                                  - 'y'
+                              id:
+                                description: The saved object id for by reference panels
+                                type: string
+                              panelConfig:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    description: The description of the panel
+                                    type: string
+                                  enhancements:
+                                    additionalProperties: {}
+                                    type: object
+                                  hidePanelTitles:
+                                    description: Set to true to hide the panel title in its container.
+                                    type: boolean
+                                  savedObjectId:
+                                    description: The unique id of the library item to construct the embeddable.
+                                    type: string
+                                  title:
+                                    description: The title of the panel
+                                    type: string
+                                  version:
+                                    description: The version of the embeddable in the panel.
+                                    type: string
+                              panelIndex:
+                                description: The unique ID of the panel.
+                                type: string
+                              panelRefName:
                                 type: string
                               title:
                                 description: The title of the panel
                                 type: string
-                              version:
-                                description: The version of the embeddable in the panel.
+                              type:
+                                description: The embeddable type
                                 type: string
-                          panelIndex:
-                            description: The unique ID of the panel.
-                            type: string
-                          panelRefName:
-                            type: string
-                          title:
-                            description: The title of the panel
-                            type: string
-                          type:
-                            description: The embeddable type
-                            type: string
-                          version:
-                            deprecated: true
-                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
-                            type: string
-                        required:
-                          - panelConfig
-                          - type
-                          - gridData
+                              version:
+                                deprecated: true
+                                description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                type: string
+                            required:
+                              - panelConfig
+                              - type
+                              - gridData
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              collapsed:
+                                description: The collapsed state of the section.
+                                type: boolean
+                              gridData:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  i:
+                                    description: The unique identifier of the section
+                                    type: string
+                                  'y':
+                                    description: The y coordinate of the section in grid units
+                                    type: number
+                                required:
+                                  - 'y'
+                              panels:
+                                default: []
+                                description: The panels that belong to the section.
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    gridData:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        h:
+                                          default: 15
+                                          description: The height of the panel in grid units
+                                          minimum: 1
+                                          type: number
+                                        i:
+                                          description: The unique identifier of the panel
+                                          type: string
+                                        w:
+                                          default: 24
+                                          description: The width of the panel in grid units
+                                          maximum: 48
+                                          minimum: 1
+                                          type: number
+                                        x:
+                                          description: The x coordinate of the panel in grid units
+                                          type: number
+                                        'y':
+                                          description: The y coordinate of the panel in grid units
+                                          type: number
+                                      required:
+                                        - x
+                                        - 'y'
+                                    id:
+                                      description: The saved object id for by reference panels
+                                      type: string
+                                    panelConfig:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        description:
+                                          description: The description of the panel
+                                          type: string
+                                        enhancements:
+                                          additionalProperties: {}
+                                          type: object
+                                        hidePanelTitles:
+                                          description: Set to true to hide the panel title in its container.
+                                          type: boolean
+                                        savedObjectId:
+                                          description: The unique id of the library item to construct the embeddable.
+                                          type: string
+                                        title:
+                                          description: The title of the panel
+                                          type: string
+                                        version:
+                                          description: The version of the embeddable in the panel.
+                                          type: string
+                                    panelIndex:
+                                      description: The unique ID of the panel.
+                                      type: string
+                                    panelRefName:
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    type:
+                                      description: The embeddable type
+                                      type: string
+                                    version:
+                                      deprecated: true
+                                      description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                      type: string
+                                  required:
+                                    - panelConfig
+                                    - type
+                                    - gridData
+                                type: array
+                              title:
+                                description: The title of the section.
+                                type: string
+                            required:
+                              - title
+                              - gridData
                       type: array
                     refreshInterval:
                       additionalProperties: false
@@ -8433,80 +8856,183 @@ paths:
                           panels:
                             default: []
                             items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                gridData:
-                                  additionalProperties: false
+                              anyOf:
+                                - additionalProperties: false
                                   type: object
                                   properties:
-                                    h:
-                                      default: 15
-                                      description: The height of the panel in grid units
-                                      minimum: 1
-                                      type: number
-                                    i:
-                                      type: string
-                                    w:
-                                      default: 24
-                                      description: The width of the panel in grid units
-                                      maximum: 48
-                                      minimum: 1
-                                      type: number
-                                    x:
-                                      description: The x coordinate of the panel in grid units
-                                      type: number
-                                    'y':
-                                      description: The y coordinate of the panel in grid units
-                                      type: number
-                                  required:
-                                    - x
-                                    - 'y'
-                                    - i
-                                id:
-                                  description: The saved object id for by reference panels
-                                  type: string
-                                panelConfig:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    description:
-                                      description: The description of the panel
-                                      type: string
-                                    enhancements:
-                                      additionalProperties: {}
+                                    gridData:
+                                      additionalProperties: false
                                       type: object
-                                    hidePanelTitles:
-                                      description: Set to true to hide the panel title in its container.
-                                      type: boolean
-                                    savedObjectId:
-                                      description: The unique id of the library item to construct the embeddable.
+                                      properties:
+                                        h:
+                                          default: 15
+                                          description: The height of the panel in grid units
+                                          minimum: 1
+                                          type: number
+                                        i:
+                                          type: string
+                                        w:
+                                          default: 24
+                                          description: The width of the panel in grid units
+                                          maximum: 48
+                                          minimum: 1
+                                          type: number
+                                        x:
+                                          description: The x coordinate of the panel in grid units
+                                          type: number
+                                        'y':
+                                          description: The y coordinate of the panel in grid units
+                                          type: number
+                                      required:
+                                        - x
+                                        - 'y'
+                                        - i
+                                    id:
+                                      description: The saved object id for by reference panels
+                                      type: string
+                                    panelConfig:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        description:
+                                          description: The description of the panel
+                                          type: string
+                                        enhancements:
+                                          additionalProperties: {}
+                                          type: object
+                                        hidePanelTitles:
+                                          description: Set to true to hide the panel title in its container.
+                                          type: boolean
+                                        savedObjectId:
+                                          description: The unique id of the library item to construct the embeddable.
+                                          type: string
+                                        title:
+                                          description: The title of the panel
+                                          type: string
+                                        version:
+                                          description: The version of the embeddable in the panel.
+                                          type: string
+                                    panelIndex:
+                                      type: string
+                                    panelRefName:
                                       type: string
                                     title:
                                       description: The title of the panel
                                       type: string
-                                    version:
-                                      description: The version of the embeddable in the panel.
+                                    type:
+                                      description: The embeddable type
                                       type: string
-                                panelIndex:
-                                  type: string
-                                panelRefName:
-                                  type: string
-                                title:
-                                  description: The title of the panel
-                                  type: string
-                                type:
-                                  description: The embeddable type
-                                  type: string
-                                version:
-                                  deprecated: true
-                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
-                                  type: string
-                              required:
-                                - panelConfig
-                                - type
-                                - gridData
-                                - panelIndex
+                                    version:
+                                      deprecated: true
+                                      description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                      type: string
+                                  required:
+                                    - panelConfig
+                                    - type
+                                    - gridData
+                                    - panelIndex
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    collapsed:
+                                      description: The collapsed state of the section.
+                                      type: boolean
+                                    gridData:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        i:
+                                          type: string
+                                        'y':
+                                          description: The y coordinate of the section in grid units
+                                          type: number
+                                      required:
+                                        - 'y'
+                                        - i
+                                    panels:
+                                      items:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          gridData:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              h:
+                                                default: 15
+                                                description: The height of the panel in grid units
+                                                minimum: 1
+                                                type: number
+                                              i:
+                                                type: string
+                                              w:
+                                                default: 24
+                                                description: The width of the panel in grid units
+                                                maximum: 48
+                                                minimum: 1
+                                                type: number
+                                              x:
+                                                description: The x coordinate of the panel in grid units
+                                                type: number
+                                              'y':
+                                                description: The y coordinate of the panel in grid units
+                                                type: number
+                                            required:
+                                              - x
+                                              - 'y'
+                                              - i
+                                          id:
+                                            description: The saved object id for by reference panels
+                                            type: string
+                                          panelConfig:
+                                            additionalProperties: true
+                                            type: object
+                                            properties:
+                                              description:
+                                                description: The description of the panel
+                                                type: string
+                                              enhancements:
+                                                additionalProperties: {}
+                                                type: object
+                                              hidePanelTitles:
+                                                description: Set to true to hide the panel title in its container.
+                                                type: boolean
+                                              savedObjectId:
+                                                description: The unique id of the library item to construct the embeddable.
+                                                type: string
+                                              title:
+                                                description: The title of the panel
+                                                type: string
+                                              version:
+                                                description: The version of the embeddable in the panel.
+                                                type: string
+                                          panelIndex:
+                                            type: string
+                                          panelRefName:
+                                            type: string
+                                          title:
+                                            description: The title of the panel
+                                            type: string
+                                          type:
+                                            description: The embeddable type
+                                            type: string
+                                          version:
+                                            deprecated: true
+                                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                            type: string
+                                        required:
+                                          - panelConfig
+                                          - type
+                                          - gridData
+                                          - panelIndex
+                                      type: array
+                                    title:
+                                      description: The title of the section.
+                                      type: string
+                                  required:
+                                    - title
+                                    - gridData
+                                    - panels
                             type: array
                           refreshInterval:
                             additionalProperties: false
@@ -22501,6 +23027,12 @@ paths:
           schema:
             type: string
         - in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
+        - in: query
           name: showInactive
           required: false
           schema:
@@ -23809,6 +24341,109 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
+  /api/fleet/agents/{agentId}/migrate:
+    post:
+      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-agentid-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    replace_token:
+                      type: boolean
+                    staging:
+                      type: boolean
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Migrate a single agent
+      tags:
+        - Elastic Agents
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -24234,6 +24869,7 @@ paths:
                             - UPDATE_TAGS
                             - POLICY_CHANGE
                             - INPUT_ACTION
+                            - MIGRATE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -25781,8 +26417,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -26451,8 +27090,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -27376,8 +28018,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -27976,6 +28621,68 @@ paths:
                   - message
                   - attributes
       summary: Get a package file
+      tags:
+        - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets:
+    delete:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: packagePolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Delete assets for an input package
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
@@ -38983,6 +39690,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -39004,6 +39712,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -39013,12 +39731,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -39077,6 +39801,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -39098,6 +39823,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -39107,12 +39842,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -41815,6 +42556,953 @@ paths:
       summary: Get value list privileges
       tags:
         - Security Lists API
+  /api/maintenance_window:
+    post:
+      description: '[Required authorization] Route required privileges: write-maintenance-window.'
+      operationId: post-maintenance-window
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                  type: boolean
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    custom:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        duration:
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                          type: string
+                        recurring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            end:
+                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                              type: string
+                            every:
+                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                              type: string
+                            occurrences:
+                              description: The total number of recurrences of the schedule.
+                              minimum: 1
+                              type: number
+                            onMonth:
+                              description: The specific months for a recurring schedule. Valid values are 1-12.
+                              items:
+                                maximum: 12
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onMonthDay:
+                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                              items:
+                                maximum: 31
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onWeekDay:
+                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                              items:
+                                type: string
+                              minItems: 1
+                              type: array
+                        start:
+                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                          type: string
+                        timezone:
+                          description: The timezone of the schedule. The default timezone is UTC.
+                          type: string
+                      required:
+                        - start
+                        - duration
+                  required:
+                    - custom
+                scope:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    alerting:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            kql:
+                              description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.
+                              type: string
+                          required:
+                            - kql
+                      required:
+                        - query
+                  required:
+                    - alerting
+                title:
+                  description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
+                  type: string
+              required:
+                - title
+                - schedule
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: The date and time when the maintenance window was created.
+                    type: string
+                  created_by:
+                    description: The identifier for the user that created the maintenance window.
+                    nullable: true
+                    type: string
+                  enabled:
+                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                    type: boolean
+                  id:
+                    description: The identifier for the maintenance window.
+                    type: string
+                  schedule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      custom:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          duration:
+                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                            type: string
+                          recurring:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              end:
+                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                type: string
+                              every:
+                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                type: string
+                              occurrences:
+                                description: The total number of recurrences of the schedule.
+                                type: number
+                              onMonth:
+                                description: The specific months for a recurring schedule. Valid values are 1-12.
+                                items:
+                                  type: number
+                                type: array
+                              onMonthDay:
+                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                items:
+                                  type: number
+                                type: array
+                              onWeekDay:
+                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                items:
+                                  type: string
+                                type: array
+                          start:
+                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                            type: string
+                          timezone:
+                            description: The timezone of the schedule. The default timezone is UTC.
+                            type: string
+                        required:
+                          - start
+                          - duration
+                    required:
+                      - custom
+                  scope:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      alerting:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          query:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              kql:
+                                description: A filter written in Kibana Query Language (KQL).
+                                type: string
+                            required:
+                              - kql
+                        required:
+                          - query
+                    required:
+                      - alerting
+                  status:
+                    description: The current status of the maintenance window.
+                    enum:
+                      - running
+                      - upcoming
+                      - finished
+                      - archived
+                    type: string
+                  title:
+                    description: The name of the maintenance window.
+                    type: string
+                  updated_at:
+                    description: The date and time when the maintenance window was last updated.
+                    type: string
+                  updated_by:
+                    description: The identifier for the user that last updated this maintenance window.
+                    nullable: true
+                    type: string
+                required:
+                  - id
+                  - title
+                  - enabled
+                  - created_by
+                  - updated_by
+                  - created_at
+                  - updated_at
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+      summary: Create a maintenance window.
+      tags:
+        - maintenance-window
+      x-state: Generally available
+  /api/maintenance_window/{id}:
+    delete:
+      description: '[Required authorization] Route required privileges: write-maintenance-window.'
+      operationId: delete-maintenance-window-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the maintenance window to be deleted.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a maintenance window with the given ID does not exist.
+      summary: Delete a maintenance window.
+      tags:
+        - maintenance-window
+      x-state: Generally available
+    get:
+      description: '[Required authorization] Route required privileges: read-maintenance-window.'
+      operationId: get-maintenance-window-id
+      parameters:
+        - description: The identifier for the maintenance window.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: The date and time when the maintenance window was created.
+                    type: string
+                  created_by:
+                    description: The identifier for the user that created the maintenance window.
+                    nullable: true
+                    type: string
+                  enabled:
+                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                    type: boolean
+                  id:
+                    description: The identifier for the maintenance window.
+                    type: string
+                  schedule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      custom:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          duration:
+                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                            type: string
+                          recurring:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              end:
+                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                type: string
+                              every:
+                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                type: string
+                              occurrences:
+                                description: The total number of recurrences of the schedule.
+                                type: number
+                              onMonth:
+                                description: The specific months for a recurring schedule. Valid values are 1-12.
+                                items:
+                                  type: number
+                                type: array
+                              onMonthDay:
+                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                items:
+                                  type: number
+                                type: array
+                              onWeekDay:
+                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                items:
+                                  type: string
+                                type: array
+                          start:
+                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                            type: string
+                          timezone:
+                            description: The timezone of the schedule. The default timezone is UTC.
+                            type: string
+                        required:
+                          - start
+                          - duration
+                    required:
+                      - custom
+                  scope:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      alerting:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          query:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              kql:
+                                description: A filter written in Kibana Query Language (KQL).
+                                type: string
+                            required:
+                              - kql
+                        required:
+                          - query
+                    required:
+                      - alerting
+                  status:
+                    description: The current status of the maintenance window.
+                    enum:
+                      - running
+                      - upcoming
+                      - finished
+                      - archived
+                    type: string
+                  title:
+                    description: The name of the maintenance window.
+                    type: string
+                  updated_at:
+                    description: The date and time when the maintenance window was last updated.
+                    type: string
+                  updated_by:
+                    description: The identifier for the user that last updated this maintenance window.
+                    nullable: true
+                    type: string
+                required:
+                  - id
+                  - title
+                  - enabled
+                  - created_by
+                  - updated_by
+                  - created_at
+                  - updated_at
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a maintenance window with the given ID does not exist.
+      summary: Get maintenance window details.
+      tags:
+        - maintenance-window
+      x-state: Generally available
+    patch:
+      description: '[Required authorization] Route required privileges: write-maintenance-window.'
+      operationId: patch-maintenance-window-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enabled:
+                  description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                  type: boolean
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    custom:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        duration:
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                          type: string
+                        recurring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            end:
+                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                              type: string
+                            every:
+                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                              type: string
+                            occurrences:
+                              description: The total number of recurrences of the schedule.
+                              minimum: 1
+                              type: number
+                            onMonth:
+                              description: The specific months for a recurring schedule. Valid values are 1-12.
+                              items:
+                                maximum: 12
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onMonthDay:
+                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                              items:
+                                maximum: 31
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onWeekDay:
+                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                              items:
+                                type: string
+                              minItems: 1
+                              type: array
+                        start:
+                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                          type: string
+                        timezone:
+                          description: The timezone of the schedule. The default timezone is UTC.
+                          type: string
+                      required:
+                        - start
+                        - duration
+                  required:
+                    - custom
+                scope:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    alerting:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            kql:
+                              description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.
+                              type: string
+                          required:
+                            - kql
+                      required:
+                        - query
+                  required:
+                    - alerting
+                title:
+                  description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: The date and time when the maintenance window was created.
+                    type: string
+                  created_by:
+                    description: The identifier for the user that created the maintenance window.
+                    nullable: true
+                    type: string
+                  enabled:
+                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                    type: boolean
+                  id:
+                    description: The identifier for the maintenance window.
+                    type: string
+                  schedule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      custom:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          duration:
+                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                            type: string
+                          recurring:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              end:
+                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                type: string
+                              every:
+                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                type: string
+                              occurrences:
+                                description: The total number of recurrences of the schedule.
+                                type: number
+                              onMonth:
+                                description: The specific months for a recurring schedule. Valid values are 1-12.
+                                items:
+                                  type: number
+                                type: array
+                              onMonthDay:
+                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                items:
+                                  type: number
+                                type: array
+                              onWeekDay:
+                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                items:
+                                  type: string
+                                type: array
+                          start:
+                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                            type: string
+                          timezone:
+                            description: The timezone of the schedule. The default timezone is UTC.
+                            type: string
+                        required:
+                          - start
+                          - duration
+                    required:
+                      - custom
+                  scope:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      alerting:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          query:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              kql:
+                                description: A filter written in Kibana Query Language (KQL).
+                                type: string
+                            required:
+                              - kql
+                        required:
+                          - query
+                    required:
+                      - alerting
+                  status:
+                    description: The current status of the maintenance window.
+                    enum:
+                      - running
+                      - upcoming
+                      - finished
+                      - archived
+                    type: string
+                  title:
+                    description: The name of the maintenance window.
+                    type: string
+                  updated_at:
+                    description: The date and time when the maintenance window was last updated.
+                    type: string
+                  updated_by:
+                    description: The identifier for the user that last updated this maintenance window.
+                    nullable: true
+                    type: string
+                required:
+                  - id
+                  - title
+                  - enabled
+                  - created_by
+                  - updated_by
+                  - created_at
+                  - updated_at
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a maintenance window with the given ID does not exist.
+        '409':
+          description: Indicates that the maintenance window has already been updated by another user.
+      summary: Update a maintenance window.
+      tags:
+        - maintenance-window
+      x-state: Generally available
+  /api/maintenance_window/{id}/_archive:
+    post:
+      description: '[Required authorization] Route required privileges: write-maintenance-window.'
+      operationId: post-maintenance-window-id-archive
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the maintenance window to be archived.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: The date and time when the maintenance window was created.
+                    type: string
+                  created_by:
+                    description: The identifier for the user that created the maintenance window.
+                    nullable: true
+                    type: string
+                  enabled:
+                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                    type: boolean
+                  id:
+                    description: The identifier for the maintenance window.
+                    type: string
+                  schedule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      custom:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          duration:
+                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                            type: string
+                          recurring:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              end:
+                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                type: string
+                              every:
+                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                type: string
+                              occurrences:
+                                description: The total number of recurrences of the schedule.
+                                type: number
+                              onMonth:
+                                description: The specific months for a recurring schedule. Valid values are 1-12.
+                                items:
+                                  type: number
+                                type: array
+                              onMonthDay:
+                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                items:
+                                  type: number
+                                type: array
+                              onWeekDay:
+                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                items:
+                                  type: string
+                                type: array
+                          start:
+                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                            type: string
+                          timezone:
+                            description: The timezone of the schedule. The default timezone is UTC.
+                            type: string
+                        required:
+                          - start
+                          - duration
+                    required:
+                      - custom
+                  scope:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      alerting:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          query:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              kql:
+                                description: A filter written in Kibana Query Language (KQL).
+                                type: string
+                            required:
+                              - kql
+                        required:
+                          - query
+                    required:
+                      - alerting
+                  status:
+                    description: The current status of the maintenance window.
+                    enum:
+                      - running
+                      - upcoming
+                      - finished
+                      - archived
+                    type: string
+                  title:
+                    description: The name of the maintenance window.
+                    type: string
+                  updated_at:
+                    description: The date and time when the maintenance window was last updated.
+                    type: string
+                  updated_by:
+                    description: The identifier for the user that last updated this maintenance window.
+                    nullable: true
+                    type: string
+                required:
+                  - id
+                  - title
+                  - enabled
+                  - created_by
+                  - updated_by
+                  - created_at
+                  - updated_at
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a maintenance window with the given ID does not exist.
+      summary: Archive a maintenance window.
+      tags:
+        - maintenance-window
+      x-state: Generally available
+  /api/maintenance_window/{id}/_unarchive:
+    post:
+      description: '[Required authorization] Route required privileges: write-maintenance-window.'
+      operationId: post-maintenance-window-id-unarchive
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the maintenance window to be unarchived.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    description: The date and time when the maintenance window was created.
+                    type: string
+                  created_by:
+                    description: The identifier for the user that created the maintenance window.
+                    nullable: true
+                    type: string
+                  enabled:
+                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+                    type: boolean
+                  id:
+                    description: The identifier for the maintenance window.
+                    type: string
+                  schedule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      custom:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          duration:
+                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                            type: string
+                          recurring:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              end:
+                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                type: string
+                              every:
+                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                type: string
+                              occurrences:
+                                description: The total number of recurrences of the schedule.
+                                type: number
+                              onMonth:
+                                description: The specific months for a recurring schedule. Valid values are 1-12.
+                                items:
+                                  type: number
+                                type: array
+                              onMonthDay:
+                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                items:
+                                  type: number
+                                type: array
+                              onWeekDay:
+                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                items:
+                                  type: string
+                                type: array
+                          start:
+                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                            type: string
+                          timezone:
+                            description: The timezone of the schedule. The default timezone is UTC.
+                            type: string
+                        required:
+                          - start
+                          - duration
+                    required:
+                      - custom
+                  scope:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      alerting:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          query:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              kql:
+                                description: A filter written in Kibana Query Language (KQL).
+                                type: string
+                            required:
+                              - kql
+                        required:
+                          - query
+                    required:
+                      - alerting
+                  status:
+                    description: The current status of the maintenance window.
+                    enum:
+                      - running
+                      - upcoming
+                      - finished
+                      - archived
+                    type: string
+                  title:
+                    description: The name of the maintenance window.
+                    type: string
+                  updated_at:
+                    description: The date and time when the maintenance window was last updated.
+                    type: string
+                  updated_by:
+                    description: The identifier for the user that last updated this maintenance window.
+                    nullable: true
+                    type: string
+                required:
+                  - id
+                  - title
+                  - enabled
+                  - created_by
+                  - updated_by
+                  - created_at
+                  - updated_at
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a maintenance window with the given ID does not exist.
+      summary: Unarchive a maintenance window.
+      tags:
+        - maintenance-window
+      x-state: Generally available
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -42501,7 +44189,7 @@ paths:
   /api/saved_objects/_export:
     post:
       description: |-
-        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.
+        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
@@ -42648,7 +44336,10 @@ paths:
         - saved objects
   /api/saved_objects/_import:
     post:
-      description: Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+      description: |-
+        Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -57214,6 +58905,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -57557,6 +59249,25 @@ components:
         - updated_at
       example: created_at
       type: string
+    Security_AI_Assistant_API_HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     Security_AI_Assistant_API_IndexEntry:
       allOf:
         - type: object
@@ -65888,6 +67599,20 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - asset
+        entity:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            id:
+              type: string
+          required:
+            - id
         host:
           type: object
           properties:
@@ -73060,6 +74785,8 @@ components:
                     type: array
                     items:
                       type: number
+                    description: |
+                      The threshold value that is used with the `comparator`. If the `comparator` is `between`, you must specify the boundary values.
                   comparator:
                     type: string
                     enum:
@@ -73069,14 +74796,27 @@ components:
                       - '>='
                       - between
                       - outside
+                    description: |
+                      The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "outside".
                   timeUnit:
                     type: string
+                    enum:
+                      - s
+                      - m
+                      - h
+                      - d
+                    description: |
+                      The type of units for the time window: seconds, minutes, hours, or days.
                   timeSize:
                     type: number
+                    description: |
+                      The size of the time window (in `timeUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
                   warningThreshold:
                     type: array
                     items:
                       type: number
+                    description: |
+                      The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.
                   warningComparator:
                     type: string
                     enum:
@@ -73119,8 +74859,17 @@ components:
                       - outside
                   timeUnit:
                     type: string
+                    enum:
+                      - s
+                      - m
+                      - h
+                      - d
+                    description: |
+                      The type of units for the time window: seconds, minutes, hours, or days.
                   timeSize:
                     type: number
+                    description: |
+                      The size of the time window (in `timeUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
                   warningThreshold:
                     type: array
                     items:
@@ -73156,8 +74905,17 @@ components:
                       - outside
                   timeUnit:
                     type: string
+                    enum:
+                      - s
+                      - m
+                      - h
+                      - d
+                    description: |
+                      The type of units for the time window: seconds, minutes, hours, or days.
                   timeSize:
                     type: number
+                    description: |
+                      The size of the time window (in `timeUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
                   warningThreshold:
                     type: array
                     items:
@@ -73191,6 +74949,8 @@ components:
                                 - max
                                 - min
                                 - cardinality
+                              description: |
+                                An aggregation to gather data for the rule. For example, find the average, highest or lowest value of a numeric field. Or use a cardinality aggregation to find the approximate number of unique values in a field. 
                             field:
                               type: string
                         - type: object
@@ -73213,14 +74973,22 @@ components:
             - type: array
               items:
                 type: string
+          description: |
+            Create an alert for every unique value of the specified fields. For example, you can create a rule per host or every mount point of each host.
+            IMPORTANT: If you include the same field in both the `filterQuery` and `groupBy`, you might receive fewer results than you expect. For example, if you filter by `cloud.region: us-east`, grouping by `cloud.region` will have no effect because the filter query can match only one region.
         filterQuery:
           type: string
+          description: |
+            A query that limits the scope of the rule. The rule evaluates only metric data that matches the query.
         sourceId:
           type: string
         alertOnNoData:
           type: boolean
+          description: If true, an alert occurs if the metrics do not report any data over the expected period or if the query fails.
         alertOnGroupDisappear:
           type: boolean
+          description: |
+            If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
     params_property_slo_burn_rate:
       properties:
         sloId:

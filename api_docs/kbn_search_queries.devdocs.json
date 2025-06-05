@@ -1,0 +1,851 @@
+{
+  "id": "@kbn/search-queries",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.buildFieldDescriptorForIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "buildFieldDescriptorForIndex",
+        "description": [],
+        "signature": [
+          "(indexName: string, indexMappings: ",
+          "IndicesGetMappingIndexMappingRecord",
+          ") => ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.QueryGenerationFieldDescriptors",
+            "text": "QueryGenerationFieldDescriptors"
+          }
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.buildFieldDescriptorForIndex.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.buildFieldDescriptorForIndex.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexMappings",
+            "description": [],
+            "signature": [
+              "IndicesGetMappingIndexMappingRecord"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/field_descriptors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.generateSearchQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "generateSearchQuery",
+        "description": [],
+        "signature": [
+          "(fields: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.IndexFields",
+            "text": "IndexFields"
+          },
+          ", sourceFields: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.IndexFields",
+            "text": "IndexFields"
+          },
+          ", fieldDescriptors: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.QueryGenerationFieldDescriptors",
+            "text": "QueryGenerationFieldDescriptors"
+          },
+          ", options: Partial<",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.GenerateQueryOptions",
+            "text": "GenerateQueryOptions"
+          },
+          "> | undefined) => { retriever: ",
+          "RetrieverContainer",
+          "; highlight?: ",
+          "SearchHighlight",
+          " | undefined; }"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.generateSearchQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.IndexFields",
+                "text": "IndexFields"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.generateSearchQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "sourceFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.IndexFields",
+                "text": "IndexFields"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.generateSearchQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldDescriptors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.QueryGenerationFieldDescriptors",
+                "text": "QueryGenerationFieldDescriptors"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.generateSearchQuery.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.GenerateQueryOptions",
+                "text": "GenerateQueryOptions"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/generate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.getDefaultQueryFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultQueryFields",
+        "description": [],
+        "signature": [
+          "(fieldDescriptors: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.QueryGenerationFieldDescriptors",
+            "text": "QueryGenerationFieldDescriptors"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.IndexFields",
+            "text": "IndexFields"
+          }
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.getDefaultQueryFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldDescriptors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.QueryGenerationFieldDescriptors",
+                "text": "QueryGenerationFieldDescriptors"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.getDefaultSourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultSourceFields",
+        "description": [],
+        "signature": [
+          "(fieldDescriptors: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.QueryGenerationFieldDescriptors",
+            "text": "QueryGenerationFieldDescriptors"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.IndexFields",
+            "text": "IndexFields"
+          }
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.getDefaultSourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldDescriptors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.QueryGenerationFieldDescriptors",
+                "text": "QueryGenerationFieldDescriptors"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.getIndicesWithNoSourceFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndicesWithNoSourceFields",
+        "description": [],
+        "signature": [
+          "(fields: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.QueryGenerationFieldDescriptors",
+            "text": "QueryGenerationFieldDescriptors"
+          },
+          ") => string[] | undefined"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.getIndicesWithNoSourceFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.QueryGenerationFieldDescriptors",
+                "text": "QueryGenerationFieldDescriptors"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.ELSERQueryFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "ELSERQueryFields",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.ELSERQueryFields",
+            "text": "ELSERQueryFields"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.ModelField",
+            "text": "ModelField"
+          }
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.ELSERQueryFields.sparse_vector",
+            "type": "boolean",
+            "tags": [],
+            "label": "sparse_vector",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.GenerateQueryMatches",
+        "type": "Interface",
+        "tags": [],
+        "label": "GenerateQueryMatches",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.GenerateQueryMatches.queryMatches",
+            "type": "Array",
+            "tags": [],
+            "label": "queryMatches",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              "[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.GenerateQueryMatches.knnMatches",
+            "type": "Array",
+            "tags": [],
+            "label": "knnMatches",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.KnnQueryMatch",
+                "text": "KnnQueryMatch"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.GenerateQueryOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "GenerateQueryOptions",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.GenerateQueryOptions.rrf",
+            "type": "boolean",
+            "tags": [],
+            "label": "rrf",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.GenerateQueryOptions.queryString",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.IndexQueryFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexQueryFields",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.bm25_query_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "bm25_query_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.dense_vector_query_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "dense_vector_query_fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.ModelField",
+                "text": "ModelField"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.elser_query_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "elser_query_fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.ELSERQueryFields",
+                "text": "ELSERQueryFields"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.semantic_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "semantic_fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-queries",
+                "scope": "common",
+                "docId": "kibKbnSearchQueriesPluginApi",
+                "section": "def-common.SemanticField",
+                "text": "SemanticField"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.source_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "source_fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.IndexQueryFields.skipped_fields",
+            "type": "number",
+            "tags": [],
+            "label": "skipped_fields",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.KnnQueryMatch",
+        "type": "Interface",
+        "tags": [],
+        "label": "KnnQueryMatch",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.KnnQueryMatch.knn",
+            "type": "Object",
+            "tags": [],
+            "label": "knn",
+            "description": [],
+            "signature": [
+              "KnnQuery"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.ModelField",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelField",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.ModelField.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.ModelField.model_id",
+            "type": "string",
+            "tags": [],
+            "label": "model_id",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.ModelField.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.SemanticField",
+        "type": "Interface",
+        "tags": [],
+        "label": "SemanticField",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.SemanticField.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.SemanticField.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.SemanticField.embeddingType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "embeddingType",
+            "description": [],
+            "signature": [
+              "\"dense_vector\" | \"sparse_vector\""
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-queries",
+            "id": "def-common.SemanticField.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.IndexFields",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexFields",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.QueryGenerationFieldDescriptors",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryGenerationFieldDescriptors",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/search-queries",
+            "scope": "common",
+            "docId": "kibKbnSearchQueriesPluginApi",
+            "section": "def-common.IndexQueryFields",
+            "text": "IndexQueryFields"
+          },
+          "; }"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.SUGGESTED_BM25_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SUGGESTED_BM25_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.SUGGESTED_DENSE_VECTOR_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SUGGESTED_DENSE_VECTOR_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-queries",
+        "id": "def-common.SUGGESTED_SPARSE_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SUGGESTED_SPARSE_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-queries/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

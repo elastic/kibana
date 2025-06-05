@@ -31,6 +31,11 @@ const pages = {
     table: 'knowledgeBaseTable',
     tableTitleCell: 'knowledgeBaseTableTitleCell',
     tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+    editUserInstructionButton:
+      'observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton',
+    entryMarkdownEditor: 'knowledgeBaseEditManualEntryFlyoutMarkdownEditor',
+    editEntryCancelButton: 'knowledgeBaseEditManualEntryFlyoutCancelButton',
+    saveEntryButton: 'knowledgeBaseEditManualEntryFlyoutSaveButton',
   },
   conversations: {
     setupGenAiConnectorsButtonSelector:

@@ -16,7 +16,7 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
-import { CombinedPrompts } from '../graphs/default_attack_discovery_graph/nodes/helpers/prompts';
+import { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';

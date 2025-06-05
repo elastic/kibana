@@ -16,6 +16,8 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { PromiseResolvedValue } from '../../../../../common/endpoint/types';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
@@ -53,6 +55,7 @@ import { ManifestClient } from '../manifest_client';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { SavedObjectsClientFactory } from '../../saved_objects';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -81,6 +84,7 @@ const iterateArtifactsBuildResult = (
 };
 
 export interface ManifestManagerContext {
+  savedObjectsClientFactory: SavedObjectsClientFactory;
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
@@ -112,8 +116,11 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
+  protected savedObjectsClientFactory: SavedObjectsClientFactory;
 
   constructor(context: ManifestManagerContext) {
+    this.savedObjectsClientFactory = context.savedObjectsClientFactory;
+
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -658,35 +665,77 @@ export class ManifestManager {
     const unChangedPolicies: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
+    const savedObjects = this.savedObjectsClientFactory;
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
-        const response = await this.packagePolicyService.bulkUpdate(
-          this.savedObjectsClient,
-          this.esClient,
-          currentBatch
-        );
+        try {
+          // With spaces, we need to group the updates by Space ID so that a properly scoped
+          // SO client is used for the update.
+          const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
-        if (!isEmpty(response.failedPolicies)) {
-          errors.push(
-            ...response.failedPolicies.map((failedPolicy) => {
-              if (failedPolicy.error instanceof Error) {
-                return failedPolicy.error;
-              } else {
-                return new Error(failedPolicy.error.message);
+          if (this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+            for (const packagePolicy of currentBatch) {
+              const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
+
+              if (!updatesBySpace[packagePolicySpace]) {
+                updatesBySpace[packagePolicySpace] = [];
               }
-            })
-          );
-        }
 
-        if (response.updatedPolicies) {
-          updatedPolicies.push(
-            ...response.updatedPolicies.map((policy) => {
-              return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
-            })
-          );
+              updatesBySpace[packagePolicySpace].push(packagePolicy);
+            }
+          } else {
+            updatesBySpace[DEFAULT_SPACE_ID] = currentBatch;
+          }
+
+          const response: Required<
+            PromiseResolvedValue<ReturnType<typeof this.packagePolicyService.bulkUpdate>>
+          > = {
+            updatedPolicies: [],
+            failedPolicies: [],
+          };
+
+          for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
+            this.logger.debug(
+              `updating [${spaceUpdates.length}] package policies for space id [${spaceId}]`
+            );
+
+            const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
+              savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
+              this.esClient,
+              currentBatch
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            response.updatedPolicies!.push(...(bulkUpdateResponse.updatedPolicies ?? []));
+            response.failedPolicies.push(...(bulkUpdateResponse.failedPolicies ?? []));
+          }
+
+          if (!isEmpty(response.failedPolicies)) {
+            errors.push(
+              ...response.failedPolicies.map((failedPolicy) => {
+                if (failedPolicy.error instanceof Error) {
+                  return failedPolicy.error;
+                } else {
+                  this.logger.debug(`Update failure:\n${stringify(failedPolicy.error)}`);
+
+                  return new EndpointError(failedPolicy.error.message, failedPolicy.error);
+                }
+              })
+            );
+          }
+
+          if (response.updatedPolicies) {
+            updatedPolicies.push(
+              ...response.updatedPolicies.map((policy) => {
+                return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
+              })
+            );
+          }
+        } catch (err) {
+          errors.push(new EndpointError(`packagePolicy.bulkUpdate error: ${err.message}`, err));
         }
       },
     });
@@ -776,6 +825,7 @@ export class ManifestManager {
   private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
   }
 
@@ -783,13 +833,19 @@ export class ManifestManager {
     const allPolicyIds: string[] = [];
     const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
 
     for await (const itemIds of idFetcher) {
       allPolicyIds.push(...itemIds);
     }
 
-    this.logger.debug(`Retrieved [${allPolicyIds.length}] endpoint integration policy IDs`);
+    this.logger.debug(
+      () =>
+        `Retrieved [${allPolicyIds.length}] endpoint integration policy IDs:\n${stringify(
+          allPolicyIds
+        )}`
+    );
 
     return allPolicyIds;
   }

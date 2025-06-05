@@ -1926,6 +1926,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getAccordionState",
+            "type": "Function",
+            "tags": [],
+            "label": "getAccordionState",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<string | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAccordionState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

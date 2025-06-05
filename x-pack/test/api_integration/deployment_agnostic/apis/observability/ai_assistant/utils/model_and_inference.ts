@@ -8,6 +8,7 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import pRetry from 'p-retry';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
@@ -39,12 +40,44 @@ export async function importModel(
   try {
     await ml.api.importTrainedModel(modelId, modelId, config);
   } catch (error) {
-    if (error.message.includes('resource_already_exists_exception')) {
+    if (
+      error.message.includes('resource_already_exists_exception') ||
+      error.message.includes(
+        'the model id is the same as the deployment id of a current model deployment'
+      )
+    ) {
       log.info(`Model "${modelId}" is already imported. Skipping import.`);
       return;
     }
 
     log.error(`Could not import model "${modelId}": ${error}`);
+    throw error;
+  }
+}
+
+export async function startModelDeployment(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    modelId,
+  }: {
+    modelId: typeof TINY_ELSER_MODEL_ID | typeof TINY_TEXT_EMBEDDING_MODEL_ID;
+  }
+) {
+  const ml = getService('ml');
+  const log = getService('log');
+
+  try {
+    await ml.api.startTrainedModelDeploymentES(modelId);
+  } catch (error) {
+    if (
+      error.message.includes(
+        'Could not start model deployment because an existing deployment with the same id'
+      )
+    ) {
+      log.info(`Model "${modelId}" is already started. Skipping starting deployment.`);
+      return;
+    }
+
     throw error;
   }
 }
@@ -144,36 +177,41 @@ export async function createInferenceEndpoint({
   modelId: string;
   taskType?: InferenceTaskType;
 }) {
-  try {
-    const res = await es.inference.put({
-      inference_id: inferenceId,
-      task_type: taskType,
-      inference_config: {
-        service: 'elasticsearch',
-        service_settings: {
-          model_id: modelId,
-          adaptive_allocations: { enabled: true, min_number_of_allocations: 1 },
-          num_threads: 1,
-        },
-        task_settings: {},
-      },
-    });
+  return pRetry(
+    async () => {
+      try {
+        const res = await es.inference.put({
+          inference_id: inferenceId,
+          task_type: taskType,
+          inference_config: {
+            service: 'elasticsearch',
+            service_settings: {
+              model_id: modelId,
+              adaptive_allocations: { enabled: true, min_number_of_allocations: 1 },
+              num_threads: 1,
+            },
+            task_settings: {},
+          },
+        });
 
-    log.info(`Inference endpoint ${inferenceId} created.`);
-    return res;
-  } catch (error) {
-    if (
-      error instanceof errors.ResponseError &&
-      (error.body?.error?.type === 'resource_not_found_exception' ||
-        error.body?.error?.type === 'status_exception')
-    ) {
-      log.debug(`Inference endpoint "${inferenceId}" already exists. Skipping creation.`);
-      return;
-    }
+        log.info(`Inference endpoint ${inferenceId} created.`);
+        return res;
+      } catch (error) {
+        if (
+          error instanceof errors.ResponseError &&
+          (error.body?.error?.type === 'resource_not_found_exception' ||
+            error.body?.error?.type === 'status_exception')
+        ) {
+          log.debug(`Inference endpoint "${inferenceId}" already exists. Skipping creation.`);
+          return;
+        }
 
-    log.error(`Error creating inference endpoint "${inferenceId}": ${error}`);
-    throw error;
-  }
+        log.error(`Error creating inference endpoint "${inferenceId}": ${error}`);
+        throw error;
+      }
+    },
+    { retries: 2 }
+  );
 }
 
 export async function deleteModel(

@@ -16,7 +16,7 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/nodes/helpers/prompts/incompatible_antivirus';
+import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts/incompatible_antivirus';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
 import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';

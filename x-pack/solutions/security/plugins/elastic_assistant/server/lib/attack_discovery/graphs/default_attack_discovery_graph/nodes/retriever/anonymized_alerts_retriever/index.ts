@@ -11,6 +11,7 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import type { CallbackManagerForRetrieverRun } from '@langchain/core/callbacks/manager';
 import type { Document } from '@langchain/core/documents';
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
+import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 
 import { getAnonymizedAlerts } from '../helpers/get_anonymized_alerts';
 
@@ -21,13 +22,13 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
 
   #alertsIndexPattern?: string;
   #anonymizationFields?: AnonymizationFieldResponse[];
-  #end?: string | null;
+  #end?: DateMath | null;
   #esClient: ElasticsearchClient;
   #filter?: Record<string, unknown> | null;
   #onNewReplacements?: (newReplacements: Replacements) => void;
   #replacements?: Replacements;
   #size?: number;
-  #start?: string | null;
+  #start?: DateMath | null;
 
   constructor({
     alertsIndexPattern,
@@ -43,14 +44,14 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
   }: {
     alertsIndexPattern?: string;
     anonymizationFields?: AnonymizationFieldResponse[];
-    end?: string | null;
+    end?: DateMath | null;
     esClient: ElasticsearchClient;
     fields?: CustomRetrieverInput;
     filter?: Record<string, unknown> | null;
     onNewReplacements?: (newReplacements: Replacements) => void;
     replacements?: Replacements;
     size?: number;
-    start?: string | null;
+    start?: DateMath | null;
   }) {
     super(fields);
 

@@ -17,6 +17,7 @@ Actions are instantiations of a connector that are linked to rules and run as ba
 * [CrowdStrike](/reference/connectors-kibana/crowdstrike-action-type.md): Send a request to CrowdStrike.
 * [D3 Security](/reference/connectors-kibana/d3security-action-type.md): Send a request to D3 Security.
 * [{{gemini}}](/reference/connectors-kibana/gemini-action-type.md): Send a request to {{gemini}}.
+* [Elastic Managed LLM](/reference/connectors-kibana/elastic-managed-llm.md): Send a request to Elastic Managed LLM.
 * [Email](/reference/connectors-kibana/email-action-type.md): Send email from your server.
 * [{{ibm-r}}](/reference/connectors-kibana/resilient-action-type.md): Create an incident in {{ibm-r}}.
 * [Index](/reference/connectors-kibana/index-action-type.md): Index data into Elasticsearch.
