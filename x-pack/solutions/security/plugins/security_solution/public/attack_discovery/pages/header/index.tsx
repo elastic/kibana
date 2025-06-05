@@ -25,6 +25,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
@@ -158,6 +159,9 @@ const HeaderComponent: React.FC<Props> = ({
                         isDisabled={isEISCostTourDisabled}
                         selectedConnectorId={connectorId}
                         zIndex={1} // Should lower than the flyout
+                        storageKey={
+                          NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
+                        }
                       >
                         <ConnectorSelectorInline
                           onConnectorSelected={noop}

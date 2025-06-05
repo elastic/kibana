@@ -14,6 +14,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
 import { css } from '@emotion/react';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getMaxAlerts } from './helpers/get_max_alerts';
@@ -105,6 +106,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
             isDisabled={false}
             wrapper={false}
             selectedConnectorId={connectorId}
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
           >
             <EuiFormRow
               label={i18n.CONNECTOR}

@@ -28,6 +28,7 @@ import { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
 import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -181,6 +182,7 @@ export const AssistantHeader: React.FC<Props> = ({
                 <ElasticLLMCostAwarenessTour
                   isDisabled={isDisabled}
                   selectedConnectorId={selectedConnectorId}
+                  storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
                 >
                   <ConnectorSelectorInline
                     isDisabled={isDisabled || selectedConversation === undefined}
