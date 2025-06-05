@@ -16,6 +16,7 @@ import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
+import { CaseLinks } from './case_links';
 
 export interface StatusBarProps {
   alert: TopAlert | null;
@@ -46,6 +47,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           />
         )}
       </EuiFlexItem>
+      <CaseLinks alert={alert} />
       <EuiFlexItem grow={false}>
         <TagsList tags={tags} ignoreEmpty color="default" />
       </EuiFlexItem>
