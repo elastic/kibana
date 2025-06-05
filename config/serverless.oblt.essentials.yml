@@ -3,3 +3,5 @@
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
+xpack.apm.enabled: false
+uiSettings.overrides.defaultRoute: /app/observability/overview
