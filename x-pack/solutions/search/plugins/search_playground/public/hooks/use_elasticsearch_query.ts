@@ -50,6 +50,7 @@ export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   };
 
   const { refetch: executeQuery, ...rest } = useQuery({
+    queryKey: ['searchPlayground', 'queryTest'],
     queryFn: executeEsQuery,
     enabled: false,
     retry: false,
