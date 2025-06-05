@@ -187,4 +187,39 @@ describe('Service Inventory', () => {
       });
     });
   });
+
+  describe('Check pagination with progressive loading enabled', () => {
+    before(() => {
+      // clean previous data created
+      synthtrace.clean();
+      const { rangeFrom, rangeTo } = timeRange;
+      synthtrace.index(
+        generateMultipleServicesData(
+          {
+            from: new Date(rangeFrom).getTime(),
+            to: new Date(rangeTo).getTime(),
+          },
+          500
+        )
+      );
+      // enable progressive loading
+      cy.loginAsEditorUser().then(() => {
+        cy.updateAdvancedSettings({
+          'observability:apmProgressiveLoading': 'low',
+        });
+      });
+      cy.visitKibana(serviceInventoryHref);
+    });
+
+    it('should navigate to the next page when clicking on the pagination button', () => {
+      cy.getByTestSubj('pagination-button-1').click();
+      cy.url().should('include', 'page=1');
+    });
+
+    after(() => {
+      cy.updateAdvancedSettings({
+        'observability:apmProgressiveLoading': 'off',
+      });
+    });
+  });
 });
