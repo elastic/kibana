@@ -143,6 +143,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
                 ])}`,
               ]
             : []),
+          // enable product intercept for api ftr tests
+          '--xpack.intercepts.enabled=true',
         ],
       },
       testFiles: options.testFiles,

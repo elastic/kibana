@@ -33,6 +33,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
+        '--xpack.intercepts.enabled=true', // enable intercepts for API tests
       ],
     },
     esTestCluster: {

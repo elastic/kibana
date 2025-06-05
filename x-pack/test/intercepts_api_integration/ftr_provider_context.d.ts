@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const TRIGGER_INFO_API_ROUTE = '/internal/api/intercepts/trigger_info' as const;
+import { GenericFtrProviderContext } from '@kbn/test';
+import { services } from './services';
 
-export const TRIGGER_USER_INTERACTION_METADATA_API_ROUTE =
-  '/internal/api/intercepts/user_interaction/{triggerId}' as const;
+export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
