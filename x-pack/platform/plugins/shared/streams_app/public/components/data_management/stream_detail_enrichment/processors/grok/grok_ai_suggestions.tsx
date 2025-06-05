@@ -37,7 +37,9 @@ import {
   ElasticLlmTourCallout,
   useElasticLlmTourCalloutDismissed,
   getElasticManagedLlmConnector,
+  getConnectorsManagementHref,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
@@ -199,6 +201,7 @@ function InnerGrokAiSuggestions({
 }) {
   const {
     dependencies,
+    core: { docLinks, http },
     services: { telemetryClient },
   } = useKibana();
   const {
@@ -316,6 +319,11 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmTourCalloutDismissed(false);
+  const elasticManagedLlm = getElasticManagedLlmConnector(
+    genAiConnectors?.connectors?.filter((c) => c.id === currentConnector)
+  );
+
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -428,6 +436,36 @@ function InnerGrokAiSuggestions({
           />
         </EuiFlexGroup>
       </EuiFlexItem>
+      {!tourCalloutDismissed && elasticManagedLlm && (
+        <EuiCallOut onDismiss={() => setTourCalloutDismissed(true)} size="s" color="primary">
+          <FormattedMessage
+            id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip"
+            defaultMessage="Elastic LLM is the new default for generating patterns and incurs <costLink>additional charges</costLink>. Other LLM connectors remain available. You can always configure and use your own <connectorLink>connector</connectorLink>."
+            values={{
+              costLink: (...chunks: React.ReactNode[]) => (
+                <EuiLink
+                  href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  external
+                >
+                  {chunks}
+                </EuiLink>
+              ),
+              connectorLink: (...chunks: React.ReactNode[]) => (
+                <EuiLink
+                  href={getConnectorsManagementHref(http!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  external
+                >
+                  {chunks}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+      )}
     </>
   );
 }
