@@ -1890,6 +1890,7 @@
     "postcss-scss": "^4.0.4",
     "prettier": "^2.8.8",
     "proxy": "^2.1.1",
+    "qs": "^6.14.0",
     "react-is": "~18.2.0",
     "react-refresh": "^0.16.0",
     "react-test-renderer": "~18.2.0",
