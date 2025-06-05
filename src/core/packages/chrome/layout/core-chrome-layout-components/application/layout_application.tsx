@@ -16,9 +16,5 @@ import { styles } from './layout_application.styles';
 export const LayoutApplication = ({ children }: { children: ReactNode }) => {
   const overflow = useEuiOverflowScroll('y');
 
-  return (
-    <main css={styles.root}>
-      <div css={styles.content(overflow)}>{children}</div>
-    </main>
-  );
+  return <main css={[styles.root, overflow]}>{children}</main>;
 };
