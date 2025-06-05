@@ -1,0 +1,6 @@
+---
+# This file is used to generate "Alert and action settings" page in the product docs
+
+product: Kibana
+collection: Logs settings in Kibana
+page_description: |
