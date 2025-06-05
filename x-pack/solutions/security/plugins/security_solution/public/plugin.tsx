@@ -66,7 +66,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
-import { hasAccessToSecuritySolution } from './helpers_access';
+import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -443,10 +443,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
-    if (
-      !hasAccessToSecuritySolution(capabilities) &&
-      !capabilities.securitySolutionCasesV3?.read_cases
-    ) {
+    if (!isSecuritySolutionAccessible(capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
       // no need to register the links updater when the plugin is inaccessible. return early
       return;
