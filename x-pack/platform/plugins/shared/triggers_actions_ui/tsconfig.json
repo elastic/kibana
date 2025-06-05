@@ -86,7 +86,9 @@
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
     "@kbn/esql-ast",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/esql-types",
+    "@kbn/presentation-containers"
   ],
   "exclude": ["target/**/*"]
 }

@@ -23,7 +23,7 @@ import {
   setup,
 } from './helpers';
 
-describe.skip('autocomplete.suggest', () => {
+describe('autocomplete.suggest', () => {
   describe('FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]', () => {
     let assertSuggestions: AssertSuggestionsFn;
     let suggest: SuggestFn;

@@ -1389,36 +1389,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureContainerAssetView\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureHostsView\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID",
         "type": "string",
         "tags": [],

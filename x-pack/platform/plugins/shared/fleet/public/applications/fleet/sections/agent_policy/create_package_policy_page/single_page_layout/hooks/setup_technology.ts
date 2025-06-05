@@ -38,6 +38,7 @@ export const useAgentless = () => {
   const isCloud = !!cloud?.isCloudEnabled;
 
   const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
+  const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -54,6 +55,7 @@ export const useAgentless = () => {
 
   return {
     isAgentlessEnabled,
+    isAgentlessDefault,
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
   };
@@ -80,7 +82,7 @@ export function useSetupTechnology({
   agentPolicies?: AgentPolicy[];
   integrationToEnable?: string;
 }) {
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
@@ -102,12 +104,12 @@ export function useSetupTechnology({
     const shouldBeDefault =
       isAgentlessEnabled &&
       (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
-        isAgentlessSetupDefault(packageInfo, integrationToEnable))
+        isAgentlessSetupDefault(isAgentlessDefault, packageInfo, integrationToEnable))
         ? SetupTechnology.AGENTLESS
         : SetupTechnology.AGENT_BASED;
     setDefaultSetupTechnology(shouldBeDefault);
     setSelectedSetupTechnology(shouldBeDefault);
-  }, [isAgentlessEnabled, packageInfo, integrationToEnable]);
+  }, [isAgentlessEnabled, isAgentlessDefault, packageInfo, integrationToEnable]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
 
@@ -184,15 +186,18 @@ export function useSetupTechnology({
   };
 }
 
-const isAgentlessSetupDefault = (packageInfo?: PackageInfo, integrationToEnable?: string) => {
+const isAgentlessSetupDefault = (
+  isAgentlessDefault: boolean,
+  packageInfo?: PackageInfo,
+  integrationToEnable?: string
+) => {
   if (
-    packageInfo &&
-    packageInfo.policy_templates &&
-    packageInfo.policy_templates.length > 0 &&
-    ((integrationToEnable &&
-      packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
-        ?.agentless.is_default) ||
-      packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default))
+    isAgentlessDefault ||
+    ((packageInfo?.policy_templates ?? []).length > 0 &&
+      ((integrationToEnable &&
+        packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
+          ?.agentless.is_default) ||
+        packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default)))
   ) {
     return true;
   }

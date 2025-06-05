@@ -101,15 +101,12 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
   defaultMessage: 'Shared exception lists',
 });
 
-export const SIEM_MIGRATIONS_RULES = i18n.translate(
-  'xpack.securitySolution.navigation.siemMigrationsRules',
-  {
-    defaultMessage: 'SIEM Rule Migrations',
-  }
-);
-
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
+});
+
+export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.navigation.alertSummary', {
+  defaultMessage: 'Alert summary',
 });
 
 export const ATTACK_DISCOVERY = i18n.translate(
@@ -125,6 +122,10 @@ export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timel
 
 export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
+});
+
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.configurations', {
+  defaultMessage: 'Configurations',
 });
 
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {

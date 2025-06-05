@@ -8,32 +8,18 @@
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 // main panels links
-export const DASHBOARDS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
-export const DASHBOARDS_PANEL_BTN =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
-
-export const INVESTIGATIONS =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:investigations"]';
 export const INVESTIGATIONS_PANEL_BTN =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:investigations"]';
-
-export const EXPLORE = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:explore"]';
-export const EXPLORE_PANEL_BTN =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:explore"]';
-
-export const RULES_PANEL_BTN =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:rules-landing"]';
-
-export const ASSETS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:assets"]';
-export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:assets"]';
-
-export const MACHINE_LEARNING =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:machine_learning-landing"]';
+  '[data-test-subj*="nav-item-id-securityGroup:investigations"]';
+export const EXPLORE_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:explore"]';
+export const RULES_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:rules"]';
+export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:assets"]';
 export const MACHINE_LEARNING_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:machine_learning-landing"]';
+  '[data-test-subj*="panelOpener-deepLinkId-id-securityGroup:machineLearning"]';
 
 // main direct links
 export const DISCOVER = '[data-test-subj*="nav-item-deepLinkId-discover"]';
+
+export const DASHBOARDS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
 
 export const ALERTS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:alerts"]';
 
@@ -46,23 +32,14 @@ export const THREAT_INTELLIGENCE =
 export const CASES = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cases"]';
 
 // nested panel links
-export const OVERVIEW = '[data-test-subj~="panelNavItem-id-overview"]';
-
-export const DETECTION_RESPONSE = '[data-test-subj~="panelNavItem-id-detection_response"]';
-
-export const ENTITY_ANALYTICS = '[data-test-subj~="panelNavItem-id-entity_analytics"]';
-
 export const TIMELINES = '[data-test-subj~="panelNavItem-id-timelines"]';
-export const OSQUERY = '[data-test-subj~="panelNavItem-id-osquery:"]';
 
-export const KUBERNETES = '[data-test-subj~="panelNavItem-id-kubernetes"]';
-
-export const CSP_DASHBOARD = '[data-test-subj~="panelNavItem-id-cloud_security_posture-dashboard"]';
+export const OSQUERY = '[data-test-subj~="panelNavItem-id-osquery"]';
 
 export const HOSTS = '[data-test-subj~="panelNavItem-id-hosts"]';
 
-export const ENDPOINTS = '[data-test-subj="panelNavItem-id-endpoints"]';
 export const CLOUD_DEFEND = '[data-test-subj="panelNavItem-id-cloud_defend"]';
+export const ENDPOINTS = '[data-test-subj~="panelNavItem-id-endpoints"]';
 
 export const POLICIES = '[data-test-subj~="panelNavItem-id-policy"]';
 
@@ -85,6 +62,8 @@ export const RULES = '[data-test-subj~="panelNavItem-id-rules"]';
 
 export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
 
+export const ONBOARDING = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:get_started"]';
+
 export const getBreadcrumb = (deepLinkId: string) => {
   return `breadcrumb-deepLinkId-${deepLinkId}`;
 };
@@ -98,14 +77,6 @@ export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
 export const openNavigationPanelFor = (pageName: string) => {
   let panel;
   switch (pageName) {
-    case OVERVIEW:
-    case DETECTION_RESPONSE:
-    case KUBERNETES:
-    case ENTITY_ANALYTICS:
-    case CSP_DASHBOARD: {
-      panel = DASHBOARDS_PANEL_BTN;
-      break;
-    }
     case RULES:
     case CSP_BENCHMARKS:
     case EXCEPTIONS:

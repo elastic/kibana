@@ -38,9 +38,6 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
-  enableInfrastructureHostsView,
-  enableInfrastructureContainerAssetView,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';

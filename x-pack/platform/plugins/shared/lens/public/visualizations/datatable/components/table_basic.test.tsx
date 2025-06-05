@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { act } from 'react-dom/test-utils';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -23,6 +23,7 @@ import { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -504,7 +505,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -537,7 +538,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -558,7 +559,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(20).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
       renderDatatableComponent({
         args,
@@ -584,7 +585,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -624,7 +625,7 @@ describe('DatatableComponent', () => {
       data.rows = new Array(rowNumbers).fill({
         a: 'shoes',
         b: 1588024800000,
-        c: faker.random.number(),
+        c: faker.number.int(),
       });
 
       args.pageSize = pageSize;
@@ -760,6 +761,61 @@ describe('DatatableComponent', () => {
           ['3', 'red'],
         ]);
       });
+    });
+  });
+
+  describe('gridStyle', () => {
+    it('should apply default grid style when density is not provided', () => {
+      renderDatatableComponent();
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply normal grid style when density is normal', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply compact grid style when density is compact', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+    it('should apply expanded grid style when density is expanded', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.EXPANDED,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-l-fontSize-l/);
+    });
+    it('should update grid style when density changes', () => {
+      const { rerender } = renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+      rerender({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
     });
   });
 });

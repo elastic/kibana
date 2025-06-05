@@ -141,6 +141,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/object-utils",
     "@kbn/presentation-containers",
+    "@kbn/apm-sources-access-plugin",
   ],
   "exclude": ["target/**/*"]
 }

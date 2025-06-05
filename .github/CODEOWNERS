@@ -47,9 +47,12 @@ x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_ser
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -952,6 +955,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/kibana-management
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
@@ -1824,6 +1828,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
 ^/src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
@@ -1978,6 +1985,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
 /x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
@@ -2175,6 +2183,12 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-explore
+
+
+# AI4DSOC in Security Solution
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -2404,8 +2418,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management

@@ -36,6 +36,7 @@ export const config: PluginConfigDescriptor = {
     },
     agentless: {
       enabled: true,
+      isDefault: true,
     },
     enableExperimental: true,
     developer: {
@@ -46,6 +47,8 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
+    integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -150,6 +153,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
+          isDefault: schema.maybe(schema.boolean({ defaultValue: false })),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -288,6 +292,8 @@ export const config: PluginConfigDescriptor = {
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

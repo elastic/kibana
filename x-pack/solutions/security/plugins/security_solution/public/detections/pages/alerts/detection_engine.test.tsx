@@ -198,6 +198,10 @@ describe('DetectionEnginePageComponent', () => {
       indicesExist: true,
       indexPattern: {},
       browserFields: mockBrowserFields,
+      sourcererDataView: {
+        fields: {},
+        title: '',
+      },
     });
     jest
       .spyOn(alertFilterControlsPackage, 'AlertFilterControls')

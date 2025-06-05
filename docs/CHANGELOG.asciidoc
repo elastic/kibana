@@ -100,7 +100,35 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.18.2]]
 == {kib} 8.18.2
 
-The 8.18.2 release includes the following fixes.
+The 8.18.2 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.18.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1508]
+
+// tag::known-issue-222127[]
+.Upgrading Kibana from 8.x to 8.18.2 fails due to a configuration conflict in the kibana.yml file.
+[%collapsible]
+====
+*Details* +
+Upgrading {kib} from version 8.x to 8.18.2 fails due to a configuration conflict if `xpack.alerting.cancelAlertsOnRuleTimeout` is set to `false` in the `kibana.yml` file. {kib} fails to boot and shows a fatal error message in the {kib} logs that's similar to the following:
+
+```sh
+FATAL Error: Rule type "transform_health" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.
+```
+
+This failure occurs when the `xpack.alerting.cancelAlertsOnRuleTimeout` setting is set to `false`, which is incompatible with the default configuration of an internal setting (`autoRecoverAlerts`) in 8.18.2.
+
+*Workaround* +
+To temporarily resolve the issue and allow the upgrade to proceed, follow these steps:
+
+. Remove the `xpack.alerting.cancelAlertsOnRuleTimeout: false` setting from the `kibana.yml` file.
+. Restart {kib} to apply the changes.
+
+====
+// end::known-issue-222127[]
 
 [float]
 [[fixes-v8.18.2]]
@@ -122,13 +150,15 @@ For the Elastic Security 8.18.2 release information, refer to {security-guide}/r
 The 8.18.1 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
 ====
 
-The 8.18.1 release includes the following enhancements and fixes.
+The 8.18.1 release includes the following known issues, enhancements and fixes.
 
 [float]
 [[known-issues-8.18.1]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
+include::CHANGELOG.asciidoc[tag=known-issue-1508]
 
 [float]
 [[enhancement-v8.18.1]]
@@ -163,12 +193,34 @@ Machine Learning::
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
-coming::[8.18.0]
 
 Review the following information about the {kib} 8.18.0 release.
 [float]
 [[known-issues-8.18.0]]
 === Known issues
+
+// tag::known-issue-320[]
+.Errors in rule executions occur when maintenance windows have filters.
+[%collapsible]
+====
+*Details* +
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+
+*Workaround* +
+Remove any filters added to the active maintenance window.
+
+====
+// end::known-issue-320[]
+
+// tag::known-issue-1508[]
+.Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function.
+[%collapsible]
+====
+*Details* +
+The Observability AI assistant gets stuck in a loop when calling the `execute_connector` function. Instead of completing queries, it times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`. 
+
+====
+// end::known-issue-1508[]
 
 // tag::known-issue-220339[]
 .Observability AI assistant Knowledge Base entries with empty text can lead to Kibana OOM or restarts.

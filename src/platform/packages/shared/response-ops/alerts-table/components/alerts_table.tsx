@@ -188,6 +188,8 @@ const AlertsTableContent = typedForwardRef(
       shouldHighlightRow,
       dynamicRowHeight = false,
       emptyStateHeight,
+      emptyStateVariant,
+      openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -195,8 +197,11 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutHeader,
       renderFlyoutBody,
       renderFlyoutFooter,
+      flyoutOwnsFocus = false,
+      flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
+      configurationStorage = new Storage(window.localStorage),
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -208,9 +213,9 @@ const AlertsTableContent = typedForwardRef(
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
-    const storage = useRef(new Storage(window.localStorage));
+    const storageRef = useRef(configurationStorage);
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storage.current.get(
+    const localStorageAlertsTableConfig = storageRef.current.get(
       id
     ) as Partial<AlertsTablePersistedConfiguration>;
 
@@ -263,7 +268,7 @@ const AlertsTableContent = typedForwardRef(
     } = useColumns({
       ruleTypeIds,
       storageAlertsTable,
-      storage,
+      storage: storageRef,
       id,
       defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
       alertsFields: propBrowserFields,
@@ -406,7 +411,7 @@ const AlertsTableContent = typedForwardRef(
           ...storageAlertsTable.current,
           sort: newSort,
         };
-        storage.current.set(id, storageAlertsTable.current);
+        storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
       [id]
@@ -478,6 +483,9 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+          flyoutOwnsFocus,
+          flyoutPagination,
+          openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
       [
@@ -508,6 +516,9 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        flyoutOwnsFocus,
+        flyoutPagination,
+        openLinksInNewTab,
         memoizedServices,
       ]
     );
@@ -593,6 +604,7 @@ const AlertsTableContent = typedForwardRef(
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
               height={emptyStateHeight}
+              variant={emptyStateVariant}
             />
           </InspectButtonContainer>
         )}

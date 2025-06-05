@@ -12,6 +12,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { SetRequired } from 'type-fest';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RULE_TYPES_FILTER_SUBJ } from '../constants';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import {
@@ -24,7 +27,8 @@ import {
 export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
-  isDisabled = false,
+  isDisabled: isDisabledProp = false,
+  error,
 }) => {
   const {
     ruleTypeIds: allowedRuleTypeIds,
@@ -34,7 +38,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   const {
     data: ruleTypes,
     isLoading,
-    isError,
+    isError: cannotLoadRuleTypes,
   } = useGetInternalRuleTypesQuery({
     http,
   });
@@ -62,19 +66,22 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
     [onChange]
   );
 
+  const isInvalid = Boolean(error) || cannotLoadRuleTypes;
+  const isDisabled = isDisabledProp || cannotLoadRuleTypes || !options.length;
+
   return (
     <EuiFormRow
       label={RULE_TYPES_FILTER_LABEL}
-      isDisabled={isDisabled || isError}
-      isInvalid={isError}
-      error={RULE_TYPES_LOAD_ERROR_MESSAGE}
+      isDisabled={isDisabled}
+      isInvalid={isInvalid}
+      error={error ?? RULE_TYPES_LOAD_ERROR_MESSAGE}
       fullWidth
     >
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || isError || !options.length}
-        isInvalid={isError}
+        isDisabled={isDisabled}
+        isInvalid={isInvalid}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onSelectedOptionsChange}
@@ -82,14 +89,28 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
           !options.length ? RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TYPES_FILTER_PLACEHOLDER
         }
         fullWidth
+        compressed
+        data-test-subj={RULE_TYPES_FILTER_SUBJ}
       />
     </EuiFormRow>
   );
 };
 
-export const filterMetadata = {
+const isEmpty = (value?: string[]) => !Boolean(value?.length);
+
+export const filterMetadata: AlertsFilterMetadata<string[]> = {
   id: 'ruleTypes',
   displayName: RULE_TYPES_FILTER_LABEL,
   component: AlertsFilterByRuleTypes,
-  isEmpty: (value?: string[]) => !Boolean(value?.length),
-} as const satisfies AlertsFilterMetadata<string[]>;
+  isEmpty,
+  toKql: (value?: string[]) => {
+    if (!value || isEmpty(value)) {
+      return null;
+    }
+    return toKqlExpression(
+      value.length === 1
+        ? nodeBuilder.is(ALERT_RULE_TYPE_ID, value[0])
+        : nodeBuilder.or(value.map((ruleTypeId) => nodeBuilder.is(ALERT_RULE_TYPE_ID, ruleTypeId)))
+    );
+  },
+};

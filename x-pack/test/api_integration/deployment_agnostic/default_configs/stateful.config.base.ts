@@ -24,6 +24,8 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
+import { getTlsWebhookServerUrls } from '../../../alerting_api_integration/common/lib/get_tls_webhook_servers';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -56,6 +58,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);
 
     /**
      * This is used by CI to set the docker registry port
@@ -161,6 +164,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
+          `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
         ],
       },
     };

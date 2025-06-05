@@ -53,16 +53,16 @@ export const SAMPLE_PREBUILT_RULES = [
   createRuleAssetSavedObject({
     ...getPrebuiltRuleWithExceptionsMock(),
     rule_id: ELASTIC_SECURITY_RULE_ID,
-    tags: ['test-tag-1'],
+    tags: ['test-tag', 'test-tag-1'],
     enabled: true,
   }),
   createRuleAssetSavedObject({
     rule_id: '000047bb-b27a-47ec-8b62-ef1a5d2c9e19',
-    tags: ['test-tag-2'],
+    tags: ['test-tag', 'test-tag-2'],
   }),
   createRuleAssetSavedObject({
     rule_id: '00140285-b827-4aee-aa09-8113f58a08f3',
-    tags: ['test-tag-3'],
+    tags: ['test-tag', 'test-tag-3'],
   }),
 ];
 

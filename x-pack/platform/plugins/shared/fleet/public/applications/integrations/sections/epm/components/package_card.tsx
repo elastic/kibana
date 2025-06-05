@@ -69,6 +69,7 @@ export function PackageCard({
   isUpdateAvailable,
   showLabels = true,
   showInstallationStatus,
+  showCompressedInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
   installStatus,
@@ -77,9 +78,12 @@ export function PackageCard({
   titleLineClamp,
   descriptionLineClamp,
   maxCardHeight,
+  minCardHeight,
+  showDescription = true,
+  showReleaseBadge = true,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
-  if (release && release !== 'ga') {
+  if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
@@ -224,6 +228,8 @@ export function PackageCard({
             [class*='euiCard__titleButton'] {
               ${getLineClampStyles(titleLineClamp)}
             }
+
+            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
           `}
           data-test-subj={testid}
           isquickstart={isQuickstart}
@@ -231,7 +237,7 @@ export function PackageCard({
           layout="horizontal"
           title={title || ''}
           titleSize="xs"
-          description={description}
+          description={showDescription ? description : ''}
           hasBorder
           icon={
             <CardIcon
@@ -239,7 +245,7 @@ export function PackageCard({
               packageName={name}
               integrationName={integration}
               version={version}
-              size="xl"
+              size={showDescription ? 'xl' : 'xxl'}
             />
           }
           onClick={onClickProp ?? onCardClick}
@@ -256,6 +262,7 @@ export function PackageCard({
             <InstallationStatus
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
+              compressed={showCompressedInstallationStatus}
             />
           </EuiFlexGroup>
         </Card>

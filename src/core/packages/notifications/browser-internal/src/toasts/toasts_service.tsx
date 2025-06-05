@@ -10,13 +10,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 import { EventReporter } from './telemetry';
@@ -26,11 +22,8 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
   overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
   eventReporter: EventReporter;
   targetDomElement: HTMLElement;
 }
@@ -44,18 +37,18 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
-    this.api!.start({ overlays, ...startDeps });
+  public start({ eventReporter, overlays, targetDomElement, rendering }: StartDeps) {
+    this.api!.start({ overlays, rendering });
     this.targetDomElement = targetDomElement;
 
     render(
-      <KibanaRenderContextProvider {...startDeps}>
+      rendering.addContext(
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
           reportEvent={eventReporter}
         />
-      </KibanaRenderContextProvider>,
+      ),
       targetDomElement
     );
 

@@ -27,6 +27,8 @@ export const templateSchema = schema.object({
           data_retention: schema.maybe(schema.string()),
         })
       ),
+      // Allowing unknowns here to support data stream options that are not yet defined in the schema
+      data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     })
   ),
   composedOf: schema.maybe(schema.arrayOf(schema.string())),
