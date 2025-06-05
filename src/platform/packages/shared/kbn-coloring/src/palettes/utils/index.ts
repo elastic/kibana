@@ -7,14 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
-import { KbnPalette } from '../../../constants';
-
-export const elasticClassicPalette = new KbnCategoricalPalette({
-  id: KbnPalette.ElasticClassic,
-  name: i18n.translate('palettes.classic.name', {
-    defaultMessage: 'Elastic classic',
-  }),
-  colors: ['#20377d', '#7de2d1', '#ff957d', '#f04e98', '#0077cc', '#fec514'],
-});
+export * from './common';
+export * from './get_config_from_palette';
