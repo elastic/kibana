@@ -11769,7 +11769,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12590,7 +12590,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>"
+              "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13683,7 +13683,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined"
+              "<Record<string, unknown>> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
