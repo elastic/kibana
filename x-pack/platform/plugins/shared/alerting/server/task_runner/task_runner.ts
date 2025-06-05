@@ -706,7 +706,7 @@ export class TaskRunner<
       schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       if (isOutdatedTaskVersionError(err)) {
-        this.logger.debug(
+        this.logger.info(
           `Outdated task version: The task instance ID: ${this.taskInstance.id} does not match the rule ID: ${ruleId}.`
         );
         return getDeleteRuleTaskRunResult();

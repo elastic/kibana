@@ -221,6 +221,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
   revision: 0,
+  scheduledTaskId: '1',
 };
 
 export const mockedRawRuleSO: SavedObject<RawRule> = {
@@ -276,6 +277,7 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
     },
     monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
     revision: 0,
+    scheduledTaskId: '1',
   },
 };
 
@@ -311,7 +313,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
 };
 
 export const mockTaskInstance = () => ({
-  id: '',
+  id: '1',
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',
