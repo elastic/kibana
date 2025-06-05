@@ -49,7 +49,6 @@ groups:
   - group: Action settings
     id: action-settings
     # description: |
-    # description: |
     # example: |
     settings:
 
