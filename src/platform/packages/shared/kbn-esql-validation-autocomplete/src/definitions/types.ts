@@ -68,6 +68,7 @@ export const dataTypes = [
   'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
+  'param', // Defines a named param such as ?value or ??field
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -155,10 +156,10 @@ export interface Signature {
      */
     acceptedValues?: string[];
     /**
-     * Must only be included _in addition to_ literalOptions.
+     * Must only be included _in addition to_ acceptedValues.
      *
      * If provided this is the list of suggested values that
-     * will show up in the autocomplete. If omitted, the literalOptions
+     * will show up in the autocomplete. If omitted, the acceptedValues
      * will be used as suggestions.
      *
      * This is useful for functions that accept
@@ -367,7 +368,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
   /**
    * The AST for the query behind the cursor.
    */
