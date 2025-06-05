@@ -15,7 +15,6 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core-saved-objects-utils-ser
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
 
-import { CoreSetup } from '@kbn/core/server';
 import { migrations730, migrations700 } from './migrate_to_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { migrateExplicitlyHiddenTitles } from './migrate_hidden_titles';
