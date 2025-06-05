@@ -88,22 +88,22 @@ export class FileUploadManager {
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
-  public readonly settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
+  private readonly settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
     json: {},
     valid: false,
   });
-  public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
+  private readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
     json: {},
     valid: false,
   });
-  public readonly existingIndexName$ = new BehaviorSubject<string | null>(null);
+  private readonly existingIndexName$ = new BehaviorSubject<string | null>(null);
 
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
 
-  public readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
+  private readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
     overallImportStatus: STATUS.NOT_STARTED,
     indexCreated: STATUS.NOT_STARTED,
@@ -274,6 +274,16 @@ export class FileUploadManager {
     };
   }
 
+  public getUploadStatus$() {
+    return this.uploadStatus$.asObservable();
+  }
+  public getUploadStatus() {
+    return this.uploadStatus$.getValue();
+  }
+
+  public getExistingIndexName$() {
+    return this.existingIndexName$.asObservable();
+  }
   public getExistingIndexName() {
     return this.existingIndexName$.getValue();
   }
@@ -339,14 +349,20 @@ export class FileUploadManager {
     });
   }
 
+  public getMappings$() {
+    return this.mappings$.asObservable();
+  }
   public getMappings() {
-    return this.mappings$.getValue().json;
+    return this.mappings$.getValue();
   }
 
   public updateMappings(mappings: MappingTypeMapping | string) {
     this.updateSettingsOrMappings('mappings', mappings);
   }
 
+  public getSettings$() {
+    return this.settings$.asObservable();
+  }
   public getSettings() {
     return this.settings$.getValue();
   }
@@ -400,7 +416,7 @@ export class FileUploadManager {
     indexName: string,
     dataViewName?: string | null
   ): Promise<FileUploadResults | null> {
-    const mappings = this.getMappings();
+    const mappings = this.getMappings().json;
     const pipelines = this.getPipelines();
 
     if (mappings === null || pipelines === null || this.commonFileFormat === null) {
@@ -626,7 +642,7 @@ export class FileUploadManager {
   }
 
   private addSemanticTextField() {
-    const mappings = this.getMappings();
+    const mappings = this.getMappings().json;
     const pipelines = this.getPipelines();
     if (
       this.isTikaFormat() &&
