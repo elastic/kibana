@@ -91,6 +91,10 @@ describe('getExpressionType', () => {
         expression: '1 day',
         expectedType: 'time_duration',
       },
+      {
+        expression: '?value',
+        expectedType: 'param',
+      },
     ];
     test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
       const ast = getASTForExpression(expression);
@@ -174,6 +178,10 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
+    });
+
+    it('handles fields defined by a named param', () => {
+      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
     });
   });
 
