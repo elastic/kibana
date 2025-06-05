@@ -45,44 +45,43 @@ const renderWithRouter = (path: string) => {
   const history = createMemoryHistory({
     initialEntries: [path],
   });
-  return {
-    ...render(
-      <Router history={history}>
-        <DiscoverRoutes customizationContext={mockCustomizationContext} />
-      </Router>
-    ),
-    history,
-  };
+  render(
+    <Router history={history}>
+      <DiscoverRoutes customizationContext={mockCustomizationContext} />
+    </Router>
+  );
+
+  return history;
 };
 
 describe('DiscoverRouter', () => {
   it('should show DiscoverMainRoute component for / route', () => {
-    const { history } = renderWithRouter('/');
+    const history = renderWithRouter('/');
     expect(screen.getByTestId('discover-main-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/');
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    const { history } = renderWithRouter('/view/test-id');
+    const history = renderWithRouter('/view/test-id');
     expect(screen.getByTestId('discover-main-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/view/test-id');
   });
 
   it('should redirect from /doc/:dataView/:index/:type to /doc/:dataView/:index', () => {
     // Render with a path that should trigger the redirect
-    const { history } = renderWithRouter('/doc/123/456/type');
+    const history = renderWithRouter('/doc/123/456/type');
     expect(screen.getByTestId('single-doc-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/doc/123/456');
   });
 
   it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
-    const { history } = renderWithRouter('/doc/test-dataview/test-index');
+    const history = renderWithRouter('/doc/test-dataview/test-index');
     expect(screen.getByTestId('single-doc-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/doc/test-dataview/test-index');
   });
 
   it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
-    const { history } = renderWithRouter('/context/test-dataview/test-id');
+    const history = renderWithRouter('/context/test-dataview/test-id');
     expect(screen.getByTestId('context-app-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/context/test-dataview/test-id');
   });
