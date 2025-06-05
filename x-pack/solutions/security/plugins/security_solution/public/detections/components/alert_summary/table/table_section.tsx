@@ -96,7 +96,6 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
           globalQuery={globalQuery}
           loading={false}
           renderChildComponent={renderChildComponent}
-          signalIndexName={indexNames}
           tableId={TableId.alertsOnAlertSummaryPage}
           to={to}
         />
