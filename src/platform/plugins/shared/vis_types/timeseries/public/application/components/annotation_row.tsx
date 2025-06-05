@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Query } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import { getDataViewsStart } from '../../services';
 
 import { AddDeleteButtons } from './add_delete_buttons';
@@ -48,6 +49,17 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 const INDEX_PATTERN_KEY = 'index_pattern';
 const TIME_FIELD_KEY = 'time_field';
+
+const useEditorStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css({
+      marginBottom: euiTheme.size.base,
+      padding: euiTheme.size.s,
+    });
+  }, [euiTheme]);
+  return styles;
+};
 
 export interface AnnotationRowProps {
   annotation: Annotation;
@@ -77,6 +89,7 @@ export const AnnotationRow = ({
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
   const { euiTheme } = useEuiTheme();
+  const editorStyles = useEditorStyles();
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -133,7 +146,7 @@ export const AnnotationRow = ({
   );
 
   return (
-    <div className="tvbAnnotationsEditor" key={model.id}>
+    <div className="tvbAnnotationsEditor" key={model.id} css={editorStyles}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />

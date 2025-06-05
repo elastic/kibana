@@ -11,13 +11,18 @@ import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { DashboardPanel } from '../../types';
 import { transformPanelsIn } from './panels_in_transforms';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid'),
-}));
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `mock-uuid-${uuid++}` };
+});
 
 const embeddableStartMock = createEmbeddableStartMock();
 
 describe('transformPanelsIn', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should transform panels', () => {
     const panels = [
       {
@@ -37,13 +42,24 @@ describe('transformPanelsIn', () => {
         panelIndex: '3',
         panelConfig: { savedObjectId: '123' },
       },
+      {
+        title: 'My section',
+        gridData: { y: 0 },
+        panels: [
+          {
+            type: 'buzz',
+            gridData: { x: 0, y: 0, w: 12, h: 12 },
+            panelConfig: { bizzy: 'bazz' },
+          },
+        ],
+      },
     ];
-    const { panelsJSON, references } = transformPanelsIn(
+    const { panelsJSON, sections, references } = transformPanelsIn(
       panels as DashboardPanel[],
       embeddableStartMock
     );
     const extractSpy = jest.spyOn(embeddableStartMock, 'extract');
-    expect(extractSpy).toHaveBeenCalledTimes(3);
+    expect(extractSpy).toHaveBeenCalledTimes(4);
     expect(extractSpy).toHaveBeenNthCalledWith(1, {
       type: 'foo',
       foo: 'bar',
@@ -56,6 +72,10 @@ describe('transformPanelsIn', () => {
       type: 'baz',
       savedObjectId: '123',
     });
+    expect(extractSpy).toHaveBeenNthCalledWith(4, {
+      type: 'buzz',
+      bizzy: 'bazz',
+    });
     expect(panelsJSON).toEqual(
       JSON.stringify([
         {
@@ -65,9 +85,9 @@ describe('transformPanelsIn', () => {
           type: 'foo',
         },
         {
-          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid' },
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid-100' },
           embeddableConfig: { bizz: 'buzz' },
-          panelIndex: 'mock-uuid',
+          panelIndex: 'mock-uuid-100',
           type: 'bar',
         },
         {
@@ -77,6 +97,12 @@ describe('transformPanelsIn', () => {
           panelRefName: 'panel_3',
           type: 'baz',
         },
+        {
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid-102', sectionId: 'mock-uuid-101' },
+          embeddableConfig: { bizzy: 'bazz' },
+          panelIndex: 'mock-uuid-102',
+          type: 'buzz',
+        },
       ])
     );
     expect(references).toEqual([
@@ -84,6 +110,13 @@ describe('transformPanelsIn', () => {
         name: '3:panel_3',
         type: 'baz',
         id: '123',
+      },
+    ]);
+
+    expect(sections).toEqual([
+      {
+        title: 'My section',
+        gridData: { y: 0, i: 'mock-uuid-101' },
       },
     ]);
   });

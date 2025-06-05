@@ -22,8 +22,9 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
-  gridDataSchema,
+  panelGridDataSchema,
   panelSchema,
+  sectionSchema,
   dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
@@ -44,8 +45,9 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
   panelConfig: TypeOf<typeof panelSchema>['panelConfig'] & { [key: string]: any };
   gridData: GridData;
 };
+export type DashboardSection = TypeOf<typeof sectionSchema>;
 export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
-  panels: DashboardPanel[];
+  panels: Array<DashboardPanel | DashboardSection>;
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
@@ -55,7 +57,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 };
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
-export type GridData = WithRequiredProperty<TypeOf<typeof gridDataSchema>, 'i'>;
+export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;

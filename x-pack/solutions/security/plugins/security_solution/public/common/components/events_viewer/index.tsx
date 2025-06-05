@@ -55,10 +55,7 @@ import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
+import { useSessionViewNavigation } from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { EmptyTable, TableContext, TableLoading } from './shared';
@@ -134,7 +131,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     graphEventId, // If truthy, the graph viewer (Resolver) is showing
     itemsPerPage,
     itemsPerPageOptions,
-    sessionViewConfig,
     showCheckboxes,
     sort,
     queryFields,
@@ -204,16 +200,10 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
   });
-  const { SessionView } = useSessionView({
-    scopeId: tableId,
-  });
   const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+    const shouldShowOverlay = graphEventId != null && graphEventId.length > 0;
+    return shouldShowOverlay ? <GraphOverlay scopeId={tableId} Navigation={Navigation} /> : null;
+  }, [graphEventId, tableId, Navigation]);
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>

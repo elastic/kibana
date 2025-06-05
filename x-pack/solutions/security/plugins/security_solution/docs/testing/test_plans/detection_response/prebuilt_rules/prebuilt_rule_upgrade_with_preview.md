@@ -62,6 +62,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Concurrency control](#concurrency-control)
     - [User gets notified after someone edited a rule being previewed](#user-gets-notified-after-someone-edited-a-rule-being-previewed)
     - [User gets notified after a new rule versions is released](#user-gets-notified-after-a-new-rule-versions-is-released)
+  - [Licensing](#licensing)
+    - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
+    - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
+    - [**Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**](#scenario-prebuilt-rule-always-gets-upgraded-to-the-target-version-when-license-is-insufficient)
 
 ## Useful information
 
@@ -75,6 +79,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
+- **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 
 ## Requirements
 
@@ -731,4 +736,51 @@ And saved custom field values via field forms
 When a new version of the same rule gets available
 Then user should see a notification that a new rule version was detected
 And saved custom field values got discarded
+```
+
+### Licensing
+
+#### **Scenario: User can NOT modify field values in upgrade preview when license is insufficient**
+
+**Automation**: 1 e2e test with a mock rule.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And a prebuilt rule is installed
+And this rule is outdated (a new version is available for this rule)
+When user opens an upgrade preview for this rule
+Then user should see a preview of rule field updates
+And there should NOT be a possibility to edit any field values
+```
+
+#### **Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**
+
+**Automation**: 1 e2e test with a mock rule.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And a prebuilt rule is installed
+And a base version exists for this rule
+And this rule is customized
+And this rule is outdated (a new version is available for this rule)
+When user opens an upgrade preview for this rule
+Then user should see a warning that their customizations will be lost on upgrade
+```
+
+#### **Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**
+
+**Automation**: 1 e2e test with a mock rule.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And a prebuilt rule is installed
+And a base version exists for this rule
+And this rule is outdated (a new version is available for this rule)
+And this rule is <customization_state>
+When user opens an upgrade preview for this rule and clicks on CTA
+Then success message should be displayed after upgrade
+And the upgraded prebuilt rule should be removed from the table
+And all customizable rule fields should be equal to the target version
+
+<customization_state> = customized | not customized
 ```

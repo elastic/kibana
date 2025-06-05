@@ -136,5 +136,19 @@ components:
                 - 'criticality'
           required:
             - 'name'
+        'entity':
+          type: object
+          properties:
+            'id':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'id'
       required:
         - 'asset'

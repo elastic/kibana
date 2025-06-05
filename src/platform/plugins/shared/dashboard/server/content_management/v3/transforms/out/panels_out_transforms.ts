@@ -9,52 +9,94 @@
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import type { SavedDashboardPanel } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardPanel } from '../../types';
-import { getReferencesForPanelId } from '../../../../../common';
+import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
+import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import { getReferencesForPanelId, isDashboardSection } from '../../../../../common';
 
-export function transformPanelsOut(
-  panelsJSON: string,
-  embeddable: EmbeddableStart,
-  references?: SavedObjectReference[]
-): DashboardAttributes['panels'] {
-  const parsedPanels = JSON.parse(panelsJSON);
-  const transformedPanels = transformPanelsProperties(parsedPanels, embeddable);
-  return injectPanelReferences(transformedPanels, embeddable, references);
+export interface TransformPanelsOutOptions {
+  panelsJSON?: string;
+  sections?: SavedDashboardSection[];
+  embeddable: EmbeddableStart;
+  references?: SavedObjectReference[];
 }
 
-function transformPanelsProperties(panels: SavedDashboardPanel[], embeddable: EmbeddableStart) {
-  return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
-      gridData,
-      id,
-      panelConfig: savedPanelToItem(embeddableConfig, type, embeddable),
-      panelIndex,
-      panelRefName,
-      title,
-      type,
-      version,
-    })
+export function transformPanelsOut({
+  panelsJSON = '[]',
+  sections = [],
+  embeddable,
+  references,
+}: TransformPanelsOutOptions): DashboardAttributes['panels'] {
+  // Step 1: Parse the panelsJSON
+  const panels = JSON.parse(panelsJSON);
+
+  // Step 2: Inject sections into panels and transform properties
+  const panelsWithSections = injectSections(panels, sections);
+
+  // Step 3: Inject panel references
+  return injectPanelReferences(panelsWithSections, embeddable, references);
+}
+
+function injectSections(panels: SavedDashboardPanel[], sections: SavedDashboardSection[]) {
+  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
+    (prev, section) => {
+      const sectionId = section.gridData.i;
+      return { ...prev, [sectionId]: { ...section, panels: [] } };
+    },
+    {}
   );
+  panels.forEach((panel: SavedDashboardPanel) => {
+    const { sectionId } = panel.gridData;
+    if (sectionId) {
+      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel));
+    } else {
+      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, embeddable);
+    }
+  });
+  return Object.values(sectionsMap);
+}
+
+function transformPanelProperties(panel: SavedDashboardPanel, embeddable: EmbeddableStart) {
+  const { embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version } = panel;
+  const { sectionId, ...restOfGridData } = gridData; // drop section ID, if it exists
+  return {
+    gridData: restOfGridData,
+    id,
+    panelConfig: savedPanelToItem(embeddableConfig, type, embeddable),
+    panelIndex,
+    panelRefName,
+    title,
+    type,
+    version,
+  };
 }
 
 function injectPanelReferences(
-  panels: DashboardAttributes['panels'],
+  widgets: DashboardAttributes['panels'],
   embeddable: EmbeddableStart,
   references: SavedObjectReference[] = []
-) {
-  return panels.map((panel) => {
-    if (!panel.panelIndex) return panel;
-    // some older dashboards may not have references prefixed with the panel index
-    // so if we don't find any references for the panel id, use all the references
-    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
-    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
-    const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(panel, panelReferences);
-    return injectPanelEmbeddableReferences(
-      panelsWithSavedObjectIdInjected,
-      embeddable,
-      panelReferences
-    );
+): Array<DashboardPanel | DashboardSection> {
+  return widgets.map((widget) => {
+    if (isDashboardSection(widget)) {
+      const { panels: sectionPanels, ...restOfSection } = widget;
+      // Only keep DashboardPanel in panels
+      const injectedPanels = injectPanelReferences(sectionPanels, embeddable, references).filter(
+        (p): p is DashboardPanel => !isDashboardSection(p)
+      );
+      return {
+        ...restOfSection,
+        panels: injectedPanels,
+      };
+    } else {
+      if (!widget.panelIndex) return widget;
+      const filteredReferences = getReferencesForPanelId(widget.panelIndex, references);
+      const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+      const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(widget, panelReferences);
+      return injectPanelEmbeddableReferences(
+        panelsWithSavedObjectIdInjected,
+        embeddable,
+        panelReferences
+      );
+    }
   });
 }
 
@@ -96,7 +138,6 @@ function savedPanelToItem(
   panelType: SavedDashboardPanel['type'],
   embeddable: EmbeddableStart
 ) {
-  if (!embeddableConfig.attributes) return embeddableConfig;
   const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
   if (!embeddableCmDefintions) return embeddableConfig;
   const { savedObjectToItem } =
