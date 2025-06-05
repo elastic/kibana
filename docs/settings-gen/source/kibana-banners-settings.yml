@@ -14,8 +14,7 @@ groups:
   - group: All settings
     id: general-banner-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.banners.placement
