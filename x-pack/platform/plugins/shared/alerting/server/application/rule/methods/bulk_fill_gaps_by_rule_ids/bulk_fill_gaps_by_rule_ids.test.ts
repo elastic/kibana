@@ -261,16 +261,16 @@ describe('validation', () => {
 
   it('should throw an error if the start date is in the future', async () => {
     const start = new Date(Date.now() + 1).toISOString();
-    expect(getCallBulkFillGaps({ start, end: new Date().toISOString() })).rejects.toThrow();
+    await expect(getCallBulkFillGaps({ start, end: new Date().toISOString() })).rejects.toThrow();
   });
   it('should throw an error if the end date is in the future', async () => {
     const end = new Date(Date.now() + 1).toISOString();
-    expect(
+    await expect(
       getCallBulkFillGaps({ start: new Date(Date.now() - 1).toISOString(), end })
     ).rejects.toThrow();
   });
   it('should throw an error if there is not at least 5 minutes before the start and end dates', async () => {
-    expect(
+    await expect(
       getCallBulkFillGaps({
         start: new Date(Date.now() - 1000).toISOString(),
         end: new Date().toISOString(),
@@ -278,7 +278,7 @@ describe('validation', () => {
     ).rejects.toThrow();
   });
   it('should throw an error if there are more than 90 days between the start and end dates', async () => {
-    expect(
+    await expect(
       getCallBulkFillGaps({
         start: new Date(Date.now() - 91 * 24 * 60 * 60 * 1000).toISOString(),
         end: new Date().toISOString(),
