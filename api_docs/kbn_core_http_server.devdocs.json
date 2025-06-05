@@ -4349,6 +4349,10 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/find.ts"
               },

@@ -21156,20 +21156,6 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmProgressiveLoading.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.solution",
                 "type": "string",
                 "tags": [],
@@ -21266,132 +21252,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmLabsButton",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmLabsButton]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -24617,21 +24477,6 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableTransactionProfiling\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.apmLabsButton",
-        "type": "string",
-        "tags": [],
-        "label": "apmLabsButton",
-        "description": [],
-        "signature": [
-          "\"observability:apmLabsButton\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
