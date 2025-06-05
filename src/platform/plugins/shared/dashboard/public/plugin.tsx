@@ -121,6 +121,10 @@ export interface DashboardStartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DashboardSetup {}
 
+interface DashboardsUiConfigType {
+  hidden: boolean;
+}
+
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
@@ -133,7 +137,10 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
+  public readonly config: DashboardsUiConfigType;
+
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<DashboardsUiConfigType>();
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
@@ -254,7 +261,10 @@ export class DashboardPlugin
       },
     };
 
-    core.application.register(app);
+    if (!this.config.hidden) {
+      core.application.register(app);
+    }
+
     urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
       const [, tail] = /(\?.*)/.exec(path) || [];
       // carry over query if it exists

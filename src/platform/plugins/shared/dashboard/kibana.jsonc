@@ -9,6 +9,10 @@
     "id": "dashboard",
     "browser": true,
     "server": true,
+    "configPath": [
+      "xpack",
+      "dashboards"
+    ],
     "requiredPlugins": [
       "data",
       "dataViews",

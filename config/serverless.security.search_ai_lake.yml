@@ -5,6 +5,9 @@ xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 
+## Hidden plugins
+xpack.dashboards.hidden: true
+
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
 xpack.alerting.rulesSettings.enabled: false
