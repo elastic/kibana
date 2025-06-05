@@ -261,8 +261,6 @@ export const panelGridDataSchema = schema.object({
 
 export const panelSchema = schema.object({
   panelConfig: schema.object(
-    // panelConfig state is owned by embeddable
-    // dashboard should know nothing about panelConfig state
     {},
     {
       unknowns: 'allow',
