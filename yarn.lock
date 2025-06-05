@@ -4846,6 +4846,34 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-pricing-browser-internal@link:src/core/packages/pricing/browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-browser-mocks@link:src/core/packages/pricing/browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-browser@link:src/core/packages/pricing/browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-common@link:src/core/packages/pricing/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-server-internal@link:src/core/packages/pricing/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-server-mocks@link:src/core/packages/pricing/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-pricing-server@link:src/core/packages/pricing/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-provider-plugin@link:src/platform/test/plugin_functional/plugins/core_provider_plugin":
   version "0.0.0"
   uid ""
