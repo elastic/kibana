@@ -9,3 +9,4 @@ export * from './latest';
 
 export { casesSchema as casesSchemaV1 } from './v1';
 export { casesSchema as casesSchemaV2 } from './v2';
+export { casesSchema as casesSchemaV3 } from './v3';

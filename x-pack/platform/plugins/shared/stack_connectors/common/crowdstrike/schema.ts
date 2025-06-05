@@ -348,5 +348,45 @@ export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-// TODO: will be part of a next PR
-export const CrowdstrikeGetScriptsParamsSchema = schema.any({});
+export const CrowdstrikeGetScriptsResponseSchema = schema.object(
+  {
+    meta: schema.maybe(
+      schema.object(
+        {
+          query_time: schema.maybe(schema.number()),
+          powered_by: schema.maybe(schema.string()),
+          trace_id: schema.maybe(schema.string()),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+    resources: schema.maybe(
+      schema.arrayOf(
+        schema.object(
+          {
+            content: schema.maybe(schema.string()),
+            created_by: schema.maybe(schema.string()),
+            created_by_uuid: schema.maybe(schema.string()),
+            created_timestamp: schema.maybe(schema.string()),
+            file_type: schema.maybe(schema.string()),
+            id: schema.maybe(schema.string()),
+            description: schema.maybe(schema.string()),
+            modified_by: schema.maybe(schema.string()),
+            modified_timestamp: schema.maybe(schema.string()),
+            name: schema.maybe(schema.string()),
+            permission_type: schema.maybe(schema.string()),
+            platform: schema.maybe(schema.arrayOf(schema.string())),
+            run_attempt_count: schema.maybe(schema.number()),
+            run_success_count: schema.maybe(schema.number()),
+            sha256: schema.maybe(schema.string()),
+            size: schema.maybe(schema.number()),
+            write_access: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        )
+      )
+    ),
+    errors: schema.maybe(schema.arrayOf(schema.any())),
+  },
+  { unknowns: 'allow' }
+);

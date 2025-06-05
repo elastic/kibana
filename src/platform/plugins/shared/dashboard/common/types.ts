@@ -12,16 +12,14 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/common';
+import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 
-import type { DashboardPanelMap } from './dashboard_container/types';
+import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
   DashboardPanel,
+  DashboardSection,
 } from '../server/content_management';
 
 export interface DashboardCapabilities {
@@ -37,6 +35,7 @@ export interface DashboardCapabilities {
 export interface ParsedDashboardAttributesWithType {
   id: string;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
   type: 'dashboard';
 }
 
@@ -59,6 +58,7 @@ export interface DashboardState extends DashboardSettings {
   refreshInterval?: RefreshInterval;
   viewMode: ViewMode;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -73,50 +73,34 @@ export interface DashboardState extends DashboardSettings {
   controlGroupInput?: ControlGroupSerializedState;
 }
 
-/**
- * Dashboard state stored in dashboard URLs
- * Do not change type without considering BWC of stored URLs
- */
-export type SharedDashboardState = Partial<
-  Omit<DashboardState, 'panels'> & {
+export type DashboardLocatorParams = Partial<
+  Omit<DashboardState, 'panels' | 'sections'> & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
-    /**
-     * Runtime control group state.
-     * @deprecated use controlGroupInput
-     */
-    controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
-
-    panels: DashboardPanel[];
+    panels: Array<DashboardPanel | DashboardSection>;
 
     references?: DashboardState['references'] & SerializableRecord;
+
+    /**
+     * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
+     */
+    dashboardId?: string;
+
+    /**
+     * Determines whether to hash the contents of the url to avoid url length issues. Defaults to the uiSettings configuration for `storeInSessionStorage`.
+     */
+    useHash?: boolean;
+
+    /**
+     * Denotes whether to merge provided filters from the locator state with the filters saved into the Dashboard.
+     * When false, the saved filters will be overwritten. Defaults to true.
+     */
+    preserveSavedFilters?: boolean;
+
+    /**
+     * Search search session ID to restore.
+     * (Background search)
+     */
+    searchSessionId?: string;
   }
 >;
-
-export type DashboardLocatorParams = Partial<SharedDashboardState> & {
-  /**
-   * If given, the dashboard saved object with this id will be loaded. If not given,
-   * a new, unsaved dashboard will be loaded up.
-   */
-  dashboardId?: string;
-
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
-
-  /**
-   * When `true` filters from saved filters from destination dashboard as merged with applied filters
-   * When `false` applied filters take precedence and override saved filters
-   *
-   * true is default
-   */
-  preserveSavedFilters?: boolean;
-
-  /**
-   * Search search session ID to restore.
-   * (Background search)
-   */
-  searchSessionId?: string;
-};

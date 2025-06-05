@@ -21,6 +21,7 @@ import {
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
@@ -76,7 +77,15 @@ export interface EndpointInternalFleetServicesInterface extends EndpointFleetSer
 }
 
 export interface EndpointFleetServicesFactoryInterface {
-  asInternalUser(spaceId?: string): EndpointInternalFleetServicesInterface;
+  asInternalUser(
+    /** The specific space ID for the soClient. Can NOT be used if `unscoped` argument is `true` */
+    spaceId?: string,
+    /**
+     * If the soClient created by this service should be unscoped (has access to all spaces).
+     * Note that when making SO updates, an `soClient` scoped to the same space as the SO itself is required.
+     */
+    unscoped?: boolean
+  ): EndpointInternalFleetServicesInterface;
 }
 
 /**
@@ -89,7 +98,20 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     private readonly logger: Logger
   ) {}
 
-  asInternalUser(spaceId?: string): EndpointInternalFleetServicesInterface {
+  asInternalUser(
+    spaceId?: string,
+    unscoped: boolean = false
+  ): EndpointInternalFleetServicesInterface {
+    this.logger.debug(
+      `creating set of fleet services with spaceId [${spaceId}] and unscoped [${unscoped}]`
+    );
+
+    if (spaceId && unscoped) {
+      throw new EndpointError(
+        `asInternalUser(): a 'spaceId' can not be set when 'unscoped' is 'true'`
+      );
+    }
+
     const {
       agentPolicyService: agentPolicy,
       packagePolicyService: packagePolicy,
@@ -104,7 +126,13 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     let _soClient: SavedObjectsClientContract;
     const getSoClient = (): SavedObjectsClientContract => {
       if (!_soClient) {
-        _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
+        if (unscoped) {
+          this.logger.debug(`getSoClient(): initializing UNSCOPED SO client`);
+          _soClient = this.savedObjects.createInternalUnscopedSoClient(false);
+        } else {
+          this.logger.debug(`getSoClient(): initializing SO client for space [${spaceId}]`);
+          _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId, readonly: false });
+        }
       }
 
       return _soClient;
@@ -139,6 +167,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         logger: this.logger,
         packagePolicyService: packagePolicy,
         agentPolicyService: agentPolicy,
+        // When using an unscoped soClient, make sure the search for policies is done across all spaces.
+        spaceId: unscoped ? '*' : undefined,
       });
     };
 
@@ -280,6 +310,12 @@ interface FetchIntegrationPolicyNamespaceOptions {
   integrationPolicies: string[];
   /** A list of Integration names */
   integrationNames?: string[];
+  /**
+   * A list of space IDs to use when retrieving the list of policies. When using an unscoped
+   * `soClient` and wanting to retrieve the policies for any space, this options can be used
+   * by setting it to `*`
+   */
+  spaceId?: string;
 }
 
 export interface FetchIntegrationPolicyNamespaceResponse {
@@ -296,6 +332,7 @@ const fetchIntegrationPolicyNamespace = async ({
   packagePolicyService,
   agentPolicyService,
   integrationPolicies,
+  spaceId,
 }: FetchIntegrationPolicyNamespaceOptions): Promise<FetchIntegrationPolicyNamespaceResponse> => {
   const response: FetchIntegrationPolicyNamespaceResponse = {
     integrationPolicy: {},
@@ -310,7 +347,7 @@ const fetchIntegrationPolicyNamespace = async ({
     );
     const packagePolicies =
       (await packagePolicyService
-        .getByIDs(soClient, integrationPolicies)
+        .getByIDs(soClient, integrationPolicies, { spaceIds: spaceId ? [spaceId] : undefined })
         .catch(catchAndWrapError)) ?? [];
 
     logger.trace(() => `Fleet package policies retrieved:\n${stringify(packagePolicies)}`);
@@ -333,7 +370,11 @@ const fetchIntegrationPolicyNamespace = async ({
 
     logger.debug(() => `Retrieving agent policies from fleet for:\n${stringify(ids)}`);
 
-    const agentPolicies = await agentPolicyService.getByIds(soClient, ids).catch(catchAndWrapError);
+    const agentPolicies = await agentPolicyService
+      .getByIds(soClient, ids, {
+        spaceId,
+      })
+      .catch(catchAndWrapError);
 
     logger.trace(() => `Fleet agent policies retrieved:\n${stringify(agentPolicies)}`);
 

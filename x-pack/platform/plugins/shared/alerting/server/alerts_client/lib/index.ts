@@ -15,7 +15,6 @@ export {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
   getMaintenanceWindowAlertsQuery,
-  getScopedQueryHitsWithIds,
 } from './get_summarized_alerts_query';
 export { expandFlattenedAlert } from './format_alert';
 export { sanitizeBulkErrorResponse } from './sanitize_bulk_response';

@@ -79,6 +79,10 @@ export const createDashboardSavedObjectType = ({
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
+      sections: {
+        properties: {},
+        dynamic: false,
+      },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },

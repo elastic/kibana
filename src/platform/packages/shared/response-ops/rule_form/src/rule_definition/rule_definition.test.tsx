@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import React, { type ReactNode } from 'react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -111,6 +111,8 @@ const plugins = {
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
 const mockOnChange = jest.fn();
+
+const render = (toRender: ReactNode) => rtlRender(toRender, { wrapper: IntlProvider });
 
 describe('Rule Definition', () => {
   beforeEach(() => {

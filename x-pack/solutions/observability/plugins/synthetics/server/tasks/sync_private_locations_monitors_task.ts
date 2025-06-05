@@ -139,7 +139,6 @@ export class SyncPrivateLocationMonitorsTask {
       taskType: TASK_TYPE,
       params: {},
     });
-    await taskManager.runSoon(TASK_ID);
     logger.debug(`Sync private location monitors task scheduled successfully`);
   };
 

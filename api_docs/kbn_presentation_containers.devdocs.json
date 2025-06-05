@@ -47,6 +47,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiCanAddNewSection",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanAddNewSection",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanAddNewSection",
+            "text": "CanAddNewSection"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiCanAddNewSection.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiCanDuplicatePanels",
         "type": "Function",
         "tags": [],
@@ -923,6 +963,36 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.CanAddNewSection",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanAddNewSection",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.CanAddNewSection.addNewSection",
+            "type": "Function",
+            "tags": [],
+            "label": "addNewSection",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_section.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

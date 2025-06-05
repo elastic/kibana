@@ -12,13 +12,29 @@ import React from 'react';
 import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';
 
+jest.mock('./use_query_ruleset_detail_state', () => ({
+  useQueryRulesetDetailState: jest.fn(() => ({
+    queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+    rules: [
+      ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
+        ...rule,
+        criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
+      })),
+    ],
+
+    setNewRules: jest.fn(),
+    updateRule: jest.fn(),
+  })),
+}));
+
 jest.mock('../../hooks/use_fetch_query_ruleset', () => ({
   useFetchQueryRuleset: jest.fn(() => ({
     data: {
       ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
     },
     isLoading: false,
-    error: null,
+    isError: false,
+    isInitialLoading: false,
   })),
 }));
 

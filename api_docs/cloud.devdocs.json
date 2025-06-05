@@ -891,9 +891,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: ",
-            "SolutionId",
-            " | undefined; }"
+            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1240,9 +1238,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: ",
-            "SolutionId",
-            " | undefined; }"
+            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,

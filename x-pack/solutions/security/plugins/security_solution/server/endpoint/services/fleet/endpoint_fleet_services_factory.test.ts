@@ -300,7 +300,9 @@ describe('EndpointServiceFactory', () => {
         });
         expect(
           fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
-        ).toHaveBeenCalledWith(expect.anything(), [agentPolicy1.id, agentPolicy2.id]);
+        ).toHaveBeenCalledWith(expect.anything(), [agentPolicy1.id, agentPolicy2.id], {
+          spaceId: undefined,
+        });
       });
 
       it('should return namespace from integration policy if defined', async () => {
@@ -321,6 +323,28 @@ describe('EndpointServiceFactory', () => {
         expect(
           fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
         ).not.toHaveBeenCalled();
+      });
+
+      it('should query fleet using a `spaceId` when services are initialized with unscoped client', async () => {
+        fleetServicesMock = fleetServicesFactoryMock.service.asInternalUser(undefined, true);
+        await fleetServicesMock.getPolicyNamespace({
+          integrationPolicies: [integrationPolicy.id],
+        });
+
+        expect(
+          fleetServicesFactoryMock.dependencies.fleetDependencies.packagePolicyService.getByIDs
+        ).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ spaceIds: ['*'] })
+        );
+        expect(
+          fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
+        ).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ spaceId: '*' })
+        );
       });
     });
 

@@ -109,7 +109,7 @@ describe('Metrics', () => {
     describe('APM agent / otel sdk with no dashboard', () => {
       beforeEach(() => {
         jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'opentelemetry/go',
+          agentName: 'opentelemetry/erlang',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
           transactionTypes: [],

@@ -39,3 +39,4 @@ enabled:
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.serverless.config.ts

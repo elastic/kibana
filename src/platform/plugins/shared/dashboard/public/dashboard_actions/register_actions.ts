@@ -8,8 +8,10 @@
  */
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 import {
+  ACTION_ADD_SECTION,
   ACTION_ADD_TO_LIBRARY,
   ACTION_CLONE_PANEL,
   ACTION_COPY_TO_DASHBOARD,
@@ -39,6 +41,12 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
     return new FiltersNotificationAction();
   });
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
+
+  uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
+    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddSectionAction();
+  });
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
 
   if (share) {
     uiActions.registerActionAsync(ACTION_EXPORT_CSV, async () => {

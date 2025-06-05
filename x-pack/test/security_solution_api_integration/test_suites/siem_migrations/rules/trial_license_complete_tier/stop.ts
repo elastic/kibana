@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../utils';
 
@@ -37,17 +38,31 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ started: true });
 
       // check if it running correctly
-      let statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
       expect(statsResponse.body.status).to.eql('running');
 
       // Stop Migration
       const response = await migrationRulesRoutes.stop({ migrationId });
       expect(response.body).to.eql({ stopped: true });
 
-      // check if the migration is stopped
-      statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('ready');
+      await pRetry(
+        async () => {
+          const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
+          if (currentStatsResponse.body.status !== 'aborted') {
+            throw new Error('Retry until migration is aborted');
+          }
+          return currentStatsResponse;
+        },
+        {
+          retries: 3,
+        }
+      );
+
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.ended_at).to.be.ok();
     });
+
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
         await migrationRulesRoutes.start({

@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Order of the sections in Stack Management might change in the future
         // so we need to find the sections by their id
         const dataSection = sections.find((section) => section.sectionId === 'data');
-        expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
         const insightsAndAlertingSection = sections.find(
           (section) => section.sectionId === 'insightsAndAlerting'
         );

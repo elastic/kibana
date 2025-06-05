@@ -8,8 +8,16 @@
 import { FlattenRecord } from '@kbn/streams-schema';
 import { getDefaultFormStateByType } from './utils';
 import { ALWAYS_CONDITION } from '../../../util/condition';
+import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import { omit } from 'lodash';
+
+let grokCollection: GrokCollection;
 
 describe('utils', () => {
+  beforeAll(async () => {
+    grokCollection = new GrokCollection();
+    await grokCollection.setup();
+  });
   describe('defaultGrokProcessorFormState', () => {
     it('should return default form state with empty field when no well known text fields are present', () => {
       const sampleDocs: FlattenRecord[] = [
@@ -22,17 +30,23 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok', sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
-      expect(result).toEqual({
+      expect(omit(result, 'patterns')).toEqual({
         type: 'grok',
         field: '',
-        patterns: [{ value: '' }],
         pattern_definitions: {},
         ignore_failure: true,
         ignore_missing: true,
         if: ALWAYS_CONDITION,
       });
+
+      if ('patterns' in result) {
+        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
+        expect(result.patterns[0].getExpression()).toEqual('');
+      } else {
+        throw new Error('Result does not contain patterns');
+      }
     });
 
     it('should select the only well known text field present', () => {
@@ -47,17 +61,23 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok', sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
-      expect(result).toEqual({
+      expect(omit(result, 'patterns')).toEqual({
         type: 'grok',
         field: 'error.message',
-        patterns: [{ value: '' }],
         pattern_definitions: {},
         ignore_failure: true,
         ignore_missing: true,
         if: ALWAYS_CONDITION,
       });
+
+      if ('patterns' in result) {
+        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
+        expect(result.patterns[0].getExpression()).toEqual('');
+      } else {
+        throw new Error('Result does not contain patterns');
+      }
     });
 
     it('should select the most common well known text field when multiple are present', () => {
@@ -75,17 +95,23 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok', sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
-      expect(result).toEqual({
+      expect(omit(result, 'patterns')).toEqual({
         type: 'grok',
         field: 'error.message', // 'error.message' appears 3 times vs 'message' 2 times
-        patterns: [{ value: '' }],
         pattern_definitions: {},
         ignore_failure: true,
         ignore_missing: true,
         if: ALWAYS_CONDITION,
       });
+
+      if ('patterns' in result) {
+        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
+        expect(result.patterns[0].getExpression()).toEqual('');
+      } else {
+        throw new Error('Result does not contain patterns');
+      }
     });
 
     it('should select based on WELL_KNOWN_TEXT_FIELDS order when frequencies are equal', () => {
@@ -102,18 +128,24 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok', sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs, { grokCollection });
 
       // In WELL_KNOWN_TEXT_FIELDS, 'message' comes before 'error.message' and 'event.original'
-      expect(result).toEqual({
+      expect(omit(result, 'patterns')).toEqual({
         type: 'grok',
         field: 'message',
-        patterns: [{ value: '' }],
         pattern_definitions: {},
         ignore_failure: true,
         ignore_missing: true,
         if: ALWAYS_CONDITION,
       });
+
+      if ('patterns' in result) {
+        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
+        expect(result.patterns[0].getExpression()).toEqual('');
+      } else {
+        throw new Error('Result does not contain patterns');
+      }
     });
   });
 });

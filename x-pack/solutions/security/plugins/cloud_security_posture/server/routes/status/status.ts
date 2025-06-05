@@ -15,7 +15,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
 import type {
@@ -219,13 +219,13 @@ export const getCspStatus = async ({
     checkIndexHasFindings(
       esClient,
       CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-      CDR_3RD_PARTY_RETENTION_POLICY,
+      LATEST_FINDINGS_RETENTION_POLICY,
       logger
     ),
     checkIndexHasFindings(
       esClient,
       CDR_VULNERABILITIES_INDEX_PATTERN,
-      CDR_3RD_PARTY_RETENTION_POLICY,
+      CDR_EXTENDED_VULN_RETENTION_POLICY,
       logger
     ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {

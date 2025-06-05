@@ -43,6 +43,7 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentMigrateFlyout,
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
@@ -83,6 +84,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+
+  // migrateAgentState
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
     allTags,
@@ -174,6 +179,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
+  const openMigrateFlyout = (agent: Agent) => {
+    setAgentToMigrate(agent);
+    setMigrateFlyoutOpen(true);
+  };
+
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -196,6 +206,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
+        onMigrateAgentClick={() => openMigrateFlyout(agent)}
       />
     );
   };
@@ -395,6 +406,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setShowTagsAddRemove(false);
           }}
         />
+      )}
+      {migrateFlyoutOpen && (
+        <EuiPortal>
+          <AgentMigrateFlyout
+            agents={[agentToMigrate]}
+            onClose={() => {
+              setAgentToMigrate(undefined);
+              setMigrateFlyoutOpen(false);
+            }}
+            onSave={() => {
+              setAgentToMigrate(undefined);
+              setMigrateFlyoutOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
       )}
       {showUnhealthyCallout && (
         <>

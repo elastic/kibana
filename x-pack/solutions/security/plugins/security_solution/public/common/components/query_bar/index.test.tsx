@@ -21,10 +21,10 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { fields } from '@kbn/data-views-plugin/common/mocks';
 import { useKibana } from '../../lib/kibana';
 
-const getMockIndexPattern = () => ({
+const getMockIndexPattern = (id: string = '1234') => ({
   ...createStubDataView({
     spec: {
-      id: '1234',
+      id,
       title: 'logstash-*',
       fields: ((): DataViewFieldMap => {
         const fieldMap: DataViewFieldMap = Object.create(null);
@@ -36,6 +36,8 @@ const getMockIndexPattern = () => ({
     },
   }),
 });
+
+const mockDataView = getMockIndexPattern('data-view-id');
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../lib/kibana');
@@ -86,6 +88,7 @@ describe('QueryBar ', () => {
     mockOnChangeQuery.mockClear();
     mockOnSubmitQuery.mockClear();
     mockOnSavedQuery.mockClear();
+    mockClearInstanceCache.mockClear();
   });
 
   test('check if we format the appropriate props to QueryBar', async () => {
@@ -126,6 +129,69 @@ describe('QueryBar ', () => {
       // ensure useEffect cleanup is called correctly after component unmounts
       wrapper.unmount();
       expect(mockClearInstanceCache).toHaveBeenCalledWith(getMockIndexPattern().id);
+    });
+  });
+
+  test('use data view directly if index pattern prop is a data view', async () => {
+    await act(async () => {
+      const wrapper = await getWrapper(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockDataView}
+          isRefreshPaused={true}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+        />
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        const { ...searchBarProps } = wrapper.find(SearchBar).props();
+        expect((searchBarProps?.indexPatterns ?? [{ id: 'unknown' }])[0].id).toEqual(
+          mockDataView.id
+        );
+      });
+
+      wrapper.unmount();
+      expect(mockClearInstanceCache).not.toHaveBeenCalled();
+    });
+  });
+
+  test('do not clear cache when preventCacheClearOnUnmount is true', async () => {
+    await act(async () => {
+      const wrapper = await getWrapper(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockIndexPattern}
+          isRefreshPaused={true}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+          preventCacheClearOnUnmount={true}
+        />
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        const { ...searchBarProps } = wrapper.find(SearchBar).props();
+        expect((searchBarProps?.indexPatterns ?? [{ id: 'unknown' }])[0].id).toEqual(
+          getMockIndexPattern().id
+        );
+      });
+
+      wrapper.unmount();
+      expect(mockClearInstanceCache).not.toHaveBeenCalled();
     });
   });
 

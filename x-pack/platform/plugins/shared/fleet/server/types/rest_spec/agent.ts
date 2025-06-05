@@ -33,6 +33,7 @@ export const GetAgentsRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({ defaultValue: true }),
       showInactive: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),

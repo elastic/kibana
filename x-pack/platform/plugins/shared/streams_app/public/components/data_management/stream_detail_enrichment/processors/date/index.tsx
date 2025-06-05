@@ -15,7 +15,7 @@ import { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api'
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFieldSelector } from '../processor_field_selector';
-import { OptionalFieldsAccordion } from '../optional_fields_accordion';
+import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
 import {
@@ -140,14 +140,14 @@ export const DateProcessorForm = () => {
       <ProcessorFieldSelector onChange={handleProcessorFieldChange} />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
       <EuiSpacer size="m" />
-      <OptionalFieldsAccordion>
+      <FieldsAccordion>
         <DateTargetField />
         <DateTimezoneField />
         <DateLocaleField />
         <DateOutputFormatField />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
-      </OptionalFieldsAccordion>
+      </FieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
     </>

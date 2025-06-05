@@ -154,9 +154,8 @@ export const SessionView: FC = memo(() => {
         ...sessionViewConfig,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
-        openDetailsInExpandableFlyout: (selectedProcess: Process | null) =>
-          openDetailsInPreview(selectedProcess),
-        closeDetailsInExpandableFlyout: () => closeDetailsInPreview(),
+        openDetails: (selectedProcess: Process | null) => openDetailsInPreview(selectedProcess),
+        closeDetails: () => closeDetailsInPreview(),
         canReadPolicyManagement,
         resetJumpToEntityId: jumpToEntityId,
         resetJumpToCursor: jumpToCursor,

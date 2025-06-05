@@ -133,7 +133,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 defaultMessage="Compress snapshots"
               />
             }
-            checked={!!compress}
+            checked={!(compress === false)}
             onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,

@@ -7,20 +7,20 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
-import {
-  EuiDescriptionList,
-  EuiText,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiLoadingSpinner,
-  EuiButtonIcon,
-  EuiPopover,
-} from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import type {
-  Type,
   ThreatMapping as ThreatMappingType,
+  Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
@@ -38,7 +38,7 @@ import type {
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
-import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
+import { RelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import { useGetSavedQuery } from '../../../common/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';

@@ -37,9 +37,8 @@ export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
 export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
-// TODO: remove once https://github.com/elastic/security-team/issues/10801 is done
-// meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683
-export const CDR_3RD_PARTY_RETENTION_POLICY = '90d';
+// meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683 and https://github.com/elastic/security-team/issues/10801
+export const CDR_EXTENDED_VULN_RETENTION_POLICY = '90d';
 
 export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 

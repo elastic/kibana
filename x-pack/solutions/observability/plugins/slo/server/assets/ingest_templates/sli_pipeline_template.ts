@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
@@ -13,7 +14,10 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 
-export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
+export const getSLIPipelineTemplate = (
+  slo: SLODefinition,
+  spaceId: string
+): IngestPutPipelineRequest => {
   // remove empty string
   const groupByFields = [slo.groupBy].flat().filter((field) => !!field);
 

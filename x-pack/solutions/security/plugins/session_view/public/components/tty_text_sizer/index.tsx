@@ -14,14 +14,14 @@ import {
 } from '@elastic/eui';
 import type { Teletype } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
-import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
+import { ZOOM_FIT, ZOOM_IN, ZOOM_OUT } from './translations';
 import { useStyles } from './styles';
 
 export interface TTYTextSizerDeps {
   tty?: Teletype;
   containerHeight: number;
   fontSize: number;
-  isFullscreen: boolean;
+
   onFontSizeChanged(newSize: number): void;
 }
 
@@ -39,7 +39,6 @@ export const TTYTextSizer = ({
   tty,
   containerHeight,
   fontSize,
-  isFullscreen,
   onFontSizeChanged,
 }: TTYTextSizerDeps) => {
   const styles = useStyles();
@@ -65,7 +64,7 @@ export const TTYTextSizer = ({
         onFontSizeChanged(newSize);
       }
     }
-  }, [isFullscreen, containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
+  }, [containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
 
   const onToggleFit = useCallback(() => {
     const newValue = !fit;

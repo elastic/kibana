@@ -325,9 +325,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$observability-apm-labs$$$`observability:apmLabsButton`
-:   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
-
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
 :   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
@@ -336,9 +333,6 @@ $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServi
 
 $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironment`
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
-
-$$$observability-apm-enable-profiling$$$`observability:apmEnableProfilingIntegration`
-:   Enable the Universal Profiling integration in APM.
 
 $$$observability-profiling-show-error-frames$$$`observability:profilingShowErrorFrames`
 :   Show error frames in the Universal Profiling views to indicate stack unwinding failures.
@@ -363,9 +357,6 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 :   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
-
-$$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration`
-:   [preview] Enables the Profiling view in Host details within Infrastructure.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.

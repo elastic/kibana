@@ -291,7 +291,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,

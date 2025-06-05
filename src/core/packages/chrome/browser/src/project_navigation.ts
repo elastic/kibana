@@ -37,11 +37,12 @@ import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deep
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
+import type { KibanaProject } from '@kbn/projects-solutions-groups';
 
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
-export type SolutionId = 'es' | 'oblt' | 'security' | 'chat';
+export type SolutionId = KibanaProject;
 
 /** @public */
 export type AppId =

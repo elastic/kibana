@@ -832,7 +832,7 @@
         "label": "SolutionType",
         "description": [],
         "signature": [
-          "\"security\" | \"analytics\" | \"es\" | \"oblt\""
+          "\"security\" | \"analytics\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,

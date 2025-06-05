@@ -229,7 +229,16 @@ const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-export const gridDataSchema = schema.object({
+const sectionGridDataSchema = schema.object({
+  y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
+  i: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique identifier of the section' },
+    })
+  ),
+});
+
+export const panelGridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
   w: schema.number({
@@ -284,7 +293,7 @@ export const panelSchema = schema.object({
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   panelRefName: schema.maybe(schema.string()),
-  gridData: gridDataSchema,
+  gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the panel.' },
@@ -300,6 +309,23 @@ export const panelSchema = schema.object({
       },
     })
   ),
+});
+
+export const sectionSchema = schema.object({
+  title: schema.string({
+    meta: { description: 'The title of the section.' },
+  }),
+  collapsed: schema.maybe(
+    schema.boolean({
+      meta: { description: 'The collapsed state of the section.' },
+      defaultValue: false,
+    })
+  ),
+  gridData: sectionGridDataSchema,
+  panels: schema.arrayOf(panelSchema, {
+    meta: { description: 'The panels that belong to the section.' },
+    defaultValue: [],
+  }),
 });
 
 export const optionsSchema = schema.object({
@@ -402,7 +428,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });
@@ -417,14 +443,29 @@ export const referenceSchema = schema.object(
 );
 
 const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
+  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
   panels: schema.arrayOf(
-    panelSchema.extends({
-      // Responses always include the panel index and gridData.i
-      panelIndex: schema.string(),
-      gridData: gridDataSchema.extends({
-        i: schema.string(),
+    schema.oneOf([
+      panelSchema.extends({
+        panelIndex: schema.string(),
+        gridData: panelGridDataSchema.extends({
+          i: schema.string(),
+        }),
       }),
-    }),
+      sectionSchema.extends({
+        gridData: sectionGridDataSchema.extends({
+          i: schema.string(),
+        }),
+        panels: schema.arrayOf(
+          panelSchema.extends({
+            panelIndex: schema.string(),
+            gridData: panelGridDataSchema.extends({
+              i: schema.string(),
+            }),
+          })
+        ),
+      }),
+    ]),
     { defaultValue: [] }
   ),
 });

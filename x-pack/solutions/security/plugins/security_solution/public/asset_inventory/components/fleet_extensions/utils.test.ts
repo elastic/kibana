@@ -30,7 +30,8 @@ describe('getPosturePolicy', () => {
       const inputVars = getAssetInputHiddenVars(
         name,
         {} as PackageInfo,
-        SetupTechnology.AGENT_BASED
+        SetupTechnology.AGENT_BASED,
+        false
       );
       const policy = getAssetPolicy(getPolicy(), name, inputVars);
 

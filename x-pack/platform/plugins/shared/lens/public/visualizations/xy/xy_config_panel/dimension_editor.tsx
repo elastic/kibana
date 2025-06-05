@@ -102,7 +102,7 @@ export function DataDimensionEditor(
   );
   const setPalette = useCallback(
     (palette: PaletteOutput) => {
-      updateLayerState(index, { palette });
+      updateLayerState(index, { palette, colorMapping: undefined });
     },
     [updateLayerState, index]
   );

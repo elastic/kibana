@@ -16,6 +16,7 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -95,6 +96,8 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
+        - '.internal.adhoc.alerts*'
+        - '.adhoc.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -420,6 +423,8 @@ rule_author:
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
+        - .internal.adhoc.alerts-security*
+        - .adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -492,6 +497,8 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -568,6 +575,8 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -631,6 +640,8 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
         - risk-score.risk-score-*
       privileges:
         - all
@@ -708,6 +719,8 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
@@ -794,6 +807,8 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
+        - .adhoc.alerts-security*
+        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write

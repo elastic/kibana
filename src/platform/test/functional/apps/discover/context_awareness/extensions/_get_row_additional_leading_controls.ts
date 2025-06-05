@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
       it('should not render logs controls for non-logs data source', async () => {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
 
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
       it('should not render logs controls for non-logs data source', async () => {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
-        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
+        await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
   });

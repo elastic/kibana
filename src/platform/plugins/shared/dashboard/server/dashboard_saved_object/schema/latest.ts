@@ -13,4 +13,5 @@ export {
   type DashboardAttributes as DashboardSavedObjectAttributes,
   type GridData,
   type SavedDashboardPanel,
+  type SavedDashboardSection,
 } from './v2';

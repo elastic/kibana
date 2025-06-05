@@ -8,14 +8,18 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { DataViewEditorProps } from '../types';
 
 const DataViewFlyoutContentContainer = lazy(() => import('./data_view_flyout_content_container'));
 
-export const DataViewEditorLazy = (props: DataViewEditorProps) => (
-  <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-    <DataViewFlyoutContentContainer {...props} />
-  </Suspense>
-);
+export const DataViewEditorLazy = (props: DataViewEditorProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <Suspense fallback={<EuiLoadingSpinner css={{ margin: euiTheme.size.m }} />}>
+      <DataViewFlyoutContentContainer {...props} />
+    </Suspense>
+  );
+};

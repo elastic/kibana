@@ -7,19 +7,10 @@
 
 import type { Subscription } from 'rxjs';
 
-import type {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-} from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,
@@ -27,42 +18,14 @@ import {
 import type { LicenseService } from '../../../../common/license/license';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export class PolicyWatcher {
   private logger: Logger;
-  private esClient: ElasticsearchClient;
-  private policyService: PackagePolicyClient;
   private subscription: Subscription | undefined;
-  private soStart: SavedObjectsServiceStart;
-  constructor(
-    policyService: PackagePolicyClient,
-    soStart: SavedObjectsServiceStart,
-    esStart: ElasticsearchServiceStart,
-    logger: Logger
-  ) {
-    this.policyService = policyService;
-    this.esClient = esStart.client.asInternalUser;
-    this.logger = logger;
-    this.soStart = soStart;
-  }
 
-  /**
-   * The policy watcher is not called as part of a HTTP request chain, where the
-   * request-scoped SOClient could be passed down. It is called via license observable
-   * changes. We are acting as the 'system' in response to license changes, so we are
-   * intentionally using the system user here. Be very aware of what you are using this
-   * client to do
-   */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+  constructor(private readonly endpointServices: EndpointAppContextService) {
+    this.logger = endpointServices.createLogger('PolicyWatcher');
   }
 
   public start(licenseService: LicenseService) {
@@ -72,10 +35,24 @@ export class PolicyWatcher {
   public stop() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+      this.subscription = undefined;
     }
   }
 
   public async watch(license: ILicense) {
+    const isSpacesEnabled =
+      this.endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
+    const fleetServices = this.endpointServices.getInternalFleetServices();
+    const esClient = this.endpointServices.getInternalEsClient();
+    const soClient = isSpacesEnabled
+      ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
+      : this.endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
+
+    this.logger.debug(
+      `Checking endpoint policies for compliance with license level [${license.type}]`
+    );
+
+    let totalUpdates = 0;
     let page = 1;
     let response: {
       items: PackagePolicy[];
@@ -83,13 +60,13 @@ export class PolicyWatcher {
       page: number;
       perPage: number;
     };
-
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
+        response = await fleetServices.packagePolicy.list(soClient, {
           page: page++,
           perPage: 100,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: fleetServices.endpointPolicyKuery,
+          spaceId: isSpacesEnabled ? '*' : undefined,
         });
       } catch (e) {
         this.logger.warn(
@@ -98,32 +75,54 @@ export class PolicyWatcher {
         return;
       }
 
+      this.logger.debug(
+        () => `Processing page [${page - 1}] with [${response.items.length}] endpoint policies`
+      );
+
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         try {
           if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
+            this.logger.debug(
+              `Endpoint policy [${policy.id}] needs updates in order to make it compliant with License [${license.type}]`
+            );
+
             updatePolicy.inputs[0].config.policy.value = unsetPolicyFeaturesAccordingToLicenseLevel(
               policyConfig,
               license
             );
+
+            const soClientForPolicyUpdate = isSpacesEnabled
+              ? this.endpointServices.savedObjects.createInternalScopedSoClient({
+                  spaceId: policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID,
+                  readonly: false,
+                })
+              : soClient;
+
             try {
-              await this.policyService.update(
-                this.makeInternalSOClient(this.soStart),
-                this.esClient,
+              await fleetServices.packagePolicy.update(
+                soClientForPolicyUpdate,
+                esClient,
                 policy.id,
                 updatePolicy
               );
+
+              totalUpdates++;
             } catch (e) {
               // try again for transient issues
+              this.logger.debug(
+                `First attempt to update endpoint policy [${policy.id}] failed. Trying again. [ERROR: ${e.message}]`
+              );
               try {
-                await this.policyService.update(
-                  this.makeInternalSOClient(this.soStart),
-                  this.esClient,
+                await fleetServices.packagePolicy.update(
+                  soClientForPolicyUpdate,
+                  esClient,
                   policy.id,
                   updatePolicy
                 );
+                totalUpdates++;
               } catch (ee) {
                 this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
                 this.logger.warn(ee);
@@ -138,5 +137,11 @@ export class PolicyWatcher {
         }
       }
     } while (response.page * response.perPage < response.total);
+
+    this.logger.debug(
+      `Checks of endpoint policies for compliance with License [${license.type}] done.${
+        totalUpdates > 0 ? ` [${totalUpdates}] policies were updated` : ''
+      }`
+    );
   }
 }

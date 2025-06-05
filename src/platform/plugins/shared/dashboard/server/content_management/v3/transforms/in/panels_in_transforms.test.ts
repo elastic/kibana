@@ -30,7 +30,7 @@ describe('transformPanelsIn', () => {
       },
     ];
     const result = transformPanelsIn(panels as DashboardPanel[]);
-    expect(result).toEqual(
+    expect(result.panelsJSON).toEqual(
       JSON.stringify([
         {
           type: 'foo',

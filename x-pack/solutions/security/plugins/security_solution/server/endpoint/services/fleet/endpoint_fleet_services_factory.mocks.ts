@@ -23,7 +23,9 @@ export type EndpointInternalFleetServicesInterfaceMocked =
 
 export interface EndpointFleetServicesFactoryInterfaceMocked
   extends EndpointFleetServicesFactoryInterface {
-  asInternalUser: () => EndpointInternalFleetServicesInterfaceMocked;
+  asInternalUser: (
+    ...args: Parameters<EndpointFleetServicesFactoryInterface['asInternalUser']>
+  ) => EndpointInternalFleetServicesInterfaceMocked;
 }
 
 export interface CreateEndpointFleetServicesFactoryMockOptions {
@@ -52,14 +54,18 @@ export const createEndpointFleetServicesFactoryMock = (
     logger
   ) as unknown as EndpointFleetServicesFactoryInterfaceMocked;
 
-  const fleetInternalServicesMocked = serviceFactoryMock.asInternalUser();
-  jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
-  jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
-  jest.spyOn(fleetInternalServicesMocked, 'getIntegrationNamespaces');
-  jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
-
+  const realAsInternalUserFn = serviceFactoryMock.asInternalUser.bind(serviceFactoryMock);
   const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
-  asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);
+
+  asInternalUserSpy.mockImplementation((...args) => {
+    const fleetInternalServicesMocked = realAsInternalUserFn(...args);
+    jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
+    jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
+    jest.spyOn(fleetInternalServicesMocked, 'getIntegrationNamespaces');
+    jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
+
+    return fleetInternalServicesMocked;
+  });
 
   return {
     service: serviceFactoryMock,

@@ -9,6 +9,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesAutocompleteResult, IndexAutocompleteItem } from '@kbn/esql-types';
+import {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -83,5 +87,20 @@ export class EsqlService {
     };
 
     return result;
+  }
+
+  public async getInferenceEndpoints(
+    taskType: InferenceTaskType
+  ): Promise<{ inferenceEndpoints: InferenceInferenceEndpointInfo[] }> {
+    const { client } = this.options;
+
+    const { endpoints } = await client.inference.get({
+      inference_id: '_all',
+      task_type: taskType,
+    });
+
+    return {
+      inferenceEndpoints: endpoints,
+    };
   }
 }

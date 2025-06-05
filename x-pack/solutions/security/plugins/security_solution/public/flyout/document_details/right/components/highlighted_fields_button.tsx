@@ -70,14 +70,13 @@ export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> =
         data-test-subj={HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID}
       >
         <EuiButtonEmpty
-          iconType={'gear'}
           onClick={onClick}
           disabled={isDisabled}
           data-test-subj={HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButton"
-            defaultMessage="Edit"
+            defaultMessage="+ Add Field"
           />
         </EuiButtonEmpty>
       </EuiToolTip>

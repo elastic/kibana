@@ -210,6 +210,45 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.extractCategorizeTokens",
+        "type": "Function",
+        "tags": [],
+        "label": "extractCategorizeTokens",
+        "description": [
+          "\nExtracts \"tokens\" from a regex string (produced by the categorize function) by stripping leading/trailing '.*?'\nand splitting the remainder by '.+?'.\n"
+        ],
+        "signature": [
+          "(regexString: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/extract_categorize_tokens.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.extractCategorizeTokens.$1",
+            "type": "string",
+            "tags": [],
+            "label": "regexString",
+            "description": [
+              "The regular expression string."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/extract_categorize_tokens.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of extracted \"keywords\"."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.fixESQLQueryWithVariables",
         "type": "Function",
         "tags": [],
@@ -319,6 +358,39 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getCategorizeColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizeColumns",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getCategorizeColumns.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

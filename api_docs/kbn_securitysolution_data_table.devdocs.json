@@ -805,21 +805,6 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.DataTableModel.sessionViewConfig",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "SessionViewConfig",
-              " | null"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
             "id": "def-public.DataTableModel.updated",
             "type": "number",
             "tags": [],
@@ -1268,9 +1253,7 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[]>; readonly sessionViewConfig: ",
-          "SessionViewConfig",
-          " | null; }"
+          "[]>; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
@@ -1542,20 +1525,6 @@
             "tags": [],
             "label": "graphEventId",
             "description": [],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.tableDefaults.sessionViewConfig",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "null"
-            ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false

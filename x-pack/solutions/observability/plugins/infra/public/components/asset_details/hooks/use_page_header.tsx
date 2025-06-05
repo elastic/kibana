@@ -18,7 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { useProfilingPluginSetting } from '../../../hooks/use_profiling_integration_setting';
 import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
 import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
@@ -115,14 +115,14 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
-  const isProfilingEnabled = useProfilingIntegrationSetting();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
-      [ContentTabIds.PROFILING]: isProfilingEnabled,
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
     }),
-    [featureFlags.osqueryEnabled, isProfilingEnabled]
+    [featureFlags.osqueryEnabled, isProfilingPluginEnabled]
   );
 
   const isTabEnabled = useCallback(

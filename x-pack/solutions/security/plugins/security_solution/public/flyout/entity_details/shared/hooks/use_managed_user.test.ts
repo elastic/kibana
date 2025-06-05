@@ -26,9 +26,12 @@ const mockUseIntegrations = jest.fn().mockReturnValue({
   data: [],
 });
 
-jest.mock('../../../../detections/components/rules/related_integrations/use_integrations', () => ({
-  useIntegrations: () => mockUseIntegrations(),
-}));
+jest.mock(
+  '../../../../detection_engine/common/components/related_integrations/use_integrations',
+  () => ({
+    useIntegrations: () => mockUseIntegrations(),
+  })
+);
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'test-space-id',

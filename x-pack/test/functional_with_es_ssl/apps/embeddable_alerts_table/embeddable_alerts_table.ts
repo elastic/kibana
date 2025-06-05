@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         name,
         rule_type_id: `.es-query`,
         enabled: true,
-        schedule: { interval: '1m' },
+        schedule: { interval: '5s' },
         consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
         tags: [name],
         params: {
@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: ['security-rule'],
         setup: '',
         license: '',
-        interval: '1m',
+        interval: '5s',
         from: 'now-10m',
         to: 'now',
         actions: [],
@@ -144,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return summary;
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220807
+  // Failing: See https://github.com/elastic/kibana/issues/220807
   describe.skip('Embeddable alerts panel', () => {
     before(async () => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -152,9 +152,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await pageObjects.home.addSampleDataSet('logs');
       const dataView = await getSampleWebLogsDataView();
-      const stackRule = await createEsQueryRule(dataView.id, 'stack');
-      const observabilityRule = await createEsQueryRule(dataView.id, 'observability');
-      const securityRule = await createSecurityRule(dataView.id);
+      const [stackRule, observabilityRule, securityRule] = await Promise.all([
+        createEsQueryRule(dataView.id, 'stack'),
+        createEsQueryRule(dataView.id, 'observability'),
+        createSecurityRule(dataView.id),
+      ]);
 
       // Refresh to see the created rules
       await browser.refresh();
@@ -170,10 +172,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rulesWithoutAlerts = Object.entries(rulesAlerted)
           .filter(([_, alerted]) => !alerted)
           .map(([ruleId]) => ruleId);
-        for (const ruleId of rulesWithoutAlerts) {
-          const summary = await getRuleSummary(ruleId);
-          rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
-        }
+        await Promise.all(
+          rulesWithoutAlerts.map(async (ruleId) => {
+            const summary = await getRuleSummary(ruleId);
+            rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
+          })
+        );
         expect(Object.values(rulesAlerted).every((hasAlerts) => hasAlerts)).to.be(true);
       });
 
@@ -208,8 +212,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#security`);
 
         expect(await find.byButtonText('Switch solution')).to.be.ok();
-
-        await new Promise((r) => setTimeout(r, 20000));
       });
     });
 
@@ -237,6 +239,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
           await options[0].click();
+          // Dashboard warnings may appear above the save button
+          await toasts.dismissIfExists();
           await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
           await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
           await pageObjects.dashboard.verifyNoRenderErrors();

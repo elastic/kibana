@@ -117,6 +117,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   canSuggestVariables: [],
   getJoinIndices: [],
   getTimeseriesIndices: [],
+  getEditorExtensions: [],
 };
 
 /**
@@ -216,7 +217,7 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {

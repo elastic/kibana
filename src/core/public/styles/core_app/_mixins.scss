@@ -12,52 +12,6 @@
   display: inline-block;
 }
 
-// Standardizes the look and layout of resizable area handles
-@mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
-  position: relative;
-  display: flex;
-  flex: 0 0 $size;
-  background-color: $euiPageBackgroundColor;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  user-select: none;
-
-  @if ($direction == horizontal) {
-    width: $size;
-  } @else if ($direction == vertical) {
-    height: $size;
-    width: 100%;
-  } @else {
-    @warn('Direction unknown for kbnResizer');
-  }
-
-  &:hover {
-    background-color: tintOrShade($euiColorPrimary, 80%, 60%);
-  }
-
-  &:focus,
-  &.active {
-    background-color: $euiColorPrimary;
-    color: $euiColorEmptyShade;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    @if ($direction == horizontal) {
-      cursor: ew-resize;
-    } @else if ($direction == vertical) {
-      cursor: ns-resize;
-    }
-  }
-}
-
 @mixin kibanaFullScreenGraphics($euiZLevel: $euiZLevel9) {
   position: fixed;
   top: 0;

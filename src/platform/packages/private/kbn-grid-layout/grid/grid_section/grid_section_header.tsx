@@ -174,6 +174,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
     section.isCollapsed = !section.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
+
+    const buttonRef = collapseButtonRef.current;
+    if (!buttonRef) return;
+    buttonRef.setAttribute('aria-expanded', `${!section.isCollapsed}`);
   }, [gridLayoutStateManager, sectionId]);
 
   return (

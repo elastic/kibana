@@ -7,19 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { css } from '@emotion/react';
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
-import './_annotations_editor.scss';
+const useContainerStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css({
+      padding: euiTheme.size.base,
+      backgroundColor: euiTheme.colors.lightestShade,
+    });
+  }, [euiTheme]);
+  return styles;
+};
 
 interface AnnotationsEditorProps {
   fields: VisFields;
@@ -65,6 +75,8 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
 
+  const containerStyles = useContainerStyles();
+
   const handleAdd = useCallback(
     () =>
       collectionActions.handleAdd(
@@ -92,7 +104,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   );
 
   return (
-    <div className="tvbAnnotationsEditor__container">
+    <div className="tvbAnnotationsEditor__container" css={containerStyles}>
       {annotations?.length ? (
         <div>
           <EuiTitle size="s">

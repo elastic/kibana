@@ -11,6 +11,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
+import { migrateOnRead } from './helpers/migrate_on_read';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -49,10 +50,14 @@ export class StreamsService {
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
-    const storageAdapter = new StorageIndexAdapter<
-      StreamsStorageSettings,
-      Streams.all.Definition & { _id: string }
-    >(scopedClusterClient.asInternalUser, logger, streamsStorageSettings);
+    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, Streams.all.Definition>(
+      scopedClusterClient.asInternalUser,
+      logger,
+      streamsStorageSettings,
+      {
+        migrateSource: migrateOnRead,
+      }
+    );
 
     return new StreamsClient({
       assetClient,

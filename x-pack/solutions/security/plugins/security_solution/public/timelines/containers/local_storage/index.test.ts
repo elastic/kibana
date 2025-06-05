@@ -7,19 +7,19 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
-  migrateColumnWidthToInitialWidth,
-  migrateColumnLabelToDisplayAsText,
-  LOCAL_STORAGE_TABLE_KEY,
-  useDataTablesStorage,
-  getDataTablesInStorageByIds,
-  getAllDataTablesInStorage,
-  addTableInStorage,
-  migrateAlertTableStateToTriggerActionsState,
-  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
   addAssigneesSpecsToSecurityDataTableIfNeeded,
+  addTableInStorage,
+  getAllDataTablesInStorage,
+  getDataTablesInStorageByIds,
+  LOCAL_STORAGE_TABLE_KEY,
+  migrateAlertTableStateToTriggerActionsState,
+  migrateColumnLabelToDisplayAsText,
+  migrateColumnWidthToInitialWidth,
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
+  useDataTablesStorage,
 } from '.';
 
-import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { createSecuritySolutionStorageMock, mockDataTableModel } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
@@ -519,7 +519,6 @@ describe('SiemLocalStorage', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        sessionViewConfig: null,
         show: false,
         status: 'draft',
         initialized: true,
@@ -647,7 +646,6 @@ describe('SiemLocalStorage', () => {
         ],
         graphEventId: undefined,
         selectedEventIds: {},
-        sessionViewConfig: null,
         selectAll: undefined,
         id: 'alerts-page',
         title: '',
@@ -888,7 +886,6 @@ describe('SiemLocalStorage', () => {
         ],
         selectAll: false,
         graphEventId: '',
-        sessionViewConfig: null,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1002,7 +999,6 @@ describe('SiemLocalStorage', () => {
         ],
         selectAll: false,
         graphEventId: '',
-        sessionViewConfig: null,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1124,7 +1120,6 @@ describe('SiemLocalStorage', () => {
         ],
         selectAll: false,
         graphEventId: '',
-        sessionViewConfig: null,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1562,7 +1557,6 @@ describe('SiemLocalStorage', () => {
           ],
           graphEventId: undefined,
           selectedEventIds: {},
-          sessionViewConfig: null,
           selectAll: false,
           id: 'alerts-page',
           title: '',

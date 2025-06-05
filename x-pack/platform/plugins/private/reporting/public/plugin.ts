@@ -115,11 +115,8 @@ export class ReportingPublicPlugin
         return [
           {
             application: start.application,
-            analytics: start.analytics,
-            i18n: start.i18n,
-            theme: start.theme,
-            userProfile: start.userProfile,
             notifications: start.notifications,
+            rendering: start.rendering,
             uiSettings: start.uiSettings,
           },
           ...rest,
@@ -210,42 +207,32 @@ export class ReportingPublicPlugin
       })
     );
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
-      licensing.license$.subscribe((license) => {
-        shareSetup.registerShareIntegration<ExportShare>(
-          'search',
-          // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-          reportingCsvExportProvider({
-            apiClient,
-            license,
-            application,
-            startServices$,
-          })
-        );
+    shareSetup.registerShareIntegration<ExportShare>(
+      'search',
+      // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+      reportingCsvExportProvider({
+        apiClient,
+        startServices$,
+      })
+    );
 
-        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.registerShareIntegration<ExportShare>(
-            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-            reportingPDFExportProvider({
-              apiClient,
-              license,
-              application,
-              startServices$,
-            })
-          );
+    if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+      shareSetup.registerShareIntegration<ExportShare>(
+        // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+        reportingPDFExportProvider({
+          apiClient,
+          startServices$,
+        })
+      );
 
-          shareSetup.registerShareIntegration<ExportShare>(
-            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-            reportingPNGExportProvider({
-              apiClient,
-              license,
-              application,
-              startServices$,
-            })
-          );
-        }
-      });
-    });
+      shareSetup.registerShareIntegration<ExportShare>(
+        // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+        reportingPNGExportProvider({
+          apiClient,
+          startServices$,
+        })
+      );
+    }
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);

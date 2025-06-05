@@ -91,8 +91,8 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
+  getActionsColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 
@@ -949,34 +949,32 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
-    const internalControlColumns = controlColumnIds
-      ? // reorder the default controls as per controlColumnIds
-        controlColumnIds.reduce((acc, id) => {
-          const controlColumn = defaultControlColumns.find((col) => col.id === id);
-          if (controlColumn) {
-            acc.push(controlColumn);
-          }
-          return acc;
-        }, [] as EuiDataGridControlColumn[])
-      : defaultControlColumns;
+    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+      rows: displayedRows,
+      canSetExpandedDoc,
+    });
 
-    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    const filteredLeadColumns = leadColumns.filter((column) =>
+      controlColumnIds.includes(column.id)
+    );
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadingColumns.unshift(colorIndicatorControlColumn);
+      filteredLeadColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (rowAdditionalLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+    const actionsColumn = getActionsColumn({
+      baseColumns: leadColumnsExtraContent,
+      rowAdditionalLeadingControls,
+      externalControlColumns,
+    });
+    if (actionsColumn) {
+      filteredLeadColumns.push(actionsColumn);
     }
 
-    return leadingColumns;
+    return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
     controlColumnIds,

@@ -9,6 +9,7 @@ import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import {
+  getAwsPackageInfoMock,
   getMockPackageInfo,
   getMockPackageInfoAssetGCP,
   getMockPackageInfoAssetInventoryAWS,
@@ -41,6 +42,8 @@ import {
 } from './test_subjects';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
+import { useKibana } from '../../hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -50,6 +53,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
@@ -64,6 +71,20 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       secretsStorage: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cloud: {
+          csp: 'aws',
+          cloudId: 'mock-cloud-id',
+          deploymentId: 'mock-deployment-id',
+          serverless: { projectId: '' },
+          isCloudEnabled: true,
+        },
+        uiSettings: {
+          get: (key: string) => false,
+        },
+      },
+    });
 
     onChange.mockClear();
   });
@@ -661,7 +682,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   });
   describe('Agentless', () => {
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
+
       const { queryByTestId } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
       );
@@ -670,7 +695,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).not.toBeInTheDocument();
     });
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
+
       const { getByTestId, getByLabelText } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
@@ -916,6 +945,62 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
         updatedPolicy: policy,
+      });
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          cloud: {
+            csp: 'aws',
+            cloudId: 'mock-cloud-id',
+            deploymentId: 'mock-deployment-id',
+            serverless: { projectId: '' },
+            isCloudEnabled: true,
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      const { getByTestId, getByLabelText } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+
+      expect(
+        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+      ).toBeInTheDocument();
+      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      await userEvent.click(setupTechnologySelector);
+      const agentlessOption = getByLabelText(/agentless/i);
+      await userEvent.click(agentlessOption);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(3);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
       });
     });
   });

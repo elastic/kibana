@@ -13,6 +13,7 @@ import {
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
+import { DraftGrokExpression } from '@kbn/grok-ui';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
@@ -24,7 +25,7 @@ export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefi
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
   type: 'grok';
-  patterns: Array<{ value: string }>;
+  patterns: DraftGrokExpression[];
 };
 
 export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };

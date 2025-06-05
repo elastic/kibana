@@ -14,6 +14,8 @@ import { appContextService } from '../../services/app_context';
 
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
+import { licenseService } from '../../services/license';
+
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
   getFollowerIndexInfo,
@@ -1640,6 +1642,7 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     (installCustomAsset as jest.Mock).mockClear();
   });
@@ -1652,6 +1655,17 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return empty integrations array if license is less than Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
       integrations: [],
     });

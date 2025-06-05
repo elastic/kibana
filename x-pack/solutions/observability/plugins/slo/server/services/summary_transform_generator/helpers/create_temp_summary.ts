@@ -135,8 +135,8 @@ export function createTempSummaryDocument(
       createdAt: slo.createdAt.toISOString(), // added in 8.14, i.e. might be undefined
       updatedAt: slo.updatedAt.toISOString(), // added in 8.14, i.e. might be undefined
       // Added in 8.18
-      createdBy: slo.createdBy,
-      updatedBy: slo.updatedBy,
+      createdBy: slo.createdBy ?? '',
+      updatedBy: slo.updatedBy ?? '',
     },
     goodEvents: 0,
     totalEvents: 0,

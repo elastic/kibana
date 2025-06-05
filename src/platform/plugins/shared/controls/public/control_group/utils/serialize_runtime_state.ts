@@ -38,7 +38,17 @@ export function serializeRuntimeState(
       ...defaultRuntimeState,
       ...omit(runtimeState, ['initialChildControlState']),
       controls: Object.entries(runtimeState?.initialChildControlState ?? {}).map(
-        ([controlId, value]) => ({ ...value, id: controlId })
+        ([controlId, value]) => {
+          const { grow, order, type, width, ...controlConfig } = value;
+          return {
+            id: controlId,
+            grow,
+            order,
+            type,
+            width,
+            controlConfig,
+          };
+        }
       ),
     },
   };

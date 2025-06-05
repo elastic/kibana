@@ -3173,6 +3173,38 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListFiltersProps.onFieldNameSearchFocus",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldNameSearchFocus",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListFiltersProps.onFieldNameSearchBlur",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldNameSearchBlur",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldListFiltersProps.compressed",
             "type": "CompoundType",
             "tags": [],
@@ -3451,6 +3483,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldListGroupedProps.muteScreenReader",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "muteScreenReader",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_grouped/field_list_grouped.tsx",
             "deprecated": false,

@@ -142,6 +142,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableCloudConnector': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -563,20 +567,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'observability:apmLabsButton': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableProfilingIntegration': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
@@ -601,10 +597,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureProfilingIntegration': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableGroupedNav': {

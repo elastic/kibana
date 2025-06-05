@@ -11,8 +11,7 @@
     "id": "share",
     "browser": true,
     "server": true,
-    "requiredBundles": [
-      "kibanaUtils"
-    ]
+    "requiredBundles": ["kibanaUtils"],
+    "optionalPlugins": ["licensing"]
   }
 }

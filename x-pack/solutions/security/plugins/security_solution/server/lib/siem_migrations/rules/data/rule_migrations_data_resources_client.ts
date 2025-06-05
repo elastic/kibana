@@ -17,6 +17,7 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { StoredRuleMigrationResource } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type CreateRuleMigrationResourceInput = Pick<
   RuleMigrationResource,
@@ -168,7 +169,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
    */
   async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();
-    const resourcesToBeDeleted = await this.get(migrationId, { size: 10000 });
+    const resourcesToBeDeleted = await this.get(migrationId, { size: MAX_ES_SEARCH_SIZE });
     const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
     return resourcesToBeDeletedDocIds.map((docId) => ({
       delete: {

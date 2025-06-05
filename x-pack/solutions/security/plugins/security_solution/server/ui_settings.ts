@@ -30,6 +30,7 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
@@ -234,6 +235,23 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
           defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+          values: { em: (chunks) => `<em>${chunks}</em>` },
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_CLOUD_CONNECTOR_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
+        defaultMessage: 'Enable Cloud Connector',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
+        {
+          defaultMessage: `<em>[technical preview]</em> Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
           values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),

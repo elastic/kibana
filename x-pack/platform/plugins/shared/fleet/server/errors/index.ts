@@ -8,6 +8,8 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import { isObjectLike } from 'lodash';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -22,6 +24,28 @@ export {
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
+
+export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta> {
+  public readonly statusCode: number | undefined;
+
+  constructor(message?: string, statusCode?: number, public readonly meta?: TMeta) {
+    super(message, meta);
+
+    if (statusCode) {
+      this.statusCode = statusCode;
+    } else if (isObjectLike(meta)) {
+      const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
+
+      // If the original error had a status code, and it is not a `401`, then set that status code here.
+      // We don't set it for `401` because the error is likely due to internal processing or lack
+      // of access to specific SO/Indexes, and we don't want Kibana/UI logout a user out due to this
+      // `401`
+      if (typeof metaStatusCode === 'number' && metaStatusCode !== 401) {
+        this.statusCode = metaStatusCode;
+      }
+    }
+  }
+}
 
 export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}

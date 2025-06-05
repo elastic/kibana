@@ -311,4 +311,5 @@ export {
   kibanaFullBodyHeightCss,
   fullScreenGraphicsMixinStyles,
   useMemoizedStyles,
+  type EmotionStyles,
 } from './css_utils';

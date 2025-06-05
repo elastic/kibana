@@ -52,7 +52,7 @@ describe('MS Defender response actions client', () => {
     msClientMock = new MicrosoftDefenderEndpointActionsClient(clientConstructorOptionsMock);
   });
 
-  const supporteResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
+  const supportedResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
     upload: false,
     scan: false,
     execute: false,
@@ -66,10 +66,11 @@ describe('MS Defender response actions client', () => {
     isolate: true,
     release: true,
     processPendingActions: true,
+    getCustomScripts: false,
   };
 
   it.each(
-    Object.entries(supporteResponseActionClassMethods).reduce((acc, [key, value]) => {
+    Object.entries(supportedResponseActionClassMethods).reduce((acc, [key, value]) => {
       if (!value) {
         acc.push(key as keyof ResponseActionsClient);
       }

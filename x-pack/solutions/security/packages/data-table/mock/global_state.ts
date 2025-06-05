@@ -41,7 +41,6 @@ export const mockGlobalState = {
           },
         ],
         graphEventId: '',
-        sessionViewConfig: null,
         selectAll: false,
         id: TableId.test,
         title: '',

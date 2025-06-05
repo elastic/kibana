@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "server/**/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/core-plugins-server",
+    "@kbn/security-plugin-types-server",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

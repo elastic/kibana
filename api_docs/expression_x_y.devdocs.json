@@ -820,7 +820,7 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }>"
+              "<Record<string, unknown>>"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2652,7 +2652,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }>; table: ",
+          "<Record<string, unknown>>; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -2692,7 +2692,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }>; table: ",
+          "<Record<string, unknown>>; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -2852,7 +2852,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<{ [key: string]: unknown; }>; table: ",
+          "<Record<string, unknown>>; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",

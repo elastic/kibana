@@ -389,7 +389,13 @@
           "(ancestors: ",
           "WiredStream",
           ".Definition[]) => ",
-          "InheritedFieldDefinition"
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.InheritedFieldDefinition",
+            "text": "InheritedFieldDefinition"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_inherited_fields_from_ancestors.ts",
         "deprecated": false,
@@ -521,6 +527,39 @@
               "TProcessorDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getRegularEcsField",
+        "type": "Function",
+        "tags": [],
+        "label": "getRegularEcsField",
+        "description": [],
+        "signature": [
+          "(field: string) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getRegularEcsField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1088,6 +1127,39 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isNamespacedEcsField",
+        "type": "Function",
+        "tags": [],
+        "label": "isNamespacedEcsField",
+        "description": [],
+        "signature": [
+          "(field: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isNamespacedEcsField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2382,6 +2454,48 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InheritedFieldDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "InheritedFieldDefinition",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InheritedFieldDefinition.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | ... 6 more ... | ({ ...; } & { ...; })",
+            "description": [],
+            "signature": [
+              "[x: string]:  (",
+              "MappingBooleanProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingKeywordProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingMatchOnlyTextProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingDateProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingIpProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingDoubleNumberProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
+              "MappingLongNumberProperty",
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | ({ type: \"system\"; } & { from: string; alias_for?: string | undefined; })"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.KvProcessorConfig",
         "type": "Interface",
         "tags": [],
@@ -3402,21 +3516,36 @@
         "signature": [
           "(",
           "MappingBooleanProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingKeywordProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingMatchOnlyTextProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingDateProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingIpProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingDoubleNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; }) | ({ type: \"system\"; } & { from: string; alias_for?: string | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.keepFields",
+        "type": "Array",
+        "tags": [],
+        "label": "keepFields",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3452,6 +3581,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.namespacePrefixes",
+        "type": "Array",
+        "tags": [],
+        "label": "namespacePrefixes",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.PhaseName",
         "type": "Type",
         "tags": [],
@@ -3477,16 +3621,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DateProcessorConfig",
-            "text": "DateProcessorConfig"
+            "section": "def-common.GrokProcessorConfig",
+            "text": "GrokProcessorConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorConfig",
-            "text": "GrokProcessorConfig"
+            "section": "def-common.DateProcessorConfig",
+            "text": "DateProcessorConfig"
           },
           " | ",
           {

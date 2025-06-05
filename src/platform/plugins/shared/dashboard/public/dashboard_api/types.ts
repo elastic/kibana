@@ -15,6 +15,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CanAddNewSection,
   CanExpandPanels,
   HasLastSavedChildState,
   HasSerializedChildState,
@@ -47,6 +48,8 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   DashboardLocatorParams,
   DashboardPanelMap,
+  DashboardPanelState,
+  DashboardSectionMap,
   DashboardSettings,
   DashboardState,
 } from '../../common';
@@ -58,9 +61,12 @@ import {
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
-export type DashboardLayoutItem = { gridData: GridData } & HasType;
+export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
+
+export type DashboardPanel = Pick<DashboardPanelState, 'gridData'> & HasType;
 export interface DashboardLayout {
-  [uuid: string]: DashboardLayoutItem;
+  panels: { [uuid: string]: DashboardPanel }; // partial of DashboardPanelState
+  sections: DashboardSectionMap;
 }
 
 export interface DashboardChildState {
@@ -102,6 +108,7 @@ export interface DashboardCreationOptions {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
   HasLastSavedChildState &
@@ -151,6 +158,8 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    scrollToBottom: () => void;
+    scrollToBottom$: Subject<void>;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
@@ -168,5 +177,10 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializePanels: () => { references: Reference[]; panels: DashboardPanelMap };
+  serializeLayout: () => {
+    references: Reference[];
+    panels: DashboardPanelMap;
+    sections: DashboardSectionMap;
+  };
+  isSectionCollapsed: (sectionId?: string) => boolean;
 }

@@ -202,7 +202,7 @@ export const getPackageInfoMock = () => {
         dataset: 'cloud_asset_inventory.asset_inventory',
         type: 'logs',
 
-        package: 'cloud_security_posture',
+        package: 'cloud_asset_inventory',
         path: 'asset_inventory',
         release: 'ga' as RegistryRelease,
 
@@ -290,4 +290,81 @@ export const getPackageInfoMock = () => {
       kibana: {},
     },
   } as PackageInfo;
+};
+
+export const getAwsPackageInfoMock = () => {
+  return {
+    ...getPackageInfoMock(),
+    policy_templates: [
+      {
+        name: 'asset_inventory',
+        title: 'Cloud Asset Inventory',
+        description: 'Discover and Create Cloud Assets Inventory',
+        multiple: true,
+        inputs: [
+          {
+            title: 'Amazon Web Services',
+            vars: [
+              {
+                name: 'cloud_formation_template',
+                type: 'text',
+                title: 'CloudFormation Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Quick Create Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-8.18.0.yml&stackName=Elastic-Cloud-Security-Posture-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent',
+              },
+              {
+                name: 'cloud_formation_credentials_template',
+                type: 'text',
+                title: 'CloudFormation Credentials Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Credentials Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-8.18.0.yml',
+              },
+              {
+                name: 'cloud_formation_cloud_connectors_template',
+                type: 'text',
+                title: 'CloudFormation Cloud Connectors Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Connectors Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-8.18.0.yml&param_ElasticResourceId=RESOURCE_ID',
+              },
+            ],
+            type: 'cloudbeat/asset_inventory_aws',
+            description: 'Cloud Asset Discovery for AWS',
+          },
+        ],
+        categories: ['security', 'cloud', 'aws', 'google_cloud'],
+        icons: [
+          {
+            src: '/img/logo_cspm.svg',
+            title: 'Asset Inventory logo',
+            size: '32x32',
+            type: 'image/svg+xml',
+          },
+        ],
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: true,
+            is_default: true,
+            organization: 'security',
+            division: 'engineering',
+            team: 'cloud-security-posture',
+          },
+        },
+      },
+    ],
+  };
 };

@@ -8,7 +8,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiHealth, EuiBadge, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { getAbbreviatedNumber, MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
@@ -36,6 +36,7 @@ export const FindingsDistributionBar = (props: Props) => (
 );
 const Counters = ({ passed, failed }: Pick<Props, 'passed' | 'failed'>) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup
@@ -62,6 +63,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
   distributionOnClick,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
   return (
     <EuiFlexGroup

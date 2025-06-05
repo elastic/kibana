@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import { createSavedObjectClientMock } from '../mocks';
 
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -38,7 +40,7 @@ let mockedLogger: jest.Mocked<Logger>;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 
 function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSettings?: boolean }) {
-  const soClient = savedObjectsClientMock.create();
+  const soClient = createSavedObjectClientMock();
   mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
 
   soClient.get.mockImplementation(async (t: string, id: string) => {
@@ -57,7 +59,7 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
     };
   });
 
-  soClient.find.mockImplementation(({ type }) => {
+  soClient.find.mockImplementation(async ({ type }) => {
     if (type === FLEET_SERVER_HOST_SAVED_OBJECT_TYPE) {
       if (options?.findHosts) {
         return {

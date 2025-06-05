@@ -185,6 +185,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".siem-signals-*"
           ],
           "privileges": ["read", "write", "manage"]
@@ -239,6 +241,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".siem-signals-*"
           ],
           "privileges": ["read", "write", "manage"]
