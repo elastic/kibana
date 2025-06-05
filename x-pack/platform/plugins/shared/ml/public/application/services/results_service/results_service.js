@@ -38,7 +38,7 @@ export function resultsServiceProvider(mlApi) {
       intervalMs,
       perPage = 10,
       fromPage = 1,
-      swimLaneSeverity = 0
+      swimLaneSeverity = [{ min: 0, max: 3 }]
     ) {
       return new Promise((resolve, reject) => {
         const obj = {
@@ -58,14 +58,23 @@ export function resultsServiceProvider(mlApi) {
               },
             },
           },
-          {
-            range: {
-              anomaly_score: {
-                gte: swimLaneSeverity,
-              },
+        ];
+
+        const thresholdCriteria = swimLaneSeverity.map((t) => ({
+          range: {
+            anomaly_score: {
+              gte: t.min,
+              ...(t.max !== undefined && { lte: t.max }),
             },
           },
-        ];
+        }));
+
+        boolCriteria.push({
+          bool: {
+            should: thresholdCriteria,
+            minimum_should_match: 1,
+          },
+        });
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
@@ -542,14 +551,23 @@ export function resultsServiceProvider(mlApi) {
               },
             },
           },
-          {
-            range: {
-              influencer_score: {
-                gt: swimLaneSeverity !== undefined ? swimLaneSeverity : 0,
-              },
+        ];
+
+        const thresholdCriteria = swimLaneSeverity.map((t) => ({
+          range: {
+            influencer_score: {
+              gte: t.min,
+              ...(t.max !== undefined && { lte: t.max }),
             },
           },
-        ];
+        }));
+
+        boolCriteria.push({
+          bool: {
+            should: thresholdCriteria,
+            minimum_should_match: 1,
+          },
+        });
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';

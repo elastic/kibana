@@ -43,6 +43,7 @@ import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -77,7 +78,7 @@ export class AnomalyTimelineStateService extends StateService {
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined | null>(
     undefined
   );
-  private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
+  private _swimLaneSeverity$ = new BehaviorSubject<TableSeverityThreshold[]>([]);
   private _swimLanePagination$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
@@ -158,8 +159,8 @@ export class AnomalyTimelineStateService extends StateService {
     subscription.add(
       this._swimLaneUrlState$
         .pipe(
-          map((v) => v?.severity ?? 0),
-          distinctUntilChanged()
+          map((v) => v?.severity ?? []),
+          distinctUntilChanged(isEqual)
         )
         .subscribe(this._swimLaneSeverity$)
     );
@@ -272,6 +273,7 @@ export class AnomalyTimelineStateService extends StateService {
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
         this._refreshSubject$,
+        this._swimLaneSeverity$,
       ]) as Observable<
         [
           ExplorerJob[],
@@ -282,7 +284,8 @@ export class AnomalyTimelineStateService extends StateService {
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
-          Refresh
+          Refresh,
+          TableSeverityThreshold[]
         ]
       >
     )
@@ -296,6 +299,9 @@ export class AnomalyTimelineStateService extends StateService {
             swimLaneCardinality,
             selectedCells,
             swimLaneBucketInterval,
+            timeBounds,
+            refresh,
+            swimLaneSeverity,
           ]) => {
             if (!selectedCells?.showTopFieldValues) {
               return of([]);
@@ -319,7 +325,8 @@ export class AnomalyTimelineStateService extends StateService {
                 swimLanePagination.viewByFromPage,
                 swimLaneBucketInterval,
                 selectionInfluencers,
-                influencersFilterQuery
+                influencersFilterQuery,
+                swimLaneSeverity
               )
             );
           }
@@ -630,11 +637,11 @@ export class AnomalyTimelineStateService extends StateService {
     return this._selectedCells$.getValue();
   }
 
-  public getSwimLaneSeverity$(): Observable<number | undefined> {
+  public getSwimLaneSeverity$(): Observable<TableSeverityThreshold[]> {
     return this._swimLaneSeverity$.asObservable();
   }
 
-  public getSwimLaneSeverity(): number | undefined {
+  public getSwimLaneSeverity(): TableSeverityThreshold[] {
     return this._swimLaneSeverity$.getValue();
   }
 
@@ -727,7 +734,7 @@ export class AnomalyTimelineStateService extends StateService {
    * Updates the URL state.
    * @param value
    */
-  public setSeverity(value: number) {
+  public setSeverity(value: TableSeverityThreshold[]) {
     this._explorerURLStateCallback({ severity: value, viewByFromPage: 1 });
   }
 

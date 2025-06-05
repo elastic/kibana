@@ -18,7 +18,7 @@ export function resultsServiceProvider(mlApi: MlApi): {
     intervalMs: number,
     perPage?: number,
     fromPage?: number,
-    swimLaneSeverity?: number,
+    swimLaneSeverity?: TableSeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencers(
@@ -51,7 +51,7 @@ export function resultsServiceProvider(mlApi: MlApi): {
     perPage: number,
     fromPage: number,
     influencersFilterQuery: InfluencersFilterQuery,
-    swimLaneSeverity?: number
+    swimLaneSeverity?: TableSeverityThreshold[]
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForDetector(): Promise<any>;

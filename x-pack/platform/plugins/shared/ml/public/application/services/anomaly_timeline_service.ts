@@ -21,6 +21,7 @@ import type {
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import type { MlResultsService } from './results_service';
+import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 /**
  * Service for retrieving anomaly swim lanes data.
@@ -113,7 +114,7 @@ export class AnomalyTimelineService {
     selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
-    overallScore?: number
+    overallScore?: TableSeverityThreshold[]
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -122,6 +123,10 @@ export class AnomalyTimelineService {
     }
 
     const bounds = this.getTimeBounds();
+
+    const minOverallScore = overallScore?.length
+      ? Math.min(...overallScore.map((threshold) => threshold.min))
+      : undefined;
 
     // Ensure the search bounds align to the bucketing interval used in the swim lane so
     // that the first and last buckets are complete.
@@ -143,12 +148,14 @@ export class AnomalyTimelineService {
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
       interval.asSeconds() + 's',
-      overallScore
+      minOverallScore
     );
+
     const overallSwimlaneData = this.processOverallResults(
       resp.results,
       searchBounds,
-      interval.asSeconds()
+      interval.asSeconds(),
+      overallScore || []
     );
 
     return overallSwimlaneData;
@@ -178,10 +185,9 @@ export class AnomalyTimelineService {
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
-    swimLaneSeverity?: number
+    swimLaneSeverity?: TableSeverityThreshold[]
   ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
-
     if (timefilterBounds === undefined) {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
     }
@@ -257,7 +263,8 @@ export class AnomalyTimelineService {
     fromPage: number,
     bucketInterval: TimeBucketsInterval,
     selectionInfluencers: MlEntityField[],
-    influencersFilterQuery: InfluencersFilterQuery
+    influencersFilterQuery: InfluencersFilterQuery,
+    swimLaneSeverity: TableSeverityThreshold[]
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -296,7 +303,7 @@ export class AnomalyTimelineService {
         bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
-        swimlaneLimit
+        swimLaneSeverity
       );
       return Object.keys(resp.results);
     }
@@ -311,7 +318,8 @@ export class AnomalyTimelineService {
   private processOverallResults(
     scoresByTime: { [timeMs: number]: number },
     searchBounds: Required<TimeRangeBounds>,
-    interval: number
+    interval: number,
+    selectedSeverity: TableSeverityThreshold[]
   ): OverallSwimlaneData {
     const overallLabel = OVERALL_LABEL;
     const dataset: OverallSwimlaneData = {
@@ -326,14 +334,34 @@ export class AnomalyTimelineService {
     // These will be used for calculating the earliest and latest times for the swim lane charts.
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
       const time = +timeMs / 1000;
-      dataset.points.push({
-        laneLabel: overallLabel,
-        time,
-        value: score,
-      });
 
-      dataset.earliest = Math.min(time, dataset.earliest);
-      dataset.latest = Math.max(time + dataset.interval, dataset.latest);
+      // Always include points with score 0, or filter based on selected severity thresholds
+      // This handles non-contiguous ranges like [0-3, 75+] where API filtering by min
+      // would return all scores, but we only want specific ranges
+      const shouldIncludePoint =
+        score === 0 ||
+        selectedSeverity.length === 0 ||
+        selectedSeverity.some((threshold) => {
+          const minScore = threshold.min;
+          const maxScore = threshold.max;
+
+          if (maxScore !== undefined) {
+            return score >= minScore && score <= maxScore;
+          } else {
+            return score >= minScore;
+          }
+        });
+
+      if (shouldIncludePoint) {
+        dataset.points.push({
+          laneLabel: overallLabel,
+          time,
+          value: score,
+        });
+
+        dataset.earliest = Math.min(time, dataset.earliest);
+        dataset.latest = Math.max(time + dataset.interval, dataset.latest);
+      }
     });
 
     return dataset;
