@@ -26,6 +26,9 @@ run(async ({ log }) => {
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to final ignores
       '**/node_modules',
+      // Ignore the dashboard files introduced in newer version when the
+      // file casing check was ignored for the whole parent directory
+      'x-pack/plugins/observability_solution/apm/public/components/app/metrics/static_dashboard/dashboards/*',
     ],
   });
 
