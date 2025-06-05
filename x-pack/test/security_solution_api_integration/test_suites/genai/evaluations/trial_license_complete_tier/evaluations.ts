@@ -102,7 +102,9 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'ES|QL Generation Regression Suite',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          const { body: evaluationId } = await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
@@ -119,7 +121,9 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Alerts RAG Regression (Episodes 1-8)',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          const { body: evaluationId } = await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
@@ -136,7 +140,9 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Assistant Eval: Custom Knowledge',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          const { body: evaluationId } = await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
@@ -155,7 +161,9 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Eval AD: All Scenarios',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          const { body: evaluationId } = await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)

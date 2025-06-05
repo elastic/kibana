@@ -8,9 +8,11 @@
 import type SuperTest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { routeWithNamespace, waitFor } from '../../../../../common/utils/security_solution';
 
 export const waitForEvaluationComplete = async ({
@@ -25,7 +27,10 @@ export const waitForEvaluationComplete = async ({
   await waitFor(
     async () => {
       const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-      const { body, status } = await supertest.get(route);
+      const { body, status } = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1);
 
       return (
         status === 200 &&
