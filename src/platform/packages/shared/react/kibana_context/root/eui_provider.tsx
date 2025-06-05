@@ -36,28 +36,34 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
   globalStyles?: boolean;
 }
 
-// Set up the caches.
-// https://eui.elastic.co/#/utilities/provider#cache-location
-const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
+
+const sharedCacheOptions = {
+  // Set up the caches.
+  // https://eui.elastic.co/#/utilities/provider#cache-location
+  stylisPlugins: [euiStylisPrefixer], // https://emotion.sh/docs/@emotion/cache#stylisplugins
+  
+  // Enables Emotion's speedy mode in dev (same as prod).
+  // This uses `insertRule` instead of default injecting <style> tags for better performance (~10x faster).
+  // Historically disabled in dev for easier inspection, but modern dev tools still support editing styles.
+  // docs: https://github.com/emotion-js/emotion/blob/main/packages/sheet/README.md#speedy
+  speedy: true, // Enable speedy mode for better performance
+}
 
 const emotionCache = createCache({
+  ...sharedCacheOptions,
   key: 'css',
-  stylisPlugins,
-  speedy: true,
   container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 
 const globalCache = createCache({
+  ...sharedCacheOptions,
   key: EUI_STYLES_GLOBAL,
-  stylisPlugins,
-  speedy: true,
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
 const utilitiesCache = createCache({
+  ...sharedCacheOptions,
   key: EUI_STYLES_UTILS,
-  stylisPlugins,
-  speedy: true,
   container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
 });
 
