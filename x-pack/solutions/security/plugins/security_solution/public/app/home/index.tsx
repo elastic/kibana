@@ -73,7 +73,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
             </DragDropContextWrapper>
             <HelpMenu />
             <TopValuesPopover />
-            <AssistantOverlay />
+            {/* <AssistantOverlay /> */}
           </>
         </TourContextProvider>
       </ConsoleManager>

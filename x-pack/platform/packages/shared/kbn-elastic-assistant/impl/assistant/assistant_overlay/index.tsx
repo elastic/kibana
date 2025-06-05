@@ -34,6 +34,7 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 `;
 
 export const AssistantOverlay = React.memo(() => {
+  console.log("HERE")
   const spaceId = useAssistantSpaceId();
   const [isModalVisible, setIsModalVisible] = useState(false);
   // id if the conversation exists in the data stream, title if it's a new conversation
@@ -122,6 +123,7 @@ export const AssistantOverlay = React.memo(() => {
 
   if (!isModalVisible) return null;
 
+  console.log("HERE")
   return (
     <>
       <EuiFlyoutResizable

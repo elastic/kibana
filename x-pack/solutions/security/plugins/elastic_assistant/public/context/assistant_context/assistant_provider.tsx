@@ -1,16 +1,17 @@
 import React, { createContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
-import type { CoreTheme, IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 
-import { useKibana } from '../kibana/use_kibana';
-import { useBasePath } from '../kibana/use_base_path';
-import { useAssistantAvailability } from '../use_assistant_availability';
+import { useKibana } from '../../hooks/kibana/use_kibana';
+import { useBasePath } from '../../hooks/kibana/use_base_path';
+import { useAssistantAvailability } from '../../hooks/use_assistant_availability';
 import useObservable from 'react-use/lib/useObservable';
-import { useMigrateConversationsFromLocalStorage } from '../migrate_conversations_from_local_storage/migrate_conversations_from_local_storage';
-import { useCreateSecurityPrompts } from '../create_security_prompts/create_security_prompts';
-import { useAppToasts } from '../toast/use_app_toasts';
-import { useInferenceEnabled } from '../inference_enabled/inference_enabled';
+import { useMigrateConversationsFromLocalStorage } from '../../hooks/migrate_conversations_from_local_storage/migrate_conversations_from_local_storage';
+import { useCreateSecurityPrompts } from '../../hooks/create_security_prompts/create_security_prompts';
+import { useAppToasts } from '../../hooks/toast/use_app_toasts';
+import { useInferenceEnabled } from '../../hooks/inference_enabled/inference_enabled';
+import { getComments } from '../../components/get_comments';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
     defaultMessage: 'Elastic AI Assistant',
@@ -53,13 +54,13 @@ export function AssistantProvider({
         <ElasticAssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             alertsIndexPattern={alertsIndexPattern}
-            augmentMessageCodeBlocks={()=>[]} // augmentMessageCodeBlocks
+            augmentMessageCodeBlocks={() => []} // augmentMessageCodeBlocks
             assistantAvailability={assistantAvailability}
             assistantTelemetry={assistantTelemetry}
             docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
             basePath={basePath}
             basePromptContexts={[]} //Object.values(PROMPT_CONTEXTS)
-            getComments={()=>[]} // getComments
+            getComments={getComments}
             http={http}
             inferenceEnabled={inferenceEnabled}
             navigateToApp={navigateToApp}

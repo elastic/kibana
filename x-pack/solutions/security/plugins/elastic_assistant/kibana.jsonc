@@ -30,6 +30,7 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
+      "discover"
     ],
     "requiredBundles": [
       "kibanaReact",

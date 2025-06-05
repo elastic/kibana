@@ -6,10 +6,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ReactQueryClientProvider } from './hooks/query_client/query_client_provider';
 import { AssistantOverlay, AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
 import { licenseService } from './hooks/licence/use_licence';
-import { AssistantProvider } from './hooks/assistant_provider/assistant_provider';
 import { KibanaContextProvider } from './hooks/kibana/use_kibana';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from './context/eui_them_provider/eui_them_provider';
+import { AssistantProvider } from './context/assistant_context/assistant_provider';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -47,12 +47,14 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         telemetry: {} as unknown,
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
+        discover: dependencies.discover,
       };
       return services;
     };
 
     // Return any functionality that should be available to other plugins at runtime
 
+    console.log(1)
     coreStart.chrome.navControls.registerRight({
       order: 500,
       mount: (target) => {

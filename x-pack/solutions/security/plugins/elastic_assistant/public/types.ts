@@ -10,6 +10,7 @@ import type {
 import { CoreStart } from '@kbn/core/public';
 import { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 export interface ElasticAssistantPublicPluginSetupDependencies {
   ml: MlPluginSetup;
@@ -23,6 +24,7 @@ export interface ElasticAssistantPublicPluginStartDependencies {
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  discover: DiscoverStart;
 }
 
 export type StartServices = CoreStart &

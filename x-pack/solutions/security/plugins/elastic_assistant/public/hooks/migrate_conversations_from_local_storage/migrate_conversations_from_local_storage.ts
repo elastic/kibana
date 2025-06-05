@@ -4,7 +4,7 @@ import { licenseService } from "../licence/use_licence";
 import { useAssistantAvailability } from "../use_assistant_availability";
 import { getUserConversationsExist } from "@kbn/elastic-assistant";
 import { useKibana } from "../kibana/use_kibana";
-import { createConversations } from "../assistant_provider/create_conversation";
+import { createConversations } from "../../context/assistant_context/create_conversation";
 
 export const useMigrateConversationsFromLocalStorage = () => {
     const hasEnterpriseLicense = licenseService.isEnterprise();
