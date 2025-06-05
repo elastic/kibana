@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   experimental: schema.maybe(
     schema.object({
-      significantEventsEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      significantEventsEnabled: schema.maybe(schema.boolean({ defaultValue: true })),
     })
   ),
 });

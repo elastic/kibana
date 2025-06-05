@@ -172,3 +172,6 @@ console.ui.embeddedEnabled: false
 
 # Disable role management (custom roles)
 xpack.security.roleManagementEnabled: false
+
+# Disable significant events feature
+xpack.streams.experimental.significantEventsEnabled: false
