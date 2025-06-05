@@ -148,6 +148,8 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
+  const [dataViewsArray, setDataViewsArray] = useState<DataView[]>([]);
+
   const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
