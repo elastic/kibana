@@ -116,12 +116,15 @@ export const SpanFlyout = ({
         <EuiSkeletonTitle isLoading={loading}>
           <EuiTitle size="m">
             <h2 id={flyoutId}>
-              {i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.title', {
-                defaultMessage: '{docType} document',
-                values: {
-                  docType: isSpan ? 'Span' : 'Transaction',
-                },
-              })}
+              {i18n.translate(
+                'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title',
+                {
+                  defaultMessage: '{docType} document',
+                  values: {
+                    docType: isSpan ? 'Span' : 'Transaction',
+                  },
+                }
+              )}
             </h2>
           </EuiTitle>
         </EuiSkeletonTitle>
