@@ -7,10 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { createSavedObjectClientMock } from '../mocks';
 
 import type {
   InstallResult,
@@ -65,7 +67,7 @@ const mockDefaultDownloadService: DownloadSource = {
 };
 
 function getPutPreconfiguredPackagesMock() {
-  const soClient = savedObjectsClientMock.create();
+  const soClient = createSavedObjectClientMock();
   soClient.find.mockImplementation(async ({ type, search }) => {
     if (type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
       const id = search!.replace(/"/g, '');
@@ -94,15 +96,19 @@ function getPutPreconfiguredPackagesMock() {
       per_page: 0,
     };
   });
-  soClient.get.mockImplementation(async (type, id) => {
-    const attributes = mockConfiguredPolicies.get(id);
-    if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-
+  soClient.bulkGet.mockImplementation(async (objects) => {
     return {
-      id,
-      attributes,
-      type: type as string,
-      references: [],
+      saved_objects: objects.map(({ id, type }) => {
+        const attributes = mockConfiguredPolicies.get(id);
+        if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+
+        return {
+          id,
+          attributes,
+          type: type as string,
+          references: [],
+        };
+      }),
     };
   });
   soClient.create.mockImplementation(async (type, policy, options) => {
@@ -291,15 +297,17 @@ jest.mock('./package_policy', () => ({
 
 jest.mock('./app_context', () => ({
   appContextService: {
-    getLogger: () =>
-      new Proxy(
-        {},
-        {
-          get() {
-            return jest.fn();
-          },
-        }
-      ),
+    getLogger: jest.fn(
+      () =>
+        new Proxy(
+          {},
+          {
+            get() {
+              return jest.fn();
+            },
+          }
+        )
+    ),
     getUninstallTokenService: () => ({
       generateTokenForPolicyId: jest.fn(),
       scoped: jest.fn().mockReturnValue({
@@ -324,6 +332,9 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
+    jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReset();
+    jest.mocked(appContextService).getLogger.mockReturnValue(loggingSystemMock.create().get());
+
     mockedPackagePolicyService.create.mockReset();
     mockedPackagePolicyService.findAllForAgentPolicy.mockReset();
     mockInstalledPackages.clear();
@@ -331,7 +342,6 @@ describe('policy preconfiguration', () => {
     mockConfiguredPolicies.clear();
     spyAgentPolicyServiceUpdate.mockClear();
     spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
-    jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReset();
   });
 
   describe('with no bundled packages', () => {

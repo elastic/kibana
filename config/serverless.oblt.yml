@@ -1,16 +1,18 @@
 # Observability Project config
 
+## Core pricing tier for observability project
+pricing.tiers.enabled: true
+pricing.tiers.products:
+  - name: observability
+    tier: complete
+
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
-
-## Enabled plugins
-xpack.infra.enabled: true
 
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
 
-## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
   apm.name: 'Applications'
@@ -30,16 +32,11 @@ xpack.features.overrides:
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
 
-## Enable the slo plugin
-xpack.slo.enabled: true
-
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
-
-## Configure plugins
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing

@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail(ui.pages.conversations.settingUpKnowledgeBase);
     });
 
-    it('should show a button to re-deploy the model if the model has been stopped', async () => {
+    it('should show a button to redeploy the model if the model has been stopped', async () => {
       await stopTinyElserModel(getService);
       await browser.refresh();
 
@@ -81,13 +81,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should show re-deploy is in progress when the re-deploy button is clicked', async () => {
+    it('should show redeploy is in progress when the redeploy button is clicked', async () => {
       await testSubjects.click(ui.pages.conversations.redeployModelButton);
 
       const deployingText = await testSubjects.getVisibleText(
         ui.pages.conversations.pendingModelText
       );
-      expect(deployingText).to.contain('Re-deploying knowledge base model');
+      expect(deployingText).to.contain('Redeploying knowledge base model');
     });
   });
 }

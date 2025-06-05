@@ -274,6 +274,8 @@ export const MetricVis = ({
 
   const minHeight = chartBaseTheme.metric.minHeight;
 
+  // this needs to use a useEffect as it depends on the scrollContainerRef
+  // which is not available on the first render
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
     setScrollChildHeight(

@@ -19,6 +19,7 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { GrokCollection } from '@kbn/grok-ui';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -39,6 +40,7 @@ import {
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
 import { getConfiguredProcessors, getStagedProcessors, getUpsertWiredFields } from './utils';
+import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 
 const createId = htmlIdGenerator();
 
@@ -52,6 +54,7 @@ export const streamEnrichmentMachine = setup({
   },
   actors: {
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     processorMachine: getPlaceholderFor(() => processorMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
@@ -73,6 +76,7 @@ export const streamEnrichmentMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
+
     stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
     setupProcessors: assign(
       ({ self, spawn }, params: { definition: Streams.ingest.all.GetResponse }) => {
@@ -168,6 +172,7 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
+    grokCollection: new GrokCollection(),
     initialProcessorsRefs: [],
     processorsRefs: [],
   }),
@@ -179,9 +184,25 @@ export const streamEnrichmentMachine = setup({
           target: 'resolvedRootStream',
           guard: 'isRootStream',
         },
-        { target: 'ready' },
+        { target: 'setupGrokCollection' },
       ],
     },
+    setupGrokCollection: {
+      invoke: {
+        id: 'setupGrokCollection',
+        src: 'setupGrokCollection',
+        input: ({ context }) => ({
+          grokCollection: context.grokCollection,
+        }),
+        onDone: {
+          target: 'ready',
+        },
+        onError: {
+          target: 'grokCollectionFailure',
+        },
+      },
+    },
+    grokCollectionFailure: {},
     ready: {
       id: 'ready',
       type: 'parallel',
@@ -326,6 +347,7 @@ export const createStreamEnrichmentMachineImplementations = ({
 > => ({
   actors: {
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    setupGrokCollection: setupGrokCollectionActor(),
     processorMachine,
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({

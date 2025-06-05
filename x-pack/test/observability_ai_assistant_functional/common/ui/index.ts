@@ -31,6 +31,17 @@ const pages = {
     table: 'knowledgeBaseTable',
     tableTitleCell: 'knowledgeBaseTableTitleCell',
     tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+    editUserInstructionButton:
+      'observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton',
+    entryMarkdownEditor: 'knowledgeBaseEditManualEntryFlyoutMarkdownEditor',
+    editEntryCancelButton: 'knowledgeBaseEditManualEntryFlyoutCancelButton',
+    saveEntryButton: 'knowledgeBaseEditManualEntryFlyoutSaveButton',
+    newEntryButton: 'knowledgeBaseNewEntryButton',
+    bulkImportEntryButton: 'knowledgeBaseBulkImportContextMenuItem',
+    bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
+    bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
+    bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    toastTitle: 'euiToastHeader__title',
   },
   conversations: {
     setupGenAiConnectorsButtonSelector:
