@@ -9,7 +9,7 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-plugin/common';

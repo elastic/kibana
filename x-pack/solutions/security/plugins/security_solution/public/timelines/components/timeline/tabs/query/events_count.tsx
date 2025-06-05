@@ -90,7 +90,6 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
-    indexPattern,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -123,7 +122,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
