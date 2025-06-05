@@ -29,7 +29,6 @@
     "@kbn/object-utils",
     "@kbn/alerting-plugin",
     "@kbn/std",
-    "@kbn/safer-lodash-set",
     "@kbn/streams-schema",
     "@kbn/es-errors",
     "@kbn/server-route-repository-utils",
@@ -49,6 +48,8 @@
     "@kbn/rule-data-utils",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-http-server-utils",
+    "@kbn/inference-common"
   ]
 }

@@ -16,6 +16,7 @@ import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -172,6 +173,7 @@ interface PluginsStart {
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
 }
 
@@ -312,6 +314,7 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
           });
         },
@@ -436,7 +439,10 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
       return action;
     };
 

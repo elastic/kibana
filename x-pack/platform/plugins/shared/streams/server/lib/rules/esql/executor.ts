@@ -60,7 +60,12 @@ export async function getRuleExecutor(
 
     return {
       _id: alertDocId,
-      _source: result._source,
+      _source: {
+        original_source: {
+          _id: result._id,
+          ...result._source,
+        },
+      },
     };
   });
 

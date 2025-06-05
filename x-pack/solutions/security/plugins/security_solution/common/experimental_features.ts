@@ -189,6 +189,11 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
+   * Enables the storing of gaps in the event log
+   */
+  storeGapsInEventLogEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -232,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to edit highlighted fields in the alertflyout
    */
-  editHighlightedFieldsEnabled: false,
+  editHighlightedFields: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command

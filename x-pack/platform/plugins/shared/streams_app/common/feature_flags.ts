@@ -8,3 +8,5 @@
 // add into kibana.dev.yml: feature_flags.overrides.featureFlagsStreams.contentPackUIEnabled: true
 
 export const FeatureFlagStreamsContentPackUIEnabled = 'featureFlagsStreams.contentPackUIEnabled';
+export const FeatureFlagStreamsSignificantEventsUIEnabled =
+  'featureFlagsStreams.significantEventsUIEnabled';

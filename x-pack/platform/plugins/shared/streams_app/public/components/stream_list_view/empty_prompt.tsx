@@ -26,6 +26,7 @@ export function StreamsEmptyPrompt() {
 
   return (
     <EuiEmptyPrompt
+      data-test-subj="streamsEmptyPrompt"
       icon={<AssetImage type="noResults" />}
       title={
         <h2>
