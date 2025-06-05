@@ -342,6 +342,32 @@ const addDefinition: FunctionDefinition = {
       ],
       returnType: 'unsigned_long',
     },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'time_literal',
+        },
+        {
+          name: 'right',
+          type: 'date',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+        },
+        {
+          name: 'right',
+          type: 'time_literal',
+        },
+      ],
+      returnType: 'date',
+    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -4956,6 +4982,32 @@ const subDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'time_literal',
+        },
+        {
+          name: 'right',
+          type: 'date',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+        },
+        {
+          name: 'right',
+          type: 'time_literal',
+        },
+      ],
+      returnType: 'date',
     },
   ],
   locationsAvailable: [

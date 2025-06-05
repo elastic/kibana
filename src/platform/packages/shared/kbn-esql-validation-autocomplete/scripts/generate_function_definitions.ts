@@ -27,6 +27,7 @@ import {
   defaultAggFunctionLocations,
   MATH_OPERATORS,
   COMPARISON_OPERATORS,
+  mathOperatorsExtraSignatures,
 } from './constants';
 import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
 
@@ -242,6 +243,11 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
+
+      // taking care the `...EVAL col = @timestamp + 1 year` cases
+      if (op.name === 'add' || op.name === 'sub') {
+        signatures.push(...mathOperatorsExtraSignatures);
+      }
     }
     if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
       locationsAvailable = [

@@ -141,3 +141,20 @@ export const COMPARISON_OPERATORS = [
   'less_than_or_equal',
   'not_equals',
 ];
+
+export const mathOperatorsExtraSignatures = [
+  {
+    params: [
+      { name: 'left', type: 'time_literal' as const },
+      { name: 'right', type: 'date' as const },
+    ],
+    returnType: 'date' as const,
+  },
+  {
+    params: [
+      { name: 'left', type: 'date' as const },
+      { name: 'right', type: 'time_literal' as const },
+    ],
+    returnType: 'date' as const,
+  },
+];
