@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { has } from 'lodash';
 import type { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import type { RRuleParams, MaintenanceWindow } from '../../../../common';

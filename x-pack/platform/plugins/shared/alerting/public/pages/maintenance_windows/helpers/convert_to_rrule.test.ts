@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { convertToRRule } from './convert_to_rrule';
 
 describe('convertToRRule', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import type { MaintenanceWindowAttributes } from './types';
 
 export const getMockMaintenanceWindow = (

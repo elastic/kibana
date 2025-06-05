@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RRule } from './rrule';
 export type { Options, WeekdayStr } from './types';
-export { Frequency, Weekday } from './types';
+export { migrateRRuleParams } from './migrate_rrule_params';

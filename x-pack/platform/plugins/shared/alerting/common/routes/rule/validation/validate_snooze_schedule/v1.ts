@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import moment from 'moment';
 import type { rRuleRequestSchema } from '../../../r_rule';
 

@@ -7,7 +7,8 @@
 
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from '@kbn/rrule';
+import { RRule, Weekday } from 'rrule-es';
+import { migrateRRuleParams } from '@kbn/rrule';
 import type { RRuleParams, DateRange } from '../../../../common';
 import type { MaintenanceWindow } from '../types';
 
@@ -27,13 +28,13 @@ export const generateMaintenanceWindowEvents = ({
   const startDate = new Date(dtstart);
   const endDate = new Date(expirationDate);
 
-  const rRuleOptions = {
+  const rRuleOptions = migrateRRuleParams({
     ...rest,
     dtstart: startDate,
     until: until ? new Date(until) : null,
     wkst: wkst ? Weekday[wkst] : null,
     byweekday: byweekday ?? null,
-  };
+  });
 
   try {
     const recurrenceRule = new RRule(rRuleOptions);

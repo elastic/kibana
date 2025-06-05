@@ -22,7 +22,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import {
   DEFAULT_FREQUENCY_OPTIONS,

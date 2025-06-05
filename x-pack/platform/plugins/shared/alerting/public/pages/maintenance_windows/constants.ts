@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { invert, mapValues } from 'lodash';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import moment from 'moment';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import * as i18n from './translations';

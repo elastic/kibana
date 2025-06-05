@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RRule } from '@kbn/rrule';
+import { RRule } from 'rrule-es';
 import type { Logger } from '@kbn/core/server';
+import { migrateRRuleParams } from '@kbn/rrule';
 import { intervalFromDate } from './intervals';
 import type { ConcreteTaskInstance } from '../task';
 
@@ -28,8 +29,8 @@ export function getNextRunAt(
       nextRunAt = intervalFromDate(scheduleFromDate, interval);
     } else if (rrule) {
       const _rrule = new RRule({
-        ...rrule,
-        dtstart: scheduleFromDate,
+        ...migrateRRuleParams(rrule),
+        dtStart: scheduleFromDate,
       });
       // adding 1ms to ensure the next run is always in the future
       // if scheduleFromDate is equal to now (very low possibility), the next run will be now again, which causes loops

@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { isSnoozeExpired } from './is_snooze_expired';
 import type { RRuleRecord } from '../../types';
 

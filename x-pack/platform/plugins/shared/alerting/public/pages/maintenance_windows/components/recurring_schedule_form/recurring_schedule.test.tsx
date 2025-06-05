@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { fireEvent, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { AppMockRenderer } from '../../../../lib/test_utils';

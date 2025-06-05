@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { FilterStateStore } from '@kbn/es-query';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';

@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import type { RecurringScheduleFormProps } from '../components/schema';

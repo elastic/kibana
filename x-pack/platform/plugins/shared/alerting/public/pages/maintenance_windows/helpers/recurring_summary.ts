@@ -7,7 +7,7 @@
 
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import * as i18n from '../translations';
 import type { MaintenanceWindowFrequency } from '../constants';
 import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from '../constants';

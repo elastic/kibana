@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RRule, Weekday } from '@kbn/rrule';
+import { RRule, Weekday } from 'rrule-es';
+import { migrateRRuleParams } from '@kbn/rrule';
 import type { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
@@ -31,13 +32,13 @@ export function getActiveSnoozeIfExist(snooze: RuleSnoozeSchedule) {
 
   // Check to see if now is during a recurrence of the snooze
   try {
-    const rRuleOptions = {
+    const rRuleOptions = migrateRRuleParams({
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
       byweekday: rRule.byweekday ?? null,
       wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
-    };
+    });
 
     const recurrenceRule = new RRule(rRuleOptions);
     const lastOccurrence = recurrenceRule.before(new Date(now));
