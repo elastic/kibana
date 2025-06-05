@@ -176,6 +176,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
 
+    /** sort of temporary solution, please do not use me elsewhere */
     const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
