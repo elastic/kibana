@@ -1256,5 +1256,50 @@ export default function (providerContext: FtrProviderContext) {
         expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
       });
     });
+    it('should return 400 for custom packages deployed as agentless', async () => {
+      const testCustomIntegrationName = 'test-custom-integration';
+      await supertest
+        .post('/api/fleet/epm/custom_integrations')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          integrationName: testCustomIntegrationName,
+          force: true,
+          datasets: [{ type: 'logs', name: testCustomIntegrationName }],
+        })
+        .expect(200);
+
+      const deletableTestPolicyRes = await apiClient.createAgentPolicy(undefined, {
+        name: `Test policy ${uuidv4()}`,
+        namespace: 'default',
+      });
+
+      const deletableTestPolicyId = deletableTestPolicyRes.item.id;
+
+      const res = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'test agentless custom package',
+          description: '',
+          namespace: 'default',
+          policy_ids: [deletableTestPolicyId],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: testCustomIntegrationName,
+            title: 'Test Custom Integration',
+            version: '1.0.0',
+          },
+          supports_agentless: true,
+        });
+
+      expect(res.statusCode).equal(400);
+      expect(res.body.message).equal(
+        'Cannot perform that action in Fleet because custom packages are not allowed to be deployed as agentless. Please choose a different deployment mode.'
+      );
+
+      // Associated agent policy that was created for agentless deployment should be deleted
+      await supertest.get(`/api/fleet/agent_policies/${deletableTestPolicyId}`).expect(404);
+    });
   });
 }
