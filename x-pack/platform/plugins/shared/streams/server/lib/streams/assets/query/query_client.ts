@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { StreamQuery } from '@kbn/streams-schema';
+import { map, partition } from 'lodash';
 import { QueryLink } from '../../../../../common/assets';
 import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
@@ -80,21 +81,16 @@ export class QueryClient {
       queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
     );
 
-    const nextQueriesUpdatedWithBreakingChange = queries
-      .filter((query) =>
-        currentQueryLinks.some(
-          (link) => link.query.id === query.id && hasBreakingChange(link.query, query)
-        )
-      )
-      .map((query) => toQueryLink(query, stream));
-
-    const nextQueriesUpdatedWithoutBreakingChange = queries
-      .filter((query) =>
-        currentQueryLinks.some(
-          (link) => link.query.id === query.id && !hasBreakingChange(link.query, query)
-        )
-      )
-      .map((query) => toQueryLink(query, stream));
+    const [nextQueriesUpdatedWithBreakingChange, nextQueriesUpdatedWithoutBreakingChange] = map(
+      partition(
+        queries.filter((query) => currentIds.has(query.id)),
+        (query) => {
+          const currentLink = currentQueryLinks.find((link) => link.query.id === query.id);
+          return hasBreakingChange(currentLink!.query, query);
+        }
+      ),
+      (partitionedQueries) => partitionedQueries.map((query) => toQueryLink(query, stream))
+    );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
     await this.installQueries(
