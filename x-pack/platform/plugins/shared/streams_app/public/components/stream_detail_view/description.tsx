@@ -19,7 +19,7 @@ const EMPTY_DESCRIPTION_LABEL = i18n.translate(
 );
 
 interface Props {
-  definition: Streams.all.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export function StreamDescription({ definition }: Props) {
@@ -48,6 +48,7 @@ export function StreamDescription({ definition }: Props) {
           display: 'empty',
         },
       }}
+      isReadOnly={definition.privileges.manage !== true}
       placeholder={EMPTY_DESCRIPTION_LABEL}
       value={description}
       onChange={onChange}
