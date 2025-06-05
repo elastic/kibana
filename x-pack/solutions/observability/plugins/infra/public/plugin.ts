@@ -187,8 +187,12 @@ export class Plugin implements InfraClientPluginClass {
                                 {
                                   id: 'dashboards',
                                   title: 'Kubernetes Dashboards',
-                                  keywords: ['dashboards'],
                                   path: '/kubernetes/:dashboardId',
+                                },
+                                {
+                                  id: 'kubernetes_otel-cluster-overview',
+                                  title: 'Static id: kubernetes_otel-cluster-overview',
+                                  path: '/kubernetes/kubernetes_otel-cluster-overview',
                                 },
                               ],
                             },
@@ -286,13 +290,22 @@ export class Plugin implements InfraClientPluginClass {
                 id: 'kubernetes',
                 title: 'Kubernetes',
                 path: '/kubernetes',
-                visibleIn,
+                // visibleIn,
                 deepLinks: [
                   {
                     id: 'dashboards',
                     title: 'Kubernetes Dashboards',
-                    keywords: ['dashboards'],
                     path: '/kubernetes/:dashboardId',
+                  },
+                  {
+                    id: 'test',
+                    title: 'Kubernetes test',
+                    path: '/kubernetes/test',
+                  },
+                  {
+                    id: 'kubernetes_otel-cluster-overview',
+                    title: 'Static title: kubernetes_otel-cluster-overview',
+                    path: '/kubernetes/kubernetes_otel-cluster-overview',
                   },
                 ],
               },
@@ -438,6 +451,7 @@ const isIntegrationInstalled = async (packageName: string, http: CoreStart['http
     }>(`/api/fleet/epm/packages/${packageName}`, {
       headers: { 'Elastic-Api-Version': '2023-10-31' },
     });
+    // console.log('integration:', JSON.stringify(integration, null, 2));
     return integration.status === 'installed';
   } catch (error) {
     return false;

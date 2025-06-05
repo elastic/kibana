@@ -154,38 +154,56 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
-            renderAs: 'panelOpener',
+            renderAs: 'accordion',
             children: [
               {
+                link: 'metrics:inventory',
+                title: i18n.translate('xpack.observability.infrastructure.inventory', {
+                  defaultMessage: 'Infrastructure Inventory',
+                }),
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                },
+              },
+              {
+                link: 'metrics:hosts',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                },
+              },
+              {
+                link: 'metrics:metrics-explorer',
+                title: i18n.translate(
+                  'xpack.observability.obltNav.infrastructure.metricsExplorer',
+                  {
+                    defaultMessage: 'Metrics explorer',
+                  }
+                ),
+              },
+              {
+                id: 'kubernetes',
+                renderAs: 'panelOpener',
+                title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
+                  defaultMessage: 'Kubernetes',
+                }),
                 children: [
                   {
-                    link: 'metrics:inventory',
-                    title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                    link: 'metrics:kubernetes',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/kubernetes'));
+                    },
+                    title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
+                      defaultMessage: 'Kubernetes Dashboards List',
                     }),
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-                    },
                   },
                   {
-                    link: 'metrics:hosts',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-                    },
-                  },
-                  {
-                    link: 'metrics:metrics-explorer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.infrastructure.metricsExplorer',
-                      {
-                        defaultMessage: 'Metrics explorer',
-                      }
-                    ),
+                    link: 'metrics:kubernetes_otel-cluster-overview',
                   },
                 ],
               },
               {
                 id: 'profiling',
+                renderAs: 'panelOpener',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {

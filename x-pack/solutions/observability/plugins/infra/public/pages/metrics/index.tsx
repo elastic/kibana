@@ -131,6 +131,11 @@ export const InfrastructurePage = () => {
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
                 <Route strict path="/kubernetes/:dashboardId" component={Dashboard} />
+                <Route
+                  strict
+                  path="/kubernetes/kubernetes_otel-cluster-overview "
+                  component={Dashboard}
+                />
                 <Route path="/kubernetes" component={Kubernetes} />
 
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
