@@ -255,7 +255,6 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-
     urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
       const [, tail] = /(\?.*)/.exec(path) || [];
       // carry over query if it exists

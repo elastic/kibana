@@ -59,7 +59,7 @@ export const commonConfigSchema = schema.object({
   inaccessibleApps: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
-export type ServerlessSecurityCommonConfigSchema = TypeOf<typeof commonConfigSchema>;
+export type ServerlessSecurityPublicConfig = TypeOf<typeof commonConfigSchema>;
 
 // This is used to expose the common config schema properties to the browser
 // so that they can be used in the client-side code.

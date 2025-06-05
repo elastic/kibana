@@ -16,12 +16,12 @@ import { BehaviorSubject } from 'rxjs';
 import { AppStatus } from '@kbn/core-application-browser';
 
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
+import type { ServerlessSecurityPublicConfig } from '../common/config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
-  ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
