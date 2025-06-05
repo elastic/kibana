@@ -24,6 +24,7 @@ import { finished } from 'stream/promises';
 import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { inspect } from 'util';
 import type { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
@@ -33,7 +34,6 @@ import type { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
 import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
-import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
