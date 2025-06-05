@@ -19,15 +19,6 @@ const root: EmotionFn = ({ euiTheme }) =>
     z-index: ${euiTheme.levels.content};
   `;
 
-const content = (overflow: string) =>
-  css`
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    ${overflow};
-  `;
-
 export const styles = {
   root,
-  content,
 };
