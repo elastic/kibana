@@ -22,9 +22,9 @@ export enum ModelProvider {
 }
 
 export enum ModelFamily {
-  GPT = 'gpt',
-  Claude = 'claude',
-  Gemini = 'gemini',
+  GPT = 'GPT',
+  Claude = 'Claude',
+  Gemini = 'Gemini',
 }
 
 export interface Model {

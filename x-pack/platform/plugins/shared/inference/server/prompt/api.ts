@@ -21,12 +21,24 @@ export function createPromptApi({ request, actions, logger }: CreateChatComplete
   const callbackApi = createChatCompleteCallbackApi({ request, actions, logger });
 
   return (options: PromptOptions) => {
-    const { connectorId, stream, abortSignal, prompt, input, prevMessages, ...rest } = options;
+    const {
+      connectorId,
+      stream,
+      abortSignal,
+      prompt,
+      input,
+      prevMessages,
+      retryConfiguration,
+      maxRetries,
+      ...rest
+    } = options;
     return callbackApi(
       {
         connectorId,
         stream,
         abortSignal,
+        maxRetries,
+        retryConfiguration,
       },
       (executor) => {
         const connector = executor.getConnector();
@@ -50,6 +62,7 @@ export function createPromptApi({ request, actions, logger }: CreateChatComplete
           metadata: {
             ...rest.metadata,
             attributes: {
+              ...rest.metadata?.attributes,
               'gen_ai.prompt.id': prompt.name,
               'gen_ai.prompt.template.template': template,
               'gen_ai.prompt.template.variables': JSON.stringify(input),

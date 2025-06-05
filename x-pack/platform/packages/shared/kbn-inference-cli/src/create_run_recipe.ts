@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FlagOptions, Flags, mergeFlagOptions, run } from '@kbn/dev-cli-runner';
-import { initPhoenixProcessor, withInferenceSpan } from '@kbn/inference-tracing';
+import { withInferenceSpan } from '@kbn/inference-tracing';
 import { createKibanaClient, KibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { LogLevelId } from '@kbn/logging';
 import { setDiagLogger } from '@kbn/telemetry';
@@ -75,17 +75,6 @@ export const createRunRecipe =
         }
 
         setDiagLogger(logger, logLevel);
-
-        initPhoenixProcessor({
-          logger,
-          config: {
-            base_url: `https://35-187-109-62.sslip.io`,
-            scheduled_delay: 1000,
-            public_url: `https://35-187-109-62.sslip.io`,
-            project_name: `dario`,
-            api_key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJBcGlLZXk6MSJ9.TGsaqPxGmmilOQtvrdfNA7qMWrfvlm6Qw5eARbJ6uZk`,
-          },
-        });
 
         const kibanaClient = await createKibanaClient({ log, signal });
 

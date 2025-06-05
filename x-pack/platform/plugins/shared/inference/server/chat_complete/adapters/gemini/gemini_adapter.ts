@@ -32,7 +32,6 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
-    invokeParameters,
   }) => {
     return defer(() => {
       return executor.invoke({
@@ -46,7 +45,6 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
-          ...invokeParameters,
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),

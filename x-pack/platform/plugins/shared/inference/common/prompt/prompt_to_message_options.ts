@@ -7,7 +7,7 @@
 
 import { MessageRole, Model, Prompt, PromptVersion } from '@kbn/inference-common';
 import { ChatCompleteOptions } from '@kbn/inference-common';
-import { orderBy } from 'lodash';
+import { omitBy, orderBy } from 'lodash';
 import Mustache from 'mustache';
 import { format } from 'util';
 
@@ -17,17 +17,19 @@ enum MatchType {
   modelId = 2,
 }
 
-export function promptToMessageOptions(
-  prompt: Prompt,
-  input: unknown,
-  model: Model
-): {
+interface PromptToMessageOptionsResult {
   match: PromptVersion;
   options: Pick<
     ChatCompleteOptions,
     'messages' | 'system' | 'tools' | 'toolChoice' | 'temperature'
   >;
-} {
+}
+
+export function promptToMessageOptions(
+  prompt: Prompt,
+  input: unknown,
+  model: Model
+): PromptToMessageOptionsResult {
   const matches = prompt.versions.flatMap((version) => {
     if (!version.models) {
       return [{ version, match: MatchType.default }];
@@ -71,12 +73,15 @@ export function promptToMessageOptions(
 
   return {
     match: bestMatch,
-    options: {
-      messages,
-      system,
-      tools,
-      toolChoice,
-      temperature,
-    },
+    options: omitBy(
+      {
+        messages,
+        system,
+        tools,
+        toolChoice,
+        temperature,
+      },
+      (val) => val === undefined
+    ) as PromptToMessageOptionsResult['options'],
   };
 }

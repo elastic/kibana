@@ -46,7 +46,6 @@ export type InferenceAdapterChatCompleteOptions = {
   modelName?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
-  invokeParameters?: Record<string, any>;
 } & ToolOptions;
 
 /**
