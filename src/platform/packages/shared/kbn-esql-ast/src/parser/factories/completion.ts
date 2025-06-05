@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EDITOR_MARKER } from '@kbn/esql-validation-autocomplete/src/shared/constants';
 import { ESQLAstCompletionCommand, ESQLSingleAstItem } from '../../types';
 import { Builder } from '../../..';
 import { visitPrimaryExpression } from '../walkers';
 import { CompletionCommandContext } from '../../antlr/esql_parser';
 import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
 import { getPosition } from '../helpers';
-import { EDITOR_MARKER } from '../constants';
 
 export const createCompletionCommand = (
   ctx: CompletionCommandContext
@@ -26,32 +26,30 @@ export const createCompletionCommand = (
 
   const withCtx = ctx.WITH();
 
-  if (withCtx) {
-    const inferenceIdCtx = ctx._inferenceId;
-    const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-    const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+  const inferenceIdCtx = ctx._inferenceId;
+  const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
+  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
 
-    const optionWith = Builder.option(
-      {
-        name: 'with',
-        args: [inferenceId],
-      },
-      inferenceIdCtx
-        ? {
-            location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
-          }
-        : undefined
-    );
-
-    if (inferenceId.incomplete || !withCtx) {
-      optionWith.incomplete = true;
-    }
-
-    if (inferenceId.text !== EDITOR_MARKER) {
-      command.args.push(optionWith);
-      command.inferenceId = inferenceId;
-    }
+  if (inferenceId.text.includes(EDITOR_MARKER)) {
+    inferenceId.incomplete = true;
   }
+
+  const optionWith = Builder.option(
+    {
+      name: 'with',
+      args: [inferenceId],
+    },
+    withCtx && inferenceIdCtx
+      ? {
+          location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
+        }
+      : undefined
+  );
+
+  optionWith.incomplete = withCtx && inferenceId.incomplete;
+
+  command.args.push(optionWith);
+  command.inferenceId = inferenceId;
 
   if (ctx._targetField) {
     const targetField = createColumn(ctx._targetField);
