@@ -46553,7 +46553,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}": {
@@ -46599,7 +46599,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       },
       "get": {
         "description": "[Required authorization] Route required privileges: read-maintenance-window.",
@@ -46795,7 +46795,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       },
       "patch": {
         "description": "[Required authorization] Route required privileges: write-maintenance-window.",
@@ -47132,7 +47132,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}/_archive": {
@@ -47340,7 +47340,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/maintenance_window/{id}/_unarchive": {
@@ -47548,7 +47548,7 @@
         "tags": [
           "maintenance-window"
         ],
-        "x-state": "Generally available; added in 9.1.0"
+        "x-state": "Generally available"
       }
     },
     "/api/saved_objects/_export": {
