@@ -46,7 +46,7 @@ export const ShareMenuTabs = () => {
 
   /**
    * If there is only one tab and the link is configured to allow copying the link without showing the modal,
-   * we will copy the link to the clipboard and show a success toast.
+   * we will copy the link to the clipboard and show a success toast on copying the share link for object.
    */
   if (
     !isDirty &&
@@ -59,8 +59,7 @@ export const ShareMenuTabs = () => {
       const shareableUrl = await objectTypeMeta.config?.link?.delegatedShareUrlHandler!();
       copyToClipboard(shareableUrl!);
       toasts.addSuccess({
-        title: objectTypeMeta.title,
-        text: i18n.translate('share.shareContextMenu.copyLinkSuccess', {
+        title: i18n.translate('share.shareContextMenu.copyLinkSuccess', {
           defaultMessage: 'Link copied to clipboard',
         }),
       });
