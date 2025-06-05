@@ -20,7 +20,7 @@ import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './utils';
-import type { SavedDashboardPanel } from '..';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 interface ValueOrReferenceInput {
   attributes?: Serializable;

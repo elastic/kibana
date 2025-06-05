@@ -20,10 +20,7 @@ import {
   ControlWidth,
 } from '@kbn/controls-plugin/common';
 
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '../../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { DashboardAttributes, DashboardItem } from './types';
 
 import {
@@ -41,7 +38,7 @@ describe('dashboardAttributesOut', () => {
     order: 0,
   };
 
-  const panelsSo: SavedDashboardPanel[] = [
+  const panelsSo = [
     {
       embeddableConfig: { enhancements: {} },
       gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },

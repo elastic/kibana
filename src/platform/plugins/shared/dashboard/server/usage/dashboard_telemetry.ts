@@ -17,7 +17,7 @@ import {
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
+import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -60,7 +60,7 @@ export const getEmptyPanelTypeData = () => ({
 });
 
 export const collectPanelsByType = (
-  panels: SavedDashboardPanel[],
+  panels: Array<{ type: string; [key: string]: unknown }>,
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {

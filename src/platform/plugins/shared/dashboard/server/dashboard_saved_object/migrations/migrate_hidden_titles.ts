@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import type { SavedDashboardPanel } from '../schema';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 import {
   convertSavedDashboardPanelToPanelState,

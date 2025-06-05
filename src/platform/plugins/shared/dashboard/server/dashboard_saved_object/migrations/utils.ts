@@ -8,7 +8,7 @@
  */
 
 import { omit } from 'lodash';
-import type { SavedDashboardPanel } from '../schema';
+import type { SavedDashboardPanel } from '../schema/v2';
 import type { DashboardPanelState } from '../../../common';
 
 export function convertSavedDashboardPanelToPanelState<PanelState = object>(

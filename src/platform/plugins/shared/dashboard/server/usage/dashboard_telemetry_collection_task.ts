@@ -23,10 +23,7 @@ import {
   collectPanelsByType,
   getEmptyDashboardData,
 } from './dashboard_telemetry';
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 
 interface DashboardSavedObjectAttributesAndReferences {
   attributes: DashboardSavedObjectAttributes;
@@ -106,7 +103,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             try {
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
-              ) as unknown as SavedDashboardPanel[];
+              ) as unknown as Array<{ type: string; [key: string]: unknown }>;
 
               collectPanelsByType(panels, dashboardData, embeddable);
             } catch (e) {

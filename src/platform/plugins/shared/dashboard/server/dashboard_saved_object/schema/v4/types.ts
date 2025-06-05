@@ -10,4 +10,6 @@
 import { TypeOf } from '@kbn/config-schema';
 import { dashboardAttributesSchema } from './v4';
 
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
+  [key: string]: unknown;
+};

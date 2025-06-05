@@ -10,11 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
-import {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-  SavedDashboardSection,
-} from '../../../../dashboard_saved_object';
+import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
 export function transformPanelsIn(
@@ -24,8 +20,8 @@ export function transformPanelsIn(
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
 } {
-  const panels: SavedDashboardPanel[] = [];
-  const sections: SavedDashboardSection[] = [];
+  const panels: unknown[] = [];
+  const sections: unknown[] = [];
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
@@ -47,7 +43,7 @@ export function transformPanelsIn(
   return { panelsJSON: JSON.stringify(panels), sections };
 }
 
-function transformPanel(panel: DashboardPanel): SavedDashboardPanel {
+function transformPanel(panel: DashboardPanel): unknown {
   const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
   const idx = panelIndex ?? uuidv4();
   return {
