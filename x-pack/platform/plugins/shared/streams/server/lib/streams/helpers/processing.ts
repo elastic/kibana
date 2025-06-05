@@ -18,7 +18,11 @@ import { conditionToPainless } from './condition_to_painless';
 
 export function formatToIngestProcessors(
   processing: ProcessorDefinition[],
-  ignoreMalformedManualIngestPipeline: boolean = false
+  {
+    ignoreMalformedManualIngestPipeline,
+  }: {
+    ignoreMalformedManualIngestPipeline?: boolean;
+  } = {}
 ): IngestProcessorContainer[] {
   return processing.flatMap((processor) => {
     const config = getProcessorConfig(processor);

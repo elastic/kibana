@@ -264,7 +264,9 @@ const prepareSimulationProcessors = (
     },
   ];
 
-  const formattedProcessors = formatToIngestProcessors(processors, true);
+  const formattedProcessors = formatToIngestProcessors(processors, {
+    ignoreMalformedManualIngestPipeline: true,
+  });
 
   return [...dotExpanderProcessors, ...formattedProcessors];
 };
