@@ -6,14 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { EDITOR_MARKER } from '@kbn/esql-validation-autocomplete/src/shared/constants';
 import { ESQLAstCompletionCommand, ESQLSingleAstItem } from '../../types';
 import { Builder } from '../../..';
 import { visitPrimaryExpression } from '../walkers';
 import { CompletionCommandContext } from '../../antlr/esql_parser';
 import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
 import { getPosition } from '../helpers';
+import { EDITOR_MARKER } from '../constants';
 
 export const createCompletionCommand = (
   ctx: CompletionCommandContext
