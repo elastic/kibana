@@ -35,7 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   let roleAuthc: RoleCredentials;
 
@@ -46,7 +45,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let removeOpenAIConnector: () => Promise<void>;
     let createOpenaiConnector: () => Promise<void>;
     let proxy: LlmProxy;
-    const openaiConnectorName = 'my-test-openai-connector';
+    const openaiConnectorName = 'test-openai-connector';
+    const indexName = 'my-test-index';
 
     before(async () => {
       proxy = await createLlmProxy(log);
@@ -159,10 +159,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('when selecting indices with no fields should show error in add data flyout', () => {
         before(async () => {
-          await es.indices.create({ index: 'my-test-index' });
+          await es.indices.create({ index: indexName });
         });
         after(async () => {
-          await esDeleteAllIndices('my-test-index');
+          await esDeleteAllIndices(indexName);
         });
         it('selecting index with no fields should show error', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectingIndicesWithNoFieldtoShowError();
@@ -171,21 +171,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('without any indices', () => {
         after(async () => {
-          await esDeleteAllIndices('my-test-index');
+          await esDeleteAllIndices(indexName);
           await browser.refresh();
         });
         it('should be able to create index from UI', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createIndex();
           await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-          await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue('my-test-index');
+          await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
           await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
           await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
           await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
 
           // add data
           await es.index({
-            index: 'my-test-index',
+            index: indexName,
             refresh: true,
             body: {
               my_field: [1, 0, 1],
