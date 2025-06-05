@@ -24,6 +24,9 @@ const packages: PackageListItem[] = [
     status: installationStatuses.NotInstalled,
     title: 'Splunk',
     version: '0.1.0',
+    download: '',
+    path: '',
+    description: 'description',
   },
 ];
 const ruleResponse = {
