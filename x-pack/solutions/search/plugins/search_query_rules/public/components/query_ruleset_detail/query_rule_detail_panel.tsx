@@ -21,6 +21,7 @@ interface QueryRuleDetailPanelProps {
   setNewRules: (newRules: SearchQueryRulesQueryRule[]) => void;
   updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
   addNewRule: (newRuleId: string) => void;
+  deleteRule?: (ruleId: string) => void;
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
   tourInfo?: {
     title: string;
@@ -35,6 +36,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   setNewRules,
   updateRule,
   addNewRule,
+  deleteRule,
 }) => {
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
 
@@ -103,6 +105,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
             onReorder={(newRules) => setNewRules(newRules)}
             onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
             tourInfo={tourInfo}
+            deleteRule={deleteRule}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

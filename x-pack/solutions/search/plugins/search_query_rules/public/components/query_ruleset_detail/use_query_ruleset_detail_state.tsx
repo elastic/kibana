@@ -48,12 +48,18 @@ export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailS
     ]);
   };
 
+  const deleteRule = (ruleId: string) => {
+    const newRules = rules.filter((rule) => rule.rule_id !== ruleId);
+    setRules(newRules);
+  };
+
   return {
     queryRuleset,
     rules,
     setNewRules: setRules,
     updateRule,
     addNewRule,
+    deleteRule,
     isInitialLoading,
     isError,
     error,

@@ -40,6 +40,7 @@ export interface QueryRuleDraggableListItemProps {
   rulesetId: string; // Add this prop to pass down the ruleset ID
   index: number;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void; // Optional prop for deleting a rule
   isLastItem?: boolean;
   tourInfo?: {
     title: string;
@@ -53,6 +54,7 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   rulesetId, // Add this prop
   rules,
   onEditRuleFlyoutOpen,
+  deleteRule,
   queryRule,
   tourInfo,
   isLastItem = false,
@@ -75,6 +77,11 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
           rulesetId={rulesetId} // Pass the ruleset ID from props
           ruleId={ruleToDelete} // Pass the rule ID to delete
           closeDeleteModal={() => setRuleToDelete(null)}
+          onSuccessAction={() => {
+            if (deleteRule) {
+              deleteRule(ruleToDelete);
+            }
+          }}
         />
       )}
       <EuiDraggable
@@ -241,6 +248,7 @@ export interface QueryRuleDraggableListProps {
   rulesetId: string; // Add this prop
   onReorder: (queryRules: SearchQueryRulesQueryRule[]) => void;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void; // Optional prop for deleting a rule
   tourInfo?: {
     title: string;
     content: string;
@@ -252,6 +260,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   rulesetId,
   onEditRuleFlyoutOpen,
+  deleteRule,
   onReorder,
   tourInfo,
 }) => {
@@ -278,6 +287,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
             <QueryRuleDraggableListItem
               key={queryRule.rule_id}
               queryRule={queryRule}
+              deleteRule={deleteRule} // Pass down the delete function
               rulesetId={rulesetId} // Pass down the ruleset ID
               index={index}
               rules={rules}

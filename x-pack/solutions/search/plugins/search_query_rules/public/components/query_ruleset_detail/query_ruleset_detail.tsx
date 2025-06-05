@@ -54,6 +54,7 @@ export const QueryRulesetDetail: React.FC = () => {
     rules,
     setNewRules,
     addNewRule,
+    deleteRule,
     updateRule,
     isInitialLoading,
     isError,
@@ -310,6 +311,7 @@ export const QueryRulesetDetail: React.FC = () => {
             rulesetId={rulesetId}
             setNewRules={setNewRules}
             addNewRule={addNewRule}
+            deleteRule={deleteRule}
             updateRule={updateRule}
             rules={rules}
             tourInfo={tourStepsInfo[1]}
