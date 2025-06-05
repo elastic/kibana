@@ -12,21 +12,17 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import globby from 'globby';
 import { existsSync } from 'fs';
-import { encryptSecurityLabsContent } from '@kbn/ai-security-labs-content';
+import { ENCODED_FILE_MICROMATCH_PATTERN, PLAIN_TEXT_FILE_MICROMATCH_PATTERN, encryptSecurityLabsContent } from '@kbn/ai-security-labs-content';
 
 // Path to the security labs markdown files
 export const SECURITY_LABS_DIR = path.resolve(__dirname, '../server/knowledge_base/security_labs');
-// Pattern to match markdown files
-export const MARKDOWN_FILE_PATTERN = ['*.md', '!*.encoded.md'];
-// Pattern for files to delete in the output directory
-export const DELETE_FILES_PATTERN = '*.encoded.md';
 
 export const deleteFilesByPattern = async ({
   directoryPath,
   pattern,
 }: {
   directoryPath: string;
-  pattern: string;
+  pattern: string | string[];
 }): Promise<void> => {
   try {
     console.log(`Deleting files matching pattern "${pattern}" in directory "${directoryPath}"`);
@@ -69,10 +65,10 @@ export const encodeSecurityLabsContent = async () => {
   }
   await deleteFilesByPattern({
     directoryPath: SECURITY_LABS_DIR,
-    pattern: DELETE_FILES_PATTERN,
+    pattern: ENCODED_FILE_MICROMATCH_PATTERN,
   });
 
-  const files = await globby(MARKDOWN_FILE_PATTERN, {
+  const files = await globby(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
     cwd: SECURITY_LABS_DIR,
   });
   files.forEach((file) => {

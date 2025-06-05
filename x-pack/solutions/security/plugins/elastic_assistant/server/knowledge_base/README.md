@@ -39,7 +39,7 @@ cd x-pack/solutions/security/plugins/elastic_assistant
 yarn encode-security-labs-content
 ```
 
-Files are encoded due to this issue: https://github.com/elastic/kibana/issues/202114
+Files are encoded due to this [issue](https://github.com/elastic/kibana/issues/202114).
 
 ### Future
 
