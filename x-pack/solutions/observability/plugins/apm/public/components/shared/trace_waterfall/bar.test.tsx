@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Bar } from './Bar';
+import { Bar } from './bar';
 
 describe('Bar', () => {
   it('renders with correct width, left, and color styles', () => {
