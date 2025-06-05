@@ -39,6 +39,12 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-router",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/content-management-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/object-versioning",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/content-management-utils"
   ]
 }
