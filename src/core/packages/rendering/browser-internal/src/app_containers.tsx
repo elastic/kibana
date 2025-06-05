@@ -8,21 +8,18 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
 export const AppWrapper: FC<
   PropsWithChildren<{
-    chromeVisible$: Observable<boolean>;
+    isChromeVisible: boolean;
   }>
-> = ({ chromeVisible$, children }) => {
-  const visible = useObservable(chromeVisible$);
+> = ({ isChromeVisible, children }) => {
   return (
     <div
-      className={classNames(APP_WRAPPER_CLASS, { 'kbnAppWrapper--hiddenChrome': !visible })}
-      data-test-subj={`kbnAppWrapper ${visible ? 'visible' : 'hidden'}Chrome`}
+      className={classNames(APP_WRAPPER_CLASS, { 'kbnAppWrapper--hiddenChrome': !isChromeVisible })}
+      data-test-subj={`kbnAppWrapper ${isChromeVisible ? 'visible' : 'hidden'}Chrome`}
     >
       {children}
     </div>

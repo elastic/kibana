@@ -112,12 +112,11 @@ export function Header({
       />
       <SkipToMainContent />
 
-      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="headerGlobalNav">
+      {/*<HeaderTopBanner headerBanner$={observables.headerBanner$} />*/}
+      <div className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
-            position="fixed"
             className="header__firstBar"
             sections={[
               {
@@ -169,37 +168,19 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed" className="header__secondBar">
+          <EuiHeader className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
-                <CollapsibleNav
-                  appId$={application.currentAppId$}
-                  id={navId}
-                  navLinks$={observables.navLinks$}
-                  recentlyAccessed$={observables.recentlyAccessed$}
-                  isNavOpen={isNavOpen}
-                  homeHref={homeHref}
-                  basePath={basePath}
-                  navigateToApp={application.navigateToApp}
-                  navigateToUrl={application.navigateToUrl}
-                  onIsLockedUpdate={onIsLockedUpdate}
-                  closeNav={() => {
-                    setIsNavOpen(false);
-                  }}
-                  customNavLink$={observables.customNavLink$}
-                  button={
-                    <HeaderMenuButton
-                      data-test-subj="toggleNavButton"
-                      aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
-                        defaultMessage: 'Toggle primary navigation',
-                      })}
-                      onClick={() => setIsNavOpen(!isNavOpen)}
-                      aria-expanded={isNavOpen}
-                      aria-pressed={isNavOpen}
-                      aria-controls={navId}
-                      forwardRef={toggleCollapsibleNavRef}
-                    />
-                  }
+                <HeaderMenuButton
+                  data-test-subj="toggleNavButton"
+                  aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
+                    defaultMessage: 'Toggle primary navigation',
+                  })}
+                  onClick={() => setIsNavOpen(!isNavOpen)}
+                  aria-expanded={isNavOpen}
+                  aria-pressed={isNavOpen}
+                  aria-controls={navId}
+                  forwardRef={toggleCollapsibleNavRef}
                 />
               </EuiHeaderSectionItem>
 
@@ -227,7 +208,7 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </header>
+      </div>
     </>
   );
 }

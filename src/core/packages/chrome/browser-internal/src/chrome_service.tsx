@@ -423,17 +423,17 @@ export class ChromeService {
       const defaultChromeStyle = chromeStyleSubject$.getValue();
 
       const HeaderComponent = () => {
-        const isVisible = useObservable(this.isVisible$);
+        // const isVisible = useObservable(this.isVisible$);
         const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
-        if (!isVisible) {
-          return (
-            <div data-test-subj="kibanaHeaderChromeless">
-              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
-              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
-            </div>
-          );
-        }
+        // if (!isVisible) {
+        //   return (
+        //     <div data-test-subj="kibanaHeaderChromeless">
+        //       <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+        //       <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+        //     </div>
+        //   );
+        // }
 
         if (chromeStyle === undefined) return null;
 
