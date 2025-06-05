@@ -13,6 +13,7 @@ import {
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
+  MicrosoftDefenderEndpointGetActionResultsResponse,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
@@ -202,7 +203,7 @@ const createMicrosoftGetActionsApiResponseMock = (
   };
 };
 const createMicrosoftGetActionResultsApiResponseMock =
-  (): MicrosoftDefenderEndpointGetActionsResponse => {
+  (): MicrosoftDefenderEndpointGetActionResultsResponse => {
     return {
       '@odata.context': 'some-context',
       value: ['http://example.com'],

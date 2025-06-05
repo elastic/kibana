@@ -62,9 +62,9 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
   value: MicrosoftDefenderEndpointMachineAction[];
 }
 
-export interface MicrosoftDefenderEndpointMachineActionResult {
+export interface MicrosoftDefenderEndpointGetActionResultsResponse {
   '@odata.context': string;
-  value: string; // Downloadable link
+  value: string[]; // Downloadable link
 }
 
 /**
