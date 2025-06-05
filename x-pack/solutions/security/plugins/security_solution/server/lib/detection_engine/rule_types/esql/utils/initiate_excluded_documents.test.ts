@@ -74,11 +74,10 @@ describe('initiateExcludedDocuments', () => {
     expect(result).toEqual([]);
   });
 
-  it('should filter documents from state out of rule range', () => {
+  it('should filter documents from state older than rule from time boundary', () => {
     const state: EsqlState = {
       excludedDocuments: [
         { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
         { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
         { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
       ],
@@ -98,14 +97,15 @@ describe('initiateExcludedDocuments', () => {
     expect(result).toEqual([
       { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
       { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
+      { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
     ]);
   });
 
-  it('should return an empty array if no state documents are within the rule range', () => {
+  it('should return an empty array if no state documents are within from time boundary', () => {
     const state: EsqlState = {
       excludedDocuments: [
         { id: 'doc1', timestamp: '2025-04-28T08:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T13:00:00Z' },
+        { id: 'doc2', timestamp: '2025-04-28T08:30:00Z' },
       ],
     };
     const tuple: RuleRangeTuple = {

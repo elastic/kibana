@@ -26,9 +26,7 @@ export const initiateExcludedDocuments = ({
   }
   return (
     state?.excludedDocuments?.filter(({ timestamp }) => {
-      return (
-        timestamp && timestamp >= tuple.from.toISOString() && timestamp <= tuple.to.toISOString()
-      );
+      return timestamp && timestamp >= tuple.from.toISOString();
     }) ?? []
   );
 };
