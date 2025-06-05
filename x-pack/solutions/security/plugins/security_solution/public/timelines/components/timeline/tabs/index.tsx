@@ -113,22 +113,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
       [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
     );
-    const getTab = useCallback(
-      (tab: TimelineTabs) => {
-        switch (tab) {
-          case TimelineTabs.notes:
-            return <NotesTab timelineId={timelineId} />;
-          default:
-            return null;
-        }
-      },
-      [timelineId]
-    );
-
-    const isNotesTab = useMemo(
-      () => [TimelineTabs.notes].includes(activeTimelineTab),
-      [activeTimelineTab]
-    );
 
     return (
       <>
@@ -178,10 +162,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <LazyTimelineTabRenderer
           timelineId={timelineId}
-          shouldShowTab={isNotesTab}
+          shouldShowTab={activeTimelineTab === TimelineTabs.notes}
           dataTestSubj={`timeline-tab-content-${TimelineTabs.notes}`}
         >
-          {isNotesTab ? getTab(activeTimelineTab) : null}
+          <NotesTab timelineId={timelineId} />
         </LazyTimelineTabRenderer>
       </>
     );
@@ -345,8 +329,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
-    // we redirect to the Query tab in the following situations:
-    // - for urls with Timeline saved with the Session or Analyzer tabs, we automatically (as Session View and Analyzer graph are now rendered in the flyout)
+    // we redirect to the Query tab when we try to load Timeline urls with the Session or Analyzer tabs active
+    // Session View and Analyzer graph are now only rendered in the flyout
     // @ts-ignore
     if (activeTab === 'graph' || activeTab === 'session') {
       setQueryAsActiveTab();
