@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, act as rtlAct } from '@testing-library/react';
+import { render, screen, act as rtlAct, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
@@ -351,6 +351,10 @@ describe('discover responsive sidebar', function () {
       await mountComponent(props, undefined, undefined, true);
 
       // Then
+      await waitFor(() =>
+        expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toBeInTheDocument()
+      );
+
       const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
       expect(a11yDescription).toHaveAttribute('aria-live', 'off');
       expect(a11yDescription).toHaveTextContent(
@@ -371,6 +375,10 @@ describe('discover responsive sidebar', function () {
       await mountComponent(props, undefined, undefined, true);
 
       // Then
+      await waitFor(() =>
+        expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toBeInTheDocument()
+      );
+
       const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
       const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
       await user.click(searchInput);
