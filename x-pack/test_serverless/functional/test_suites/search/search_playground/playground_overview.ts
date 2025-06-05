@@ -139,11 +139,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
 
-        it('can select index from dropdown and load chat page', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-        });
-
-        it('load start page after removing selected index', async () => {
+        it('load start page after selecting index', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
           await esArchiver.unload(esArchiveIndex);
           await browser.refresh();
@@ -170,43 +166,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        after(async () => {
-          await esDeleteAllIndices(indexName);
-          await browser.refresh();
-        });
-        it('should be able to create index from UI', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-          await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-          await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
-          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-          await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
-
-          // add data
-          await es.index({
-            index: indexName,
-            refresh: true,
-            body: {
-              my_field: [1, 0, 1],
-            },
+        describe('create index from API', () => {
+          it('show create index button', async () => {
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
           });
-          await svlSearchNavigation.navigateToSearchPlayground();
-        });
-        it('should show data source success button when index is selected', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDataSourcesButtonToBeSuccess();
-        });
-        describe('creating an LLM should show chat start page', () => {
-          before(async () => {
+          it('add data source and creating an LLM should show chat start page', async () => {
             await createOpenaiConnector();
             await browser.refresh();
+            await createIndex();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
+            await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
           });
           after(async () => {
+            await esArchiver.unload(esArchiveIndex);
             await removeOpenAIConnector?.();
             await browser.refresh();
           });
-          it('create LLM and chat window is Loaded', async () => {
+        });
+        describe('create index from UI', () => {
+          after(async () => {
+            await esDeleteAllIndices(indexName);
+            await removeOpenAIConnector?.();
+            await browser.refresh();
+          });
+          it('should be able to create index from UI', async () => {
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
+            await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
+            await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
+            await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
+            await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+
+            // add data
+            await es.index({
+              index: indexName,
+              refresh: true,
+              body: {
+                my_field: [1, 0, 1],
+              },
+            });
+            await svlSearchNavigation.navigateToSearchPlayground();
+          });
+
+          it('add data source and creating an LLM should show chat start page', async () => {
+            await createOpenaiConnector();
+            await browser.refresh();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
             await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
           });
         });
