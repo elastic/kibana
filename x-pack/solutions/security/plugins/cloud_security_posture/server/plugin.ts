@@ -29,6 +29,10 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -52,10 +56,6 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import {
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-common';
 
 export class CspPlugin
   implements
@@ -253,7 +253,8 @@ export class CspPlugin
         );
       } catch (error) {
         this.logger.error(
-          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}: ${error}`
+          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}`,
+          error
         );
         throw error;
       }
