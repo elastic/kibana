@@ -56,7 +56,6 @@ export const reportingExportModalProvider = ({
     onClose,
     shareableUrl,
     shareableUrlForSavedObject,
-    toasts,
     ...shareOpts
   }: ShareContext) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
@@ -115,47 +114,53 @@ export const reportingExportModalProvider = ({
         ...getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')(),
       });
 
-      return apiClient
-        .createReportingJob('printablePdfV2', decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+
+        return apiClient
+          .createReportingJob('printablePdfV2', decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error: any) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: error.body?.message,
+            });
           });
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: error.body?.message,
-          });
-        });
+      });
     };
 
     const generateExportUrlPDF = ({ optimizedForPrinting }: ScreenshotExportOpts) => {
@@ -180,47 +185,54 @@ export const reportingExportModalProvider = ({
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
       });
-      return apiClient
-        .createReportingJob('pngV2', decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+
+        return apiClient
+          .createReportingJob('pngV2', decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error: any) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: error.body?.message,
+            });
           });
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: error.body?.message,
-          });
-        });
+      });
     };
 
     shareActions.push({
