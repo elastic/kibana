@@ -111,11 +111,7 @@ export class UnenrollInactiveAgentsTask {
   // find inactive agents enrolled on selected policies
   // check that the time since last checkin was longer than unenroll_timeout
   public getAgentsQuery(agentPolicies: AgentPolicy[]): string {
-    const filteredPolicies = agentPolicies.filter(
-      (policy) => policy?.unenroll_timeout && policy.unenroll_timeout > 0
-    );
-
-    return `(${AGENTS_PREFIX}.policy_id:${filteredPolicies
+    return `(${AGENTS_PREFIX}.policy_id:${agentPolicies
       .map((policy) => {
         // @ts-ignore-next-line
         const inactivityThreshold = Date.now() - policy.unenroll_timeout * 1000;
@@ -162,7 +158,6 @@ export class UnenrollInactiveAgentsTask {
         page: 1,
         perPage: this.unenrollBatchSize,
       });
-
       if (!res.agents.length) {
         this.logger.debug(
           '[UnenrollInactiveAgentsTask] No inactive agents to unenroll in agent policy batch'

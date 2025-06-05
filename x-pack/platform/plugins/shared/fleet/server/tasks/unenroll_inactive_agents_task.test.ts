@@ -250,12 +250,5 @@ describe('UnenrollInactiveAgentsTask', () => {
         `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000) or \"agent-policy-2\" and (fleet-agents.last_checkin < 1748735700000)) and fleet-agents.status: inactive`
       );
     });
-
-    it('Should exclude policies that do not have unenroll_timeout from the query', async () => {
-      const policies = [policy1, policy2, createAgentPolicyMock({ id: 'agent-policy-2' })];
-      expect(mockTask.getAgentsQuery(policies as any)).toEqual(
-        `(fleet-agents.policy_id:\"agent-policy-1\" and (fleet-agents.last_checkin < 1748735000000) or \"agent-policy-2\" and (fleet-agents.last_checkin < 1748735700000)) and fleet-agents.status: inactive`
-      );
-    });
   });
 });
