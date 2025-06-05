@@ -11,37 +11,24 @@ import React from 'react';
 import { Bar } from './bar';
 import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';
+import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 export interface Props {
   item: TraceWaterfallItem;
-  duration: number;
+  childrenCount: number;
   state: EuiAccordionProps['forceState'];
   onToggle: (id: string) => void;
-  onClick?: (id: string) => void;
-  margin: { left: number; right: number };
-  showAccordion: boolean;
-  isHighlighted?: boolean;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
-  childrenCount: number;
 }
 
 export const ACCORDION_PADDING_LEFT = 8; // px
 export const ACCORDION_HEIGHT = 48; // px
 export const BORDER_THICKNESS = 1; // px
 
-export function TraceItemRow({
-  item,
-  duration,
-  state,
-  onToggle,
-  onClick,
-  margin,
-  showAccordion,
-  isHighlighted = false,
-  onErrorClick,
-  childrenCount,
-}: Props) {
+export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
+  const { duration, margin, showAccordion, onClick, onErrorClick, highlightedTraceId } =
+    useTraceWaterfallContext();
+  const isHighlighted = highlightedTraceId === item.id;
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;

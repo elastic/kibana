@@ -13,22 +13,17 @@ import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
-import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
-import {
-  ACCORDION_HEIGHT,
-  ACCORDION_PADDING_LEFT,
-  BORDER_THICKNESS,
-  TraceItemRow,
-} from './trace_item_row';
+import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
+import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
+import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { useTraceWaterfall } from './use_trace_waterfall';
 
 export interface Props {
   traceItems: TraceItem[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
-  onClick?: (id: string) => void;
-  onErrorClick?: (params: { traceId: string; docId: string }) => void;
+  onClick?: OnNodeClick;
+  onErrorClick?: OnErrorClick;
 }
 
 export function TraceWaterfall({
@@ -38,17 +33,30 @@ export function TraceWaterfall({
   onClick,
   onErrorClick,
 }: Props) {
+  return (
+    <TraceWaterfallContextProvider
+      traceItems={traceItems}
+      showAccordion={showAccordion}
+      highlightedTraceId={highlightedTraceId}
+      onClick={onClick}
+      onErrorClick={onErrorClick}
+    >
+      <TraceWaterfallComponent />
+    </TraceWaterfallContextProvider>
+  );
+}
+
+function TraceWaterfallComponent() {
   const { euiTheme } = useEuiTheme();
-  const { duration, traceWaterfall, maxDepth, rootItem } = useTraceWaterfall({
-    traceItems,
-  });
+  const {
+    duration,
+    rootItem,
+    margin: { left, right },
+  } = useTraceWaterfallContext();
 
   if (!rootItem) {
     return null;
   }
-
-  const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
-  const right = 40;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -88,37 +96,14 @@ export function TraceWaterfall({
           position: relative;
         `}
       >
-        <TraceTree
-          traceWaterfall={traceWaterfall}
-          highlightedTraceId={highlightedTraceId}
-          margin={{ left, right }}
-          onClick={onClick}
-          showAccordion={showAccordion}
-          duration={duration}
-          onErrorClick={onErrorClick}
-        />
+        <TraceTree />
       </div>
     </div>
   );
 }
 
-function TraceTree({
-  traceWaterfall,
-  margin,
-  highlightedTraceId,
-  onClick,
-  showAccordion = true,
-  duration,
-  onErrorClick,
-}: {
-  traceWaterfall: TraceWaterfallItem[];
-  margin: { left: number; right: number };
-  highlightedTraceId: Props['highlightedTraceId'];
-  onClick: Props['onClick'];
-  showAccordion: Props['showAccordion'];
-  duration: number;
-  onErrorClick: Props['onErrorClick'];
-}) {
+function TraceTree() {
+  const { traceWaterfallMap, traceWaterfall } = useTraceWaterfallContext();
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const [accordionStatesMap, setAccordionStateMap] = useState(
@@ -127,6 +112,13 @@ function TraceTree({
       return acc;
     }, {})
   );
+
+  function toggleAccordionState(id: string) {
+    setAccordionStateMap((prevStates) => ({
+      ...prevStates,
+      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
+    }));
+  }
 
   const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);
@@ -140,57 +132,9 @@ function TraceTree({
     listRef.current?.scrollTo(scrollTop);
   };
 
-  const treeMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
-
   const visibleList = useMemo(
-    () => convertTreeToList(treeMap, accordionStatesMap, traceWaterfall[0]),
-    [accordionStatesMap, traceWaterfall, treeMap]
-  );
-
-  function toggleAccordion(id: string) {
-    setAccordionStateMap((prevStates) => ({
-      ...prevStates,
-      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
-    }));
-  }
-
-  const VirtualRow = React.memo(
-    ({
-      index,
-      style,
-      data,
-    }: ListChildComponentProps<{
-      traceList: TraceWaterfallItem[];
-      onLoad: (index: number, size: number) => void;
-    }>) => {
-      const { onLoad, traceList } = data;
-
-      const ref = React.useRef<HTMLDivElement | null>(null);
-      useEffect(() => {
-        onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
-      }, [index, onLoad]);
-
-      const item = traceList[index];
-      const children = treeMap[item.id] || [];
-      return (
-        <div style={style} ref={ref}>
-          <TraceItemRow
-            key={item.id}
-            item={item}
-            duration={duration}
-            state={accordionStatesMap[item.id] || 'open'}
-            onToggle={toggleAccordion}
-            onClick={onClick}
-            margin={margin}
-            showAccordion={showAccordion}
-            isHighlighted={item.id === highlightedTraceId}
-            onErrorClick={onErrorClick}
-            childrenCount={children.length}
-          />
-        </div>
-      );
-    },
-    areEqual
+    () => convertTreeToList(traceWaterfallMap, accordionStatesMap, traceWaterfall[0]),
+    [accordionStatesMap, traceWaterfall, traceWaterfallMap]
   );
 
   return (
@@ -207,7 +151,13 @@ function TraceTree({
                 itemSize={getRowSize}
                 height={window.innerHeight}
                 width={width}
-                itemData={{ traceList: visibleList, onLoad: onRowLoad }}
+                itemData={{
+                  traceList: visibleList,
+                  onLoad: onRowLoad,
+                  traceWaterfallMap,
+                  accordionStatesMap,
+                  toggleAccordionState,
+                }}
               >
                 {VirtualRow}
               </List>
@@ -218,6 +168,42 @@ function TraceTree({
     </WindowScroller>
   );
 }
+
+const VirtualRow = React.memo(
+  ({
+    index,
+    style,
+    data,
+  }: ListChildComponentProps<{
+    traceList: TraceWaterfallItem[];
+    traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
+    accordionStatesMap: Record<string, EuiAccordionProps['forceState']>;
+    toggleAccordionState: (id: string) => void;
+    onLoad: (index: number, size: number) => void;
+  }>) => {
+    const { onLoad, traceList, accordionStatesMap, toggleAccordionState, traceWaterfallMap } = data;
+
+    const ref = React.useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
+    }, [index, onLoad]);
+
+    const item = traceList[index];
+    const children = traceWaterfallMap[item.id] || [];
+    return (
+      <div style={style} ref={ref}>
+        <TraceItemRow
+          key={item.id}
+          item={item}
+          childrenCount={children.length}
+          state={accordionStatesMap[item.id] || 'open'}
+          onToggle={toggleAccordionState}
+        />
+      </div>
+    );
+  },
+  areEqual
+);
 
 export function convertTreeToList(
   treeMap: Record<string, TraceWaterfallItem[]>,
@@ -244,14 +230,4 @@ export function convertTreeToList(
     }
   }
   return result;
-}
-
-export function groupByParent(items: TraceWaterfallItem[]) {
-  return items.reduce<Record<string, TraceWaterfallItem[]>>((acc, item) => {
-    if (item.parentId) {
-      if (!acc[item.parentId]) acc[item.parentId] = [];
-      acc[item.parentId].push(item);
-    }
-    return acc;
-  }, {});
 }
