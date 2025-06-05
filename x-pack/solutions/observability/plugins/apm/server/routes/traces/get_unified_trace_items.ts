@@ -112,13 +112,17 @@ export async function getUnifiedTraceItems({
 
   return response.hits.hits.map((hit) => {
     const event = unflattenKnownApmEventFields(hit.fields, fields);
+    const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
+
     return {
       id: event.span.id ?? event.transaction?.id,
       timestamp: event['@timestamp'],
       name: event.span.name ?? event.transaction?.name,
       traceId: event.trace.id,
       duration:
-        event.span?.duration?.us ?? event.transaction?.duration?.us ?? Array.isArray(event.duration)
+        apmDuration !== undefined
+          ? apmDuration
+          : Array.isArray(event.duration)
           ? (event.duration as number[])[0]
           : event.duration ?? 0,
       hasError:
