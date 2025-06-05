@@ -35,6 +35,7 @@ import {
   isReturnType,
   isSupportedDataType,
 } from '../../definitions/types';
+import { timeUnitsToSuggest } from '../../definitions/literals';
 import { fieldNameFromType } from '../../validation/validation.test';
 import { ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
@@ -581,6 +582,7 @@ describe('autocomplete.suggest', () => {
     });
 
     test('date math', async () => {
+      const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
       // Eval bucket is not a valid expression
       await assertSuggestions('from a | eval col0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
@@ -611,9 +613,11 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: '(' }
       );
-      await assertSuggestions('from a | eval col0=date_trunc(2 /)', [','], {
-        triggerCharacter: ' ',
-      });
+      await assertSuggestions(
+        'from a | eval col0=date_trunc(2 /)',
+        [...dateSuggestions.map((t) => `${t}, `), ','],
+        { triggerCharacter: ' ' }
+      );
     });
   });
 });
