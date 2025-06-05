@@ -115,6 +115,7 @@ import type {
   Suggestion,
   DatasourceMap,
   VisualizationMap,
+  VisualizationLayer,
 } from './types';
 import { lensVisTypeAlias } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
@@ -209,6 +210,21 @@ export interface LensPublicSetup {
     visualization: Visualization<T> | (() => Promise<Visualization<T>>)
   ) => void;
   /**
+   * Register 3rd party visualization layer types
+   * See `x-pack/examples/3rd_party_lens_vis_layer` for exemplary usage.
+   *
+   * In case the visualization layer is a function returning a promise, it will only be called once Lens is actually requiring it.
+   * This can be used to lazy-load parts of the code to keep the initial bundle as small as possible.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerVisualizationLayer: <T, P, E>(
+    visualizationType: string,
+    layer: VisualizationLayer<T, P, E> | (() => Promise<VisualizationLayer<T, P, E>>)
+  ) => void;
+  /**
    * Register a generic menu entry shown in the top nav
    * See `x-pack/examples/3rd_party_lens_navigation_prompt` for exemplary usage.
    *
@@ -239,7 +255,9 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
+  SaveModalComponent: React.ComponentType<
+    Omit<SaveModalContainerProps, 'lensServices' | 'visualizationMap' | 'datasourceMap'>
+  >;
   /**
    * React component which can be used to embed a Lens Visualization Config Panel Component.
    *
@@ -300,6 +318,10 @@ export class LensPlugin {
   private editorFrameService: EditorFrameServiceType | undefined;
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
+  private queuedVisualizationLayers: Array<
+    | { visualizationType: string; layer: VisualizationLayer }
+    | { visualizationType: string; layer: () => Promise<VisualizationLayer> }
+  > = [];
   private FormBasedDatasource: FormBasedDatasourceType | undefined;
   private TextBasedDatasource: TextBasedDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
@@ -566,6 +588,14 @@ export class LensPlugin {
           this.queuedVisualizations.push(vis);
         }
       },
+      registerVisualizationLayer: (visualizationType: string, layer: VisualizationLayer) => {
+        if (this.editorFrameSetup) {
+          this.editorFrameSetup.registerVisualizationLayer(visualizationType, layer);
+        } else {
+          // queue visualization layers if editor frame is not yet ready as it's loaded async
+          this.queuedVisualizationLayers.push({ visualizationType, layer });
+        }
+      },
       registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
         this.topNavMenuEntries.push(menuEntryGenerator);
       },
@@ -633,6 +663,13 @@ export class LensPlugin {
     this.queuedVisualizations.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);
     });
+    this.queuedVisualizationLayers.forEach((queuedLayer) => {
+      editorFrameSetupInterface.registerVisualizationLayer(
+        queuedLayer.visualizationType,
+        queuedLayer.layer
+      );
+    });
+
     this.editorFrameSetup = editorFrameSetupInterface;
   }
 
@@ -701,14 +738,6 @@ export class LensPlugin {
       }
     );
 
-    // Allows the Lens embeddable to easily open the inline editing flyout
-    // });
-    // embeddable inline edit panel action
-    // startDependencies.uiActions.addTriggerAction(
-    //   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-    //   editLensEmbeddableAction
-    // );
-
     startDependencies.uiActions.addTriggerActionAsync(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       ACTION_EDIT_LENS_EMBEDDABLE,
@@ -756,7 +785,11 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: LensRenderer,
-      SaveModalComponent: getSaveModalComponent(core, startDependencies),
+      SaveModalComponent: getSaveModalComponent(
+        core,
+        startDependencies,
+        this.initEditorFrameService.bind(this)
+      ),
       navigateToPrefilledEditor: (
         input,
         { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}

@@ -14,6 +14,7 @@ import {
   FramePublicAPI,
   OperationMetadata,
   UserMessage,
+  VisualizationLayer,
   VisualizationType,
 } from '../../types';
 import {
@@ -28,11 +29,13 @@ import {
   XYByValueAnnotationLayerConfig,
   visualizationTypes,
   visualizationSubtypes,
+  MinimalLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
 import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
+import { XYPersistedState } from './persistence';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -160,6 +163,14 @@ export const isByReferenceAnnotationsLayer = (
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
 
+export const buildAdditionalLayerTypeGuard = (
+  additionalLayersMap: Map<string, VisualizationLayer<State, XYPersistedState, ExtraAppendLayerArg>>
+) => {
+  const isAdditionalLayerType = (layer: XYLayerConfig): layer is MinimalLayerConfig =>
+    additionalLayersMap.has(layer.layerType);
+  return isAdditionalLayerType;
+};
+
 export const getGroupMetadataFromAnnotationLayer = (
   layer: XYAnnotationLayerConfig
 ): { title: string; description: string; tags: string[] } => {
@@ -186,10 +197,14 @@ export interface LayerTypeToLayer {
 export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
   if (isDataLayer(layer)) {
     return options[layerTypes.DATA](layer);
-  } else if (isReferenceLayer(layer)) {
+  }
+  if (isReferenceLayer(layer)) {
     return options[layerTypes.REFERENCELINE](layer);
   }
-  return options[layerTypes.ANNOTATIONS](layer);
+  if (isAnnotationsLayer(layer)) {
+    return options[layerTypes.ANNOTATIONS](layer);
+  }
+  return { ...layer, simpleView: true };
 };
 
 export function getVisualizationSubtypeId(state: State) {
@@ -225,12 +240,15 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
       visualizationTypes[0]
     );
   }
-  const visualizationType =
-    visualizationTypes.find((t) => t.subtypes?.includes(dataLayers[0].seriesType)) ??
-    visualizationTypes[0];
-  const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
+  if (dataLayers.length) {
+    const visualizationType =
+      visualizationTypes.find((t) => t.subtypes?.includes(dataLayers[0].seriesType)) ??
+      visualizationTypes[0];
+    const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
-  return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
+    return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
+  }
+  return 'mixed';
 }
 
 export function getDescription(state?: State, layerId?: string) {
@@ -374,7 +392,7 @@ const newLayerFn = {
 
     return newLayer;
   },
-};
+} as const;
 
 export function newLayerState({
   layerId,
@@ -384,12 +402,25 @@ export function newLayerState({
   extraArg,
 }: {
   layerId: string;
-  layerType?: XYLayerType;
+  layerType?: XYLayerType | string;
   seriesType: SeriesType;
   indexPatternId: string;
   extraArg?: ExtraAppendLayerArg;
 }) {
-  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
+  if (layerType in newLayerFn) {
+    // @ts-expect-error - layerType is a string, but newLayerFn expects a specific type
+    return newLayerFn[layerType]({
+      layerId,
+      seriesType,
+      indexPatternId,
+      extraArg,
+    });
+  }
+  return {
+    layerId,
+    layerType,
+    seriesType,
+  };
 }
 
 export function getLayersByType(state: State, byType?: string) {

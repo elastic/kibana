@@ -130,38 +130,45 @@ export function getAssignedColorConfig(
         : defaultAnnotationColor,
     };
   }
-  const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
+  if (isDataLayer(layer)) {
+    const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
+    const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+    const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
 
-  if (layerContainsSplits) {
-    return getDisabledConfig(accessor);
+    if (layerContainsSplits) {
+      return getDisabledConfig(accessor);
+    }
+
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const rank = colorAssignments[currentPalette.name].getRank(
+      layer,
+      columnToLabel[accessor] || accessor,
+      accessor
+    );
+    const assignedColor =
+      totalSeriesCount != null
+        ? paletteService.get(currentPalette.name).getCategoricalColor(
+            [
+              {
+                name: columnToLabel[accessor] || accessor,
+                rankAtDepth: rank,
+                totalSeriesAtDepth: totalSeriesCount,
+              },
+            ],
+            { maxDepth: 1, totalSeries: totalSeriesCount },
+            currentPalette.params
+          )
+        : undefined;
+    return {
+      columnId: accessor,
+      triggerIconType: assignedColor ? 'color' : 'disabled',
+      color: assignedColor ?? undefined,
+    };
   }
-
-  const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-  const rank = colorAssignments[currentPalette.name].getRank(
-    layer,
-    columnToLabel[accessor] || accessor,
-    accessor
-  );
-  const assignedColor =
-    totalSeriesCount != null
-      ? paletteService.get(currentPalette.name).getCategoricalColor(
-          [
-            {
-              name: columnToLabel[accessor] || accessor,
-              rankAtDepth: rank,
-              totalSeriesAtDepth: totalSeriesCount,
-            },
-          ],
-          { maxDepth: 1, totalSeries: totalSeriesCount },
-          currentPalette.params
-        )
-      : undefined;
   return {
     columnId: accessor,
-    triggerIconType: assignedColor ? 'color' : 'disabled',
-    color: assignedColor ?? undefined,
+    triggerIconType: 'color',
+    color: undefined,
   };
 }
 
@@ -177,19 +184,22 @@ export function getAccessorColorConfigs(
   if (isAnnotationsLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
-  const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
-  return layer.accessors.map((accessor) => {
-    if (layerContainsSplits) {
-      return getDisabledConfig(accessor);
-    }
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    if (currentYConfig?.color) {
-      return {
-        columnId: accessor,
-        triggerIconType: 'color',
-        color: currentYConfig.color,
-      };
-    }
-    return getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService);
-  });
+  if (isDataLayer(layer)) {
+    const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
+    return layer.accessors.map((accessor) => {
+      if (layerContainsSplits) {
+        return getDisabledConfig(accessor);
+      }
+      const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+      if (currentYConfig?.color) {
+        return {
+          columnId: accessor,
+          triggerIconType: 'color',
+          color: currentYConfig.color,
+        };
+      }
+      return getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService);
+    });
+  }
+  return [];
 }

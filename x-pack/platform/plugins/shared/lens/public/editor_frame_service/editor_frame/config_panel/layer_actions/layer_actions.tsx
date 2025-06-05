@@ -79,6 +79,7 @@ export const getSharedActions = ({
     isOnlyLayer,
     core,
     customModalText: customRemoveModalText,
+    supportedLayerTypes: (activeVisualization.getSupportedLayers?.() ?? []).map(({ type }) => type),
   }),
 ];
 

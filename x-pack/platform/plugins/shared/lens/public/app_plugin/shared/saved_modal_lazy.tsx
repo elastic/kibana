@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SaveModalContainerProps } from '../save_modal_container';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensAppServices } from '../types';
+import type { DatasourceMap, VisualizationMap } from '../../types';
 
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
@@ -33,10 +34,21 @@ const LensSavedModalLazy = (props: SaveModalContainerProps) => {
 
 export function getSaveModalComponent(
   coreStart: CoreStart,
-  startDependencies: LensPluginStartDependencies
+  startDependencies: LensPluginStartDependencies,
+  initEditorFrame: () => Promise<{
+    datasourceMap: DatasourceMap;
+    visualizationMap: VisualizationMap;
+  }>
 ) {
   return (props: Omit<SaveModalContainerProps, 'lensServices'>) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
+    const [assets, setAssets] = useState<
+      | {
+          datasourceMap: DatasourceMap;
+          visualizationMap: VisualizationMap;
+        }
+      | undefined
+    >();
 
     useEffect(() => {
       async function loadLensService() {
@@ -48,18 +60,25 @@ export function getSaveModalComponent(
           getLensAttributeService(coreStart, startDependencies)
         );
 
+        const { visualizationMap, datasourceMap } = await initEditorFrame();
+        setAssets({ visualizationMap, datasourceMap });
         setLensServices(lensServicesT);
       }
       loadLensService();
     }, []);
 
-    if (!lensServices) {
+    if (!lensServices || !assets) {
       return <LoadingSpinnerWithOverlay />;
     }
 
     return (
       <EuiOverlayMask>
-        <LensSavedModalLazy {...props} lensServices={lensServices} />
+        <LensSavedModalLazy
+          {...props}
+          lensServices={lensServices}
+          visualizationMap={assets?.visualizationMap}
+          datasourceMap={assets?.datasourceMap}
+        />
       </EuiOverlayMask>
     );
   };

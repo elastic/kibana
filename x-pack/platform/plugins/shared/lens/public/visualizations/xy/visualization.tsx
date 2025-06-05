@@ -109,9 +109,15 @@ import {
   supportedDataLayer,
   validateLayersForDimension,
   isTimeChart,
+  buildAdditionalLayerTypeGuard,
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
-import type { XYByValueAnnotationLayerConfig, XYState } from './types';
+import type {
+  AdditionalLayersMap,
+  MinimalLayerConfig,
+  XYByValueAnnotationLayerConfig,
+  XYState,
+} from './types';
 import { defaultSeriesType } from './types';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
@@ -137,7 +143,9 @@ import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_pane
 
 const XY_ID = 'lnsXY';
 
-export type ExtraAppendLayerArg = EventAnnotationGroupConfig & { annotationGroupId: string };
+export type ExtraAppendLayerArg = EventAnnotationGroupConfig & {
+  annotationGroupId: string;
+} & unknown;
 
 export const getXyVisualization = ({
   core,
@@ -163,43 +171,71 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
-  id: XY_ID,
-  getVisualizationTypeId(state, layerId) {
-    const type = getVisualizationType(state, layerId);
-    return type === 'mixed' ? type : type.id;
-  },
+}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => {
+  const additionalLayerMap: AdditionalLayersMap = new Map();
+  const isAdditionalLayerType = buildAdditionalLayerTypeGuard(additionalLayerMap);
+  return {
+    id: XY_ID,
+    getVisualizationTypeId(state, layerId) {
+      const type = getVisualizationType(state, layerId);
+      return type === 'mixed' ? type : type.id;
+    },
 
-  visualizationTypes,
+    visualizationTypes,
 
-  getLayerIds(state) {
-    return getLayersByType(state).map((l) => l.layerId);
-  },
+    getLayerIds(state) {
+      return getLayersByType(state).map((l) => l.layerId);
+    },
 
-  getRemoveOperation(state, layerId) {
-    const dataLayers = getLayersByType(state, LayerTypes.DATA).map((l) => l.layerId);
-    return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
-  },
+    getRemoveOperation(state, layerId) {
+      const dataLayers = getLayersByType(state, LayerTypes.DATA).map((l) => l.layerId);
+      return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
+    },
 
-  removeLayer(state, layerId) {
-    return {
-      ...state,
-      layers: state.layers.filter((l) => l.layerId !== layerId),
-    };
-  },
+    addNewLayerType(layer) {
+      additionalLayerMap.set(layer.layerType, layer);
+    },
 
-  cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
-    const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
-    if (toCopyLayer) {
+    removeLayer(state, layerId) {
+      return {
+        ...state,
+        layers: state.layers.filter((l) => l.layerId !== layerId),
+      };
+    },
+
+    cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
+      const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
+      if (!toCopyLayer) {
+        return state;
+      }
+      const newLayers = [...state.layers];
+      const extraLayerType = additionalLayerMap.get(toCopyLayer.layerType);
+      if (extraLayerType) {
+        const values =
+          extraLayerType.getDimensionValues?.(
+            toCopyLayer as MinimalLayerConfig<ExtraAppendLayerArg>
+          ) ?? [];
+        values.forEach(({ id }) => clonedIDsMap.set(id, generateId()));
+      }
+
       if (isAnnotationsLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
 
-      let newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
         clonedIDsMap.get(id)
       );
 
       newLayer.layerId = newLayerId;
+
+      if (extraLayerType) {
+        const newExtraLayer =
+          extraLayerType?.getClonedLayer?.(newLayer as MinimalLayerConfig<ExtraAppendLayerArg>) ??
+          newLayer;
+        if (newExtraLayer) {
+          newLayers.push(newExtraLayer);
+        }
+      }
 
       if (isAnnotationsLayer(newLayer) && isByReferenceAnnotationsLayer(newLayer)) {
         const byValueVersion: XYByValueAnnotationLayerConfig = {
@@ -210,921 +246,1025 @@ export const getXyVisualization = ({
           indexPatternId: newLayer.indexPatternId,
         };
 
-        newLayer = byValueVersion;
+        newLayers.push(byValueVersion);
       }
 
       return {
         ...state,
-        layers: [...state.layers, newLayer],
+        layers: newLayers,
       };
-    }
-    return state;
-  },
+    },
 
-  appendLayer(state, layerId, layerType, indexPatternId, extraArg, seriesType) {
-    if (layerType === 'metricTrendline') {
-      return state;
-    }
-
-    return {
-      ...state,
-      layers: [
-        ...state.layers,
-        newLayerState({
-          layerId,
-          layerType,
-          seriesType:
-            seriesType || getDataLayers(state.layers)?.[0]?.seriesType || state.preferredSeriesType,
-          indexPatternId,
-          extraArg,
-        }),
-      ],
-    };
-  },
-
-  clearLayer(state, layerId, indexPatternId) {
-    return {
-      ...state,
-      layers: state.layers.map((l) =>
-        l.layerId !== layerId
-          ? l
-          : newLayerState({
-              seriesType: state.preferredSeriesType,
-              layerId,
-              indexPatternId,
-            })
-      ),
-    };
-  },
-
-  getPersistableState(state) {
-    return convertToPersistable(state);
-  },
-
-  getDescription,
-
-  switchVisualizationType(seriesType: string, state: State, layerId?: string) {
-    const dataLayer = layerId
-      ? state.layers.find((l) => l.layerId === layerId)
-      : state.layers.at(0);
-    if (dataLayer && !isDataLayer(dataLayer)) {
-      throw new Error('Cannot switch series type for non-data layer');
-    }
-    if (!dataLayer) {
-      return state;
-    }
-    const currentStackingType = stackingTypes.find(({ subtypes }) =>
-      subtypes.includes(dataLayer.seriesType)
-    );
-    const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
-
-    const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
-      seriesType) as SeriesType;
-
-    return {
-      ...state,
-      preferredSeriesType: compatibleSeriesType,
-      layers: layerId
-        ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
-          )
-        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
-    };
-  },
-
-  getSuggestions,
-
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
-
-  initialize(
-    addNewLayer,
-    state,
-    mainPalette?,
-    annotationGroups?: AnnotationGroups,
-    references?: SavedObjectReference[]
-  ) {
-    if (state) {
-      return convertToRuntime(state, annotationGroups!, references);
-    }
-    return {
-      title: 'Empty XY chart',
-      legend: { isVisible: true, position: Position.Right },
-      valueLabels: 'hide',
-      preferredSeriesType: defaultSeriesType,
-      layers: [
-        {
-          layerId: addNewLayer(),
-          accessors: [],
-          position: Position.Top,
-          seriesType: defaultSeriesType,
-          showGridlines: false,
-          layerType: LayerTypes.DATA,
-          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-          colorMapping:
-            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-        },
-      ],
-    };
-  },
-
-  getLayerType(layerId, state) {
-    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
-  },
-
-  getSupportedLayers(state, frame) {
-    return [
-      supportedDataLayer,
-      getAnnotationsSupportedLayer(state, frame),
-      getReferenceSupportedLayer(state, frame),
-    ];
-  },
-
-  getSupportedActionsForLayer(
-    layerId,
-    state,
-    setState,
-    registerLibraryAnnotationGroup,
-    isSaveable
-  ) {
-    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[layerIndex];
-    const actions = [];
-    if (isAnnotationsLayer(layer)) {
-      actions.push(
-        ...createAnnotationActions({
-          state,
-          layer,
-          setState,
-          registerLibraryAnnotationGroup,
-          core,
-          isSaveable,
-          eventAnnotationService,
-          savedObjectsTagging,
-          dataViews: data.dataViews,
-          startServices: core,
-        })
-      );
-    }
-    return actions;
-  },
-
-  getCustomRemoveLayerText(layerId, state) {
-    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[layerIndex];
-    if (layer && isByReferenceAnnotationsLayer(layer)) {
-      return { title: `Delete "${getAnnotationLayerTitle(layer)}"` };
-    }
-  },
-
-  hasLayerSettings({ state, layerId: currentLayerId }) {
-    const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
-    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
-  },
-
-  LayerSettingsComponent(props) {
-    return <LayerSettings {...props} />;
-  },
-  onIndexPatternChange(state, indexPatternId, layerId) {
-    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[layerIndex];
-    if (!layer || !isAnnotationsLayer(layer)) {
-      return state;
-    }
-    const newLayers = [...state.layers];
-    newLayers[layerIndex] = { ...layer, indexPatternId };
-    return {
-      ...state,
-      layers: newLayers,
-    };
-  },
-
-  getConfiguration({ state, frame, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    if (!layer) {
-      return { groups: [] };
-    }
-
-    if (isAnnotationsLayer(layer)) {
-      return getAnnotationsConfiguration({ state, frame, layer });
-    }
-
-    const sortedAccessors: string[] = getSortedAccessors(
-      frame.datasourceLayers[layer.layerId],
-      layer
-    );
-    if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
-    }
-
-    const mappedAccessors = getMappedAccessors({
-      state,
-      frame,
-      layer,
-      fieldFormats,
-      paletteService,
-      accessors: sortedAccessors,
-    });
-
-    const dataLayer: XYDataLayerConfig = layer;
-
-    const dataLayers = getDataLayers(state.layers);
-    const isHorizontal = isHorizontalChart(state.layers);
-    const { left, right } = groupAxesByType([layer], frame.activeData);
-    // Check locally if it has one accessor OR one accessor per axis
-    const layerHasOnlyOneAccessor = Boolean(
-      dataLayer.accessors.length < 2 ||
-        (left.length && left.length < 2) ||
-        (right.length && right.length < 2)
-    );
-    // Check also for multiple layers that can stack for percentage charts
-    // Make sure that if multiple dimensions are defined for a single dataLayer, they should belong to the same axis
-    const hasOnlyOneAccessor =
-      layerHasOnlyOneAccessor &&
-      dataLayers.filter(
-        // check that the other layers are compatible with this one
-        (l) => {
-          if (
-            isDataLayer(l) &&
-            l.seriesType === dataLayer.seriesType &&
-            Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
-            Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
-          ) {
-            const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
-            // return true only if matching axis are found
-            return (
-              l.accessors.length &&
-              (Boolean(localLeft.length) === Boolean(left.length) ||
-                Boolean(localRight.length) === Boolean(right.length))
-            );
-          }
-          return false;
+    appendLayer(state, layerId, layerType, indexPatternId, extraArg, seriesType) {
+      const layer = state.layers.find((l) => l.layerId === layerId);
+      if (!layer) {
+        const extraLayerType = additionalLayerMap.get(layerType);
+        if (extraLayerType?.appendLayer) {
+          return extraLayerType.appendLayer(
+            state,
+            layerId,
+            layerType,
+            indexPatternId,
+            extraArg,
+            seriesType
+          );
         }
-      ).length < 2;
+        return {
+          ...state,
+          layers: [
+            ...state.layers,
+            newLayerState({
+              layerId,
+              layerType,
+              seriesType:
+                seriesType ||
+                getDataLayers(state.layers)?.[0]?.seriesType ||
+                state.preferredSeriesType,
+              indexPatternId,
+              extraArg,
+            }),
+          ],
+        };
+      }
 
-    const canUseColorMapping = layer.colorMapping ? true : false;
-    let colors: string[] = [];
-    if (canUseColorMapping) {
-      kibanaTheme.theme$
-        .subscribe({
-          next(theme) {
-            const palettes = getKbnPalettes(theme);
-            colors = getColorsFromMapping(palettes, theme.darkMode, layer.colorMapping);
+      return state;
+    },
+
+    clearLayer(state, layerId, indexPatternId) {
+      return {
+        ...state,
+        layers: state.layers.map((l) =>
+          l.layerId !== layerId
+            ? l
+            : newLayerState({
+                seriesType: state.preferredSeriesType,
+                layerId,
+                indexPatternId,
+              })
+        ),
+      };
+    },
+
+    getPersistableState(state) {
+      return convertToPersistable(state, additionalLayerMap);
+    },
+
+    getDescription,
+
+    switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+      const dataLayer = layerId
+        ? state.layers.find((l) => l.layerId === layerId)
+        : state.layers.at(0);
+      if (dataLayer && !isDataLayer(dataLayer)) {
+        throw new Error('Cannot switch series type for non-data layer');
+      }
+      if (!dataLayer) {
+        return state;
+      }
+      const currentStackingType = stackingTypes.find(({ subtypes }) =>
+        subtypes.includes(dataLayer.seriesType)
+      );
+      const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
+
+      const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
+        seriesType) as SeriesType;
+
+      return {
+        ...state,
+        preferredSeriesType: compatibleSeriesType,
+        layers: layerId
+          ? state.layers.map((layer) =>
+              layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
+            )
+          : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
+      };
+    },
+
+    getSuggestions,
+
+    triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+
+    initialize(
+      addNewLayer,
+      state,
+      mainPalette?,
+      annotationGroups?: AnnotationGroups,
+      references?: SavedObjectReference[]
+    ) {
+      if (state) {
+        return convertToRuntime(state, annotationGroups!, references);
+      }
+      return {
+        title: 'Empty XY chart',
+        legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
+        preferredSeriesType: defaultSeriesType,
+        layers: [
+          {
+            layerId: addNewLayer(),
+            accessors: [],
+            position: Position.Top,
+            seriesType: defaultSeriesType,
+            showGridlines: false,
+            layerType: LayerTypes.DATA,
+            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+            colorMapping:
+              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
           },
-        })
-        .unsubscribe();
-    } else {
-      const palette = paletteService.get(dataLayer.palette?.name || 'default');
-      colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
-    }
+        ],
+      };
+    },
 
-    return {
-      groups: [
-        {
-          groupId: 'x',
-          groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
-          filterOperations: isBucketed,
-          supportsMoreColumns: !dataLayer.xAccessor,
-          dataTestSubj: 'lnsXY_xDimensionPanel',
-        },
-        {
-          groupId: 'y',
-          groupLabel: getAxisName('y', { isHorizontal }),
-          accessors: mappedAccessors,
-          filterOperations: isNumericDynamicMetric,
-          isMetricDimension: true,
-          supportsMoreColumns: true,
-          requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsXY_yDimensionPanel',
-          enableDimensionEditor: true,
-        },
-        {
-          groupId: 'breakdown',
-          groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
-            defaultMessage: 'Breakdown',
-          }),
-          accessors: dataLayer.splitAccessor
-            ? [
-                {
-                  columnId: dataLayer.splitAccessor,
-                  triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn ? undefined : colors,
-                },
-              ]
-            : [],
-          filterOperations: isBucketed,
-          supportsMoreColumns: !dataLayer.splitAccessor,
-          dataTestSubj: 'lnsXY_splitDimensionPanel',
-          requiredMinDimensionCount:
-            dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
-          enableDimensionEditor: true,
-          isBreakdownDimension: true,
-        },
-      ],
-    };
-  },
+    getLayerType(layerId, state) {
+      return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
+    },
 
-  getMainPalette: (state) => {
-    if (!state || state.layers.length === 0) return;
-    const firstDataLayer = getFirstDataLayer(state.layers);
+    getSupportedLayers(state, frame) {
+      return [
+        supportedDataLayer,
+        getAnnotationsSupportedLayer(state, frame),
+        getReferenceSupportedLayer(state, frame),
+        ...Array.from(additionalLayerMap.values())
+          .map((layer) => layer.getLayerDescription(state))
+          .filter(nonNullable),
+      ];
+    },
 
-    return firstDataLayer?.colorMapping
-      ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
-      : firstDataLayer?.palette
-      ? { type: 'legacyPalette', value: firstDataLayer.palette }
-      : undefined;
-  },
+    getSupportedActionsForLayer(
+      layerId,
+      state,
+      setState,
+      registerLibraryAnnotationGroup,
+      isSaveable
+    ) {
+      const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+      const layer = state.layers[layerIndex];
+      const actions = [];
+      const extraLayerType = additionalLayerMap.get(layer.layerType);
+      if (extraLayerType?.getSupportedActionsForLayer) {
+        return extraLayerType?.getSupportedActionsForLayer(layerId, state, setState, isSaveable);
+      }
+      if (isAnnotationsLayer(layer)) {
+        actions.push(
+          ...createAnnotationActions({
+            state,
+            layer,
+            setState,
+            registerLibraryAnnotationGroup,
+            core,
+            isSaveable,
+            eventAnnotationService,
+            savedObjectsTagging,
+            dataViews: data.dataViews,
+            startServices: core,
+          })
+        );
+      }
+      return actions;
+    },
 
-  getDropProps(dropProps) {
-    if (!dropProps.source) {
-      return;
-    }
-    const srcDataView = dropProps.source.indexPatternId;
-    const targetDataView = dropProps.target.indexPatternId;
-    if (!targetDataView || srcDataView !== targetDataView) {
-      return;
-    }
+    getCustomRemoveLayerText(layerId, state) {
+      const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+      const layer = state.layers[layerIndex];
+      if (layer && isByReferenceAnnotationsLayer(layer)) {
+        return { title: `Delete "${getAnnotationLayerTitle(layer)}"` };
+      }
+    },
 
-    if (isDraggedDataViewField(dropProps.source)) {
-      if (dropProps.source.field.type === 'document') {
+    hasLayerSettings({ state, layerId: currentLayerId }) {
+      const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
+      return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+    },
+
+    LayerSettingsComponent(props) {
+      return <LayerSettings {...props} />;
+    },
+    onIndexPatternChange(state, indexPatternId, layerId) {
+      const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+      const layer = state.layers[layerIndex];
+      if (!layer || !isAnnotationsLayer(layer)) {
+        return state;
+      }
+      const newLayers = [...state.layers];
+      newLayers[layerIndex] = { ...layer, indexPatternId };
+      return {
+        ...state,
+        layers: newLayers,
+      };
+    },
+
+    getConfiguration({ state, frame, layerId }) {
+      const layer: XYLayerConfig | undefined = state.layers.find((l) => l.layerId === layerId);
+      if (!layer) {
+        return { groups: [] };
+      }
+
+      if (isAnnotationsLayer(layer)) {
+        return getAnnotationsConfiguration({ state, frame, layer });
+      }
+      if (!isReferenceLayer(layer) && !isDataLayer(layer)) {
+        if (isAdditionalLayerType(layer)) {
+          const extraLayerType = additionalLayerMap.get(layer.layerType)!;
+          return extraLayerType.getConfiguration({
+            state,
+            frame,
+            layer: layer as MinimalLayerConfig<ExtraAppendLayerArg>,
+          });
+        }
+      }
+
+      const sortedAccessors: string[] = getSortedAccessors(
+        frame.datasourceLayers[layer.layerId],
+        layer
+      );
+
+      if (isReferenceLayer(layer)) {
+        return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
+      }
+
+      const mappedAccessors = getMappedAccessors({
+        state,
+        frame,
+        layer,
+        fieldFormats,
+        paletteService,
+        accessors: sortedAccessors,
+      });
+
+      const dataLayer: XYDataLayerConfig = layer;
+
+      const dataLayers = getDataLayers(state.layers);
+      const isHorizontal = isHorizontalChart(state.layers);
+      const { left, right } = groupAxesByType([layer], frame.activeData);
+      // Check locally if it has one accessor OR one accessor per axis
+      const layerHasOnlyOneAccessor = Boolean(
+        dataLayer.accessors.length < 2 ||
+          (left.length && left.length < 2) ||
+          (right.length && right.length < 2)
+      );
+      // Check also for multiple layers that can stack for percentage charts
+      // Make sure that if multiple dimensions are defined for a single dataLayer, they should belong to the same axis
+      const hasOnlyOneAccessor =
+        layerHasOnlyOneAccessor &&
+        dataLayers.filter(
+          // check that the other layers are compatible with this one
+          (l) => {
+            if (
+              isDataLayer(l) &&
+              l.seriesType === dataLayer.seriesType &&
+              Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
+              Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
+            ) {
+              const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
+              // return true only if matching axis are found
+              return (
+                l.accessors.length &&
+                (Boolean(localLeft.length) === Boolean(left.length) ||
+                  Boolean(localRight.length) === Boolean(right.length))
+              );
+            }
+            return false;
+          }
+        ).length < 2;
+
+      const canUseColorMapping = layer.colorMapping ? true : false;
+      let colors: string[] = [];
+      if (canUseColorMapping) {
+        kibanaTheme.theme$
+          .subscribe({
+            next(theme) {
+              const palettes = getKbnPalettes(theme);
+              colors = getColorsFromMapping(palettes, theme.darkMode, layer.colorMapping);
+            },
+          })
+          .unsubscribe();
+      } else {
+        const palette = paletteService.get(dataLayer.palette?.name || 'default');
+        colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
+      }
+
+      return {
+        groups: [
+          {
+            groupId: 'x',
+            groupLabel: getAxisName('x', { isHorizontal }),
+            accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
+            filterOperations: isBucketed,
+            supportsMoreColumns: !dataLayer.xAccessor,
+            dataTestSubj: 'lnsXY_xDimensionPanel',
+          },
+          {
+            groupId: 'y',
+            groupLabel: getAxisName('y', { isHorizontal }),
+            accessors: mappedAccessors,
+            filterOperations: isNumericDynamicMetric,
+            isMetricDimension: true,
+            supportsMoreColumns: true,
+            requiredMinDimensionCount: 1,
+            dataTestSubj: 'lnsXY_yDimensionPanel',
+            enableDimensionEditor: true,
+          },
+          {
+            groupId: 'breakdown',
+            groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            accessors: dataLayer.splitAccessor
+              ? [
+                  {
+                    columnId: dataLayer.splitAccessor,
+                    triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
+                    palette: dataLayer.collapseFn ? undefined : colors,
+                  },
+                ]
+              : [],
+            filterOperations: isBucketed,
+            supportsMoreColumns: !dataLayer.splitAccessor,
+            dataTestSubj: 'lnsXY_splitDimensionPanel',
+            requiredMinDimensionCount:
+              dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
+            enableDimensionEditor: true,
+            isBreakdownDimension: true,
+          },
+        ],
+      };
+    },
+
+    getMainPalette: (state) => {
+      if (!state || state.layers.length === 0) return;
+      const firstDataLayer = getFirstDataLayer(state.layers);
+
+      return firstDataLayer?.colorMapping
+        ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
+        : firstDataLayer?.palette
+        ? { type: 'legacyPalette', value: firstDataLayer.palette }
+        : undefined;
+    },
+
+    getDropProps(dropProps) {
+      if (!dropProps.source) {
         return;
       }
-      return dropProps.target.isNewColumn
-        ? { dropTypes: ['field_add'] }
-        : { dropTypes: ['field_replace'] };
-    }
+      const srcDataView = dropProps.source.indexPatternId;
+      const targetDataView = dropProps.target.indexPatternId;
+      if (!targetDataView || srcDataView !== targetDataView) {
+        return;
+      }
 
-    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
-      return dropProps.target.isNewColumn
-        ? { dropTypes: ['duplicate_compatible'] }
-        : { dropTypes: ['reorder'] };
-    }
-    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+      if (isDraggedDataViewField(dropProps.source)) {
+        if (dropProps.source.field.type === 'document') {
+          return;
+        }
+        return dropProps.target.isNewColumn
+          ? { dropTypes: ['field_add'] }
+          : { dropTypes: ['field_replace'] };
+      }
+
+      if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
+        return dropProps.target.isNewColumn
+          ? { dropTypes: ['duplicate_compatible'] }
+          : { dropTypes: ['reorder'] };
+      }
+      if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+        return {
+          dropTypes: dropProps.target.isNewColumn
+            ? ['move_compatible', 'duplicate_compatible']
+            : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+        };
+      }
+    },
+
+    onDrop(props) {
+      const targetLayer: XYLayerConfig | undefined = props.prevState.layers.find(
+        (l) => l.layerId === props.target.layerId
+      );
+      if (!targetLayer) {
+        throw new Error('target layer should exist');
+      }
+
+      if (isAnnotationsLayer(targetLayer)) {
+        return onAnnotationDrop?.(props) || props.prevState;
+      }
+      return onDropForVisualization(props, this);
+    },
+
+    setDimension(props) {
+      const { prevState, layerId, columnId, groupId } = props;
+
+      const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
+        (l) => l.layerId === layerId
+      );
+      if (!foundLayer) {
+        return prevState;
+      }
+
+      if (isReferenceLayer(foundLayer)) {
+        return setReferenceDimension(props);
+      }
+      if (isAnnotationsLayer(foundLayer)) {
+        return setAnnotationsDimension(props);
+      }
+      if (!isDataLayer(foundLayer) && isAdditionalLayerType(foundLayer)) {
+        const extraLayer = additionalLayerMap.get(foundLayer.layerType)!;
+        return extraLayer?.updateDimension(props);
+      }
+
+      const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+      if (groupId === 'x') {
+        newLayer.xAccessor = columnId;
+      }
+      if (groupId === 'y') {
+        newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+      }
+      if (groupId === 'breakdown') {
+        newLayer.splitAccessor = columnId;
+      }
       return {
-        dropTypes: dropProps.target.isNewColumn
-          ? ['move_compatible', 'duplicate_compatible']
-          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+        ...prevState,
+        layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
       };
-    }
-  },
+    },
 
-  onDrop(props) {
-    const targetLayer: XYLayerConfig | undefined = props.prevState.layers.find(
-      (l) => l.layerId === props.target.layerId
-    );
-    if (!targetLayer) {
-      throw new Error('target layer should exist');
-    }
+    removeDimension({ prevState, layerId, columnId, frame }) {
+      const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+      if (!foundLayer) {
+        return prevState;
+      }
+      if (isAnnotationsLayer(foundLayer)) {
+        const newLayer = {
+          ...foundLayer,
+          annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
+        };
 
-    if (isAnnotationsLayer(targetLayer)) {
-      return onAnnotationDrop?.(props) || props.prevState;
-    }
-    return onDropForVisualization(props, this);
-  },
+        const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+        return {
+          ...prevState,
+          layers: newLayers,
+        };
+      }
+      if (!isDataLayer(foundLayer) && !isReferenceLayer(foundLayer)) {
+        if (isAdditionalLayerType(foundLayer)) {
+          const extraLayer = additionalLayerMap.get(foundLayer.layerType)!;
+          return extraLayer.removeDimension({ prevState, layerId, columnId, frame });
+        }
+      }
+      const newLayer = { ...foundLayer };
+      if (isDataLayer(newLayer)) {
+        if (newLayer.xAccessor === columnId) {
+          delete newLayer.xAccessor;
+        } else if (newLayer.splitAccessor === columnId) {
+          delete newLayer.splitAccessor;
+          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          delete newLayer.palette;
+        }
+      }
+      if (newLayer.accessors.includes(columnId)) {
+        newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
+      }
 
-  setDimension(props) {
-    const { prevState, layerId, columnId, groupId } = props;
+      if ('yConfig' in newLayer) {
+        newLayer.yConfig = newLayer.yConfig?.filter(({ forAccessor }) => forAccessor !== columnId);
+      }
 
-    const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
-      (l) => l.layerId === layerId
-    );
-    if (!foundLayer) {
-      return prevState;
-    }
+      let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
+      // check if there's any reference layer and pull it off if all data layers have no dimensions set
+      // check for data layers if they all still have xAccessors
+      const groupsAvailable = getGroupsAvailableInData(
+        getDataLayers(prevState.layers),
+        frame.datasourceLayers,
+        frame.activeData
+      );
 
-    if (isReferenceLayer(foundLayer)) {
-      return setReferenceDimension(props);
-    }
-    if (isAnnotationsLayer(foundLayer)) {
-      return setAnnotationsDimension(props);
-    }
+      if (
+        (Object.keys(groupsAvailable) as Array<'x' | 'yLeft' | 'yRight'>).every(
+          (id) => !groupsAvailable[id]
+        )
+      ) {
+        newLayers = newLayers.filter(
+          (layer) => isDataLayer(layer) || ('accessors' in layer && layer.accessors.length)
+        );
+      }
 
-    const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
-    if (groupId === 'x') {
-      newLayer.xAccessor = columnId;
-    }
-    if (groupId === 'y') {
-      newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
-    }
-    if (groupId === 'breakdown') {
-      newLayer.splitAccessor = columnId;
-    }
-    return {
-      ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
-    };
-  },
-
-  removeDimension({ prevState, layerId, columnId, frame }) {
-    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
-    if (!foundLayer) {
-      return prevState;
-    }
-    if (isAnnotationsLayer(foundLayer)) {
-      const newLayer = {
-        ...foundLayer,
-        annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
-      };
-
-      const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
       return {
         ...prevState,
         layers: newLayers,
       };
-    }
-    const newLayer = { ...foundLayer };
-    if (isDataLayer(newLayer)) {
-      if (newLayer.xAccessor === columnId) {
-        delete newLayer.xAccessor;
-      } else if (newLayer.splitAccessor === columnId) {
-        delete newLayer.splitAccessor;
-        // as the palette is associated with the break down by dimension, remove it together with the dimension
-        delete newLayer.palette;
-      }
-    }
-    if (newLayer.accessors.includes(columnId)) {
-      newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
-    }
+    },
 
-    if ('yConfig' in newLayer) {
-      newLayer.yConfig = newLayer.yConfig?.filter(({ forAccessor }) => forAccessor !== columnId);
-    }
+    LayerPanelComponent(props) {
+      const { onChangeIndexPattern, ...otherProps } = props;
 
-    let newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
-    // check if there's any reference layer and pull it off if all data layers have no dimensions set
-    // check for data layers if they all still have xAccessors
-    const groupsAvailable = getGroupsAvailableInData(
-      getDataLayers(prevState.layers),
-      frame.datasourceLayers,
-      frame.activeData
-    );
-
-    if (
-      (Object.keys(groupsAvailable) as Array<'x' | 'yLeft' | 'yRight'>).every(
-        (id) => !groupsAvailable[id]
-      )
-    ) {
-      newLayers = newLayers.filter(
-        (layer) => isDataLayer(layer) || ('accessors' in layer && layer.accessors.length)
-      );
-    }
-
-    return {
-      ...prevState,
-      layers: newLayers,
-    };
-  },
-
-  LayerPanelComponent(props) {
-    const { onChangeIndexPattern, ...otherProps } = props;
-
-    return (
-      <LayerHeaderContent
-        {...otherProps}
-        onChangeIndexPattern={(indexPatternId) => {
-          onChangeIndexPattern(indexPatternId);
-        }}
-      />
-    );
-  },
-
-  isSubtypeCompatible(subtype1, subtype2) {
-    return (
-      (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
-      (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
-    );
-  },
-  getSubtypeSwitch({ state, setState, layerId }) {
-    const index = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[index];
-
-    if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
-      return null;
-    }
-
-    return () => (
-      <SubtypeSwitch
-        layer={layer}
-        setLayerState={(newLayer: XYDataLayerConfig) =>
-          setState(updateLayer(state, newLayer, index))
-        }
-      />
-    );
-  },
-
-  getCustomLayerHeader(props) {
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId);
-    if (!layer) {
-      return undefined;
-    }
-    if (isReferenceLayer(layer)) {
-      return <ReferenceLayerHeader />;
-    }
-    if (isAnnotationsLayer(layer)) {
       return (
-        <AnnotationsLayerHeader
-          title={getAnnotationLayerTitle(layer)}
-          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+        <LayerHeaderContent
+          {...otherProps}
+          onChangeIndexPattern={(indexPatternId) => {
+            onChangeIndexPattern(indexPatternId);
+          }}
         />
       );
-    }
-    return undefined;
-  },
+    },
 
-  ToolbarComponent(props) {
-    return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
-  },
+    isSubtypeCompatible(subtype1, subtype2) {
+      return (
+        (isHorizontalSeries(subtype1 as SeriesType) &&
+          isHorizontalSeries(subtype2 as SeriesType)) ||
+        (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+      );
+    },
+    getSubtypeSwitch({ state, setState, layerId }) {
+      const index = state.layers.findIndex((l) => l.layerId === layerId);
+      const layer = state.layers[index];
 
-  DimensionEditorComponent(props) {
-    const allProps = {
-      ...props,
-      datatableUtilities: data.datatableUtilities,
-      formatFactory: fieldFormats.deserialize,
-      paletteService,
-    };
+      if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
+        return null;
+      }
 
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
-    const dimensionEditor = isReferenceLayer(layer) ? (
-      <ReferenceLinePanel {...allProps} palettes={palettes} />
-    ) : isAnnotationsLayer(layer) ? (
-      <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
-    ) : (
-      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={theme.darkMode} />
-    );
-
-    return dimensionEditor;
-  },
-
-  DimensionEditorDataExtraComponent(props) {
-    const allProps = {
-      ...props,
-      datatableUtilities: data.datatableUtilities,
-      formatFactory: fieldFormats.deserialize,
-      paletteService,
-    };
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
-    if (isReferenceLayer(layer)) {
-      return null;
-    }
-    if (isAnnotationsLayer(layer)) {
-      return null;
-    }
-
-    return <DataDimensionEditorDataSectionExtra {...allProps} />;
-  },
-  getAddLayerButtonComponent: (props) => {
-    return (
-      <AddLayerButton
-        {...props}
-        eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
-          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
-            await props.ensureIndexPattern(
-              loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
-            );
-
-            props.registerLibraryAnnotationGroup({
-              id: loadedGroupInfo.annotationGroupId,
-              group: loadedGroupInfo,
-            });
+      return () => (
+        <SubtypeSwitch
+          layer={layer}
+          setLayerState={(newLayer: XYDataLayerConfig) =>
+            setState(updateLayer(state, newLayer, index))
           }
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
-        }}
-      />
-    );
-  },
-  toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
-    toExpression(
-      state,
-      layers,
-      paletteService,
-      datasourceExpressionsByLayers,
-      eventAnnotationService
-    ),
+        />
+      );
+    },
 
-  toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
-    toPreviewExpression(
-      state,
-      layers,
-      paletteService,
-      datasourceExpressionsByLayers,
-      eventAnnotationService
-    ),
+    getCustomLayerHeader(props) {
+      const layer = props.state.layers.find((l) => l.layerId === props.layerId);
+      if (!layer) {
+        return undefined;
+      }
+      if (isReferenceLayer(layer)) {
+        return <ReferenceLayerHeader />;
+      }
+      if (isAnnotationsLayer(layer)) {
+        return (
+          <AnnotationsLayerHeader
+            title={getAnnotationLayerTitle(layer)}
+            hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+          />
+        );
+      }
+      if (isAdditionalLayerType(layer)) {
+        const extraLayer = additionalLayerMap.get(layer.layerType)!;
+        return extraLayer.getCustomLayerHeader?.(props);
+      }
+      return undefined;
+    },
 
-  getUserMessages(state, { frame }) {
-    const { datasourceLayers, dataViews, activeData } = frame;
-    const annotationLayers = getAnnotationsLayers(state.layers);
-    const errors: UserMessage[] = [];
+    ToolbarComponent(props) {
+      return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
+    },
 
-    const hasDateHistogram = isTimeChart(getDataLayers(state.layers), frame);
+    DimensionEditorComponent(props) {
+      const allProps = {
+        ...props,
+        datatableUtilities: data.datatableUtilities,
+        formatFactory: fieldFormats.deserialize,
+        paletteService,
+      };
 
-    annotationLayers.forEach((layer) => {
-      layer.annotations.forEach((annotation) => {
-        if (!hasDateHistogram) {
-          errors.push({
-            uniqueId: ANNOTATION_MISSING_DATE_HISTOGRAM,
-            severity: 'error',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
-            shortMessage: i18n.translate(
-              'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
-              {
-                defaultMessage:
-                  'Annotations require a time based chart to work. Add a date histogram.',
-              }
-            ),
-            longMessage: '',
-          });
-        }
-
-        const errorMessages = getAnnotationLayerErrors(layer, annotation.id, dataViews);
-        errors.push(...errorMessages);
+      const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+        darkMode: false,
+        name: 'amsterdam',
       });
-    });
+      const palettes = getKbnPalettes(theme);
+      const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+      if (isReferenceLayer(layer)) {
+        return <ReferenceLinePanel {...allProps} palettes={palettes} />;
+      }
+      if (isAnnotationsLayer(layer)) {
+        return <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />;
+      }
+      if (isDataLayer(layer)) {
+        return (
+          <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={theme.darkMode} />
+        );
+      }
 
-    // check if the layers in the state are compatible with this type of chart
-    if (state && state.layers.length > 1) {
-      // Order is important here: Y Axis is fundamental to exist to make it valid
-      const yLayerValidation = validateLayersForDimension(
-        'y',
-        state.layers,
-        ({ accessors }) => accessors == null || accessors.length === 0 // has no accessor
+      if (isAdditionalLayerType(layer)) {
+        const extraLayer = additionalLayerMap.get(layer.layerType)!;
+        return extraLayer.getDimensionEditorComponent({
+          ...allProps,
+          layer: layer as MinimalLayerConfig<ExtraAppendLayerArg>,
+          palettes,
+        });
+      }
+      return null;
+    },
+
+    DimensionEditorDataExtraComponent(props) {
+      const allProps = {
+        ...props,
+        datatableUtilities: data.datatableUtilities,
+        formatFactory: fieldFormats.deserialize,
+        paletteService,
+      };
+      const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+      if (isReferenceLayer(layer)) {
+        return null;
+      }
+      if (isAnnotationsLayer(layer)) {
+        return null;
+      }
+      if (isDataLayer(layer)) {
+        return <DataDimensionEditorDataSectionExtra {...allProps} />;
+      }
+      if (isAdditionalLayerType(layer)) {
+        const extraLayer = additionalLayerMap.get(layer.layerType)!;
+        return extraLayer.getDimensionEditorDataExtraComponent(
+          allProps,
+          layer as MinimalLayerConfig<ExtraAppendLayerArg>
+        );
+      }
+      return null;
+    },
+    getAddLayerButtonComponent: (props) => {
+      return (
+        <AddLayerButton
+          {...props}
+          eventAnnotationService={eventAnnotationService}
+          addLayer={async (type, loadedGroupInfo, _, seriesType) => {
+            if (additionalLayerMap.has(type)) {
+              const extraLayer = additionalLayerMap.get(type)!;
+              extraLayer.onAddLayer?.(props, loadedGroupInfo);
+            }
+            if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+              await props.ensureIndexPattern(
+                loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
+              );
+
+              props.registerLibraryAnnotationGroup({
+                id: loadedGroupInfo.annotationGroupId,
+                group: loadedGroupInfo,
+              });
+            }
+            props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
+          }}
+        />
       );
-      if (!yLayerValidation.valid) {
-        errors.push(yLayerValidation.error);
-      }
+    },
+    toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
+      toExpression(
+        state,
+        layers,
+        paletteService,
+        datasourceExpressionsByLayers,
+        eventAnnotationService,
+        additionalLayerMap
+      ),
 
-      const breakDownLayerValidation = validateLayersForDimension(
-        'break_down',
-        state.layers,
-        ({ splitAccessor, seriesType }) =>
-          seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
-      );
-      if (!breakDownLayerValidation.valid) {
-        errors.push(breakDownLayerValidation.error);
-      }
-    }
-    // temporary fix for #87068
-    errors.push(
-      ...checkXAccessorCompatibility(state, datasourceLayers).map<UserMessage>(
-        ({ shortMessage, longMessage }) => ({
-          severity: 'error',
-          uniqueId: XY_X_WRONG_DATA_TYPE,
-          fixableInEditor: true,
-          displayLocations: [{ id: 'visualization' }],
-          shortMessage,
-          longMessage,
-        })
-      )
-    );
+    toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
+      toPreviewExpression(
+        state,
+        layers,
+        paletteService,
+        datasourceExpressionsByLayers,
+        eventAnnotationService,
+        additionalLayerMap
+      ),
 
-    for (const layer of getDataLayers(state.layers)) {
-      const datasourceAPI = datasourceLayers[layer.layerId];
-      if (datasourceAPI) {
-        for (const accessor of layer.accessors) {
-          const operation = datasourceAPI.getOperationForColumnId(accessor);
-          if (operation && operation.dataType !== 'number') {
-            errors.push({
-              uniqueId: XY_Y_WRONG_DATA_TYPE,
-              severity: 'error',
-              fixableInEditor: true,
-              displayLocations: [{ id: 'visualization' }],
-              shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
-                defaultMessage: `Wrong data type for {axis}.`,
-                values: {
-                  axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
-                },
-              }),
-              longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
-                defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
-                values: {
-                  label: operation.label,
-                  dataType: operation.dataType,
-                  axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
-                },
-              }),
-            });
-          }
-        }
-      }
-    }
+    getUserMessages(state, { frame }) {
+      const { datasourceLayers, dataViews, activeData } = frame;
+      const errors: UserMessage[] = [];
+      const dataLayers = getDataLayers(state.layers);
 
-    const warnings: UserMessage[] = [];
+      const hasDateHistogram = isTimeChart(dataLayers, frame);
 
-    if (state?.layers.length > 0 && activeData) {
-      const filteredLayers = [
-        ...getDataLayers(state.layers),
-        ...getReferenceLayers(state.layers),
-      ].filter(({ accessors }) => accessors.length > 0);
-
-      const accessorsWithArrayValues = [];
-
-      for (const layer of filteredLayers) {
-        const { layerId, accessors } = layer;
-        const rows = activeData?.[layerId] && activeData[layerId].rows;
-        if (!rows) {
-          break;
-        }
-        const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layerId]);
-        for (const accessor of accessors) {
-          const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
-          if (hasArrayValues) {
-            accessorsWithArrayValues.push(columnToLabel[accessor]);
-          }
-        }
-      }
-
-      accessorsWithArrayValues.forEach((label) =>
-        warnings.push({
-          uniqueId: XY_RENDER_ARRAY_VALUES,
-          severity: 'warning',
-          fixableInEditor: true,
-          displayLocations: [{ id: 'toolbar' }],
-          shortMessage: '',
-          longMessage: (
-            <FormattedMessage
-              key={label}
-              id="xpack.lens.xyVisualization.arrayValues"
-              defaultMessage="{label} contains array values. Your visualization may not render as expected."
-              values={{
-                label: <strong>{label}</strong>,
-              }}
-            />
-          ),
-        })
-      );
-    }
-
-    const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
-    const dataLayers = getDataLayers(state.layers);
-    const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
-    const logAxisGroups = axisGroups.filter(
-      ({ groupId }) =>
-        (groupId === 'left' && state.yLeftScale === 'log') ||
-        (groupId === 'right' && state.yRightScale === 'log')
-    );
-
-    if (logAxisGroups.length > 0) {
-      logAxisGroups
-        .map((axis) => {
-          const mixedDomainSeries = axis.series.filter((series) => {
-            let hasNegValues = false;
-            let hasPosValues = false;
-            const arr = activeData?.[series.layer]?.rows ?? [];
-            for (let index = 0; index < arr.length; index++) {
-              const value = arr[index][series.accessor];
-
-              if (value < 0) {
-                hasNegValues = true;
-              } else {
-                hasPosValues = true;
-              }
-
-              if (hasNegValues && hasPosValues) {
-                return true;
-              }
+      for (const layer of state.layers) {
+        if (isAnnotationsLayer(layer)) {
+          layer.annotations.forEach((annotation) => {
+            if (!hasDateHistogram) {
+              errors.push({
+                uniqueId: ANNOTATION_MISSING_DATE_HISTOGRAM,
+                severity: 'error',
+                fixableInEditor: true,
+                displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
+                shortMessage: i18n.translate(
+                  'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
+                  {
+                    defaultMessage:
+                      'Annotations require a time based chart to work. Add a date histogram.',
+                  }
+                ),
+                longMessage: '',
+              });
             }
 
-            return false;
+            const errorMessages = getAnnotationLayerErrors(layer, annotation.id, dataViews);
+            errors.push(...errorMessages);
           });
-          return {
-            ...axis,
-            mixedDomainSeries,
-          };
-        })
-        .forEach((axisGroup) => {
-          if (axisGroup.mixedDomainSeries.length === 0) return;
-          const { groupId } = axisGroup;
+        }
+        if (isDataLayer(layer)) {
+          const datasourceAPI = datasourceLayers[layer.layerId];
+          if (datasourceAPI) {
+            for (const accessor of layer.accessors) {
+              const operation = datasourceAPI.getOperationForColumnId(accessor);
+              if (operation && operation.dataType !== 'number') {
+                errors.push({
+                  uniqueId: XY_Y_WRONG_DATA_TYPE,
+                  severity: 'error',
+                  fixableInEditor: true,
+                  displayLocations: [{ id: 'visualization' }],
+                  shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
+                    defaultMessage: `Wrong data type for {axis}.`,
+                    values: {
+                      axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                    },
+                  }),
+                  longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
+                    defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
+                    values: {
+                      label: operation.label,
+                      dataType: operation.dataType,
+                      axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                    },
+                  }),
+                });
+              }
+            }
+          }
+        }
+        if (isAdditionalLayerType(layer)) {
+          const extraLayer = additionalLayerMap.get(layer.layerType)!;
+          const errorMessages = extraLayer.getUserMessages(
+            layer as MinimalLayerConfig<ExtraAppendLayerArg>,
+            hasDateHistogram
+          );
+          errors.push(...errorMessages);
+        }
+      }
 
+      // check if the layers in the state are compatible with this type of chart
+      if (state && state.layers.length > 1) {
+        // Order is important here: Y Axis is fundamental to exist to make it valid
+        const yLayerValidation = validateLayersForDimension(
+          'y',
+          state.layers,
+          ({ accessors }) => accessors == null || accessors.length === 0 // has no accessor
+        );
+        if (!yLayerValidation.valid) {
+          errors.push(yLayerValidation.error);
+        }
+
+        const breakDownLayerValidation = validateLayersForDimension(
+          'break_down',
+          state.layers,
+          ({ splitAccessor, seriesType }) =>
+            seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
+        );
+        if (!breakDownLayerValidation.valid) {
+          errors.push(breakDownLayerValidation.error);
+        }
+      }
+      // temporary fix for #87068
+      errors.push(
+        ...checkXAccessorCompatibility(state, datasourceLayers).map<UserMessage>(
+          ({ shortMessage, longMessage }) => ({
+            severity: 'error',
+            uniqueId: XY_X_WRONG_DATA_TYPE,
+            fixableInEditor: true,
+            displayLocations: [{ id: 'visualization' }],
+            shortMessage,
+            longMessage,
+          })
+        )
+      );
+
+      const warnings: UserMessage[] = [];
+
+      if (state?.layers.length > 0 && activeData) {
+        const filteredLayers = [...dataLayers, ...getReferenceLayers(state.layers)].filter(
+          ({ accessors }) => accessors.length > 0
+        );
+
+        const accessorsWithArrayValues = [];
+
+        for (const layer of filteredLayers) {
+          const { layerId, accessors } = layer;
+          const rows = activeData?.[layerId] && activeData[layerId].rows;
+          if (!rows) {
+            break;
+          }
+          const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layerId]);
+          for (const accessor of accessors) {
+            const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+            if (hasArrayValues) {
+              accessorsWithArrayValues.push(columnToLabel[accessor]);
+            }
+          }
+        }
+
+        accessorsWithArrayValues.forEach((label) =>
           warnings.push({
-            // TODO: can we push the group into the metadata and use a correct unique ID here?
-            uniqueId: `${XY_MIXED_LOG_SCALE}${groupId}`,
+            uniqueId: XY_RENDER_ARRAY_VALUES,
             severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
             shortMessage: '',
             longMessage: (
               <FormattedMessage
-                id="xpack.lens.xyVisualization.mixedLogScaleWarning"
-                defaultMessage="When the {axisName} axis is set to logarithmic scale, the dataset should not contain positive and negative data."
+                key={label}
+                id="xpack.lens.xyVisualization.arrayValues"
+                defaultMessage="{label} contains array values. Your visualization may not render as expected."
                 values={{
-                  axisName:
-                    groupId === 'left' ? (
-                      <FormattedMessage
-                        id="xpack.lens.xyVisualization.mixedLogScaleWarningLeft"
-                        defaultMessage="left"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.lens.xyVisualization.mixedLogScaleWarningRight"
-                        defaultMessage="right"
-                      />
-                    ),
+                  label: <strong>{label}</strong>,
                 }}
               />
             ),
-            displayLocations: [{ id: 'toolbar' }],
-            fixableInEditor: true,
-          });
+          })
+        );
+      }
 
-          axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
+      const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+      const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
+      const logAxisGroups = axisGroups.filter(
+        ({ groupId }) =>
+          (groupId === 'left' && state.yLeftScale === 'log') ||
+          (groupId === 'right' && state.yRightScale === 'log')
+      );
+
+      if (logAxisGroups.length > 0) {
+        logAxisGroups
+          .map((axis) => {
+            const mixedDomainSeries = axis.series.filter((series) => {
+              let hasNegValues = false;
+              let hasPosValues = false;
+              const arr = activeData?.[series.layer]?.rows ?? [];
+              for (let index = 0; index < arr.length; index++) {
+                const value = arr[index][series.accessor];
+
+                if (value < 0) {
+                  hasNegValues = true;
+                } else {
+                  hasPosValues = true;
+                }
+
+                if (hasNegValues && hasPosValues) {
+                  return true;
+                }
+              }
+
+              return false;
+            });
+            return {
+              ...axis,
+              mixedDomainSeries,
+            };
+          })
+          .forEach((axisGroup) => {
+            if (axisGroup.mixedDomainSeries.length === 0) return;
+            const { groupId } = axisGroup;
+
             warnings.push({
               // TODO: can we push the group into the metadata and use a correct unique ID here?
-              uniqueId: `${XY_MIXED_LOG_SCALE_DIMENSION}${accessor}`,
+              uniqueId: `${XY_MIXED_LOG_SCALE}${groupId}`,
               severity: 'warning',
               shortMessage: '',
               longMessage: (
                 <FormattedMessage
-                  id="xpack.lens.xyVisualization.mixedLogScaleDimensionWarning"
-                  defaultMessage="This metric is using logarithmic scale and should not contain positive and negative data."
+                  id="xpack.lens.xyVisualization.mixedLogScaleWarning"
+                  defaultMessage="When the {axisName} axis is set to logarithmic scale, the dataset should not contain positive and negative data."
+                  values={{
+                    axisName:
+                      groupId === 'left' ? (
+                        <FormattedMessage
+                          id="xpack.lens.xyVisualization.mixedLogScaleWarningLeft"
+                          defaultMessage="left"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.lens.xyVisualization.mixedLogScaleWarningRight"
+                          defaultMessage="right"
+                        />
+                      ),
+                  }}
                 />
               ),
-              displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+              displayLocations: [{ id: 'toolbar' }],
               fixableInEditor: true,
             });
+
+            axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
+              warnings.push({
+                // TODO: can we push the group into the metadata and use a correct unique ID here?
+                uniqueId: `${XY_MIXED_LOG_SCALE_DIMENSION}${accessor}`,
+                severity: 'warning',
+                shortMessage: '',
+                longMessage: (
+                  <FormattedMessage
+                    id="xpack.lens.xyVisualization.mixedLogScaleDimensionWarning"
+                    defaultMessage="This metric is using logarithmic scale and should not contain positive and negative data."
+                  />
+                ),
+                displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+                fixableInEditor: true,
+              });
+            });
           });
-        });
+      }
+
+      const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
+
+      return errors.concat(warnings, info);
+    },
+
+    getUniqueLabels(state) {
+      return getUniqueLabels(state.layers, additionalLayerMap);
+    },
+    getUsedDataView(state, layerId) {
+      const layer = state.layers.find((l) => l.layerId === layerId);
+      return getUsedDataView(layer, additionalLayerMap, isAdditionalLayerType);
+    },
+    getUsedDataViews(state) {
+      const dataViews = [];
+      if (state?.layers) {
+        for (const layer of state.layers) {
+          const dataView = getUsedDataView(layer, additionalLayerMap, isAdditionalLayerType);
+          if (dataView) {
+            dataViews.push(dataView);
+          }
+        }
+      }
+      return dataViews;
+    },
+    DimensionTriggerComponent({ columnId, label }) {
+      if (label) {
+        return <DimensionTrigger id={columnId} label={label || defaultAnnotationLabel} />;
+      }
+      return null;
+    },
+
+    getSuggestionFromConvertToLensContext({ suggestions, context }) {
+      const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
+      const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
+        ...allSuggestions[0],
+        datasourceState: {
+          ...allSuggestions[0].datasourceState,
+          layers: allSuggestions.reduce(
+            (acc, s) => ({
+              ...acc,
+              ...s.datasourceState?.layers,
+            }),
+            {}
+          ),
+        },
+        visualizationState: {
+          ...allSuggestions[0].visualizationState,
+          ...(context.configuration as XYState),
+        },
+      };
+      return suggestion;
+    },
+
+    isEqual(state1, references1, state2, references2, annotationGroups) {
+      const injected1 = convertToRuntime(state1, annotationGroups, references1);
+      const injected2 = convertToRuntime(state2, annotationGroups, references2);
+      return isEqual(injected1, injected2);
+    },
+
+    getVisualizationInfo(state, frame) {
+      return getVisualizationInfo(state, frame, paletteService, fieldFormats);
+    },
+
+    getTelemetryEventsOnSave(state, prevState) {
+      const dataLayers = getDataLayers(state.layers);
+      const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
+      const colorMappingEvents = dataLayers.flatMap((l) => {
+        const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
+        return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
+      });
+      const legendStatsEvents = getLegendStatsTelemetryEvents(
+        state.legend.legendStats,
+        prevState ? prevState.legend.legendStats : undefined
+      );
+      return colorMappingEvents.concat(legendStatsEvents);
+    },
+
+    getRenderEventCounters(state) {
+      if (shouldDisplayTable(state.legend.legendStats ?? [])) {
+        return [`legend_stats`];
+      }
+      return [];
+    },
+  };
+};
+
+function getUsedDataView(
+  layer: XYLayerConfig | undefined,
+  additionalLayerMap: AdditionalLayersMap,
+  isAdditionalLayerType: (layer: XYLayerConfig) => layer is MinimalLayerConfig
+) {
+  if (layer) {
+    if (isAnnotationsLayer(layer)) {
+      return layer.indexPatternId;
     }
-
-    const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
-
-    return errors.concat(warnings, info);
-  },
-
-  getUniqueLabels(state) {
-    return getUniqueLabels(state.layers);
-  },
-  getUsedDataView(state, layerId) {
-    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
-  },
-  getUsedDataViews(state) {
-    return (
-      state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
-    );
-  },
-  DimensionTriggerComponent({ columnId, label }) {
-    if (label) {
-      return <DimensionTrigger id={columnId} label={label || defaultAnnotationLabel} />;
+    if (isAdditionalLayerType(layer)) {
+      const extraLayer = additionalLayerMap.get(layer.layerType)!;
+      return extraLayer.getUsedDataView?.(layer as MinimalLayerConfig<ExtraAppendLayerArg>);
     }
-    return null;
-  },
-
-  getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
-    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
-      ...allSuggestions[0],
-      datasourceState: {
-        ...allSuggestions[0].datasourceState,
-        layers: allSuggestions.reduce(
-          (acc, s) => ({
-            ...acc,
-            ...s.datasourceState?.layers,
-          }),
-          {}
-        ),
-      },
-      visualizationState: {
-        ...allSuggestions[0].visualizationState,
-        ...(context.configuration as XYState),
-      },
-    };
-    return suggestion;
-  },
-
-  isEqual(state1, references1, state2, references2, annotationGroups) {
-    const injected1 = convertToRuntime(state1, annotationGroups, references1);
-    const injected2 = convertToRuntime(state2, annotationGroups, references2);
-    return isEqual(injected1, injected2);
-  },
-
-  getVisualizationInfo(state, frame) {
-    return getVisualizationInfo(state, frame, paletteService, fieldFormats);
-  },
-
-  getTelemetryEventsOnSave(state, prevState) {
-    const dataLayers = getDataLayers(state.layers);
-    const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
-    const colorMappingEvents = dataLayers.flatMap((l) => {
-      const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
-      return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
-    });
-    const legendStatsEvents = getLegendStatsTelemetryEvents(
-      state.legend.legendStats,
-      prevState ? prevState.legend.legendStats : undefined
-    );
-    return colorMappingEvents.concat(legendStatsEvents);
-  },
-
-  getRenderEventCounters(state) {
-    if (shouldDisplayTable(state.legend.legendStats ?? [])) {
-      return [`legend_stats`];
-    }
-    return [];
-  },
-});
+  }
+}
 
 const getMappedAccessors = ({
   accessors,

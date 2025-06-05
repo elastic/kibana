@@ -14,15 +14,18 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
+import type { VisualizationMap, DatasourceMap } from '../types';
 import type { SaveProps } from './app';
 import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
-import type { LensAppState } from '../state_management';
+import type { LensAppState, DatasourceStates, VisualizationState } from '../state_management';
+import { mergeToNewDoc } from '../state_management/shared_logic';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
 import { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import { LensSerializedState } from '../react_embeddable/types';
 import { isLegacyEditorEmbeddable } from './app_helpers';
+import { getActiveDatasourceIdFromDoc } from '../utils';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -40,8 +43,11 @@ export type SaveModalContainerProps = {
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
+  visualizationMap?: VisualizationMap;
+  datasourceMap?: DatasourceMap;
   lensServices: Pick<
     LensAppServices,
+    | 'data'
     | 'attributeService'
     | 'savedObjectsTagging'
     | 'application'
@@ -78,6 +84,8 @@ export function SaveModalContainer({
   lensServices,
   initialContext,
   managed,
+  visualizationMap,
+  datasourceMap,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -152,7 +160,25 @@ export function SaveModalContainer({
           ...lensServices,
         },
         saveProps,
-        options
+        options,
+        (doc: LensDocument) => {
+          return mergeToNewDoc(
+            doc,
+            doc.state.visualization as VisualizationState,
+            doc.state.datasourceStates as DatasourceStates,
+            doc.state.query,
+            doc.state.filters,
+            getActiveDatasourceIdFromDoc(doc),
+            doc.state.adHocDataViews ?? {},
+            {
+              datasourceMap: datasourceMap ?? {},
+              visualizationMap: visualizationMap ?? {},
+              extractFilterReferences: lensServices.data.query.filterManager.extract.bind(
+                lensServices.data.query.filterManager
+              ),
+            }
+          );
+        }
       );
       onSave?.(saveProps);
       onClose();
@@ -192,11 +218,13 @@ export function SaveModalContainer({
 function fromDocumentToSerializedState(
   doc: LensDocument,
   panelSettings: Partial<LensSerializedState>,
+  getPesistableState: (doc: LensDocument) => LensDocument | undefined,
   originalInput?: LensAppProps['initialInput']
 ): LensSerializedState {
+  const persistableDoc = getPesistableState(doc);
   return {
     ...originalInput,
-    attributes: omit(doc, 'savedObjectId'),
+    attributes: persistableDoc ? omit(persistableDoc, 'savedObjectId') : undefined,
     savedObjectId: doc.savedObjectId,
     ...panelSettings,
   };
@@ -252,7 +280,8 @@ export type SaveVisualizationProps = Simplify<
 export const runSaveLensVisualization = async (
   props: SaveVisualizationProps,
   saveProps: SaveProps,
-  options: { saveToLibrary: boolean }
+  options: { saveToLibrary: boolean },
+  getPesistableState: (doc: LensDocument) => LensDocument | undefined
 ): Promise<Partial<LensAppState> | undefined> => {
   const {
     chrome,
@@ -327,6 +356,7 @@ export const runSaveLensVisualization = async (
         timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
         savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
+      getPesistableState,
       originalInput
     );
 

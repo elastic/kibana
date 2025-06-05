@@ -19,9 +19,15 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
-import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
+import type {
+  XYState,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+  XYLayerConfig,
+  AdditionalLayersMap,
+  MinimalLayerConfig,
+} from '../types';
 import {
-  getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   isAnnotationsLayer,
@@ -424,19 +430,29 @@ export const getAnnotationsConfiguration = ({
   };
 };
 
-export const getUniqueLabels = (layers: XYLayerConfig[]) => {
-  const annotationLayers = getAnnotationsLayers(layers);
+export const getUniqueLabels = <Args extends {}>(
+  layers: XYLayerConfig[],
+  additionalLayersMap?: AdditionalLayersMap
+) => {
   const columnLabelMap = {} as Record<string, string>;
 
   const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-  annotationLayers.forEach((layer) => {
-    if (!layer.annotations) {
-      return;
+  for (const layer of layers) {
+    if (isAnnotationsLayer(layer)) {
+      layer.annotations?.forEach((l) => {
+        columnLabelMap[l.id] = uniqueLabelGenerator(l.label);
+      });
     }
-    layer.annotations.forEach((l) => {
-      columnLabelMap[l.id] = uniqueLabelGenerator(l.label);
-    });
-  });
+    const additionalLayer = additionalLayersMap?.get(layer.layerType);
+    if (additionalLayer) {
+      // @ts-ignore could not solve this type issue
+      const values = additionalLayer.getDimensionValues?.(layer as MinimalLayerConfig<Args>) ?? [];
+      for (const value of values) {
+        columnLabelMap[value.id] = uniqueLabelGenerator(value.label);
+      }
+    }
+  }
+
   return columnLabelMap;
 };

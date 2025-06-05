@@ -32,6 +32,7 @@ import {
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
+  VisualizationLayer,
 } from '../types';
 
 export interface EditorFrameSetupPlugins {
@@ -84,9 +85,30 @@ async function collectAsyncDefinitions<T extends { id: string; alias?: string[] 
 export class EditorFrameService {
   private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
   private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
+  private readonly visualizationLayers: Array<
+    | { visualizationType: string; layer: VisualizationLayer }
+    | { visualizationType: string; layer: () => Promise<VisualizationLayer> }
+  > = [];
 
   public loadDatasources = () => collectAsyncDefinitions(this.datasources);
-  public loadVisualizations = () => collectAsyncDefinitions(this.visualizations);
+  public loadVisualizations = async () => {
+    const [visualizationMap, layersDefs] = await Promise.all([
+      collectAsyncDefinitions(this.visualizations),
+      await Promise.all(
+        this.visualizationLayers.map(({ layer: definition }) =>
+          typeof definition === 'function' ? definition() : definition
+        )
+      ),
+    ]);
+
+    layersDefs.forEach((layer, i) => {
+      const { visualizationType } = this.visualizationLayers[i];
+      if (layer && visualizationMap[visualizationType]?.addNewLayerType) {
+        visualizationMap[visualizationType].addNewLayerType?.(layer);
+      }
+    });
+    return visualizationMap;
+  };
 
   /**
    * This method takes a Lens saved object as returned from the persistence helper,
@@ -115,6 +137,12 @@ export class EditorFrameService {
       },
       registerVisualization: (visualization) => {
         this.visualizations.push(visualization as Visualization<unknown>);
+      },
+      registerVisualizationLayer: (visualizationType, layer) => {
+        this.visualizationLayers.push({
+          visualizationType,
+          layer: layer as VisualizationLayer<unknown>,
+        });
       },
     };
   }

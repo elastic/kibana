@@ -529,7 +529,7 @@ function buildSuggestion({
     splitAccessor: splitBy?.columnId,
     accessors,
     yConfig:
-      existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
+      existingLayer && 'yConfig' in existingLayer && Array.isArray(existingLayer.yConfig)
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: LayerTypes.DATA,

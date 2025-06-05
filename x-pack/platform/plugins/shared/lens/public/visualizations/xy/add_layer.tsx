@@ -149,7 +149,8 @@ export function AddLayerButton({
                 const { type, label, icon, disabled, toolTipContent } = props;
                 if (type === LayerTypes.ANNOTATIONS) {
                   return annotationPanel(props);
-                } else if (type === LayerTypes.DATA) {
+                }
+                if (type === LayerTypes.DATA) {
                   if (horizontalOnly) {
                     return {
                       toolTipContent,

@@ -7666,6 +7666,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/third-party-vis-layer-lens-example-plugin@link:x-pack/examples/third_party_vis_layer_lens_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/third-party-vis-lens-example-plugin@link:x-pack/examples/third_party_vis_lens_example":
   version "0.0.0"
   uid ""

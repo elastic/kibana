@@ -34,6 +34,7 @@ interface RemoveLayerAction {
   isOnlyLayer: boolean;
   core: StartServices;
   customModalText?: { title?: string; description?: string };
+  supportedLayerTypes?: LayerType[];
 }
 
 const SKIP_DELETE_MODAL_KEY = 'skipDeleteModal';
@@ -41,7 +42,8 @@ const SKIP_DELETE_MODAL_KEY = 'skipDeleteModal';
 const getCopy = (
   layerType: LayerType,
   isOnlyLayer?: boolean,
-  customModalText: { title?: string; description?: string } | undefined = undefined
+  customModalText: { title?: string; description?: string } | undefined = undefined,
+  supportedLayerTypes: LayerType[] = []
 ): { buttonLabel: string; modalTitle: string; modalBody: string } => {
   if (isOnlyLayer && layerType === 'data') {
     return {
@@ -108,6 +110,24 @@ const getCopy = (
       };
 
     default:
+      if (supportedLayerTypes.includes(layerType)) {
+        // If the layer type is not recognized, we throw an error.
+        return {
+          buttonLabel,
+          modalTitle:
+            customModalText?.title ??
+            i18n.translate('xpack.lens.modalTitle.title.deleteVis', {
+              defaultMessage: 'Delete {layerType} layer?',
+              values: { layerType },
+            }),
+          modalBody:
+            customModalText?.description ??
+            i18n.translate('xpack.lens.layer.confirmModal.deleteVis', {
+              defaultMessage: `Deleting this layer removes the {layerType} and its configurations. `,
+              values: { layerType },
+            }),
+        };
+      }
       throw new Error('Unknown layer type');
   }
 };
@@ -207,7 +227,8 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
   const { buttonLabel, modalTitle, modalBody } = getCopy(
     props.layerType || LayerTypes.DATA,
     props.isOnlyLayer,
-    props.customModalText
+    props.customModalText,
+    props.supportedLayerTypes
   );
 
   return {

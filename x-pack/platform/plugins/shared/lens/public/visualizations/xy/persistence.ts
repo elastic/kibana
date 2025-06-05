@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 
 import { LegendValue } from '@elastic/charts';
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups } from '../../types';
+import { AnnotationGroups, VisualizationLayer } from '../../types';
 import {
   XYLayerConfig,
   XYDataLayerConfig,
@@ -20,10 +20,13 @@ import {
   XYAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  State,
+  MinimalLayerConfig,
 } from './types';
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
+import { ExtraAppendLayerArg } from './visualization';
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
@@ -76,7 +79,8 @@ export type XYPersistedAnnotationLayerConfig =
 export type XYPersistedLayerConfig =
   | XYDataLayerConfig
   | XYReferenceLineLayerConfig
-  | XYPersistedAnnotationLayerConfig;
+  | XYPersistedAnnotationLayerConfig
+  | MinimalLayerConfig;
 
 export type XYPersistedState = Omit<XYState, 'layers'> & {
   layers: XYPersistedLayerConfig[];
@@ -93,74 +97,92 @@ export function convertToRuntime(
   return newState;
 }
 
-export function convertToPersistable(state: XYState) {
+export function convertToPersistable(
+  state: XYState,
+  additionalLayerMap: Map<string, VisualizationLayer<State, XYPersistedState, ExtraAppendLayerArg>>
+) {
   const persistableState: XYPersistedState = state;
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
 
   persistableState.layers.forEach((layer) => {
-    // anything but an annotation can just be persisted as is
-    if (!isAnnotationsLayer(layer)) {
-      persistableLayers.push(layer);
-      return;
-    }
-    // a by value annotation layer can be persisted with some config tweak
-    if (!isByReferenceAnnotationsLayer(layer)) {
-      const { indexPatternId, ...persistableLayer } = layer;
+    if (isAnnotationsLayer(layer)) {
+      // a by value annotation layer can be persisted with some config tweak
+      if (!isByReferenceAnnotationsLayer(layer)) {
+        const { indexPatternId, ...persistableLayer } = layer;
+        savedObjectReferences.push({
+          type: 'index-pattern',
+          id: indexPatternId,
+          name: getLayerReferenceName(layer.layerId),
+        });
+        persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
+        return;
+      }
+      /**
+       * by reference annotation layer needs to be handled carefully
+       **/
+
+      // make this id stable so that it won't retrigger all the time a change diff
+      const referenceName = `ref-${layer.layerId}`;
       savedObjectReferences.push({
-        type: 'index-pattern',
-        id: indexPatternId,
-        name: getLayerReferenceName(layer.layerId),
+        type: EVENT_ANNOTATION_GROUP_TYPE,
+        id: layer.annotationGroupId,
+        name: referenceName,
       });
-      persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
-      return;
-    }
-    /**
-     * by reference annotation layer needs to be handled carefully
-     **/
 
-    // make this id stable so that it won't retrigger all the time a change diff
-    const referenceName = `ref-${layer.layerId}`;
-    savedObjectReferences.push({
-      type: EVENT_ANNOTATION_GROUP_TYPE,
-      id: layer.annotationGroupId,
-      name: referenceName,
-    });
+      // if there's no divergence from the library, it can be persisted without much ado
+      if (!annotationLayerHasUnsavedChanges(layer)) {
+        const persistableLayer: XYPersistedByReferenceAnnotationLayerConfig = {
+          persistanceType: 'byReference',
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          annotationGroupRef: referenceName,
+        };
 
-    // if there's no divergence from the library, it can be persisted without much ado
-    if (!annotationLayerHasUnsavedChanges(layer)) {
-      const persistableLayer: XYPersistedByReferenceAnnotationLayerConfig = {
-        persistanceType: 'byReference',
+        persistableLayers.push(persistableLayer);
+        return;
+      }
+      // this is the case where the by reference diverged from library
+      // so it needs to persist some extra metadata
+      const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
+        persistanceType: 'linked',
+        cachedMetadata: layer.cachedMetadata || {
+          title: layer.__lastSaved.title,
+          description: layer.__lastSaved.description,
+          tags: layer.__lastSaved.tags,
+        },
         layerId: layer.layerId,
         layerType: layer.layerType,
         annotationGroupRef: referenceName,
+        annotations: layer.annotations,
+        ignoreGlobalFilters: layer.ignoreGlobalFilters,
       };
-
       persistableLayers.push(persistableLayer);
+
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: layer.indexPatternId,
+        name: getLayerReferenceName(layer.layerId),
+      });
+    }
+
+    // now check from the extra layer registry
+    const extraLayer = additionalLayerMap.get(layer.layerType);
+    if (extraLayer) {
+      // if no method is exposed, save the layer as is
+      if (!extraLayer.getPersistableLayer) {
+        persistableLayers.push(layer);
+      } else {
+        const persistedLayer = extraLayer.getPersistableLayer?.(state, layer);
+        // if the function returns undefined that is an explicit request to not persist the layer
+        if (persistedLayer != null) {
+          persistableLayers.push(persistedLayer);
+        }
+      }
       return;
     }
-    // this is the case where the by reference diverged from library
-    // so it needs to persist some extra metadata
-    const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
-      persistanceType: 'linked',
-      cachedMetadata: layer.cachedMetadata || {
-        title: layer.__lastSaved.title,
-        description: layer.__lastSaved.description,
-        tags: layer.__lastSaved.tags,
-      },
-      layerId: layer.layerId,
-      layerType: layer.layerType,
-      annotationGroupRef: referenceName,
-      annotations: layer.annotations,
-      ignoreGlobalFilters: layer.ignoreGlobalFilters,
-    };
-    persistableLayers.push(persistableLayer);
-
-    savedObjectReferences.push({
-      type: 'index-pattern',
-      id: layer.indexPatternId,
-      name: getLayerReferenceName(layer.layerId),
-    });
+    // anything but an annotation can just be persisted as is
+    persistableLayers.push(layer);
   });
   return { savedObjectReferences, state: { ...persistableState, layers: persistableLayers } };
 }

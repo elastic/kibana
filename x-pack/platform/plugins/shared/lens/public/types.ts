@@ -7,7 +7,7 @@
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
@@ -43,8 +43,9 @@ import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { KbnPalettes } from '@kbn/palettes';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -52,7 +53,6 @@ import type {
   LensToggleActionData,
   LensPagesizeActionData,
 } from './visualizations/datatable/components/types';
-
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
@@ -64,6 +64,7 @@ import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
 import { TableInspectorAdapter } from './editor_frame_service/types';
+import { MinimalLayerConfig } from './async_services';
 
 export type StartServices = Pick<
   CoreStart,
@@ -150,6 +151,10 @@ export interface EditorFrameSetup {
     visualization:
       | Visualization<T, P, ExtraAppendLayerArg>
       | (() => Promise<Visualization<T, P, ExtraAppendLayerArg>>)
+  ) => void;
+  registerVisualizationLayer: <T, P, E>(
+    visualizationType: string,
+    layer: VisualizationLayer<T, P, E> | (() => Promise<VisualizationLayer<T, P, E>>)
   ) => void;
 }
 
@@ -1030,19 +1035,22 @@ export type AddLayerFunction<T = unknown> = (
 
 export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
 
-export interface VisualizationLayerDescription {
+export interface VisualizationLayerDescription<Args extends unknown = unknown> {
   type: LayerType;
   label: string;
   icon?: IconType;
   noDatasource?: boolean;
   disabled?: boolean;
   toolTipContent?: string;
-  initialDimensions?: Array<{
-    columnId: string;
-    groupId: string;
-    staticValue?: unknown;
-    autoTimeField?: boolean;
-  }>;
+  initialDimensions?: Array<
+    | {
+        columnId: string;
+        groupId: string;
+        staticValue?: unknown;
+        autoTimeField?: boolean;
+      }
+    | ({ columnId: string; groupId: string } & Args)
+  >;
 }
 
 export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
@@ -1128,6 +1136,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     /** @param contains map old -> new id **/
     clonedIDsMap: Map<string, string>
   ) => T;
+  addNewLayerType?: (layer: VisualizationLayer<T, P, ExtraAppendLayerArg>) => void;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
@@ -1167,7 +1176,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   ) => { title?: string; description?: string } | undefined;
 
   /** returns the type string of the given layer */
-  getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+  getLayerType: (layerId: string, state?: T) => LayerType | string | undefined;
 
   /**
    * Get the layers this one should be linked to (currently that means just keeping the data view in sync)
@@ -1487,3 +1496,165 @@ export type GetCompatibleCellValueActions = (
 ) => Promise<LensCellValueAction[]>;
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
+// Let's start with a semplification of this problem
+// focusing only on XY visualization for now
+export type VisualizationLayer<T = unknown, P = T, ExtraAppendLayerArg = unknown> = Simplify<{
+  /**
+  // The identifier for the visualization layer
+  */
+  layerType: string;
+  // metadata about the layer
+  /**
+   * A description of the layer, used to get generic metadata information about the layer
+   * @param state
+   * @returns
+   */
+  getLayerDescription: (state?: T) => VisualizationLayerDescription;
+  /**
+   * It should return any useful information about the layer
+   * to expose to the embeddable panel, for instance a count of the values defined, filters used, etc...
+   */
+  getVisualizationInfo?: Visualization<T, P, ExtraAppendLayerArg>['getVisualizationInfo'];
+  /**
+   * A helper method to extract the dataView used by the specific layer
+   */
+  getUsedDataView?: (layer: MinimalLayerConfig<ExtraAppendLayerArg>) => string;
+  /**
+   * A helper method to extract all the dataViews used within the layer
+   */
+  getUsedDataViews?: Visualization<T, P, ExtraAppendLayerArg>['getUsedDataViews'];
+  /**
+   * A comparison helper to check whether two layers of the same type are equal
+   */
+  isEqualType: (layer: MinimalLayerConfig<ExtraAppendLayerArg>) => boolean;
+  /**
+   * This methods should return the list of dimension values (aka accessors) ids
+   * to make Lens able to clone the layer
+   * @param layer
+   * @returns ids of the dimension values
+   * @example ['col-1', 'col-2']
+   */
+  getDimensionValues?: (
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>
+  ) => Array<{ id: string; label: string }>;
+  /**
+   * Give the custom layer the ability to tweak the cloned layer just before rendering it (i.e. useful to reset some valeus  to defaults)
+   * @param layer
+   * @returns
+   */
+  getClonedLayer?: (
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>
+  ) => MinimalLayerConfig<ExtraAppendLayerArg>;
+  /**
+   * It can be used to define what part of the layer can be persisted.
+   * If the layer should not be persisted, it should return undefined.
+   * @param state
+   * @param layer
+   * @returns
+   */
+  getPersistableLayer?: (
+    state: T,
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>
+  ) => MinimalLayerConfig<ExtraAppendLayerArg> | undefined;
+  /**
+   * This method can define a set of actions to be exposed at the layer level in the UI
+   * @param layerId
+   * @param state
+   * @param setState
+   * @param isSaveable
+   * @returns
+   */
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    isSaveable?: boolean
+  ) => LayerAction[];
+  /**
+   * This method it is required to define how to translate the layer configuration
+   * into something that should be rendered in the visualization.
+   */
+  toExpression: Visualization<T, P, ExtraAppendLayerArg>['toExpression'];
+  /**
+   * Some at the toExpression but scope to the suggestions
+   */
+  toPreviewExpression?: Visualization<T, P, ExtraAppendLayerArg>['toPreviewExpression'];
+  // UI utilities
+  /**
+   * This method defines how the layer preview UI should look like:
+   * what groups should be shown? Shoud it have any custom icon? color? etc...
+   * @param props
+   * @returns
+   */
+  getConfiguration: (props: {
+    state: T;
+    frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>;
+  }) => {
+    hidden?: boolean | undefined;
+    groups: VisualizationDimensionGroupConfig[];
+  };
+  /**
+   * This method is used when updating a dimension in the layer
+   * @param props
+   * @returns
+   */
+  updateDimension: Visualization<T, P, ExtraAppendLayerArg>['setDimension'];
+  /**
+   * This method is used when remving a dimension in the layer
+   * @param props
+   * @returns
+   */
+  removeDimension: Visualization<T, P, ExtraAppendLayerArg>['removeDimension'];
+  /**
+   * This is a helper method used to collect error/warning/info messages
+   * that should be displayed to the user in the UI.
+   * If any configuration validation should be performed, it should be done here.
+   * @param layer
+   * @param hasDateHistogram
+   * @returns
+   */
+  getUserMessages: (
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>,
+    hasDateHistogram: boolean
+  ) => UserMessage[];
+  /**
+   * This is a hook for the current drag and drop system.
+   * What should happen (i.e. how the state changes) when the user drops a dimension
+   * here should be implemented in this method
+   */
+  onDrop?: Visualization<T, P, ExtraAppendLayerArg>['onDrop'];
+  // Layer CRUD operations
+  onAddLayer?: (props: AddLayerButtonProps<T>, extraArgs?: ExtraAppendLayerArg) => void;
+  /**
+   * This method is used to provide a custom logic for the layer
+   * creation
+   */
+  appendLayer?: Visualization<T, P, ExtraAppendLayerArg>['appendLayer'];
+  // React components for the UI (description TBD)
+  getDimensionEditorComponent: (
+    props: VisualizationDimensionEditorProps<T> & {
+      formatFactory: FormatFactory;
+      paletteService: PaletteRegistry;
+      layer: MinimalLayerConfig<ExtraAppendLayerArg>;
+      palettes: KbnPalettes;
+    }
+  ) => null | ReactElement<VisualizationDimensionEditorProps<T>>;
+  getDimensionEditorDataExtraComponent: (
+    props: VisualizationDimensionEditorProps<T> & {
+      formatFactory: FormatFactory;
+      paletteService: PaletteRegistry;
+    },
+    layer: MinimalLayerConfig<ExtraAppendLayerArg>
+  ) => null | ReactElement<VisualizationDimensionEditorProps<T>>;
+  getDimensionTriggerComponent: (props: {
+    columnId: string;
+    label: string;
+  }) => null | ReactElement<{ columnId: string; label: string }>;
+  getLayerPanelComponent: (
+    props: VisualizationLayerWidgetProps<T>
+  ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
+  getCustomRemoveLayerText?: Visualization<T, P, ExtraAppendLayerArg>['getCustomRemoveLayerText'];
+  getCustomLayerHeader?: Visualization<T, P, ExtraAppendLayerArg>['getCustomLayerHeader'];
+}>;

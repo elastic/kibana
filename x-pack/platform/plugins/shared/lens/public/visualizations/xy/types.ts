@@ -37,8 +37,10 @@ import {
 import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
 import { CollapseFunction } from '../../../common/expressions';
-import type { VisualizationType } from '../../types';
+import type { VisualizationLayer, VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
+import { XYPersistedState } from './persistence';
+import { ExtraAppendLayerArg } from './visualization';
 
 export const YAxisModes = {
   AUTO: 'auto',
@@ -135,10 +137,17 @@ export type XYAnnotationLayerConfig =
   | XYByReferenceAnnotationLayerConfig
   | XYByValueAnnotationLayerConfig;
 
-export type XYLayerConfig =
+// any other layer should have at least these 2 properties
+export type MinimalLayerConfig<Args extends unknown = unknown> = {
+  layerType: string;
+  layerId: string;
+} & Args;
+
+export type XYLayerConfig<Args extends unknown = unknown> =
   | XYDataLayerConfig
   | XYReferenceLineLayerConfig
-  | XYAnnotationLayerConfig;
+  | XYAnnotationLayerConfig
+  | MinimalLayerConfig<Args>;
 
 export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
   xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
@@ -343,3 +352,8 @@ export const visualizationTypes: VisualizationType[] = [
     subtypes: ['line'],
   },
 ];
+
+export type AdditionalLayersMap = Map<
+  string,
+  VisualizationLayer<State, XYPersistedState, ExtraAppendLayerArg>
+>;

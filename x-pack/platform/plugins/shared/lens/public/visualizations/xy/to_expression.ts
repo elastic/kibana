@@ -50,7 +50,12 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
-import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
+import type {
+  OperationMetadata,
+  DatasourcePublicAPI,
+  DatasourceLayers,
+  VisualizationLayer,
+} from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -68,6 +73,8 @@ import {
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+import { XYPersistedState } from './persistence';
+import { ExtraAppendLayerArg } from './visualization';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
@@ -92,7 +99,8 @@ export const toExpression = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
-  eventAnnotationService: EventAnnotationServiceType
+  eventAnnotationService: EventAnnotationServiceType,
+  additionalLayersMap: Map<string, VisualizationLayer<State, XYPersistedState, ExtraAppendLayerArg>>
 ): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -144,7 +152,8 @@ export function toPreviewExpression(
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
-  eventAnnotationService: EventAnnotationServiceType
+  eventAnnotationService: EventAnnotationServiceType,
+  additionaLayersMap: Map<string, VisualizationLayer<State, XYPersistedState, ExtraAppendLayerArg>>
 ) {
   return toExpression(
     {
@@ -160,7 +169,8 @@ export function toPreviewExpression(
     datasourceLayers,
     paletteService,
     datasourceExpressionsByLayers,
-    eventAnnotationService
+    eventAnnotationService,
+    additionaLayersMap
   );
 }
 

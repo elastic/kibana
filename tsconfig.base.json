@@ -1988,6 +1988,8 @@
       "@kbn/testing-embedded-lens-plugin/*": ["x-pack/examples/testing_embedded_lens/*"],
       "@kbn/third-party-lens-navigation-prompt-plugin": ["x-pack/examples/third_party_lens_navigation_prompt"],
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["x-pack/examples/third_party_lens_navigation_prompt/*"],
+      "@kbn/third-party-vis-layer-lens-example-plugin": ["x-pack/examples/third_party_vis_layer_lens_example"],
+      "@kbn/third-party-vis-layer-lens-example-plugin/*": ["x-pack/examples/third_party_vis_layer_lens_example/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["x-pack/examples/third_party_vis_lens_example"],
       "@kbn/third-party-vis-lens-example-plugin/*": ["x-pack/examples/third_party_vis_lens_example/*"],
       "@kbn/threat-intelligence-plugin": ["x-pack/solutions/security/plugins/threat_intelligence"],

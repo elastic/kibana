@@ -30,6 +30,7 @@ import {
   selectFramePublicAPI,
   selectIsManaged,
 } from '../state_management';
+import { mergeToNewDoc } from '../state_management/shared_logic';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
@@ -113,12 +114,12 @@ export function App({
     datasourceStates,
     isLoading,
     isSaveable,
-    visualization,
+    visualization: visualizationState,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
 
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
+  const activeVisualization = visualizationState.activeId
+    ? visualizationMap[visualizationState.activeId]
     : undefined;
 
   const selectorDependencies = useMemo(
@@ -291,16 +292,18 @@ export function App({
     }
   }, []);
 
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
       const prevVisState =
-        persistedDoc?.visualizationType === visualization.activeId
+        persistedDoc?.visualizationType === visualizationState.activeId
           ? persistedDoc?.state.visualization
           : undefined;
 
       const telemetryEvents = activeVisualization?.getTelemetryEventsOnSave?.(
-        visualization.state,
+        visualizationState.state,
         prevVisState
       );
       if (telemetryEvents && telemetryEvents.length) {
@@ -322,7 +325,18 @@ export function App({
             ...lensAppServices,
           },
           saveProps,
-          options
+          options,
+          (docToSave) =>
+            mergeToNewDoc(
+              docToSave,
+              visualizationState,
+              datasourceStates,
+              data.query.queryString.getQuery(),
+              data.query.filterManager.getFilters(),
+              activeDatasourceId,
+              docToSave.state.adHocDataViews || {},
+              selectorDependencies
+            )
         );
         if (newState) {
           dispatchSetState(newState);
@@ -335,21 +349,25 @@ export function App({
       }
     },
     [
-      visualization.activeId,
-      visualization.state,
-      activeVisualization,
       dispatch,
+      persistedDoc,
+      visualizationState,
+      activeVisualization,
       lastKnownDoc,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
-      persistedDoc,
       onAppLeave,
       redirectTo,
       switchDatasource,
       incomingState?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
+      datasourceStates,
+      data.query.queryString,
+      data.query.filterManager,
+      activeDatasourceId,
+      selectorDependencies,
       dispatchSetState,
     ]
   );
@@ -413,8 +431,6 @@ export function App({
         })
       : undefined;
 
-  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
   const { getUserMessages, addUserMessages } = useApplicationUserMessages({
@@ -431,8 +447,8 @@ export function App({
         : null,
     dispatch,
     visualization: activeVisualization,
-    visualizationType: visualization.activeId,
-    visualizationState: visualization,
+    visualizationType: visualizationState.activeId,
+    visualizationState,
   });
 
   return (
@@ -489,6 +505,8 @@ export function App({
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
           originatingApp={
             isLinkedToOriginatingApp
               ? incomingState?.originatingApp ?? initialContext?.originatingApp

@@ -29,6 +29,7 @@ import {
 import {
   getDataLayers,
   isAnnotationsLayer,
+  isReferenceLayer,
   isDataLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
@@ -137,9 +138,12 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
     return null;
   }
-  return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
-  );
+  if (isDataLayer(layer) || isReferenceLayer(layer)) {
+    return (
+      layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+    );
+  }
+  return null;
 };
 
 export const getColumnToLabelMap = (
