@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
 import { UseKnowledgeBaseResult } from '../hooks';
@@ -39,6 +39,34 @@ export function WelcomeMessageKnowledgeBase({
   }
 
   if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+    if (knowledgeBase.status.value?.isReIndexing) {
+      return (
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
+          <EuiFlexItem grow>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutTitle',
+                {
+                  defaultMessage: 'Re-indexing in progress.',
+                }
+              )}
+              color="warning"
+              iconType="alert"
+              data-test-subj="welcomeMessageKnowledgeBaseReindexingCallOut"
+            >
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reindexingCalloutBody',
+                {
+                  defaultMessage:
+                    'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
+                }
+              )}
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return showSuccessBanner ? (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
