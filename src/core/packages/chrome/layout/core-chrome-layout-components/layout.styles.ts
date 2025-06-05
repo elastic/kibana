@@ -29,7 +29,7 @@ export const useLayoutStyles = ({
   sidebarWidth,
   sidebarPanelWidth,
 }: LayoutStyleArgs) => {
-  return css`
+  const cssProp = css`
     align-items: baseline;
     height: 100vh;
     width: 100vw;
@@ -38,24 +38,31 @@ export const useLayoutStyles = ({
 
     display: grid;
 
-    // TODO: clintandrewhall - Inline these
-    grid-template-columns:
-      ${navigationWidth}px
-      ${navigationPanelWidth}px
-      1fr
-      ${sidebarPanelWidth}px
-      ${sidebarWidth}px;
-
-    grid-template-rows:
-      ${bannerHeight}px
-      ${headerHeight}px
-      1fr
-      ${footerHeight}px;
-
     grid-template-areas:
       'banner banner banner banner banner'
       'navigation navigationPanel header sidebarPanel sidebar'
       'navigation navigationPanel app sidebarPanel sidebar'
       'navigation navigationPanel footer sidebarPanel sidebar';
   `;
+
+  const style = {
+    gridTemplateColumns: `
+      ${navigationWidth}px
+      ${navigationPanelWidth}px
+      1fr
+      ${sidebarPanelWidth}px
+      ${sidebarWidth}px
+    `,
+    gridTemplateRows: `
+      ${bannerHeight}px
+      ${headerHeight}px
+      1fr
+      ${footerHeight}px
+    `,
+  };
+
+  return {
+    css: cssProp,
+    style,
+  };
 };

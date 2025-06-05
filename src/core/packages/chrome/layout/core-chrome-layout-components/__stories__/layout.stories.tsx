@@ -113,8 +113,8 @@ const LayoutExample = ({
               <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
                 <EuiFlexItem
                   grow={false}
+                  style={{ height: props.headerHeight }}
                   css={css`
-                    height: 50px;
                     white-space: nowrap;
                   `}
                 >
@@ -130,8 +130,7 @@ const LayoutExample = ({
                     color={colors.textPrimary}
                     backgroundColor={colors.primary}
                     labelCSS={css`
-                      transform: translate(-50%, -50%) rotate(-90deg);
-                      white-space: nowrap;
+                      text-align: center;
                     `}
                   />
                 </EuiFlexItem>
@@ -152,11 +151,28 @@ const LayoutExample = ({
         SidebarPanel: !includeSidebarPanel
           ? null
           : () => (
-              <Box
-                label="Sidebar Panel"
-                color={colors.accentSecondary}
-                backgroundColor={colors.textAccentSecondary}
-              />
+              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ height: props.headerHeight }}
+                  css={css`
+                    white-space: nowrap;
+                  `}
+                >
+                  <Box
+                    label="Sidebar Header"
+                    color={colors.accentSecondary}
+                    backgroundColor={colors.textAccentSecondary}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <Box
+                    label="Sidebar Panel"
+                    color={colors.accentSecondary}
+                    backgroundColor={colors.textAccentSecondary}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
         Footer: !includeFooter
           ? null
@@ -173,13 +189,13 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeNavigationPanel: true,
     includeSidebar: true,
     includeSidebarPanel: true,
-    bannerHeight: 50,
-    footerHeight: 50,
-    headerHeight: 50,
-    navigationWidth: 50,
-    navigationPanelWidth: 200,
-    sidebarPanelWidth: 300,
-    sidebarWidth: 50,
+    bannerHeight: 48,
+    footerHeight: 48,
+    headerHeight: 48,
+    navigationWidth: 48,
+    navigationPanelWidth: 240,
+    sidebarPanelWidth: 368,
+    sidebarWidth: 48,
   },
   argTypes: {
     includeBanner: {

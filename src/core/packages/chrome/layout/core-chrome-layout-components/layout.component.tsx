@@ -59,7 +59,7 @@ export const ChromeLayoutComponent = ({
   const hasSidebarPanel = !!SidebarPanel;
   const hasNavigationPanel = !!NavigationPanel;
 
-  const styleProps: LayoutStyleArgs = {
+  const styleArgs: LayoutStyleArgs = {
     ...props,
     bannerHeight: hasBanner ? props.bannerHeight : 0,
     footerHeight: hasFooter ? props.footerHeight : 0,
@@ -68,48 +68,48 @@ export const ChromeLayoutComponent = ({
     sidebarPanelWidth: hasSidebar && hasSidebarPanel ? props.sidebarPanelWidth : 0,
   };
 
-  const styles = useLayoutStyles(styleProps);
+  const styleProps = useLayoutStyles(styleArgs);
 
-  const slotProps = { hasBanner, hasFooter, hasSidebar, hasSidebarPanel, ...styleProps };
+  const slotProps = { hasBanner, hasFooter, hasSidebar, hasSidebarPanel, ...styleArgs };
 
   const banner = hasBanner ? (
-    <LayoutBanner height={styleProps.bannerHeight}>
+    <LayoutBanner height={styleArgs.bannerHeight}>
       <Banner {...slotProps} />
     </LayoutBanner>
   ) : null;
 
   const footer = hasFooter ? (
-    <LayoutFooter height={styleProps.footerHeight}>
+    <LayoutFooter height={styleArgs.footerHeight}>
       <Footer {...slotProps} />
     </LayoutFooter>
   ) : null;
 
   const navigationPanel = hasNavigationPanel ? (
-    <LayoutNavigationPanel width={styleProps.navigationPanelWidth}>
+    <LayoutNavigationPanel width={styleArgs.navigationPanelWidth}>
       <NavigationPanel {...slotProps} />
     </LayoutNavigationPanel>
   ) : null;
 
   const sidebar = hasSidebar ? (
-    <LayoutSidebar width={styleProps.sidebarWidth}>
+    <LayoutSidebar width={styleArgs.sidebarWidth}>
       <Sidebar {...slotProps} />
     </LayoutSidebar>
   ) : null;
 
   const sidebarPanel =
     hasSidebar && hasSidebarPanel ? (
-      <LayoutSidebarPanel width={styleProps.sidebarPanelWidth}>
+      <LayoutSidebarPanel width={styleArgs.sidebarPanelWidth}>
         <SidebarPanel {...slotProps} />
       </LayoutSidebarPanel>
     ) : null;
 
   return (
-    <div css={styles}>
+    <div {...styleProps}>
       {banner}
-      <LayoutHeader top={styleProps.bannerHeight} height={styleProps.headerHeight}>
+      <LayoutHeader top={styleArgs.bannerHeight} height={styleArgs.headerHeight}>
         <Header {...slotProps} />
       </LayoutHeader>
-      <LayoutNavigation width={styleProps.navigationWidth}>
+      <LayoutNavigation width={styleArgs.navigationWidth}>
         <Navigation {...slotProps} />
       </LayoutNavigation>
       {navigationPanel}
