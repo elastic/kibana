@@ -36,3 +36,7 @@ export const migrateRuleState = Annotation.Root({
     default: () => [],
   }),
 });
+
+export const configAnnotation = Annotation.Root({
+  skipPrebuiltRulesMatching: Annotation<boolean | undefined>(),
+});

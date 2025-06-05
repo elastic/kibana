@@ -49,7 +49,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               langsmith_options: langsmithOptions,
               settings: {
                 connector_id: connectorId,
-                should_match_prebuilt_rules: shouldMatchPrebuiltRules = true,
+                skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
               },
               retry,
             } = req.body;
@@ -85,7 +85,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               const { exists, started } = await ruleMigrationsClient.task.start({
                 migrationId,
                 connectorId,
-                shouldMatchPrebuiltRules,
+                skipPrebuiltRulesMatching,
                 invocationConfig: { callbacks },
               });
 

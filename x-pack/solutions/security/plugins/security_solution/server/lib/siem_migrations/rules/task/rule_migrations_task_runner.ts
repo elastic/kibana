@@ -8,12 +8,11 @@
 import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
 import { type ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { MigrateRuleState } from './agent/types';
+import type { GraphConfig, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
@@ -56,11 +55,6 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
-interface TaskRunnerSetupParams {
-  connectorId: string;
-  shouldMatchPrebuiltRules: boolean;
-}
-
 export class RuleMigrationTaskRunner {
   private telemetry?: SiemMigrationTelemetryClient;
   protected agent?: MigrationAgent;
@@ -88,7 +82,7 @@ export class RuleMigrationTaskRunner {
   }
 
   /** Retrieves the connector and creates the migration agent */
-  public async setup({ connectorId, shouldMatchPrebuiltRules }: TaskRunnerSetupParams) {
+  public async setup(connectorId: string) {
     const { inferenceClient } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
@@ -117,9 +111,6 @@ export class RuleMigrationTaskRunner {
       ruleMigrationsRetriever: this.retriever,
       telemetryClient: this.telemetry,
       logger: this.logger,
-      runOptions: {
-        shouldMatchPrebuiltRules,
-      },
     });
   }
 
@@ -128,7 +119,7 @@ export class RuleMigrationTaskRunner {
     await this.retriever.initialize();
   }
 
-  public async run(invocationConfig: RunnableConfig): Promise<void> {
+  public async run(invocationConfig: GraphConfig): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
     const { telemetry, migrationId } = this;
 
@@ -216,10 +207,10 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  protected createMigrateRuleTask(invocationConfig: RunnableConfig) {
+  protected createMigrateRuleTask(invocationConfig: GraphConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
-    const config: RunnableConfig = {
+    const config: GraphConfig = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
       // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       ...invocationConfig,

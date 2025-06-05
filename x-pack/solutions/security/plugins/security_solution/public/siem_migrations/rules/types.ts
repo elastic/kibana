@@ -34,5 +34,5 @@ export interface FilterOptions {
 
 export interface RuleMigrationSettings {
   connectorId: string;
-  shouldMatchPrebuiltRules: boolean;
+  skipPrebuiltRulesMatching: boolean;
 }

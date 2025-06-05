@@ -175,7 +175,7 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: false,
       },
     },
-    shouldMatchPrebuiltRules: {
+    skipPrebuiltRulesMatching: {
       type: 'boolean',
       _meta: {
         description: 'Flag indicating if prebuilt rules should be matched',

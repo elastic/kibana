@@ -492,9 +492,9 @@ components:
         is_aborted:
           type: boolean
           description: Indicates if the last execution was aborted by the user.
-        should_match_prebuilt_rules:
+        skip_prebuilt_rules_matching:
           type: boolean
-          description: Indicates if the last execution should match prebuilt rules.
+          description: Indicates if the last execution skipped pre-built rule matching.
 
     RuleMigrationTaskExecutionSettings:
       type: object
@@ -505,6 +505,6 @@ components:
         connector_id:
           type: string
           description: The connector ID used for the last execution.
-        should_match_prebuilt_rules:
+        skip_prebuilt_rules_matching:
           type: boolean
-          description: Indicates if the last execution should match prebuilt rules.
+          description: Indicates if the current execution should skip matching prebuilt rules.

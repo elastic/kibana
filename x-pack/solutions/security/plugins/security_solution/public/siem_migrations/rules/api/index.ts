@@ -157,7 +157,7 @@ export interface StartRuleMigrationParams {
   /** The connector id to use for the migration */
   connectorId: string;
   /** Optional indicator to toggle prebuilt rules matching */
-  shouldMatchPrebuiltRules: boolean;
+  skipPrebuiltRulesMatching?: boolean;
   /** Optional indicator to retry the migration with specific filtering criteria */
   retry?: SiemMigrationRetryFilter;
   /** Optional LangSmithOptions to use for the for the migration */
@@ -172,12 +172,12 @@ export const startRuleMigration = async ({
   retry,
   langSmithOptions,
   signal,
-  shouldMatchPrebuiltRules = true,
+  skipPrebuiltRulesMatching = false,
 }: StartRuleMigrationParams): Promise<StartRuleMigrationResponse> => {
   const body: StartRuleMigrationRequestBody = {
     settings: {
       connector_id: connectorId,
-      should_match_prebuilt_rules: shouldMatchPrebuiltRules,
+      skip_prebuilt_rules_matching: skipPrebuiltRulesMatching,
     },
     retry,
     langsmith_options: langSmithOptions,

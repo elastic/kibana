@@ -109,16 +109,16 @@ export class SiemRulesMigrationsTelemetry {
   reportStartTranslation = (params: {
     migrationId: string;
     connectorId: string;
-    shouldMatchPrebuiltRules: boolean;
+    skipPrebuiltRulesMatching?: boolean;
     retry?: SiemMigrationRetryFilter;
     error?: Error;
   }) => {
-    const { migrationId, connectorId, shouldMatchPrebuiltRules, retry, error } = params;
+    const { migrationId, connectorId, skipPrebuiltRulesMatching, retry, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.StartMigration, {
       migrationId,
       connectorId,
       isRetry: !!retry,
-      shouldMatchPrebuiltRules,
+      skipPrebuiltRulesMatching: skipPrebuiltRulesMatching ?? false,
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StartMigration],
       ...(retry && { retryFilter: retry }),
       ...this.getBaseResultParams(error),

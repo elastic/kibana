@@ -6,6 +6,7 @@
  */
 
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
@@ -23,6 +24,7 @@ import type {
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
+import type { GraphConfig } from './agent/types';
 
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
@@ -37,7 +39,7 @@ export class RuleMigrationsTaskClient {
 
   /** Starts a rule migration task */
   async start(params: RuleMigrationTaskStartParams): Promise<RuleMigrationTaskStartResult> {
-    const { migrationId, connectorId, invocationConfig, shouldMatchPrebuiltRules } = params;
+    const { migrationId, connectorId, invocationConfig, skipPrebuiltRulesMatching } = params;
     if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
@@ -68,10 +70,7 @@ export class RuleMigrationsTaskClient {
       this.dependencies
     );
 
-    await migrationTaskRunner.setup({
-      connectorId,
-      shouldMatchPrebuiltRules,
-    });
+    await migrationTaskRunner.setup(connectorId);
 
     if (this.migrationsRunning.has(migrationId)) {
       // Just to prevent a race condition in the setup
@@ -85,12 +84,16 @@ export class RuleMigrationsTaskClient {
     await this.data.migrations.saveAsStarted({
       id: migrationId,
       connectorId,
-      shouldMatchPrebuiltRules,
+      skipPrebuiltRulesMatching,
+    });
+
+    const graphRunConfig = this.getGraphRunConfig(invocationConfig, {
+      skipPrebuiltRulesMatching,
     });
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
-      .run(invocationConfig)
+      .run(graphRunConfig)
       .then(() => {
         /**
          * Handles
@@ -233,15 +236,31 @@ export class RuleMigrationsTaskClient {
       this.dependencies
     );
 
+    const evaluationRunConfig = this.getGraphRunConfig(invocationConfig, {
+      skipPrebuiltRulesMatching: false,
+    });
+
     await migrationTaskEvaluator.evaluate({
       connectorId,
       langsmithSettings,
-      invocationConfig,
+      invocationConfig: evaluationRunConfig,
     });
   }
 
   /** Returns if a migration is running or not */
   isMigrationRunning(migrationId: string): boolean {
     return this.migrationsRunning.has(migrationId);
+  }
+
+  private getGraphRunConfig(
+    invocationConfig: RunnableConfig,
+    graphConfig: GraphConfig['configurable']
+  ): GraphConfig {
+    return {
+      ...invocationConfig,
+      configurable: {
+        skipPrebuiltRulesMatching: graphConfig?.skipPrebuiltRulesMatching ?? false,
+      },
+    };
   }
 }

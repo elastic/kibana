@@ -13,13 +13,16 @@ import { RuleTranslationResult } from '../../../../../../../../../../common/siem
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
-  return async (state) => {
+  return async (state, config) => {
     // Set defaults
     const elasticRule = {
       title: state.original_rule.title,
       description: state.original_rule.description || state.original_rule.title,
       severity: DEFAULT_TRANSLATION_SEVERITY,
       risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+      prebuilt_rule_id: config.configurable?.skipPrebuiltRulesMatching
+        ? null
+        : state.elastic_rule.prebuilt_rule_id,
       ...state.elastic_rule,
     };
 

@@ -7,10 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import {
-  RuleTranslationResult,
-  SIEM_MIGRATIONS_ASSISTANT_USER,
-} from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
@@ -27,7 +24,6 @@ interface GetMatchPrebuiltRuleNodeParams {
   logger: Logger;
   telemetryClient: SiemMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
-  shouldMatchPrebuiltRules: boolean;
 }
 
 interface GetMatchedRuleResponse {
@@ -39,26 +35,9 @@ export const getMatchPrebuiltRuleNode = ({
   model,
   ruleMigrationsRetriever,
   telemetryClient,
-  shouldMatchPrebuiltRules,
   logger,
 }: GetMatchPrebuiltRuleNodeParams): GraphNode => {
   return async (state) => {
-    if (!shouldMatchPrebuiltRules) {
-      const newComments = 'Skipping prebuilt rule matching as per run configuration';
-      return {
-        comments: [
-          {
-            message: newComments,
-            created_at: new Date().toISOString(),
-            created_by: SIEM_MIGRATIONS_ASSISTANT_USER,
-          },
-        ],
-        elastic_rule: {
-          ...state.elastic_rule,
-          prebuilt_rule_id: null, // Clear the prebuilt rule ID if it exists
-        },
-      };
-    }
     const query = state.semantic_query;
     const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
     const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.search(

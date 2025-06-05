@@ -167,9 +167,9 @@ export const RuleMigrationLastExecution = z.object({
    */
   is_aborted: z.boolean().optional(),
   /**
-   * Indicates if the last execution should match prebuilt rules.
+   * Indicates if the last execution skipped pre-built rule matching.
    */
-  should_match_prebuilt_rules: z.boolean().optional(),
+  skip_prebuilt_rules_matching: z.boolean().optional(),
 });
 
 /**
@@ -554,7 +554,7 @@ export const RuleMigrationTaskExecutionSettings = z.object({
    */
   connector_id: z.string(),
   /**
-   * Indicates if the last execution should match prebuilt rules.
+   * Indicates if the current execution should skip matching prebuilt rules.
    */
-  should_match_prebuilt_rules: z.boolean().optional(),
+  skip_prebuilt_rules_matching: z.boolean().optional(),
 });

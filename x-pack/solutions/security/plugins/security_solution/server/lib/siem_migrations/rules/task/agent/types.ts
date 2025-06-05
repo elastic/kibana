@@ -6,17 +6,22 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import type { RuleMigrationsRetriever } from '../retrievers';
 import type { EsqlKnowledgeBase } from '../util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
 import type { ChatModel } from '../util/actions_client_chat';
-import type { migrateRuleState } from './state';
+import type { configAnnotation, migrateRuleState } from './state';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
-export type GraphNode = (state: MigrateRuleState) => Promise<Partial<MigrateRuleState>>;
+export type GraphConfig = RunnableConfig<(typeof configAnnotation)['State']>;
+export type GraphNode = (
+  state: MigrateRuleState,
+  config: GraphConfig
+) => Promise<Partial<MigrateRuleState>>;
 
 export interface RuleMigrationAgentRunOptions {
-  shouldMatchPrebuiltRules: boolean;
+  skipPrebuiltRulesMatching: boolean;
 }
 
 export interface MigrateRuleGraphParams {
@@ -25,5 +30,4 @@ export interface MigrateRuleGraphParams {
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
   telemetryClient: SiemMigrationTelemetryClient;
-  runOptions?: RuleMigrationAgentRunOptions;
 }

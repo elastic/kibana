@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RunnableConfig } from '@langchain/core/runnables';
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { Run, Example } from 'langsmith/schemas';
 import { evaluate } from 'langsmith/evaluation';
@@ -14,12 +13,12 @@ import { Client } from 'langsmith';
 import { distance } from 'fastest-levenshtein';
 import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { MigrateRuleState } from './agent/types';
+import type { GraphConfig, MigrateRuleState } from './agent/types';
 
 export interface EvaluateParams {
   connectorId: string;
   langsmithSettings: LangSmithEvaluationSettings;
-  invocationConfig?: RunnableConfig;
+  invocationConfig?: GraphConfig;
 }
 
 export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;
@@ -27,7 +26,15 @@ type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
 export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
-  public async evaluate({ connectorId, langsmithSettings, invocationConfig = {} }: EvaluateParams) {
+  public async evaluate({
+    connectorId,
+    langsmithSettings,
+    invocationConfig = {
+      configurable: {
+        skipPrebuiltRulesMatching: false,
+      },
+    },
+  }: EvaluateParams) {
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }
@@ -53,10 +60,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
     }
 
     // for each connector, setup the evaluator
-    await this.setup({
-      connectorId,
-      shouldMatchPrebuiltRules: true,
-    });
+    await this.setup(connectorId);
 
     // create the migration task after setup
     const migrateRuleTask = this.createMigrateRuleTask(invocationConfig);

@@ -38,22 +38,21 @@ import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/cons
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 
 interface ReprocessFailedRulesDialogProps {
-  isModalVisible: boolean;
-  closeModal: () => void;
+  onClose: () => void;
+  onSubmit: (settings: RuleMigrationSettings) => void;
+  onCancel?: () => void;
   lastExecution?: Partial<RuleMigrationSettings>;
-  startMigration: (settings: RuleMigrationSettings) => void;
   connectors: ActionConnector[];
-  numberOfFailedRules?: number;
+  numberOfFailedRules: number;
 }
 
 const DATA_TEST_SUBJ_PREFIX = 'reprocessFailedRulesDialog';
 
 export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = React.memo(
   function ReprocessFailedRulesDialog({
-    isModalVisible,
-    closeModal,
+    onClose: closeModal,
     lastExecution,
-    startMigration,
+    onSubmit: startMigration,
     numberOfFailedRules = 0,
     connectors = [],
   }) {
@@ -64,7 +63,7 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
       lastExecution?.connectorId || siemMigrationsDefaultConnectorId || ''
     );
     const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      lastExecution?.shouldMatchPrebuiltRules ?? true
+      lastExecution?.skipPrebuiltRulesMatching ?? true
     );
     const modalTitleId = useGeneratedHtmlId();
 
@@ -100,83 +99,78 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
     const startMigrationWithSettings = useCallback(() => {
       startMigration({
         connectorId: selectedConnectorId,
-        shouldMatchPrebuiltRules: enablePrebuiltRulesMatching,
+        skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
       });
       closeModal();
     }, [startMigration, selectedConnectorId, enablePrebuiltRulesMatching, closeModal]);
 
-    if (isModalVisible) {
-      return (
-        <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX} size="m">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle
-              data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`}
-              id={modalTitleId}
-            >
-              {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfFailedRules)}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText>
-              <p>{i18n.REPROCESS_RULES_DIALOG_DESCRIPTION}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              label={i18n.REPROCESS_RULES_DIALOG_AI_CONNECTOR_LABEL}
-              helpText={
-                <FormattedMessage
-                  id="xpack.securitySolution.siemMigrations.reprocessFailedRulesDialog.connectorHelpText"
-                  defaultMessage={'To setup other LLM connectors, visit {link}.'}
-                  values={{
-                    link: (
-                      /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-                      <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
-                        {i18n.REPROCESS_RULES_DIALOG_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            >
-              <EuiSuperSelect
-                options={selectOptions}
-                valueOfSelected={selectedConnectorId}
-                onChange={setSelectedConnectorId}
-                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
+    return (
+      <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`} id={modalTitleId}>
+            {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfFailedRules)}
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText>
+            <p>{i18n.REPROCESS_RULES_DIALOG_DESCRIPTION}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.REPROCESS_RULES_DIALOG_AI_CONNECTOR_LABEL}
+            helpText={
+              <FormattedMessage
+                id="xpack.securitySolution.siemMigrations.reprocessFailedRulesDialog.connectorHelpText"
+                defaultMessage={'To setup other LLM connectors, visit {link}.'}
+                values={{
+                  link: (
+                    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                    <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
+                      {i18n.REPROCESS_RULES_DIALOG_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
+                    </EuiLink>
+                  ),
+                }}
               />
-            </EuiFormRow>
-            <EuiFormRow>
-              <EuiSwitch
-                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
-                label={i18n.REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL}
-                checked={enablePrebuiltRulesMatching}
-                onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={closeModal}
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
-                >
-                  {i18n.REPROCESS_RULES_DIALOG_CANCEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Translate`}
-                  color="primary"
-                  fill
-                  onClick={startMigrationWithSettings}
-                >
-                  {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalBody>
-        </EuiModal>
-      );
-    }
+            }
+          >
+            <EuiSuperSelect
+              options={selectOptions}
+              valueOfSelected={selectedConnectorId}
+              onChange={setSelectedConnectorId}
+              data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiSwitch
+              data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
+              label={i18n.REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL}
+              checked={enablePrebuiltRulesMatching}
+              onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={closeModal}
+                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
+              >
+                {i18n.REPROCESS_RULES_DIALOG_CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Translate`}
+                color="primary"
+                fill
+                onClick={startMigrationWithSettings}
+              >
+                {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalBody>
+      </EuiModal>
+    );
   }
 );

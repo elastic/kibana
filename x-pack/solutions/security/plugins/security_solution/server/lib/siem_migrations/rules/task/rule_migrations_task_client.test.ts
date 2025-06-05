@@ -320,11 +320,21 @@ describe('RuleMigrationsTaskClient', () => {
       expect(stats.status).toEqual(SiemMigrationTaskStatus.STOPPED);
     });
 
-    it('should include last_error if one exists', async () => {
-      const error = new Error('Test error');
+    it('should include error if one exists', async () => {
+      const errorMessage = 'Test error';
       data.rules.getStats.mockResolvedValue({
+        id: 'migration-1',
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
+
+      data.migrations.get.mockResolvedValue({
+        id: 'migration-1',
+        created_at: new Date().toISOString(),
+        created_by: 'test-user',
+        last_execution: {
+          error: errorMessage,
+        },
+      });
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,

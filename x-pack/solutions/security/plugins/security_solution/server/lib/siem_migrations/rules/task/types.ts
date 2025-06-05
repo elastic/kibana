@@ -31,7 +31,7 @@ export interface RuleMigrationTaskCreateClientParams {
 export interface RuleMigrationTaskStartParams {
   migrationId: string;
   connectorId: string;
-  shouldMatchPrebuiltRules: boolean;
+  skipPrebuiltRulesMatching?: boolean;
   invocationConfig: RunnableConfig;
 }
 
