@@ -10,7 +10,6 @@
 import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
-import { LogsCustom } from '../lib/logs/logs_synthtrace_es_client';
 import { withClient } from '../lib/utils/with_client';
 import {
   MORE_THAN_1024_CHARS,
@@ -63,21 +62,26 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
   return {
     bootstrap: async ({ logsEsClient }) => {
-      await logsEsClient.createCustomPipeline(processors);
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
 
+      await logsEsClient.createCustomPipeline(
+        processors,
+        `${IndexTemplateName.SomeFailureStore}@pipeline`
+      );
       await logsEsClient.createComponentTemplate({
-        name: LogsCustom,
+        name: `${IndexTemplateName.SomeFailureStore}@custom`,
         dataStreamOptions: {
           failure_store: {
             enabled: true,
           },
         },
       });
+      await logsEsClient.createIndexTemplate(IndexTemplateName.SomeFailureStore);
     },
     teardown: async ({ logsEsClient }) => {
-      await logsEsClient.deleteComponentTemplate(LogsCustom);
-      await logsEsClient.deleteCustomPipeline();
+      await logsEsClient.deleteIndexTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
+      await logsEsClient.deleteComponentTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
+      await logsEsClient.deleteCustomPipeline(`${IndexTemplateName.SomeFailureStore}@pipeline`);
       if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {
@@ -134,16 +138,23 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const {
           serviceName,
           logMessage: { level, message },
+          cloudRegion,
           commonLongEntryFields,
         } = constructLogsCommonData();
         const isFailed = i % 60 === 0;
+        const isMalformed = i % 25 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.2')
           .message(message)
           .logLevel(isFailed ? '4' : level) // "script_exception": Not a valid log level
           .service(serviceName)
-          .defaults(commonLongEntryFields)
+          .defaults({
+            ...commonLongEntryFields,
+            'cloud.availability_zone': isMalformed
+              ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
+              : `${cloudRegion}a`,
+          })
           .timestamp(timestamp);
       };
 
@@ -154,19 +165,17 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           cloudRegion,
           commonLongEntryFields,
         } = constructLogsCommonData();
-        const isMalformed = i % 10 === 0;
         const isFailed = i % 80 === 0;
         return log
           .create({ isLogsDb })
           .dataset('synth.3')
           .message(message)
-          .logLevel(isFailed ? '5' : level) // "script_exception": Not a valid log level
+          .logLevel(level)
           .service(serviceName)
           .defaults({
             ...commonLongEntryFields,
-            'cloud.availability_zone': isMalformed
-              ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
-              : `${cloudRegion}a`,
+            'cloud.availability_zone': `${cloudRegion}a`,
+            'foo.bar': i !== 0 && isFailed ? { baz: 123 } : 'baz', // document_parsing_exception
           })
           .timestamp(timestamp);
       };
