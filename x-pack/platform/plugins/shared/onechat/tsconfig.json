@@ -28,6 +28,7 @@
     "@kbn/core-security-server",
     "@kbn/inference-common",
     "@kbn/logging-mocks",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-logging-server-mocks"
   ]
 }
