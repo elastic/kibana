@@ -417,6 +417,17 @@ export function getCompatibleLiterals(
     // filter plural for now and suggest only unit + singular
     suggestions.push(...timeLiteralSuggestions); // i.e. 1 year
   }
+  // this is a special type built from the suggestion system, not inherited from the AST
+  if (types.includes('time_literal_unit')) {
+    suggestions.push(
+      ...buildConstantsDefinitions(
+        timeUnitsToSuggest.map(({ name }) => name),
+        undefined,
+        undefined,
+        options
+      )
+    ); // i.e. year, month, ...
+  }
   return suggestions;
 }
 
