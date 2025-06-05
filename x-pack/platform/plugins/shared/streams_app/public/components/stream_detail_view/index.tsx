@@ -21,11 +21,9 @@ import { StreamDescription } from './description';
 const getStreamDetailTabs = ({
   definition,
   router,
-  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
-  refreshDefinition: () => void;
 }) =>
   ({
     overview: {
@@ -43,9 +41,7 @@ const getStreamDetailTabs = ({
         path: { key: definition.stream.name, tab: 'dashboards' },
       }),
       background: true,
-      content: (
-        <StreamDetailDashboardsView definition={definition} refreshDefinition={refreshDefinition} />
-      ),
+      content: <StreamDetailDashboardsView definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
@@ -64,7 +60,7 @@ export function StreamDetailView() {
   const { path } = useStreamsAppParams('/{key}/{tab}', true);
   const { key, tab } = path;
 
-  const { definition, refresh: refreshDefinition } = useStreamDetail();
+  const { definition } = useStreamDetail();
 
   if (tab === 'management') {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
@@ -74,7 +70,7 @@ export function StreamDetailView() {
     return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
   }
 
-  const tabs = getStreamDetailTabs({ definition, router, refreshDefinition });
+  const tabs = getStreamDetailTabs({ definition, router });
 
   const selectedTabObject = tabs[tab as StreamDetailTabName];
 
@@ -92,7 +88,7 @@ export function StreamDetailView() {
               </EuiBadgeGroup>
             </EuiFlexGroup>
 
-            <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+            <StreamDescription definition={definition} />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {

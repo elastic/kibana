@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiInlineEditText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
+import { useStreamDetail } from '../../hooks/use_stream_detail';
 
 const EMPTY_DESCRIPTION_LABEL = i18n.translate(
   'xpack.streams.streamDescription.emptyDescriptionLabel',
@@ -20,10 +21,10 @@ const EMPTY_DESCRIPTION_LABEL = i18n.translate(
 
 interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
 }
 
-export function StreamDescription({ definition, refreshDefinition }: Props) {
+export function StreamDescription({ definition }: Props) {
+  const { refresh } = useStreamDetail();
   const updateStream = useUpdateStreams(definition.stream.name);
   const [description, setDescription] = useState(definition.stream.description);
 
@@ -37,36 +38,52 @@ export function StreamDescription({ definition, refreshDefinition }: Props) {
 
   return (
     <EuiFlexGroup>
-      <EuiInlineEditText
-        data-test-subj="streamDescriptionEdit"
-        css={css`
-          div {
-            align-items: baseline;
-          }
-        `}
-        placeholder={EMPTY_DESCRIPTION_LABEL}
-        value={description}
-        onChange={onChange}
-        onCancel={(previousValue) => {
-          setDescription(previousValue);
-        }}
-        inputAriaLabel={i18n.translate('xpack.streams.streamDescription.inputAriaLabel', {
-          defaultMessage: 'Edit Stream description',
-        })}
-        size="xs"
-        onSave={async (value) => {
-          const sanitized = value.trim();
-          setDescription(sanitized);
+      <EuiFlexItem grow>
+        <EuiInlineEditText
+          data-test-subj="streamDescriptionEdit"
+          editModeProps={{
+            inputProps: {
+              fullWidth: true,
+            },
+            formRowProps: {
+              fullWidth: true,
+            },
+            saveButtonProps: {
+              color: 'primary',
+            },
+            cancelButtonProps: {
+              display: 'empty',
+            },
+          }}
+          css={css`
+            // div {
+            //   align-items: baseline;
+            // }
+          `}
+          placeholder={EMPTY_DESCRIPTION_LABEL}
+          value={description}
+          onChange={onChange}
+          onCancel={(previousValue) => {
+            setDescription(previousValue);
+          }}
+          inputAriaLabel={i18n.translate('xpack.streams.streamDescription.inputAriaLabel', {
+            defaultMessage: 'Edit Stream description',
+          })}
+          size="xs"
+          onSave={async (value) => {
+            const sanitized = value.trim();
+            setDescription(sanitized);
 
-          await updateStream({
-            queries: definition.queries,
-            dashboards: definition.dashboards,
-            stream: { ...omit(definition.stream, ['name']), description: sanitized },
-          } as Streams.all.UpsertRequest);
+            await updateStream({
+              queries: definition.queries,
+              dashboards: definition.dashboards,
+              stream: { ...omit(definition.stream, ['name']), description: sanitized },
+            } as Streams.all.UpsertRequest);
 
-          refreshDefinition();
-        }}
-      />
+            refresh();
+          }}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

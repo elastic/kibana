@@ -8,8 +8,10 @@ import { useCallback } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
+import { useStreamDetail } from './use_stream_detail';
 
-export const useDashboardsApi = (name: string, refreshDefinition: () => void) => {
+export const useDashboardsApi = (name: string) => {
+  const { refresh } = useStreamDetail();
   const { signal } = useAbortController();
   const {
     dependencies: {
@@ -34,9 +36,9 @@ export const useDashboardsApi = (name: string, refreshDefinition: () => void) =>
           },
         },
       });
-      refreshDefinition();
+      refresh();
     },
-    [name, signal, streamsRepositoryClient, refreshDefinition]
+    [name, signal, streamsRepositoryClient, refresh]
   );
 
   const removeDashboards = useCallback(
@@ -54,9 +56,9 @@ export const useDashboardsApi = (name: string, refreshDefinition: () => void) =>
           },
         },
       });
-      refreshDefinition();
+      refresh();
     },
-    [name, signal, streamsRepositoryClient, refreshDefinition]
+    [name, signal, streamsRepositoryClient, refresh]
   );
 
   return {
