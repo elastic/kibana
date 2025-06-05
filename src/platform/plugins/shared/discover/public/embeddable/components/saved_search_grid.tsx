@@ -134,6 +134,12 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
+  const defaultAppStateAccessor = useProfileAccessor('getDefaultAppState');
+  const columns = useMemo(() => {
+    const appState = defaultAppStateAccessor(() => ({}))({ dataView: props.dataView });
+    return appState.columns ? appState.columns.map((col) => col.name) : [];
+  }, [defaultAppStateAccessor, props.dataView]);
+
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
@@ -156,6 +162,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showColumnTokens
         showFullScreenButton={false}
         className="unifiedDataTable"
+        columns={columns}
       />
     </SavedSearchEmbeddableBase>
   );

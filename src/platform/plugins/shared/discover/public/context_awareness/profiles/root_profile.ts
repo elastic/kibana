@@ -19,6 +19,7 @@ export enum SolutionType {
   Security = 'security',
   Search = 'search',
   Default = 'default',
+  FleetAgentLogs = 'fleet-agent-logs',
 }
 
 /**
