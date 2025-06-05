@@ -58,6 +58,13 @@ export default ({ getService }: FtrProviderContext) => {
             completed,
             failed,
           },
+          last_execution: {
+            is_aborted: false,
+            started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            ended_at: null,
+            skip_prebuilt_rules_matching: false,
+            connector_id: 'preconfigured-bedrock',
+          },
         })
       );
     });
@@ -94,11 +101,25 @@ export default ({ getService }: FtrProviderContext) => {
           status: 'stopped',
           id: migrationId1,
           rules: { total: 42, pending: 4, processing: 3, completed: 33, failed: 2 },
+          last_execution: {
+            is_aborted: false,
+            started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            ended_at: null,
+            skip_prebuilt_rules_matching: false,
+            connector_id: 'preconfigured-bedrock',
+          },
         }),
         expect.objectContaining({
           status: 'stopped',
           id: migrationId2,
           rules: { total: 28, pending: 2, processing: 5, completed: 14, failed: 7 },
+          last_execution: {
+            is_aborted: false,
+            started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            ended_at: null,
+            skip_prebuilt_rules_matching: false,
+            connector_id: 'preconfigured-bedrock',
+          },
         }),
       ]);
       expect(response.body).toEqual(expectedStats);
