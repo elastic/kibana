@@ -56,16 +56,17 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       withEndpointAuthz(
-        { any: ['canWriteEventFilters'] },
+        { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
         endpointContext.logFactory.get('endpointSuggestions'),
-        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
+        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext), endpointContext.experimentalFeatures.trustedAppsAdvancedMode)
       )
     );
 }
 
 export const getEndpointSuggestionsRequestHandler = (
   config$: Observable<ConfigSchema>,
-  logger: Logger
+  logger: Logger,
+  isTrustedAppsAdvancedModeFFEnabled: boolean
 ): RequestHandler<
   TypeOf<typeof EndpointSuggestionsSchema.params>,
   never,
@@ -77,7 +78,8 @@ export const getEndpointSuggestionsRequestHandler = (
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
 
-    if (request.params.suggestion_type === 'eventFilters') {
+    // TODO: check if 'trustedApps' is the correct suggestion type terms
+    if (request.params.suggestion_type === 'eventFilters' || (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')) {
       index = eventsIndexPattern;
     } else {
       return response.badRequest({
