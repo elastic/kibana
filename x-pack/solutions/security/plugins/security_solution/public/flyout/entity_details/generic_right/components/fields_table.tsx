@@ -73,12 +73,9 @@ export const usePinnedFields = (storageKey: string, defaultPinnedFields?: string
   useEffect(() => {
     const hasStoredPinnedFields = !!getPinnedFieldsFromLocalStorage(storageKey)?.length;
     const hasDefaultPinnedFields = !!defaultPinnedFields?.length;
-    console.log(getPinnedFieldsFromLocalStorage(storageKey));
-    console.log(defaultPinnedFields);
 
     // If no pinned fields exist in localStorage, set the default fields
     if (!hasStoredPinnedFields && hasDefaultPinnedFields) {
-      console.log(defaultPinnedFields);
       setPinnedFieldsInLocalStorage(storageKey, defaultPinnedFields);
       queryClient.setQueryData(['pinnedFields', storageKey], defaultPinnedFields);
       queryClient.invalidateQueries(['pinnedFields', storageKey]);
