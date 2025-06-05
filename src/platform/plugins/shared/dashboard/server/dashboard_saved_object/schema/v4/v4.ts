@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Latest model version for dashboard saved objects is v4
-export {
-  dashboardAttributesSchema as dashboardSavedObjectSchema,
-  type DashboardAttributes as DashboardSavedObjectAttributes,
-} from './v4';
+import { schema } from '@kbn/config-schema';
+
+export const dashboardAttributesSchema = schema.object(
+  {
+    title: schema.string(),
+    description: schema.string({ defaultValue: '' }),
+    version: schema.maybe(schema.number()),
+  },
+  { unknowns: 'ignore' }
+);

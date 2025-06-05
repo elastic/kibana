@@ -13,6 +13,7 @@ import { SavedObjectsType } from '@kbn/core/server';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV4 } from './schema/v4';
 
 import {
   createDashboardSavedObjectTypeMigrations,
@@ -85,41 +86,35 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV3,
       },
     },
+    4: {
+      // remove **all** non-indexed fields from the mapping so that we can treat the dashboard SO as a black box
+      changes: [
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: [
+            'hits',
+            'kibanaSavedObjectMeta',
+            'optionsJSON',
+            'panelsJSON',
+            'sections',
+            'refreshInterval',
+            'controlGroupInput',
+            'timeFrom',
+            'timeRestore',
+            'timeTo',
+          ],
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+        create: dashboardAttributesSchemaV4,
+      },
+    },
   },
   mappings: {
     dynamic: false,
     properties: {
       description: { type: 'text' },
-      hits: { type: 'integer', index: false, doc_values: false },
-      kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false } },
-      },
-      optionsJSON: { type: 'text', index: false },
-      panelsJSON: { type: 'text', index: false },
-      sections: {
-        properties: {},
-        dynamic: false,
-      },
-      refreshInterval: {
-        properties: {
-          display: { type: 'keyword', index: false, doc_values: false },
-          pause: { type: 'boolean', index: false, doc_values: false },
-          section: { type: 'integer', index: false, doc_values: false },
-          value: { type: 'integer', index: false, doc_values: false },
-        },
-      },
-      controlGroupInput: {
-        properties: {
-          controlStyle: { type: 'keyword', index: false, doc_values: false },
-          chainingSystem: { type: 'keyword', index: false, doc_values: false },
-          panelsJSON: { type: 'text', index: false },
-          showApplySelections: { type: 'boolean', index: false, doc_values: false },
-          ignoreParentSettingsJSON: { type: 'text', index: false },
-        },
-      },
-      timeFrom: { type: 'keyword', index: false, doc_values: false },
-      timeRestore: { type: 'boolean', index: false, doc_values: false },
-      timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
     },
