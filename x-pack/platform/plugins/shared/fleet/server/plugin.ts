@@ -667,6 +667,9 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.syncIntegrations?.taskInterval,
+      },
     });
     this.automaticAgentUpgradeTask = new AutomaticAgentUpgradeTask({
       core,

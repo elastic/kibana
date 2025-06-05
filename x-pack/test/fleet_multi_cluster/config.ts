@@ -7,9 +7,10 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
-import { pageObjects } from '../functional/page_objects';
+import { pageObjects as functionalPageObjects } from '../functional/page_objects';
 import { RemoteEsArchiverProvider } from '../functional/services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from '../functional/services/remote_es/remote_es';
+import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -18,10 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    pageObjects,
-    testFiles: [
-      resolve(__dirname, './apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
-    ],
+    pageObjects: {
+      ...functionalPageObjects,
+      ...pageObjects,
+    },
+    testFiles: [resolve(__dirname, './apps/fleet/sync_integrations_flow')],
     junit: {
       reportName: 'X-Pack Fleet Multi Cluster Tests',
     },
@@ -33,14 +35,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       ['fleet']: {
-        pathname: '/app/remote_clusters',
+        pathname: '/app/fleet',
       },
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-
+        `--xpack.fleet.syncIntegrations.taskInterval=5s`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
 
@@ -80,6 +82,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             `${xpackFunctionalConfig.get('servers.elasticsearch.port') + 1}`,
       },
       serverArgs: ['xpack.ml.enabled=false'],
+      license: 'trial',
     },
   };
 }

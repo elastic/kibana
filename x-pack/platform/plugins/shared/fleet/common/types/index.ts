@@ -89,6 +89,9 @@ export interface FleetConfigType {
     taskInterval?: string;
     retryDelays?: string[];
   };
+  syncIntegrations?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
 }

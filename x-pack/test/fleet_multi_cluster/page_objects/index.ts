@@ -10,6 +10,7 @@ import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
+import { FleetSettingsPageProvider } from './fleet_settings_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -18,4 +19,5 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   indexManagement: IndexManagementPageProvider,
   remoteClusters: RemoteClustersPageProvider,
+  fleetSettingsPage: FleetSettingsPageProvider,
 };
