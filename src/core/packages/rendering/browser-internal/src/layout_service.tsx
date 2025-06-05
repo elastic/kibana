@@ -14,8 +14,9 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { GlobalAppStyle } from '@kbn/core-application-common';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import { ChromeLayout } from '@kbn/core-chrome-layout-components';
-import { AppWrapper } from './app_containers';
 import useObservable from 'react-use/lib/useObservable';
+import { useSyncPushFlyoutStyles } from './use_sync_push_flyout_styles';
+import { AppWrapper } from './app_containers';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
@@ -23,9 +24,9 @@ export interface LayoutServiceStartDeps {
   overlays: OverlayStart;
 }
 
-const BANNER_HEIGHT = 0; // TODO
+const BANNER_HEIGHT = 32;
 const FOOTER_HEIGHT = 0;
-const HEADER_HEIGHT = 96; // TODO
+const HEADER_HEIGHT = 96;
 const NAVIGATION_WIDTH = 0; // TODO
 const NAVIGATION_PANEL_WIDTH = 0;
 const SIDEBAR_WIDTH = 0;
@@ -43,16 +44,22 @@ export class LayoutService {
   public getComponent(): React.ComponentType {
     const { application, chrome, overlays } = this.deps;
     const chromeHeader = chrome.getHeaderComponent();
+    const chromeBanner = chrome.getHeaderBannerComponent();
     const appComponent = application.getComponent();
-    // const bannerComponent = overlays.banners.getComponent();
-    // Example layout; replace with actual layout logic as needed
-    return () => {
+    const bannerComponent = overlays.banners.getComponent();
+
+    return React.memo(() => {
+      // TODO: optimize state
       const isChromeVisible = useObservable(chrome.getIsVisible$(), false);
+      const isChromeBannerVisible = useObservable(chrome.hasHeaderBanner$(), false);
+      const pushFlyoutOverrideStyles = useSyncPushFlyoutStyles();
+
       return (
         <>
           {/* Global Styles that apply across the entire app */}
-          <GlobalAppStyle />
+          <GlobalAppStyle headerHeight={HEADER_HEIGHT} />
           <ChromeLayout
+            applicationCSS={pushFlyoutOverrideStyles}
             bannerHeight={BANNER_HEIGHT}
             footerHeight={FOOTER_HEIGHT}
             headerHeight={HEADER_HEIGHT}
@@ -62,40 +69,26 @@ export class LayoutService {
             sidebarPanelWidth={SIDEBAR_PANEL_WIDTH}
           >
             {{
-              Header: () => chromeHeader,
-              Navigation: () => <div>Navigation</div>,
-              Application: () => (
-                <AppWrapper isChromeVisible={isChromeVisible}>
-                  {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-                  <div id={APP_FIXED_VIEWPORT_ID} />
+              Header: isChromeVisible ? () => chromeHeader : undefined,
+              Banner: isChromeBannerVisible ? () => chromeBanner : undefined,
+              Application: () => {
+                return (
+                  <>
+                    <div id="globalBannerList">{bannerComponent}</div>
+                    <AppWrapper isChromeVisible={isChromeVisible}>
+                      {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+                      <div id={APP_FIXED_VIEWPORT_ID} />
 
-                  {/* The actual plugin/app */}
-                  {appComponent}
-                </AppWrapper>
-              ),
+                      {/* The actual plugin/app */}
+                      {appComponent}
+                    </AppWrapper>
+                  </>
+                );
+              },
             }}
           </ChromeLayout>
         </>
-        // <>
-        //   {/* Global Styles that apply across the entire app */}
-        //   <GlobalAppStyle />
-        //
-        //   {/* Fixed headers */}
-        //   {chromeHeader}
-        //
-        //   {/* banners$.subscribe() for things like the No data banner */}
-        //   <div id="globalBannerList">{bannerComponent}</div>
-        //
-        //   {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-        //   <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-        //     {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-        //     <div id={APP_FIXED_VIEWPORT_ID} />
-        //
-        //     {/* The actual plugin/app */}
-        //     {appComponent}
-        //   </AppWrapper>
-        // </>
       );
-    };
+    });
   }
 }

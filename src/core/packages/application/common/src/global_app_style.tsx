@@ -11,7 +11,21 @@ import React from 'react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
-export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
+export const renderingOverrides = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  props: GlobalAppStyleProps
+) => css`
+  :root {
+    // height of the header banner
+    --kbnHeaderBannerHeight: ${props.bannerHeight ?? 0}px;
+    // for legacy reasons, TODO: explain better
+    --euiFixedHeadersOffset: ${props.headerHeight ?? 0}px;
+    // total height of all fixed headers (when the banner is *not* present) inherited from EUI
+    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
+    // total height of everything when the banner is present
+    --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
+  }
+
   #kibana-body {
     // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
     // It will break the sticky navigation
@@ -39,10 +53,6 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
     flex-grow: 1;
     z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
     position: relative; // This is temporary for apps that relied on this being present on \`.application\`
-  }
-
-  .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
@@ -153,14 +163,24 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-export const GlobalAppStyle = () => {
+export interface GlobalAppStyleProps {
+  bannerHeight?: number;
+  footerHeight?: number;
+  headerHeight?: number;
+  navigationWidth?: number;
+  navigationPanelWidth?: number;
+  sidebarWidth?: number;
+  sidebarPanelWidth?: number;
+}
+
+export const GlobalAppStyle = (props: GlobalAppStyleProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <Global
       styles={css`
         ${bannerStyles(euiTheme)}
-        ${chromeStyles(euiTheme)} 
-        ${renderingOverrides(euiTheme)}
+        ${chromeStyles(euiTheme)}
+        ${renderingOverrides(euiTheme, props)}
       `}
     />
   );

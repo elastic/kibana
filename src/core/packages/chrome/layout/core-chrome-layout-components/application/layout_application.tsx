@@ -10,11 +10,17 @@
 import React, { ReactNode } from 'react';
 
 import { useEuiOverflowScroll } from '@elastic/eui';
+import { SerializedStyles } from '@emotion/react';
 
 import { styles } from './layout_application.styles';
 
-export const LayoutApplication = ({ children }: { children: ReactNode }) => {
+export const LayoutApplication = ({
+  children,
+  applicationCSS,
+}: {
+  children: ReactNode;
+  applicationCSS?: SerializedStyles;
+}) => {
   const overflow = useEuiOverflowScroll('y');
-
-  return <main css={[styles.root, overflow]}>{children}</main>;
+  return <main css={[styles.root, overflow, applicationCSS]}>{children}</main>;
 };

@@ -615,6 +615,10 @@ export class ChromeService {
         );
       },
 
+      getHeaderBannerComponent: () => (
+        <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+      ),
+
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$,

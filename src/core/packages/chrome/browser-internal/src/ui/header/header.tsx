@@ -171,16 +171,34 @@ export function Header({
           <EuiHeader className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
-                <HeaderMenuButton
-                  data-test-subj="toggleNavButton"
-                  aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
-                  })}
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                  aria-expanded={isNavOpen}
-                  aria-pressed={isNavOpen}
-                  aria-controls={navId}
-                  forwardRef={toggleCollapsibleNavRef}
+                <CollapsibleNav
+                  appId$={application.currentAppId$}
+                  id={navId}
+                  navLinks$={observables.navLinks$}
+                  recentlyAccessed$={observables.recentlyAccessed$}
+                  isNavOpen={isNavOpen}
+                  homeHref={homeHref}
+                  basePath={basePath}
+                  navigateToApp={application.navigateToApp}
+                  navigateToUrl={application.navigateToUrl}
+                  onIsLockedUpdate={onIsLockedUpdate}
+                  closeNav={() => {
+                    setIsNavOpen(false);
+                  }}
+                  customNavLink$={observables.customNavLink$}
+                  button={
+                    <HeaderMenuButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
+                      })}
+                      onClick={() => setIsNavOpen(!isNavOpen)}
+                      aria-expanded={isNavOpen}
+                      aria-pressed={isNavOpen}
+                      aria-controls={navId}
+                      forwardRef={toggleCollapsibleNavRef}
+                    />
+                  }
                 />
               </EuiHeaderSectionItem>
 
