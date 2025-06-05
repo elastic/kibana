@@ -1656,10 +1656,10 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.CDR_3RD_PARTY_RETENTION_POLICY",
+        "id": "def-common.CDR_EXTENDED_VULN_RETENTION_POLICY",
         "type": "string",
         "tags": [],
-        "label": "CDR_3RD_PARTY_RETENTION_POLICY",
+        "label": "CDR_EXTENDED_VULN_RETENTION_POLICY",
         "description": [],
         "signature": [
           "\"90d\""
