@@ -11,6 +11,7 @@ import { type Params, Weekday } from 'rrule-es';
 import type { ConstructorOptions, WeekdayStr } from './types';
 
 // Migrate RRULEs using the old python-dateutils schema to the new rrule-es schema
+export function migrateRRuleParams(oldParams: ConstructorOptions): Params;
 export function migrateRRuleParams(
   oldParams: Omit<ConstructorOptions, 'dtstart'>
 ): Omit<Params, 'dtStart'>;
