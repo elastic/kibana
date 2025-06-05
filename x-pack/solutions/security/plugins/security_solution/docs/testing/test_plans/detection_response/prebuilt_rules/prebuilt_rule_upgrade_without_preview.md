@@ -91,7 +91,7 @@ Unless explicitly indicated otherwise:
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - Package with prebuilt rules is already installed, and rule assets from it are stored in Elasticsearch.
-- Prebuilt rules have the corresponding base versions until it's explicitly indicated otherwise
+- It's expected the Prebuilt Rules upgrade workflow works seamlessly even if some or all prebuilt rules may have their **base versions** missing.
 - \<Upgrade Prebuilt Rules CTA\> combines two bulk upgrade options
 
   | \<Upgrade Prebuilt Rules CTA\>             | comment                                                                                  |
