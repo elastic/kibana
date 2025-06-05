@@ -11,7 +11,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 
-const safeURL = /^[^\s\/:?#]+$/;
+const safeURL = /^[^\s\/:?#]+[^\.#]$/;
 
 export const validateURL =
   (message: string) =>
@@ -30,9 +30,10 @@ export const validateURL =
 
     try {
       const url = new URL(value);
-      const hostname = url.hostname;
+      const hostname = decodeURIComponent(url.hostname);
+      const path = url.pathname;
 
-      const isValid = hostname && !hostname.endsWith('.') && safeURL.test(hostname);
+      const isValid = hostname && safeURL.test(hostname) && !path.endsWith('.');
       if (isValid) return;
       // eslint-disable-next-line no-empty
     } catch {}
