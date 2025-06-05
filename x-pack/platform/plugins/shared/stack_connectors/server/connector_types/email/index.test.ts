@@ -486,6 +486,23 @@ describe('params validation', () => {
       treatMustacheTemplatesAsValid: true,
     });
   });
+
+  test('doesnt throws if both host and port do not match AWS SES config', () => {
+    expect(() => {
+      validateConfig(
+        connectorType,
+        {
+          service: AdditionalEmailServices.AWS_SES,
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities }
+      );
+    }).not.toThrowError();
+  });
 });
 
 describe('execute()', () => {
@@ -1260,6 +1277,61 @@ describe('execute()', () => {
         ],
       ]
     `);
+  });
+
+  test('parameters are as expected when using ses service without ses kbn config', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: mockedActionsConfig,
+      config: {
+        ...config,
+        service: 'ses',
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+    expect(sendEmailMock.mock.calls[0][1].transport).toStrictEqual({
+      service: 'ses',
+    });
+  });
+
+  test('parameters are as expected when using ses service and ses kbn config', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getAwsSesConfig = jest.fn().mockReturnValue({
+      host: 'aws-ses-host',
+      port: 5555,
+      secure: true,
+    });
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: mockedActionsConfig,
+      config: {
+        ...config,
+        service: 'ses',
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+    expect(sendEmailMock.mock.calls[0][1].transport).toStrictEqual({
+      host: 'aws-ses-host',
+      port: 5555,
+      secure: true,
+    });
   });
 });
 

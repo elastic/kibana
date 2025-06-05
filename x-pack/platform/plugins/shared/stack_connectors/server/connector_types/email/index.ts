@@ -313,6 +313,7 @@ async function executor(
     connectorUsageCollector,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
@@ -364,6 +365,10 @@ async function executor(
     if (config.oauthTokenUrl !== null) {
       transport.oauthTokenUrl = config.oauthTokenUrl;
     }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    transport.host = awsSesConfig.host;
+    transport.port = awsSesConfig.port;
+    transport.secure = awsSesConfig.secure;
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...
