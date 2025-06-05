@@ -65,7 +65,7 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
 
-    disableInaccessibleApps(inaccessibleApps, core);
+    updateInaccessibleApps(inaccessibleApps, core);
 
     return {};
   }
@@ -99,7 +99,7 @@ export class SecuritySolutionServerlessPlugin
  * It updates the app status to 'inaccessible' for those apps.
  * The apps will still execute their lifecycle methods, but it will remain inaccessible in the UI.
  */
-const disableInaccessibleApps = (inaccessibleApps: string[], core: CoreSetup) => {
+const updateInaccessibleApps = (inaccessibleApps: string[], core: CoreSetup) => {
   if (!inaccessibleApps?.length) {
     return;
   }
