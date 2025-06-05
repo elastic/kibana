@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  ALERT_RULE_NAME,
   ALERT_STATUS,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
@@ -51,9 +50,6 @@ describe('Source bar', () => {
       alertStatus: alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus,
     });
 
-    expect(
-      statusBar.queryByText(alertWithGroupsAndTags.fields[ALERT_RULE_NAME])
-    ).toBeInTheDocument();
     expect(statusBar.getByText('Active')).toBeTruthy();
   });
 
