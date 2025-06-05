@@ -36,7 +36,15 @@ export function composeSamplingCondition(
 }
 
 export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
+  return processors
+    .map((processor) => {
+      const config = getProcessorConfig(processor);
+      if ('field' in config) {
+        return config.field.trim();
+      }
+      return '';
+    })
+    .filter(Boolean);
 }
 
 export function getTableColumns(
@@ -111,6 +119,7 @@ export function getSchemaFieldsFromSimulation(
     // Detected field still unmapped
     return {
       status: 'unmapped',
+      esType: field.esType,
       name: field.name,
       parent: streamName,
     };
