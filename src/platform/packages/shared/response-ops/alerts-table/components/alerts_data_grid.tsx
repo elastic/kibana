@@ -84,6 +84,7 @@ export const AlertsDataGrid = typedMemo(
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
+      maxRowCount,
       ...euiDataGridProps
     } = props;
     const {
@@ -333,6 +334,17 @@ export const AlertsDataGrid = typedMemo(
       [colorMode]
     );
 
+    /**
+     * Elasticsearch has a hard-limit of 10k results, even with pagination.
+     * Therefore, we need to cap the page count to a max of 10k results
+     *
+     * @see https://github.com/elastic/kibana/issues/151913s
+     */
+    const cappedAlertsCount = useMemo(
+      () => (maxRowCount && alertsCount > maxRowCount ? maxRowCount : alertsCount),
+      [alertsCount, maxRowCount]
+    );
+
     return (
       <InspectButtonContainer>
         <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -364,7 +376,7 @@ export const AlertsDataGrid = typedMemo(
               columnVisibility={columnVisibility}
               trailingControlColumns={trailingControlColumns}
               leadingControlColumns={leadingControlColumns}
-              rowCount={alertsCount}
+              rowCount={cappedAlertsCount}
               renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
               cellContext={renderContext}
               // Cast necessary because `cellContext` is untyped in EuiDataGrid

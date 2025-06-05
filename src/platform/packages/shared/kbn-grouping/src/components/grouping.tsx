@@ -62,6 +62,12 @@ export interface GroupingProps<T> {
   // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
   // when filtering by it
   multiValueFields?: string[];
+
+  /**
+   * Limits the number of results to be paginated.
+   * @see https://github.com/elastic/kibana/issues/151913
+   */
+  maxGroupCount?: number;
 }
 
 const GroupingComponent = <T,>({
@@ -86,6 +92,7 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
   multiValueFields,
+  maxGroupCount,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -204,10 +211,17 @@ const GroupingComponent = <T,>({
     ]
   );
 
-  const pageCount = useMemo(
-    () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
-    [groupCount, itemsPerPage]
-  );
+  /**
+   * Elasticsearch has a hard-limit of 10k results, even with pagination.
+   * Therefore, we need to cap the page count to a max of 10k results
+   *
+   * More info: https://github.com/elastic/kibana/issues/151913s
+   */
+  const pageCount = useMemo(() => {
+    const cappedGroupCount =
+      maxGroupCount && groupCount > maxGroupCount ? maxGroupCount : groupCount;
+    return cappedGroupCount ? Math.ceil(cappedGroupCount / itemsPerPage) : 1;
+  }, [groupCount, itemsPerPage, maxGroupCount]);
 
   return (
     <>

@@ -485,6 +485,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                 showInspectButton
                 services={services}
                 {...tablePropsOverrides}
+                //  Setting maxRowCount to 10k because of elasticsearch limitations
+                //  More info here: https://github.com/elastic/kibana/issues/151913
+                maxRowCount={10_000}
               />
             </AlertTableCellContextProvider>
           </EuiDataGridContainer>
