@@ -105,7 +105,7 @@ const emptyText: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.promptDoc', {
     defaultMessage: 'Prompt',
   }),
-  kind: 'Snippet',
+  kind: 'Constant',
   asSnippet: true,
   label: '""',
   sortText: '1',
