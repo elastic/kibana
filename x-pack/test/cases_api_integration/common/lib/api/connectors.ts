@@ -29,10 +29,10 @@ import type {
   GetCaseConnectorsResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { camelCase, mapKeys } from 'lodash';
+import type { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
-import type { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { createConfiguration, getConfigurationRequest } from './configuration';
 import { createCase } from './case';
 import { getSpaceUrlPrefix } from './helpers';

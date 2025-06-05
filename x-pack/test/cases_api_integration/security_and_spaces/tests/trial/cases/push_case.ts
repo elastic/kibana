@@ -14,8 +14,8 @@ import type { User } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import type { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
   postCaseReq,
