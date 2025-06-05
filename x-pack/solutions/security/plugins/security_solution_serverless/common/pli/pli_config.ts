@@ -23,8 +23,9 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.externalDetections,
       ProductFeatureKey.externalRuleActions,
     ],
-    essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
-    complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+    // neither of these tiers are available in ai_soc product line
+    essentials: [],
+    complete: [],
   },
   [ProductLine.security]: {
     search_ai_lake: [],
@@ -49,7 +50,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
-      ProductFeatureKey.automaticImport,
+      ProductFeatureKey.integrationAssistant,
       ProductFeatureKey.prebuiltRuleCustomization,
       ProductFeatureKey.siemMigrations,
     ],
