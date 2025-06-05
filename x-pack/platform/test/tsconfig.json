@@ -83,5 +83,18 @@
     "@kbn/task-manager-plugin",
     "@kbn/alerting-state-types",
     "@kbn/std",
+    "@kbn/test-suites-xpack",
+    "@kbn/dev-proc-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/discover-plugin",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-common",
+    "@kbn/rison",
+    "@kbn/es-query",
+    "@kbn/es-archiver",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-server",
   ]
 }
