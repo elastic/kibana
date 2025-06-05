@@ -24,7 +24,6 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const GROUPED_TABLE_TEST_ID = 'alert-summary-grouped-table';
 
-
 export interface TableSectionProps {
   /**
    * DataView created for the alert summary page
