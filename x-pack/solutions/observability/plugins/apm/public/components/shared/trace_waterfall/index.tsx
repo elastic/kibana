@@ -92,7 +92,6 @@ function TraceWaterfallComponent() {
       />
       <div
         css={css`
-          z-index: ${euiTheme.levels.toast};
           position: relative;
         `}
       >
