@@ -39,11 +39,21 @@ export interface DetectedEntity {
 }
 
 export type DetectedEntityType = DetectedEntity['type'];
+export interface Unredaction {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  type: 'ner' | 'regex';
+}
+
+export type UnredactionType = Unredaction['type'];
+
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    detected_entities?: DetectedEntity[];
+    unredactions?: Unredaction[];
     name?: string;
     role: MessageRole;
     function_call?: {

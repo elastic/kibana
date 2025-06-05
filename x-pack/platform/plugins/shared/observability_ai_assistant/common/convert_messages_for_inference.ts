@@ -13,7 +13,6 @@ import {
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
-import { redactEntities } from './utils/anonymization/redaction';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
@@ -34,42 +33,23 @@ export function convertMessagesForInference(
   const inferenceMessages: InferenceMessage[] = [];
 
   messages.forEach((message) => {
-    const detectedEntities = message.message.detected_entities;
-    const hasDetectedEntities = (detectedEntities?.length ?? 0) > 0;
     if (message.message.role === MessageRole.Assistant) {
-      let assistantContent = message.message.content ?? null;
-      // Stored assistant content is un‑redacted, so reapply hashes here
-      // before sending the history back to the LLM.
-      if (hasDetectedEntities && assistantContent) {
-        assistantContent = redactEntities(assistantContent, detectedEntities!);
-      }
-
-      // Reapply redaction inside function_call.arguments JSON, if any
-      let toolCalls;
-      if (message.message.function_call?.name) {
-        const functionArgs = message.message.function_call.arguments;
-        // Replace any entity values with their hashes
-        const redactedArgs =
-          hasDetectedEntities && functionArgs
-            ? redactEntities(functionArgs, detectedEntities!)
-            : functionArgs;
-        const parsedArgs = safeJsonParse(redactedArgs, logger);
-
-        toolCalls = [
-          {
-            function: {
-              name: message.message.function_call.name,
-              arguments: parsedArgs,
-            },
-            toolCallId: generateFakeToolCallId(),
-          },
-        ];
-      }
-
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
-        content: assistantContent ?? null,
-        ...(toolCalls ? { toolCalls } : {}),
+        content: message.message.content ?? null,
+        ...(message.message.function_call?.name
+          ? {
+              toolCalls: [
+                {
+                  function: {
+                    name: message.message.function_call.name,
+                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
+                  },
+                  toolCallId: generateFakeToolCallId(),
+                },
+              ],
+            }
+          : {}),
       });
       return;
     }
@@ -87,18 +67,11 @@ export function convertMessagesForInference(
       if (!toolCallRequest) {
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
-      let contentWithToolCallForInference = message.message.content ?? '';
-      if (hasDetectedEntities) {
-        contentWithToolCallForInference = redactEntities(
-          contentWithToolCallForInference,
-          detectedEntities!
-        );
-      }
 
       inferenceMessages.push({
         name: message.message.name!,
         role: InferenceMessageRole.Tool,
-        response: JSON.parse(contentWithToolCallForInference),
+        response: JSON.parse(message.message.content ?? '{}'),
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 
@@ -106,14 +79,9 @@ export function convertMessagesForInference(
     }
 
     if (isUserMessage) {
-      let contentForInference = message.message.content ?? '';
-      // If detectedEntities exist, remove them
-      if (hasDetectedEntities) {
-        contentForInference = redactEntities(contentForInference, detectedEntities!);
-      }
       inferenceMessages.push({
         role: InferenceMessageRole.User,
-        content: contentForInference,
+        content: message.message.content ?? '',
       });
       return;
     }

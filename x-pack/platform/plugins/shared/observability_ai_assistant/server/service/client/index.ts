@@ -315,8 +315,8 @@ export class ObservabilityAIAssistantClient {
       );
 
       const output$ = conversationWithMetaFields$.pipe(
-        switchMap((conversation) =>
-          mergeOperator(
+        switchMap((conversation) => {
+          return mergeOperator(
             // get all the events from continuing the conversation
             nextEvents$,
             // wait until all dependencies have completed
@@ -327,81 +327,80 @@ export class ObservabilityAIAssistantClient {
               title$.pipe(filter((value): value is string => typeof value === 'string')),
               systemMessage$,
             ]).pipe(
-              switchMap(([addedMessages, title, systemMessage]) =>
-                from(
-                  // Call processMessages on history + new messages
-                  this.dependencies.anonymizationService.processMessages(
+              switchMap(([addedMessages, title, systemMessage]) => {
+                const { unredactedMessages } =
+                  this.dependencies.anonymizationService.unredactMessages(
                     initialMessages.concat(addedMessages)
-                  )
-                ).pipe(
-                  switchMap(({ processedMessages }) => {
-                    const lastMessage = last(processedMessages);
+                  );
+                const lastMessage = last(unredactedMessages);
 
-                    // if a function request is at the very end, close the stream to consumer
-                    // without persisting or updating the conversation. we need to wait
-                    // on the function response to have a valid conversation
-                    const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+                // if a function request is at the very end, close the stream to consumer
+                // without persisting or updating the conversation. we need to wait
+                // on the function response to have a valid conversation
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                    if (!persist || isFunctionRequest) {
-                      return of();
-                    }
+                if (!persist || isFunctionRequest) {
+                  return of();
+                }
 
-                    if (isConversationUpdate && conversation) {
-                      return from(
-                        this.update(
-                          conversationId,
-                          merge(
-                            {},
-                            // base conversation without messages
-                            omit(conversation._source, 'messages'),
-                            // update messages and system message
-                            { messages: processedMessages, systemMessage },
-                            // update title
-                            {
-                              conversation: {
-                                title: title || conversation._source?.conversation.title,
-                              },
-                            }
-                          )
-                        )
-                      ).pipe(
-                        map(
-                          (conversationUpdated): ConversationUpdateEvent => ({
-                            conversation: conversationUpdated.conversation,
-                            type: StreamingChatResponseEventType.ConversationUpdate,
-                          })
-                        )
-                      );
-                    }
+                if (isConversationUpdate && conversation) {
+                  return from(
+                    this.update(
+                      conversationId,
 
-                    return from(
-                      this.create({
-                        '@timestamp': new Date().toISOString(),
-                        conversation: {
-                          title,
-                          id: conversationId,
-                        },
-                        public: !!isPublic,
-                        labels: {},
-                        numeric_labels: {},
-                        systemMessage,
-                        messages: processedMessages,
-                        archived: false,
-                      })
-                    ).pipe(
-                      map(
-                        (conversationCreated): ConversationCreateEvent => ({
-                          conversation: conversationCreated.conversation,
-                          type: StreamingChatResponseEventType.ConversationCreate,
-                        })
+                      merge(
+                        {},
+
+                        // base conversation without messages
+                        omit(conversation._source, 'messages'),
+
+                        // update messages and system message
+                        { messages: unredactedMessages, systemMessage },
+
+                        // update title
+                        {
+                          conversation: {
+                            title: title || conversation._source?.conversation.title,
+                          },
+                        }
                       )
-                    );
+                    )
+                  ).pipe(
+                    map((conversationUpdated): ConversationUpdateEvent => {
+                      return {
+                        conversation: conversationUpdated.conversation,
+                        type: StreamingChatResponseEventType.ConversationUpdate,
+                      };
+                    })
+                  );
+                }
+
+                return from(
+                  this.create({
+                    '@timestamp': new Date().toISOString(),
+                    conversation: {
+                      title,
+                      id: conversationId,
+                    },
+                    public: !!isPublic,
+                    labels: {},
+                    numeric_labels: {},
+                    systemMessage,
+                    messages: unredactedMessages,
+                    archived: false,
                   })
-                )
-              )
+                ).pipe(
+                  map((conversationCreated): ConversationCreateEvent => {
+                    return {
+                      conversation: conversationCreated.conversation,
+                      type: StreamingChatResponseEventType.ConversationCreate,
+                    };
+                  })
+                );
+              })
             )
-          )
-        )
+          );
+        })
       );
 
       return output$.pipe(
@@ -490,19 +489,24 @@ export class ObservabilityAIAssistantClient {
     };
     if (stream) {
       return defer(() =>
-        from(this.dependencies.anonymizationService.processMessages(messages)).pipe(
-          switchMap(({ processedMessages }) => {
+        from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
+          switchMap(({ redactedMessages }) => {
             this.dependencies.logger.debug(
               () =>
                 `Calling inference client for name: "${name}" with options: ${JSON.stringify(
                   options
                 )}`
             );
-            return this.dependencies.inferenceClient.chatComplete({
-              ...options,
-              stream: true,
-              messages: convertMessagesForInference(processedMessages, this.dependencies.logger),
-            });
+            return (
+              this.dependencies.inferenceClient
+                .chatComplete({
+                  ...options,
+                  stream: true,
+                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+                })
+                // unredact complete assistant response event
+                .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
+            );
           })
         )
       ).pipe(

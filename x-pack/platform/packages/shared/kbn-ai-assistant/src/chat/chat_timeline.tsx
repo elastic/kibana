@@ -150,11 +150,11 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { role, content, detected_entities: detectedEntities } = item.message.message;
+      const { role, content, unredactions } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && role === 'user' && content && detectedEntities) {
-        item.anonymizedHighlightedContent = highlightContent(content, detectedEntities);
+      if (anonymizationEnabled && role === 'user' && content && unredactions) {
+        item.anonymizedHighlightedContent = highlightContent(content, unredactions);
       }
 
       if (item.display.collapsed) {

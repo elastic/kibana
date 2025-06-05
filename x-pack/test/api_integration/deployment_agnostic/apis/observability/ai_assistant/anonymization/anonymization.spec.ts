@@ -144,17 +144,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // First stored message
       const firstSavedMsg = storedUserMsgs[0];
-      expect(firstSavedMsg.detected_entities).to.have.length(1);
-      expect(firstSavedMsg.detected_entities[0].entity).to.eql('claudia@example.com');
-      expect(firstSavedMsg.detected_entities[0].class_name).to.eql('EMAIL');
-      expect(firstSavedMsg.detected_entities[0].hash).to.match(/[0-9a-f]{40}/);
+      expect(firstSavedMsg.unredactions).to.have.length(1);
+      expect(firstSavedMsg.unredactions[0].entity).to.eql('claudia@example.com');
+      expect(firstSavedMsg.unredactions[0].class_name).to.eql('EMAIL');
 
       // Second stored message
       const secSavedMsg = storedUserMsgs[1];
-      expect(secSavedMsg.detected_entities).to.have.length(1);
-      expect(secSavedMsg.detected_entities[0].entity).to.eql('http://claudia.is');
-      expect(secSavedMsg.detected_entities[0].class_name).to.eql('URL');
-      expect(secSavedMsg.detected_entities[0].hash).to.match(/[0-9a-f]{40}/);
+      expect(secSavedMsg.unredactions).to.have.length(1);
+      expect(secSavedMsg.unredactions[0].entity).to.eql('http://claudia.is');
+      expect(secSavedMsg.unredactions[0].class_name).to.eql('URL');
     });
   });
 }

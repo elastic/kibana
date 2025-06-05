@@ -15,12 +15,11 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
-export const detectedEntityRt = t.type({
+export const unredactionRt = t.type({
   entity: t.string,
   class_name: t.string,
   start_pos: t.number,
   end_pos: t.number,
-  hash: t.string,
   type: t.union([t.literal('ner'), t.literal('regex')]),
 });
 
@@ -54,7 +53,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
-      detected_entities: t.array(detectedEntityRt),
+      unredactions: t.array(unredactionRt),
     }),
   ]),
 });

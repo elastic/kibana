@@ -8,11 +8,12 @@
 import { withInferenceSpan } from '@kbn/inference-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import pLimit from 'p-limit';
-
+import { OperatorFunction, map } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import { ChatCompletionEvent, ChatCompletionEventType } from '@kbn/inference-common';
 import { unhashString } from '../../../common/utils/anonymization/redaction';
-import { buildDetectedEntitiesMap } from '../../../common/utils/anonymization/build_detected_entities_map';
+import { redactEntities } from '../../../common/utils/anonymization/redaction';
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
 import { chunkText } from './chunk_text';
@@ -40,6 +41,11 @@ export class AnonymizationService {
   private readonly esClient: { asCurrentUser: ElasticsearchClient };
   private readonly logger: Logger;
   private rules: AnonymizationRule[];
+
+  private currentHashMap: Map<
+    string,
+    { value: string; class_name: string; type: DetectedEntityType }
+  > = new Map();
 
   constructor({ esClient, logger, anonymizationRules }: Dependencies) {
     this.esClient = esClient;
@@ -152,100 +158,115 @@ export class AnonymizationService {
   }
 
   /**
-   * New user messages are anonymised (NER + regex) and their entities stored.
-   * Assistant messages have any {hash} placeholders replaced with the original values.
-   *
-   * The function keeps a running `hashMap` built from all previously detected
-   * entities so that assistant placeholders originating from earlier user
-   * messages can be restored.
-   *
-   * If a message already has `detected_entities` it is skipped.
-   *
-   * @param messages - Messages to process for anonymization/deanonymization
-   * @returns Object containing the processed messages
+   * Redacts all user messages by replacing detected entities with {hash} placeholders
    */
-  async processMessages(messages: Message[]): Promise<{ processedMessages: Message[] }> {
-    this.logger.debug(
-      `Processing ${messages.length} messages for entity detection and deanonymization`
-    );
-
+  async redactMessages(messages: Message[]): Promise<{ redactedMessages: Message[] }> {
+    this.logger.debug(`Redacting ${messages.length} messages (per‑message detection)`);
     if (!this.rules.length) {
-      return { processedMessages: messages };
+      return { redactedMessages: messages };
     }
 
-    // Initialize hash map from existing entities
-    const hashMap = buildDetectedEntitiesMap(messages);
-
-    // Process each message and mutate in place
-    for (const message of messages) {
-      // Skip messages that already have entities detected
-      if (message.message.detected_entities) {
+    for (const msg of messages) {
+      if (msg.message.role !== 'user' || !msg.message.content) {
         continue;
       }
 
-      const { role, content } = message.message;
+      const entities = await this.detectEntities(msg.message.content);
 
-      // Process user messages - detect entities
-      if (role === 'user' && content) {
-        const entities = await this.detectEntities(content);
-        message.message.detected_entities = entities.map((ent) => ({
-          entity: ent.entity,
-          class_name: ent.class_name,
-          start_pos: ent.start_pos,
-          end_pos: ent.end_pos,
-          type: ent.type,
-          hash: ent.hash,
-        }));
-        // Update hash map with newly detected entities
-        entities.forEach((entity) => {
-          hashMap.set(entity.hash, {
-            value: entity.entity,
-            class_name: entity.class_name,
-            type: entity.type,
+      if (entities.length) {
+        msg.message.content = redactEntities(msg.message.content, entities);
+
+        // Update hashMap
+        entities.forEach((e) => {
+          this.currentHashMap.set(e.hash, {
+            value: e.entity,
+            class_name: e.class_name,
+            type: e.type,
           });
         });
-        continue;
-      }
-      // Process assistant messages - replace hash placeholders
-      else if (role === 'assistant') {
-        this.processAssistantMessage(message, hashMap);
       }
     }
 
-    return { processedMessages: messages };
+    // Redact entity values inside any function_call.arguments JSON strings
+    for (const msg of messages) {
+      const argsStr = msg.message.function_call?.arguments;
+      if (!argsStr) continue;
+
+      let redactedArgs = argsStr;
+      // Replace every known entity value with its hash
+      this.currentHashMap.forEach((info, hash) => {
+        redactedArgs = redactedArgs.split(info.value).join(hash);
+      });
+      msg.message.function_call!.arguments = redactedArgs;
+    }
+
+    return { redactedMessages: messages };
   }
 
   /**
-   * Process an assistant message to replace hash placeholders
-   *
-   * Replaces hash placeholders in content and function arguments
-   * with their original values using the provided hash map.
-   *
-   * @param message - Assistant message to process
-   * @param hashMap - Map of hash values to entity information
-   * @returns New message with hash placeholders replaced
+   * Restores all {hash} placeholders in-place and attaches `unredactions` array
+   * for UI highlighting (content only).
    */
-  private processAssistantMessage(
-    message: Message,
-    hashMap: Map<string, { value: string; class_name: string; type: DetectedEntityType }>
-  ): void {
-    const { content } = message.message;
+  unredactMessages(messages: Message[]): { unredactedMessages: Message[] } {
+    for (const msg of messages) {
+      const content = msg.message.content;
+      if (content) {
+        const { unhashedText, detectedEntities } = deanonymizeText(content, this.currentHashMap);
 
-    // Process content if it exists
-    if (content) {
-      const { unhashedText, detectedEntities } = deanonymizeText(content, hashMap);
-      message.message.content = unhashedText;
-      message.message.detected_entities = detectedEntities;
+        msg.message.content = unhashedText;
+        if (detectedEntities.length > 0) {
+          msg.message.unredactions = detectedEntities.map(({ hash, ...rest }) => rest);
+        }
+      }
+
+      // also unhash function_call.arguments if present
+      if (msg.message.function_call?.arguments) {
+        msg.message.function_call.arguments = unhashString(
+          msg.message.function_call.arguments,
+          this.currentHashMap
+        );
+      }
     }
+    return { unredactedMessages: messages };
+  }
 
-    // Process function call arguments if they exist
-    if (message.message.function_call?.arguments) {
-      message.message.function_call.arguments = unhashString(
-        message.message.function_call.arguments,
-        hashMap
+  unredactChatCompletionEvent(): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
+    return (source$) => {
+      return source$.pipe(
+        map((event): ChatCompletionEvent => {
+          if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
+            if (event.toolCalls?.length > 0) {
+              const unredactedToolCalls = event.toolCalls.map((toolCall) => {
+                const args = toolCall.function?.arguments;
+                if (args && typeof args === 'object' && 'text' in args) {
+                  const { unhashedText } = deanonymizeText(
+                    args.text as string,
+                    this.currentHashMap
+                  );
+                  args.text = unhashedText;
+                }
+                return {
+                  ...toolCall,
+                  function: {
+                    ...toolCall.function,
+                    arguments: JSON.stringify(args),
+                  },
+                };
+              });
+
+              return {
+                ...event,
+                toolCalls: unredactedToolCalls,
+              };
+            }
+            if ('content' in event && typeof event.content === 'string') {
+              const { unhashedText } = deanonymizeText(event.content, this.currentHashMap);
+              event.content = unhashedText;
+            }
+          }
+          return event;
+        })
       );
-    }
-
-    // TODO: process other fields?
+    };
   }
 }

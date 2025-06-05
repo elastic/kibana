@@ -13,15 +13,14 @@ export const HASH_REGEX = /[0-9a-f]{40}/g;
  */
 
 export function redactEntities(original: string, entities: DetectedEntity[]): string {
-  const sortedEntities = entities.slice().sort((a, b) => a.start_pos - b.start_pos);
-  let redacted = '';
-  let currentIndex = 0;
-  for (const ent of sortedEntities) {
-    redacted += original.substring(currentIndex, ent.start_pos);
-    redacted += `${ent.hash}`;
-    currentIndex = ent.end_pos;
-  }
-  redacted += original.substring(currentIndex);
+  let redacted = original;
+  entities
+    .slice()
+    .sort((a, b) => b.start_pos - a.start_pos)
+    .forEach((e) => {
+      redacted = redacted.slice(0, e.start_pos) + e.hash + redacted.slice(e.end_pos);
+    });
+
   return redacted;
 }
 /**

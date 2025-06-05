@@ -83,7 +83,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                     trigger: keyword,
                   },
                 },
-                detected_entities: {
+                unredactions: {
                   type: 'object',
                   enabled: false,
                 },

@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { type Observable, scan, filter, defaultIfEmpty } from 'rxjs';
-import type { ChatCompletionChunkEvent, ChatEvent } from '../conversation_complete';
+import { type Observable, scan, map, defaultIfEmpty, filter } from 'rxjs';
+import type { ChatEvent } from '../conversation_complete';
 import { StreamingChatResponseEventType } from '../conversation_complete';
 import { MessageRole } from '../types';
 
@@ -27,16 +27,34 @@ export const concatenateChatCompletionChunks =
   () =>
   (source: Observable<ChatEvent>): Observable<ConcatenatedMessage> =>
     source.pipe(
-      filter(
-        (event): event is ChatCompletionChunkEvent =>
-          event.type === StreamingChatResponseEventType.ChatCompletionChunk
-      ),
+      filter((event: ChatEvent) => {
+        if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
+          return true; // Always allow chunks
+        }
+        if (event.type === StreamingChatResponseEventType.ChatCompletionMessage) {
+          // Only allow messages if they have a function call
+          return !!(event.message.function_call?.name && event.message.function_call?.arguments);
+        }
+        return false;
+      }),
       scan(
-        (acc, { message }) => {
-          acc.message.content += message.content ?? '';
-          acc.message.function_call.name += message.function_call?.name ?? '';
-          acc.message.function_call.arguments += message.function_call?.arguments ?? '';
-
+        (acc, event) => {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
+            acc.message.content += event.message.content ?? '';
+            if (!acc.functionCallFullySet) {
+              acc.message.function_call.name += event.message.function_call?.name ?? '';
+              acc.message.function_call.arguments += event.message.function_call?.arguments ?? '';
+            }
+          } else if (event.type === StreamingChatResponseEventType.ChatCompletionMessage) {
+            if (event.message.content) {
+              acc.message.content = event.message.content; 
+            }
+            if (event.message.function_call?.name && event.message.function_call?.arguments) {
+              acc.message.function_call.name = event.message.function_call.name;
+              acc.message.function_call.arguments = event.message.function_call.arguments;
+              acc.functionCallFullySet = true;
+            }
+          }
           return cloneDeep(acc);
         },
         {
@@ -49,8 +67,14 @@ export const concatenateChatCompletionChunks =
             },
             role: MessageRole.Assistant,
           },
-        } as ConcatenatedMessage
+          functionCallFullySet: false, // track if function_call is set by a full message
+        } as ConcatenatedMessage & { functionCallFullySet: boolean }
       ),
+      map((acc) => {
+        // Remove the temporary flag before returning
+        const { functionCallFullySet, ...result } = acc;
+        return result;
+      }),
       defaultIfEmpty({
         message: {
           content: '',
@@ -61,5 +85,5 @@ export const concatenateChatCompletionChunks =
           },
           role: MessageRole.Assistant,
         },
-      })
+      } as ConcatenatedMessage)
     );
