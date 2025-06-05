@@ -472,6 +472,7 @@ describe('RelatedDashboardsClient', () => {
   describe('Linked Dashboards', () => {
     describe('getLinkedDashboards', () => {
       it('should throw an error if no alert is set', async () => {
+        // @ts-ignore next-line
         client.setAlert(null);
 
         await expect(client.getLinkedDashboards()).rejects.toThrow(

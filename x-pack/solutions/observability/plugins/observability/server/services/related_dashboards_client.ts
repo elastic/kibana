@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import { omit } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardSection } from '@kbn/dashboard-plugin/common';
@@ -65,9 +66,9 @@ export class RelatedDashboardsClient {
     };
   }
 
-  async fetchSuggestedDashboards(): Promise<RelatedDashboard[]> {
+  async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
-    const relevantDashboardsById = new Map<string, RelatedDashboard>();
+    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
     const index = await this.getRuleQueryIndex();
     if (!this.alert) {
       throw new Error('Alert not found. Could not fetch suggested dashboards.');
@@ -343,7 +344,7 @@ export class RelatedDashboardsClient {
   getMatchingFields(dashboard: RelatedDashboard): string[] {
     const matchingFields = new Set<string>();
     // grab all the top level arrays from the matchedBy object via Object.values
-    Object.values(dashboard.matchedBy).forEach((match) => {
+    Object.values(omit(dashboard.matchedBy, 'linked')).forEach((match) => {
       // add the values of each array to the matchingFields set
       match.forEach((value) => {
         matchingFields.add(value);
