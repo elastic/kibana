@@ -35,39 +35,39 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can see correct rule information in the preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-the-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in the preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-the-preview-before-upgrading)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
-    - [Preview non-customized field that has an upgrade (AAB)](#preview-non-customized-field-that-has-an-upgrade-aab)
-    - [Preview customized field that doesn't have an upgrade (ABA)](#preview-customized-field-that-doesnt-have-an-upgrade-aba)
-    - [Preview customized field that has a matching upgrade (ABB)](#preview-customized-field-that-has-a-matching-upgrade-abb)
-    - [Preview customized field that has an upgrade resulting in a solvable conflict (ABC, conflict solvable by diff algo)](#preview-customized-field-that-has-an-upgrade-resulting-in-a-solvable-conflict-abc-conflict-solvable-by-diff-algo)
-    - [Preview customized field that has an upgrade resulting in a non-solvable conflict (ABC, conflict non-solvable by diff algo)](#preview-customized-field-that-has-an-upgrade-resulting-in-a-non-solvable-conflict-abc-conflict-non-solvable-by-diff-algo)
+    - [**Scenario: Preview non-customized field that has an upgrade (AAB)**](#scenario-preview-non-customized-field-that-has-an-upgrade-aab)
+    - [**Scenario: Preview customized field that doesn't have an upgrade (ABA)**](#scenario-preview-customized-field-that-doesnt-have-an-upgrade-aba)
+    - [**Scenario: Preview customized field that has a matching upgrade (ABB)**](#scenario-preview-customized-field-that-has-a-matching-upgrade-abb)
+    - [**Scenario: Preview customized field that has an upgrade resulting in a solvable conflict (ABC, conflict solvable by diff algo)**](#scenario-preview-customized-field-that-has-an-upgrade-resulting-in-a-solvable-conflict-abc-conflict-solvable-by-diff-algo)
+    - [**Scenario: Preview customized field that has an upgrade resulting in a non-solvable conflict (ABC, conflict non-solvable by diff algo)**](#scenario-preview-customized-field-that-has-an-upgrade-resulting-in-a-non-solvable-conflict-abc-conflict-non-solvable-by-diff-algo)
   - [Rule upgrade field preview Diff View options](#rule-upgrade-field-preview-diff-view-options)
-    - [Preview customized field that doesn't have an upgrade (AAB diff case)](#preview-customized-field-that-doesnt-have-an-upgrade-aab-diff-case)
-    - [Preview non-customized field that has an upgrade (ABA diff case)](#preview-non-customized-field-that-has-an-upgrade-aba-diff-case)
-    - [Preview customized field diff that has a matching upgrade (ABB diff case)](#preview-customized-field-diff-that-has-a-matching-upgrade-abb-diff-case)
-    - [Preview customized field diff that has an upgrade with a solvable conflict (ABC diff case, conflict solvable by diff algo)](#preview-customized-field-diff-that-has-an-upgrade-with-a-solvable-conflict-abc-diff-case-conflict-solvable-by-diff-algo)
-    - [Preview customized field diff that has an upgrade with a non-solvable conflict (ABC diff case, conflict non-solvable by diff algo)](#preview-customized-field-diff-that-has-an-upgrade-with-a-non-solvable-conflict-abc-diff-case-conflict-non-solvable-by-diff-algo)
+    - [**Scenario: Preview customized field that doesn't have an upgrade (AAB diff case)**](#scenario-preview-customized-field-that-doesnt-have-an-upgrade-aab-diff-case)
+    - [**Scenario: Preview non-customized field that has an upgrade (ABA diff case)**](#scenario-preview-non-customized-field-that-has-an-upgrade-aba-diff-case)
+    - [**Scenario: Preview customized field diff that has a matching upgrade (ABB diff case)**](#scenario-preview-customized-field-diff-that-has-a-matching-upgrade-abb-diff-case)
+    - [**Scenario: Preview customized field diff that has an upgrade with a solvable conflict (ABC diff case, conflict solvable by diff algo)**](#scenario-preview-customized-field-diff-that-has-an-upgrade-with-a-solvable-conflict-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [**Scenario: Preview customized field diff that has an upgrade with a non-solvable conflict (ABC diff case, conflict non-solvable by diff algo)**](#scenario-preview-customized-field-diff-that-has-an-upgrade-with-a-non-solvable-conflict-abc-diff-case-conflict-non-solvable-by-diff-algo)
   - [Field editing](#field-editing)
-    - [Validation blocks saving field form when value is invalid](#validation-blocks-saving-field-form-when-value-is-invalid)
-    - [Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View](#saving-unchanged-field-form-value-doesnt-add-up-or-remove-anything-to-the-field-diff-in-diff-view)
+    - [**Scenario: Validation blocks saving field form when value is invalid**](#scenario-validation-blocks-saving-field-form-when-value-is-invalid)
+    - [**Scenario: Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View**](#scenario-saving-unchanged-field-form-value-doesnt-add-up-or-remove-anything-to-the-field-diff-in-diff-view)
   - [Rule upgrade button](#rule-upgrade-button)
-    - [Rule upgrade button is disabled when num of conflicts \>= 1](#rule-upgrade-button-is-disabled-when-num-of-conflicts--1)
-    - [Rule upgrade button is disabled when num fields in edit mode \>= 1](#rule-upgrade-button-is-disabled-when-num-fields-in-edit-mode--1)
-    - [Rule upgrade button is disabled when num of conflicts \>= 1 or num fields in edit mode \>= 1](#rule-upgrade-button-is-disabled-when-num-of-conflicts--1-or-num-fields-in-edit-mode--1)
+    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1)
+    - [**Scenario: Rule upgrade button is disabled when num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-fields-in-edit-mode--1)
+    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1 or num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1-or-num-fields-in-edit-mode--1)
   - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
-    - [Non-customized rule upgrade after preview (AAB diff case)](#non-customized-rule-upgrade-after-preview-aab-diff-case)
-    - [Non-customized rule upgrade after preview and customizing field values (AAB diff case)](#non-customized-rule-upgrade-after-preview-and-customizing-field-values-aab-diff-case)
-    - [Customized rule upgrade after preview customized fields that don't have upgrades (ABA diff case)](#customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-aba-diff-case)
-    - [Customized rule upgrade after preview customized fields that don't have upgrades and changing that field values (ABA diff case)](#customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-and-changing-that-field-values-aba-diff-case)
-    - [Customized rule upgrade after preview and accepting solvable conflicts (ABC diff case, conflict solvable by diff algo)](#customized-rule-upgrade-after-preview-and-accepting-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
-    - [Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)](#customized-rule-upgrade-after-preview-and-accepting-edited-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
-    - [Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)](#customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-suggested-field-value-abc-diff-case-non-solvable-by-diff-algo)
-    - [Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)](#customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-edited-field-value-abc-diff-case-non-solvable-by-diff-algo)
+    - [**Scenario: Non-customized rule upgrade after preview (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-aab-diff-case)
+    - [**Scenario: Non-customized rule upgrade after preview and customizing field values (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-and-customizing-field-values-aab-diff-case)
+    - [**Scenario: Customized rule upgrade after preview customized fields that don't have upgrades (ABA diff case)**](#scenario-customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-aba-diff-case)
+    - [**Scenario: Customized rule upgrade after preview customized fields that don't have upgrades and changing that field values (ABA diff case)**](#scenario-customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-and-changing-that-field-values-aba-diff-case)
+    - [**Scenario: Customized rule upgrade after preview and accepting solvable conflicts (ABC diff case, conflict solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-and-accepting-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [**Scenario: Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-and-accepting-edited-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-suggested-field-value-abc-diff-case-non-solvable-by-diff-algo)
+    - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-edited-field-value-abc-diff-case-non-solvable-by-diff-algo)
   - [Rule type upgrade](#rule-type-upgrade)
-    - [Non-customized rule upgrade to a different rule type after preview](#non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
-    - [Customized rule upgrade to a different rule type after preview](#customized-rule-upgrade-to-a-different-rule-type-after-preview)
+    - [**Scenario: Non-customized rule upgrade to a different rule type after preview**](#scenario-non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
+    - [**Scenario: Customized rule upgrade to a different rule type after preview**](#scenario-customized-rule-upgrade-to-a-different-rule-type-after-preview)
   - [Concurrency control](#concurrency-control)
-    - [User gets notified after someone edited a rule being previewed](#user-gets-notified-after-someone-edited-a-rule-being-previewed)
-    - [User gets notified after a new rule versions is released](#user-gets-notified-after-a-new-rule-versions-is-released)
+    - [**Scenario: User gets notified after someone edited a rule being previewed**](#scenario-user-gets-notified-after-someone-edited-a-rule-being-previewed)
+    - [**Scenario: User gets notified after a new rule versions is released**](#scenario-user-gets-notified-after-a-new-rule-versions-is-released)
   - [Licensing](#licensing)
     - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
     - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
@@ -204,7 +204,7 @@ And the Investigation Guide tab should NOT be displayed
 
 ### Rule upgrade field preview
 
-#### Preview non-customized field that has an upgrade (AAB)
+#### **Scenario: Preview non-customized field that has an upgrade (AAB)**
 
 **Automation**: Jest functional test for each \<field\>.
 
@@ -223,7 +223,7 @@ Examples:
 <field> = all customizable fields
 ```
 
-#### Preview customized field that doesn't have an upgrade (ABA)
+#### **Scenario: Preview customized field that doesn't have an upgrade (ABA)**
 
 **Automation**: Jest functional test for each \<field\>.
 
@@ -244,7 +244,7 @@ And user should see <field> Readonly View
 
 `<field>` = all customizable fields
 
-#### Preview customized field that has a matching upgrade (ABB)
+#### **Scenario: Preview customized field that has a matching upgrade (ABB)**
 
 **Automation**: Jest functional test for each \<field\>.
 
@@ -265,7 +265,7 @@ And user should see <field> Readonly View
 
 `<field>` = all customizable fields
 
-#### Preview customized field that has an upgrade resulting in a solvable conflict (ABC, conflict solvable by diff algo)
+#### **Scenario: Preview customized field that has an upgrade resulting in a solvable conflict (ABC, conflict solvable by diff algo)**
 
 **Automation**: Jest functional test for each \<field\>.
 
@@ -298,7 +298,7 @@ And <field> edit form has merged value
 - `threat_index`
 - `new_terms_fields`
 
-#### Preview customized field that has an upgrade resulting in a non-solvable conflict (ABC, conflict non-solvable by diff algo)
+#### **Scenario: Preview customized field that has an upgrade resulting in a non-solvable conflict (ABC, conflict non-solvable by diff algo)**
 
 **Automation**: Jest functional test for each \<field\>.
 
@@ -324,7 +324,7 @@ And <field> Readonly mode displays the current rule version field value
 
 ### Rule upgrade field preview Diff View options
 
-#### Preview customized field that doesn't have an upgrade (AAB diff case)
+#### **Scenario: Preview customized field that doesn't have an upgrade (AAB diff case)**
 
 **Automation**: 1 Jest integration test.
 
@@ -343,7 +343,7 @@ Then user should see a diff between original and edited <field> values
 
 `<field>` = all customizable fields
 
-#### Preview non-customized field that has an upgrade (ABA diff case)
+#### **Scenario: Preview non-customized field that has an upgrade (ABA diff case)**
 
 **Automation**: 1 Jest integration test.
 
@@ -367,7 +367,7 @@ And user should have an ability to see <diff option>
 
 - Elastic update, a diff between original and upgrade field values
 
-#### Preview customized field diff that has a matching upgrade (ABB diff case)
+#### **Scenario: Preview customized field diff that has a matching upgrade (ABB diff case)**
 
 **Automation**: 1 Jest integration test.
 
@@ -392,7 +392,7 @@ And user should have an ability to see a <diff option>
 
 - Elastic update, a diff between original and upgrade field values
 
-#### Preview customized field diff that has an upgrade with a solvable conflict (ABC diff case, conflict solvable by diff algo)
+#### **Scenario: Preview customized field diff that has an upgrade with a solvable conflict (ABC diff case, conflict solvable by diff algo)**
 
 **Automation**: 1 Jest integration test.
 
@@ -418,7 +418,7 @@ And user should have an ability to see a <diff option>
 - Elastic update, a diff between original and upgrade field values
 - Original field customization, a diff between original and customized field values
 
-#### Preview customized field diff that has an upgrade with a non-solvable conflict (ABC diff case, conflict non-solvable by diff algo)
+#### **Scenario: Preview customized field diff that has an upgrade with a non-solvable conflict (ABC diff case, conflict non-solvable by diff algo)**
 
 **Automation**: 1 Jest integration test.
 
@@ -450,7 +450,7 @@ And user should have an ability to see a <diff option B>
 
 ### Field editing
 
-#### Validation blocks saving field form when value is invalid
+#### **Scenario: Validation blocks saving field form when value is invalid**
 
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
@@ -475,7 +475,7 @@ And user should not be able to save the <field> form until a valid value is ente
   - `ABC solvable` = customized field diff that has an upgrade with a solvable conflict
   - `ABC non-solvable` = customized field diff that has an upgrade with a non-solvable conflict
 
-#### Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View
+#### **Scenario: Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View**
 
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
@@ -501,7 +501,7 @@ Then <field> Diff View should not have any new lines added up or removed
 
 ### Rule upgrade button
 
-#### Rule upgrade button is disabled when num of conflicts >= 1
+#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1**
 
 **Automation**: 1 Cypress test.
 
@@ -515,7 +515,7 @@ When user resolves all conflicts
 Then the INACTIVE CTA becomes ACTIVE
 ```
 
-#### Rule upgrade button is disabled when num fields in edit mode >= 1
+#### **Scenario: Rule upgrade button is disabled when num fields in edit mode >= 1**
 
 **Automation**: 1 Cypress test.
 
@@ -531,7 +531,7 @@ When user every field in readonly mode
 Then the INACTIVE CTA becomes ACTIVE
 ```
 
-#### Rule upgrade button is disabled when num of conflicts >= 1 or num fields in edit mode >= 1
+#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1 or num fields in edit mode >= 1**
 
 **Automation**: 1 Cypress test.
 
@@ -548,7 +548,7 @@ Then user should see INACTIVE CTA
 
 ### Rule upgrade after field preview
 
-#### Non-customized rule upgrade after preview (AAB diff case)
+#### **Scenario: Non-customized rule upgrade after preview (AAB diff case)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -569,7 +569,7 @@ Then user should see <field> has an upgraded value
 
 `<field>` = all customizable fields
 
-#### Non-customized rule upgrade after preview and customizing field values (AAB diff case)
+#### **Scenario: Non-customized rule upgrade after preview and customizing field values (AAB diff case)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -592,7 +592,7 @@ Then user should see <field> has a new value
 
 `<field>` = all customizable fields
 
-#### Customized rule upgrade after preview customized fields that don't have upgrades (ABA diff case)
+#### **Scenario: Customized rule upgrade after preview customized fields that don't have upgrades (ABA diff case)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -614,7 +614,7 @@ Then user should see <fieldA> has preserved the customized value
 
 `<field>` = all customizable fields
 
-#### Customized rule upgrade after preview customized fields that don't have upgrades and changing that field values (ABA diff case)
+#### **Scenario: Customized rule upgrade after preview customized fields that don't have upgrades and changing that field values (ABA diff case)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -638,7 +638,7 @@ Then user should see <fieldA> has a new value
 
 `<field>` = all customizable fields
 
-#### Customized rule upgrade after preview and accepting solvable conflicts (ABC diff case, conflict solvable by diff algo)
+#### **Scenario: Customized rule upgrade after preview and accepting solvable conflicts (ABC diff case, conflict solvable by diff algo)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -671,7 +671,7 @@ Then user should see <field> has an upgraded value user accepted
 - `threat_index`
 - `new_terms_fields`
 
-#### Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)
+#### **Scenario: Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -708,7 +708,7 @@ Then user should see <field> has an upgraded value user entered and saved in the
 - `threat_index`
 - `new_terms_fields`
 
-#### Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)
+#### **Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)**
 
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
@@ -734,7 +734,7 @@ Then user should see <field> has an upgraded value accepted by user
 
 `<field>` = all customizable fields
 
-#### Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)
+#### **Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
@@ -762,7 +762,7 @@ Then user should see <field> has an upgraded value user entered and saved in the
 
 ### Rule type upgrade
 
-#### Non-customized rule upgrade to a different rule type after preview
+#### **Scenario: Non-customized rule upgrade to a different rule type after preview**
 
 **Automation**: 1 Cypress test.
 
@@ -779,7 +779,7 @@ Then user should see <field> has changed its type
 And has upgraded field values
 ```
 
-#### Customized rule upgrade to a different rule type after preview
+#### **Scenario: Customized rule upgrade to a different rule type after preview**
 
 **Automation**: 1 Cypress test.
 
@@ -799,7 +799,7 @@ And has upgraded field values
 
 ### Concurrency control
 
-#### User gets notified after someone edited a rule being previewed
+#### **Scenario: User gets notified after someone edited a rule being previewed**
 
 **Automation**: 1 Cypress test.
 
@@ -812,7 +812,7 @@ Then <userA> should see a notification that rule has been edited
 And saved custom field values got discarded
 ```
 
-#### User gets notified after a new rule versions is released
+#### **Scenario: User gets notified after a new rule versions is released**
 
 **Automation**: 1 Cypress test.
 
