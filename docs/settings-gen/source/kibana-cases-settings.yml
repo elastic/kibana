@@ -10,8 +10,7 @@ groups:
   - group: All settings
     id: general-cases-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.cases.files.allowedMimeTypes
