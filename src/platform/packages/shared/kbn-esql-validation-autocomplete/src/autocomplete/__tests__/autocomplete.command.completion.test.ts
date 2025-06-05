@@ -36,8 +36,8 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(`from a | completion "prompt" /`, ['WITH ']);
     });
 
-    it('suggests nothing after WITH', async () => {
-      await assertSuggestions(`from a | completion "prompt" WITH /`, []);
+    it('suggests inference endpoints after WITH', async () => {
+      await assertSuggestions(`from a | completion "prompt" WITH /`, ['`inference_1` ']);
     });
 
     describe('optional AS', () => {

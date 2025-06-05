@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { EDITOR_MARKER } from '../../../shared/constants';
 import { pipeCompleteItem } from '../../complete_items';
@@ -66,7 +67,7 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const { suggestFieldsOrFunctionsByType } = params;
+  const { suggestFieldsOrFunctionsByType, callbacks } = params;
 
   const position = getPosition(params);
 
@@ -84,8 +85,8 @@ export async function suggest(
       return [withCompletionItem];
 
     case CompletionPosition.AFTER_WITH:
-      // Must fetch inference endpoints from API.
-      return [];
+      const result = await callbacks?.getInferenceEndpoints?.('completion');
+      return result?.inferenceEndpoints?.map(inferenceEndpointToCompletionItem) || [];
 
     case CompletionPosition.AFTER_INFERENCE_ID:
       return [asCompletionItem, pipeCompleteItem];
@@ -99,6 +100,27 @@ export async function suggest(
     default:
       return [];
   }
+}
+
+function inferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): SuggestionRawDefinition {
+  return {
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.completionInferenceIdDoc',
+      {
+        defaultMessage: 'Inference endpoint used for the completion',
+        values: {
+          inferenceId: inferenceEndpoint.inference_id,
+        },
+      }
+    ),
+    kind: 'Reference',
+    label: inferenceEndpoint.inference_id,
+    sortText: '1',
+    text: `\`${inferenceEndpoint.inference_id}\` `,
+    command: TRIGGER_SUGGESTION_COMMAND,
+  };
 }
 
 const emptyText: SuggestionRawDefinition = {
@@ -120,6 +142,7 @@ const withCompletionItem: SuggestionRawDefinition = {
   label: 'WITH',
   sortText: '1',
   text: 'WITH ',
+  command: TRIGGER_SUGGESTION_COMMAND,
 };
 
 const asCompletionItem: SuggestionRawDefinition = {
