@@ -7,11 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiCallOut, EuiFlexItem, EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
+
+const FAILURE_STORE_DOCS_URL =
+  'https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
@@ -22,6 +26,7 @@ export function Overview() {
     dataStream,
     isNonAggregatable,
     canUserReadFailureStore,
+    hasFailureStore,
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
   } = useDatasetQualityDetailsState();
@@ -39,6 +44,23 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
+      {!hasFailureStore && canUserReadFailureStore && (
+        <div style={{ marginBottom: 16 }}>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
+              defaultMessage: 'Failure store is not enabled for this data stream.',
+            })}
+          >
+            <EuiLink href={FAILURE_STORE_DOCS_URL} external>
+              {i18n.translate('xpack.datasetQuality.learnMore', {
+                defaultMessage: 'Learn how to enable it',
+              })}
+            </EuiLink>
+          </EuiCallOut>
+        </div>
+      )}
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
           <EuiCallOut
