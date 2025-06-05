@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { setupTestUsers } from '../test_users';
+import { setupTestUsers } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/test_users';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-export default function loadTests({ loadTestFile, getService }) {
+export default function loadTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Package policies', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
-    loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./get'));
-
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./upgrade'));
-    loadTestFile(require.resolve('./input_package_create_upgrade'));
-    loadTestFile(require.resolve('./input_package_rollback'));
   });
 }

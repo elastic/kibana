@@ -13,8 +13,8 @@ import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
 
+import { getLatestVersion } from '@kbn/test-suites-xpack/fleet_cypress/artifact_manager';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getLatestVersion } from '../../../fleet_cypress/artifact_manager';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {

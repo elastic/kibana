@@ -8,14 +8,14 @@ import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
   isDockerRegistryEnabledOrSkipped,
   enableSecrets,
-} from '../../helpers';
-import { testUsers } from '../test_users';
-import { getInstallationInfo } from './helper';
+} from '@kbn/test-suites-xpack-platform/fleet_api_integration/helpers';
+import { testUsers } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/test_users';
+import { getInstallationInfo } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/package_policy/helper';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

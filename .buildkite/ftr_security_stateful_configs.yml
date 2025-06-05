@@ -111,6 +111,7 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts
+  - x-pack/solutions/security/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_basic.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_trial.ts
