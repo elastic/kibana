@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { BehaviorSubject } from 'rxjs';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -16,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 describe('ESQLEditor', () => {
@@ -25,12 +26,14 @@ describe('ESQLEditor', () => {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
 
+  const corePluginMock = coreMock.createStart();
+  corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
-    core: coreMock.createStart(),
+    core: corePluginMock,
     data: dataPluginMock.createStartContract(),
   };
 

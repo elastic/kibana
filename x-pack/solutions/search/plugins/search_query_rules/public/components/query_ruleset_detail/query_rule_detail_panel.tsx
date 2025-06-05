@@ -86,6 +86,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
         <EuiFlexItem>
           <QueryRuleDraggableList
             rules={rules}
+            rulesetId={rulesetId}
             onReorder={(newRules) => setNewRules(newRules)}
             onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
             tourInfo={tourInfo}
