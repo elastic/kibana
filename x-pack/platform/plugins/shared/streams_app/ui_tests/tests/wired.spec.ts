@@ -70,12 +70,14 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByPlaceholder('Search...').fill('attributes');
     await page.getByTestId('streamsAppContentRefreshButton').click();
 
-    await page
+    const actionsButtons = page
       .getByRole('row', { name: 'attributes.custom_field' })
-      .getByLabel('Open actions menu')
-      .click();
+      .getByTestId('streamsAppActionsButton');
 
-    await page.getByRole('button', { name: 'Map field' }).click({ force: true, delay: 100 });
+    await actionsButtons.focus();
+    await actionsButtons.click();
+
+    await page.getByRole('button', { name: 'Map field' }).click();
     await page.getByRole('combobox').selectOption('keyword');
     await page.getByRole('button', { name: 'Save changes' }).click();
     await page.getByRole('heading', { name: 'logs.foo' }).waitFor({ state: 'hidden' });
