@@ -43,18 +43,21 @@ const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/c
 const emotionCache = createCache({
   key: 'css',
   stylisPlugins,
+  speedy: true,
   container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 
 const globalCache = createCache({
   key: EUI_STYLES_GLOBAL,
   stylisPlugins,
+  speedy: true,
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
 const utilitiesCache = createCache({
   key: EUI_STYLES_UTILS,
   stylisPlugins,
+  speedy: true,
   container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
 });
 
