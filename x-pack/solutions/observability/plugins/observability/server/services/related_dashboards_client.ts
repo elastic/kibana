@@ -4,29 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardSection } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { v4 as uuidv4 } from 'uuid';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import type { Logger } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type {
   RelevantPanel,
   RelatedDashboard,
   SuggestedDashboard,
 } from '@kbn/observability-schema';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { RelatedDashboard, RelevantPanel } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
-import type { InvestigateAlertsClient } from './investigate_alerts_client';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -39,6 +33,10 @@ export class RelatedDashboardsClient {
     private alertsClient: InvestigateAlertsClient,
     private alertId: string
   ) {}
+
+  setAlert(alert: AlertData) {
+    this.alert = alert;
+  }
 
   async fetchRelatedDashboards(): Promise<{
     suggestedDashboards: RelatedDashboard[];
