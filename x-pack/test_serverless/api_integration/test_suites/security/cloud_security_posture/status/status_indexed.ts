@@ -16,7 +16,7 @@ import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_postu
 import {
   findingsMockData,
   vulnerabilityMockData,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
+} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 
