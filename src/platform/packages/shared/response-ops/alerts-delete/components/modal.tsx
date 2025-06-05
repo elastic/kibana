@@ -322,7 +322,7 @@ export const AlertDeleteModal = ({
             <EuiIconTip
               color="subdued"
               size="s"
-              type="questionInCircle"
+              type="iInCircle"
               content={translations.MODAL_DESCRIPTION_EXCEPTION}
             />
           </p>
