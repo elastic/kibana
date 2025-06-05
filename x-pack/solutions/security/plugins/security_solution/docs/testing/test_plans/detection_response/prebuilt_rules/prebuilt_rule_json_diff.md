@@ -84,8 +84,7 @@ Functional requirements for the functionality outlined in this test plan.
 **Automation**: 1 e2e test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then the per-field upgrade preview should open
 And rule changes should be displayed in a two-column diff view with each field in its own accordion component
@@ -100,8 +99,7 @@ Then the preview should display the changes for the newly selected rule
 **Automation**: 1 e2e test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
 # When tooltip enhancement is added, this step needs to be added to the corresponding test scenario
@@ -113,42 +111,36 @@ And a tooltip is displayed with information about changing rule types
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 The <field> diff accordion panel should display its grouped rule properties
 And each property should have its name displayed inside the panel above its value
-
-Examples:
-| field              |
-| data_source        |
-| kql_query          |
-| eql_query          |
-| esql_query         |
-| threat_query       |
-| rule_schedule      |
-| rule_name_override |
-| timestamp_override |
-| timeline_template  |
-| building_block     |
-| threshold          |
 ```
+
+**Examples:**
+
+- `<field>`
+  - `data_source`
+  - `kql_query`
+  - `eql_query`
+  - `esql_query`
+  - `threat_query`
+  - `rule_schedule`
+  - `rule_name_override`
+  - `timestamp_override`
+  - `timeline_template`
+  - `building_block`
+  - `threshold`
 
 #### **Scenario: Undefined values are displayed with empty diffs**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then the preview should open
 And the old/new field should render an empty panel
-
-Examples:
-| version_one | version_two |
-| target      | current     |
-| current     | target      |
 ```
 
 #### **Scenario: Field diff components have the same grouping and order as in rule details overview**
@@ -156,56 +148,54 @@ Examples:
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then the multiple field diff accordions should be sorted in the same order as on the rule details overview tab
 And the field diff accordions should be grouped inside its corresponding <section> accordion
 And any <section> accordion that doesn't have fields inside it shouldn't be displayed
-
-Examples:
-| section     |
-| About       |
-| Definition  |
-| Schedule    |
-| Setup Guide |
 ```
+
+**Examples:**
+
+- `<section>`
+  - About
+  - Definition
+  - Schedule
+  - Setup Guide
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
 
-> This section is license agnostic.
+> This section is license agnostic. JSON view is displayed at a separate tab.
 
 #### **Scenario: User can see precisely how property values would change after upgrade**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 And the upgrade preview for this prebuilt rule is shown
 Then each line of <column> that was <change_type> should have <bg_color> background
 And marked with <line_badge> badge
 And each changed word in <column> should be highlighted with <accent_color>
 ```
 
-Examples:
-| change_type | column | bg_color | accent_color | line_badge |
-| --- | --- | --- | --- | --- |
-| updated | Current rule | removed_bg_color | removed_accent_color | - |
-| updated | Elastic update | added_bg_color | added_accent_color | + |
-| removed | Current rule | removed_bg_color | none | - |
-| removed | Elastic update | none | none | none |
-| added | Current rule | none | none | none |
-| added | Elastic update | added_bg_color | none | + |
+**Examples:**
+
+| change_type | column         | bg_color         | accent_color         | line_badge |
+| ----------- | -------------- | ---------------- | -------------------- | ---------- |
+| updated     | Current rule   | removed_bg_color | removed_accent_color | -          |
+| updated     | Elastic update | added_bg_color   | added_accent_color   | +          |
+| removed     | Current rule   | removed_bg_color | none                 | -          |
+| removed     | Elastic update | none             | none                 | none       |
+| added       | Current rule   | none             | none                 | none       |
+| added       | Elastic update | added_bg_color   | none                 | +          |
 
 #### **Scenario: Rule actions and exception lists SHOULDN'T be shown as modified**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this rule doesn't have any actions or exception lists
-And this prebuilt has an upgrade not including any actions nor exception lists
+Given a prebuilt rule with an upgrade not including any actions nor exception lists
 And user adds actions and an exception list for this rule
 When user opens Prebuilt Rule Upgrade Flyout for this rule
 Then the JSON diff shouldn't show any modifications to rule's actions or exception list
@@ -216,59 +206,62 @@ Then the JSON diff shouldn't show any modifications to rule's actions or excepti
 **Automation**: 1 e2e test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an update
+Given a prebuilt rule with an upgrade
 And this prebuilt rule has executed at least once
 When user opens the upgrade preview
 Then the JSON diff shouldn't show any <property> properties on both sides
 ```
 
-\<property\> = `property` | `execution_summary` | `enabled`
+**Examples:**
+
+`<property>` = `property` | `execution_summary` | `enabled`
 
 #### **Scenario: Technical properties should not be included in preview**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then the JSON diff shouldn't show any <technical_property> properties on both sides
 ```
 
-\<technical_property\> = `revision` | `updated_at` | `updated_by` | `created_at` | `created_by`
+**Examples:**
+
+`<technical_property>` = `revision` | `updated_at` | `updated_by` | `created_at` | `created_by`
 
 #### **Scenario: Properties with semantically equal values should not be shown as modified**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 And the upgrade has properties with different, but semantically equal values
 When user opens the upgrade preview
 Then the JSON diff shouldn't show any changes to properties with semantically equal values
-
-Duration examples:
-| 1h       |
-| 60m      |
-| 3600s    |
-
-Empty value examples:
-| no value  |
-| ''        |
-| []        |
-| undefined |
-| null      |
 ```
+
+**Examples:**
+
+- Duration:
+
+  - 1h
+  - 60m
+  - 3600s
+
+- Empty value:
+  - no value
+  - ''
+  - []
+  - undefined
+  - null
 
 #### **Scenario: Unchanged sections of a rule should be hidden by default**
 
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then only the sections of the diff that have changes should be visible
 And unchanged sections should be hidden behind a button with a number of unchanged lines
@@ -281,8 +274,7 @@ Then the section should expand and show the unchanged properties
 **Automation**: 1 UI integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user opens the upgrade preview
 Then visible properties should be sorted alphabetically
 When user expands all hidden sections

@@ -29,21 +29,21 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Rule upgrade workflow: individual upgrades from Rule Updates table](#rule-upgrade-workflow-individual-upgrades-from-rule-updates-table)
+  - [Rule upgrade workflow: individual upgrades from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-individual-upgrades-from-rule-updates-table)
     - [**Scenario: User can upgrade a single conflict-free prebuilt rule from Rules Update table**](#scenario-user-can-upgrade-a-single-conflict-free-prebuilt-rule-from-rules-update-table)
     - [**Scenario: User CAN'T upgrade a single prebuilt rule with upgrade conflicts from Rules Update table**](#scenario-user-cant-upgrade-a-single-prebuilt-rule-with-upgrade-conflicts-from-rules-update-table)
-  - [Rule upgrade workflow: bulk upgrade from Rule Updates table](#rule-upgrade-workflow-bulk-upgrade-from-rule-updates-table)
+  - [Rule upgrade workflow: bulk upgrade from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-bulk-upgrade-from-rule-updates-table)
     - [**Scenario: User can bulk upgrade conflict-free prebuilt rules**](#scenario-user-can-bulk-upgrade-conflict-free-prebuilt-rules)
     - [**Scenario: User can bulk upgrade prebuilt rules with auto-resolved upgrade conflicts**](#scenario-user-can-bulk-upgrade-prebuilt-rules-with-auto-resolved-upgrade-conflicts)
     - [**Scenario: User CAN'T bulk upgrade prebuilt rules with unresolved upgrade conflicts**](#scenario-user-cant-bulk-upgrade-prebuilt-rules-with-unresolved-upgrade-conflicts)
     - [**Scenario: User can bulk upgrade a mix of prebuilt rules with and without upgrade conflicts**](#scenario-user-can-bulk-upgrade-a-mix-of-prebuilt-rules-with-and-without-upgrade-conflicts)
   - [Rule upgrade workflow: upgrading rules with rule type changes](#rule-upgrade-workflow-upgrading-rules-with-rule-type-changes)
-    - [**Scenario: User CAN'T upgrade rules with rule type change from Rule Updates table**](#scenario-user-cant-upgrade-rules-with-rule-type-change-from-rule-updates-table)
+    - [**Scenario: User CAN'T upgrade rules with rule type change from Prebuilt Rules Upgrades page**](#scenario-user-cant-upgrade-rules-with-rule-type-change-from-rule-updates-table)
     - [**Scenario: User CAN'T bulk upgrade prebuilt rules with rule type change**](#scenario-user-cant-bulk-upgrade-prebuilt-rules-with-rule-type-change)
   - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
-    - [**Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT\&CK™ tactic or technique on Rule Updates table**](#scenario-user-can-search-prebuilt-rules-by-rule-name-index-pattern-or-mitre-attck-tactic-or-technique-on-rule-updates-table)
-    - [**Scenario: User can filter prebuilt rules by customized/non-customized state on Rule Updates table**](#scenario-user-can-filter-prebuilt-rules-by-customizednon-customized-state-on-rule-updates-table)
-    - [**Scenario: User can filter prebuilt rules by tags on Rule Updates table**](#scenario-user-can-filter-prebuilt-rules-by-tags-on-rule-updates-table)
+    - [**Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT\&CK™ tactic or technique on Prebuilt Rules Upgrades page**](#scenario-user-can-search-prebuilt-rules-by-rule-name-index-pattern-or-mitre-attck-tactic-or-technique-on-rule-updates-table)
+    - [**Scenario: User can filter prebuilt rules by customized/non-customized state on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-customizednon-customized-state-on-rule-updates-table)
+    - [**Scenario: User can filter prebuilt rules by tags on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-tags-on-rule-updates-table)
   - [Rule upgrade workflow: Edge cases](#rule-upgrade-workflow-edge-cases)
     - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version)
   - [Error handling](#error-handling)
@@ -92,10 +92,10 @@ Unless explicitly indicated otherwise:
 - Prebuilt rules have the corresponding base versions until it's explicitly indicated otherwise
 - \<Upgrade Prebuilt Rules CTA\> combines two bulk upgrade options
 
-  | \<Upgrade Prebuilt Rules CTA\>             | comment                                                                        |
-  | ------------------------------------------ | ------------------------------------------------------------------------------ |
-  | CTA to upgrade all prebuilt rules          | -                                                                              |
-  | CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Rule Updates table to see this CTA |
+  | \<Upgrade Prebuilt Rules CTA\>             | comment                                                                                  |
+  | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+  | CTA to upgrade all prebuilt rules          | -                                                                                        |
+  | CTA to upgrade the selected prebuilt rules | user must select multiple prebuilt rules in Prebuilt Rules Upgrades page to see this CTA |
 
 ### Technical requirements
 
@@ -138,17 +138,15 @@ User stories, misc:
 
 ## Scenarios
 
-### Rule upgrade workflow: individual upgrades from Rule Updates table
+### Rule upgrade workflow: individual upgrades from Prebuilt Rules Upgrades page
 
 #### **Scenario: User can upgrade a single conflict-free prebuilt rule from Rules Update table**
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this rule has an upgrade
-And this rule doesn't have upgrade conflicts
-When user is on the Rule Updates table
+Given a prebuilt rule with a conflict-free upgrade
+When user is on the Prebuilt Rules Upgrades page
 Then the rule should be shown in the table
 When user upgrades the rule without previewing it
 Then a success message should be shown after the upgrade
@@ -161,10 +159,8 @@ And user should see the number of rules available to upgrade decreased by 1
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this rule has an upgrade
-And this rule has an upgrade conflict
-When user is on the Rule Updates table
+Given a prebuilt rule with a conflicting upgrade
+When user is on the Prebuilt Rules Upgrades page
 Then the rule should be shown in the table
 And it's visible the rule has upgrade conflicts
 And "Review" button is shown in the rule's row
@@ -174,17 +170,15 @@ When user click the button
 Then Prebuilt Rule Upgrade Flyout should be shown
 ```
 
-### Rule upgrade workflow: bulk upgrade from Rule Updates table
+### Rule upgrade workflow: bulk upgrade from Prebuilt Rules Upgrades page
 
 #### **Scenario: User can bulk upgrade conflict-free prebuilt rules**
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-And these installed prebuilt rules don't have upgrade conflicts
-When user opens the Rule Updates table
+Given multiple prebuilt rules with conflict-free upgrades
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having upgrades should be shown in the table
 And user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
@@ -198,10 +192,8 @@ And user should NOT see any prebuilt rules having upgrades
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-And these installed prebuilt have auto-resolved upgrade conflicts
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades having auto-resolved conflicts
+When user opens the Prebuilt Rules Upgrades page
 Then user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
 Then user should see a warning modal with several CTAs
@@ -216,10 +208,8 @@ And user should see the number of rules available to upgrade decreased by the nu
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-And these installed prebuilt have unresolved upgrade conflicts
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades having unresolved conflicts
+When user opens the Prebuilt Rules Upgrades page
 Then user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
 Then user should see a warning modal saying the upgrade isn't possible
@@ -230,11 +220,10 @@ Then user should see a warning modal saying the upgrade isn't possible
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-And some of these installed prebuilt have auto-resolved upgrade conflicts
-And some of these installed prebuilt have unresolved upgrade conflicts
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades
+And some of these rules have auto-resolved upgrade conflicts
+And some of these rules have unresolved upgrade conflicts
+When user opens the Prebuilt Rules Upgrades page
 Then user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
 Then user should see a warning modal with several CTAs
@@ -246,14 +235,13 @@ And user should see the number of rules available to upgrade decreased by the nu
 
 ### Rule upgrade workflow: upgrading rules with rule type changes
 
-#### **Scenario: User CAN'T upgrade rules with rule type change from Rule Updates table**
+#### **Scenario: User CAN'T upgrade rules with rule type change from Prebuilt Rules Upgrades page**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this rule has an update that changes its rule type
-When user opens the Rule Updates table
+Given a prebuilt rule with an update that changes its rule type
+When user opens the Prebuilt Rules Upgrades page
 Then this rule should be displayed in the table
 And "Review" button is shown in the rule's row
 When user hovers on the button
@@ -267,9 +255,8 @@ Then Prebuilt Rule Upgrade Flyout should be shown
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available that change their rule type*
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades that change their rule type*
+When user opens the Prebuilt Rules Upgrades page
 Then user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
 Then user should see a warning modal saying the upgrade isn't possible
@@ -279,54 +266,49 @@ Then user should see a warning modal saying the upgrade isn't possible
 
 ### Rule upgrade workflow: filtering, sorting, pagination
 
-#### **Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT&CK™ tactic or technique on Rule Updates table**
+#### **Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT&CK™ tactic or technique on Prebuilt Rules Upgrades page**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have an upgrade available
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having an upgrade should be shown in the table
 When user enters <text> in the search field
 Then only the prebuilt rules having an upgrade and matching the <text> should be shown
 ```
 
-Examples:
-| \<text\> |
-| --- |
-| rule name or its part |
-| index pattern |
-| MITRE ATT&CK™ tactic or technique |
+**Examples:**
 
-#### **Scenario: User can filter prebuilt rules by customized/non-customized state on Rule Updates table**
+- `<text>`
+  - rule name or its part
+  - index pattern
+  - MITRE ATT&CK™ tactic or technique
+
+#### **Scenario: User can filter prebuilt rules by customized/non-customized state on Prebuilt Rules Upgrades page**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have an upgrade available
+Given multiple prebuilt rules with upgrades
 And some if these rules are customized
-When user opens the Rule Updates table
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having an upgrade should be shown in the table
 When user filters prebuilt rules by <customization state>
 Then only the prebuilt rules having an upgrade and matching the <customization state> should be shown
 ```
 
-Examples:
-| \<customization state\> |
-| --- |
-| customized |
-| non-customized |
+**Examples:**
 
-#### **Scenario: User can filter prebuilt rules by tags on Rule Updates table**
+`<customization state>` = `customized` | `non-customized`
+
+#### **Scenario: User can filter prebuilt rules by tags on Prebuilt Rules Upgrades page**
 
 **Automation**: 1 e2e test with mock rules
 
 ```Gherkin
-Given multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-When user opens the Rule Updates table
+Given multiple prebuilt rules with upgrades
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having an upgrade should be shown in the table
 When user filters prebuilt rules by one or more tags
 Then only the prebuilt rules having an upgrade and having these tags should be shown
@@ -339,13 +321,14 @@ Then only the prebuilt rules having an upgrade and having these tags should be s
 **Automation**: 1 unit test per case, 1 integration test
 
 ```Gherkin
-Given a prebuilt rule is installed
-And this rule has an upgrade
+Given a prebuilt rule with an upgrade
 When user upgrades the rule
 Then the rule bound data should be preserved
 ```
 
-Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), actions, enabled state, execution results and execution events.
+**Examples:**
+
+generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), actions, enabled state, execution results and execution events.
 
 ### Error handling
 
@@ -359,12 +342,9 @@ And this operation fails
 Then user should see an error message
 ```
 
-Examples:
-| \<upgrade operation\> |
-| --- |
-| upgrade all |
-| upgrade selected |
-| upgrade individual |
+**Examples:**
+
+`<upgrade operation>` = upgrade all | upgrade selected | upgrade individual
 
 ### Authorization / RBAC
 
@@ -374,9 +354,8 @@ Examples:
 
 ```Gherkin
 Given user with "Security: read" privileges on Security Solution
-And multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades
-When user opens the Rule Updates table
+And multiple prebuilt rules with upgrades
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having upgrades should be shown in the table
 But user should not be able to upgrade them
 ```
@@ -391,16 +370,16 @@ But user should not be able to upgrade them
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this rule has an upgrade
-When user opens the Rule Updates table
+And a prebuilt rule with an upgrade
+When user opens the Prebuilt Rules Upgrades page
 And clicks on CTA to upgrade the prebuilt rule
 Then success message should be displayed after upgrade
 And the upgraded prebuilt rule should be removed from the table
 And all customizable rule fields should be equal to the target version
 ```
 
-Examples:
+**Examples:**
+
 The scenario is applicable to customized and non-customized prebuilt rules. Customized rules lose any customizations after the upgrade.
 
 #### **Scenario: Multiple selected prebuilt rules are upgraded to target versions when license is insufficient**
@@ -409,10 +388,8 @@ The scenario is applicable to customized and non-customized prebuilt rules. Cust
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And multiple prebuilt rules are installed
-And these installed prebuilt rules have upgrades available
-And these installed prebuilt rules don't have upgrade conflicts
-When user opens the Rule Updates table
+And multiple prebuilt rules with conflict-free upgrades
+When user opens the Prebuilt Rules Upgrades page
 Then the prebuilt rules having upgrades should be shown in the table
 And user should see a <Upgrade Prebuilt Rules CTA>
 When user clicks the <Upgrade Prebuilt Rules CTA>
@@ -420,7 +397,8 @@ Then success message should be shown after the upgrade
 And the upgraded prebuilt rules should upgrade to the corresponding target versions
 ```
 
-Examples:
+**Examples:**
+
 The scenario is applicable to customized and non-customized prebuilt rules. Customized rules lose any customizations after the upgrade.
 
 #### **Scenario: User CAN'T see whether a prebuilt rule has conflicts in upgrade table when license is insufficient**
@@ -429,10 +407,9 @@ The scenario is applicable to customized and non-customized prebuilt rules. Cust
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+And a prebuilt rule with an upgrade
 And this rule has an upgrade conflict (as it detected by the diffable algorithms)
-When user opens the Rule Updates table
+When user opens the Prebuilt Rules Upgrades page
 Then user should NOT see any information about conflicts in the upgrade table
 ```
 
@@ -442,10 +419,9 @@ Then user should NOT see any information about conflicts in the upgrade table
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+And a prebuilt rule with an upgrade
 And this rule has an upgrade conflict (as it detected by the diffable algorithms)
-When user opens the Rule Updates table
+When user opens the Prebuilt Rules Upgrades page
 Then user should see a CTA to upgrade the prebuilt rule
 When user clicks the CTA
 Then the prebuilt rule upgrades successfully
@@ -459,8 +435,7 @@ Then the prebuilt rule upgrades successfully
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+And a prebuilt rule with an upgrade
 When user makes an API request to upgrade the prebuilt rule to the TARGET version
 Then the API should return a HTTP 200 status code
 And the prebuilt rule is upgraded to the corresponding target versions
@@ -472,15 +447,15 @@ And the prebuilt rule is upgraded to the corresponding target versions
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+And a prebuilt rule with an upgrade
 When user makes an API request to upgrade the prebuilt rule to the <pick_version> version
 Then the API should return a HTTP 400 status code
 And the response should contain an error message that user can only upgrade to the TARGET version
 ```
 
-Examples:
-<pick_version> = `BASE` | `CURRENT` | `MERGED`
+**Examples:**
+
+`<pick_version>` = `BASE` | `CURRENT` | `MERGED`
 
 #### **Scenario: User CAN'T specify field's resolved value via API on insufficient license**
 
@@ -488,8 +463,7 @@ Examples:
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And a prebuilt rule is installed
-And this prebuilt rule has an upgrade
+And a prebuilt rule with an upgrade
 When user makes an API request to upgrade the prebuilt rule and specifies resolved values for fields
 Then the endpoint should return a HTTP 400 status code
 And the response should contain an error message that field customization is not allowed under current license
