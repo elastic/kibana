@@ -9,7 +9,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import type { Props } from './trace_item_row';
 import { TraceItemRow } from './trace_item_row';
-import type { FlattenedTraceItem } from '.';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 jest.mock('./bar', () => ({
   Bar: ({ width, left, color }: { width: number; left: number; color: string }) => (
@@ -42,7 +42,7 @@ const baseItem = {
   skew: 0,
   color: 'red',
   depth: 1,
-} as FlattenedTraceItem;
+} as TraceWaterfallItem;
 
 const baseProps = {
   item: baseItem,
@@ -51,6 +51,7 @@ const baseProps = {
   onToggle: jest.fn(),
   margin: { left: 20, right: 10 },
   showAccordion: false,
+  childrenCount: 0,
 } as Props;
 
 describe('TraceItemRow', () => {

@@ -8,13 +8,13 @@ import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { type FlattenedTraceItem } from '.';
 import { Bar } from './bar';
 import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 export interface Props {
-  item: FlattenedTraceItem;
+  item: TraceWaterfallItem;
   duration: number;
   state: EuiAccordionProps['forceState'];
   onToggle: (id: string) => void;
@@ -27,7 +27,8 @@ export interface Props {
 }
 
 export const ACCORDION_PADDING_LEFT = 8; // px
-const BORDER_THICKNESS = 1; // px
+export const ACCORDION_HEIGHT = 48; // px
+export const BORDER_THICKNESS = 1; // px
 
 export function TraceItemRow({
   item,
@@ -55,6 +56,7 @@ export function TraceItemRow({
 
   const content = (
     <div
+      id="caue-123"
       css={css`
         border-bottom: ${euiTheme.border.thin};
         ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}

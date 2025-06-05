@@ -5,16 +5,23 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { WindowScroller, AutoSizer } from 'react-virtualized';
+import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
-import { areEqual, VariableSizeList as List } from 'react-window';
-import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
-import { ACCORDION_PADDING_LEFT, TraceItemRow } from './trace_item_row';
-import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
+import { VariableSizeList as List, areEqual } from 'react-window';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
+import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
+import {
+  ACCORDION_HEIGHT,
+  ACCORDION_PADDING_LEFT,
+  BORDER_THICKNESS,
+  TraceItemRow,
+} from './trace_item_row';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { useTraceWaterfall } from './use_trace_waterfall';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -32,28 +39,9 @@ export function TraceWaterfall({
   onErrorClick,
 }: Props) {
   const { euiTheme } = useEuiTheme();
-
-  const serviceColors = useMemo(() => {
-    return getServiceColors(traceItems);
-  }, [traceItems]);
-
-  const traceMap = useMemo(() => {
-    return getTraceMap(traceItems);
-  }, [traceItems]);
-
-  const rootItem = traceMap.root?.[0];
-
-  const flattenedTraceWaterfall = useMemo(
-    () => (rootItem ? getFlattenedTraceWaterfall(rootItem, traceMap, serviceColors) : []),
-    [rootItem, serviceColors, traceMap]
-  );
-  const { duration, maxDepth } = useMemo(
-    () => ({
-      duration: getTraceWaterfallDuration(flattenedTraceWaterfall),
-      maxDepth: Math.max(...flattenedTraceWaterfall.map((item) => item.depth)),
-    }),
-    [flattenedTraceWaterfall]
-  );
+  const { duration, traceWaterfall, maxDepth, rootItem } = useTraceWaterfall({
+    traceItems,
+  });
 
   if (!rootItem) {
     return null;
@@ -101,7 +89,7 @@ export function TraceWaterfall({
         `}
       >
         <TraceTree
-          flattenedTraceWaterfall={flattenedTraceWaterfall}
+          traceWaterfall={traceWaterfall}
           highlightedTraceId={highlightedTraceId}
           margin={{ left, right }}
           onClick={onClick}
@@ -114,42 +102,8 @@ export function TraceWaterfall({
   );
 }
 
-export function getTraceWaterfallDuration(flattenedTraceWaterfall: FlattenedTraceItem[]) {
-  return Math.max(
-    ...flattenedTraceWaterfall.map((item) => item.offset + item.skew + item.duration),
-    0
-  );
-}
-
-export function getTraceMap(traceItems: TraceItem[]) {
-  const traceMap = traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
-    if (!item.parentId) {
-      acc.root = [item];
-    } else {
-      if (!acc[item.parentId]) {
-        acc[item.parentId] = [];
-      }
-      acc[item.parentId].push(item);
-    }
-    return acc;
-  }, {});
-
-  return traceMap;
-}
-
-export function getServiceColors(traceItems: TraceItem[]) {
-  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
-  const palette = euiPaletteColorBlind({
-    rotations: Math.ceil(allServiceNames.size / 10),
-  });
-  return Array.from(allServiceNames).reduce<Record<string, string>>((acc, serviceName, idx) => {
-    acc[serviceName] = palette[idx];
-    return acc;
-  }, {});
-}
-
 function TraceTree({
-  flattenedTraceWaterfall,
+  traceWaterfall,
   margin,
   highlightedTraceId,
   onClick,
@@ -157,7 +111,7 @@ function TraceTree({
   duration,
   onErrorClick,
 }: {
-  flattenedTraceWaterfall: FlattenedTraceItem[];
+  traceWaterfall: TraceWaterfallItem[];
   margin: { left: number; right: number };
   highlightedTraceId: Props['highlightedTraceId'];
   onClick: Props['onClick'];
@@ -168,7 +122,7 @@ function TraceTree({
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const [accordionStatesMap, setAccordionStateMap] = useState(
-    flattenedTraceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
+    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
       acc[item.id] = 'open';
       return acc;
     }, {})
@@ -179,14 +133,19 @@ function TraceTree({
   };
 
   const getRowSize = (index: number) => {
-    return rowSizeMapRef.current.get(index) || 48 + 1;
+    return rowSizeMapRef.current.get(index) || ACCORDION_HEIGHT + BORDER_THICKNESS;
   };
 
   const onScroll = ({ scrollTop }: { scrollTop: number }) => {
     listRef.current?.scrollTo(scrollTop);
   };
 
-  const treeMap = groupByParent(flattenedTraceWaterfall);
+  const treeMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
+
+  const visibleList = useMemo(
+    () => convertTreeToList(treeMap, accordionStatesMap, traceWaterfall[0]),
+    [accordionStatesMap, traceWaterfall, treeMap]
+  );
 
   function toggleAccordion(id: string) {
     setAccordionStateMap((prevStates) => ({
@@ -201,14 +160,14 @@ function TraceTree({
       style,
       data,
     }: ListChildComponentProps<{
-      traceList: FlattenedTraceItem[];
+      traceList: TraceWaterfallItem[];
       onLoad: (index: number, size: number) => void;
     }>) => {
       const { onLoad, traceList } = data;
 
       const ref = React.useRef<HTMLDivElement | null>(null);
       useEffect(() => {
-        onLoad(index, ref.current?.getBoundingClientRect().height ?? 48);
+        onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
       }, [index, onLoad]);
 
       const item = traceList[index];
@@ -232,11 +191,6 @@ function TraceTree({
       );
     },
     areEqual
-  );
-
-  const visibleList = useMemo(
-    () => convertTreeToList(treeMap, accordionStatesMap, flattenedTraceWaterfall[0]),
-    [accordionStatesMap, flattenedTraceWaterfall, treeMap]
   );
 
   return (
@@ -266,16 +220,16 @@ function TraceTree({
 }
 
 export function convertTreeToList(
-  treeMap: Record<string, FlattenedTraceItem[]>,
+  treeMap: Record<string, TraceWaterfallItem[]>,
   accordionsState: Record<string, EuiAccordionProps['forceState']>,
-  root?: FlattenedTraceItem
+  root?: TraceWaterfallItem
 ) {
   if (!root) {
     return [];
   }
 
-  const result: FlattenedTraceItem[] = [];
-  const stack: FlattenedTraceItem[] = [root];
+  const result: TraceWaterfallItem[] = [];
+  const stack: TraceWaterfallItem[] = [root];
   while (stack.length > 0) {
     const current = stack.pop();
     if (current) {
@@ -292,15 +246,8 @@ export function convertTreeToList(
   return result;
 }
 
-export interface FlattenedTraceItem extends TraceItem {
-  depth: number;
-  offset: number;
-  skew: number;
-  color: string;
-}
-
-export function groupByParent(items: FlattenedTraceItem[]) {
-  return items.reduce<Record<string, FlattenedTraceItem[]>>((acc, item) => {
+export function groupByParent(items: TraceWaterfallItem[]) {
+  return items.reduce<Record<string, TraceWaterfallItem[]>>((acc, item) => {
     if (item.parentId) {
       if (!acc[item.parentId]) acc[item.parentId] = [];
       acc[item.parentId].push(item);
@@ -308,40 +255,3 @@ export function groupByParent(items: FlattenedTraceItem[]) {
     return acc;
   }, {});
 }
-
-export function getFlattenedTraceWaterfall(
-  rootItem: TraceItem,
-  parentChildMap: Record<string, TraceItem[]>,
-  serviceColorsMap: Record<string, string>
-) {
-  const rootStartMicroseconds = toMicroseconds(rootItem.timestamp);
-
-  function flattenItems(item: TraceItem, depth: number, parent?: FlattenedTraceItem) {
-    const startMicroseconds = toMicroseconds(item.timestamp);
-    let skew = 0;
-    if (parent) {
-      const parentTimestamp = toMicroseconds(parent.timestamp);
-      const parentStart = parentTimestamp + parent.skew;
-
-      const offsetStart = parentStart - startMicroseconds;
-      if (offsetStart > 0) {
-        const latency = Math.max(parent.duration - item.duration, 0) / 2;
-        skew = offsetStart + latency;
-      }
-    }
-    const color = serviceColorsMap[item.serviceName];
-    const offset = startMicroseconds - rootStartMicroseconds;
-    const flattenedItem: FlattenedTraceItem = { ...item, depth, offset, skew, color };
-    const result: FlattenedTraceItem[] = [flattenedItem];
-    const children = parentChildMap[item.id];
-    const sortedChildren = children?.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-    sortedChildren?.forEach((child) => {
-      result.push(...flattenItems(child, depth + 1, flattenedItem));
-    });
-    return result;
-  }
-
-  return flattenItems(rootItem, 0);
-}
-
-const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

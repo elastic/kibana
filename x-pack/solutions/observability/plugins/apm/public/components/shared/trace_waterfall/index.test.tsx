@@ -6,19 +6,11 @@
  */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import type { FlattenedTraceItem } from '.';
-import {
-  groupByParent,
-  getFlattenedTraceWaterfall,
-  getServiceColors,
-  getTraceMap,
-  getTraceWaterfallDuration,
-  TraceWaterfall,
-  convertTreeToList,
-} from '.';
+import { groupByParent, TraceWaterfall, convertTreeToList } from '.';
 import type { Props as TraceItemRowProps } from './trace_item_row';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { EuiAccordionProps } from '@elastic/eui';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: jest.fn(({ rotations }) => {
@@ -56,7 +48,7 @@ jest.mock('./trace_item_row', () => ({
 
 describe('groupByParent', () => {
   it('groups items by their parentId', () => {
-    const items: FlattenedTraceItem[] = [
+    const items: TraceWaterfallItem[] = [
       {
         id: '1',
         parentId: undefined,
@@ -120,7 +112,7 @@ describe('groupByParent', () => {
   });
 
   it('returns an empty object if no items have parentId', () => {
-    const items: FlattenedTraceItem[] = [
+    const items: TraceWaterfallItem[] = [
       {
         id: '1',
         parentId: undefined,
@@ -142,7 +134,7 @@ describe('groupByParent', () => {
   });
 
   it('handles multiple children for the same parent', () => {
-    const items: FlattenedTraceItem[] = [
+    const items: TraceWaterfallItem[] = [
       {
         id: '2',
         parentId: '1',
@@ -175,283 +167,6 @@ describe('groupByParent', () => {
 
     expect(result['1']).toHaveLength(2);
     expect(result['1'].map((i) => i.id)).toEqual(['2', '3']);
-  });
-});
-
-describe('getFlattenedTraceWaterfall', () => {
-  const root: TraceItem = {
-    id: '1',
-    timestamp: '2024-01-01T00:00:00.000Z',
-    name: 'root',
-    traceId: 't1',
-    duration: 1000,
-    serviceName: 'svcA',
-  };
-  const child1: TraceItem = {
-    id: '2',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.500Z',
-    name: 'child1',
-    traceId: 't1',
-    duration: 400,
-    serviceName: 'svcB',
-  };
-  const child2: TraceItem = {
-    id: '3',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.800Z',
-    name: 'child2',
-    traceId: 't1',
-    duration: 100,
-    serviceName: 'svcC',
-  };
-  const grandchild: TraceItem = {
-    id: '4',
-    parentId: '2',
-    timestamp: '2024-01-01T00:00:01.000Z',
-    name: 'grandchild',
-    traceId: 't1',
-    duration: 50,
-    serviceName: 'svcD',
-  };
-
-  const parentChildMap = {
-    root: [root],
-    '1': [child1, child2],
-    '2': [grandchild],
-  };
-
-  const serviceColorsMap = {
-    svcA: 'red',
-    svcB: 'blue',
-    svcC: 'green',
-    svcD: 'yellow',
-  };
-
-  it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
-    const result = getFlattenedTraceWaterfall(root, parentChildMap, serviceColorsMap);
-
-    expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
-
-    expect(result[0]).toMatchObject({
-      id: '1',
-      depth: 0,
-      color: 'red',
-      offset: 0,
-      skew: 0,
-    });
-
-    expect(result[1]).toMatchObject({
-      id: '2',
-      depth: 1,
-      color: 'blue',
-    });
-
-    expect(result[2]).toMatchObject({
-      id: '4',
-      depth: 2,
-      color: 'yellow',
-    });
-
-    expect(result[3]).toMatchObject({
-      id: '3',
-      depth: 1,
-      color: 'green',
-    });
-
-    expect(result[1].offset).toBe(500000); // child1: 0.5s after root
-    expect(result[2].offset).toBe(1000000); // grandchild: 1s after root
-    expect(result[3].offset).toBe(800000); // child2: 0.8s after root
-  });
-
-  it('returns only the root if there are no children', () => {
-    const result = getFlattenedTraceWaterfall(root, {}, serviceColorsMap);
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('1');
-    expect(result[0].depth).toBe(0);
-  });
-
-  it('sorts children by timestamp', () => {
-    const unorderedMap = {
-      root: [root],
-      '1': [child2, child1], // child2 timestamp is after child1
-      '2': [grandchild],
-    };
-    const result = getFlattenedTraceWaterfall(root, unorderedMap, serviceColorsMap);
-    expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
-  });
-});
-
-describe('getServiceColors', () => {
-  it('assigns a unique color to each serviceName', () => {
-    const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcC' },
-    ];
-
-    const result = getServiceColors(traceItems);
-
-    expect(Object.keys(result)).toEqual(expect.arrayContaining(['svcA', 'svcB', 'svcC']));
-    expect(result.svcA).toBe('color0');
-    expect(result.svcB).toBe('color1');
-    expect(result.svcC).toBe('color2');
-  });
-
-  it('handles duplicate service names gracefully', () => {
-    const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-    ];
-
-    const result = getServiceColors(traceItems);
-
-    expect(Object.keys(result)).toEqual(expect.arrayContaining(['svcA', 'svcB']));
-    expect(result.svcA).toBe('color0');
-    expect(result.svcB).toBe('color1');
-  });
-
-  it('returns an empty object if no traceItems are provided', () => {
-    const result = getServiceColors([]);
-    expect(result).toEqual({});
-  });
-
-  it('rotates the palette if there are more than 10 unique services', () => {
-    const traceItems: TraceItem[] = Array.from({ length: 15 }, (_, i) => ({
-      id: `${i}`,
-      timestamp: '',
-      name: '',
-      traceId: '',
-      duration: 1,
-      serviceName: `svc${i}`,
-    }));
-
-    const result = getServiceColors(traceItems);
-
-    expect(Object.keys(result)).toHaveLength(15);
-    expect(result.svc0).toBe('color0');
-    expect(result.svc10).toBe('color10');
-    expect(result.svc14).toBe('color14');
-  });
-});
-
-describe('getTraceMap', () => {
-  it('maps root and children correctly', () => {
-    const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      {
-        id: '2',
-        timestamp: '',
-        name: 'child1',
-        traceId: 't1',
-        duration: 50,
-        serviceName: 'svcB',
-        parentId: '1',
-      },
-      {
-        id: '3',
-        timestamp: '',
-        name: 'child2',
-        traceId: 't1',
-        duration: 30,
-        serviceName: 'svcC',
-        parentId: '1',
-      },
-      {
-        id: '4',
-        timestamp: '',
-        name: 'grandchild',
-        traceId: 't1',
-        duration: 10,
-        serviceName: 'svcD',
-        parentId: '2',
-      },
-    ];
-
-    const result = getTraceMap(items);
-
-    expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
-    expect(result['1']).toEqual([
-      expect.objectContaining({ id: '2' }),
-      expect.objectContaining({ id: '3' }),
-    ]);
-    expect(result['2']).toEqual([expect.objectContaining({ id: '4' })]);
-  });
-
-  it('returns only root if there are no children', () => {
-    const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
-    ];
-
-    const result = getTraceMap(items);
-
-    expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
-    expect(Object.keys(result)).toHaveLength(1);
-  });
-
-  it('handles multiple roots (should only keep the last as root)', () => {
-    const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
-    ];
-
-    const result = getTraceMap(items);
-
-    expect(result.root).toEqual([expect.objectContaining({ id: '2' })]);
-  });
-
-  it('returns an empty object for empty input', () => {
-    const result = getTraceMap([]);
-    expect(result).toEqual({});
-  });
-});
-
-describe('getTraceWaterfallDuration', () => {
-  it('returns the max sum of offset + skew + duration', () => {
-    const items: FlattenedTraceItem[] = [
-      {
-        id: '1',
-        timestamp: '',
-        name: '',
-        traceId: '',
-        duration: 100,
-        serviceName: 'svcA',
-        depth: 0,
-        offset: 0,
-        skew: 0,
-        color: 'red',
-      },
-      {
-        id: '2',
-        timestamp: '',
-        name: '',
-        traceId: '',
-        duration: 50,
-        serviceName: 'svcB',
-        depth: 1,
-        offset: 80,
-        skew: 10,
-        color: 'blue',
-      },
-      {
-        id: '3',
-        timestamp: '',
-        name: '',
-        traceId: '',
-        duration: 30,
-        serviceName: 'svcC',
-        depth: 1,
-        offset: 120,
-        skew: 5,
-        color: 'green',
-      },
-    ];
-    expect(getTraceWaterfallDuration(items)).toBe(155);
-  });
-
-  it('returns 0 for empty input', () => {
-    expect(getTraceWaterfallDuration([])).toBe(0);
   });
 });
 
@@ -514,7 +229,7 @@ describe('TraceWaterfall', () => {
 });
 
 describe('convertTreeToList', () => {
-  const itemA: FlattenedTraceItem = {
+  const itemA: TraceWaterfallItem = {
     id: 'a',
     parentId: undefined,
     name: 'A',
@@ -527,7 +242,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'red',
   };
-  const itemB: FlattenedTraceItem = {
+  const itemB: TraceWaterfallItem = {
     id: 'b',
     parentId: 'a',
     name: 'B',
@@ -540,7 +255,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'blue',
   };
-  const itemC: FlattenedTraceItem = {
+  const itemC: TraceWaterfallItem = {
     id: 'c',
     parentId: 'a',
     name: 'C',
@@ -553,7 +268,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'green',
   };
-  const itemD: FlattenedTraceItem = {
+  const itemD: TraceWaterfallItem = {
     id: 'd',
     parentId: 'b',
     name: 'D',
