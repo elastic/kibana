@@ -11,6 +11,7 @@ import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
   ALERT_TABLE_ROW_CSS_SELECTOR,
+  EVENT_PREVIEW_SECTION_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_PREVIEW_LOADING_TEST_ID,
@@ -105,6 +106,10 @@ export class AlertsPageObject extends FtrService {
 
     waitGraphIsLoaded: async () => {
       await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
+    },
+
+    assertEventPreviewPanelIsOpen: async () => {
+      await this.testSubjects.existOrFail(EVENT_PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
     },
   };
 }

@@ -36,6 +36,12 @@ export const graphResponseSchema = () =>
     nodes: schema.arrayOf(
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
+    nodeIdentifiers: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+      )
+    ),
     edges: schema.arrayOf(edgeDataSchema),
     messages: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
@@ -75,6 +81,7 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
+    count: schema.maybe(schema.number()),
   }),
 ]);
 

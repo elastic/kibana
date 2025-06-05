@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -19,6 +20,8 @@ import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { EVENT_PREVIEW_BANNER } from '../../preview/constants';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -41,7 +44,7 @@ export const GraphVisualization: React.FC = memo(() => {
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
+  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
   const {
     eventIds,
@@ -52,6 +55,23 @@ export const GraphVisualization: React.FC = memo(() => {
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
+
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const openEventPreview = useCallback(
+    (evtId: string) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: evtId,
+          indexName: 'logs-*',
+          scopeId,
+          banner: EVENT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
+  );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -108,6 +128,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
+            openEventPreview={openEventPreview}
           />
         </React.Suspense>
       )}

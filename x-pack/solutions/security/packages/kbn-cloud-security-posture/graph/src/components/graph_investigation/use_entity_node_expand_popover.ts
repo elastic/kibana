@@ -15,6 +15,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../test_ids';
 import {
   ItemExpandPopoverListItemProps,
@@ -38,7 +39,8 @@ type NodeToggleAction = 'show' | 'hide';
 export const useEntityNodeExpandPopover = (
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   dataViewId: string,
-  searchFilters: Filter[]
+  searchFilters: Filter[],
+  onShowEntityDetailsClick: (node: NodeProps) => void
 ) => {
   const onToggleExploreRelatedEntitiesClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
@@ -154,12 +156,30 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
+        {
+          type: 'separator',
+        },
+        {
+          type: 'item',
+          iconType: 'expand',
+          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+          label: i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            {
+              defaultMessage: 'Show event details',
+            }
+          ),
+          onClick: () => {
+            onShowEntityDetailsClick(node);
+          },
+        },
       ];
     },
     [
       onToggleActionsByEntityClick,
       onToggleActionsOnEntityClick,
       onToggleExploreRelatedEntitiesClick,
+      onShowEntityDetailsClick,
       searchFilters,
     ]
   );
