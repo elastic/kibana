@@ -757,10 +757,7 @@ export class ObservabilityAIAssistantClient {
   addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<
-      KnowledgeBaseEntry,
-      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
-    >;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type' | 'role'>;
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
@@ -787,8 +784,6 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry: {
         ...entry,
-        confidence: 'high',
-        is_correction: false,
         type: KnowledgeBaseType.UserInstruction,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,

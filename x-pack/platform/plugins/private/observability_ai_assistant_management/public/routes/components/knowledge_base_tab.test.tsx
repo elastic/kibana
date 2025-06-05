@@ -165,8 +165,6 @@ describe('KnowledgeBaseTab', () => {
             public: false,
             text: 'bar',
             role: 'user_entry',
-            confidence: 'high',
-            is_correction: false,
             labels: expect.any(Object),
           },
         });

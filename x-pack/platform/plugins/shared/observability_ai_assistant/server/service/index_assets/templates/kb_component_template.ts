@@ -66,10 +66,6 @@ export function getComponentTemplate(inferenceId: string) {
         'ml.tokens': {
           type: 'rank_features',
         },
-        confidence: keyword,
-        is_correction: {
-          type: 'boolean',
-        },
         public: {
           type: 'boolean',
         },
