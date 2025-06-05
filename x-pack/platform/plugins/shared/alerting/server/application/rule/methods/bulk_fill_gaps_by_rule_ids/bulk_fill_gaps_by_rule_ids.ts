@@ -5,6 +5,8 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import Boom from '@hapi/boom';
+import { groupBy, mapValues } from 'lodash';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { ScheduleBackfillParams } from '../../../backfill/methods/schedule/types';
 import type { BulkFillGapsByRuleIdsResult, BulkFillGapsByRuleIdsParams } from './types';
@@ -16,6 +18,7 @@ import { toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { getBackfillPayloadForRuleGaps } from './get_backfill_payload_for_rule_gaps';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
+import { bulkFillGapsByRuleIdParamsSchema } from './schemas';
 
 const DEFAULT_MAX_BACKFILL_CONCURRENCY = 10;
 
@@ -39,6 +42,14 @@ export const bulkFillGapsByRuleIds = async (
   { rules, range }: BulkFillGapsByRuleIdsParams,
   options?: { maxBackfillConcurrency: number }
 ): Promise<BulkFillGapsByRuleIdsResult> => {
+  const result = bulkFillGapsByRuleIdParamsSchema.safeParse(range);
+  if (!result.success) {
+    const message = result.error.errors.map((error) => error.message).join(' ');
+    throw Boom.badRequest(
+      `Error validating backfill schedule parameters "${JSON.stringify(range)}" - ${message}`
+    );
+  }
+
   const errored: BulkFillGapsByRuleIdsResult['errored'] = [];
   const skipped: BulkFillGapsByRuleIdsResult['skipped'] = [];
   const outcomes: BulkFillGapsByRuleIdsResult['outcomes'] = [];

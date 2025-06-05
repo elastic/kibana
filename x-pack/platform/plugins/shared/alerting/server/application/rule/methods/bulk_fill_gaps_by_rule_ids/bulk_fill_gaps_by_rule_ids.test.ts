@@ -83,10 +83,11 @@ const returnedGaps = rulesThatCalledScheduleBackfill.reduce((acc, rule) => {
   return acc;
 }, {} as Record<string, object>);
 
+let rulesClientContext: RulesClientContext;
+
 describe('bulkFillGapsByRuleIds', () => {
-  let results: BulkFillGapsByRuleIdsResult;
-  let rulesClientContext: RulesClientContext;
   let refreshIndexMock: jest.Mock;
+  let results: BulkFillGapsByRuleIdsResult;
 
   const authorizationError = new Error('error at authorization');
   const gapResolutionError = new Error('error at gap resolution');
@@ -247,5 +248,41 @@ describe('bulkFillGapsByRuleIds', () => {
       ];
     expect(refreshIndexMock).toHaveBeenCalledTimes(1);
     expect(refreshIndexMock.mock.invocationCallOrder[0]).toBeGreaterThan(lastSchedulingCall);
+  });
+});
+
+describe('validation', () => {
+  beforeEach(() => {
+    rulesClientContext = rulesClientContextMock.create();
+  });
+
+  const getCallBulkFillGaps = (range: { start: string; end: string }) => () =>
+    bulkFillGapsByRuleIds(rulesClientContext, { rules: [], range });
+
+  it('should throw an error if the start date is in the future', async () => {
+    const start = new Date(Date.now() + 1).toISOString();
+    expect(getCallBulkFillGaps({ start, end: new Date().toISOString() })).rejects.toThrow();
+  });
+  it('should throw an error if the end date is in the future', async () => {
+    const end = new Date(Date.now() + 1).toISOString();
+    expect(
+      getCallBulkFillGaps({ start: new Date(Date.now() - 1).toISOString(), end })
+    ).rejects.toThrow();
+  });
+  it('should throw an error if there is not at least 5 minutes before the start and end dates', async () => {
+    expect(
+      getCallBulkFillGaps({
+        start: new Date(Date.now() - 1000).toISOString(),
+        end: new Date().toISOString(),
+      })
+    ).rejects.toThrow();
+  });
+  it('should throw an error if there are more than 90 days between the start and end dates', async () => {
+    expect(
+      getCallBulkFillGaps({
+        start: new Date(Date.now() - 91 * 24 * 60 * 60 * 1000).toISOString(),
+        end: new Date().toISOString(),
+      })
+    ).rejects.toThrow();
   });
 });
