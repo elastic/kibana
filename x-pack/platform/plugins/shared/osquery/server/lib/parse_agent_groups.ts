@@ -183,6 +183,8 @@ export const parseAgentSelection = async (
 
     return selectedAgentsArray;
   } catch (error) {
+    context.logFactory.get().error(error);
+
     return [];
   }
 };
