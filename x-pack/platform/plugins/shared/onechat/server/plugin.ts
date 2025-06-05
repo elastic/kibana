@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { z } from '@kbn/zod';
 import type { OnechatConfig } from './config';
 import type {
   OnechatPluginSetup,
@@ -42,44 +41,6 @@ export class OnechatPlugin
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices();
-
-    serviceSetups.tools.register({
-      id: 'onechat_tool',
-      name: 'Onechat Tool',
-      description: 'Increments a number by 42',
-      meta: {
-        tags: ['increment', 'math'],
-      },
-      schema: z.object({
-        someNumber: z.number().describe('Some number'),
-      }),
-      handler: (args) => {
-        const { someNumber } = args as { someNumber: number };
-        return 42 + someNumber;
-      },
-    });
-
-    serviceSetups.tools.register({
-      id: 'onechat_list_indices',
-      name: 'List Indices',
-      description: 'List indices',
-      schema: z.object({
-        indexPattern: z.string().describe('Index pattern to filter on').optional(),
-      }),
-      handler: async ({ indexPattern }, { esClient }) => {
-        const indicesResponse = await esClient.asCurrentUser.cat.indices({
-          index: indexPattern,
-          format: 'json',
-        });
-
-        return indicesResponse.map((index) => ({
-          index: index.index,
-          health: index.health,
-          status: index.status,
-          docsCount: index.docsCount,
-        }));
-      },
-    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
