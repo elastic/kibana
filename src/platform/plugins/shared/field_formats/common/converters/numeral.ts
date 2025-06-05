@@ -31,6 +31,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
   getParamDefaults = () => ({
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
+    alwaysShowSign: false,
   });
 
   protected getConvertedValue(val: number | string | object): string {
@@ -50,7 +51,12 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    const formatted = numeralInst.set(val).format(this.param('pattern'));
+    let pattern = this.param('pattern');
+    if (this.param('alwaysShowSign')) {
+      pattern = /^\+/.test(pattern) || val === 0 ? pattern : `+ ${pattern}`;
+    }
+
+    const formatted = numeralInst.set(val).format(pattern);
 
     numeral.language(previousLocale);
 
