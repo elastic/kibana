@@ -14,9 +14,11 @@ import {
   CAI_CASES_SOURCE_INDEX,
   CAI_CASES_SOURCE_QUERY,
   CAI_CASES_BACKFILL_TASK_ID,
+  CAI_CASES_SYNCHRONIZATION_TASK_ID,
 } from './constants';
 import { CAI_CASES_INDEX_MAPPINGS } from './mappings';
 import { CAI_CASES_INDEX_SCRIPT_ID, CAI_CASES_INDEX_SCRIPT } from './painless_scripts';
+import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createCasesAnalyticsIndex = ({
   esClient,
@@ -43,3 +45,25 @@ export const createCasesAnalyticsIndex = ({
     sourceIndex: CAI_CASES_SOURCE_INDEX,
     sourceQuery: CAI_CASES_SOURCE_QUERY,
   });
+
+export const scheduleCasesAnalyticsSyncTask = ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}) => {
+  try {
+    scheduleCAISynchronizationTask({
+      taskId: CAI_CASES_SYNCHRONIZATION_TASK_ID,
+      sourceIndex: CAI_CASES_SOURCE_INDEX,
+      destIndex: CAI_CASES_INDEX_NAME,
+      taskManager,
+      logger,
+    });
+  } catch (e) {
+    logger.error(
+      `Error scheduling ${CAI_CASES_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
+    );
+  }
+};

@@ -47,7 +47,11 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
-import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndicesTasks } from './cases_analytics';
+import {
+  createCasesAnalyticsIndexes,
+  registerCasesAnalyticsIndexesTasks,
+  scheduleCasesAnalyticsSyncTasks,
+} from './cases_analytics';
 
 export class CasePlugin
   implements
@@ -96,7 +100,7 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
-    registerCasesAnalyticsIndicesTasks({
+    registerCasesAnalyticsIndexesTasks({
       taskManager: plugins.taskManager,
       logger: this.logger,
       core,
@@ -199,6 +203,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
     }
 
     createCasesAnalyticsIndexes({

@@ -12,9 +12,13 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
-import { createCasesAnalyticsIndex } from './cases_index';
-import { createCommentsAnalyticsIndex } from './comments_index';
-import { createAttachmentsAnalyticsIndex } from './attachments_index';
+import { registerCAISynchronizationTask } from './tasks/synchronization_task';
+import {
+  createAttachmentsAnalyticsIndex,
+  scheduleAttachmentsAnalyticsSyncTask,
+} from './attachments_index';
+import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
+import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
 
 export const createCasesAnalyticsIndexes = ({
   esClient,
@@ -53,7 +57,7 @@ export const createCasesAnalyticsIndexes = ({
   ]);
 };
 
-export const registerCasesAnalyticsIndicesTasks = ({
+export const registerCasesAnalyticsIndexesTasks = ({
   taskManager,
   logger,
   core,
@@ -63,4 +67,17 @@ export const registerCasesAnalyticsIndicesTasks = ({
   core: CoreSetup<CasesServerStartDependencies>;
 }) => {
   registerCAIBackfillTask({ taskManager, logger, core });
+  registerCAISynchronizationTask({ taskManager, logger, core });
+};
+
+export const scheduleCasesAnalyticsSyncTasks = ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}) => {
+  scheduleCasesAnalyticsSyncTask({ taskManager, logger });
+  scheduleCommentsAnalyticsSyncTask({ taskManager, logger });
+  scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger });
 };

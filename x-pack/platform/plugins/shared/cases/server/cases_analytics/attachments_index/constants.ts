@@ -35,3 +35,48 @@ export const CAI_ATTACHMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
 export const CAI_ATTACHMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 export const CAI_ATTACHMENTS_BACKFILL_TASK_ID = 'cai_attachments_backfill_task';
+
+export const CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_attachments_synchronization_task';
+
+export const getAttachmentsSynchronizationSourceQuery = (
+  lastSyncAt: Date
+): QueryDslQueryContainer => ({
+  bool: {
+    must: [
+      {
+        term: {
+          type: 'cases-comments',
+        },
+      },
+      {
+        bool: {
+          must_not: {
+            term: {
+              'cases-comments.type': 'user',
+            },
+          },
+        },
+      },
+      {
+        bool: {
+          should: [
+            {
+              range: {
+                'cases-comments.created_at': {
+                  gte: lastSyncAt.toISOString(),
+                },
+              },
+            },
+            {
+              range: {
+                'cases-comments.updated_at': {
+                  gte: lastSyncAt.toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+});

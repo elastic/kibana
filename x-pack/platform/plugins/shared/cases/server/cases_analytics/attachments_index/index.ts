@@ -14,9 +14,11 @@ import {
   CAI_ATTACHMENTS_SOURCE_INDEX,
   CAI_ATTACHMENTS_SOURCE_QUERY,
   CAI_ATTACHMENTS_BACKFILL_TASK_ID,
+  CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
 } from './constants';
 import { CAI_ATTACHMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_ATTACHMENTS_INDEX_SCRIPT, CAI_ATTACHMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
+import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createAttachmentsAnalyticsIndex = ({
   esClient,
@@ -43,3 +45,25 @@ export const createAttachmentsAnalyticsIndex = ({
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
     sourceQuery: CAI_ATTACHMENTS_SOURCE_QUERY,
   });
+
+export const scheduleAttachmentsAnalyticsSyncTask = ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}) => {
+  try {
+    scheduleCAISynchronizationTask({
+      taskId: CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+      sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
+      destIndex: CAI_ATTACHMENTS_INDEX_NAME,
+      taskManager,
+      logger,
+    });
+  } catch (e) {
+    logger.error(
+      `Error scheduling ${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
+    );
+  }
+};

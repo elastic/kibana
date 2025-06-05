@@ -14,9 +14,11 @@ import {
   CAI_COMMENTS_SOURCE_INDEX,
   CAI_COMMENTS_SOURCE_QUERY,
   CAI_COMMENTS_BACKFILL_TASK_ID,
+  CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
 } from './constants';
 import { CAI_COMMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_COMMENTS_INDEX_SCRIPT, CAI_COMMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
+import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createCommentsAnalyticsIndex = ({
   esClient,
@@ -43,3 +45,25 @@ export const createCommentsAnalyticsIndex = ({
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
     sourceQuery: CAI_COMMENTS_SOURCE_QUERY,
   });
+
+export const scheduleCommentsAnalyticsSyncTask = ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}) => {
+  try {
+    scheduleCAISynchronizationTask({
+      taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+      sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
+      destIndex: CAI_COMMENTS_INDEX_NAME,
+      taskManager,
+      logger,
+    });
+  } catch (e) {
+    logger.error(
+      `Error scheduling ${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
+    );
+  }
+};
