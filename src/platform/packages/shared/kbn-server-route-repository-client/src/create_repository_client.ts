@@ -33,7 +33,7 @@ export function createRepositoryClient<
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
     return core.http.fetch(pathname, {
-      method,
+      method: method.toUpperCase(),
       ...options,
       body: params && params.body ? JSON.stringify(params.body) : undefined,
       query: params?.query,

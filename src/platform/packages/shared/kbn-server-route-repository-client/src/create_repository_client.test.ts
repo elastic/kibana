@@ -44,7 +44,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
-      method: 'get',
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: undefined,
@@ -65,7 +65,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/handler', {
-      method: 'get',
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: '2024-08-05',
@@ -90,7 +90,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
-      method: 'get',
+      method: 'GET',
       headers: {
         some_header: 'header_value',
       },
@@ -125,7 +125,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler/param_value', {
-      method: 'get',
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: undefined,
@@ -157,7 +157,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
-      method: 'get',
+      method: 'GET',
       body: JSON.stringify({
         payload: 'body_value',
       }),
@@ -191,7 +191,7 @@ describe('createRepositoryClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
-      method: 'get',
+      method: 'GET',
       body: undefined,
       query: {
         parameter: 'query_value',
