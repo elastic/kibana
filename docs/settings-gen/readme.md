@@ -9,7 +9,7 @@ Following is a schema for all available properties in the docs settings source f
 ```
 product: REQUIRED e.g. Elasticsearch, Kibana, Enterprise Search
 collection: REQUIRED e.g. Alerting and action settings in Kibana
-id: REQUIRED The ID used for for other docs to link to this page, e.g., general-alert-action-settings
+id: REQUIRED The ID used for links to this page, e.g., general-alert-action-settings
 page_description: |
   OPTIONAL
   Multiline string. Can include tables, lists, code examples, etc.
