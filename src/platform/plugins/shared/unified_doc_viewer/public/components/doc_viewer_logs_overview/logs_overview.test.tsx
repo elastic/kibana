@@ -266,7 +266,7 @@ describe('LogsOverview', () => {
 
       const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
       const accordion = accordions[accordions.length - 1];
-      const button = accordion.querySelector('button');
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
 
       act(() => {
         button?.click();
@@ -331,16 +331,8 @@ describe('LogsOverview with accordion state', () => {
       screen.queryByTestId('unifiedDocViewLogsOverviewStacktraceAccordion')
     ).toBeInTheDocument();
 
-    const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewStacktraceAccordion');
-    if (accordion === null) {
-      return;
-    }
-    const button = accordion.querySelector('button');
-
-    if (button === null) {
-      return;
-    }
-
+    const accordion = screen.getByTestId('unifiedDocViewLogsOverviewStacktraceAccordion');
+    const button = within(accordion).getByRole('button', { name: /stacktrace/i });
     // Check the aria-expanded property of the button
     const isExpanded = button.getAttribute('aria-expanded');
     expect(isExpanded).toBe('true');
@@ -358,16 +350,8 @@ describe('LogsOverview with accordion state', () => {
       screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion')
     ).toBeInTheDocument();
 
-    const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
-    if (accordion === null) {
-      return;
-    }
-    const button = accordion.querySelector('button');
-
-    if (button === null) {
-      return;
-    }
-
+    const accordion = screen.getByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+    const button = within(accordion).getByRole('button', { name: /quality issues/i });
     // Check the aria-expanded property of the button
     const isExpanded = button.getAttribute('aria-expanded');
     expect(isExpanded).toBe('true');
