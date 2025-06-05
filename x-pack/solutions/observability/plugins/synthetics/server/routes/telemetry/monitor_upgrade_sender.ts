@@ -37,8 +37,8 @@ export function sendTelemetryEvents(
   try {
     eventsTelemetry.queueTelemetryEvents(MONITOR_UPDATE_CHANNEL, [updateEvent]);
     eventsTelemetry.queueTelemetryEvents(MONITOR_CURRENT_CHANNEL, [updateEvent]);
-  } catch (e) {
-    logger.error(`queuing telemetry events failed ${e.message}`, { error: e });
+  } catch (error) {
+    logger.error(`queuing telemetry events failed ${error.message}`, { error });
   }
 }
 
@@ -53,8 +53,8 @@ export function sendErrorTelemetryEvents(
 
   try {
     eventsTelemetry.queueTelemetryEvents(MONITOR_ERROR_EVENTS_CHANNEL, [updateEvent]);
-  } catch (e) {
-    logger.error(`queuing telemetry events failed ${e.message}`, { error: e });
+  } catch (error) {
+    logger.error(`queuing telemetry events failed ${error.message}`, { error });
   }
 }
 
