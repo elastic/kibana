@@ -717,7 +717,6 @@ export class ObservabilityAIAssistantClient {
             esClient,
             logger,
             inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
-            taskType: 'sparse_embedding',
           });
         }
       })
