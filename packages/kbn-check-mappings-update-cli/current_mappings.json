@@ -1059,6 +1059,37 @@
     "dynamic": false,
     "properties": {}
   },
+  "entity-analytics-monitoring-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "error": {
+        "type": "keyword"
+      },
+      "filter": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "integrationName": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+        "matchers": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "entity-definition": {
     "dynamic": false,
     "properties": {

@@ -96,6 +96,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "endpoint:unified-user-artifact-manifest": "71c7fcb52c658b21ea2800a6b6a76972ae1c776e",
         "endpoint:user-artifact-manifest": "1c3533161811a58772e30cdc77bac4631da3ef2b",
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
+        "entity-analytics-monitoring-entity-source": "207ca6f7ed3a04ebe33d81675a09e253446fe897",
         "entity-definition": "1c6bff35c423d5dc5650bc806cf2899e4706a0bc",
         "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
         "entity-engine-status": "09f6a617020708e4f638137e5ef35bd9534133be",
