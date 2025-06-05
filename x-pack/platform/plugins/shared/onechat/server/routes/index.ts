@@ -11,5 +11,7 @@ import { registerMCPRoutes } from './mcp';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
-  registerMCPRoutes(dependencies);
+  if (dependencies.config.mcpServer.enabled) {
+    registerMCPRoutes(dependencies);
+  }
 };

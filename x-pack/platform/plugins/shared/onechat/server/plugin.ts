@@ -27,7 +27,6 @@ export class OnechatPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
 
@@ -47,6 +46,7 @@ export class OnechatPlugin
       router,
       coreSetup,
       logger: this.logger,
+      config: this.config,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
