@@ -63,13 +63,6 @@ describe('TraceItemRow', () => {
     expect(getByTestId('bar-details')).toHaveAttribute('data-left', '0');
   });
 
-  it('renders children when showAccordion is false', () => {
-    const { getByText } = render(
-      <TraceItemRow {...baseProps}>{[<div key={1}>Child Content</div>]}</TraceItemRow>
-    );
-    expect(getByText('Child Content')).toBeInTheDocument();
-  });
-
   it('renders EuiAccordion when showAccordion is true', () => {
     const { container } = render(<TraceItemRow {...baseProps} showAccordion={true} />);
     expect(container.querySelector('.accordion__buttonContent')).toBeInTheDocument();
@@ -79,7 +72,12 @@ describe('TraceItemRow', () => {
     const onToggle = jest.fn();
     const children = [<div key="c">Child</div>];
     const { getByTestId } = render(
-      <TraceItemRow {...baseProps} showAccordion={true} children={children} onToggle={onToggle} />
+      <TraceItemRow
+        {...baseProps}
+        showAccordion={true}
+        childrenCount={children.length}
+        onToggle={onToggle}
+      />
     );
     fireEvent.click(getByTestId('toggle-btn'));
     expect(onToggle).toHaveBeenCalledWith('span-1');
@@ -93,18 +91,15 @@ describe('TraceItemRow', () => {
     expect(onClick).toHaveBeenCalledWith('span-1');
   });
 
-  it('renders children when accordion is open', () => {
-    const children = [<div key="c">Accordion Child</div>];
-    const { getByText } = render(
-      <TraceItemRow {...baseProps} showAccordion={true} state="open" children={children} />
-    );
-    expect(getByText('Accordion Child')).toBeInTheDocument();
-  });
-
   it('hides children when accordion is closed', () => {
     const children = [<div key="c">Accordion Child</div>];
     const { queryByText } = render(
-      <TraceItemRow {...baseProps} showAccordion={true} state="closed" children={children} />
+      <TraceItemRow
+        {...baseProps}
+        showAccordion={true}
+        state="closed"
+        childrenCount={children.length}
+      />
     );
     expect(queryByText('Accordion Child')).toBeNull();
   });

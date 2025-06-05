@@ -44,7 +44,7 @@ export function TraceWaterfall({
   const rootItem = traceMap.root?.[0];
 
   const flattenedTraceWaterfall = useMemo(
-    () => getFlattenedTraceWaterfall(rootItem, traceMap, serviceColors),
+    () => (rootItem ? getFlattenedTraceWaterfall(rootItem, traceMap, serviceColors) : []),
     [rootItem, serviceColors, traceMap]
   );
   const { duration, maxDepth } = useMemo(

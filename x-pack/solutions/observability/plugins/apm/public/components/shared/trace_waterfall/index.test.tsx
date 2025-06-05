@@ -49,7 +49,6 @@ jest.mock('./trace_item_row', () => ({
       {...(props.isHighlighted ? { 'data-highlighted': true } : {})}
     >
       {props.item.name}
-      {props.children}
     </div>
   ),
   ACCORDION_PADDING_LEFT: 10,
