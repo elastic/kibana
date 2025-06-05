@@ -36,9 +36,8 @@ export interface SecurityIntegrationsGridTabsProps {
   packageListGridOptions?: {
     showCardLabels?: boolean;
   };
-  toggleIdSelected?: UseSelectedTabReturn['toggleIdSelected'];
-  setSelectedTabIdToStorage?: UseSelectedTabReturn['setSelectedTabIdToStorage'];
   selectedTab: UseSelectedTabReturn['selectedTab'];
+  setSelectedTabId?: UseSelectedTabReturn['setSelectedTabId'];
 }
 
 const emptyStateStyles = { paddingTop: '16px' };
@@ -58,8 +57,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     integrationList,
     availablePackages,
     packageListGridOptions,
-    toggleIdSelected = '',
-    setSelectedTabIdToStorage,
+    setSelectedTabId,
     selectedTab,
   }) => {
     const {
@@ -99,10 +97,10 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
         const id = stringId as IntegrationTabId;
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
-        setSelectedTabIdToStorage?.(id);
+        setSelectedTabId?.(id);
         reportLinkClick?.(trackId);
       },
-      [setSelectedTabIdToStorage, reportLinkClick]
+      [setSelectedTabId, reportLinkClick]
     );
 
     const buttonGroupStyles = useIntegrationCardGridTabsStyles();
@@ -130,7 +128,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       if (
         selectedTab.showSearchTools &&
         searchTermFromStorage &&
-        toggleIdSelected !== IntegrationTabId.recommended
+        selectedTab.id !== IntegrationTabId.recommended
       ) {
         setSearchTerm(searchTermFromStorage);
       }
@@ -143,7 +141,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       setCategory,
       setSearchTerm,
       setSelectedSubCategory,
-      toggleIdSelected,
+      selectedTab.id,
     ]);
 
     if (isLoading) {
@@ -170,7 +168,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
               css={buttonGroupStyles}
               buttonSize="compressed"
               color="primary"
-              idSelected={toggleIdSelected}
+              idSelected={selectedTab.id}
               isFullWidth
               legend="Categories"
               onChange={onTabChange}

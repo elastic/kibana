@@ -54,7 +54,7 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
   }) => {
     const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
     const activeIntegrationsCount = activeIntegrations?.length ?? 0;
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage } = useSelectedTab();
+    const { selectedTab, setSelectedTabId } = useSelectedTab();
     const list = useIntegrationCardList({
       integrationsList: availablePackages.filteredCards,
       activeIntegrations,
@@ -99,8 +99,7 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
         integrationList={integrationList}
         availablePackages={availablePackages}
         selectedTab={selectedTab}
-        toggleIdSelected={toggleIdSelected}
-        setSelectedTabIdToStorage={setSelectedTabIdToStorage}
+        setSelectedTabId={setSelectedTabId}
       />
     );
   }

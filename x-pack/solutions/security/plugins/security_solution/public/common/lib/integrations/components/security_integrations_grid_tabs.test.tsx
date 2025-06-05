@@ -63,8 +63,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
     } as unknown as AvailablePackages,
     integrationList: [],
     selectedTab: INTEGRATION_TABS[0],
-    toggleIdSelected: INTEGRATION_TABS[0].id,
-    setSelectedTabIdToStorage: mockSetTabId,
+    setSelectedTabId: mockSetTabId,
   };
 
   beforeEach(() => {
@@ -156,8 +155,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
       <SecurityIntegrationsGridTabs
         {...props}
         selectedTab={{ ...INTEGRATION_TABS[0], appendAutoImportCard: true }}
-        toggleIdSelected={INTEGRATION_TABS[0].id}
-        setSelectedTabIdToStorage={mockSetTabId}
+        setSelectedTabId={mockSetTabId}
       />,
       { wrapper: TestProviders }
     );

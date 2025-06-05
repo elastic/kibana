@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useStoredIntegrationTabId } from './use_stored_state';
 import type { IntegrationTabId, Tab } from '../types';
 import { useIntegrationContext } from './integration_context';
@@ -14,12 +14,7 @@ export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
 export const useSelectedTab = () => {
   const { spaceId, integrationTabs } = useIntegrationContext();
-  const [lastTabId, setLastTabIdToStorage] = useStoredIntegrationTabId(
-    spaceId,
-    integrationTabs[0].id
-  );
-
-  const [toggleIdSelected, setToggleIdSelected] = useState(lastTabId);
+  const [selectedId, setSelectedId] = useStoredIntegrationTabId(spaceId, integrationTabs[0].id);
 
   const integrationTabsById = useMemo(
     () => Object.fromEntries(integrationTabs.map((tab: Tab) => [tab.id, tab])),
@@ -27,20 +22,15 @@ export const useSelectedTab = () => {
   );
 
   const selectedTab = useMemo(
-    /**
-     * When toggleIdSelected from the local storage is not found in the integrationTabs,
-     * we fallback to the first tab in the integrationTabs array.
-     */
-    () => integrationTabsById[toggleIdSelected] ?? integrationTabs[0],
-    [integrationTabs, integrationTabsById, toggleIdSelected]
+    () => integrationTabsById[selectedId] ?? integrationTabs[0], // fallback to first tab if not found
+    [integrationTabs, integrationTabsById, selectedId]
   );
 
-  const setSelectedTabIdToStorage = useCallback(
+  const setSelectedTabId = useCallback(
     (id: IntegrationTabId) => {
-      setToggleIdSelected(id);
-      setLastTabIdToStorage(id);
+      setSelectedId(id);
     },
-    [setLastTabIdToStorage]
+    [setSelectedId]
   );
-  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage };
+  return { selectedTab, setSelectedTabId };
 };
