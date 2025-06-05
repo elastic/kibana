@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { services as xpackServices } from '../../functional/services';
 import { services as apiIntegrationServices } from '../../api_integration/services';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { createUsageServices } from './usage';
@@ -19,8 +18,6 @@ export function ReportingAPIProvider(context: FtrProviderContext) {
 }
 
 export const services = {
-  ...xpackServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
-  usageAPI: apiIntegrationServices.usageAPI,
+  ...apiIntegrationServices,
   reportingAPI: ReportingAPIProvider,
 };

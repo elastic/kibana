@@ -269,10 +269,6 @@ enabled:
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
-  - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
-  - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_security.config.ts
-  - x-pack/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
@@ -392,6 +388,10 @@ enabled:
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
+  - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
+  - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts

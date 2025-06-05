@@ -1289,8 +1289,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
-/x-pack/test/reporting_api_integration/ @elastic/response-ops
-/x-pack/test/reporting_functional/ @elastic/response-ops
+/x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
+/x-pack/platform/test/reporting_functional/ @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/response-ops
 /docs/user/reporting @elastic/response-ops
 /docs/settings/reporting-settings.asciidoc @elastic/response-ops
