@@ -7,8 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { sortBy } from 'lodash';
+import { isNotFoundError } from '@kbn/es-errors';
+import { badRequest, notFound } from '@hapi/boom';
 import { createChangeRequestsServerRoute } from './route_factory';
 import { CHANGE_REQUESTS_API_PRIVILEGES } from '../constants';
+import { ChangeRequestDoc, Status, statusRt } from '../types';
+import { getCurrentUser } from '../lib/get_current_user';
 
 const listRequestsRoute = createChangeRequestsServerRoute({
   endpoint: 'GET /internal/change_requests/manage/change_requests',
@@ -95,8 +99,8 @@ function authorizationId(changeRequest: { id: string }, index: number) {
   return `${changeRequest.id}_${index}` as string;
 }
 
-const approveRequestRoute = createChangeRequestsServerRoute({
-  endpoint: 'POST /internal/change_requests/manage/change_requests/{id}/_approve',
+const updateRequestRoute = createChangeRequestsServerRoute({
+  endpoint: 'PATCH /internal/change_requests/manage/change_requests/{id}',
   security: {
     authz: {
       requiredPrivileges: [CHANGE_REQUESTS_API_PRIVILEGES.manage],
@@ -106,47 +110,123 @@ const approveRequestRoute = createChangeRequestsServerRoute({
     path: z.object({
       id: z.string(),
     }),
-  }),
-  handler: async ({ params, response }) => {
-    // Once I've read the request from the index, how do I put the path params into the endpoint string?
-    // Attaching query params and the body should be easy since this part won't be type safe (that burden is on the one submitting the request)
-
-    // I'm missing the HTTP method and API version...
-
-    // How do I bubble back "failed to apply requested changes"
-    // How can we push an update about this back to the user?
-
-    // How do we handle rollbacks in case of failure?
-
-    return response.ok({
-      body: `Request ${params.path.id} approved`,
-    });
-  },
-});
-
-const declineRequestRoute = createChangeRequestsServerRoute({
-  endpoint: 'POST /internal/change_requests/manage/change_requests/{id}/_decline',
-  security: {
-    authz: {
-      requiredPrivileges: [CHANGE_REQUESTS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string(),
+    body: z.object({
+      status: statusRt,
+      reviewComment: z.string().optional(),
     }),
   }),
-  handler: async ({ params, response }) => {
-    // How can we push an update about this back to the user which submitted the request?
+  handler: async ({ params, response, getClients, getStartServices, request }) => {
+    // For approve, I probably want a lock but how does that even work if the UI is doing the actions?
 
-    return response.ok({
-      body: `Request ${params.path.id} declined`,
-    });
+    try {
+      const { storageClient } = await getClients();
+      const { security, spaces, core } = await getStartServices();
+      const space = spaces.spacesService.getSpaceId(request);
+      const user = await getCurrentUser(core, request);
+
+      const result = await storageClient.get({
+        id: params.path.id,
+      });
+
+      const changeRequest = result._source?.request;
+      if (!changeRequest) {
+        throw notFound();
+      }
+
+      if (changeRequest.space !== space) {
+        throw notFound();
+      }
+
+      if (changeRequest.user === user) {
+        throw badRequest('You cannot approve your own change request'); // Or?
+      }
+
+      assertValidStatusTransition(changeRequest.status, params.body.status);
+
+      const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const authorizationResults = await Promise.all(
+        changeRequest.actions.map(async (action) => checkPrivileges(action.requiredPrivileges))
+      );
+      const isAuthorized = authorizationResults.every(({ hasAllRequested }) => hasAllRequested);
+
+      if (!isAuthorized) {
+        throw notFound();
+      }
+
+      const updatedChangeRequest: ChangeRequestDoc = {
+        ...changeRequest,
+        lastUpdatedAt: new Date().toISOString(),
+        reviewedBy: user,
+        status: params.body.status,
+        reviewComment: params.body.reviewComment,
+      };
+
+      // Do I need to log this event for audit tracing?
+      storageClient.index({
+        id: params.path.id,
+        document: {
+          request: updatedChangeRequest,
+        },
+      });
+
+      return response.ok({
+        body: {
+          change_request: updatedChangeRequest,
+        },
+      });
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        throw notFound();
+      }
+
+      throw error;
+    }
   },
 });
+
+function assertValidStatusTransition(currentStatus: Status, nextStatus: Status) {
+  if (currentStatus === 'pending') {
+    const invalidTransitions: Status[] = ['pending', 'applied', 'failed'];
+    if (invalidTransitions.includes(nextStatus)) {
+      throw badRequest(`Invalid status transitions: ${currentStatus} -> ${nextStatus}`);
+    }
+    return;
+  }
+
+  if (currentStatus === 'approved') {
+    const invalidTransitions: Status[] = ['pending', 'rejected', 'approved'];
+    if (invalidTransitions.includes(nextStatus)) {
+      throw badRequest(`Invalid status transitions: ${currentStatus} -> ${nextStatus}`);
+    }
+    return;
+  }
+
+  if (currentStatus === 'applied') {
+    const invalidTransitions: Status[] = ['pending', 'approved', 'rejected', 'failed', 'applied'];
+    if (invalidTransitions.includes(nextStatus)) {
+      throw badRequest(`Invalid status transitions: ${currentStatus} -> ${nextStatus}`);
+    }
+    return;
+  }
+
+  if (currentStatus === 'rejected') {
+    const invalidTransitions: Status[] = ['pending', 'rejected', 'failed', 'applied'];
+    if (invalidTransitions.includes(nextStatus)) {
+      throw badRequest(`Invalid status transitions: ${currentStatus} -> ${nextStatus}`);
+    }
+    return;
+  }
+
+  if (currentStatus === 'failed') {
+    const invalidTransitions: Status[] = ['pending', 'applied', 'failed'];
+    if (invalidTransitions.includes(nextStatus)) {
+      throw badRequest(`Invalid status transitions: ${currentStatus} -> ${nextStatus}`);
+    }
+    return;
+  }
+}
 
 export const manageRoutes = {
   ...listRequestsRoute,
-  ...approveRequestRoute,
-  ...declineRequestRoute,
+  ...updateRequestRoute,
 };

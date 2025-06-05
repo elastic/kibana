@@ -17,6 +17,9 @@ export class ChangeRequestsPlugin
     // I guess the widget should show two sections, one for your own requests and another one for things you could approve (if you have the right privilege)
     // How can I make sure that the request the UI makes to submit this request still matches the API type of the target
     // endpoint if I'm using the route repository?
+    // Once I've read the request from the index, how do I put the path params into the endpoint string?
+    // Attaching query params and the body should be easy since this part won't be type safe (that burden is on the one submitting the request)
+    // What about rollbacks?
   }
 
   public start() {

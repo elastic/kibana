@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { badRequest } from '@hapi/boom';
-import { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { RequiredPrivileges, submitRequestBodyRt } from '../types';
 import { createChangeRequestsServerRoute } from './route_factory';
 import { CHANGE_REQUESTS_API_PRIVILEGES } from '../constants';
+import { getCurrentUser } from '../lib/get_current_user';
 
 const submitRequestRoute = createChangeRequestsServerRoute({
   endpoint: 'POST /internal/change_requests/change_requests',
@@ -41,6 +41,8 @@ const submitRequestRoute = createChangeRequestsServerRoute({
 
     const { storageClient } = await getClients();
 
+    // Do I need to log this for audit tracing?
+    // https://docs.elastic.dev/kibana-dev-docs/key-concepts/audit-logging
     const indexResponse = await storageClient.index({
       document: {
         request: {
@@ -49,7 +51,7 @@ const submitRequestRoute = createChangeRequestsServerRoute({
           space,
           status: 'pending',
           submittedAt: new Date().toISOString(),
-          handledAt: undefined,
+          lastUpdatedAt: new Date().toISOString(),
         },
       },
     });
@@ -110,16 +112,6 @@ const listRequestsRoute = createChangeRequestsServerRoute({
     });
   },
 });
-
-async function getCurrentUser(core: CoreStart, request: KibanaRequest) {
-  const currentUser = core.security.authc.getCurrentUser(request);
-
-  if (!currentUser) {
-    throw new Error('Could not resolve current user');
-  }
-
-  return currentUser.username;
-}
 
 function isEmptyRequiredPrivileges(requiredPrivileges: RequiredPrivileges) {
   const missingKibanaPrivileges = requiredPrivileges.kibana

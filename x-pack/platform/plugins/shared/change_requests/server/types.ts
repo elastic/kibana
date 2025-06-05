@@ -49,14 +49,27 @@ export const submitRequestBodyRt = z.object({
   description: z.string(),
 });
 
+export const statusRt = z.union([
+  z.literal('pending'),
+  z.literal('approved'),
+  z.literal('applied'),
+  z.literal('rejected'),
+  z.literal('failed'),
+  // Maybe in the future we'll also have a status like "exported" for GitOps
+]);
+
+export type Status = z.TypeOf<typeof statusRt>;
+
 type SubmitRequestBody = z.TypeOf<typeof submitRequestBodyRt>;
 
 export interface ChangeRequestDoc extends SubmitRequestBody {
   user: string;
   space: string;
-  status: 'pending' | 'approved' | 'rejected'; // Maybe in the future we'll also have a status like "exported", and maybe "approved" should be "applied" instead
+  status: Status;
   submittedAt: string;
-  handledAt: string | undefined;
+  lastUpdatedAt: string;
+  reviewedBy?: string;
+  reviewComment?: string;
 }
 
 export type ChangeRequestsStorageSettings = typeof changeRequestsStorageSettings;
