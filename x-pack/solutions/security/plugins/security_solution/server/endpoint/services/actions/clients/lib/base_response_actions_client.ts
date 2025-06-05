@@ -790,16 +790,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
-    return createEsSearchIterable<LogsEndpointAction>({
+    return createEsSearchIterable<
+      LogsEndpointAction,
+      Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+    >({
       esClient,
       searchRequest: {
         index: ENDPOINT_ACTIONS_INDEX,
         sort: '@timestamp',
         query,
       },
-      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
+      resultsMapper: async (
+        data
+      ): Promise<Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>> => {
         const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
-        const pendingRequests: ResponseActionsClientPendingAction[] = [];
+        const pendingRequests: Array<
+          ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>
+        > = [];
 
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
@@ -821,10 +828,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             // If not completed, add action to the pending list and calculate the list of agent IDs
             // whose response we are still waiting on
             if (!actionCompleteInfo.isCompleted) {
-              const pendingActionData: ResponseActionsClientPendingAction = {
+              const pendingActionData = {
                 action: actionRequest,
                 pendingAgentIds: [],
-              };
+              } as unknown as ResponseActionsClientPendingAction<
+                TParameters,
+                TOutputContent,
+                TMeta
+              >;
 
               for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
                 if (!agentIdState.isCompleted) {
