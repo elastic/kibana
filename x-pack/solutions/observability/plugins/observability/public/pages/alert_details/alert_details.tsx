@@ -60,6 +60,7 @@ import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
+import { AlertSubtitle } from './components/alert_subtitle';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -383,7 +384,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: alertDetail?.formatted ? (
-          getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          <>
+            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
+            <EuiSpacer size="xs" />
+            <AlertSubtitle alert={alertDetail.formatted} />
+          </>
         ) : (
           <EuiLoadingSpinner />
         ),
