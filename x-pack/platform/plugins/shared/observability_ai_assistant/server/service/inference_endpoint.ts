@@ -96,7 +96,7 @@ export async function deleteInferenceEndpoint({
       error instanceof errors.ResponseError &&
       error.body?.error?.type === 'resource_not_found_exception'
     ) {
-      log.debug(`Inference endpoint "${inferenceId}" was already deleted. Skipping deletion.`);
+      logger.debug(`Inference endpoint "${inferenceId}" was already deleted. Skipping deletion.`);
       return;
     }
 
