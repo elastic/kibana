@@ -18,6 +18,7 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   type ESQLAstCommand,
+  lastItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -842,6 +843,13 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+// --- Expression types helpers ---
+
+/**
+ * Type guard to check if the type is 'param'
+ */
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
 /**
  * Determines the type of the expression
  */
@@ -861,7 +869,7 @@ export function getExpressionType(
     return getExpressionType(root[0], fields, userDefinedColumns);
   }
 
-  if (isLiteralItem(root) && root.literalType !== 'param') {
+  if (isLiteralItem(root)) {
     return root.literalType;
   }
 
@@ -889,6 +897,12 @@ export function getExpressionType(
 
   if (isColumnItem(root) && fields && userDefinedColumns) {
     const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+    const lastArg = lastItem(root.args);
+    // If the last argument is a param, we return its type (param literal type)
+    // This is useful for cases like `where ??field`
+    if (isParam(lastArg)) {
+      return lastArg.literalType;
+    }
     if (!column) {
       return 'unknown';
     }
@@ -938,7 +952,6 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
 
     // When functions are passed null for any argument, they generally return null
@@ -952,7 +965,8 @@ export function getExpressionType(
           param &&
           (param.type === 'any' ||
             param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
+            isParamExpressionType(argType))
         );
       });
     });
@@ -966,6 +980,8 @@ export function getExpressionType(
 
   return 'unknown';
 }
+
+// --- Fields helpers ---
 
 export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>

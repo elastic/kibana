@@ -68,6 +68,7 @@ export const dataTypes = [
   'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
+  'param', // Defines a named param such as ?value or ??field
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
