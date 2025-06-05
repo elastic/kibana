@@ -41,7 +41,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     },
   };
 
-  describe('Queries API', () => {
+  describe('Queries API', function () {
+    // Intentionally skipped in all serverless environnments (local and MKI) until we enable sig events
+    this.tags(['skipServerless', 'skipMKI']);
+
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);

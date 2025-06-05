@@ -24,7 +24,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe('Significant Events', () => {
+  describe('Significant Events', function () {
+    // Intentionally skipped in all serverless environnments (local and MKI) until we enable sig events
+    this.tags(['skipServerless', 'skipMKI']);
+
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
