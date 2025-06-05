@@ -46,7 +46,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
         to: last30MinRange.to,
         kind: 'absolute',
       },
-      keepDataView: false, // it will reset to the Security default data view
+      keepDataView: true, // it will reset to the Security default data view
       query: {
         language: 'kuery',
         query: kqlQuery,
