@@ -59,6 +59,8 @@ import { AlertDetailContextualInsights } from './alert_details_contextual_insigh
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
+import { getAlertTitle } from '../../utils/format_alert_title';
+import { AlertSubtitle } from './components/alert_subtitle';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -84,16 +86,6 @@ type TabId =
   | typeof METADATA_TAB_ID
   | typeof RELATED_ALERTS_TAB_ID
   | typeof INVESTIGATION_GUIDE_TAB_ID;
-
-export const getPageTitle = (ruleCategory: string) => {
-  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
-    defaultMessage:
-      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
-    values: {
-      ruleCategory,
-    },
-  });
-};
 
 export function AlertDetails() {
   const {
@@ -177,6 +169,7 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      setActiveTabId(OVERVIEW_TAB_ID);
     }
   }, [alertDetail, ruleTypeRegistry]);
 
@@ -191,7 +184,7 @@ export function AlertDetails() {
       },
       {
         text: alertDetail
-          ? getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
           : defaultBreadcrumb,
       },
     ],
@@ -391,7 +384,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: alertDetail?.formatted ? (
-          getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          <>
+            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
+            <EuiSpacer size="xs" />
+            <AlertSubtitle alert={alertDetail.formatted} />
+          </>
         ) : (
           <EuiLoadingSpinner />
         ),
