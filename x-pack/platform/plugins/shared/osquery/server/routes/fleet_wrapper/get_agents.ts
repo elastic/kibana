@@ -112,7 +112,8 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
               pitId: query.pitId,
               searchAfter: query.searchAfter,
               kuery,
-              showAgentless: query.showAgentless,showInactive: query.showInactive,
+              showAgentless: query.showAgentless,
+              showInactive: query.showInactive,
               aggregations: {
                 platforms: {
                   terms: {
