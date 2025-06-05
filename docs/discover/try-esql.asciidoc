@@ -101,7 +101,7 @@ If you'd like to keep the visualization and add it to a dashboard, you can save 
 
 By default, ES|QL identifies time series data when an index contains a `@timestamp` field. This enables the time range selector and visualization options for your query.
 
-If your index doesn't have an explicit `@timestamp` field, but has a different time field, you can still enable the time range selector and visualization options by calling the `?_start` and `?_tend` parameters in your query.
+If your index doesn't have an explicit `@timestamp` field, but has a different time field, you can still enable the time range selector and visualization options by calling the `?_tstart` and `?_tend` parameters in your query.
 
 For example, the eCommerce sample data set doesn't have a `@timestamp` field, but has an `order_date` field.
 
@@ -115,7 +115,7 @@ FROM kibana_sample_data_ecommerce
 
 image::images/esql-no-time-series.png[ESQL query without time series capabilities enabled]
 
-While still querying the same data set, by adding the `?_start` and `?_tend` parameters based on the `order_date` field, **Discover** enables times series capabilities.
+While still querying the same data set, by adding the `?_tstart` and `?_tend` parameters based on the `order_date` field, **Discover** enables times series capabilities.
 
 [source,esql]
 ----
