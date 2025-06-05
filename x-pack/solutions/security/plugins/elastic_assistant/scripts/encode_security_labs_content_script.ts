@@ -16,7 +16,6 @@ import { encryptSecurityLabsContent } from '@kbn/ai-security-labs-content';
 
 // Path to the security labs markdown files
 export const SECURITY_LABS_DIR = path.resolve(__dirname, '../server/knowledge_base/security_labs');
-// Output directory for the encoded files
 // Pattern to match markdown files
 export const MARKDOWN_FILE_PATTERN = ['*.md', '!*.encoded.md'];
 // Pattern for files to delete in the output directory
