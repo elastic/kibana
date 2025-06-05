@@ -80,10 +80,8 @@ export const getCustomScriptsRouteHandler = (
       const user = coreContext.security.authc.getCurrentUser();
       const esClient = coreContext.elasticsearch.client.asInternalUser;
       const connectorActions = (await context.actions).getActionsClient();
-      const spaceId = (await context.securitySolution).getSpaceId();
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
         esClient,
-        spaceId,
         endpointService: endpointContext.service,
         username: user?.username || 'unknown',
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
