@@ -10,8 +10,7 @@ groups:
   - group: General settings
     id: general-i18n-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: i18n.locale
