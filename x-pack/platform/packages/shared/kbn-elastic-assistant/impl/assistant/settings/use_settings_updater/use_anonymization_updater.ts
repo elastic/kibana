@@ -79,8 +79,11 @@ export const useAnonymizationUpdater = ({
       : undefined;
 
     setHasPendingChanges(false);
+    if (!bulkAnonymizationFieldsResult?.success) {
+      setUpdatedAnonymizationData(anonymizationFields);
+    }
     return bulkAnonymizationFieldsResult?.success ?? false;
-  }, [anonymizationFieldsBulkActions, http, toasts]);
+  }, [anonymizationFields, anonymizationFieldsBulkActions, http, toasts]);
 
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
