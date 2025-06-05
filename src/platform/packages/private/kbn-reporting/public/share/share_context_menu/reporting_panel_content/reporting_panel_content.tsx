@@ -283,9 +283,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private createReportingJob = async () => {
     const { startServices$, apiClient, intl } = this.props;
     const [coreStart] = await Rx.firstValueFrom(startServices$);
-    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
-    const { toasts } = coreStart.notifications;
+    const {
+      rendering,
+      notifications: { toasts },
+    } = coreStart;
 
+    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
     this.setState({ isCreatingReportJob: true });
 
     try {
@@ -313,7 +316,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               ),
             }}
           />,
-          coreStart
+          rendering
         ),
         'data-test-subj': 'queueReportSuccess',
       });
