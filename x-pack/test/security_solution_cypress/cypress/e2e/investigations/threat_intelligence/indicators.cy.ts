@@ -359,9 +359,13 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
 });
 
 describe('Missing mappings', { tags: ['@ess'] }, () => {
-  before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_no_mappings' }));
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_no_mappings' });
+  });
 
-  after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_no_mappings' }));
+  after(() => {
+    cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_no_mappings' });
+  });
 
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     beforeEach(() => {
@@ -372,6 +376,7 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
 
     it('should display data grid despite the missing mappings and missing fields', () => {
       // there are 2 documents in the x-pack/test/security_solution_cypress/es_archives/ti_indicators_data_no_mappings/data.json
+      // mappings are removed entirely
       const documentsNumber = 2;
       cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);
 
