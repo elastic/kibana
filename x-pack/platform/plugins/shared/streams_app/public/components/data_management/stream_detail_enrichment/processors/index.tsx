@@ -83,6 +83,7 @@ export function AddProcessorPanel() {
   const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
 
   const methods = useForm<ProcessorFormState>({
+    // cast necessary because DeepPartial does not work with `unknown`
     defaultValues: initialDefaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });

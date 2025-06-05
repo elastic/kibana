@@ -9,28 +9,11 @@ import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export type ElasticsearchProcessorType = keyof IngestProcessorContainer;
 
-type IsArraySynced<TUnion extends string, TArray extends readonly string[]> =
-  // First, check if all elements in TArray are actually part of TUnion.
-  Exclude<TArray[number], TUnion> extends never
-    ? // Check if all members of TUnion are present in TArray.
-      Exclude<TUnion, TArray[number]> extends never
-      ? true // All checks passed, array is synced.
-      : {
-          readonly _errorType: 'Missing elements from union';
-          readonly missing: Exclude<TUnion, TArray[number]>;
-        }
-    : {
-        readonly _errorType: 'Array contains elements not in union';
-        readonly invalid: Exclude<TArray[number], TUnion>;
-      };
-
-function ensureFullProcessorTypeList<const Arr extends readonly string[]>(
-  arr: IsArraySynced<ElasticsearchProcessorType, Arr> extends true
-    ? Arr
-    : IsArraySynced<ElasticsearchProcessorType, Arr>
-): Arr {
-  return arr as Arr;
-}
+const ensureFullProcessorTypeList = <T extends readonly ElasticsearchProcessorType[]>(
+  types: ElasticsearchProcessorType extends T[number]
+    ? T
+    : `Missing elements from union: "${Exclude<ElasticsearchProcessorType, T[number]>}"`
+) => types as T;
 
 export const elasticsearchProcessorTypes = ensureFullProcessorTypeList([
   'append',
@@ -78,4 +61,4 @@ export const elasticsearchProcessorTypes = ensureFullProcessorTypeList([
   'urldecode',
   'uri_parts',
   'user_agent',
-]);
+] as const);

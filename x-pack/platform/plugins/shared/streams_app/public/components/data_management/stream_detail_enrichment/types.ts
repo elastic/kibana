@@ -13,7 +13,7 @@ import {
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
-import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema/src/models/ingest/processors';
+import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
