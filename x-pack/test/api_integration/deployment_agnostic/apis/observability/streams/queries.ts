@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
+import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -15,7 +16,6 @@ import {
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, getQueries, putStream } from './helpers/requests';
 import { RoleCredentials } from '../../../services';
-import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
