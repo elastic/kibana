@@ -232,7 +232,10 @@ describe('SiemRulesMigrationsService', () => {
 
       expect(startRuleMigrationAPI).toHaveBeenCalledWith({
         migrationId: 'mig-1',
-        connectorId: 'connector-123',
+        settings: {
+          connectorId: 'connector-123',
+          skipPrebuiltRulesMatching: undefined,
+        },
         retry: SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED,
         langSmithOptions: { project_name: 'proj', api_key: 'key' },
       });
@@ -409,9 +412,16 @@ describe('SiemRulesMigrationsService', () => {
         jest.useRealTimers();
       });
 
-      it('should automatically start the stopped migration', async () => {
+      it('should automatically start the stopped migration with last_execution values', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const stoppedMigration = {
+          id: 'mig-1',
+          status: SiemMigrationTaskStatus.STOPPED,
+          last_execution: {
+            connector_id: 'connector-last',
+            skip_prebuilt_rules_matching: true,
+          },
+        };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         service.getRuleMigrationsStats = jest
@@ -436,7 +446,10 @@ describe('SiemRulesMigrationsService', () => {
         // Expect that the migration was resumed
         expect(startRuleMigrationAPI).toHaveBeenCalledWith({
           migrationId: 'mig-1',
-          connectorId: 'connector-123',
+          settings: {
+            connectorId: 'connector-last',
+            skipPrebuiltRulesMatching: true,
+          },
         });
 
         // Restore real timers.

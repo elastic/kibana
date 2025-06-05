@@ -187,9 +187,11 @@ export class SiemRulesMigrationsService {
     }
     const params: api.StartRuleMigrationParams = {
       migrationId,
-      connectorId,
+      settings: {
+        connectorId,
+        skipPrebuiltRulesMatching,
+      },
       retry,
-      skipPrebuiltRulesMatching,
     };
 
     const traceOptions = this.traceOptionsStorage.get();
@@ -204,10 +206,21 @@ export class SiemRulesMigrationsService {
       const result = await api.startRuleMigration(params);
       this.startPolling();
 
-      this.telemetry.reportStartTranslation(params);
+      this.telemetry.reportStartTranslation({
+        migrationId,
+        connectorId,
+        skipPrebuiltRulesMatching,
+        retry,
+      });
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({
+        migrationId,
+        connectorId,
+        skipPrebuiltRulesMatching,
+        retry,
+        error,
+      });
       throw error;
     }
   }
@@ -271,14 +284,16 @@ export class SiemRulesMigrationsService {
 
         // automatically resume stopped migrations when all conditions are met
         if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_execution?.error) {
-          const connectorId = this.connectorIdStorage.get();
+          const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
           const skipPrebuiltRulesMatching =
             result.last_execution?.skip_prebuilt_rules_matching ?? true;
           if (connectorId && !this.hasMissingCapabilities('all')) {
             await api.startRuleMigration({
               migrationId: result.id,
-              connectorId,
-              skipPrebuiltRulesMatching,
+              settings: {
+                connectorId,
+                skipPrebuiltRulesMatching,
+              },
             });
             pendingMigrationIds.push(result.id);
           }

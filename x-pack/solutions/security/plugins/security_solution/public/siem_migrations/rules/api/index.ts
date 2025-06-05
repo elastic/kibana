@@ -154,10 +154,12 @@ export const upsertMigrationResources = async ({
 export interface StartRuleMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
-  /** The connector id to use for the migration */
-  connectorId: string;
-  /** Optional indicator to toggle prebuilt rules matching */
-  skipPrebuiltRulesMatching?: boolean;
+  settings: {
+    /** The connector id to use for the migration */
+    connectorId: string;
+    /** Option to toggle prebuilt rules matching */
+    skipPrebuiltRulesMatching?: boolean;
+  };
   /** Optional indicator to retry the migration with specific filtering criteria */
   retry?: SiemMigrationRetryFilter;
   /** Optional LangSmithOptions to use for the for the migration */
@@ -168,11 +170,10 @@ export interface StartRuleMigrationParams {
 /** Starts a new migration with the provided rules. */
 export const startRuleMigration = async ({
   migrationId,
-  connectorId,
   retry,
   langSmithOptions,
   signal,
-  skipPrebuiltRulesMatching = false,
+  settings: { connectorId, skipPrebuiltRulesMatching = false },
 }: StartRuleMigrationParams): Promise<StartRuleMigrationResponse> => {
   const body: StartRuleMigrationRequestBody = {
     settings: {
