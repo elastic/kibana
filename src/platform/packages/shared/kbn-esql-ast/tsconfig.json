@@ -12,6 +12,7 @@
     "**/*.ts",
   ],
   "kbn_references": [
+    "@kbn/esql-validation-autocomplete",
   ],
   "exclude": [
     "target/**/*",
