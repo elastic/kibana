@@ -503,10 +503,16 @@ async function getFunctionArgsSuggestions(
 
     const finalCommandArg = command.args[finalCommandArgIndex];
 
-    // never suggest grouping functions as args to other functions
-    const fnToIgnore = getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(
-      ({ name }) => name
-    );
+    const fnToIgnore = [];
+
+    if (node.subtype === 'variadic-call') {
+      // for now, this getFunctionArgsSuggestions is being used in STATS to suggest for
+      // operators. When that is fixed, we can remove this "is variadic-call" check
+      // and always exclude the grouping functions
+      fnToIgnore.push(
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+      );
+    }
 
     if (
       command.name !== 'stats' ||
