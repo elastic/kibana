@@ -32,7 +32,9 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
       expect(body).to.eql({ started: true });
@@ -68,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await migrationRulesRoutes.start({
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
-          payload: { connector_id: 'preconfigured-bedrock' },
+          payload: { settings: { connector_id: 'preconfigured-bedrock' } },
         });
       });
 

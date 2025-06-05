@@ -120,7 +120,9 @@ export default ({ getService }: FtrProviderContext) => {
           const response = await ruleMigrationRoutes.start({
             migrationId,
             payload: {
-              connector_id: 'preconfigured-bedrock',
+              settings: {
+                connector_id: 'preconfigured-bedrock',
+              },
             },
           });
 
