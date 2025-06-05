@@ -92,7 +92,7 @@ export class GrokCollection {
     this.customPatternsChanged$.next();
   }
 
-  public resolvePatterns(source: Map<string, GrokPattern>) {
+  public resolvePatterns(source: Map<string, GrokPattern> = this.patterns) {
     source.forEach((pattern) => {
       if (!pattern.isResolved()) {
         pattern.resolvePattern();
