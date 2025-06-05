@@ -73,6 +73,19 @@ export function compileConfigStack({
     }
   }
 
+  // Pricing specific tier configs
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+  const isPricingTiersEnabled = _.get(config, 'pricing.tiers.enabled', false);
+  if (isPricingTiersEnabled) {
+    const tier = getServerlessProjectTierFromConfig(config);
+    if (tier) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
+      if (dev && devConfig !== false) {
+        configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
+      }
+    }
+  }
+
   return configs.filter(isNotNull);
 }
 
@@ -98,6 +111,25 @@ function getSecurityTierFromCfg(configs) {
   // and is the only element in the array, which is why we can access the first element for product type/tier
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
+}
+
+/** @typedef {'essentials' | 'complete' | 'search_ai_lake' | 'ai_soc'} ServerlessProjectTier */
+/**
+ * @param {string[]} config Configuration object from merged configs
+ * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
+ */
+function getServerlessProjectTierFromConfig(config) {
+  const products = _.get(config, 'pricing.tiers.products', []);
+
+  // Constraint tier to be the same for
+  const uniqueTiers = _.uniqBy(products, 'tier');
+  if (uniqueTiers.length > 1) {
+    throw new Error(
+      'Multiple tiers found in pricing.tiers.products, the applied tier should be the same for all the products.'
+    );
+  }
+
+  return uniqueTiers.at(0)?.tier;
 }
 
 /**
