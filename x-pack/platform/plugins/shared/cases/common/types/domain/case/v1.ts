@@ -53,8 +53,6 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
-export const CaseIncrementalId = rt.union([rt.number, rt.undefined]);
-
 const CaseBaseFields = {
   /**
    * The description of the case
@@ -97,10 +95,6 @@ const CaseBaseFields = {
    * Observables
    */
   observables: rt.array(CaseObservableRt),
-  /**
-   * Incremental ID
-   */
-  incremental_id: CaseIncrementalId,
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(
@@ -132,6 +126,7 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
+    incremental_id: rt.union([rt.number, rt.undefined]),
   }),
 ]);
 
