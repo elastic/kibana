@@ -119,14 +119,12 @@ function SecondaryMetricValue({
   formattedValue,
   trendConfig,
   color,
-  fontSize,
   formatter,
 }: {
   rawValue?: number | string;
   formattedValue?: string;
   trendConfig?: TrendConfig;
   color?: string;
-  fontSize: number;
   formatter?: FieldFormatConvertFunction;
 }) {
   const safeFormattedValue = formattedValue ?? notAvailable;
@@ -214,7 +212,6 @@ export function SecondaryMetric({
   getMetricFormatter,
   trendConfig,
   color,
-  fontSize,
 }: SecondaryMetricProps) {
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(columns, config, getMetricFormatter) || {};
@@ -230,7 +227,6 @@ export function SecondaryMetric({
         formattedValue={metricFormatter?.(value)}
         trendConfig={color ? undefined : trendConfig}
         color={color}
-        fontSize={fontSize}
         formatter={metricFormatter}
       />
     </span>
