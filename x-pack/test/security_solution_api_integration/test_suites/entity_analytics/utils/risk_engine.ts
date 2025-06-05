@@ -563,3 +563,220 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
     return response;
   },
 });
+
+export const downgradeRiskEngineMappingsVersion = async ({
+  es,
+  log,
+  space = 'default',
+  mappingsVersion,
+  otherProps,
+}: {
+  es: Client;
+  log: ToolingLog;
+  space?: string;
+  mappingsVersion?: number;
+  otherProps?: Record<string, any>;
+}): Promise<void> => {
+  let painless = `ctx._source._meta.mappingsVersion = ${mappingsVersion ?? 4}`;
+
+  if (otherProps) {
+    const otherPropsString = Object.entries(otherProps)
+      .map(([key, value]) => `ctx._source.${key} = ${JSON.stringify(value)}`)
+      .join('; ');
+    painless = `${otherPropsString}; ${painless}`;
+  }
+
+  await es.updateByQuery({
+    index: '.kibana_security_solution_*',
+    query: {
+      bool: {
+        must: [
+          { term: { type: { value: riskEngineConfigurationTypeName } } },
+          { term: { namespaces: { value: space } } },
+        ],
+      },
+    },
+    script: {
+      source: 'ctx._source._meta.mappingsVersion = 4',
+      lang: 'painless',
+    },
+    conflicts: 'proceed',
+    refresh: true,
+  });
+};
+
+export const deleteEventIngestedPipeline = async ({
+  es,
+  log,
+  space = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  space?: string;
+}) => {
+  const pipelineId = 'entity_analytics_create_eventIngest_from_timestamp-pipeline-' + space;
+
+  try {
+    await es.ingest.deletePipeline({
+      id: pipelineId,
+    });
+    log.info(`Deleted eventIngest pipeline: ${pipelineId}`);
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      log.warning(`Pipeline ${pipelineId} not found, skipping deletion.`);
+    } else {
+      log.error(`Error deleting pipeline ${pipelineId}: ${error.message}`);
+      throw error;
+    }
+  }
+};
+
+export const doesEventIngestedPipelineExist = async ({
+  es,
+  log,
+  space = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  space?: string;
+}) => {
+  const pipelineId = 'entity_analytics_create_eventIngest_from_timestamp-pipeline-' + space;
+
+  try {
+    await es.ingest.getPipeline({
+      id: pipelineId,
+    });
+    log.info(`Pipeline ${pipelineId} exists.`);
+    return true;
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      log.warning(`Pipeline ${pipelineId} does not exist.`);
+      return false;
+    } else {
+      log.error(`Error checking pipeline ${pipelineId}: ${error.message}`);
+      throw error;
+    }
+  }
+};
+
+const getBackingIndexFromDataStream = async ({
+  es,
+  datastreamName,
+}: {
+  es: Client;
+  datastreamName: string;
+}) => {
+  const response = await es.indices.getDataStream({
+    name: datastreamName,
+  });
+
+  const dataStream = response.data_streams[0];
+  const indices = dataStream.indices;
+  const latestBackingIndex = indices[indices.length - 1]?.index_name;
+
+  return latestBackingIndex;
+};
+
+const removeDefaultPipelineFromIndex = async ({ es, index }: { es: Client; index: string }) => {
+  await es.indices.putSettings({
+    index,
+    settings: {
+      index: {
+        default_pipeline: null,
+      },
+    },
+  });
+};
+
+const addDefaultPipelineToIndex = async ({
+  es,
+  index,
+  space = 'default',
+}: {
+  es: Client;
+  index: string;
+  space?: string;
+}) => {
+  const pipelineId = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${space}`;
+  await es.indices.putSettings({
+    index,
+    settings: {
+      index: {
+        default_pipeline: pipelineId,
+      },
+    },
+  });
+};
+
+const removeDefaultPipelineFromRiskScoreIndices = async ({
+  es,
+  log,
+  namespace = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  namespace?: string;
+}): Promise<void> => {
+  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+
+  const riskScoreBackingIndex = await getBackingIndexFromDataStream({
+    es,
+    datastreamName: riskScoreIndex,
+  });
+
+  await removeDefaultPipelineFromIndex({ es, index: riskScoreBackingIndex });
+  await removeDefaultPipelineFromIndex({ es, index: riskScoreLatestIndex });
+
+  log.info(
+    `Removed default pipeline from risk score indices: ${riskScoreIndex}, ${riskScoreLatestIndex}`
+  );
+};
+
+const addDefaultPipelineToRiskScoreIndices = async ({
+  es,
+  log,
+  namespace = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  namespace?: string;
+}): Promise<void> => {
+  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+
+  const riskScoreBackingIndex = await getBackingIndexFromDataStream({
+    es,
+    datastreamName: riskScoreIndex,
+  });
+
+  await addDefaultPipelineToIndex({ es, index: riskScoreBackingIndex, space: namespace });
+  await addDefaultPipelineToIndex({ es, index: riskScoreLatestIndex, space: namespace });
+
+  log.info(
+    `Added default pipeline to risk score indices: ${riskScoreIndex}, ${riskScoreLatestIndex}`
+  );
+};
+
+export const simulateMissingPipelineBug = async ({
+  es,
+  space = 'default',
+  log,
+}: {
+  es: Client;
+  space?: string;
+  log: ToolingLog;
+}): Promise<void> => {
+  log.info(
+    'Simulating missing pipeline bug by removing default pipeline from risk score indices so pipeline can be deleted'
+  );
+  await removeDefaultPipelineFromRiskScoreIndices({ es, log, namespace: space });
+
+  log.info('Simulating missing pipeline bug by deleting eventIngested pipeline');
+  await deleteEventIngestedPipeline({ es, log, space });
+
+  log.info(
+    'Simulating missing pipeline bug by re-adding default pipeline back to risk score indices'
+  );
+  await addDefaultPipelineToRiskScoreIndices({ es, log, namespace: space });
+};
