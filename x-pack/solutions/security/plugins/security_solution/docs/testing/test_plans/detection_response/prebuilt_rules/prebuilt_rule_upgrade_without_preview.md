@@ -29,21 +29,23 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Rule upgrade workflow: individual upgrades from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-individual-upgrades-from-rule-updates-table)
+  - [Rule upgrade workflow: individual upgrades from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-individual-upgrades-from-prebuilt-rules-upgrades-page)
     - [**Scenario: User can upgrade a single conflict-free prebuilt rule from Rules Update table**](#scenario-user-can-upgrade-a-single-conflict-free-prebuilt-rule-from-rules-update-table)
     - [**Scenario: User CAN'T upgrade a single prebuilt rule with upgrade conflicts from Rules Update table**](#scenario-user-cant-upgrade-a-single-prebuilt-rule-with-upgrade-conflicts-from-rules-update-table)
-  - [Rule upgrade workflow: bulk upgrade from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-bulk-upgrade-from-rule-updates-table)
+  - [Rule upgrade workflow: bulk upgrade from Prebuilt Rules Upgrades page](#rule-upgrade-workflow-bulk-upgrade-from-prebuilt-rules-upgrades-page)
     - [**Scenario: User can bulk upgrade conflict-free prebuilt rules**](#scenario-user-can-bulk-upgrade-conflict-free-prebuilt-rules)
     - [**Scenario: User can bulk upgrade prebuilt rules with auto-resolved upgrade conflicts**](#scenario-user-can-bulk-upgrade-prebuilt-rules-with-auto-resolved-upgrade-conflicts)
     - [**Scenario: User CAN'T bulk upgrade prebuilt rules with unresolved upgrade conflicts**](#scenario-user-cant-bulk-upgrade-prebuilt-rules-with-unresolved-upgrade-conflicts)
     - [**Scenario: User can bulk upgrade a mix of prebuilt rules with and without upgrade conflicts**](#scenario-user-can-bulk-upgrade-a-mix-of-prebuilt-rules-with-and-without-upgrade-conflicts)
   - [Rule upgrade workflow: upgrading rules with rule type changes](#rule-upgrade-workflow-upgrading-rules-with-rule-type-changes)
-    - [**Scenario: User CAN'T upgrade rules with rule type change from Prebuilt Rules Upgrades page**](#scenario-user-cant-upgrade-rules-with-rule-type-change-from-rule-updates-table)
+    - [**Scenario: User CAN'T upgrade rules with rule type change from Prebuilt Rules Upgrades page**](#scenario-user-cant-upgrade-rules-with-rule-type-change-from-prebuilt-rules-upgrades-page)
     - [**Scenario: User CAN'T bulk upgrade prebuilt rules with rule type change**](#scenario-user-cant-bulk-upgrade-prebuilt-rules-with-rule-type-change)
   - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
-    - [**Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT\&CK™ tactic or technique on Prebuilt Rules Upgrades page**](#scenario-user-can-search-prebuilt-rules-by-rule-name-index-pattern-or-mitre-attck-tactic-or-technique-on-rule-updates-table)
-    - [**Scenario: User can filter prebuilt rules by customized/non-customized state on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-customizednon-customized-state-on-rule-updates-table)
-    - [**Scenario: User can filter prebuilt rules by tags on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-tags-on-rule-updates-table)
+    - [**Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT\&CK™ tactic or technique on Prebuilt Rules Upgrades page**](#scenario-user-can-search-prebuilt-rules-by-rule-name-index-pattern-or-mitre-attck-tactic-or-technique-on-prebuilt-rules-upgrades-page)
+    - [**Scenario: User can filter prebuilt rules by customized/non-customized state on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-customizednon-customized-state-on-prebuilt-rules-upgrades-page)
+    - [**Scenario: User can filter prebuilt rules by tags on Prebuilt Rules Upgrades page**](#scenario-user-can-filter-prebuilt-rules-by-tags-on-prebuilt-rules-upgrades-page)
+    - [**Scenario: User can sort prebuilt rules on Prebuilt Rules Upgrades page**](#scenario-user-can-sort-prebuilt-rules-on-prebuilt-rules-upgrades-page)
+    - [**Scenario: User can paginate over prebuilt rules on Prebuilt Rules Upgrades page**](#scenario-user-can-paginate-over-prebuilt-rules-on-prebuilt-rules-upgrades-page)
   - [Rule upgrade workflow: Edge cases](#rule-upgrade-workflow-edge-cases)
     - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version)
   - [Error handling](#error-handling)
@@ -273,7 +275,7 @@ Then user should see a warning modal saying the upgrade isn't possible
 ```Gherkin
 Given multiple prebuilt rules with upgrades
 When user opens the Prebuilt Rules Upgrades page
-Then the prebuilt rules having an upgrade should be shown in the table
+Then the prebuilt rules having an upgrade should be shown
 When user enters <text> in the search field
 Then only the prebuilt rules having an upgrade and matching the <text> should be shown
 ```
@@ -293,7 +295,7 @@ Then only the prebuilt rules having an upgrade and matching the <text> should be
 Given multiple prebuilt rules with upgrades
 And some if these rules are customized
 When user opens the Prebuilt Rules Upgrades page
-Then the prebuilt rules having an upgrade should be shown in the table
+Then the prebuilt rules having an upgrade should be shown
 When user filters prebuilt rules by <customization state>
 Then only the prebuilt rules having an upgrade and matching the <customization state> should be shown
 ```
@@ -309,10 +311,47 @@ Then only the prebuilt rules having an upgrade and matching the <customization s
 ```Gherkin
 Given multiple prebuilt rules with upgrades
 When user opens the Prebuilt Rules Upgrades page
-Then the prebuilt rules having an upgrade should be shown in the table
+Then the prebuilt rules having an upgrade should be shown
 When user filters prebuilt rules by one or more tags
 Then only the prebuilt rules having an upgrade and having these tags should be shown
 ```
+
+#### **Scenario: User can sort prebuilt rules on Prebuilt Rules Upgrades page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules with upgrades
+When user opens the Prebuilt Rules Upgrades page
+Then the prebuilt rules having an upgrade should be shown
+When user clicks on <field> header by picking the sorting direction
+Then the prebuilt rules having an upgrade should be sorted by <field> in the expected order
+```
+
+**Examples:**
+
+- `<field>`
+  - rule name
+  - risk score
+  - severity
+
+#### **Scenario: User can paginate over prebuilt rules on Prebuilt Rules Upgrades page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules with upgrades
+When user opens the Prebuilt Rules Upgrades page
+Then the prebuilt rules having an upgrade should be shown
+When user picks the desired number of <rows_per_page>
+Then the <rows_per_page> of the prebuilt rules having an upgrade should be shown on the page
+When user navigates to the next pages
+Then the next page of the prebuilt rules having an upgrade should be shown
+```
+
+**Examples:**
+
+`<rows_per_page>` = 5 | 10 | 20 | 50 | 100
 
 ### Rule upgrade workflow: Edge cases
 
