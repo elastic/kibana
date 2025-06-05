@@ -7,7 +7,10 @@
 
 import { waitFor, renderHook, act } from '@testing-library/react';
 
-import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
+import {
+  createPackagePolicyMock,
+  createPackageInfoMock,
+} from '../../../../../../../../common/mocks';
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../../../../common/types';
 import { SetupTechnology } from '../../../../../../../../common/types';
@@ -113,6 +116,48 @@ describe('useAgentless', () => {
     expect(result.current.isAgentlessEnabled).toBeFalsy();
   });
 
+  it('should return isAgentlessIntegration that returns false when agentless custom integrations are not enabled, and a custom integration is provided', () => {
+    (useStartServices as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        customIntegrations: {
+          enabled: false,
+        },
+      },
+    });
+
+    const mockPackageInfo = createPackageInfoMock({ installSource: 'custom' });
+
+    const {
+      result: {
+        current: { isAgentlessIntegration },
+      },
+    } = renderHook(() => useAgentless());
+
+    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+  });
+
+  it('should return isAgentlessIntegration that returns true when agentless custom integrations are enabled, and a custom integration is provided', () => {
+    (useStartServices as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        customIntegrations: {
+          enabled: true,
+        },
+      },
+    });
+
+    const mockPackageInfo = createPackageInfoMock({ installSource: 'custom' });
+
+    const {
+      result: {
+        current: { isAgentlessIntegration },
+      },
+    } = renderHook(() => useAgentless());
+
+    expect(isAgentlessIntegration(mockPackageInfo)).toBe(false);
+  });
+
   it('should return isAgentlessDefault as falsey when agentless is disabled and isDefault is true', () => {
     (useStartServices as MockFn).mockReturnValue({
       cloud: {
@@ -202,88 +247,88 @@ describe('useSetupTechnology', () => {
     inactivity_timeout: 3600,
   };
 
-  const packageInfoWithoutAgentless = {
-    policy_templates: [
-      {
-        name: 'cspm',
-        title: 'Template 1',
-        description: '',
-        deployment_modes: {
-          default: {
-            enabled: true,
-          },
-          agentless: {
-            enabled: false,
-          },
-        },
-      },
-    ] as RegistryPolicyTemplate[],
-  } as PackageInfo;
+  // const packageInfoWithoutAgentless = {
+  //   policy_templates: [
+  //     {
+  //       name: 'cspm',
+  //       title: 'Template 1',
+  //       description: '',
+  //       deployment_modes: {
+  //         default: {
+  //           enabled: true,
+  //         },
+  //         agentless: {
+  //           enabled: false,
+  //         },
+  //       },
+  //     },
+  //   ] as RegistryPolicyTemplate[],
+  // } as PackageInfo;
 
-  const packageInfoMock = {
-    policy_templates: [
-      {
-        name: 'cspm',
-        title: 'Template 1',
-        description: '',
-        deployment_modes: {
-          default: {
-            enabled: true,
-          },
-          agentless: {
-            enabled: true,
-            organization: 'org',
-            division: 'div',
-            team: 'team',
-            resources: {
-              requests: {
-                memory: '256Mi',
-                cpu: '100m',
-              },
-            },
-          },
-        },
-      },
-      {
-        name: 'not-cspm',
-        title: 'Template 2',
-        description: '',
-        deployment_modes: {
-          default: {
-            enabled: true,
-          },
-        },
-      },
-    ] as RegistryPolicyTemplate[],
-  } as PackageInfo;
+  // const packageInfoMock = {
+  //   policy_templates: [
+  //     {
+  //       name: 'cspm',
+  //       title: 'Template 1',
+  //       description: '',
+  //       deployment_modes: {
+  //         default: {
+  //           enabled: true,
+  //         },
+  //         agentless: {
+  //           enabled: true,
+  //           organization: 'org',
+  //           division: 'div',
+  //           team: 'team',
+  //           resources: {
+  //             requests: {
+  //               memory: '256Mi',
+  //               cpu: '100m',
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     {
+  //       name: 'not-cspm',
+  //       title: 'Template 2',
+  //       description: '',
+  //       deployment_modes: {
+  //         default: {
+  //           enabled: true,
+  //         },
+  //       },
+  //     },
+  //   ] as RegistryPolicyTemplate[],
+  // } as PackageInfo;
 
-  const packageInfoWithoutResources = {
-    policy_templates: [
-      {
-        name: 'cspm',
-        title: 'Template 1',
-        description: '',
-        deployment_modes: {
-          default: {
-            enabled: true,
-          },
-          agentless: {
-            enabled: true,
-          },
-        },
-      },
-      {
-        name: 'not-cspm',
-        title: 'Template 2',
-        description: '',
-        deployment_modes: {
-          default: {
-            enabled: true,
-          },
-        },
-      },
-    ] as RegistryPolicyTemplate[],
-  } as PackageInfo;
+  // const packageInfoWithoutResources = {
+  //   policy_templates: [
+  //     {
+  //       name: 'cspm',
+  //       title: 'Template 1',
+  //       description: '',
+  //       deployment_modes: {
+  //         default: {
+  //           enabled: true,
+  //         },
+  //         agentless: {
+  //           enabled: true,
+  //         },
+  //       },
+  //     },
+  //     {
+  //       name: 'not-cspm',
+  //       title: 'Template 2',
+  //       description: '',
+  //       deployment_modes: {
+  //         default: {
+  //           enabled: true,
+  //         },
+  //       },
+  //     },
+  //   ] as RegistryPolicyTemplate[],
+  // } as PackageInfo;
 
   const packagePolicyMock = createPackagePolicyMock();
 
@@ -919,6 +964,9 @@ describe('useSetupTechnology', () => {
         isServerlessEnabled: true,
       },
     });
+
+    const packageInfoMock = createPackageInfoMock();
+
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -995,7 +1043,7 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: createPackageInfoMock(),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1041,7 +1089,7 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoWithoutResources,
+        packageInfo: createPackageInfoMock({ agentless: { withResources: false } }),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1080,7 +1128,7 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoWithoutAgentless,
+        packageInfo: createPackageInfoMock({ agentless: { enabled: false } }),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1119,7 +1167,7 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoMock,
+        packageInfo: createPackageInfoMock(),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1157,33 +1205,33 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    const packageInfoWithoutGlobalDataTags = {
-      policy_templates: [
-        {
-          name: 'cspm',
-          title: 'Template 1',
-          description: '',
-          deployment_modes: {
-            default: {
-              enabled: true,
-            },
-            agentless: {
-              enabled: true,
-            },
-          },
-        },
-        {
-          name: 'not-cspm',
-          title: 'Template 2',
-          description: '',
-          deployment_modes: {
-            default: {
-              enabled: true,
-            },
-          },
-        },
-      ] as RegistryPolicyTemplate[],
-    } as PackageInfo;
+    // const packageInfoWithoutGlobalDataTags = {
+    //   policy_templates: [
+    //     {
+    //       name: 'cspm',
+    //       title: 'Template 1',
+    //       description: '',
+    //       deployment_modes: {
+    //         default: {
+    //           enabled: true,
+    //         },
+    //         agentless: {
+    //           enabled: true,
+    //         },
+    //       },
+    //     },
+    //     {
+    //       name: 'not-cspm',
+    //       title: 'Template 2',
+    //       description: '',
+    //       deployment_modes: {
+    //         default: {
+    //           enabled: true,
+    //         },
+    //       },
+    //     },
+    //   ] as RegistryPolicyTemplate[],
+    // } as PackageInfo;
 
     const { result } = renderHook(() =>
       useSetupTechnology({
@@ -1191,7 +1239,9 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoWithoutGlobalDataTags,
+        packageInfo: createPackageInfoMock({
+          agentless: { withGlobalDataTags: false, withResources: false },
+        }),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1233,33 +1283,33 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    const packageInfoWithoutGlobalDataTags = {
-      policy_templates: [
-        {
-          name: 'cspm',
-          title: 'Template 1',
-          description: '',
-          deployment_modes: {
-            default: {
-              enabled: true,
-            },
-            agentless: {
-              enabled: true,
-            },
-          },
-        },
-        {
-          name: 'not-cspm',
-          title: 'Template 2',
-          description: '',
-          deployment_modes: {
-            default: {
-              enabled: true,
-            },
-          },
-        },
-      ] as RegistryPolicyTemplate[],
-    } as PackageInfo;
+    // const packageInfoWithoutGlobalDataTags = {
+    //   policy_templates: [
+    //     {
+    //       name: 'cspm',
+    //       title: 'Template 1',
+    //       description: '',
+    //       deployment_modes: {
+    //         default: {
+    //           enabled: true,
+    //         },
+    //         agentless: {
+    //           enabled: true,
+    //         },
+    //       },
+    //     },
+    //     {
+    //       name: 'not-cspm',
+    //       title: 'Template 2',
+    //       description: '',
+    //       deployment_modes: {
+    //         default: {
+    //           enabled: true,
+    //         },
+    //       },
+    //     },
+    //   ] as RegistryPolicyTemplate[],
+    // } as PackageInfo;
 
     const { result } = renderHook(() =>
       useSetupTechnology({
@@ -1267,7 +1317,9 @@ describe('useSetupTechnology', () => {
         newAgentPolicy: newAgentPolicyMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
-        packageInfo: packageInfoWithoutGlobalDataTags,
+        packageInfo: createPackageInfoMock({
+          agentless: { withGlobalDataTags: false, withResources: false },
+        }),
         updatePackagePolicy: updatePackagePolicyMock,
       })
     );
@@ -1355,6 +1407,8 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
+
+    const packageInfoMock = createPackageInfoMock();
 
     const { result } = renderHook(() =>
       useSetupTechnology({
