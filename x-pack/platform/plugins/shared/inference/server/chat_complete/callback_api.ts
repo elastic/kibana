@@ -37,14 +37,21 @@ interface CreateChatCompleteApiOptions {
   logger: Logger;
 }
 
+type CreateChatCompleteApiOptionsKey =
+  | 'connectorId'
+  | 'abortSignal'
+  | 'stream'
+  | 'retryConfiguration'
+  | 'maxRetries';
+
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions<ToolOptions, boolean>,
-  'connectorId' | 'abortSignal' | 'stream'
+  CreateChatCompleteApiOptionsKey
 >;
 
 type ChatCompleteApiWithCallbackCallback = (
   connector: InferenceExecutor
-) => Omit<ChatCompleteOptions<ToolOptions, boolean>, 'connectorId' | 'abortSignal' | 'stream'>;
+) => Omit<ChatCompleteOptions<ToolOptions, boolean>, CreateChatCompleteApiOptionsKey>;
 
 type ChatCompleteApiWithCallback = (
   options: ChatCompleteApiWithCallbackInitOptions,
@@ -61,95 +68,97 @@ export function createChatCompleteCallbackApi({
   logger,
 }: CreateChatCompleteApiOptions) {
   return (
-    { connectorId, abortSignal, stream }: ChatCompleteApiWithCallbackInitOptions,
+    {
+      connectorId,
+      abortSignal,
+      stream,
+      maxRetries = 3,
+      retryConfiguration = { retryOn: 'all' },
+    }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
-    const inference$ = defer(() =>
-      from(getInferenceExecutor({ connectorId, request, actions }))
-    ).pipe(
-      switchMap((executor) => {
-        const {
-          system,
-          messages: givenMessages,
-          functionCalling,
-          maxRetries = 3,
-          metadata,
-          modelName,
-          retryConfiguration = {
-            retryOn: 'all',
-          },
-          temperature,
-          toolChoice,
-          tools,
-        } = callback(executor);
-
-        const messages = givenMessages.map((message) => {
-          // remove empty toolCalls array, spec doesn't like it
-          if (
-            message.role === MessageRole.Assistant &&
-            message.toolCalls !== undefined &&
-            message.toolCalls.length === 0
-          ) {
-            return omit(message, 'toolCalls');
-          }
-          return message;
-        });
-
-        const connector = executor.getConnector();
-        const connectorType = connector.type;
-        const inferenceAdapter = getInferenceAdapter(connectorType);
-
-        if (!inferenceAdapter) {
-          return throwError(() =>
-            createInferenceRequestError(`Adapter for type ${connectorType} not implemented`, 400)
-          );
-        }
-
-        return withChatCompleteSpan(
-          {
+    const inference$ = defer(() => from(getInferenceExecutor({ connectorId, request, actions })))
+      .pipe(
+        switchMap((executor) => {
+          const {
             system,
-            messages,
-            tools,
+            messages: givenMessages,
+            functionCalling,
+            metadata,
+            modelName,
+            temperature,
             toolChoice,
-            model: {
-              family: getConnectorFamily(connector),
-              provider: getConnectorProvider(connector),
-            },
-            ...metadata?.attributes,
-          },
-          () => {
-            return inferenceAdapter
-              .chatComplete({
-                system,
-                executor,
-                messages,
-                toolChoice,
-                tools,
-                temperature,
-                logger,
-                functionCalling,
-                modelName,
-                abortSignal,
-                metadata,
-              })
-              .pipe(
-                chunksIntoMessage({
-                  toolOptions: { toolChoice, tools },
-                  logger,
-                })
-              );
+            tools,
+          } = callback(executor);
+
+          const messages = givenMessages.map((message) => {
+            // remove empty toolCalls array, spec doesn't like it
+            if (
+              message.role === MessageRole.Assistant &&
+              message.toolCalls !== undefined &&
+              message.toolCalls.length === 0
+            ) {
+              return omit(message, 'toolCalls');
+            }
+            return message;
+          });
+
+          const connector = executor.getConnector();
+          const connectorType = connector.type;
+          const inferenceAdapter = getInferenceAdapter(connectorType);
+
+          if (!inferenceAdapter) {
+            return throwError(() =>
+              createInferenceRequestError(`Adapter for type ${connectorType} not implemented`, 400)
+            );
           }
-        ).pipe(
-          retryWithExponentialBackoff({
-            maxRetry: maxRetries,
-            backoffMultiplier: retryConfiguration.backoffMultiplier,
-            initialDelay: retryConfiguration.initialDelay,
-            errorFilter: getRetryFilter(retryConfiguration.retryOn),
-          }),
-          abortSignal ? handleCancellation(abortSignal) : identity
-        );
-      })
-    );
+
+          return withChatCompleteSpan(
+            {
+              system,
+              messages,
+              tools,
+              toolChoice,
+              model: {
+                family: getConnectorFamily(connector),
+                provider: getConnectorProvider(connector),
+              },
+              ...metadata?.attributes,
+            },
+            () => {
+              return inferenceAdapter
+                .chatComplete({
+                  system,
+                  executor,
+                  messages,
+                  toolChoice,
+                  tools,
+                  temperature,
+                  logger,
+                  functionCalling,
+                  modelName,
+                  abortSignal,
+                  metadata,
+                })
+                .pipe(
+                  chunksIntoMessage({
+                    toolOptions: { toolChoice, tools },
+                    logger,
+                  })
+                );
+            }
+          );
+        })
+      )
+      .pipe(
+        retryWithExponentialBackoff({
+          maxRetry: maxRetries,
+          backoffMultiplier: retryConfiguration.backoffMultiplier,
+          initialDelay: retryConfiguration.initialDelay,
+          errorFilter: getRetryFilter(retryConfiguration.retryOn),
+        }),
+        abortSignal ? handleCancellation(abortSignal) : identity
+      );
 
     if (stream) {
       return inference$.pipe(share());

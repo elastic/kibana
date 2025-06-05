@@ -21,21 +21,24 @@ export function processVertexStream() {
       function handleNext(value: GenerateContentResponseChunk) {
         const finishReason = value.candidates?.[0].finishReason as string | undefined;
 
-        // 'usageMetadata' can be present as an empty object on chunks
-        // only the last chunk will have its fields populated
-        if (value.usageMetadata?.totalTokenCount) {
-          subscriber.next({
-            type: ChatCompletionEventType.ChatCompletionTokenCount,
-            tokens: {
-              prompt: value.usageMetadata.promptTokenCount,
-              completion: value.usageMetadata.candidatesTokenCount,
-              cached: value.usageMetadata.cachedContentTokenCount,
-              total: value.usageMetadata.totalTokenCount,
-            },
-          });
+        function emitTokenCountIfApplicable() {
+          // 'usageMetadata' can be present as an empty object on chunks
+          // only the last chunk will have its fields populated
+          if (value.usageMetadata?.totalTokenCount) {
+            subscriber.next({
+              type: ChatCompletionEventType.ChatCompletionTokenCount,
+              tokens: {
+                prompt: value.usageMetadata.promptTokenCount,
+                completion: value.usageMetadata.candidatesTokenCount,
+                cached: value.usageMetadata.cachedContentTokenCount,
+                total: value.usageMetadata.totalTokenCount,
+              },
+            });
+          }
         }
 
         if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_TOOL_CALL') {
+          emitTokenCountIfApplicable();
           subscriber.error(
             createToolValidationError(finishReason, {
               errorsText: value.candidates?.[0].finishMessage,
@@ -64,6 +67,8 @@ export function processVertexStream() {
               : [],
           });
         }
+
+        emitTokenCountIfApplicable();
       }
 
       source.subscribe({

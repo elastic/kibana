@@ -16,8 +16,6 @@ import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
-
-import type { GenerationConfig } from '@google/generative-ai';
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import {
   RunActionParamsSchema,
@@ -304,7 +302,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             temperature,
             toolConfig,
             systemInstruction,
-            generationConfig,
           })
         ),
         model,
@@ -339,7 +336,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             messages,
             temperature,
             systemInstruction,
-            generationConfig,
           }),
           tools,
         }),
@@ -374,7 +370,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       tools,
       toolConfig,
-      generationConfig,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
@@ -387,7 +382,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             temperature,
             toolConfig,
             systemInstruction,
-            generationConfig,
           }),
           tools,
         }),
@@ -408,25 +402,18 @@ const formatGeminiPayload = ({
   systemInstruction,
   temperature,
   toolConfig,
-  generationConfig,
 }: {
   maxOutputTokens?: number;
   messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
   systemInstruction?: string;
   toolConfig?: InvokeAIActionParams['toolConfig'];
   temperature: number;
-  generationConfig?: GenerationConfig & {
-    thinkingConfig?: {
-      thinkingBudget?: number;
-    };
-  };
 }): Payload => {
   const payload: Payload = {
     contents: [],
     generation_config: {
       temperature,
       maxOutputTokens,
-      ...generationConfig,
     },
     ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     ...(toolConfig

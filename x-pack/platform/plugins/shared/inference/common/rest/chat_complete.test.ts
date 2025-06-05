@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ChatCompleteAPI, MessageRole, ChatCompleteOptions } from '@kbn/inference-common';
 import { createChatCompleteRestApi } from './chat_complete';
+import { getMockHttpFetchStreamingResponse } from '../utils/mock_http_fetch_streaming';
 
 describe('createChatCompleteRestApi', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -19,7 +20,7 @@ describe('createChatCompleteRestApi', () => {
     chatComplete = createChatCompleteRestApi({ fetch: http.fetch });
   });
 
-  it('calls http.post with the right parameters when stream is not true', async () => {
+  it('calls http.fetch with the right parameters when stream is not true', async () => {
     const params = {
       connectorId: 'my-connector',
       functionCalling: 'native',
@@ -27,21 +28,23 @@ describe('createChatCompleteRestApi', () => {
       temperature: 0.5,
       modelName: 'gpt-4o',
       messages: [{ role: MessageRole.User, content: 'question' }],
-    };
-    await chatComplete(params as ChatCompleteOptions);
+    } satisfies ChatCompleteOptions;
 
-    expect(http.post).toHaveBeenCalledTimes(1);
-    expect(http.post).toHaveBeenCalledWith('/internal/inference/chat_complete', {
+    http.fetch.mockResolvedValue({});
+
+    await chatComplete(params);
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+    expect(http.fetch).toHaveBeenCalledWith('/internal/inference/chat_complete', {
+      method: 'POST',
       body: expect.any(String),
     });
-    const callBody = http.post.mock.lastCall!;
+    const callBody = http.fetch.mock.lastCall!;
 
     expect(JSON.parse((callBody as any[])[1].body as string)).toEqual(params);
   });
 
-  it('calls http.post with the right parameters when stream is true', async () => {
-    http.post.mockResolvedValue({});
-
+  it('calls http.fetch with the right parameters when stream is true', async () => {
     const params = {
       connectorId: 'my-connector',
       functionCalling: 'native',
@@ -52,15 +55,18 @@ describe('createChatCompleteRestApi', () => {
       messages: [{ role: MessageRole.User, content: 'question' }],
     };
 
+    http.fetch.mockResolvedValue(getMockHttpFetchStreamingResponse());
+
     await chatComplete(params as ChatCompleteOptions);
 
-    expect(http.post).toHaveBeenCalledTimes(1);
-    expect(http.post).toHaveBeenCalledWith('/internal/inference/chat_complete/stream', {
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+    expect(http.fetch).toHaveBeenCalledWith('/internal/inference/chat_complete/stream', {
+      method: 'POST',
       asResponse: true,
       rawResponse: true,
       body: expect.any(String),
     });
-    const callBody = http.post.mock.lastCall!;
+    const callBody = http.fetch.mock.lastCall!;
 
     expect(JSON.parse((callBody as any[])[1].body as string)).toEqual(omit(params, 'stream'));
   });

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-describe('createBoundPromptApi', () => {});
+describe('createBoundPromptApi', () => {
+  it('dummy test', () => {});
+});

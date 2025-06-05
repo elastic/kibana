@@ -14,12 +14,14 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
   const callbackApi = createChatCompleteCallbackApi({ request, actions, logger });
 
   return (options: ChatCompleteOptions) => {
-    const { connectorId, stream, abortSignal, ...rest } = options;
+    const { connectorId, stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
     return callbackApi(
       {
         connectorId,
         stream,
         abortSignal,
+        retryConfiguration,
+        maxRetries,
       },
       () => {
         return rest;
