@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createInternalError } from './errors';
+import { createInternalError } from '../base/errors';
 
 /**
  * Represents a plain toolId, without source information attached to it.
@@ -157,7 +157,7 @@ export interface ToolDescriptor {
   /**
    * A unique id for this tool.
    */
-  id: string;
+  id: PlainIdToolIdentifier;
   /**
    * Name of the tool, which will be exposed to the LLM.
    */
@@ -194,3 +194,11 @@ export interface ToolDescriptorMeta {
    */
   tags: string[];
 }
+
+export const toolDescriptorToIdentifier = (tool: ToolDescriptor): StructuredToolIdentifier => {
+  return {
+    toolId: tool.id,
+    sourceType: tool.meta.sourceType,
+    sourceId: tool.meta.sourceId,
+  };
+};

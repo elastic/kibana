@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptor, ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
-import type { RunEventEmitter } from './events';
+import type { ToolEventEmitter } from './events';
 
 /**
  * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
@@ -108,7 +108,7 @@ export interface ToolHandlerContext {
   /**
    * Event emitter that can be used to emits custom events
    */
-  events: RunEventEmitter;
+  events: ToolEventEmitter;
 }
 
 /**

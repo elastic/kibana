@@ -8,11 +8,7 @@
 /**
  * Base type for all onechat events
  */
-export interface OnechatEvent<
-  TEventType extends string,
-  TData extends Record<string, any>,
-  TMeta extends Record<string, any>
-> {
+export interface OnechatEvent<TEventType extends string, TData extends Record<string, any>> {
   /**
    * Unique type identifier for the event.
    */
@@ -21,8 +17,4 @@ export interface OnechatEvent<
    * Data bound to this event.
    */
   data: TData;
-  /**
-   * Metadata bound to this event.
-   */
-  meta: TMeta;
 }
