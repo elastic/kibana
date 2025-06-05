@@ -119,17 +119,11 @@ describe('KnowledgeBaseTab', () => {
       });
     });
 
-    it('should show a warning callout', () => {
-      const { getByTestId } = render(<KnowledgeBaseTab />);
-      const reindexingCallout = getByTestId('knowledgeBaseReindexingCallOut');
-
-      expect(reindexingCallout).toBeInTheDocument();
-    });
-
-    it('should hide warning callout after re-indexing is complete', async () => {
+    it('should show a warning callout while re-indexing is in progress', async () => {
       const { getByTestId, queryByTestId, rerender } = render(<KnowledgeBaseTab />);
       expect(getByTestId('knowledgeBaseReindexingCallOut')).toBeInTheDocument();
 
+      // Re-indexing completed
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
@@ -145,6 +139,8 @@ describe('KnowledgeBaseTab', () => {
       await act(async () => {
         rerender(<KnowledgeBaseTab />);
       });
+
+      // Callout is no longer shown
       expect(queryByTestId('knowledgeBaseReindexingCallOut')).not.toBeInTheDocument();
     });
   });
