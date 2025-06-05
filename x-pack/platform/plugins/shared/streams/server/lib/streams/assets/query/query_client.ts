@@ -222,98 +222,20 @@ export class QueryClient {
 
     await Promise.all([
       ...queriesToCreate.map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
         return rulesClient
-          .create<EsqlRuleParams>({
-            data: {
-              name: query.query.title,
-              consumer: 'streams',
-              alertTypeId: 'streams.rules.esql',
-              actions: [],
-              params: {
-                timestampField: '@timestamp',
-                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-                  query.query.kql.query
-                )}\")`,
-              },
-              enabled: true,
-              tags: ['streams'],
-              schedule: {
-                interval: '1m',
-              },
-            },
-            options: {
-              id: ruleId,
-            },
-          })
+          .create<EsqlRuleParams>(this.toCreateRuleParams(query, stream))
           .catch((error) => {
             if (isBoom(error) && error.output.statusCode === 409) {
-              // If the rule already exists, we should update it instead
-              return rulesClient.update<EsqlRuleParams>({
-                id: ruleId,
-                data: {
-                  name: query.query.title,
-                  actions: [],
-                  params: {
-                    timestampField: '@timestamp',
-                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-                      query.query.kql.query
-                    )}\")`,
-                  },
-                  tags: ['streams'],
-                  schedule: {
-                    interval: '1m',
-                  },
-                },
-              });
+              return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
             }
           });
       }),
       ...queriesToUpdate.map((query) => {
-        const ruleId = getRuleIdFromQueryLink(query);
         return rulesClient
-          .update<EsqlRuleParams>({
-            id: ruleId,
-            data: {
-              name: query.query.title,
-              actions: [],
-              params: {
-                timestampField: '@timestamp',
-                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-                  query.query.kql.query
-                )}\")`,
-              },
-              tags: ['streams'],
-              schedule: {
-                interval: '1m',
-              },
-            },
-          })
+          .update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream))
           .catch((error) => {
             if (isBoom(error) && error.output.statusCode === 404) {
-              // If the rule does not exist, we should create it instead
-              return rulesClient.create<EsqlRuleParams>({
-                data: {
-                  name: query.query.title,
-                  consumer: 'streams',
-                  alertTypeId: 'streams.rules.esql',
-                  actions: [],
-                  params: {
-                    timestampField: '@timestamp',
-                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-                      query.query.kql.query
-                    )}\")`,
-                  },
-                  enabled: true,
-                  tags: ['streams'],
-                  schedule: {
-                    interval: '1m',
-                  },
-                },
-                options: {
-                  id: ruleId,
-                },
-              });
+              return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
             }
           });
       }),
@@ -334,5 +256,52 @@ export class QueryClient {
         }
         throw error;
       });
+  }
+
+  private toCreateRuleParams(query: QueryLink, stream: string) {
+    const ruleId = getRuleIdFromQueryLink(query);
+    return {
+      data: {
+        name: query.query.title,
+        consumer: 'streams',
+        alertTypeId: 'streams.rules.esql',
+        actions: [],
+        params: {
+          timestampField: '@timestamp',
+          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
+            query.query.kql.query
+          )}\")`,
+        },
+        enabled: true,
+        tags: ['streams'],
+        schedule: {
+          interval: '1m',
+        },
+      },
+      options: {
+        id: ruleId,
+      },
+    };
+  }
+
+  private toUpdateRuleParams(query: QueryLink, stream: string) {
+    const ruleId = getRuleIdFromQueryLink(query);
+    return {
+      id: ruleId,
+      data: {
+        name: query.query.title,
+        actions: [],
+        params: {
+          timestampField: '@timestamp',
+          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
+            query.query.kql.query
+          )}\")`,
+        },
+        tags: ['streams'],
+        schedule: {
+          interval: '1m',
+        },
+      },
+    };
   }
 }
