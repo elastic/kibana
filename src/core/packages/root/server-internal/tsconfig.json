@@ -79,6 +79,9 @@
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-http-rate-limiter-internal",
     "@kbn/projects-solutions-groups",
+    "@kbn/core-di-internal",
+    "@kbn/core-di-mocks",
+    "@kbn/core-di-server-internal",
   ],
   "exclude": [
     "target/**/*",

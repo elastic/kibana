@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Container } from 'inversify';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
@@ -15,7 +16,14 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
-import { read } from './plugin_reader';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { toContainerModule } from '@kbn/core-di-internal';
+import {
+  CoreSetup as CoreSetupService,
+  CoreStart as CoreStartService,
+  PluginInitializer as PluginInitializerService,
+} from '@kbn/core-di-browser';
+import { type PluginDefinition, read } from './plugin_reader';
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -34,7 +42,9 @@ export class PluginWrapper<
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
   public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
+  private definition?: PluginDefinition;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private container?: Container;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
@@ -59,8 +69,20 @@ export class PluginWrapper<
    * is the contract returned by the dependency's `setup` function.
    */
   public setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup {
+    this.definition = read(this.name);
     this.instance = this.createPluginInstance();
-    return this.instance.setup(setupContext, plugins);
+
+    if (this.definition.module) {
+      this.container = setupContext.injection.getContainer();
+      this.container.loadSync(this.definition.module);
+      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
+      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
+      this.container.loadSync(toContainerModule(plugins, PluginSetup));
+    }
+
+    return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
+      Boolean
+    )!;
   }
 
   /**
@@ -70,39 +92,48 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public start(startContext: CoreStart, plugins: TPluginsStart) {
-    if (this.instance === undefined) {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart {
+    if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins, startContract]);
-    return startContract;
+    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
+    this.container?.loadSync(toContainerModule(plugins, PluginStart));
+    const contract = [
+      this.instance?.start(startContext, plugins),
+      this.container?.get<TStart>(Start),
+    ].find(Boolean)!;
+
+    this.startDependencies$.next([startContext, plugins, contract]);
+
+    return contract;
   }
 
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
-  public stop() {
-    if (this.instance === undefined) {
+  public async stop() {
+    if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance.stop === 'function') {
-      this.instance.stop();
-    }
-
+    await this.instance?.stop?.();
+    await this.container?.unbindAll();
     this.instance = undefined;
+    this.container = undefined;
   }
 
   private createPluginInstance() {
-    const initializer = read(this.name) as PluginInitializer<
+    if (!this.definition?.plugin) {
+      return;
+    }
+
+    const initializer = this.definition.plugin as PluginInitializer<
       TSetup,
       TStart,
       TPluginsSetup,
       TPluginsStart
     >;
-
     const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
