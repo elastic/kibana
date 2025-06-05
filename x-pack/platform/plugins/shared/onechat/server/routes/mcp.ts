@@ -9,166 +9,193 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMCPTransport } from './kibana_mcp_transport';
+import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
+
+const TECHNICAL_PREVIEW_WARNING =
+  'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+
+const MCP_SERVER_NAME = 'elastic-mcp-server';
+const MCP_SERVER_VERSION = '0.0.1';
+const MCP_SERVER_PATH = '/api/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
-    {
-      path: '/api/onechat/mcp',
+  router.versioned
+    .post({
+      path: MCP_SERVER_PATH,
       security: {
         authz: {
           enabled: false,
           reason: 'todo',
         },
       },
+      access: 'public',
+      summary: 'MCP server',
+      description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        summary: `1Chat MCP server`,
-        access: 'public',
-        description: '1Chat MCP server',
-        tags: ['1chat', 'mcp'],
+        tags: ['mcp'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
         },
       },
-      validate: { body: schema.object({}, { unknowns: 'allow' }) },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      let transport: KibanaMCPTransport | undefined;
-      let server: McpServer | undefined;
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: schema.object({}, { unknowns: 'allow' }) },
+        },
+      },
+      wrapHandler(async (_, request, response) => {
+        let transport: KibanaMcpHttpTransport | undefined;
+        let server: McpServer | undefined;
 
-      try {
-        transport = new KibanaMCPTransport({ sessionIdGenerator: undefined, logger });
-
-        server = new McpServer({
-          name: '1chat-mcp-server',
-          version: '0.0.1',
-        });
-
-        const { tools: toolService } = getInternalServices();
-
-        const registry = toolService.registry.asScopedPublicRegistry({ request });
-        const tools = await registry.list({});
-
-        for (const tool of tools) {
-          server.tool(
-            tool.id,
-            tool.description,
-            tool.schema.shape,
-            async (args: { [x: string]: any }) => {
-              const toolResult = await tool.execute({ toolParams: args });
-              return {
-                content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
-              };
-            }
-          );
-        }
-
-        request.events.aborted$.subscribe(() => {
-          transport?.close().catch((error) => {
-            logger.error('MCP: Error closing transport', { error });
-          });
-          server?.close();
-        });
-
-        await server.connect(transport);
-
-        return await transport.handleRequest(request, response);
-      } catch (error) {
-        logger.error('MCP: Error handling request', { error });
         try {
-          await transport?.close();
-        } catch (closeError) {
-          logger.error('MCP: Error closing transport during error handling', { error: closeError });
-        }
-        if (server) {
-          try {
-            server.close();
-          } catch (closeError) {
-            logger.error('MCP: Error closing server during error handling', { error: closeError });
-          }
-        }
+          transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
 
-        logger.error('MCP: Error handling request', { error });
+          // Instantiate new MCP server upon every request, no session persistence
+          server = new McpServer({
+            name: MCP_SERVER_NAME,
+            version: MCP_SERVER_VERSION,
+          });
+
+          const { tools: toolService } = getInternalServices();
+
+          const registry = toolService.registry.asScopedPublicRegistry({ request });
+          const tools = await registry.list({});
+
+          // Expose tools scoped to the request
+          for (const tool of tools) {
+            server.tool(
+              tool.id,
+              tool.description,
+              tool.schema.shape,
+              async (args: { [x: string]: any }) => {
+                const toolResult = await tool.execute({ toolParams: args });
+                return {
+                  content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
+                };
+              }
+            );
+          }
+
+          request.events.aborted$.subscribe(() => {
+            transport?.close().catch((error) => {
+              logger.error('MCP Server: Error closing transport', { error });
+            });
+            server?.close();
+          });
+
+          await server.connect(transport);
+
+          return await transport.handleRequest(request, response);
+        } catch (error) {
+          logger.error('MCP Server: Error handling request', { error });
+          try {
+            await transport?.close();
+          } catch (closeError) {
+            logger.error('MCP Server: Error closing transport during error handling', {
+              error: closeError,
+            });
+          }
+          if (server) {
+            try {
+              server.close();
+            } catch (closeError) {
+              logger.error('MCP Server: Error closing server during error handling', {
+                error: closeError,
+              });
+            }
+          }
+
+          logger.error('MCP Server: Error handling request', { error });
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Internal server error: ${error}`,
+              attributes: {
+                code: -32603,
+              },
+            },
+          });
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: MCP_SERVER_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'todo',
+        },
+      },
+      access: 'public',
+      summary: 'MCP server',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['mcp'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      wrapHandler(async (_, __, response) => {
         return response.customError({
-          statusCode: 500,
+          statusCode: 405,
           body: {
-            message: `Internal server error: ${error}`,
+            message: 'Method not allowed',
             attributes: {
-              code: -32603,
+              code: -32000,
             },
           },
         });
-      }
-    })
-  );
+      })
+    );
 
-  router.get(
-    {
-      path: '/api/onechat/mcp',
+  router.versioned
+    .delete({
+      path: MCP_SERVER_PATH,
       security: {
         authz: {
           enabled: false,
           reason: 'todo',
         },
       },
+      access: 'public',
+      summary: 'MCP server',
+      description: TECHNICAL_PREVIEW_WARNING,
       options: {
-        summary: `1Chat MCP server`,
-        access: 'public',
-        description: '1Chat MCP server',
-        tags: ['1chat', 'mcp'],
-        availability: {
-          stability: 'experimental',
-        },
-      },
-      validate: false,
-    },
-    wrapHandler(async (_, request, response) => {
-      return response.customError({
-        statusCode: 405,
-        body: {
-          message: 'Method not allowed',
-          attributes: {
-            code: -32000,
-          },
-        },
-      });
-    })
-  );
-
-  router.delete(
-    {
-      path: '/api/onechat/mcp',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'todo',
-        },
-      },
-      options: {
-        summary: `1Chat MCP server`,
-        access: 'public',
-        description: '1Chat MCP server',
-        tags: ['1chat', 'mcp'],
+        tags: ['mcp'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
         },
       },
-      validate: false,
-    },
-    wrapHandler(async (_, request, response) => {
-      return response.customError({
-        statusCode: 405,
-        body: {
-          message: 'Method not allowed',
-          attributes: {
-            code: -32000,
-          },
-        },
-      });
     })
-  );
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      wrapHandler(async (_, request, response) => {
+        return response.customError({
+          statusCode: 405,
+          body: {
+            message: 'Method not allowed',
+            attributes: {
+              code: -32000,
+            },
+          },
+        });
+      })
+    );
 }
