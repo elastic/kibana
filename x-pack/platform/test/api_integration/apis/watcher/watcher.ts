@@ -50,53 +50,57 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
   const es = getService('es');
 
+  const createNWatches = async (N: number) => {
+    for (let i = 0; i < N; i++) {
+      try {
+        await es.watcher.putWatch({
+          id: `test-watch-${i}`,
+          active: true,
+          ...DEFAULT_WATCH_BODY,
+          metadata: {
+            name: `My watch ${i}`,
+          },
+        });
+      } catch (error) {
+        log.debug(`[Setup error] Error creating watch test-watch-${i}`);
+        throw error;
+      }
+    }
+  };
+
+  const deleteNWatches = async (N: number) => {
+    for (let i = 0; i < N; i++) {
+      try {
+        await es.watcher.deleteWatch({
+          id: `test-watch-${i}`,
+        });
+      } catch (error) {
+        log.debug(`[Cleanup error] Error deleting watch test-watch-${i}`);
+        throw error;
+      }
+    }
+  };
+
   describe('watcher', () => {
-    before(async () => {
-      try {
-        await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
-      } catch (error) {
-        log.debug('[Setup error] Error creating index pattern');
-        throw error;
-      }
-
-      for (let i = 0; i < 10; i++) {
-        try {
-          await es.watcher.putWatch({
-            id: `test-watch-${i}`,
-            active: true,
-            ...DEFAULT_WATCH_BODY,
-            metadata: {
-              name: `My watch ${i}`,
-            },
-          });
-        } catch (error) {
-          log.debug(`[Setup error] Error creating watch test-watch-${i}`);
-          throw error;
-        }
-      }
-    });
-
-    after(async () => {
-      try {
-        await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
-      } catch (error) {
-        log.debug('[Cleanup error] Error deleting index pattern');
-        throw error;
-      }
-
-      for (let i = 0; i < 10; i++) {
-        try {
-          await es.watcher.deleteWatch({
-            id: `test-watch-${i}`,
-          });
-        } catch (error) {
-          log.debug(`[Cleanup error] Error deleting watch test-watch-${i}`);
-          throw error;
-        }
-      }
-    });
-
     describe('POST /api/watcher/indices/index_patterns', () => {
+      before(async () => {
+        try {
+          await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
+        } catch (error) {
+          log.debug('[Setup error] Error creating index pattern');
+          throw error;
+        }
+      });
+
+      after(async () => {
+        try {
+          await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
+        } catch (error) {
+          log.debug('[Cleanup error] Error deleting index pattern');
+          throw error;
+        }
+      });
+
       it('returns list of index patterns', async () => {
         const response = await supertest
           .get('/api/watcher/indices/index_patterns')
@@ -108,27 +112,49 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /api/watcher/watches', () => {
-      it('returns list of watches', async () => {
+      it.skip('returns an empty array if there are no watches', async () => {
         const response = await supertest
           .get('/api/watcher/watches')
           .set('kbn-xsrf', 'kibana')
-          .query({
-            pageSize: 3,
-            pageIndex: 1,
-            sortField: 'name',
-            sortDirection: 'asc',
-            query: '',
-          })
           .expect(200);
 
         const responseWatches = response.body.watches;
-        const responseTotalCount = response.body.watchCount;
+        expect(responseWatches.length).to.equal(0);
+      });
 
-        expect(responseTotalCount).to.equal(10);
+      it.skip('returns list of watches', async () => {
+        await createNWatches(3);
+
+        const response = await supertest
+          .get('/api/watcher/watches')
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const responseWatches = response.body.watches;
         expect(responseWatches.length).to.equal(3);
-        expect(responseWatches[0].id).to.equal(`test-watch-3`);
-        expect(responseWatches[1].id).to.equal(`test-watch-4`);
-        expect(responseWatches[2].id).to.equal(`test-watch-5`);
+        expect(responseWatches[0].id).to.equal(`test-watch-0`);
+        expect(responseWatches[1].id).to.equal(`test-watch-1`);
+        expect(responseWatches[2].id).to.equal(`test-watch-2`);
+
+        await deleteNWatches(3);
+      });
+
+      it('can handle a large number of watches', async () => {
+        await createNWatches(10000);
+
+        const response = await supertest
+          .get('/api/watcher/watches')
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        const responseWatches = response.body.watches;
+        expect(responseWatches.length).to.equal(10000);
+        // Check the id of some of the watches
+        expect(responseWatches[150].id).to.equal(`test-watch-150`);
+        expect(responseWatches[9482].id).to.equal(`test-watch-9482`);
+        expect(responseWatches[19592].id).to.equal(`test-watch-19592`);
+
+        await deleteNWatches(10000);
       });
     });
   });

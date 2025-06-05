@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export type {
-  ActionStatusModelEs,
-  ServerActionStatusModel,
-  ClientActionStatusModel,
-  WatchStatusModelEs,
-  ServerWatchStatusModel,
-  ClientWatchStatusModel,
-} from './status_types';
+export const QUERY_WATCHES_PAGINATION: {
+  PAGE_SIZE: number;
+} = {
+  // How many watches to return per response
+  PAGE_SIZE: 500,
+};

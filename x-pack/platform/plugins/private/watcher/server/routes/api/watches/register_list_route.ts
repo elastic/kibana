@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { WatcherQueryWatchesRequest } from '@elastic/elasticsearch/lib/api/types';
-import { RouteDependencies } from '../../../types';
+import { fetchWatchesWithPagination } from '../../../lib/fetch_watches_with_pagination';
 import { Watch } from '../../../models/watch';
-
-const querySchema = schema.object({
-  pageSize: schema.number(),
-  pageIndex: schema.number(),
-  sortField: schema.maybe(schema.string()),
-  sortDirection: schema.maybe(schema.string()),
-  query: schema.string(),
-});
+import { RouteDependencies } from '../../../types';
+import { QUERY_WATCHES_PAGINATION } from '../../../../common/constants';
 
 export function registerListRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -28,52 +20,16 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
           reason: 'Relies on es client for authorization',
         },
       },
-      validate: {
-        query: querySchema,
-      },
+      validate: false,
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const { pageSize, pageIndex, sortField, sortDirection, query } = request.query;
         const esClient = (await ctx.core).elasticsearch.client;
-        const body: WatcherQueryWatchesRequest = {
-          from: pageIndex * pageSize,
-          size: pageSize,
-        };
-        if (sortField && sortDirection) {
-          const order: 'asc' | 'desc' = sortDirection === 'desc' ? 'desc' : 'asc';
-          // The Query Watch API only allows sorting by metadata.* fields
-          body.sort = [
-            {
-              [`metadata.${sortField}.keyword`]: {
-                order,
-              },
-            },
-          ];
-        }
-        if (query) {
-          // The Query Watch API only allows searching by _id or by metadata.* fields
-          body.query = {
-            bool: {
-              should: [
-                {
-                  wildcard: {
-                    ['metadata.name.keyword']: `*${query}*`,
-                  },
-                },
-                {
-                  match: {
-                    _id: {
-                      query,
-                    },
-                  },
-                },
-              ],
-            },
-          };
-        }
-        const { watches: hits, count } = await esClient.asCurrentUser.watcher.queryWatches(body);
-        const watches = hits.map(({ _id, watch, status }) => {
+        const responseWatches = await fetchWatchesWithPagination(
+          esClient,
+          QUERY_WATCHES_PAGINATION.PAGE_SIZE
+        );
+        const watches = responseWatches.map(({ _id, watch, status }) => {
           return Watch.fromUpstreamJson(
             {
               id: _id,
@@ -91,7 +47,6 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
         return response.ok({
           body: {
             watches: watches.map((watch) => watch.downstreamJson),
-            watchCount: count,
           },
         });
       } catch (e) {

@@ -11,6 +11,7 @@ export { ACTION_TYPES } from './action_types';
 export { AGG_TYPES } from './agg_types';
 export { COMPARATORS } from './comparators';
 export { ES_SCROLL_SETTINGS } from './es_scroll_settings';
+export { QUERY_WATCHES_PAGINATION } from './query_watches_pagination';
 export { INDEX_NAMES } from './index_names';
 export { LISTS } from './lists';
 export { PAGINATION } from './pagination';
