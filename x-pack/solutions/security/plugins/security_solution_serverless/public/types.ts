@@ -15,7 +15,7 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
-import type { ServerlessSecurityConfigSchema } from '../common/config';
+import type { ServerlessSecurityCommonConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -41,6 +41,6 @@ export interface SecuritySolutionServerlessPluginStartDeps {
 }
 
 export type ServerlessSecurityPublicConfig = Pick<
-  ServerlessSecurityConfigSchema,
-  'productTypes' | 'enableExperimental'
+  ServerlessSecurityCommonConfigSchema,
+  'productTypes' | 'enableExperimental' | 'inaccessibleApps'
 >;

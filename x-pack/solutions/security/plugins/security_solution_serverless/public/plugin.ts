@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { AppStatus } from '@kbn/core-application-browser';
 
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
@@ -44,18 +52,21 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
-    const { productTypes } = this.config;
+    const { productTypes, enableExperimental, inaccessibleApps } = this.config;
 
     this.experimentalFeatures = parseExperimentalConfigValue(
-      this.config.enableExperimental,
+      enableExperimental,
       securitySolution.experimentalFeatures
     ).features;
 
     securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
+
+    disableInaccessibleApps(inaccessibleApps, core);
+
     return {};
   }
 
@@ -82,3 +93,23 @@ export class SecuritySolutionServerlessPlugin
 
   public stop() {}
 }
+
+/**
+ * Disables apps that are inaccessible based on the provided configuration.
+ * It updates the app status to 'inaccessible' for those apps.
+ * The apps will still execute their lifecycle methods, but it will remain inaccessible in the UI.
+ */
+const disableInaccessibleApps = (inaccessibleApps: string[], core: CoreSetup) => {
+  if (!inaccessibleApps?.length) {
+    return;
+  }
+
+  const inaccessibleAppsSet = new Set(inaccessibleApps);
+  const appUpdater$ = new BehaviorSubject<AppUpdater>((app) => {
+    if (inaccessibleAppsSet.has(app.id)) {
+      return { status: AppStatus.inaccessible };
+    }
+  });
+
+  core.application.registerAppUpdater(appUpdater$);
+};

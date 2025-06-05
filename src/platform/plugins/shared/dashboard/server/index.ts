@@ -16,17 +16,10 @@ export const configSchema = schema.object({
    * This can be removed in 10.0. https://github.com/elastic/kibana/issues/221197
    */
   allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
-  /**
-   * This flag is used to determine if the plugin should be hidden from the UI.
-   */
-  hidden: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
-  exposeToBrowser: {
-    hidden: true,
-  },
   deprecations: ({ deprecate }) => {
     return [
       deprecate('allowByValueEmbeddables', '9.1.0', {
