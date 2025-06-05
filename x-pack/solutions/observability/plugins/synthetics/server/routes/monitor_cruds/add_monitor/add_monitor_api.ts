@@ -227,10 +227,12 @@ export class AddEditMonitorAPI {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
         .catch((error) => {
-          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`);
+          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, {
+            error,
+          });
         });
-    } catch (e) {
-      server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
+    } catch (error) {
+      server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, { error });
     }
   }
 
@@ -246,15 +248,15 @@ export class AddEditMonitorAPI {
           .then(() => {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
-          .catch((e) => {
+          .catch((error) => {
             server.logger.error(`Error while triggering test for monitor: ${configId}`, {
-              error: e,
+              error,
             });
           });
       }
-    } catch (e) {
+    } catch (error) {
       server.logger.error(`Error triggering test for getting started monitor: ${configId}`, {
-        error: e,
+        error,
       });
     }
   };
@@ -307,10 +309,10 @@ export class AddEditMonitorAPI {
           monitorIds: [newMonitorId],
         });
       }
-    } catch (e) {
+    } catch (error) {
       // ignore errors here
       server.logger.error(`Unable to revert monitor with id ${newMonitorId}`, {
-        error: e,
+        error,
       });
     }
   }
