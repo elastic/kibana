@@ -122,16 +122,7 @@ export class QueryClient {
       });
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
-    const nextQueries = [
-      ...currentQueryLinks.filter((link) => link.query.id !== query.id),
-      toQueryLink(query, stream),
-    ];
-
-    await this.syncQueries(
-      stream,
-      nextQueries.map((link) => link.query)
-    );
+    await this.bulk(stream, [{ index: query }]);
   }
 
   public async delete(stream: string, queryId: string) {
@@ -144,12 +135,7 @@ export class QueryClient {
       });
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
-    const nextQueries = currentQueryLinks.filter((link) => link.query.id !== queryId);
-    await this.syncQueries(
-      stream,
-      nextQueries.map((link) => link.query)
-    );
+    await this.bulk(stream, [{ delete: { id: queryId } }]);
   }
 
   public async bulk(
