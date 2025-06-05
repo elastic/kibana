@@ -18,6 +18,10 @@ export interface SecurityFeatureParams {
    */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
+  /**
+   * Sort of temporary solution for merging diverged ESS/serverless offering Endpoint Exception privileges,
+   * it would be best not to use it for other things.
+   */
   isServerless: boolean;
 }
 

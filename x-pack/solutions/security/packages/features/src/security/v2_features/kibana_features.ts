@@ -94,6 +94,7 @@ export const getSecurityV2BaseKibanaFeature = ({
         minimal: [
           {
             feature: SECURITY_FEATURE_ID_V3,
+            // please do not use `isServerless` for other things
             privileges: ['minimal_all', ...(isServerless ? [] : ['endpoint_exceptions_all'])],
           },
         ],
@@ -120,6 +121,7 @@ export const getSecurityV2BaseKibanaFeature = ({
         minimal: [
           {
             feature: SECURITY_FEATURE_ID_V3,
+            // please do not use `isServerless` for other things
             privileges: ['minimal_read', ...(isServerless ? [] : ['endpoint_exceptions_read'])],
           },
         ],
