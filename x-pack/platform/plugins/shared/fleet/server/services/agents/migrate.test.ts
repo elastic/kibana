@@ -88,9 +88,11 @@ describe('Agent migration', () => {
         created_at: expect.any(String),
         type: 'MIGRATE',
         policyId: options.policyId,
-        enrollment_token: options.enrollment_token,
-        target_uri: options.uri,
-        additionalSettings: options.settings,
+        data: {
+          enrollment_token: options.enrollment_token,
+          target_uri: options.uri,
+          settings: options.settings,
+        },
       });
 
       // Verify result contains the action ID from createAgentAction
@@ -111,7 +113,11 @@ describe('Agent migration', () => {
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
         expect.objectContaining({
-          additionalSettings: undefined,
+          data: {
+            enrollment_token: options.enrollment_token,
+            target_uri: options.uri,
+            settings: undefined,
+          },
         })
       );
     });

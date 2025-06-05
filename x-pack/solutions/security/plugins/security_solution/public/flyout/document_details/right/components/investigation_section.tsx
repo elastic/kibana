@@ -31,9 +31,7 @@ export const InvestigationSection = memo(() => {
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
-  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
-    'editHighlightedFieldsEnabled'
-  );
+  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled('editHighlightedFields');
 
   return (
     <ExpandableSection
