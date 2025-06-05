@@ -29,7 +29,7 @@ import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
-  PublishesSavedSearch,
+  PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableSerializedState,
@@ -73,7 +73,9 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  api: PublishesSavedSearch & PublishesWritableDataViews & Partial<PublishesWritableUnifiedSearch>;
+  api: PublishesWritableSavedSearch &
+    PublishesWritableDataViews &
+    Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
