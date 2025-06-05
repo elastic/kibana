@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import type { Tab } from '../types';
 import { useStoredIntegrationTabId } from './use_stored_state';
-import type { IntegrationTabId, Tab } from '../types';
 import { useIntegrationContext } from './integration_context';
 
 export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
 export const useSelectedTab = () => {
   const { spaceId, integrationTabs } = useIntegrationContext();
-  const [selectedId, setSelectedId] = useStoredIntegrationTabId(spaceId, integrationTabs[0].id);
+  const [selectedTabId, setSelectedTabId] = useStoredIntegrationTabId(
+    spaceId,
+    integrationTabs[0].id
+  );
 
   const integrationTabsById = useMemo(
     () => Object.fromEntries(integrationTabs.map((tab: Tab) => [tab.id, tab])),
@@ -22,15 +25,9 @@ export const useSelectedTab = () => {
   );
 
   const selectedTab = useMemo(
-    () => integrationTabsById[selectedId] ?? integrationTabs[0], // fallback to first tab if not found
-    [integrationTabs, integrationTabsById, selectedId]
+    () => integrationTabsById[selectedTabId] ?? integrationTabs[0], // fallback to first tab if not found
+    [integrationTabs, integrationTabsById, selectedTabId]
   );
 
-  const setSelectedTabId = useCallback(
-    (id: IntegrationTabId) => {
-      setSelectedId(id);
-    },
-    [setSelectedId]
-  );
   return { selectedTab, setSelectedTabId };
 };
