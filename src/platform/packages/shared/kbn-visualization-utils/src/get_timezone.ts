@@ -14,10 +14,6 @@ import type { IUiSettingsClient } from '@kbn/core/public';
  * Get timeZone from uiSettings
  */
 export function getTimeZone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimeZone = moment.tz.guess();
-    return detectedTimeZone || moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
+  const timeZone = uiSettings.get('dateFormat:tz');
+  return moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
 }

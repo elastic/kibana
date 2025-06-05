@@ -44,6 +44,34 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('FROM " /"', []);
+        await assertSuggestions('FROM "/"', []);
+      });
+
+      test('does create suggestions after a closed quote', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('FROM "lolz", /', visibleIndices);
+      });
+
+      test('doesnt suggest indices twice', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions(
+          'from index, /',
+          visibleIndices.filter((i) => i !== 'index')
+        );
+      });
+
+      test('suggests comma or pipe after complete index name', async () => {
+        const { suggest } = await setup();
+        const suggestions = (await suggest('from index/')).map((s) => s.text);
+        expect(suggestions).toContain('index, ');
+        expect(suggestions).toContain('index | ');
+
+        const suggestions2 = (await suggest('from index, "my-index[quoted]"/')).map((s) => s.text);
+
+        expect(suggestions2).toContain('"my-index[quoted]", ');
+        expect(suggestions2).toContain('"my-index[quoted]" | ');
       });
 
       test('can suggest integration data sources', async () => {
@@ -61,8 +89,16 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from /', expectedSuggestions, { callbacks: cb });
         await assertSuggestions('FROM /', expectedSuggestions, { callbacks: cb });
-        await assertSuggestions('FROM a,/', expectedSuggestions, { callbacks: cb });
-        await assertSuggestions('from a, /', expectedSuggestions, { callbacks: cb });
+        await assertSuggestions(
+          'FROM a,/',
+          expectedSuggestions.filter((i) => i !== 'a'),
+          { callbacks: cb }
+        );
+        await assertSuggestions(
+          'from a, /',
+          expectedSuggestions.filter((i) => i !== 'a'),
+          { callbacks: cb }
+        );
         await assertSuggestions('from *,/', expectedSuggestions, { callbacks: cb });
       });
     });

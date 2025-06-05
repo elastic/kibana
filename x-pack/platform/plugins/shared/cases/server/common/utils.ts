@@ -89,6 +89,7 @@ export const transformNewCase = ({
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
   observables: [],
+  incremental_id: undefined,
 });
 
 export const transformCases = ({
@@ -364,7 +365,7 @@ export const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment: string
 ): SavedObjectReference[] => {
-  const extract = lensEmbeddableFactory && lensEmbeddableFactory().extract;
+  const extract = lensEmbeddableFactory()?.extract;
 
   if (extract) {
     const parsedComment = parseCommentString(comment);

@@ -2113,6 +2113,22 @@
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionExecutionMeta.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [
+              "\nThe event that caused the action to execute (e.g., mouse click, keyboard event)"
+            ],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

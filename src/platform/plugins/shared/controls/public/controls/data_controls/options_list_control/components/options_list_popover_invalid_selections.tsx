@@ -29,14 +29,14 @@ import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverInvalidSelections = () => {
-  const { api } = useOptionsListContext();
+  const { componentApi } = useOptionsListContext();
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
-    api.invalidSelections$,
-    api.fieldFormatter
+    componentApi.invalidSelections$,
+    componentApi.fieldFormatter
   );
   const defaultPanelTitle = useStateFromPublishingSubject(
-    api.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
@@ -94,7 +94,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          api.deselectOption(changedOption.key);
+          componentApi.deselectOption(changedOption.key);
         }}
       >
         {(list) => list}
