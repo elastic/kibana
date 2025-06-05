@@ -26,6 +26,8 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
   const [initialSerializedState, setInitialSerializedState] =
     useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
+  const [parentInitialSerializedState, setParentInitialSerializedState] =
+    useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -34,6 +36,8 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timeRange,
     query,
     filters,
+    parentQuery,
+    parentFilters,
     index,
     timestampField,
     height,
@@ -60,14 +64,25 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
         if (!abortController.signal.aborted) {
           // Search source
           const searchSource = searchSourceService.createEmpty();
+          const parentSearchSource = searchSourceService.createEmpty();
           searchSource.setField('index', dataView);
           searchSource.setField('query', query);
           searchSource.setField('filter', filters);
+          parentSearchSource.setField('index', dataView);
+          parentSearchSource.setField('query', parentQuery);
+          parentSearchSource.setField('filter', parentFilters);
           const { searchSourceJSON, references } = searchSource.serialize();
+          const { searchSourceJSON: parentSearchSourceJSON, references: parentReferences } =
+            parentSearchSource.serialize();
           // By-value saved object structure
           const attributes = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
+            },
+          };
+          const parentAttributes = {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: parentSearchSourceJSON,
             },
           };
           setInitialSerializedState({
@@ -81,6 +96,18 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               },
             } as SearchEmbeddableSerializedState,
             references,
+          });
+          setParentInitialSerializedState({
+            rawState: {
+              attributes: { ...parentAttributes, references: parentReferences },
+              timeRange,
+              nonPersistedDisplayOptions: {
+                solutionNavIdOverride,
+                enableDocumentViewer: documentViewerEnabled,
+                enableFilters: filtersEnabled,
+              },
+            } as SearchEmbeddableSerializedState,
+            references: parentReferences,
           });
         }
       } catch (e) {
@@ -97,9 +124,11 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     dataViews,
     documentViewerEnabled,
     filters,
+    parentFilters,
     filtersEnabled,
     index,
     query,
+    parentQuery,
     searchSourceService,
     solutionNavIdOverride,
     timeRange,
@@ -110,7 +139,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     return <SavedSearchComponentErrorContent error={error} />;
   }
 
-  return initialSerializedState ? (
+  return initialSerializedState && parentInitialSerializedState ? (
     <div
       css={css`
         height: ${height ?? '100%'};
@@ -119,7 +148,11 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
         }
       `}
     >
-      <SavedSearchComponentTable {...props} initialSerializedState={initialSerializedState} />
+      <SavedSearchComponentTable
+        {...props}
+        initialSerializedState={initialSerializedState}
+        parentInitialSerializedState={parentInitialSerializedState}
+      />
     </div>
   ) : null;
 };
@@ -127,13 +160,15 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
     initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+    parentInitialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
   }
 > = (props) => {
   const {
     dependencies: { dataViews },
     initialSerializedState,
-    filters,
+    parentInitialSerializedState,
     query,
+    filters,
     timeRange,
     timestampField,
     index,
@@ -143,10 +178,10 @@ const SavedSearchComponentTable: React.FC<
   const parentApi = useMemo(() => {
     return {
       getSerializedStateForChild: () => {
-        return initialSerializedState;
+        return parentInitialSerializedState;
       },
     };
-  }, [initialSerializedState]);
+  }, [parentInitialSerializedState]);
 
   useEffect(
     function syncIndex() {

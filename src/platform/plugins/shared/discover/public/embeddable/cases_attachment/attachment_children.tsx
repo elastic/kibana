@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -33,12 +34,15 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
       search: { searchSource },
       dataViews,
     },
-    unifiedSearch,
   } = useDiscoverServices();
-  const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
+  const { index, timeRange, query, filters, parentQuery, parentFilters, timestampField } =
+    persistableStateAttachmentState;
   const hasESQLQuery = Boolean(query?.esql);
   const hasNonESQLQuery = Boolean(query?.query);
   const hasQuery = hasESQLQuery || hasNonESQLQuery;
+  const hasParentESQLQuery = Boolean(parentQuery?.esql);
+  const hasParentNonESQLQuery = Boolean(parentQuery?.query);
+  const hasParentQuery = hasParentESQLQuery || hasParentNonESQLQuery;
 
   return (
     <>
@@ -72,12 +76,37 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
             </EuiFlexGroup>
           </EuiBadge>
         </EuiFlexItem>
+        {hasParentQuery && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{QUERY_LABEL}</EuiText>
+                </EuiFlexItem>
+                {hasParentESQLQuery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCodeBlock language="esql" paddingSize="none">
+                      {parentQuery?.esql}
+                    </EuiCodeBlock>
+                  </EuiFlexItem>
+                )}
+                {hasParentNonESQLQuery && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="success">
+                      {parentQuery?.query}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {hasQuery && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">{'Query:'}</EuiText>
+                  <EuiText size="xs">{QUERY_LABEL}</EuiText>
                 </EuiFlexItem>
                 {hasESQLQuery && (
                   <EuiFlexItem grow={false}>
@@ -86,7 +115,7 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
                     </EuiCodeBlock>
                   </EuiFlexItem>
                 )}
-                {!hasNonESQLQuery && (
+                {hasNonESQLQuery && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="success">
                       {query?.query}
@@ -105,6 +134,8 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
         timeRange={timeRange}
         query={query}
         filters={filters}
+        parentQuery={parentQuery}
+        parentFilters={parentFilters}
         timestampField={timestampField}
         height={'360px'}
       />
@@ -112,6 +143,9 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
   );
 };
 
+const QUERY_LABEL = i18n.translate('discover.cases.attachment.queryLabel', {
+  defaultMessage: 'Query',
+});
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default CommentChildren;

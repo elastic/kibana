@@ -51,18 +51,19 @@ const getAttachments = ({
     const indexPattern = dataView.getIndexPattern();
     const timestampField = dataView.timeFieldName;
     const query = api.query$.getValue() as Query | undefined;
-    const parentQuery = api.parentApi?.query$.getValue() as Query | undefined;
     const filters = api.filters$.getValue() || [];
+    const parentQuery = api.parentApi?.query$.getValue() as Query | undefined;
     const parentFilters = api.parentApi?.filters$.getValue() || [];
-    const combinedFilters = [...filters, ...parentFilters];
 
     return [
       getSavedSearchCaseAttachment({
         index: indexPattern,
         timeRange: appliedTimeRange,
         timestampField,
-        filters: combinedFilters.length ? combinedFilters : undefined,
-        query: query || parentQuery,
+        filters,
+        parentFilters,
+        query,
+        parentQuery,
       }),
     ];
   }

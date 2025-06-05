@@ -281,5 +281,7 @@ export interface SavedSearchCasesAttachmentPersistedState {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  parentQuery?: Query;
+  parentFilters?: Filter[];
   timestampField?: string;
 }

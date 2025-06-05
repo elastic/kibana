@@ -25,6 +25,8 @@ export interface SavedSearchComponentProps {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  parentQuery?: Query;
+  parentFilters?: Filter[];
   timestampField?: string;
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;

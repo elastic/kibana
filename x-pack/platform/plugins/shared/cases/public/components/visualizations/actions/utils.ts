@@ -34,6 +34,8 @@ export const getSavedSearchCaseAttachment = ({
   timeRange,
   query,
   filters,
+  parentQuery,
+  parentFilters,
   timestampField,
 }: SavedSearchCasesAttachmentPersistedState): PersistableStateAttachmentWithoutOwner => {
   const persistableStateAttachmentState: SavedSearchCasesAttachmentPersistedState = {
@@ -41,6 +43,8 @@ export const getSavedSearchCaseAttachment = ({
     timeRange,
     query,
     filters,
+    parentQuery,
+    parentFilters,
     timestampField,
   };
   return {
