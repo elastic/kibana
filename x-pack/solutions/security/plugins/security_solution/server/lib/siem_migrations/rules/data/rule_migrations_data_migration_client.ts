@@ -134,7 +134,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   async saveAsStarted({
     id,
     connectorId,
-    skipPrebuiltRulesMatching = true,
+    skipPrebuiltRulesMatching = false,
   }: {
     id: string;
     connectorId: RuleMigrationLastExecution['connector_id'];

@@ -10,7 +10,7 @@ import {
   getActionTypeTitle,
   getGenAiConfig,
 } from '@kbn/elastic-assistant/impl/connectorland/helpers';
-import type { StartServices } from '../../types';
+import type { StartServices } from '../../../types';
 import * as i18n from '../../translations';
 
 export const getConnectorDescription = ({

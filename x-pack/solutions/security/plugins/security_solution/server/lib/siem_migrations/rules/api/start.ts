@@ -85,8 +85,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               const { exists, started } = await ruleMigrationsClient.task.start({
                 migrationId,
                 connectorId,
-                skipPrebuiltRulesMatching,
-                invocationConfig: { callbacks },
+                invocationConfig: { callbacks, configurable: { skipPrebuiltRulesMatching } },
               });
 
               if (!exists) {

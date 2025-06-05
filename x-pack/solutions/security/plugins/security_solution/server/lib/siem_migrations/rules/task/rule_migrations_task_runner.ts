@@ -207,7 +207,7 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  protected createMigrateRuleTask(invocationConfig: GraphConfig) {
+  protected createMigrateRuleTask(invocationConfig?: GraphConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
     const config: GraphConfig = {

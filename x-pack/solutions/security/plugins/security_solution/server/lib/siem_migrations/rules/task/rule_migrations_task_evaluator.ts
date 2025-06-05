@@ -26,15 +26,7 @@ type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
 export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
-  public async evaluate({
-    connectorId,
-    langsmithSettings,
-    invocationConfig = {
-      configurable: {
-        skipPrebuiltRulesMatching: false,
-      },
-    },
-  }: EvaluateParams) {
+  public async evaluate({ connectorId, langsmithSettings, invocationConfig }: EvaluateParams) {
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }
