@@ -1455,29 +1455,28 @@ components:
         - type
         - value
 
-    BulkActionEditPayloadAddSetAlertSuppression:
+    BulkActionEditPayloadSetAlertSuppression:
       type: object
       properties:
         type:
           type: string
           enum:
-            - add_alert_suppression
             - set_alert_suppression
         value:
-          type: object
-          properties:
-            group_by:
-                type: array
-                items:
-                  type: string
-                maxItems: 3
-            duration:
-              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
-              nullable: true
-            missing_fields_strategy:
-              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_alert_suppression_for_threshold
+        value:
+          $ref: '../../model/rule_schema/specific_attributes/threshold_attributes.schema.yaml#/components/schemas/ThresholdAlertSuppression'
       required:
         - type
         - value
@@ -1489,27 +1488,13 @@ components:
           type: string
           enum:
             - delete_alert_suppression
-        value:
-          type: object
-          properties:
-            group_by:
-                type: array
-                items:
-                  type: string        
-            duration:
-              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
-              nullable: true
-            missing_fields_strategy:
-              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
       required:
         - type
-        - value
 
     BulkActionEditPayloadAlertSuppression:
       anyOf:
-        - $ref: '#/components/schemas/BulkActionEditPayloadAddSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
 
     BulkActionEditPayload:

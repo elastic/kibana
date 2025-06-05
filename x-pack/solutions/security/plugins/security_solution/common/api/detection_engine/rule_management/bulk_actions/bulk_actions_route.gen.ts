@@ -29,9 +29,9 @@ import {
   InvestigationFields,
   TimelineTemplateId,
   TimelineTemplateTitle,
-  AlertSuppressionDuration,
-  AlertSuppressionMissingFieldsStrategy,
+  AlertSuppression,
 } from '../../model/rule_schema/common_attributes.gen';
+import { ThresholdAlertSuppression } from '../../model/rule_schema/specific_attributes/threshold_attributes.gen';
 
 export type BulkEditSkipReason = z.infer<typeof BulkEditSkipReason>;
 export const BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
@@ -354,16 +354,20 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-export type BulkActionEditPayloadAddSetAlertSuppression = z.infer<
-  typeof BulkActionEditPayloadAddSetAlertSuppression
+export type BulkActionEditPayloadSetAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppression
 >;
-export const BulkActionEditPayloadAddSetAlertSuppression = z.object({
-  type: z.enum(['add_alert_suppression', 'set_alert_suppression']),
-  value: z.object({
-    group_by: z.array(z.string()).max(3),
-    duration: AlertSuppressionDuration.nullable().optional(),
-    missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
-  }),
+export const BulkActionEditPayloadSetAlertSuppression = z.object({
+  type: z.literal('set_alert_suppression'),
+  value: AlertSuppression,
+});
+
+export type BulkActionEditPayloadSetAlertSuppressionForThreshold = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppressionForThreshold
+>;
+export const BulkActionEditPayloadSetAlertSuppressionForThreshold = z.object({
+  type: z.literal('set_alert_suppression_for_threshold'),
+  value: ThresholdAlertSuppression,
 });
 
 export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
@@ -371,20 +375,19 @@ export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
 >;
 export const BulkActionEditPayloadDeleteAlertSuppression = z.object({
   type: z.literal('delete_alert_suppression'),
-  value: z.object({
-    group_by: z.array(z.string()),
-    duration: AlertSuppressionDuration.nullable().optional(),
-    missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
-  }),
 });
 
-export type BulkActionEditPayloadAlertSuppression = z.infer<
-  typeof BulkActionEditPayloadAlertSuppression
->;
-export const BulkActionEditPayloadAlertSuppression = z.union([
-  BulkActionEditPayloadAddSetAlertSuppression,
+export const BulkActionEditPayloadAlertSuppressionInternal = z.union([
+  BulkActionEditPayloadSetAlertSuppression,
+  BulkActionEditPayloadSetAlertSuppressionForThreshold,
   BulkActionEditPayloadDeleteAlertSuppression,
 ]);
+
+export type BulkActionEditPayloadAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAlertSuppressionInternal
+>;
+export const BulkActionEditPayloadAlertSuppression =
+  BulkActionEditPayloadAlertSuppressionInternal as z.ZodType<BulkActionEditPayloadAlertSuppression>;
 
 export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
