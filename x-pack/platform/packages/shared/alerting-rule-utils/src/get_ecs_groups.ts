@@ -8,7 +8,7 @@
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { Group } from './types';
 
-export const getEcsGroups = (groups: Group[] = []): Record<string, string> => {
+export const getEcsGroups = (groups: Group[] = []): Record<string, string | string[]> => {
   const ecsGroups = groups.filter((group) => {
     const path = group.field;
     const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
@@ -25,10 +25,19 @@ export const getEcsGroups = (groups: Group[] = []): Record<string, string> => {
     return true;
   });
 
-  const ecsGroup: Record<string, string> = {};
+  const ecsGroup: Record<string, string | string[]> = {};
 
   ecsGroups.forEach((group) => {
-    ecsGroup[group.field] = group.value;
+    const path = group.field;
+    const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
+
+    if (!ecsField.array) {
+      // if the ecs type is not an array, assign the value
+      ecsGroup[group.field] = group.value;
+    } else {
+      // otherwise the ecs type is an array, create a 1-element array
+      ecsGroup[group.field] = [group.value];
+    }
   });
 
   return ecsGroup;
