@@ -10,7 +10,7 @@
 import { TestTrack, TestTrackLoad } from './test_track';
 
 describe('TestTrack', () => {
-  it('no lanes available when creating the track', () => {
+  it('should not create lanes when the track is created', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
     expect(track.laneCount).toBe(0);
     expect(track.anyLaneOpen).toBe(false);
@@ -18,7 +18,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(undefined);
   });
 
-  it('one lane available and one load that fills the entire lane. The lane closes', () => {
+  it('closes the lane when one load fills it entirely', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const load: TestTrackLoad = {
@@ -51,7 +51,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(undefined);
   });
 
-  it('one lane available and one load that partially fills the lane. The lane remains open', () => {
+  it('keeps the lane open when a load only partially fills it', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const load: TestTrackLoad = {
@@ -84,7 +84,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(lane);
   });
 
-  it('one lane available and multiple loads that partially fill the lane. The lane remains open', () => {
+  it('keeps a lane open when multiple loads partially fill it', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const loadA: TestTrackLoad = {
@@ -135,7 +135,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(lane);
   });
 
-  it('one lane available and multiple loads that completely fill the lane. The lane closes', () => {
+  it('closes the lane when multiple loads completely fill it', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const loadA: TestTrackLoad = {
@@ -186,7 +186,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(undefined);
   });
 
-  it('adding a load that exceeds the current lane capacity creates a new lane if allowNewLane is set to true', () => {
+  it('creates a new lane if a load exceeds capacity and allowNewLane is true', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const loadA: TestTrackLoad = {
@@ -247,7 +247,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(newLane);
   });
 
-  it('adding a load that exceeds the current lane capacity does not create a new lane if allowNewLane is set to false', () => {
+  it('does not create a new lane if a load exceeds capacity and allowNewLane is false', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const loadA: TestTrackLoad = {
@@ -302,7 +302,7 @@ describe('TestTrack', () => {
     expect(track.leastLoadedOpenLane).toBe(undefined);
   });
 
-  it('adding a load to a track with two open lanes adds the load to the least loaded lane', () => {
+  it('adds the load to the least loaded lane when multiple lanes are open', () => {
     const track = new TestTrack({ runtimeTarget: 10 });
 
     const loadA: TestTrackLoad = {
@@ -365,5 +365,182 @@ describe('TestTrack', () => {
     expect(lane.number).toBe(1);
     expect(lane.runtimeTarget).toBe(10);
     expect(lane.runtimeEstimate).toBe(8);
+  });
+
+  it('adds load to a new lane with addLoadToNewLane', () => {
+    // fix it
+    const track = new TestTrack({ runtimeTarget: 10 });
+
+    const loadA: TestTrackLoad = {
+      id: 'configPathA',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 7,
+          pc99th: 0,
+          max: 0,
+          estimate: 7,
+        },
+      },
+    };
+
+    track.addLoadToLeastCongestedLane(loadA, true);
+
+    const loadB: TestTrackLoad = {
+      id: 'configPathB',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 8,
+          pc99th: 0,
+          max: 0,
+          estimate: 8,
+        },
+      },
+    };
+
+    track.addLoadToNewLane(loadB);
+
+    // by now, there should be two lanes
+    expect(track.laneCount).toBe(2);
+  });
+
+  it('should throw an error if no lanes are available and allowNewLane is false', () => {
+    const track = new TestTrack({ runtimeTarget: 10 });
+    expect(track.laneCount).toBe(0);
+
+    const load: TestTrackLoad = {
+      id: 'configPathA',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 7,
+          pc99th: 0,
+          max: 0,
+          estimate: 7,
+        },
+      },
+    };
+
+    expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrowError(
+      "Track doesn't have any lanes"
+    );
+  });
+
+  it('returns the test track specification', () => {
+    const track = new TestTrack({ runtimeTarget: 10 });
+
+    const loadA: TestTrackLoad = {
+      id: 'configPathA',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 7,
+          pc99th: 0,
+          max: 0,
+          estimate: 7,
+        },
+      },
+    };
+
+    track.addLoadToLeastCongestedLane(loadA, true);
+
+    const loadB: TestTrackLoad = {
+      id: 'configPathB',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 8,
+          pc99th: 0,
+          max: 0,
+          estimate: 8,
+        },
+      },
+    };
+
+    track.addLoadToLeastCongestedLane(loadB, true);
+
+    // adding a third load will add the load to the least loaded lane: the first lane
+    const loadC: TestTrackLoad = {
+      id: 'configPathC',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 2,
+          pc99th: 0,
+          max: 0,
+          estimate: 2,
+        },
+      },
+    };
+
+    // disable creating a new lane
+    track.addLoadToLeastCongestedLane(loadC, false);
+
+    const loadD: TestTrackLoad = {
+      id: 'configPathD',
+      stats: {
+        runCount: 0,
+        runtime: {
+          avg: 0,
+          median: 0,
+          pc95th: 5,
+          pc99th: 0,
+          max: 0,
+          estimate: 5,
+        },
+      },
+    };
+
+    track.addLoadToLeastCongestedLane(loadD, false);
+
+    expect(track.specification).toEqual({
+      lanes: [
+        {
+          availableCapacity: 1,
+          isCongested: false,
+          loads: ['configPathA', 'configPathC'],
+          number: 1,
+          runtimeEstimate: 9,
+          runtimeTarget: 10,
+          status: 'open',
+        },
+        {
+          availableCapacity: -3,
+          isCongested: true,
+          loads: ['configPathB', 'configPathD'],
+          number: 2,
+          runtimeEstimate: 13,
+          runtimeTarget: 10,
+          status: 'closed',
+        },
+      ],
+      stats: {
+        combinedRuntime: {
+          expected: 22,
+          overflow: 2,
+          target: 20,
+          unused: 0,
+        },
+        lane: {
+          count: 2,
+          longestEstimate: 13,
+          saturationPercent: 110,
+          shortestEstimate: 9,
+        },
+      },
+    });
   });
 });
