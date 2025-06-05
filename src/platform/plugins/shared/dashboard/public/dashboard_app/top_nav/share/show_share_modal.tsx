@@ -24,7 +24,7 @@ import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { coreServices, dataService, shareService } from '../../../services/kibana_services';
+import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -229,7 +229,6 @@ export function ShowShareModal({
       },
     ],
     snapshotShareWarning: hasPanelChanges ? shareModalStrings.getSnapshotShareWarning() : undefined,
-    toasts: coreServices.notifications.toasts,
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
