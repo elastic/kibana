@@ -57,5 +57,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
