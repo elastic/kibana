@@ -16,8 +16,7 @@ groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
@@ -50,8 +49,7 @@ groups:
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts
