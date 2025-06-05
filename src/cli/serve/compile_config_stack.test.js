@@ -264,6 +264,7 @@ describe('pricing tiers configuration', () => {
       'serverless.oblt.yml',
       'kibana.yml',
       'kibana.dev.yml',
+      'serverless.recent.dev.yml',
       'serverless.dev.yml',
       'serverless.oblt.dev.yml',
       'serverless.oblt.complete.yml',
