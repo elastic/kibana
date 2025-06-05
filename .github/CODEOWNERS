@@ -1740,7 +1740,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/api_integration/services @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/test/tsconfig.json @elastic/appex-qa
-/x-pack/test/load @elastic/appex-qa
+/x-pack/platform/test/load @elastic/appex-qa
 /src/platform/test/tsconfig.json @elastic/appex-qa
 /src/platform/test/plugin_functional/services/index.ts @elastic/appex-qa
 /src/platform/test/plugin_functional/README.md @elastic/appex-qa

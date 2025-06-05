@@ -23,8 +23,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/common/config')
   );
-  const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+  const xpackTestsConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
 
   return {
