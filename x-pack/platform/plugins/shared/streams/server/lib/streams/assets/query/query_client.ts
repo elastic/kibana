@@ -14,7 +14,7 @@ import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetClient, getUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
-import { escapeQuotes, getRuleIdFromQueryLink } from './helpers/query';
+import { getKqlAsCommandArg, getRuleIdFromQueryLink } from './helpers/query';
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return currentQuery.kql.query !== nextQuery.kql.query;
@@ -236,9 +236,9 @@ export class QueryClient {
               actions: [],
               params: {
                 timestampField: '@timestamp',
-                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${escapeQuotes(
+                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
                   query.query.kql.query
-                )}\"\"\")`,
+                )}\")`,
               },
               enabled: true,
               tags: ['streams'],
@@ -260,9 +260,9 @@ export class QueryClient {
                   actions: [],
                   params: {
                     timestampField: '@timestamp',
-                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${escapeQuotes(
+                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
                       query.query.kql.query
-                    )}\"\"\")`,
+                    )}\")`,
                   },
                   tags: ['streams'],
                   schedule: {
@@ -283,9 +283,9 @@ export class QueryClient {
               actions: [],
               params: {
                 timestampField: '@timestamp',
-                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${escapeQuotes(
+                query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
                   query.query.kql.query
-                )}\"\"\")`,
+                )}\")`,
               },
               tags: ['streams'],
               schedule: {
@@ -304,9 +304,9 @@ export class QueryClient {
                   actions: [],
                   params: {
                     timestampField: '@timestamp',
-                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"\"\"${escapeQuotes(
+                    query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
                       query.query.kql.query
-                    )}\"\"\")`,
+                    )}\")`,
                   },
                   enabled: true,
                   tags: ['streams'],

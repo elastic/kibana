@@ -15,6 +15,6 @@ export function getRuleIdFromQueryLink(query: QueryLink) {
   return v5(queryHash, v5.DNS);
 }
 
-export const escapeQuotes = (str: string): string => {
-  return str.replace(/[\\"]/g, '\\$&');
+export const getKqlAsCommandArg = (str: string): string => {
+  return str.replace(/(?<!\\)"/g, '\\"');
 };
