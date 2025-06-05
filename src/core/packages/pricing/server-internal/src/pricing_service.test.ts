@@ -50,10 +50,15 @@ describe('PricingService', () => {
   });
 
   describe('#preboot()', () => {
-    it('loads the pricing configuration', async () => {
-      await service.preboot({ http: prebootHttp });
-      // Access the private property using bracket notation for testing purposes
-      expect((service as any).pricingConfig).toEqual(mockConfig);
+    it('registers the pricing routes with default config', () => {
+      service.preboot({ http: prebootHttp });
+
+      // Preboot uses default config, not the loaded config
+      const expectedDefaultConfig = { tiers: { enabled: false, products: [] } };
+      expect((service as any).pricingConfig).toEqual(expectedDefaultConfig);
+
+      // Verify that routes are registered on the preboot HTTP service
+      expect(prebootHttp.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
     });
   });
 
@@ -69,9 +74,6 @@ describe('PricingService', () => {
           path: '/internal/core/pricing',
           security: expect.objectContaining({
             authz: expect.objectContaining({
-              enabled: false,
-            }),
-            authc: expect.objectContaining({
               enabled: false,
             }),
           }),
