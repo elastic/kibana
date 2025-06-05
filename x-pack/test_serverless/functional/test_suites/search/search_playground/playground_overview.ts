@@ -25,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlSearchElasticsearchStartPage',
     'svlSearchCreateIndexPage',
   ]);
-  const testSubjects = getService('testSubjects');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
@@ -113,13 +112,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
             'management:triggersActionsConnectors'
           );
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.searchConnector(
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
             openaiConnectorName
           );
-          await testSubjects.click('deleteConnector');
-          await testSubjects.existOrFail('deleteIdsConfirmation');
-          await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-          await testSubjects.missingOrFail('deleteIdsConfirmation');
+
           await browser.refresh();
         });
         it('should be able to set up connectors from flyout', async () => {

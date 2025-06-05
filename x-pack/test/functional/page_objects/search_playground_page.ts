@@ -189,6 +189,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         );
         expect(await s.getVisibleText()).to.be(connectorName);
       },
+      async deleteConnector(connectorName: string) {
+        this.searchConnector(connectorName);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+      },
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
