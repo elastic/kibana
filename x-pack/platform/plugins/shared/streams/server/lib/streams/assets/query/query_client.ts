@@ -152,7 +152,7 @@ export class QueryClient {
     );
   }
 
-  public async bulkOperations(
+  public async bulk(
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {

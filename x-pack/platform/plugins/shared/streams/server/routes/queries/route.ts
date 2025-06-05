@@ -187,7 +187,7 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-    await queryClient.bulkOperations(streamName, operations);
+    await queryClient.bulk(streamName, operations);
 
     return { acknowledged: true };
   },
