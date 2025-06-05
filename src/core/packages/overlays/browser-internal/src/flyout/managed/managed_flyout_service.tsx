@@ -36,24 +36,30 @@ interface ManagedFlyoutServiceStartDeps {
 }
 
 export interface FlyoutState {
-  main: ManagedFlyoutEntry | null;
-  child: ManagedFlyoutEntry | null;
+  main: { entry: ManagedFlyoutEntry<any>; props?: any } | null;
+  child: { entry: ManagedFlyoutEntry<any>; props?: any } | null;
 }
 
 interface HistoryEntry {
-  main: ManagedFlyoutEntry;
-  child: ManagedFlyoutEntry | null;
+  main: { entry: ManagedFlyoutEntry<any>; props?: any };
+  child: { entry: ManagedFlyoutEntry<any>; props?: any } | null;
 }
 
 export class ManagedFlyoutService implements ManagedFlyoutApi {
-  private flyout$ = new Subject<FlyoutState>();
+  // State and Observables
+  public flyout$ = new Subject<FlyoutState>();
   private isOpen$ = new BehaviorSubject<boolean>(false);
   private targetElement: HTMLElement | null = null;
   private isStarted = false;
 
-  private _currentMainEntry: ManagedFlyoutEntry | null = null;
+  // Main flyout state
+  private _currentMainEntry: ManagedFlyoutEntry<any> | null = null;
+  private _currentMainProps: any | undefined = undefined;
   private _mainHistoryStack: HistoryEntry[] = [];
-  private _childFlyoutEntry: ManagedFlyoutEntry | null = null;
+
+  // Child flyout state
+  private _childFlyoutEntry: ManagedFlyoutEntry<any> | null = null;
+  private _childFlyoutProps: any | undefined = undefined;
 
   constructor() {
     this.flyout$.subscribe((state) => {
@@ -61,13 +67,19 @@ export class ManagedFlyoutService implements ManagedFlyoutApi {
     });
   }
 
+  // Internal helpers
   private _emitFlyoutState(): void {
     this.flyout$.next({
-      main: this._currentMainEntry,
-      child: this._childFlyoutEntry,
+      main: this._currentMainEntry
+        ? { entry: this._currentMainEntry, props: this._currentMainProps }
+        : null,
+      child: this._childFlyoutEntry
+        ? { entry: this._childFlyoutEntry, props: this._childFlyoutProps }
+        : null,
     });
   }
 
+  // Lifecycle methods
   public start({ targetDomElement, ...startDeps }: ManagedFlyoutServiceStartDeps): void {
     if (this.isStarted) {
       return;
@@ -86,35 +98,41 @@ export class ManagedFlyoutService implements ManagedFlyoutApi {
     this.isStarted = true;
   }
 
-  public openFlyout(entry: ManagedFlyoutEntry): void {
-    this.initializeFlyout(entry);
+  public stop(): void {
+    if (this.targetElement && this.isStarted) {
+      ReactDOM.unmountComponentAtNode(this.targetElement);
+      this.isStarted = false;
+      this.targetElement = null;
+      this.flyout$.complete();
+      this.isOpen$.complete();
+      this._mainHistoryStack = [];
+      this._currentMainEntry = null;
+      this._currentMainProps = undefined;
+      this._childFlyoutEntry = null;
+      this._childFlyoutProps = undefined;
+    }
+  }
+
+  // Main flyout navigation methods
+  public openFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
+    this.initializeFlyout(entry, props);
   }
 
   public closeFlyout(): void {
     this.initializeFlyout(null);
   }
 
-  public nextFlyout(entry: ManagedFlyoutEntry): void {
-    this.navigateToFlyout(entry);
-  }
-
-  public openChildFlyout(entry: ManagedFlyoutEntry): void {
-    if (!this._currentMainEntry) {
-      return;
-    }
-    this._childFlyoutEntry = entry;
-    this._emitFlyoutState();
-  }
-
-  public isFlyoutOpen(): boolean {
-    return this.getIsFlyoutOpen();
+  public nextFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
+    this.navigateToFlyout(entry, props);
   }
 
   public goBack(): void {
     if (this.canGoBack()) {
       const prevState = this._mainHistoryStack.pop()!;
-      this._currentMainEntry = prevState.main;
-      this._childFlyoutEntry = prevState.child;
+      this._currentMainEntry = prevState.main.entry;
+      this._currentMainProps = prevState.main.props;
+      this._childFlyoutEntry = prevState.child?.entry || null;
+      this._childFlyoutProps = prevState.child?.props;
       this._emitFlyoutState();
     } else {
       this.initializeFlyout(null);
@@ -125,13 +143,25 @@ export class ManagedFlyoutService implements ManagedFlyoutApi {
     return this._mainHistoryStack.length > 0;
   }
 
+  // Child flyout methods
+  public openChildFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
+    if (!this._currentMainEntry) {
+      return;
+    }
+    this._childFlyoutEntry = entry;
+    this._childFlyoutProps = props;
+    this._emitFlyoutState();
+  }
+
   public closeChildFlyout(): void {
     if (this._childFlyoutEntry) {
       this._childFlyoutEntry = null;
+      this._childFlyoutProps = undefined;
       this._emitFlyoutState();
     }
   }
 
+  // State query methods
   public getFlyout$(): Subject<FlyoutState> {
     return this.flyout$;
   }
@@ -140,39 +170,43 @@ export class ManagedFlyoutService implements ManagedFlyoutApi {
     return this.isOpen$.getValue();
   }
 
-  public initializeFlyout(entry: ManagedFlyoutEntry | null): void {
+  public isFlyoutOpen(): boolean {
+    return this.getIsFlyoutOpen();
+  }
+
+  // Implementation details for navigation
+  public initializeFlyout<TProps = any>(
+    entry: ManagedFlyoutEntry<TProps> | null,
+    props?: TProps
+  ): void {
     this._mainHistoryStack = [];
     this._childFlyoutEntry = null;
+    this._childFlyoutProps = undefined;
     this._currentMainEntry = entry;
+    this._currentMainProps = props;
     this._emitFlyoutState();
   }
 
-  public navigateToFlyout(entry: ManagedFlyoutEntry): void {
+  public navigateToFlyout<TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps): void {
     if (this._currentMainEntry) {
       this._mainHistoryStack.push({
-        main: this._currentMainEntry,
-        child: this._childFlyoutEntry,
+        main: {
+          entry: this._currentMainEntry,
+          props: this._currentMainProps,
+        },
+        child: this._childFlyoutEntry
+          ? {
+              entry: this._childFlyoutEntry,
+              props: this._childFlyoutProps,
+            }
+          : null,
       });
     }
     this._childFlyoutEntry = null;
+    this._childFlyoutProps = undefined;
     this._currentMainEntry = entry;
+    this._currentMainProps = props;
     this._emitFlyoutState();
-  }
-
-  /**
-   * TODO: use this from somewhere
-   */
-  public stop(): void {
-    if (this.targetElement && this.isStarted) {
-      ReactDOM.unmountComponentAtNode(this.targetElement);
-      this.isStarted = false;
-      this.targetElement = null;
-      this.flyout$.complete();
-      this.isOpen$.complete();
-      this._mainHistoryStack = [];
-      this._currentMainEntry = null;
-      this._childFlyoutEntry = null;
-    }
   }
 }
 

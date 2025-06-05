@@ -45,9 +45,9 @@ export type OverlayFlyoutOpenOptions = Omit<
 };
 
 export interface ManagedFlyoutApi {
-  openFlyout: (entry: ManagedFlyoutEntry) => void;
-  nextFlyout: (entry: ManagedFlyoutEntry) => void;
-  openChildFlyout: (entry: ManagedFlyoutEntry) => void;
+  openFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
+  nextFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
+  openChildFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
   closeFlyout: () => void;
   isFlyoutOpen: () => boolean;
   goBack: () => void;
@@ -61,9 +61,9 @@ export type FlyoutPropsEnhanced = Omit<EuiFlyoutProps, 'onClose' | 'hideCloseBut
 
 type FooterActions = Record<string, React.ReactElement>;
 
-export interface ManagedFlyoutEntry {
-  flyoutProps?: (managedFlyoutApi: ManagedFlyoutApi) => FlyoutPropsEnhanced;
-  renderBody: (managedFlyoutApi: ManagedFlyoutApi) => React.ReactElement;
-  renderHeader?: (managedFlyoutApi: ManagedFlyoutApi) => React.ReactElement;
-  footerActions?: (managedFlyoutApi: ManagedFlyoutApi) => FooterActions;
+export interface ManagedFlyoutEntry<TProps = any> {
+  flyoutProps?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => FlyoutPropsEnhanced;
+  renderBody: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => React.ReactElement;
+  renderHeader?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => React.ReactElement;
+  footerActions?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => FooterActions;
 }

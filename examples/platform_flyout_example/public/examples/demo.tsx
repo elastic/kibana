@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type FC, useState } from 'react';
+import React, { useCallback, type FC, useState, useMemo } from 'react';
 
 import {
   EuiButton,
@@ -26,52 +26,61 @@ interface DemoDeps {
   overlays: OverlayStart;
 }
 
-const DataList: FC = () => {
-  return <>Hello world</>;
+interface FlyoutProps {
+  username: string;
+  isPushMode: boolean;
+}
+
+const DataList: FC<{ username: string }> = ({ username }) => {
+  return <p>{username ? `Hello ${username}` : 'Hello world'}</p>;
 };
 
-const childFlyoutConfig: ManagedFlyoutEntry = {
-  renderBody: () => {
+type DemoFlyoutEntry = ManagedFlyoutEntry<FlyoutProps>;
+
+const childFlyoutConfig: DemoFlyoutEntry = {
+  renderBody: (_api, props) => {
     return (
       <EuiText>
         <h4>Child Flyout Content!</h4>
         <p>This panel is aligned to the left of the main flyout.</p>
-        <DataList />
+        <DataList username={props.username} />
       </EuiText>
     );
   },
 };
 
-const step1Config: ManagedFlyoutEntry = {
-  flyoutProps: () => ({
+const step1Config: DemoFlyoutEntry = {
+  flyoutProps: (_, { isPushMode }) => ({
     size: 400,
-    type: 'push',
+    type: isPushMode ? 'push' : 'overlay',
   }),
   renderHeader: () => (
     <EuiTitle size="m">
       <h2>Step 1: The initial flyout</h2>
     </EuiTitle>
   ),
-  renderBody: ({ nextFlyout }) => {
+  renderBody: ({ nextFlyout }, renderProps) => {
     const handleGoToStep2 = () => {
-      nextFlyout(step2Config);
+      nextFlyout(step2Config, renderProps);
     };
 
     return (
       <EuiText>
         <p>This is the first step in the flyout sequence.</p>
-        <DataList />
+        <DataList username={renderProps.username} />
         <p>
           <EuiButton onClick={handleGoToStep2}>Go to Step 2</EuiButton>
         </p>
       </EuiText>
     );
   },
-  footerActions: ({ openChildFlyout }) => ({
+  footerActions: ({ openChildFlyout }, renderProps) => ({
     openChildFlyout: (
       <EuiButton
         key="openChildFlyout"
-        onClick={() => openChildFlyout(childFlyoutConfig)}
+        onClick={() => {
+          openChildFlyout(childFlyoutConfig, renderProps);
+        }}
         color="primary"
       >
         Open Child Flyout
@@ -80,25 +89,25 @@ const step1Config: ManagedFlyoutEntry = {
   }),
 };
 
-const step2Config: ManagedFlyoutEntry = {
-  flyoutProps: () => ({
+const step2Config: DemoFlyoutEntry = {
+  flyoutProps: (_, { isPushMode }) => ({
     size: 600,
-    type: 'push',
+    type: isPushMode ? 'push' : 'overlay',
   }),
   renderHeader: () => (
     <EuiTitle size="m">
       <h2>Step 2: The second flyout</h2>
     </EuiTitle>
   ),
-  renderBody: () => {
+  renderBody: (_, { username }) => {
     return (
       <EuiText>
         <p>This is the second step in the flyout sequence.</p>
-        <DataList />
+        <DataList username={username} />
       </EuiText>
     );
   },
-  footerActions: ({ goBack, openChildFlyout }) => ({
+  footerActions: ({ goBack, openChildFlyout }, renderProps) => ({
     goBack: (
       <EuiButton
         key="goBack"
@@ -113,7 +122,9 @@ const step2Config: ManagedFlyoutEntry = {
     openChildFlyout: (
       <EuiButton
         key="openChildFlyout"
-        onClick={() => openChildFlyout(childFlyoutConfig)}
+        onClick={() => {
+          openChildFlyout(childFlyoutConfig, renderProps);
+        }}
         color="primary"
       >
         Open Child Flyout
@@ -122,34 +133,51 @@ const step2Config: ManagedFlyoutEntry = {
   }),
 };
 
-const complexFlyoutConfig: ManagedFlyoutEntry = {
-  flyoutProps: () => ({
-    type: 'push',
+const complexFlyoutConfig: DemoFlyoutEntry = {
+  flyoutProps: (_, { isPushMode }) => ({
+    type: isPushMode ? 'push' : 'overlay',
     size: 800,
   }),
-  renderBody: () => {
+  renderBody: ({ openChildFlyout }, renderProps) => {
     const ComplexComponent: FC = () => {
+      const [localState, setLocalState] = useState<string | null>(null);
+
+      const handleClickOpenChildFlyout = useCallback(() => {
+        openChildFlyout(childFlyoutConfig, renderProps);
+      }, []);
+
       return (
-        <EuiText>
-          <h4>Complex Flyout Content!</h4>
-          <p>This flyout has no header and is more complex.</p>
-        </EuiText>
+        <>
+          <EuiPanel>
+            <EuiText>
+              <p>This flyout manages its own local state.</p>
+              <EuiFormRow label="Local state example">
+                <EuiFieldText
+                  value={localState ?? ''}
+                  onChange={(e) => setLocalState(e.target.value)}
+                  placeholder="Enter some text"
+                />
+              </EuiFormRow>
+              <p>You typed: {localState ?? 'nothing'}</p>
+            </EuiText>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiText>
+            <DataList username={renderProps.username} />
+            <p>
+              <a href="#" onClick={handleClickOpenChildFlyout}>
+                Would you like to open a child flyout?
+              </a>
+            </p>
+          </EuiText>
+        </>
       );
     };
 
     return <ComplexComponent />;
   },
-  footerActions: ({ openChildFlyout }) => ({
-    openChildFlyout: (
-      <EuiButton
-        key="openChildFlyout"
-        onClick={() => openChildFlyout(childFlyoutConfig)}
-        color="primary"
-      >
-        Open Child Flyout
-      </EuiButton>
-    ),
-  }),
 };
 
 export const Demo: FC<DemoDeps> = ({ overlays }) => {
@@ -158,13 +186,15 @@ export const Demo: FC<DemoDeps> = ({ overlays }) => {
   const [username, setUsername] = useState('');
   const [isPushMode, setIsPushMode] = useState(true);
 
+  const props = useMemo(() => ({ username, isPushMode }), [username, isPushMode]);
+
   const handleOpenInitialFlyout = useCallback(() => {
-    openFlyout(step1Config);
-  }, [openFlyout]);
+    openFlyout(step1Config, props);
+  }, [openFlyout, props]);
 
   const handleOpenComplexFlyout = useCallback(() => {
-    openFlyout(complexFlyoutConfig);
-  }, [openFlyout]);
+    openFlyout(complexFlyoutConfig, props);
+  }, [openFlyout, props]);
 
   const handleCheckFlyoutStatus = useCallback(() => {
     alert(`The flyout is currently ${isFlyoutOpen() ? 'open' : 'closed'}. (Synchronous check)`);

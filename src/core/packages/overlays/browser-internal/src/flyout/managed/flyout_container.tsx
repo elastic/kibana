@@ -30,19 +30,19 @@ import { managedFlyoutService } from './managed_flyout_service';
 import { useManagedFlyout } from './use_managed_flyout';
 
 interface FlyoutPanelProps {
-  entry: ManagedFlyoutEntry | null;
+  flyoutData: { entry: ManagedFlyoutEntry<any>; props?: any } | null;
   level: 'main' | 'child';
   positionRight: number;
   managedFlyoutApi: ManagedFlyoutApi;
 }
 
 const FlyoutPanel = React.memo(
-  ({ entry, level, positionRight, managedFlyoutApi }: FlyoutPanelProps) => {
-    const [isOpen, setIsOpen] = useState(!!entry);
+  ({ flyoutData, level, positionRight, managedFlyoutApi }: FlyoutPanelProps) => {
+    const [isOpen, setIsOpen] = useState(!!flyoutData);
 
     useEffect(() => {
-      setIsOpen(!!entry);
-    }, [entry]);
+      setIsOpen(!!flyoutData);
+    }, [flyoutData]);
 
     const handleCloseFlyout = useCallback(() => managedFlyoutApi.closeFlyout(), [managedFlyoutApi]);
     const handleCloseChildFlyout = useCallback(
@@ -50,21 +50,27 @@ const FlyoutPanel = React.memo(
       [managedFlyoutApi]
     );
 
+    const entry = flyoutData?.entry;
+    const entryProps = useMemo(() => flyoutData?.props || {}, [flyoutData]);
+
     const bodyToRender = useMemo<React.ReactNode>(
-      () => (entry && entry.renderBody ? entry.renderBody(managedFlyoutApi) : null),
-      [entry, managedFlyoutApi]
+      () => (entry && entry.renderBody ? entry.renderBody(managedFlyoutApi, entryProps) : null),
+      [entry, managedFlyoutApi, entryProps]
     );
     const headerToRender = useMemo<React.ReactNode>(
-      () => (entry && entry.renderHeader ? entry.renderHeader(managedFlyoutApi) : null),
-      [entry, managedFlyoutApi]
+      () => (entry && entry.renderHeader ? entry.renderHeader(managedFlyoutApi, entryProps) : null),
+      [entry, managedFlyoutApi, entryProps]
     );
     const flyoutProps = useMemo<FlyoutPropsEnhanced>(
-      () => (entry && entry.flyoutProps ? entry.flyoutProps(managedFlyoutApi) : { size: 400 }),
-      [entry, managedFlyoutApi]
+      () =>
+        entry && entry.flyoutProps
+          ? entry.flyoutProps(managedFlyoutApi, entryProps)
+          : { size: 400 },
+      [entry, managedFlyoutApi, entryProps]
     );
     const footerActions = useMemo<Record<string, React.ReactElement>>(
-      () => (entry && entry.footerActions ? entry.footerActions(managedFlyoutApi) : {}),
-      [entry, managedFlyoutApi]
+      () => (entry && entry.footerActions ? entry.footerActions(managedFlyoutApi, entryProps) : {}),
+      [entry, managedFlyoutApi, entryProps]
     );
 
     if (!isOpen) {
@@ -129,15 +135,17 @@ export const FlyoutContainer: React.FC = () => {
   const flyout$ = managedFlyoutService.getFlyout$();
   const flyoutState = useObservable(flyout$, { main: null, child: null });
 
+  const mainEntry = flyoutState.main;
+
   const mainFlyoutWidth = useMemo(
-    () => flyoutState.main?.flyoutProps?.(managedFlyoutApi).size || 400,
-    [flyoutState.main, managedFlyoutApi]
+    () => mainEntry?.entry.flyoutProps?.(managedFlyoutApi, mainEntry.props || {}).size || 400,
+    [mainEntry, managedFlyoutApi]
   );
 
   return (
     <>
       <FlyoutPanel
-        entry={flyoutState.main}
+        flyoutData={flyoutState.main}
         level="main"
         positionRight={0}
         managedFlyoutApi={managedFlyoutApi}
@@ -145,7 +153,7 @@ export const FlyoutContainer: React.FC = () => {
 
       {flyoutState.main && (
         <FlyoutPanel
-          entry={flyoutState.child}
+          flyoutData={flyoutState.child}
           level="child"
           positionRight={mainFlyoutWidth}
           managedFlyoutApi={managedFlyoutApi}
