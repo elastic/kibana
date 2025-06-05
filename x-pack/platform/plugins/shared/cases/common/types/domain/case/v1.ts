@@ -53,6 +53,8 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
+export const CaseIncrementalId = rt.union([rt.number, rt.undefined]);
+
 const CaseBaseFields = {
   /**
    * The description of the case
@@ -95,6 +97,10 @@ const CaseBaseFields = {
    * Observables
    */
   observables: rt.array(CaseObservableRt),
+  /**
+   * Incremental ID
+   */
+  incremental_id: CaseIncrementalId,
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(
