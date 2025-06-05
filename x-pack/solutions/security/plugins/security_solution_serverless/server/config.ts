@@ -74,6 +74,8 @@ export const configSchema = schema.object({
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
   }),
+
+  usageApi: usageApiConfig,
 });
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 

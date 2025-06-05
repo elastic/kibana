@@ -52,6 +52,15 @@ export const promptDictionary = {
   attackDiscoverySummaryMarkdown: `summaryMarkdown`,
   attackDiscoveryGenerationTitle: `generationTitle`,
   attackDiscoveryGenerationInsights: `generationInsights`,
+  defendInsightsIncompatibleAntivirusDefault: `defendInsights-incompatibleAntivirusDefault`,
+  defendInsightsIncompatibleAntivirusRefine: `defendInsights-incompatibleAntivirusRefine`,
+  defendInsightsIncompatibleAntivirusContinue: `defendInsights-incompatibleAntivirusContinue`,
+  defendInsightsIncompatibleAntivirusGroup: 'defendInsights-incompatibleAntivirusGroup',
+  defendInsightsIncompatibleAntivirusEvents: 'defendInsights-incompatibleAntivirusEvents',
+  defendInsightsIncompatibleAntivirusEventsId: 'defendInsights-incompatibleAntivirusEventsId',
+  defendInsightsIncompatibleAntivirusEventsEndpointId:
+    'defendInsights-incompatibleAntivirusEventsEndpointId',
+  defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
 };
 
 export const localPrompts: Prompt[] = [

@@ -184,7 +184,6 @@ export const postActionsConnectorExecuteRoute = (
             isOssModel,
             conversationId,
             context: ctx,
-            getElser,
             logger,
             inference,
             messages: (newMessage ? [newMessage] : messages) ?? [],

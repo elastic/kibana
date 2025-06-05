@@ -131,6 +131,7 @@ jest.mock('./attack_discovery/schedules/disable');
 const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedulesRoute as jest.Mock;
 jest.mock('./attack_discovery/schedules/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
+import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
@@ -141,7 +142,8 @@ describe('registerRoutes', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, getElserIdMock);
+    const config = { elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID, responseTimeout: 60000 };
+    registerRoutes(server.router, loggerMock, config);
   });
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {
