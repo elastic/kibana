@@ -37,38 +37,40 @@ import { useStoredAssistantConnectorId } from '../../../../onboarding/components
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 
-interface ReprocessFailedRulesDialogProps {
+interface StartMigrationModalProps {
+  lastConnectorId?: RuleMigrationSettings['connectorId'];
+  skipPrebuiltRulesMatching?: RuleMigrationSettings['skipPrebuiltRulesMatching'];
+  startMigrationWithSettings: (settings: RuleMigrationSettings) => void;
   onClose: () => void;
-  onSubmit: (settings: RuleMigrationSettings) => void;
-  onCancel?: () => void;
-  lastExecution?: Partial<RuleMigrationSettings>;
-  connectors: ActionConnector[];
-  numberOfFailedRules: number;
+  availableConnectors: ActionConnector[];
+  numberOfRules: number;
 }
 
-const DATA_TEST_SUBJ_PREFIX = 'reprocessFailedRulesDialog';
+export const DATA_TEST_SUBJ_PREFIX = 'startMigrationModal';
 
-export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = React.memo(
-  function ReprocessFailedRulesDialog({
+export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
+  function StartMigrationModal({
+    lastConnectorId,
+    skipPrebuiltRulesMatching = false,
     onClose: closeModal,
-    lastExecution,
-    onSubmit: startMigration,
-    numberOfFailedRules = 0,
-    connectors = [],
+    startMigrationWithSettings,
+    numberOfRules = 0,
+    availableConnectors = [],
   }) {
     const spaceId = useSpaceId() ?? 'default';
     const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
     const [siemMigrationsDefaultConnectorId] = useStoredAssistantConnectorId(spaceId);
     const [selectedConnectorId, setSelectedConnectorId] = useState<string>(
-      lastExecution?.connectorId || siemMigrationsDefaultConnectorId || ''
+      lastConnectorId || siemMigrationsDefaultConnectorId || ''
     );
     const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      lastExecution?.skipPrebuiltRulesMatching ?? true
+      !skipPrebuiltRulesMatching
     );
+
     const modalTitleId = useGeneratedHtmlId();
 
     const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-      return connectors.map((connector) => {
+      return availableConnectors.map((connector) => {
         const connectorDescription = getConnectorDescription({
           connector,
           actionTypeRegistry,
@@ -84,10 +86,10 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
               </EuiText>
             </>
           ),
-          'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector-${connector.id}`,
+          'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}-ConnectorOption`,
         };
       });
-    }, [actionTypeRegistry, connectors]);
+    }, [actionTypeRegistry, availableConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
     const { onClick: onClickSetupAIConnector, href: setupAIConnectorLink } =
@@ -96,19 +98,19 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
         path: `${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationsAiConnectors}`,
       });
 
-    const startMigrationWithSettings = useCallback(() => {
-      startMigration({
+    const onStartMigrationWithSettings = useCallback(() => {
+      startMigrationWithSettings({
         connectorId: selectedConnectorId,
         skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
       });
       closeModal();
-    }, [startMigration, selectedConnectorId, enablePrebuiltRulesMatching, closeModal]);
+    }, [startMigrationWithSettings, selectedConnectorId, enablePrebuiltRulesMatching, closeModal]);
 
     return (
       <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
         <EuiModalHeader>
           <EuiModalHeaderTitle data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`} id={modalTitleId}>
-            {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfFailedRules)}
+            {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfRules)}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -163,7 +165,7 @@ export const ReprocessFailedRulesDialog: FC<ReprocessFailedRulesDialogProps> = R
                 data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Translate`}
                 color="primary"
                 fill
-                onClick={startMigrationWithSettings}
+                onClick={onStartMigrationWithSettings}
               >
                 {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
               </EuiButton>

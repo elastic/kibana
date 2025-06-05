@@ -41,9 +41,9 @@ import type { FilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { ReprocessFailedRulesDialog } from './reprocess_rule_dialog';
+import { StartMigrationModal } from './start_migration_modal';
 import { useGetAIConnectors } from './use_get_ai_connectors';
-import { useReprocessFailedRulesDialog } from './use_reprocess_failed_rules';
+import { useStartMigrationModal } from './use_start_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -229,14 +229,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     );
 
     const {
-      isVisible: isReprocessFailedRulesDialogVisible,
-      onReprocessRulesClick,
-      props: reprocessFailedRulesDialogProps,
-    } = useReprocessFailedRulesDialog({
-      aiConnectors,
-      migrationStats,
+      isVisible: isStartMigrationModalVisible,
+      showStartMigrationModal,
+      startMigrationWithSettings,
+      closeModal,
+    } = useStartMigrationModal({
+      migrationId,
       startMigration,
-      numberOfFailedRules: translationStats?.rules.failed ?? 0,
     });
 
     const isRulesLoading =
@@ -331,8 +330,15 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
-        {isReprocessFailedRulesDialogVisible && (
-          <ReprocessFailedRulesDialog {...reprocessFailedRulesDialogProps} />
+        {isStartMigrationModalVisible && (
+          <StartMigrationModal
+            availableConnectors={aiConnectors}
+            lastConnectorId={migrationStats?.last_execution?.connector_id}
+            skipPrebuiltRulesMatching={migrationStats?.last_execution?.skip_prebuilt_rules_matching}
+            onClose={closeModal}
+            startMigrationWithSettings={startMigrationWithSettings}
+            numberOfRules={translationStats?.rules.total ?? 0}
+          />
         )}
 
         {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
@@ -373,7 +379,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       numberOfSelectedRules={selectedMigrationRules.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
-                      reprocessFailedRules={onReprocessRulesClick}
+                      reprocessFailedRules={showStartMigrationModal}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
