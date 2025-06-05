@@ -7,7 +7,6 @@
 
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { buildChildrenTree, buildFocusedTraceItems } from './build_focused_trace_items';
-import type { TraceItems } from './get_trace_items';
 
 const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId } as TraceItem);
 
