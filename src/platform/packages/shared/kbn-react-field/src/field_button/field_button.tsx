@@ -107,7 +107,7 @@ export function FieldButton({
         </span>
       )}
       {fieldInfoIcon && (
-        <div className="kbnFieldButton__infoIcon" css={styles.infoIcon}>
+        <div css={styles.infoIcon} data-test-subj="kbnFieldButton_fieldInfoIcon">
           {fieldInfoIcon}
         </div>
       )}
