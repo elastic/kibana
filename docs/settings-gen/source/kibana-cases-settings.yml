@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: Cases settings in Kibana
+id: cases-settings
 page_description: |
   You do not need to configure any additional settings to use [cases](docs-content://explore-analyze/alerts-cases/cases.md) in {{kib}}. To provide greater control over case features, you can configure the following settings in the `kibana.yml` file.
 
