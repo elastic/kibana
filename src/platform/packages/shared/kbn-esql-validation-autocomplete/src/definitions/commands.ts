@@ -75,7 +75,10 @@ import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForCompletion } from '../autocomplete/commands/completion';
+import {
+  suggest as suggestForCompletion,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterCompletion,
+} from '../autocomplete/commands/completion';
 import {
   suggest as suggestForStats,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
@@ -723,6 +726,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
     suggest: suggestForCompletion,
     validate: validateCompletion,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterCompletion,
   },
   {
     hidden: true,

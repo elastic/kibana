@@ -13,7 +13,7 @@ import { ESQLAstCommand, ESQLAstCompletionCommand } from '@kbn/esql-ast/src/type
 import { getExpressionType } from '../../../shared/helpers';
 import { ReferenceMaps } from '../../types';
 
-const supportedPromptTypes = ['text', 'keyword', 'unknown'];
+const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 
 /**
  * Validates the COMPLETION command:
@@ -23,7 +23,7 @@ const supportedPromptTypes = ['text', 'keyword', 'unknown'];
 export const validate = (command: ESQLAstCommand, references: ReferenceMaps): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { prompt, location } = command as ESQLAstCompletionCommand;
+  const { prompt, location, targetField } = command as ESQLAstCompletionCommand;
 
   const promptExpressionType = getExpressionType(
     prompt,
@@ -46,6 +46,17 @@ export const validate = (command: ESQLAstCommand, references: ReferenceMaps): ES
       code: 'completionUnsupportedFieldType',
     });
   }
+
+  const targetName = targetField?.name || 'completion';
+
+  // Sets the target field so the column is recognized after the command is applied
+  references.userDefinedColumns.set(targetName, [
+    {
+      name: targetName,
+      location: targetField?.location || command.location,
+      type: 'keyword',
+    },
+  ]);
 
   return messages;
 };
