@@ -10,6 +10,7 @@ import { RulesClient } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { StreamQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
+import pLimit from 'p-limit';
 import { QueryLink } from '../../../../../common/assets';
 import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
@@ -219,25 +220,30 @@ export class QueryClient {
     stream: string
   ) {
     const { rulesClient } = this.dependencies;
+    const limiter = pLimit(10);
 
     await Promise.all([
       ...queriesToCreate.map((query) => {
-        return rulesClient
-          .create<EsqlRuleParams>(this.toCreateRuleParams(query, stream))
-          .catch((error) => {
-            if (isBoom(error) && error.output.statusCode === 409) {
-              return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
-            }
-          });
+        return limiter(() =>
+          rulesClient
+            .create<EsqlRuleParams>(this.toCreateRuleParams(query, stream))
+            .catch((error) => {
+              if (isBoom(error) && error.output.statusCode === 409) {
+                return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
+              }
+            })
+        );
       }),
       ...queriesToUpdate.map((query) => {
-        return rulesClient
-          .update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream))
-          .catch((error) => {
-            if (isBoom(error) && error.output.statusCode === 404) {
-              return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
-            }
-          });
+        return limiter(() =>
+          rulesClient
+            .update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream))
+            .catch((error) => {
+              if (isBoom(error) && error.output.statusCode === 404) {
+                return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
+              }
+            })
+        );
       }),
     ]);
   }
