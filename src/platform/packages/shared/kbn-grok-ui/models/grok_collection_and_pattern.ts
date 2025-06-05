@@ -69,7 +69,11 @@ export class GrokCollection {
     }
   }
 
-  public addPattern(id: string, rawPattern: string, destination: Map<string, GrokPattern>) {
+  public addPattern(
+    id: string,
+    rawPattern: string,
+    destination: Map<string, GrokPattern> = this.patterns
+  ) {
     if (this.patterns.has(id)) {
       // eslint-disable-next-line no-console
       console.warn('Warning: pattern with ID: %s already exists', id);
@@ -89,7 +93,7 @@ export class GrokCollection {
     this.resolvePatterns(this.customPatterns);
   }
 
-  public resolvePatterns(source: Map<string, GrokPattern>) {
+  public resolvePatterns(source: Map<string, GrokPattern> = this.patterns) {
     source.forEach((pattern) => {
       if (!pattern.isResolved()) {
         pattern.resolvePattern();
