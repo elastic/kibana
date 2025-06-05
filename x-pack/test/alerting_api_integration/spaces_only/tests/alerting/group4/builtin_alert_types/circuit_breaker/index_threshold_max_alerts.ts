@@ -24,7 +24,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('index threshold rule that hits max alerts circuit breaker', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/193876
+  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -71,7 +72,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // this should trigger the circuit breaker and while we'd expect groups 0 and 1
       // to recover under normal conditions, they should stay active because the
       // circuit breaker hit
-      await createEsDocumentsInGroups(22, getEndDate(), 2);
+      await createEsDocumentsInGroups(112, getEndDate(), 2);
 
       // get the events we're expecting
       const events = await retry.try(async () => {
