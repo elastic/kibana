@@ -54,6 +54,10 @@ import {
   pipeStreamingResponse,
   sanitizeRequest,
 } from './lib/utils';
+import {
+  TaskErrorSource,
+  createTaskRunError,
+} from 'x-pack/platform/plugins/shared/task_manager/server';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -339,7 +343,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
-      throw new Error(errorMessage);
+      throw createTaskRunError(new Error(errorMessage), TaskErrorSource.USER);
     }
   }
 
