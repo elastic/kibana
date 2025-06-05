@@ -96,9 +96,7 @@ export const HighlightedFields: FC = () => {
     useDocumentDetailsContext();
 
   const [isEditLoading, setIsEditLoading] = useState(false);
-  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
-    'editHighlightedFieldsEnabled'
-  );
+  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled('editHighlightedFields');
 
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,

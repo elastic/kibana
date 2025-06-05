@@ -14,6 +14,7 @@ import {
   EuiRadioGroup,
   EuiDescribedFormGroup,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { SetupTechnology } from '../../../../../types';
@@ -25,11 +26,13 @@ export const SetupTechnologySelector = ({
   allowedSetupTechnologies,
   setupTechnology,
   onSetupTechnologyChange,
+  isAgentlessDefault,
 }: {
   disabled: boolean;
   allowedSetupTechnologies: SetupTechnology[];
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
+  isAgentlessDefault: boolean;
 }) => {
   return (
     <EuiDescribedFormGroup
@@ -64,12 +67,21 @@ export const SetupTechnologySelector = ({
                     id="xpack.fleet.setupTechnology.agentlessInputDisplay"
                     defaultMessage="Agentless"
                   />{' '}
-                  <EuiBetaBadge
-                    label="Beta"
-                    size="s"
-                    tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
-                    alignment="middle"
-                  />
+                  {isAgentlessDefault ? (
+                    <EuiBadge>
+                      <FormattedMessage
+                        id="xpack.fleet.setupTechnology.agentlessDeployment.recommendedBadge"
+                        defaultMessage="Recommended"
+                      />
+                    </EuiBadge>
+                  ) : (
+                    <EuiBetaBadge
+                      label="Beta"
+                      size="s"
+                      tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
+                      alignment="middle"
+                    />
+                  )}
                 </strong>
                 <EuiText size="s">
                   <p>

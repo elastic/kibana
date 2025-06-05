@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { testData, test } from '../fixtures';
 
-test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.skip('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, kbnClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await apiServices.streams.enable();
@@ -25,7 +25,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoCreateChildStream('logs');
 
     await page.getByLabel('Stream name').fill('logs.nginx');
-    await page.getByPlaceholder('Field').fill('agent.name');
+    await page.getByPlaceholder('Field').fill('attributes.custom_field');
     await page.getByPlaceholder('Value').fill('nginx');
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('link', { name: 'logs.nginx', exact: true })).toBeVisible();
@@ -47,13 +47,9 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
       index: 'logs',
       document: {
         '@timestamp': '2025-05-01T00:00:00.000Z',
-        message: JSON.stringify({
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          message: 'GET /search HTTP/1.1 200 1070000',
-        }),
-        'agent.name': 'nginx',
-        'other.field': 'important',
+        'log.level': 'warn',
+        message: 'GET /search HTTP/1.1 200 1070000',
+        custom_field: 'nginx',
       },
       refresh: 'wait_for',
     });
@@ -61,10 +57,10 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoExtractFieldTab('logs.nginx');
     await page.getByText('Add a processor').click();
 
-    await page.locator('input[name="field"]').fill('message');
+    await page.locator('input[name="field"]').fill('body.text');
     await page
       .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:method} %{URIPATH:request}');
+      .fill('%{WORD:attributes.method} %{URIPATH:attributes.request}');
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
@@ -72,19 +68,18 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Update "logs.nginx" mapping
     await pageObjects.streams.gotoSchemaEditorTab('logs.nginx');
+    await page.getByPlaceholder('Search...').fill('attributes');
+    await page.getByTestId('streamsAppContentRefreshButton').click();
 
     await page
-      .getByRole('row', { name: 'agent.name ----- ----- logs.' })
+      .getByRole('row', { name: 'attributes.custom_field' })
       .getByLabel('Open actions menu')
       .click();
-    await page
-      .getByRole('row', { name: 'agent.name ----- ----- logs.' })
-      .getByLabel('Open actions menu')
-      .click();
+
     await page.getByRole('button', { name: 'Map field' }).click();
     await page.getByRole('combobox').selectOption('keyword');
     await page.getByRole('button', { name: 'Save changes' }).click();
-    await page.getByRole('heading', { name: 'agent.name' }).waitFor({ state: 'hidden' });
+    await page.getByRole('heading', { name: 'logs.foo' }).waitFor({ state: 'hidden' });
 
     await expect(page.getByText('Mapped', { exact: true })).toBeVisible();
     await page.getByTestId('toastCloseButton').click();

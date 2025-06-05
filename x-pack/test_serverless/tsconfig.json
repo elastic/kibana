@@ -91,7 +91,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/data-usage-plugin",
-    "@kbn/observability-plugin",
     "@kbn/scout-info",
     "@kbn/streams-schema",
   ]

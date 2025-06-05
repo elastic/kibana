@@ -21,6 +21,9 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
+        "maintenanceWindow": Object {
+          "enabled": true,
+        },
         "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
           "maxScheduledPerMinute": 32000,
@@ -39,6 +42,7 @@ describe('config validation', () => {
         },
         "rulesSettings": Object {
           "cacheInterval": 60000,
+          "enabled": true,
         },
       }
     `);

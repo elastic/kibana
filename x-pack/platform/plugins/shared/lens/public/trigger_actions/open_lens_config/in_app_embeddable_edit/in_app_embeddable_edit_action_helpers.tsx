@@ -15,7 +15,7 @@ import { DatasourceMap, VisualizationMap } from '../../../types';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
-import { mountInlinePanel } from '../../../react_embeddable/inline_editing/mount';
+import { mountInlinePanel } from '../../../react_embeddable/mount';
 import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
 import type { LensChartLoadEvent } from './types';
 

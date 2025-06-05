@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
@@ -15,7 +15,13 @@ import * as esMigrationsMock from '../__fixtures__/es_deprecations';
 import type { DataSourceExclusions, FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
 import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
+import * as updateIndexModule from '../update_index';
+
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
+
+jest.mock('../update_index', () => ({
+  updateIndex: jest.fn(),
+}));
 
 describe('getESUpgradeStatus', () => {
   const featureSet: FeatureSet = {
@@ -24,7 +30,13 @@ describe('getESUpgradeStatus', () => {
     mlSnapshots: true,
     migrateDataStreams: true,
   };
+  const log = loggingSystemMock.createLogger();
+
   const dataSourceExclusions: DataSourceExclusions = {};
+
+  const mockUpdateIndex = updateIndexModule.updateIndex as jest.MockedFunction<
+    typeof updateIndexModule.updateIndex
+  >;
 
   const resolvedIndices = {
     indices: fakeIndexNames.map((indexName) => {
@@ -90,12 +102,12 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('calls /_migration/deprecations', async () => {
-    await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+    await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions }, log);
     expect(esClient.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+    const resp = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions }, log);
     expect(resp).toMatchSnapshot();
   });
 
@@ -112,7 +124,7 @@ describe('getESUpgradeStatus', () => {
     });
 
     await expect(
-      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions }, log)
     ).resolves.toHaveProperty('totalCriticalDeprecations', 1);
   });
 
@@ -129,7 +141,7 @@ describe('getESUpgradeStatus', () => {
     });
 
     await expect(
-      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions })
+      getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions }, log)
     ).resolves.toHaveProperty('totalCriticalDeprecations', 0);
   });
 
@@ -154,7 +166,11 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      { featureSet, dataSourceExclusions },
+      log
+    );
     const {
       totalCriticalDeprecations,
       migrationsDeprecations,
@@ -174,23 +190,31 @@ describe('getESUpgradeStatus', () => {
     // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
     esClient.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions,
-    });
+    const enabledUpgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet,
+        dataSourceExclusions,
+      },
+      log
+    );
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
     ]).toHaveLength(2);
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
-    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet: {
-        ...featureSet,
-        mlSnapshots: false,
+    const disabledUpgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet: {
+          ...featureSet,
+          mlSnapshots: false,
+        },
+        dataSourceExclusions,
       },
-      dataSourceExclusions,
-    });
+      log
+    );
 
     expect([
       ...disabledUpgradeStatus.migrationsDeprecations,
@@ -206,23 +230,31 @@ describe('getESUpgradeStatus', () => {
     } as MigrationDeprecationsResponse;
     esClient.migration.deprecations.mockResponse(mockResponse);
 
-    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions,
-    });
+    const enabledUpgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet,
+        dataSourceExclusions,
+      },
+      log
+    );
     expect([
       ...enabledUpgradeStatus.migrationsDeprecations,
       ...enabledUpgradeStatus.enrichedHealthIndicators,
     ]).toHaveLength(1);
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
-    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet: {
-        ...featureSet,
-        migrateDataStreams: false,
+    const disabledUpgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet: {
+          ...featureSet,
+          migrateDataStreams: false,
+        },
+        dataSourceExclusions,
       },
-      dataSourceExclusions,
-    });
+      log
+    );
 
     expect([
       ...disabledUpgradeStatus.migrationsDeprecations,
@@ -265,13 +297,17 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, {
-      dataSourceExclusions,
-      featureSet: {
-        ...featureSet,
-        reindexCorrectiveActions: false,
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        dataSourceExclusions,
+        featureSet: {
+          ...featureSet,
+          reindexCorrectiveActions: false,
+        },
       },
-    });
+      log
+    );
 
     expect([
       ...upgradeStatus.migrationsDeprecations,
@@ -339,10 +375,14 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions: {},
-    });
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet,
+        dataSourceExclusions: {},
+      },
+      log
+    );
 
     expect(upgradeStatus.migrationsDeprecations).toHaveLength(2);
     expect(
@@ -397,10 +437,14 @@ describe('getESUpgradeStatus', () => {
     // @ts-expect-error not full interface of response
     esClient.indices.resolveIndex.mockResponse(resolvedIndices);
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, {
-      featureSet,
-      dataSourceExclusions: {},
-    });
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet,
+        dataSourceExclusions: {},
+      },
+      log
+    );
 
     expect([
       ...upgradeStatus.migrationsDeprecations,
@@ -441,7 +485,11 @@ describe('getESUpgradeStatus', () => {
       },
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      { featureSet, dataSourceExclusions },
+      log
+    );
     expect(upgradeStatus.totalCriticalHealthIssues + upgradeStatus.totalCriticalDeprecations).toBe(
       2
     );
@@ -495,5 +543,89 @@ describe('getESUpgradeStatus', () => {
         },
       ]
     `);
+  });
+
+  it('Auto correct apm-7 indices when they are empty', async () => {
+    esClient.migration.deprecations.mockResponse({
+      cluster_settings: [],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {
+        'apm-7.17.7-transaction.000001': [
+          {
+            level: 'critical',
+            message: 'Old index with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
+            details: 'This index has version: 7.17.25',
+            resolve_during_rolling_upgrade: false,
+            _meta: {
+              reindex_required: true,
+            },
+          },
+        ],
+        'apm-7.17.7-span.000001': [
+          {
+            level: 'critical',
+            message: 'Old index with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
+            details: 'This index has version: 7.17.25',
+            resolve_during_rolling_upgrade: false,
+            _meta: {
+              reindex_required: true,
+            },
+          },
+        ],
+        'apm-7.17.7-onboarding.25-05-27': [
+          {
+            level: 'critical',
+            message: 'Old index with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
+            details: 'This index has version: 7.17.25',
+            resolve_during_rolling_upgrade: false,
+            _meta: {
+              reindex_required: true,
+            },
+          },
+        ],
+      },
+      data_streams: {},
+      ilm_policies: {},
+      templates: {},
+    });
+
+    esClient.count.mockImplementation((params): any => {
+      if (!params) {
+        return Promise.reject(new Error('Params are required'));
+      }
+      if (params!.index === 'apm-7.17.7-transaction.000001') {
+        return Promise.resolve({ body: { count: 0 } });
+      } else if (params!.index === 'apm-7.17.7-span.000001') {
+        return Promise.resolve({ body: { count: 0 } });
+      } else if (params!.index === 'apm-7.17.7-onboarding.25-05-27') {
+        return Promise.resolve({ body: { count: 1 } });
+      }
+      return Promise.resolve({ body: { count: 0 } });
+    });
+
+    const upgradeStatus = await getESUpgradeStatus(
+      esClient,
+      {
+        featureSet,
+        dataSourceExclusions: {},
+      },
+      log
+    );
+
+    expect(upgradeStatus.migrationsDeprecations).toHaveLength(1);
+    expect(mockUpdateIndex).toHaveBeenCalledTimes(2);
+    expect(mockUpdateIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'apm-7.17.7-transaction.000001',
+        operations: ['blockWrite'],
+      })
+    );
+    expect(mockUpdateIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'apm-7.17.7-span.000001', operations: ['blockWrite'] })
+    );
   });
 });

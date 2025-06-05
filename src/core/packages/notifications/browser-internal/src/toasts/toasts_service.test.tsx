@@ -12,22 +12,14 @@ import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.m
 import { ToastsService } from './toasts_service';
 import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EventReporter } from './telemetry';
-
-const mockI18n: any = {
-  Context: function I18nContext() {
-    return '';
-  },
-};
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 const mockOverlays = overlayServiceMock.createStartContract();
-const mockTheme = themeServiceMock.createStartContract();
-const mockUserProfile = userProfileServiceMock.createStart();
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
+const mockRendering = renderingServiceMock.create();
 
 const eventReporter = new EventReporter({ analytics: mockAnalytics });
 
@@ -50,10 +42,7 @@ describe('#start()', () => {
     expect(mockReactDomRender).not.toHaveBeenCalled();
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
-      analytics: mockAnalytics,
-      i18n: mockI18n,
-      theme: mockTheme,
-      userProfile: mockUserProfile,
+      rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,
@@ -70,10 +59,7 @@ describe('#start()', () => {
     ).toBeInstanceOf(ToastsApi);
     expect(
       toasts.start({
-        analytics: mockAnalytics,
-        i18n: mockI18n,
-        theme: mockTheme,
-        userProfile: mockUserProfile,
+        rendering: mockRendering,
         targetDomElement,
         overlays: mockOverlays,
         eventReporter,
@@ -90,10 +76,7 @@ describe('#stop()', () => {
 
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
-      analytics: mockAnalytics,
-      i18n: mockI18n,
-      theme: mockTheme,
-      userProfile: mockUserProfile,
+      rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,
@@ -117,10 +100,7 @@ describe('#stop()', () => {
 
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
-      analytics: mockAnalytics,
-      i18n: mockI18n,
-      theme: mockTheme,
-      userProfile: mockUserProfile,
+      rendering: mockRendering,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,

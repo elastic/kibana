@@ -130,7 +130,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/apm-data-access-plugin",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -189,9 +188,12 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-observability",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/apm-sources-access-plugin",
   ]
 }

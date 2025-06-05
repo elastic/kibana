@@ -23,21 +23,39 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.string(),
-  label: schema.maybe(schema.string()),
-  order: schema.number(),
+  id: schema.string({ meta: { description: 'The unique ID of the link' } }),
+  label: schema.maybe(
+    schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
+  ),
+  order: schema.number({
+    meta: { description: 'The position this link should appear in the order of the list' },
+  }),
 };
 
 const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
-  destinationRefName: schema.string(),
+  destinationRefName: schema.string({
+    meta: { description: 'The name of the SavedObject reference to the linked dashboard' },
+  }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.boolean(),
-        useCurrentFilters: schema.boolean(),
-        useCurrentDateRange: schema.boolean(),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        useCurrentFilters: schema.boolean({
+          meta: {
+            description: 'Whether to use the filters and query from the origin dashboard',
+          },
+        }),
+        useCurrentDateRange: schema.boolean({
+          meta: {
+            description: 'Whether to use the date range from the origin dashboard',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )
@@ -47,12 +65,20 @@ const dashboardLinkSchema = schema.object({
 const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string(),
+  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.boolean(),
-        encodeUrl: schema.boolean(),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        encodeUrl: schema.boolean({
+          meta: {
+            description: 'Whether to escape the URL with percent encoding',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )
@@ -61,11 +87,20 @@ const externalLinkSchema = schema.object({
 
 const linksAttributesSchema = schema.object(
   {
-    title: schema.string(),
-    description: schema.maybe(schema.string()),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
+    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
+    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
+      meta: { description: 'The list of links to display' },
+    }),
     layout: schema.maybe(
-      schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)])
+      schema.oneOf(
+        [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
+        {
+          meta: {
+            description: 'Denote whether to display the links in a horizontal or vertical layout',
+          },
+        }
+      )
     ),
   },
   { unknowns: 'forbid' }

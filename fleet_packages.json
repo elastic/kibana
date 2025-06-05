@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "8.15.0-preview-1716438434",
+    "version": "8.19.0-preview-1748425740",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },

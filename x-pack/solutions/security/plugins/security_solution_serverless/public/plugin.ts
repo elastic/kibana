@@ -24,7 +24,7 @@ import {
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
-import { getProductProductFeatures } from '../common/pli/pli_features';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -44,7 +44,7 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
@@ -55,7 +55,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    securitySolution.setProductFeatureKeys(getProductProductFeatures(productTypes));
+    securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
 
     setupDeps.discover.showInlineTopNav();
 
@@ -78,7 +78,7 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services);
+    startNavigation(services, productTypes);
 
     return {};
   }

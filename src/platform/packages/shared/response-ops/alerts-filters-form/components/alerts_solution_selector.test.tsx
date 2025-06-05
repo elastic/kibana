@@ -9,99 +9,42 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
-import { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { AlertsSolutionSelector } from './alerts_solution_selector';
 import { SOLUTION_SELECTOR_SUBJ } from '../constants';
 import userEvent from '@testing-library/user-event';
+import { RuleTypeSolution } from '@kbn/alerting-types';
 
-const http = httpServiceMock.createStartContract();
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
-const mockUseGetInternalRuleTypesQuery = useGetInternalRuleTypesQuery as jest.Mock;
+const availableSolutions: RuleTypeSolution[] = ['observability', 'stack', 'security'];
 
 describe('AlertsSolutionSelector', () => {
-  it('should not render when only no solution is available', () => {
-    mockUseGetInternalRuleTypesQuery.mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    });
-    const mockOnSolutionChange = jest.fn();
+  it('should render the available options in a select', async () => {
     render(
       <AlertsSolutionSelector
-        solution={undefined}
-        onSolutionChange={mockOnSolutionChange}
-        services={{ http }}
-      />
-    );
-    expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).not.toBeInTheDocument();
-    expect(mockOnSolutionChange).not.toHaveBeenCalled();
-  });
-
-  it.each(['stack', 'security', 'observability'])(
-    'should not render when only one solution (%s) is available and auto-select it',
-    (solution) => {
-      mockUseGetInternalRuleTypesQuery.mockReturnValue({
-        data: [{ id: '.test-rule-type', name: 'Test rule type', solution }],
-        isLoading: false,
-        isError: false,
-      });
-      const mockOnSolutionChange = jest.fn();
-      render(
-        <AlertsSolutionSelector
-          solution={undefined}
-          onSolutionChange={mockOnSolutionChange}
-          services={{ http }}
-        />
-      );
-      expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).not.toBeInTheDocument();
-      expect(mockOnSolutionChange).toHaveBeenCalledWith(solution);
-    }
-  );
-
-  it('should not render when only stack and observability are available and auto-select observability', () => {
-    mockUseGetInternalRuleTypesQuery.mockReturnValue({
-      data: [
-        { id: '.es-query', name: 'Elasticsearch Query', solution: 'stack' },
-        { id: '.custom-threshold', name: 'Custom threshold', solution: 'observability' },
-      ] as InternalRuleType[],
-      isLoading: false,
-      isError: false,
-    });
-    const mockOnSolutionChange = jest.fn();
-    render(
-      <AlertsSolutionSelector
-        solution={undefined}
-        onSolutionChange={mockOnSolutionChange}
-        services={{ http }}
-      />
-    );
-    expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).not.toBeInTheDocument();
-    expect(mockOnSolutionChange).toHaveBeenCalledWith('observability');
-  });
-
-  it('should render when security and observability/stack are available', async () => {
-    mockUseGetInternalRuleTypesQuery.mockReturnValue({
-      data: [
-        { id: '.es-query', name: 'Elasticsearch Query', solution: 'stack' },
-        { id: '.custom-threshold', name: 'Custom threshold', solution: 'observability' },
-        { id: 'siem.esqlRule', name: 'Security ESQL Rule', solution: 'security' },
-      ] as InternalRuleType[],
-      isLoading: false,
-      isError: false,
-    });
-    render(
-      <AlertsSolutionSelector
+        availableSolutions={availableSolutions}
         solution={undefined}
         onSolutionChange={jest.fn()}
-        services={{ http }}
       />
     );
     expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
-    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')).toHaveLength(3);
     expect(screen.getByText('Observability')).toBeInTheDocument();
     expect(screen.getByText('Security')).toBeInTheDocument();
+    expect(screen.getByText('Stack')).toBeInTheDocument();
+  });
+
+  it('should call onSolutionChange with the selected solution', async () => {
+    const onSolutionChange = jest.fn();
+    render(
+      <AlertsSolutionSelector
+        availableSolutions={availableSolutions}
+        solution={undefined}
+        onSolutionChange={onSolutionChange}
+      />
+    );
+    expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByText('Observability'));
+    expect(onSolutionChange).toHaveBeenCalledWith('observability');
   });
 });

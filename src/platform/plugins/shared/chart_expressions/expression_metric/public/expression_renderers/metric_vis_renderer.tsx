@@ -82,6 +82,7 @@ export const getMetricVisRenderer = (
             handlers.hasCompatibleActions?.bind(handlers)
           )
         : false;
+
       const renderComplete = () => {
         performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
 
