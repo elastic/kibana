@@ -79,7 +79,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       await logsEsClient.createIndexTemplate(IndexTemplateName.SomeFailureStore);
     },
     teardown: async ({ logsEsClient }) => {
-      await logsEsClient.deleteIndexTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
+      await logsEsClient.deleteIndexTemplate(IndexTemplateName.SomeFailureStore);
       await logsEsClient.deleteComponentTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
       await logsEsClient.deleteCustomPipeline(`${IndexTemplateName.SomeFailureStore}@pipeline`);
       if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
