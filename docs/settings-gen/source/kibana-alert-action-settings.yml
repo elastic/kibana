@@ -35,7 +35,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
