@@ -34,6 +34,7 @@ const hit = {
 describe('formatFieldValue', () => {
   afterEach(() => {
     (dataViewMock.getFormatterForField as jest.Mock).mockReset();
+    (dataViewMock.getFormatterForFieldNoDefault as jest.Mock).mockReset();
   });
 
   it('should call correct fieldFormatter for field', () => {
@@ -78,6 +79,19 @@ describe('formatFieldValue', () => {
       'formatted:19000'
     );
     expect(services.fieldFormats.getInstance).toHaveBeenCalledWith('duration', expect.any(Object));
+    expect(convertMock).toHaveBeenCalledWith(19000, 'html', { field, hit });
+  });
+
+  it('should call custom duration formatter if matching field is specified', () => {
+    const convertMock = jest.fn((value: unknown) => `formatted:${value}`);
+    (dataViewMock.getFormatterForFieldNoDefault as jest.Mock).mockReturnValue({
+      convert: convertMock,
+    });
+    const field = dataViewMock.fields.getByName('time.duration.us');
+    expect(formatFieldValue(19000, hit, services.fieldFormats, dataViewMock, field)).toBe(
+      'formatted:19000'
+    );
+    expect(dataViewMock.getFormatterForFieldNoDefault).toHaveBeenCalledWith('time.duration.us');
     expect(convertMock).toHaveBeenCalledWith(19000, 'html', { field, hit });
   });
 });
