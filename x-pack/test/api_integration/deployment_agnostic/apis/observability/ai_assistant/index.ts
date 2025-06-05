@@ -26,13 +26,12 @@ export default function aiAssistantApiIntegrationTests({
 
     // knowledge base
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.10_upgrade_test.spec.ts'));
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.16_upgrade_test.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.18_upgrade_test.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_reindex_concurrency.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
+    loadTestFile(require.resolve('./knowledge_base/knowledge_base_basic_operations.spec.ts'));
     loadTestFile(
       require.resolve('./knowledge_base/knowledge_base_change_model_from_elser_to_e5.spec.ts')
     );

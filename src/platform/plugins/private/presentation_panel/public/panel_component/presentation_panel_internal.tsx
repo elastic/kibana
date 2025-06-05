@@ -49,10 +49,10 @@ export const PresentationPanelInternal = <
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
-  const viewModeSubject = (() => {
+  const viewModeSubject = useMemo(() => {
     if (apiPublishesViewMode(api)) return api.viewMode$;
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
-  })();
+  }, [api]);
 
   const [
     dataLoading,

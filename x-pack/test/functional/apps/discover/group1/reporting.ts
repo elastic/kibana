@@ -18,12 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, share, header } = getPageObjects([
+  const { reporting, common, discover, timePicker, header, exports } = getPageObjects([
     'reporting',
     'common',
     'discover',
     'timePicker',
     'share',
+    'exports',
     'header',
   ]);
   const monacoEditor = getService('monacoEditor');
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await reporting.openExportTab();
+    await exports.clickExportTopNavButton();
     await reporting.clickGenerateReportButton();
 
     const url = await reporting.getReportURL(timeout);
@@ -114,15 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
-    await share.clickShareTopNavButton();
-    await reporting.openExportTab();
-    const copyButton = await testSubjects.find('shareReportingCopyURL');
+    await exports.clickExportTopNavButton();
+    await reporting.copyReportingPOSTURLValueToClipboard();
 
-    return decodeURIComponent((await copyButton.getAttribute('data-share-url')) ?? '');
+    const clipboardValue = decodeURIComponent(await browser.getClipboardValue());
+
+    await exports.closeExportFlyout();
+
+    return clipboardValue;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/219807
-  describe.skip('Discover CSV Export', () => {
+  describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
@@ -137,16 +140,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await reporting.openExportTab();
+        await reporting.openExportPopover();
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await reporting.openExportTab();
+        await reporting.openExportPopover();
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
     });
 
@@ -182,13 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // get shared URL value
         const sharedURL = await browser.getCurrentUrl();
 
-        // click 'Copy POST URL'
-        await share.clickShareTopNavButton();
-        await reporting.openExportTab();
-        const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = decodeURIComponent(
-          (await copyButton.getAttribute('data-share-url')) ?? ''
-        );
+        const reportURL = await getReportPostUrl();
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =

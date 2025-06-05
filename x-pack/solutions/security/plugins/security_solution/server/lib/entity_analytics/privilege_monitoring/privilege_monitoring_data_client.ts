@@ -17,7 +17,16 @@ import type {
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { merge } from 'lodash';
+import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
+
+import type {
+  CreatePrivMonUserRequestBody,
+  CreatePrivMonUserResponse,
+} from '../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import type { MonitoredUserDoc } from '../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -38,6 +47,7 @@ import {
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
+import type { PrivMonUserSource } from './types';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -54,10 +64,12 @@ interface PrivilegeMonitoringClientOpts {
 export class PrivilegeMonitoringDataClient {
   private apiKeyGenerator?: ApiKeyManager;
   private esClient: ElasticsearchClient;
+  private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
+    this.internalUserClient = opts.clusterClient.asInternalUser;
     this.apiKeyGenerator = opts.apiKeyManager;
     this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient: opts.soClient,
@@ -130,11 +142,14 @@ export class PrivilegeMonitoringDataClient {
 
   public async createOrUpdateIndex() {
     await createOrUpdateIndex({
-      esClient: this.esClient,
+      esClient: this.internalUserClient,
       logger: this.opts.logger,
       options: {
         index: this.getIndex(),
         mappings: generateUserIndexMappings(),
+        settings: {
+          hidden: true,
+        },
       },
     });
   }
@@ -163,6 +178,71 @@ export class PrivilegeMonitoringDataClient {
 
   public getIndex() {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
+  }
+
+  public async createUser(
+    user: CreatePrivMonUserRequestBody,
+    source: PrivMonUserSource
+  ): Promise<CreatePrivMonUserResponse> {
+    const doc = merge(user, {
+      labels: {
+        monitoring: { privileged_users: 'monitored' },
+        sources: [source],
+      },
+    });
+    const res = await this.esClient.index({
+      index: this.getIndex(),
+      refresh: 'wait_for',
+      document: doc,
+    });
+
+    const newUser = await this.getUser(res._id);
+    if (!newUser) {
+      throw new Error(`Failed to create user: ${res._id}`);
+    }
+    return newUser;
+  }
+
+  public async getUser(id: string): Promise<MonitoredUserDoc | undefined> {
+    const response = await this.esClient.get<MonitoredUserDoc>({
+      index: this.getIndex(),
+      id,
+    });
+    return response.found
+      ? ({ ...response._source, id: response._id } as MonitoredUserDoc)
+      : undefined;
+  }
+
+  public async updateUser(
+    id: string,
+    user: UpdatePrivMonUserRequestBody
+  ): Promise<MonitoredUserDoc | undefined> {
+    await this.esClient.update<MonitoredUserDoc>({
+      index: this.getIndex(),
+      refresh: 'wait_for',
+      id,
+      doc: user,
+    });
+    return this.getUser(id);
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    await this.esClient.delete({
+      index: this.getIndex(),
+      id,
+    });
+  }
+
+  public async listUsers(kuery?: string): Promise<MonitoredUserDoc[]> {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+    const response = await this.esClient.search({
+      index: this.getIndex(),
+      query,
+    });
+    return response.hits.hits.map((hit) => ({
+      id: hit._id,
+      ...(hit._source as {}),
+    })) as MonitoredUserDoc[];
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

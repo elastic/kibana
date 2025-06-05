@@ -87,6 +87,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
+
     return {
       core: coreContext,
       buildFlavor: this.buildFlavor,
@@ -155,6 +157,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          actionsClient,
+          logger: this.logger,
           rulesClient,
         });
       }),

@@ -219,7 +219,7 @@ const DataTableWithLocalPagination = ({
     ...currentGroupFilters,
     ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
   ]
-    .map(({ query }) => (query.match_phrase ? query : null))
+    .map(({ query }) => (query?.match_phrase || query?.bool?.should ? query : null))
     .filter(Boolean);
 
   const newState: AssetInventoryURLStateResult = {

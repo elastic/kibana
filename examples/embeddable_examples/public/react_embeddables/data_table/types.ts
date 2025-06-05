@@ -16,6 +16,4 @@ import {
 
 export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;
 
-export type DataTableRuntimeState = DataTableSerializedState;
-
 export type DataTableApi = DefaultEmbeddableApi<DataTableSerializedState> & PublishesDataLoading;

@@ -30,10 +30,8 @@ import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { hasKbWriteIndex } from './has_kb_index';
-import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
-import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -418,7 +416,7 @@ export class KnowledgeBaseService {
     }
 
     try {
-      await this.dependencies.esClient.asInternalUser.index<
+      const indexResult = await this.dependencies.esClient.asInternalUser.index<
         Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
       >({
         index: resourceNames.writeIndexAlias.kb,
@@ -433,7 +431,9 @@ export class KnowledgeBaseService {
         refresh: 'wait_for',
       });
 
-      this.dependencies.logger.debug(`Entry added to knowledge base`);
+      this.dependencies.logger.debug(
+        `Entry added to knowledge base. title = "${doc.title}", user = "${user?.name}, namespace = "${namespace}", index = ${indexResult._index}, id = ${indexResult._id}`
+      );
     } catch (error) {
       this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
@@ -441,13 +441,10 @@ export class KnowledgeBaseService {
       }
 
       if (isSemanticTextUnsupportedError(error)) {
-        const inferenceId = await getInferenceIdFromWriteIndex(this.dependencies.esClient);
-
         reIndexKnowledgeBaseWithLock({
           core: this.dependencies.core,
           logger: this.dependencies.logger,
           esClient: this.dependencies.esClient,
-          inferenceId,
         }).catch((e) => {
           if (isLockAcquisitionError(e)) {
             this.dependencies.logger.info(`Re-indexing operation is already in progress`);
@@ -461,12 +458,55 @@ export class KnowledgeBaseService {
         );
       }
 
-      if (isKnowledgeBaseIndexWriteBlocked(error)) {
-        throw new Error(
-          `Writes to the knowledge base are currently blocked due to an Elasticsearch write index block. This is most likely due to an ongoing re-indexing operation. Please try again later. Error: ${error.message}`
-        );
+      throw error;
+    }
+  };
+
+  addBulkEntries = async ({
+    entries,
+    user,
+    namespace,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+    user?: { name: string; id?: string };
+    namespace: string;
+  }): Promise<void> => {
+    if (!this.dependencies.config.enableKnowledgeBase) {
+      return;
+    }
+
+    try {
+      const bulkBody = entries.flatMap((entry) => [
+        { index: { _index: resourceNames.writeIndexAlias.kb, _id: entry.id } },
+        {
+          '@timestamp': new Date().toISOString(),
+          ...entry,
+          ...(entry.text ? { semantic_text: entry.text } : {}),
+          user,
+          namespace,
+        },
+      ]);
+
+      const bulkResult = await this.dependencies.esClient.asInternalUser.bulk({
+        refresh: 'wait_for',
+        body: bulkBody,
+      });
+
+      if (bulkResult.errors) {
+        const errorMessages = bulkResult.items
+          .filter((item: any) => item.index?.error)
+          .map((item: any) => item.index?.error?.reason);
+        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
       }
 
+      this.dependencies.logger.debug(
+        `Successfully added ${entries.length} entries to the knowledge base`
+      );
+    } catch (error) {
+      this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
+        throwKnowledgeBaseNotReady(error);
+      }
       throw error;
     }
   };

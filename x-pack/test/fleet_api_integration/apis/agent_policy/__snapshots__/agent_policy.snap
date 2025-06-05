@@ -29,7 +29,7 @@ Object {
       "created_by": "elastic",
       "enabled": true,
       "name": "system-1",
-      "namespace": "default",
+      "namespace": "",
       "package": Object {
         "name": "system",
         "requires_root": true,

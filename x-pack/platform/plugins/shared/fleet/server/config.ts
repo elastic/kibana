@@ -38,6 +38,9 @@ export const config: PluginConfigDescriptor = {
     agentless: {
       enabled: true,
       isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -165,6 +168,11 @@ export const config: PluginConfigDescriptor = {
                   ca: schema.maybe(schema.string()),
                 })
               ),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
         })
@@ -297,6 +305,7 @@ export const config: PluginConfigDescriptor = {
       ),
       autoUpgrades: schema.maybe(
         schema.object({
+          taskInterval: schema.maybe(schema.string()),
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),

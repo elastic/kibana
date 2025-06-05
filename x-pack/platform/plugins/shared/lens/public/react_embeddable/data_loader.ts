@@ -31,7 +31,7 @@ import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext, buildObservableVariable } from './helper';
+import { getRenderMode, getParentContext } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
@@ -119,7 +119,7 @@ export function loadEmbeddableData(
     }
   };
 
-  const [controlESQLVariables$] = buildObservableVariable<ESQLControlVariable[]>([]);
+  const controlESQLVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
 
   async function reload(
     // make reload easier to debug

@@ -8,7 +8,6 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { Theme, css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -23,7 +22,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 
 import { SubItemTitle } from '../subitem_title';
 import { useNavigation as useServices } from '../../../services';
-import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../../utils';
+import { isAbsoluteLink, isActiveFromUrl, isAccordionNode, isSpecialClick } from '../../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../../types';
 import { useNavigation } from '../../navigation';
 import { EventTracker } from '../../../analytics';
@@ -36,51 +35,7 @@ import {
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../../types';
 import { PanelContext, usePanel } from '../panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
-
-const sectionStyles = {
-  blockTitle: ({ euiTheme }: Theme) => ({
-    paddingBlock: euiTheme.size.xs,
-    paddingInline: euiTheme.size.s,
-  }),
-  euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
-    .euiCollapsibleNavAccordion.isSelected {
-      .euiAccordion__triggerWrapper,
-      .euiCollapsibleNavLink {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-      }
-    }
-
-    .euiAccordion__children .euiCollapsibleNavItem__items {
-      padding-inline-start: ${euiTheme.size.m};
-      margin-inline-start: ${euiTheme.size.m};
-    }
-
-    &:only-child .euiCollapsibleNavItem__icon {
-      transform: scale(1.33);
-    }
-  `,
-  euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
-    &.euiLink,
-    &.euiCollapsibleNavLink {
-      :hover {
-        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-
-      &.isSelected {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
-        :hover {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-        }
-      }
-    }
-  `,
-  euiAccordionChildWrapper: ({ euiTheme }: Theme) => css`
-    .euiAccordion__childWrapper {
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-    }
-  `,
-};
+import { sectionStyles } from './styles';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
@@ -332,25 +287,17 @@ const getEuiProps = (
         })
         .flat();
 
-  /**
-   * Check if the click event is a special click (e.g. right click, click with modifier key)
-   * We do not want to prevent the default behavior in these cases.
-   */
-  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
-    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
-    const isLeftClickEvent = e.button === 0;
-    return isModifiedEvent || !isLeftClickEvent;
-  };
-
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
         external: isExternal,
+        'aria-label': navNode.title,
         onClick: (e) => {
           if (href) {
             eventTracker.clickNavLink({
-              href: basePath.remove(href),
               id: navNode.id,
+              path: navNode.path,
+              href: basePath.remove(href),
               hrefPrev: basePath.remove(window.location.pathname),
             });
           }
@@ -375,8 +322,9 @@ const getEuiProps = (
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
     if (href) {
       eventTracker.clickNavLink({
-        href: basePath.remove(href),
         id: navNode.id,
+        path: navNode.path,
+        href: basePath.remove(href),
         hrefPrev: basePath.remove(window.location.pathname),
       });
     }

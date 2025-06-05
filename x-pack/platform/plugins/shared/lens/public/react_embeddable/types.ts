@@ -64,6 +64,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { CanAddNewPanel, TracksOverlays } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -204,6 +205,15 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
+  mountInlineFlyout: (
+    Component: React.ComponentType,
+    overlayTracker?: TracksOverlays,
+    options?: {
+      dataTestSubj?: string;
+      uuid?: string;
+      container?: HTMLElement | null;
+    }
+  ) => void;
 }
 
 /**
@@ -227,6 +237,7 @@ export interface LensPublicCallbacks extends LensApiProps {
    * Let the consumer overwrite embeddable user messages
    */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
+  onAlertRule?: (data: unknown) => void;
 }
 
 /**
@@ -374,7 +385,7 @@ export interface LensInspectorAdapters {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
+  DefaultEmbeddableApi<LensSerializedState> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -432,6 +443,7 @@ export type LensInternalApi = Simplify<
       updateAbortController: (newAbortController: AbortController | undefined) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
+      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
@@ -524,13 +536,9 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
-export interface ControlGroupApi {
-  addNewPanel: (panelState: Record<string, unknown>) => void;
-}
-
 interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 

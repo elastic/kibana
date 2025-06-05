@@ -16,17 +16,12 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
-  apmLabsButton,
   apmEnableTableSearchBar,
   entityCentricExperience,
-  enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableContinuousRollups,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
-  apmEnableProfilingIntegration,
   profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
@@ -35,9 +30,7 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
-  enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
-  enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
   apmEnableServiceMapApiV2,
@@ -52,12 +45,10 @@ const technicalPreviewLabel = i18n.translate(
   { defaultMessage: 'technical preview' }
 );
 
-type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
-
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettings> = {
+export const uiSettings: Record<string, UiSettingsParams<boolean | number | string | object>> = {
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -119,7 +110,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage:
         'Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
     }),
-    value: ProgressiveLoadingQuality.low,
+    value: ProgressiveLoadingQuality.off,
     schema: schema.oneOf([
       schema.literal(ProgressiveLoadingQuality.off),
       schema.literal(ProgressiveLoadingQuality.low),
@@ -160,7 +151,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
     solution: 'oblt',
   },
   [apmServiceGroupMaxNumberOfServices]: {
@@ -173,96 +163,6 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
-    solution: 'oblt',
-  },
-  [apmTraceExplorerTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
-      defaultMessage: 'APM Trace Explorer',
-    }),
-    description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        link: traceExplorerDocsLink({
-          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
-        }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
-  [apmLabsButton]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmLabs', {
-      defaultMessage: 'Enable labs button in APM',
-    }),
-    description: i18n.translate('xpack.observability.apmLabsDescription', {
-      defaultMessage:
-        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.',
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    solution: 'oblt',
-  },
-  [enableInfrastructureProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
-      defaultMessage: 'Universal Profiling integration in Infrastructure',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
-      {
-        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableInfrastructureAssetCustomDashboards]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
-      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAwsLambdaMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
-      defaultMessage: 'AWS Lambda Metrics',
-    }),
-    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
@@ -363,21 +263,6 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.number({ min: 0 }),
     solution: 'oblt',
   },
-  [apmEnableContinuousRollups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
-      defaultMessage: 'Continuous rollups',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
-      defaultMessage:
-        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
   [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
@@ -412,16 +297,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [apmEnableProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
-      defaultMessage: 'Enable Universal Profiling integration in APM',
-    }),
-    value: true,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [profilingShowErrorFrames]: {
@@ -598,12 +473,5 @@ function throttlingDocsLink({ href }: { href: string }) {
   return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
     'xpack.observability.uiSettings.throttlingDocsLinkText',
     { defaultMessage: 'read notice here.' }
-  )}</a>`;
-}
-
-function traceExplorerDocsLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank">${i18n.translate(
-    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
-    { defaultMessage: 'Learn more.' }
   )}</a>`;
 }

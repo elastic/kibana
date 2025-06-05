@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
@@ -97,11 +97,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     >;
 
     render(
-      <ReactEmbeddableRenderer<
-        AnomalySwimLaneEmbeddableState,
-        AnomalySwimLaneEmbeddableState,
-        AnomalySwimLaneEmbeddableApi
-      >
+      <EmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
         maybeId={'maybe_id'}
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
         onApiAvailable={onApiAvailable}
