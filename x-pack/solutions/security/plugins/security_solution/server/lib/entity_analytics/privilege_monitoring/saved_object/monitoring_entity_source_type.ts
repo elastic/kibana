@@ -34,14 +34,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     matchers: {
       type: 'object',
       dynamic: false,
-      properties: {
-        fields: {
-          type: 'keyword',
-        },
-        values: {
-          type: 'keyword',
-        },
-      },
     },
     filter: {
       dynamic: false,
