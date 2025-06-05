@@ -64,7 +64,6 @@ describe('useIntegrationCardList', () => {
       version: '1.0.0',
       status: 'installed',
       dataStreams: [{ name: 'endpoint-data-stream', title: 'Endpoint Data Stream' }],
-      title: 'Security Integration',
     },
   ];
 
