@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGrid, EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridRowHeightsOptions, EuiDataGridSorting } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
   documents,
   displayColumns,
   renderCellValue,
   rowHeightsOptions,
+  sorting,
+  setSorting,
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
@@ -25,6 +28,8 @@ export function PreviewTable({
   toolbarVisibility?: boolean;
   setVisibleColumns?: (visibleColumns: string[]) => void;
   columnOrderHint?: string[];
+  sorting?: SimulationContext['previewColumnsSorting'];
+  setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
 }) {
   const allColumns = useMemo(() => {
     const cols = new Set<string>();
@@ -64,14 +69,41 @@ export function PreviewTable({
     return allColumns;
   }, [allColumns, columnOrderHint, displayColumns]);
 
+  const sortingConfig = useMemo(() => {
+    if (!sorting && !setSorting) {
+      return undefined;
+    }
+    return {
+      columns: sorting?.fieldName
+        ? [
+            {
+              id: sorting?.fieldName || '',
+              direction: sorting?.direction || 'asc',
+            },
+          ]
+        : [],
+      onSort: (newSorting) => {
+        if (setSorting) {
+          const mostRecentSorting = newSorting[newSorting.length - 1];
+          setSorting({
+            fieldName: mostRecentSorting?.id,
+            direction: mostRecentSorting?.direction || 'asc',
+          });
+        }
+      },
+    } as EuiDataGridSorting;
+  }, [setSorting, sorting]);
+
   const gridColumns = useMemo(() => {
     return allColumns.map((column) => ({
       id: column,
       displayAsText: column,
-      actions: false as false,
+      actions: sortingConfig ? { showMoveLeft: false, showMoveRight: false } : (false as false),
+      isSortable: true,
+      defaultSortDirection: 'asc' as 'asc' | 'desc',
       initialWidth: visibleColumns.length > 10 ? 250 : undefined,
     }));
-  }, [allColumns, visibleColumns.length]);
+  }, [allColumns, sortingConfig, visibleColumns.length]);
 
   return (
     <EuiDataGrid
@@ -84,6 +116,8 @@ export function PreviewTable({
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
+      sorting={sortingConfig}
+      inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}

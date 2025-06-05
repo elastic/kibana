@@ -13,7 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import { GrokCollection } from '@kbn/grok-ui';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationActorRef,
+  SimulationContext,
+} from '../simulation_state_machine';
 import { MappedSchemaField } from '../../../schema_editor/types';
 
 export interface StreamEnrichmentServiceDependencies {
@@ -48,5 +52,6 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };

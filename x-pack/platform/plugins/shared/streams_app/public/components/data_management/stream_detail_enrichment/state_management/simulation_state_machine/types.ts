@@ -43,6 +43,7 @@ export type SimulationEvent =
   | { type: 'simulation.reset' }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.order'; columns: string[] };
 
 export interface SimulationContext {
@@ -52,6 +53,10 @@ export interface SimulationContext {
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];
   previewColumnsOrder: string[];
+  previewColumnsSorting: {
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  };
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
   samplingCondition?: Condition;

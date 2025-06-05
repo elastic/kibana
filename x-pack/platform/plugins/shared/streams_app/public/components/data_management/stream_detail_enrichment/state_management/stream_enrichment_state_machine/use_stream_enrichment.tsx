@@ -15,7 +15,11 @@ import {
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
-import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationActorSnapshot,
+  SimulationContext,
+} from '../simulation_state_machine';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 const consoleInspector = createConsoleInspector();
@@ -80,6 +84,9 @@ export const useStreamEnrichmentEvents = () => {
           type: 'previewColumns.order',
           columns: columns.filter((col) => col.trim() !== ''),
         });
+      },
+      setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
+        service.send({ type: 'previewColumns.setSorting', sorting });
       },
     }),
     [service]
