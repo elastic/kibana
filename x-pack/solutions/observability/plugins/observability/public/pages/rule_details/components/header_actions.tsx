@@ -207,14 +207,16 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={panels}
-              className="actDetailsCollapsedItemActions"
-              data-test-subj={`ruleActions_ruleType_${rule.ruleTypeId}`}
-              data-testid="detailsCollapsedActionPanel"
-              css={collapsedItemActionsCss}
-            />
+            <div data-test-subj={`ruleType_${rule.ruleTypeId}`}>
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={panels}
+                className="actDetailsCollapsedItemActions"
+                data-test-subj="detailsCollapsedActionPanel"
+                data-testid="detailsCollapsedActionPanel"
+                css={collapsedItemActionsCss}
+              />
+            </div>
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>

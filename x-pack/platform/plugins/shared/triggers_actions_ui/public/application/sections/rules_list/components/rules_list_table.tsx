@@ -322,16 +322,18 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const renderRuleStatusDropdown = useCallback(
     (rule: RuleTableItem) => {
       return (
-        <RuleStatusDropdown
-          hideSnoozeOption
-          disableRule={onDisableRuleInternal(rule)}
-          enableRule={async () => await onEnableRule(rule)}
-          snoozeRule={async () => {}}
-          unsnoozeRule={async () => {}}
-          rule={rule}
-          onRuleChanged={onRuleChanged}
-          isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
-        />
+        <div data-test-subj={`ruleType_${rule.ruleTypeId}`}>
+          <RuleStatusDropdown
+            hideSnoozeOption
+            disableRule={onDisableRuleInternal(rule)}
+            enableRule={async () => await onEnableRule(rule)}
+            snoozeRule={async () => {}}
+            unsnoozeRule={async () => {}}
+            rule={rule}
+            onRuleChanged={onRuleChanged}
+            isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
+          />
+        </div>
       );
     },
     [isRuleTypeEditableInContext, onDisableRuleInternal, onEnableRule, onRuleChanged]
@@ -541,18 +543,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
           }
 
           return (
-            <RulesListNotifyBadge
-              showOnHover
-              snoozeSettings={rule}
-              loading={!!isLoadingMap[rule.id]}
-              disabled={!rule.isEditable}
-              onRuleChanged={onRuleChanged}
-              snoozeRule={async (snoozeSchedule) => {
-                await onSnoozeRule(rule, snoozeSchedule);
-              }}
-              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-              isRuleEditable={rule.isEditable}
-            />
+            <div data-test-subj={`ruleType_${rule.ruleTypeId}`}>
+              <RulesListNotifyBadge
+                showOnHover
+                snoozeSettings={rule}
+                loading={!!isLoadingMap[rule.id]}
+                disabled={!rule.isEditable}
+                onRuleChanged={onRuleChanged}
+                snoozeRule={async (snoozeSchedule) => {
+                  await onSnoozeRule(rule, snoozeSchedule);
+                }}
+                unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
+                isRuleEditable={rule.isEditable}
+              />
+            </div>
           );
         },
       },
@@ -780,7 +784,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             <EuiFlexGroup
               justifyContent="flexEnd"
               gutterSize="none"
-              data-test-subj={`tableRow_ruleType_${rule.ruleTypeId}`}
+              data-test-subj={`ruleType_${rule.ruleTypeId}`}
             >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
