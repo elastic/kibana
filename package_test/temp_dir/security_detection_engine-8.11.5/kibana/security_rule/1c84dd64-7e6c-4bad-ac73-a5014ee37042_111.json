@@ -1,0 +1,171 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the manual creation of files in specific etc directories, via user root, used by Linux malware to persist and elevate privileges on compromised systems. File creation in these directories should not be entirely common and could indicate a malicious binary or script installing persistence mechanisms for long term access.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious File Creation in /etc for Persistence",
+        "note": "## Triage and analysis\n\n### Investigating Suspicious File Creation in /etc for Persistence\n\nThe /etc/ directory in Linux is used to store system-wide configuration files and scripts.\n\nBy creating or modifying specific system-wide configuration files, attackers can leverage system services to execute malicious commands or scripts at predefined intervals, ensuring their continued presence and enabling unauthorized activities.\n\nThis rule monitors for the creation of the most common system-wide configuration files and scripts abused by attackers for persistence. \n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\u003e This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible Investigation Steps\n\n- Investigate the file that was created or modified.\n- Investigate whether any other files in any of the commonly abused directories have been altered through OSQuery.\n  - !{osquery{\"label\":\"Osquery - Retrieve File Listing Information\",\"query\":\"SELECT * FROM file WHERE (\\n  path LIKE '/etc/ld.so.conf.d/%' OR\\n  path LIKE '/etc/cron.d/%' OR\\n  path LIKE '/etc/sudoers.d/%' OR\\n  path LIKE '/etc/rc%.d/%' OR\\n  path LIKE '/etc/init.d/%' OR\\n  path LIKE '/etc/systemd/system/%' OR\\n  path LIKE '/usr/lib/systemd/system/%'\\n)\\n\"}}\n  - !{osquery{\"label\":\"Osquery - Retrieve Additional File Listing Information\",\"query\":\"SELECT\\n  f.path,\\n  u.username AS file_owner,\\n  g.groupname AS group_owner,\\n  datetime(f.atime, 'unixepoch') AS file_last_access_time,\\n  datetime(f.mtime, 'unixepoch') AS file_last_modified_time,\\n  datetime(f.ctime, 'unixepoch') AS file_last_status_change_time,\\n  datetime(f.btime, 'unixepoch') AS file_created_time,\\n  f.size AS size_bytes\\nFROM\\n  file f\\n  LEFT JOIN users u ON f.uid = u.uid\\n  LEFT JOIN groups g ON f.gid = g.gid\\nWHERE (\\n  path LIKE '/etc/ld.so.conf.d/%' OR\\n  path LIKE '/etc/cron.d/%' OR\\n  path LIKE '/etc/sudoers.d/%' OR\\n  path LIKE '/etc/rc%.d/%' OR\\n  path LIKE '/etc/init.d/%' OR\\n  path LIKE '/etc/systemd/system/%' OR\\n  path LIKE '/usr/lib/systemd/system/%'\\n)\\n\"}}\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Investigate whether the altered scripts call other malicious scripts elsewhere on the file system. \n  - If scripts or executables were dropped, retrieve the files and determine if they are malicious:\n    - Use a private sandboxed malware analysis system to perform analysis.\n      - Observe and collect information about the following activities:\n        - Attempts to contact external domains and addresses.\n          - Check if the domain is newly registered or unexpected.\n          - Check the reputation of the domain or IP address.\n        - File access, modification, and creation activities.\n        - Cron jobs, services and other persistence mechanisms.\n            - !{osquery{\"label\":\"Osquery - Retrieve Crontab Information\",\"query\":\"SELECT * FROM crontab\"}}\n- Investigate abnormal behaviors by the subject process/user such as network connections, file modifications, and any other spawned child processes.\n  - Investigate listening ports and open sockets to look for potential command and control traffic or data exfiltration.\n    - !{osquery{\"label\":\"Osquery - Retrieve Listening Ports\",\"query\":\"SELECT pid, address, port, socket, protocol, path FROM listening_ports\"}}\n    - !{osquery{\"label\":\"Osquery - Retrieve Open Sockets\",\"query\":\"SELECT pid, family, remote_address, remote_port, socket, state FROM process_open_sockets\"}}\n  - Identify the user account that performed the action, analyze it, and check whether it should perform this kind of action.\n    - !{osquery{\"label\":\"Osquery - Retrieve Information for a Specific User\",\"query\":\"SELECT * FROM users WHERE username = {{user.name}}\"}}\n- Investigate whether the user is currently logged in and active.\n    - !{osquery{\"label\":\"Osquery - Investigate the Account Authentication Status\",\"query\":\"SELECT * FROM logged_in_users WHERE user = {{user.name}}\"}}\n\n### False Positive Analysis\n\n- If this activity is related to new benign software installation activity, consider adding exceptions \u2014 preferably with a combination of user and command line conditions.\n- If this activity is related to a system administrator that performed these actions for administrative purposes, consider adding exceptions for this specific administrator user account. \n- Try to understand the context of the execution by thinking about the user, machine, or business purpose. A small number of endpoints, such as servers with unique software, might appear unusual but satisfy a specific business need.\n\n### Related Rules\n\n- Cron Job Created or Changed by Previously Unknown Process - ff10d4d8-fea7-422d-afb1-e5a2702369a9\n- Potential Persistence Through Run Control Detected - 0f4d35e4-925e-4959-ab24-911be207ee6f\n- Potential Persistence Through init.d Detected - 474fd20e-14cc-49c5-8160-d9ab4ba16c8b\n- New Systemd Timer Created - 7fb500fa-8e24-4bd1-9480-2a819352602c\n- New Systemd Service Created by Previously Unknown Process - 17b0a495-4d9f-414c-8ad0-92f018b8e001\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Delete the service/timer or restore its original configuration.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Leverage the incident response data and logging to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "file where host.os.type == \"linux\" and event.type in (\"creation\", \"file_create_event\") and user.name == \"root\" and\nfile.path : (\"/etc/ld.so.conf.d/*\", \"/etc/cron.d/*\", \"/etc/sudoers.d/*\", \"/etc/rc.d/init.d/*\", \"/etc/systemd/system/*\",\n\"/usr/lib/systemd/system/*\") and not process.executable : (\"*/dpkg\", \"*/yum\", \"*/apt\", \"*/dnf\", \"*/rpm\", \"*/systemd\",\n\"*/snapd\", \"*/dnf-automatic\",\"*/yum-cron\", \"*/elastic-agent\", \"*/dnfdaemon-system\", \"*/bin/dockerd\", \"*/sbin/dockerd\",\n\"/kaniko/executor\", \"/usr/sbin/rhn_check\") and not file.extension in (\"swp\", \"swpx\", \"tmp\")\n",
+        "references": [
+            "https://www.intezer.com/blog/incident-response/orbit-new-undetected-linux-threat/",
+            "https://www.intezer.com/blog/research/lightning-framework-new-linux-threat/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1c84dd64-7e6c-4bad-ac73-a5014ee37042",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Threat: Orbit",
+            "Threat: Lightning Framework",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/",
+                        "subtechnique": [
+                            {
+                                "id": "T1037.004",
+                                "name": "RC Scripts",
+                                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1574",
+                        "name": "Hijack Execution Flow",
+                        "reference": "https://attack.mitre.org/techniques/T1574/",
+                        "subtechnique": [
+                            {
+                                "id": "T1574.006",
+                                "name": "Dynamic Linker Hijacking",
+                                "reference": "https://attack.mitre.org/techniques/T1574/006/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1053",
+                        "name": "Scheduled Task/Job",
+                        "reference": "https://attack.mitre.org/techniques/T1053/",
+                        "subtechnique": [
+                            {
+                                "id": "T1053.003",
+                                "name": "Cron",
+                                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1548",
+                        "name": "Abuse Elevation Control Mechanism",
+                        "reference": "https://attack.mitre.org/techniques/T1548/",
+                        "subtechnique": [
+                            {
+                                "id": "T1548.003",
+                                "name": "Sudo and Sudo Caching",
+                                "reference": "https://attack.mitre.org/techniques/T1548/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 111
+    },
+    "id": "1c84dd64-7e6c-4bad-ac73-a5014ee37042_111",
+    "type": "security-rule"
+}

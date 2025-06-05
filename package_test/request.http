@@ -1,0 +1,9 @@
+curl \
+  -XPOST \
+  -H 'content-type: application/zip' \
+  -H 'kbn-xsrf: true' \
+  -H 'kbn-version: 9.0.0' \
+  -H 'elastic-api-version: 2023-10-31' \
+  http://localhost:5601/kbn/api/fleet/epm/packages \
+  -u elastic:changeme \
+  --data-binary @security_detection_engine-8.17.2.zip

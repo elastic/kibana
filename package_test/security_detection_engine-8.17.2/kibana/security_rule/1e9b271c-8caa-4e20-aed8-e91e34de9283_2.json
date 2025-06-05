@@ -1,0 +1,93 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Detects a new private repo interaction for a GitHub PAT not seen in the last 14 days.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of Private Repo Event from Specific GitHub Personal Access Token (PAT)",
+    "new_terms_fields": [
+      "github.hashed_token",
+      "github.repo"
+    ],
+    "query": "event.dataset:\"github.audit\" and event.category:\"configuration\" and\ngithub.repo:* and github.hashed_token:* and\ngithub.programmatic_access_type:(\"OAuth access token\" or \"Fine-grained personal access token\") and \ngithub.repository_public:false\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.hashed_token",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.programmatic_access_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.repo",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.repository_public",
+        "type": "boolean"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "1e9b271c-8caa-4e20-aed8-e91e34de9283",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Execution",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 2
+  },
+  "id": "1e9b271c-8caa-4e20-aed8-e91e34de9283_2",
+  "type": "security-rule"
+}
