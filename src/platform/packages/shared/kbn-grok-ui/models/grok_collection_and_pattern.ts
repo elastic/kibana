@@ -16,6 +16,7 @@ import { unflattenObject } from '@kbn/object-utils';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { escape } from 'lodash';
+import { Subject } from 'rxjs';
 import { PATTERN_MAP } from '../constants/pattern_map';
 import { SupportedTypeConversion, FieldDefinition } from './types';
 
@@ -46,6 +47,7 @@ export class GrokCollection {
   private patterns: Map<string, GrokPattern> = new Map();
   // Custom patterns that may be expected to change on the fly (via user input in the UI etc).
   private customPatterns: Map<string, GrokPattern> = new Map();
+  public readonly customPatternsChanged$ = new Subject<void>();
   // Combination of core and custom patterns.
   private patternKeys: string[] = [];
   // NOTE: This doesn't subscribe to EUI_VIS_COLOR_STORE changes at the moment, whilst UI / UX is being finalised.
@@ -70,7 +72,7 @@ export class GrokCollection {
   }
 
   public addPattern(id: string, rawPattern: string, destination: Map<string, GrokPattern>) {
-    if (this.patterns.has(id)) {
+    if (destination.has(id)) {
       // eslint-disable-next-line no-console
       console.warn('Warning: pattern with ID: %s already exists', id);
     } else {
@@ -87,6 +89,7 @@ export class GrokCollection {
       this.addPattern(key, String.raw`${value}`, this.customPatterns);
     });
     this.resolvePatterns(this.customPatterns);
+    this.customPatternsChanged$.next();
   }
 
   public resolvePatterns(source: Map<string, GrokPattern>) {

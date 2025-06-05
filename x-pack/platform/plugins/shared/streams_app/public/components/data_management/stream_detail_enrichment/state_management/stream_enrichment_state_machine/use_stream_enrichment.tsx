@@ -17,6 +17,7 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isGrokProcessor } from '../../utils';
 
 const consoleInspector = createConsoleInspector();
 
@@ -84,9 +85,32 @@ export const StreamEnrichmentContextProvider = ({
         },
       }}
     >
+      <StreamEnrichmentCleanupOnUnmount />
       <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
     </StreamEnrichmentContext.Provider>
   );
+};
+
+/* Grok resources are not directly modeled by Xstate (they are not first class machines or actors etc) */
+const StreamEnrichmentCleanupOnUnmount = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+
+  useEffect(() => {
+    return () => {
+      const context = service.getSnapshot().context;
+      context.processorsRefs.forEach((procRef) => {
+        const procContext = procRef.getSnapshot().context;
+        if (isGrokProcessor(procContext.processor)) {
+          const draftGrokExpressions = procContext.resources?.grokExpressions ?? [];
+          draftGrokExpressions.forEach((expression) => {
+            expression.destroy();
+          });
+        }
+      });
+    };
+  }, [service]);
+
+  return null;
 };
 
 const ListenForDefinitionChanges = ({
