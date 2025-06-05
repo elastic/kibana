@@ -78,17 +78,14 @@ export function StreamDetailView() {
     <>
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
+        description={<StreamDescription definition={definition} />}
         pageTitle={
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-
-            <StreamDescription definition={definition} />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {key}
+            <EuiBadgeGroup gutterSize="s">
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            </EuiBadgeGroup>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {
