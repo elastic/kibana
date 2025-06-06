@@ -12,8 +12,10 @@ import { cloneDeep } from 'lodash';
  * Updates each filter's `meta.index` property to match the specified index pattern.
  *
  * This ensures compatibility with the filters UI component, which requires `meta.index`
- * to match the current index pattern. If it doesn't, the UI may:
+ * to match the current index pattern. If it doesn't, the UI will:
  *  - Display a vague warning: "Field does not exist in current view"
+ *    (see: https://github.com/elastic/kibana/issues/178908)
+ *  - Display the word "warning" instead of an actual value for filters with "AND" or "OR" operators
  *    (see: https://github.com/elastic/kibana/issues/203615)
  *  - Show an unnecessary data view selector in the filter editor
  *    (see: https://github.com/elastic/kibana/pull/174922)
