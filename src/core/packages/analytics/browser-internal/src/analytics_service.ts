@@ -8,7 +8,7 @@
  */
 
 import { of, Subscription } from 'rxjs';
-import { apm } from '@elastic/apm-rum';
+import { apm, type Transaction } from '@elastic/apm-rum';
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
@@ -26,6 +26,10 @@ export interface AnalyticsServiceSetupDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
+interface TransactionWithUndocumentedProps extends Transaction {
+  traceId: string;
+}
+
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
   private readonly subscriptionsHandler = new Subscription();
@@ -35,7 +39,7 @@ export class AnalyticsService {
       isDev: core.env.mode.dev,
       logger: core.logger.get('analytics'),
       getTraceContext: () => ({
-        id: apm.getCurrentTransaction()?.traceId,
+        id: (apm.getCurrentTransaction() as TransactionWithUndocumentedProps | undefined)?.traceId,
       }),
     });
 
