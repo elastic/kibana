@@ -136,13 +136,9 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
+  const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
-  const [code, setCode] = useState<{ edited: string; submitted: string | undefined }>({
-    edited: fixedQuery ?? '',
-    submitted: undefined,
-  });
-  const editedQuery = code.edited;
-  const submittedQuery = code.submitted;
+  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
@@ -169,15 +165,14 @@ export const ESQLEditor = memo(function ESQLEditor({
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
   }>({
-    errors: serverErrors ? parseErrors(serverErrors, code.edited) : [],
+    errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
   const onQueryUpdate = useCallback(
     (value: string) => {
-      setCode({ ...code, edited: value });
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange, code]
+    [onTextLangQueryChange]
   );
 
   const onQuerySubmit = useCallback(() => {
@@ -191,18 +186,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
       const currentValue = editor1.current?.getValue();
       if (currentValue != null) {
-        setCode({ ...code, submitted: currentValue });
+        setCodeStateOnSubmission(currentValue);
       }
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
-  }, [
-    code,
-    isQueryLoading,
-    isLoading,
-    allowQueryCancellation,
-    abortController,
-    onTextLangQuerySubmit,
-  ]);
+  }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -236,25 +224,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      const hasSubmittedQueryChanged = fixedQuery !== submittedQuery || editedQuery === undefined;
-      const hasEditedQueryChanged = fixedQuery !== editedQuery;
-
-      if (fixedQuery === code.submitted || fixedQuery === code.edited) {
-        return;
-      }
-
-      /* console.log({
-        edited: editedQuery,
-        submitted: submittedQuery,
-        fixedQuery,
-      });*/
-
-      if (!isLoading && hasEditedQueryChanged && hasSubmittedQueryChanged) {
-        // console.log('changed');
-        setCode({ edited: fixedQuery, submitted: submittedQuery });
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
       }
     }
-  }, [code, editedQuery, submittedQuery, fixedQuery, isLoading]);
+  }, [code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -585,7 +559,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         color: 'text',
       };
     }
-    if (code.edited !== code.submitted) {
+    if (code !== codeWhenSubmitted) {
       return {
         label: i18n.translate('esqlEditor.query.runQuery', {
           defaultMessage: 'Run query',
@@ -601,11 +575,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       iconType: 'refresh',
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, isLoading]);
+  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
-      return await ESQLLang.validate(editorModel.current, code.edited, esqlCallbacks);
+      return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
     }
     return {
       errors: [],
@@ -624,7 +598,7 @@ export const ESQLEditor = memo(function ESQLEditor({
           : 'success';
 
         addQueriesToCache({
-          queryString: code.edited,
+          queryString: code,
           status: clientParserStatus,
         });
       }
@@ -671,8 +645,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
-      if (code.edited === code.submitted && (serverErrors || serverWarning)) {
-        const parsedErrors = parseErrors(serverErrors || [], code.edited);
+      if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
           errors: parsedErrors,
@@ -845,7 +819,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 <CodeEditor
                   languageId={ESQL_LANG_ID}
                   classNameCss={getEditorOverwrites(theme)}
-                  value={code.edited}
+                  value={code}
                   options={codeEditorOptions}
                   width="100%"
                   suggestionProvider={suggestionProvider}
@@ -946,7 +920,7 @@ export const ESQLEditor = memo(function ESQLEditor({
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
-        code={code.edited}
+        code={code}
         onErrorClick={onErrorClick}
         runQuery={onQuerySubmit}
         updateQuery={onQueryUpdate}
