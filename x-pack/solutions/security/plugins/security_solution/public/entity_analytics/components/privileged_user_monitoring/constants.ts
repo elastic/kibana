@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FileManager } from './file_manager';
+export const SCOPE_ID = 'privileged-user-monitoring';

@@ -9,15 +9,25 @@ import { BehaviorSubject } from 'rxjs';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type {
   FindFileStructureResponse,
+  FormattedOverrides,
+  ImportFailure,
   IngestPipeline,
+  InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { isSupportedFormat } from '../../../common/constants';
-import { isTikaType } from '../../../common/utils/tika_utils';
-import { processResults, readFile } from '../../application/common/components/utils';
-import { analyzeTikaFile } from '../../application/file_data_visualizer/components/file_data_visualizer_view/tika_analyzer';
+import { isTikaType } from './tika_utils';
+
 import { STATUS } from './file_manager';
-import { FileSizeChecker } from '../../application/file_data_visualizer/components/file_data_visualizer_view/file_size_check';
+import { analyzeTikaFile } from './tika_analyzer';
+import { FileSizeChecker } from './file_size_check';
+import { processResults, readFile, isSupportedFormat } from '../src/utils';
+
+interface FileSizeInfo {
+  fileSize: number;
+  fileSizeFormatted: string;
+  maxFileSizeFormatted: string;
+  diffFormatted: string;
+}
 
 interface AnalysisResults {
   analysisStatus: STATUS;
@@ -25,6 +35,7 @@ interface AnalysisResults {
   results: FindFileStructureResponse | null;
   explanation: string[] | undefined;
   serverSettings: ReturnType<typeof processResults> | null;
+  overrides: FormattedOverrides;
   analysisError?: any;
 }
 
@@ -33,7 +44,6 @@ export type FileAnalysis = AnalysisResults & {
   importStatus: STATUS;
   fileName: string;
   fileContents: string;
-  fileSize: string;
   data: ArrayBuffer | null;
   fileTooLarge: boolean;
   fileCouldNotBeRead: boolean;
@@ -44,16 +54,18 @@ export type FileAnalysis = AnalysisResults & {
   importProgress: number;
   docCount: number;
   supportedFormat: boolean;
+  failures: ImportFailure[];
+  fileSizeInfo: FileSizeInfo;
 };
 
 export class FileWrapper {
   private analyzedFile$ = new BehaviorSubject<FileAnalysis>({
     analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
-    fileSize: '',
     results: null,
     explanation: undefined,
     serverSettings: null,
+    overrides: {},
     loaded: false,
     importStatus: STATUS.NOT_STARTED,
     fileName: '',
@@ -65,7 +77,18 @@ export class FileWrapper {
     importProgress: 0,
     docCount: 0,
     supportedFormat: true,
+    failures: [],
+    fileSizeInfo: {
+      fileSize: 0,
+      fileSizeFormatted: '',
+      maxFileSizeFormatted: '',
+      diffFormatted: '',
+    },
   });
+
+  private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
+  public readonly pipelineObvs$ = this.pipeline$.asObservable();
+  private pipelineJsonValid$ = new BehaviorSubject<boolean>(true);
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
@@ -76,16 +99,23 @@ export class FileWrapper {
       ...this.analyzedFile$.getValue(),
       fileName: this.file.name,
       loaded: false,
-      fileTooLarge: !this.fileSizeChecker.check(),
-      fileSize: this.fileSizeChecker.fileSizeFormatted(),
+      fileTooLarge: !this.fileSizeChecker.isValid(),
+      fileSizeInfo: {
+        fileSize: this.file.size,
+        fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
+        maxFileSizeFormatted: this.fileSizeChecker.maxFileSizeFormatted(),
+        diffFormatted: this.fileSizeChecker.fileSizeDiffFormatted(),
+      },
     });
   }
 
   public destroy() {
     this.analyzedFile$.complete();
+    this.pipeline$.complete();
+    this.pipelineJsonValid$.complete();
   }
 
-  public async analyzeFile() {
+  public async analyzeFile(overrides: InputOverrides = {}) {
     this.setStatus({ analysisStatus: STATUS.STARTED });
     readFile(this.file).then(async ({ data, fileContents }) => {
       // return after file has been read
@@ -98,7 +128,7 @@ export class FileWrapper {
         analysisResults = await this.analyzeTika(data);
         parsedFileContents = analysisResults.fileContents;
       } else {
-        analysisResults = await this.analyzeStandardFile(fileContents, {});
+        analysisResults = await this.analyzeStandardFile(fileContents, overrides);
       }
       const supportedFormat = isSupportedFormat(analysisResults.results?.format ?? '');
 
@@ -110,6 +140,7 @@ export class FileWrapper {
         data,
         supportedFormat,
       });
+      this.setPipeline(analysisResults.results?.ingest_pipeline);
     });
   }
 
@@ -122,17 +153,22 @@ export class FileWrapper {
       results: standardResults.results,
       explanation: standardResults.results.explanation,
       serverSettings,
+      overrides: {},
       analysisStatus: STATUS.COMPLETED,
     };
   }
 
   private async analyzeStandardFile(
     fileContents: string,
-    overrides: Record<string, string>,
+    overrides: InputOverrides,
     isRetry = false
   ): Promise<AnalysisResults> {
     try {
-      const resp = await this.fileUpload.analyzeFile(fileContents, overrides);
+      const resp = await this.fileUpload.analyzeFile(
+        fileContents,
+        overrides as Record<string, string>
+      );
+
       const serverSettings = processResults(resp);
 
       return {
@@ -140,6 +176,7 @@ export class FileWrapper {
         results: resp.results,
         explanation: resp.results.explanation,
         serverSettings,
+        overrides: resp.overrides ?? {},
         analysisStatus: STATUS.COMPLETED,
       };
     } catch (e) {
@@ -149,6 +186,7 @@ export class FileWrapper {
         explanation: undefined,
         serverSettings: null,
         analysisError: e,
+        overrides: {},
         analysisStatus: STATUS.FAILED,
       };
     }
@@ -172,13 +210,53 @@ export class FileWrapper {
     return this.analyzedFile$.getValue().results?.mappings;
   }
   public getPipeline(): IngestPipeline | undefined {
-    return this.analyzedFile$.getValue().results?.ingest_pipeline;
+    return this.pipeline$.getValue();
+  }
+  public isPipelineValid() {
+    return this.pipelineJsonValid$.getValue();
+  }
+  public setPipeline(pipeline: IngestPipeline | undefined) {
+    this.pipeline$.next(pipeline);
+  }
+  public setPipelineValid(valid: boolean) {
+    this.pipelineJsonValid$.next(valid);
+  }
+  public updatePipeline(pipeline: IngestPipeline | string) {
+    if (typeof pipeline === 'string') {
+      try {
+        const json = JSON.parse(pipeline);
+        const currentPipeline = this.getPipeline();
+        const currentPipelineString = JSON.stringify(currentPipeline);
+        const incomingPipelineString = JSON.stringify(json);
+
+        this.setPipelineValid(true);
+
+        if (currentPipelineString === incomingPipelineString) {
+          return;
+        }
+
+        this.setPipeline(json);
+      } catch (e) {
+        this.setPipelineValid(false);
+        return;
+      }
+    } else {
+      this.setPipeline(pipeline);
+    }
   }
   public getFormat() {
     return this.analyzedFile$.getValue().results?.format;
   }
   public getData() {
     return this.analyzedFile$.getValue().data;
+  }
+
+  public getFileSizeInfo() {
+    return {
+      fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
+      maxFileSizeFormatted: this.fileSizeChecker.maxFileSizeFormatted(),
+      diffFormatted: this.fileSizeChecker.fileSizeDiffFormatted(),
+    };
   }
 
   public async import(index: string, mappings: MappingTypeMapping, pipelineId: string | undefined) {
@@ -201,7 +279,12 @@ export class FileWrapper {
       const resp = await importer.import(index, pipelineId, (p) => {
         this.setStatus({ importProgress: p });
       });
-      this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
+
+      this.setStatus({
+        docCount: resp.docCount,
+        failures: resp.failures ?? [],
+        importStatus: STATUS.COMPLETED,
+      });
       return resp;
     } catch (error) {
       this.setStatus({ importStatus: STATUS.FAILED });

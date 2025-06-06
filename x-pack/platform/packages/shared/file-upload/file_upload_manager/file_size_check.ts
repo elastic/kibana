@@ -7,8 +7,8 @@
 
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import numeral from '@elastic/numeral';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
-import { isTikaType } from '../../../../../common/utils/tika_utils';
+import { FILE_SIZE_DISPLAY_FORMAT } from '@kbn/file-upload-common';
+import { isTikaType } from './tika_utils';
 
 export class FileSizeChecker {
   private _maxBytes: number;
@@ -20,7 +20,7 @@ export class FileSizeChecker {
       : fileUpload.getMaxBytes();
   }
 
-  public check(): boolean {
+  public isValid(): boolean {
     return this._fileSize <= this._maxBytes;
   }
 
