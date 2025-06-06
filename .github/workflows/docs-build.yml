@@ -14,7 +14,9 @@ jobs:
   docs-preview:
     uses: elastic/docs-builder/.github/workflows/preview-build.yml@main
     with:
-      path-pattern: docs/**
+      path-pattern: |
+        docs/**
+        dev_docs/**
     permissions:
       deployments: write
       id-token: write
