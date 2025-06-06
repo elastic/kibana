@@ -53,7 +53,7 @@ export abstract class NumeralFormat extends FieldFormat {
     numeral.language(defaultLocale);
 
     let pattern: string = this.param('pattern');
-    if (this.param('alwaysShowSign')) {
+    if (pattern && this.param('alwaysShowSign')) {
       pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
     }
 
