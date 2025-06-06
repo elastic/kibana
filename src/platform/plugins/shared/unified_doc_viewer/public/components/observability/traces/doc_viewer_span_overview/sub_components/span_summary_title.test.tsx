@@ -63,7 +63,7 @@ describe('SpanSummaryTitle', () => {
     expect(container.querySelector('h2')?.innerHTML).toBe('<mark>123</mark>');
   });
 
-  it('renders FieldHoverActionPopover for spanName and id ', () => {
+  it('renders FieldHoverActionPopover for spanName and id', () => {
     const { getByText } = render(
       <SpanSummaryTitle
         spanName="Test Span"
