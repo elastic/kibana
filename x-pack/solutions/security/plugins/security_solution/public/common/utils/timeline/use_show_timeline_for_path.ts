@@ -17,12 +17,6 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
-const isTimelinePathVisible = (currentPath: string): boolean => {
-  const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
-  const hiddenTimelineRoutes = groupLinksWithHiddenTimelinePaths;
-  return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
-};
-
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
   const hiddenTimelineRoutes = useMemo(

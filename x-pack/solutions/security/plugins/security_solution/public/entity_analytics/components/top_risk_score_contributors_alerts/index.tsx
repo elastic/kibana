@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
@@ -54,8 +53,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   loading,
 }: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
-  const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
-    useUserData();
+  const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
     SourcererScopeName.detections
   );
@@ -63,7 +61,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const sourcererDataViewSpec = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

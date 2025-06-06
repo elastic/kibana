@@ -34,7 +34,6 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -168,7 +167,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     SourcererScopeName.detections
   );
 
-  const sourcererDataView = newDataViewPickerEnabled
+  const sourcererDataViewSpec = newDataViewPickerEnabled
     ? experimentalDataViewSpec
     : oldSourcererDataView;
   const isLoadingIndexPattern = newDataViewPickerEnabled

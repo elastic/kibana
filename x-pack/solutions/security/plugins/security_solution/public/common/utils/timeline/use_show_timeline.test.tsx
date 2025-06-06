@@ -12,8 +12,6 @@ import { useShowTimeline } from './use_show_timeline';
 import { TestProviders } from '../../mock';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 import type { LinkInfo } from '../../links';
-import { TestProviders } from '../../mock';
-import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 jest.mock('../../components/user_privileges');
 jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));

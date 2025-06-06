@@ -116,103 +116,101 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
-      try {
-        const result = await (action.payload.saveAsNew && timeline.id
-          ? copyTimeline({
-              timelineId,
-              timeline: {
-                ...convertTimelineAsInput(timeline, timelineTimeRange),
-                dataViewId: selectedDataViewIdSourcerer,
-                indexNames: selectedPatterns,
-                templateTimelineId,
-                templateTimelineVersion,
-              },
-              savedSearch: timeline.savedSearch,
-            })
-          : persistTimeline({
-              timelineId,
-              version: timelineVersion,
-              timeline: {
-                ...convertTimelineAsInput(timeline, timelineTimeRange),
-                dataViewId: selectedDataViewIdSourcerer,
-                indexNames: selectedPatterns,
-                templateTimelineId,
-                templateTimelineVersion,
-              },
-              savedSearch: timeline.savedSearch,
-            }));
+    try {
+      const result = await (action.payload.saveAsNew && timeline.id
+        ? copyTimeline({
+            timelineId,
+            timeline: {
+              ...convertTimelineAsInput(timeline, timelineTimeRange),
+              dataViewId,
+              indexNames,
+              templateTimelineId,
+              templateTimelineVersion,
+            },
+            savedSearch: timeline.savedSearch,
+          })
+        : persistTimeline({
+            timelineId,
+            version: timelineVersion,
+            timeline: {
+              ...convertTimelineAsInput(timeline, timelineTimeRange),
+              dataViewId,
+              indexNames,
+              templateTimelineId,
+              templateTimelineVersion,
+            },
+            savedSearch: timeline.savedSearch,
+          }));
 
-        if (isTimelineErrorResponse(result)) {
-          const error = getErrorFromResponse(result);
-          switch (error?.errorCode) {
-            case 403:
-              store.dispatch(showCallOutUnauthorizedMsg());
-              break;
-            // conflict
-            case 409:
-              kibana.notifications.toasts.addDanger({
-                title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
-                text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
-              });
-              break;
-            default:
-              kibana.notifications.toasts.addDanger({
-                title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-              });
-          }
-          return;
+      if (isTimelineErrorResponse(result)) {
+        const error = getErrorFromResponse(result);
+        switch (error?.errorCode) {
+          case 403:
+            store.dispatch(showCallOutUnauthorizedMsg());
+            break;
+          // conflict
+          case 409:
+            kibana.notifications.toasts.addDanger({
+              title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
+              text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
+            });
+            break;
+          default:
+            kibana.notifications.toasts.addDanger({
+              title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+              text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+            });
         }
+        return;
+      }
 
-        const response = result?.data?.persistTimeline;
-        if (response == null) {
-          kibana.notifications.toasts.addDanger({
-            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-            text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
-          });
-          return;
-        }
+      const response = result?.data?.persistTimeline;
+      if (response == null) {
+        kibana.notifications.toasts.addDanger({
+          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+          text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
+        });
+        return;
+      }
 
       refreshTimelines(store.getState());
 
-        store.dispatch(
-          updateTimeline({
-            id: localTimelineId,
-            timeline: {
-              ...timeline,
-              id: response.timeline.savedObjectId,
-              updated: response.timeline.updated ?? undefined,
-              savedObjectId: response.timeline.savedObjectId,
-              version: response.timeline.version,
-              status: response.timeline.status ?? TimelineStatusEnum.active,
-              timelineType: response.timeline.timelineType ?? TimelineTypeEnum.default,
-              templateTimelineId: response.timeline.templateTimelineId ?? null,
-              templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
-              savedSearchId: response.timeline.savedSearchId ?? null,
-              isSaving: false,
-            },
-          })
-        );
-        store.dispatch(
-          setChanged({
-            id: action.payload.id,
-            changed: false,
-          })
-        );
-      } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
-      } finally {
-        store.dispatch(
-          endTimelineSaving({
-            id: localTimelineId,
-          })
-        );
-      }
+      store.dispatch(
+        updateTimeline({
+          id: localTimelineId,
+          timeline: {
+            ...timeline,
+            id: response.timeline.savedObjectId,
+            updated: response.timeline.updated ?? undefined,
+            savedObjectId: response.timeline.savedObjectId,
+            version: response.timeline.version,
+            status: response.timeline.status ?? TimelineStatusEnum.active,
+            timelineType: response.timeline.timelineType ?? TimelineTypeEnum.default,
+            templateTimelineId: response.timeline.templateTimelineId ?? null,
+            templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
+            savedSearchId: response.timeline.savedSearchId ?? null,
+            isSaving: false,
+          },
+        })
+      );
+      store.dispatch(
+        setChanged({
+          id: action.payload.id,
+          changed: false,
+        })
+      );
+    } catch (error) {
+      kibana.notifications.toasts.addDanger({
+        title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+        text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+      });
+    } finally {
+      store.dispatch(
+        endTimelineSaving({
+          id: localTimelineId,
+        })
+      );
     }
-    return ret;
   };
 
 const timelineInput: SavedTimeline = {

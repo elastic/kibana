@@ -38,7 +38,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import {
@@ -269,7 +268,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const sourcererDataViewSpec = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
