@@ -164,7 +164,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                     content={panelTitle || defaultPanelTitle}
                     anchorProps={{ css: styles.tooltipAnchor }}
                   >
-                    <EuiFormLabel css={styles.formLabel} className="eui-textTruncate">
+                    <EuiFormLabel
+                      css={styles.formLabel}
+                      className="eui-textTruncate controlPanel--label"
+                    >
                       {panelTitle || defaultPanelTitle}
                     </EuiFormLabel>
                   </EuiToolTip>
