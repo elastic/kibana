@@ -8,9 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
 import React, { useMemo, useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { RuleTableItem, BulkEditActions, UpdateRulesToBulkEditProps } from '../../../../types';
 import {
