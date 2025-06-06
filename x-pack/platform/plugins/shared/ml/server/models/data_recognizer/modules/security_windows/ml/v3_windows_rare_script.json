@@ -7,7 +7,7 @@
       {
         "detector_description": "Detects rare powershell scripts via hash.",
         "function": "rare",
-        "field_name": "powershell.file.script_block_hash",
+        "by_field_name": "powershell.file.script_block_hash",
         "detector_index": 0
       }
     ],
@@ -24,6 +24,6 @@
     "created_by": "ml-module-security-windows-v3",
     "security_app_display_name": "Rare Powershell Script",
     "managed": true,
-    "job_revision": 1
+    "job_revision": 4
   }
 }
