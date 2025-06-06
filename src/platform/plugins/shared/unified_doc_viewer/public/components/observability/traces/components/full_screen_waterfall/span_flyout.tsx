@@ -76,7 +76,7 @@ export const SpanFlyout = ({
   const { span, docId, loading } = useSpan({ indexPattern: tracesIndexPattern, spanId });
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const { euiTheme } = useEuiTheme();
-  const documentAsHit: DataTableRecord | null = useMemo(() => {
+  const documentAsHit = useMemo<DataTableRecord | null>(() => {
     if (!span || !docId) return null;
 
     return {
