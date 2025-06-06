@@ -32,8 +32,11 @@ import type {
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
   PublishingSubject,
+  PublishesDataViews,
   SerializedTimeRange,
   SerializedTitles,
+  PublishesFilters,
+  PublishesQuery,
 } from '@kbn/presentation-publishing';
 import type {
   SavedSearch,
@@ -252,15 +255,15 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState
-> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesWritableTitle &
   PublishesSavedSearch &
+  PublishesDataViews &
+  PublishesQuery &
+  PublishesFilters &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -281,7 +284,5 @@ export interface SavedSearchCasesAttachmentPersistedState {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
-  parentQuery?: Query;
-  parentFilters?: Filter[];
   timestampField?: string;
 }

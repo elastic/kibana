@@ -47,13 +47,11 @@ const getAttachments = ({
       : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
   }
   if (isSavedSearchApi(api)) {
-    const dataView = api.dataViews$.getValue()?.[0] || {};
+    const dataView = api.dataViews$.getValue()[0]; // what happens if there are multiple data views for an ES|QL query
     const indexPattern = dataView.getIndexPattern();
     const timestampField = dataView.timeFieldName;
     const query = api.query$.getValue() as Query | undefined;
     const filters = api.filters$.getValue() || [];
-    const parentQuery = api.parentApi?.query$.getValue() as Query | undefined;
-    const parentFilters = api.parentApi?.filters$.getValue() || [];
 
     return [
       getSavedSearchCaseAttachment({
@@ -61,9 +59,7 @@ const getAttachments = ({
         timeRange: appliedTimeRange,
         timestampField,
         filters,
-        parentFilters,
         query,
-        parentQuery,
       }),
     ];
   }

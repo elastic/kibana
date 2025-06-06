@@ -8,19 +8,22 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-utils';
-import type {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasType,
-} from '@kbn/presentation-publishing';
+import { type SearchEmbeddableApi } from '@kbn/discover-utils';
 import {
+  type EmbeddableApiContext,
+  type PublishesDataViews,
+  type PublishingSubject,
   apiCanAccessViewMode,
+  apiPublishesQuery,
+  apiPublishesFilters,
   apiHasType,
   apiIsOfType,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 
-type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
+type SearchEmbeddableApiWithAtLeastOneDataView = Omit<SearchEmbeddableApi, 'dataViews$'> & {
+  dataViews$: PublishingSubject<DataView[]>;
+};
 
 export const apiPublishesSavedSearch = (
   api: EmbeddableApiContext['embeddable']
@@ -29,14 +32,34 @@ export const apiPublishesSavedSearch = (
   return Boolean(embeddable.savedSearch$);
 };
 
+export const apiPublishesDataViews = (
+  api: EmbeddableApiContext['embeddable']
+): api is PublishesDataViews => {
+  const embeddable = api as PublishesDataViews;
+  return Boolean(embeddable.dataViews$);
+};
+
+export const apiHasAtLeastOneDataView = (
+  api: EmbeddableApiContext['embeddable']
+): api is SearchEmbeddableApiWithAtLeastOneDataView => {
+  const embeddable = api as PublishesDataViews;
+  if (!apiPublishesDataViews(embeddable)) {
+    return false;
+  }
+  return Boolean(embeddable.dataViews$ && (embeddable.dataViews$.getValue()?.length ?? 0) > 0);
+};
+
 export const isSavedSearchApi = (
   api: EmbeddableApiContext['embeddable']
-): api is ViewSavedSearchActionApi => {
+): api is SearchEmbeddableApiWithAtLeastOneDataView => {
   return (
     apiCanAccessViewMode(api) &&
     getInheritedViewMode(api) === 'view' &&
     apiHasType(api) &&
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
-    apiPublishesSavedSearch(api)
+    apiPublishesSavedSearch(api) &&
+    apiHasAtLeastOneDataView(api) &&
+    apiPublishesQuery(api) &&
+    apiPublishesFilters(api)
   );
 };
