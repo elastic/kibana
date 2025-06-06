@@ -186,8 +186,10 @@ RUN chmod g+ws /usr/share/kibana && \
 # Remove the suid bit everywhere to mitigate "Stack Clash"
 RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
+{{! Ubuntu 24 containers include ubuntu:1000:1000 as part of a non-root standardization effort }}
+{{! Remove ubuntu to maintain the expected kibana user definition }}
 # Provide a non-root user to run the process.
-RUN groupadd --gid 1000 kibana && \
+RUN {{#ubuntu}}userdel -r ubuntu && {{/ubuntu}}groupadd --gid 1000 kibana && \
     useradd --uid 1000 --gid 1000 -G 0 \
       --home-dir /usr/share/kibana --no-create-home \
       kibana

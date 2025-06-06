@@ -1,6 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`User Summary Component it renders the default User Summary 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -32,14 +40,6 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div
@@ -381,6 +381,14 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
 `;
 
 exports[`User Summary Component it renders the panel view User Summary 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -412,14 +420,6 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div
