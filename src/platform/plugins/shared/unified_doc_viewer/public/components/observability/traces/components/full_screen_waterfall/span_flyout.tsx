@@ -144,8 +144,8 @@ export const SpanFlyout = ({
           <>
             <EuiTabs size="s">{renderTabs()}</EuiTabs>
             <EuiSkeletonText isLoading={loading}>
-              {selectedTabId === tabIds.OVERVIEW ? (
-                isSpan ? (
+              {selectedTabId === tabIds.OVERVIEW &&
+                (isSpan ? (
                   <SpanOverview
                     hit={documentAsHit}
                     tracesIndexPattern={tracesIndexPattern}
@@ -161,10 +161,13 @@ export const SpanFlyout = ({
                     showActions={false}
                     dataView={dataView}
                   />
-                )
-              ) : selectedTabId === tabIds.TABLE ? (
+                ))}
+
+              {selectedTabId === tabIds.TABLE && (
                 <DocViewerTable hit={documentAsHit} dataView={dataView} />
-              ) : (
+              )}
+
+              {selectedTabId === tabIds.JSON && (
                 <DocViewerSource
                   id={documentAsHit.id}
                   index={documentAsHit.raw._index}
