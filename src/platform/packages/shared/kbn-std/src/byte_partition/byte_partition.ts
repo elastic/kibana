@@ -7,45 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepMerge from 'deepmerge';
-
-type CallbackFn<TResult> = (chunk: string[], id: number) => Promise<TResult>;
-
 const MAX_HTTP_LINE_LENGTH = 4096;
 // Apply an 80% threshold to the http line max length to guarantee enough space for url and potentially other parameters.
 // This value might need to vary as it's an estimate of how much we can reserve for the chunked list length.
 export const MAX_HTTP_LINE_CHUNK_SIZE = MAX_HTTP_LINE_LENGTH * 0.75; // 4096 *0.75 === 3072 characters, as 1 char = 1 byte
 
 /**
- * This process takes a list of strings (for this use case, we'll pass it a list of data streams), and does the following steps:
- * 1. Create chunks from the original list. Each chunk will contain as many items until their summed length hits the limit.
- * 2. Provide each chunk in parallel to the chunkExecutor callback and resolve the result, which for our use case performs HTTP requests for data stream stats.
- * 3. Deep merge the result of each response into the same data structure, which is defined by the first item in the list.
- * 4. Once all chunks are processed, return the merged result.
- */
-export const processInChunks = async <TResult>(
-  list: string[],
-  chunkExecutor: CallbackFn<TResult>,
-  options: { chunkSize: number } = { chunkSize: MAX_HTTP_LINE_CHUNK_SIZE }
-): Promise<TResult> => {
-  const { chunkSize } = options;
-
-  const chunks = bytePartition(list, chunkSize);
-
-  const chunkResults = await Promise.all(chunks.map(chunkExecutor));
-
-  return chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
-};
-
-/**
- * Support functions for processInChunks
- */
-
-/**
  * Creates chunks from a list of strings, where each chunk contains as many items
  * as possible without exceeding the specified chunk size limit.
  */
-const bytePartition = (list: string[], chunkSize: number): string[][] => {
+export const bytePartition = (list: string[], chunkSize = MAX_HTTP_LINE_CHUNK_SIZE): string[][] => {
   if (list.length === 0) {
     return [[]];
   }
