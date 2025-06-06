@@ -73,6 +73,9 @@ export const isIntegerLiteral = (node: unknown): node is ESQLIntegerLiteral =>
 export const isDoubleLiteral = (node: unknown): node is ESQLIntegerLiteral =>
   isLiteral(node) && node.literalType === 'double';
 
+export const isBooleanLiteral = (node: unknown): node is ESQLStringLiteral =>
+  isLiteral(node) && node.literalType === 'boolean';
+
 export const isParamLiteral = (node: unknown): node is ESQLParamLiteral =>
   isLiteral(node) && node.literalType === 'param';
 

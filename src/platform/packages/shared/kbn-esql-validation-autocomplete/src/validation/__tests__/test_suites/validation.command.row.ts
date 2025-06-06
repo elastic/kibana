@@ -17,7 +17,7 @@ export const validationRowCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('row var = 1 in ("a", "b", "c")', [
-            'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
+            'Argument of [in] must be [integer], found value ["a"] type [string]',
           ]);
         });
       });

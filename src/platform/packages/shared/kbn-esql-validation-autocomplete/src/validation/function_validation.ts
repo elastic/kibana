@@ -10,7 +10,14 @@
 import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { isStringLiteral, isLiteral, isList } from '@kbn/esql-ast/src/ast/helpers';
+import {
+  isStringLiteral,
+  isLiteral,
+  isList,
+  isBooleanLiteral,
+  isIntegerLiteral,
+  isDoubleLiteral,
+} from '@kbn/esql-ast/src/ast/helpers';
 import { resolveItem } from '@kbn/esql-ast/src/visitor/utils';
 import {
   isLiteralItem,
@@ -338,7 +345,14 @@ export function validateFunction({
 
 const formatType = (argument: ESQLAstExpression): string => {
   if (isLiteral(argument)) {
-    return argument.type + ':' + argument.literalType;
+    switch (argument.literalType) {
+      case 'keyword': {
+        return 'string';
+      }
+      default: {
+        return argument.type + ':' + argument.literalType;
+      }
+    }
   }
 
   return argument.type;
@@ -370,21 +384,35 @@ const validateParameter = (
     }
   }
 
+  if (isParam(argument)) {
+    return;
+  }
+
   switch (parameter.type) {
     case 'keyword': {
-      if (isParam(argument) || isStringLiteral(argument)) {
+      if (isStringLiteral(argument)) {
         return;
       }
       return [parameter, argument];
     }
-    case 'double':
+    case 'integer': {
+      if (isIntegerLiteral(argument)) return;
+    }
+    case 'double': {
+      if (isDoubleLiteral(argument)) {
+        return;
+      }
+    }
+    case 'boolean': {
+      if (isBooleanLiteral(argument)) {
+        return;
+      }
+    }
     case 'unsigned_long':
     case 'long':
-    case 'integer':
     case 'counter_integer':
     case 'counter_long':
     case 'counter_double':
-    case 'boolean':
     case 'any':
     case 'date':
     case 'date_period':
@@ -395,9 +423,11 @@ const validateParameter = (
     case 'geo_shape':
     case 'version':
     case 'date_nanos': {
-      throw new Error('Not implemented');
+      return [parameter, argument];
     }
   }
+
+  return [parameter, argument];
 };
 
 function validateFunctionLiteralArg(
