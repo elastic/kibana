@@ -22,6 +22,7 @@ import {
   getIndexFilters,
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
+  getESQLGlobalFilters,
 } from './utils';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -121,26 +122,15 @@ export const useLensAttributes = ({
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
     const query = esql ? { esql } : globalQuery;
 
-    const queryFilters =
-      applyGlobalQueriesAndFilters && esql
-        ? [
-            {
-              meta: {
-                alias: null,
-                disabled: false,
-                key: 'globalFilterKey',
-                negate: false,
-                params: {},
-                type: 'string',
-              },
-              query: {
-                bool: {
-                  filter: globalFilterQuery,
-                },
-              },
-            },
-          ]
-        : [...(applyGlobalQueriesAndFilters ? filters : [])];
+    const queryFilters = (() => {
+      if (!applyGlobalQueriesAndFilters) return [];
+
+      if (esql) {
+        return getESQLGlobalFilters(globalFilterQuery);
+      }
+
+      return filters;
+    })();
 
     return {
       ...attrs,
