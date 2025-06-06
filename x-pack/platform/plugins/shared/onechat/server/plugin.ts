@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import type { OnechatConfig } from './config';
 import type {
   OnechatPluginSetup,
@@ -17,6 +19,7 @@ import type {
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import { registerFeatures } from './features';
+import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -28,6 +31,7 @@ export class OnechatPlugin
     >
 {
   private logger: Logger;
+  // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
 
@@ -46,12 +50,25 @@ export class OnechatPlugin
 
     registerFeatures({ features: pluginsSetup.features });
 
+    coreSetup.uiSettings.register({
+      [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
+        description: i18n.translate('onechat.uiSettings.mcpServer.description', {
+          defaultMessage: 'Enables MCP server with access to tools.',
+        }),
+        name: i18n.translate('onechat.uiSettings.mcpServer.name', {
+          defaultMessage: 'MCP Server',
+        }),
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
-      config: this.config,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {

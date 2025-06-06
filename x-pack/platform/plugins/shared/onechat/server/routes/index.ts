@@ -17,7 +17,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
-  if (dependencies.config.mcpServer.enabled) {
-    registerMCPRoutes(dependencies);
-  }
+  registerMCPRoutes(dependencies);
 };

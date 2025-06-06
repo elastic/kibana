@@ -12,13 +12,14 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
+import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../../common/constants';
 
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/onechat/mcp';
+const MCP_SERVER_PATH = '/api/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -27,7 +28,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .post({
       path: MCP_SERVER_PATH,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: {
+          enabled: false,
+          reason: 'todo',
+        },
+        // authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'MCP server',
@@ -47,9 +52,16 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           request: { body: schema.object({}, { unknowns: 'allow' }) },
         },
       },
-      wrapHandler(async (_, request, response) => {
+      wrapHandler(async (ctx, request, response) => {
         let transport: KibanaMcpHttpTransport | undefined;
         let server: McpServer | undefined;
+
+        const { uiSettings } = await ctx.core;
+        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
+
+        if (!enabled) {
+          return response.notFound();
+        }
 
         try {
           transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
@@ -146,7 +158,13 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
       },
-      wrapHandler(async (_, __, response) => {
+      wrapHandler(async (ctx, _, response) => {
+        const { uiSettings } = await ctx.core;
+        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
+
+        if (!enabled) {
+          return response.notFound();
+        }
         return response.customError({
           statusCode: 405,
           body: {
@@ -181,7 +199,13 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         version: '2023-10-31',
         validate: false,
       },
-      wrapHandler(async (_, __, response) => {
+      wrapHandler(async (ctx, _, response) => {
+        const { uiSettings } = await ctx.core;
+        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
+
+        if (!enabled) {
+          return response.notFound();
+        }
         return response.customError({
           statusCode: 405,
           body: {
