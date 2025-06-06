@@ -2727,6 +2727,110 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('TaskValidator', () => {
+    test(`should pass allowReadingInvalidState:false accordingly`, async () => {
+      const logger = mockLogger();
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const store = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+      });
+
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'id',
+        type,
+        attributes: {
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          state: JSON.stringify({
+            foo: 1, // Invalid state
+          }),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      // allowReadingInvalidState: false, should throw an error
+      await expect(store.schedule(task as TaskInstance)).rejects.toThrowError(
+        `[TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]`
+      );
+    });
+
+    test(`should pass allowReadingInvalidState:true accordingly`, async () => {
+      const logger = mockLogger();
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const store = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: true,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+      });
+
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'id',
+        type,
+        attributes: {
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          state: JSON.stringify({
+            foo: 1, // Invalid state
+          }),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      // allowReadingInvalidState: true, should not throw but log a debug message
+      await store.schedule(task as TaskInstance);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        "[report][id] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]"
+      );
+    });
+  });
+
   describe('updateByQuery', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
