@@ -31,7 +31,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Importing a single non-customized prebuilt rule](#importing-a-single-non-customized-prebuilt-rule)
-    - [**Scenario: Importing a non-customized rule when it's not installed**](#scenario-importing-a-non-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a non-customized prebuilt rule without overwriting**](#scenario-importing-a-non-customized-prebuilt-rule-without-overwriting)
     - [**Scenario: Importing a non-customized rule on top of an installed non-customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a non-customized rule on top of an installed customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing a single customized prebuilt rule](#importing-a-single-customized-prebuilt-rule)
@@ -129,7 +129,7 @@ User stories:
 
 ### Importing a single non-customized prebuilt rule
 
-#### **Scenario: Importing a non-customized rule when it's not installed**
+#### **Scenario: Importing a non-customized prebuilt rule without overwriting**
 
 **Automation**: 1 API integration test.
 
@@ -179,7 +179,7 @@ And the updated rule's parameters should match the import payload
 
 ### Importing a single customized prebuilt rule
 
-#### **Scenario: Importing a customized rule when it's not installed**
+#### **Scenario: Importing a customized rule without overwriting**
 
 **Automation**: 1 API integration test.
 
