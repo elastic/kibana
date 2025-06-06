@@ -604,9 +604,9 @@ describe('MS Defender response actions client', () => {
 
         const actionRequestsSearchResponse = generator.toEsSearchResponse([
           generator.generateActionEsHit<
-          { scriptName: string },
-          {},
-          MicrosoftDefenderEndpointActionRequestCommonMeta
+            { scriptName: string },
+            {},
+            MicrosoftDefenderEndpointActionRequestCommonMeta
           >({
             agent: { id: 'agent-uuid-1' },
             EndpointActions: {
