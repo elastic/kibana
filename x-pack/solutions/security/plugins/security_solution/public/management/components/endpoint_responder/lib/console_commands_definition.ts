@@ -666,7 +666,7 @@ const adjustCommandsForCrowdstrike = ({
   crowdstrikeRunScriptEnabled,
 }: {
   commandList: CommandDefinition[];
-  microsoftDefenderEndpointRunScriptEnabled: boolean;
+  crowdstrikeRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   return commandList.map((command) => {
     if (
