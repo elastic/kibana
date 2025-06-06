@@ -27,7 +27,7 @@ import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../application/maintenance_window/transforms';
-import { generateMaintenanceWindowEvents } from '../application/maintenance_window/lib/generate_maintenance_window_events';
+import { generateMaintenanceWindowEvents as generateMaintenanceWindowEventsViaRRule } from '../application/maintenance_window/lib/generate_maintenance_window_events';
 import { getMaintenanceWindowStatus } from '../application/maintenance_window/lib/get_maintenance_window_status';
 
 export const MAINTENANCE_WINDOW_EVENTS_TASK_TYPE = 'maintenance-window:generate-events';
@@ -69,6 +69,7 @@ function registerMaintenanceWindowEventsGeneratorTask(
     [MAINTENANCE_WINDOW_EVENTS_TASK_TYPE]: {
       title: 'Maintenance window events generator task',
       createTaskRunner: createEventsGeneratorTaskRunner(logger, coreStartServices),
+      timeout: '30m',
     },
   });
 }
@@ -88,8 +89,9 @@ export function createEventsGeneratorTaskRunner(
             MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
           ]);
 
-          const startRangeDate = moment().startOf('day').utc().toISOString();
-          const endRangeDate = moment().startOf('day').utc().add(1, 'week').toISOString();
+          // we are using total 2 weeks range to find maintenance windows that are expiring
+          const startRangeDate = moment().startOf('day').utc().subtract(1, 'week').toISOString(); // 1 week before current date
+          const endRangeDate = moment().startOf('day').utc().add(1, 'week').toISOString(); // 1 week after current date
 
           const startRangeFilter = nodeBuilder.range(
             'maintenance-window.attributes.expirationDate',
@@ -120,6 +122,12 @@ export function createEventsGeneratorTaskRunner(
           logger.warn(`Error executing maintenance windows events generator task: ${e.message}`);
         }
       },
+      async cancel() {
+        logger.debug(
+          `Cancelling maintenance windows events generator task - execution error due to timeout.`
+        );
+        return;
+      },
     };
   };
 }
@@ -138,6 +146,69 @@ export function getStatusFilter() {
 
   return fromKueryExpression(fullQuery);
 }
+
+export const updateMaintenanceWindowsEvents = async ({
+  filter,
+  savedObjectsClient,
+  logger,
+  startRangeDate,
+}: {
+  logger: Logger;
+  savedObjectsClient: ISavedObjectsRepository;
+  filter: KueryNode;
+  startRangeDate: string;
+}) => {
+  let totalUpdatedMaintenanceWindows = 0;
+  let mwsWithNewEvents = [];
+  const soFinder = await getSOFinder({
+    savedObjectsClient,
+    logger,
+    filter,
+  });
+
+  if (soFinder) {
+    for await (const findResults of soFinder.find()) {
+      try {
+        mwsWithNewEvents = await generateEvents({
+          maintenanceWindowsSO: findResults.saved_objects,
+          startRangeDate,
+        });
+
+        if (mwsWithNewEvents.length) {
+          const bulkUpdateReq = mwsWithNewEvents.map((mw) => {
+            const updatedMaintenanceWindowAttributes =
+              transformMaintenanceWindowToMaintenanceWindowAttributes({
+                ...mw,
+              });
+
+            return {
+              type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+              id: mw.id,
+              attributes: updatedMaintenanceWindowAttributes,
+            };
+          });
+
+          const result = await savedObjectsClient.bulkUpdate<MaintenanceWindowAttributes>(
+            bulkUpdateReq
+          );
+
+          totalUpdatedMaintenanceWindows =
+            totalUpdatedMaintenanceWindows + result.saved_objects.length;
+        }
+      } catch (e) {
+        logger.error(
+          `MW event generator: Failed to update events in maintenance windows saved object". Error: ${e.message}`
+        );
+      }
+    }
+
+    await soFinder.close();
+  }
+
+  logger.debug(`Total updated maintenance windows "${totalUpdatedMaintenanceWindows}"`);
+
+  return totalUpdatedMaintenanceWindows;
+};
 
 export async function getSOFinder({
   savedObjectsClient,
@@ -179,96 +250,38 @@ export async function generateEvents({
     })
   );
 
-  const newExpirationDate = moment(startRangeDate).utc().add(1, 'year').toISOString();
+  // 1 year from the task run date (current date) till the end of the day
+  const newExpirationDate = moment().utc().endOf('day').add(1, 'year').toISOString();
 
-  const mwWithGeneratedEvents = maintenanceWindows
-    // filtering the maintenance windows that have recurring schedule and events
-    .filter(
-      (maintenanceWindow) =>
-        (maintenanceWindow.rRule.interval !== undefined ||
-          maintenanceWindow.rRule.freq !== undefined) &&
-        maintenanceWindow.events.length
-    )
-    .map((filteredMaintenanceWindow) => {
-      const { rRule, duration, expirationDate: oldExpirationDate } = filteredMaintenanceWindow;
+  try {
+    const mwWithGeneratedEvents = maintenanceWindows
+      // filtering the maintenance windows that have recurring schedule and events
+      .filter(
+        (maintenanceWindow) =>
+          (maintenanceWindow.rRule.interval !== undefined ||
+            maintenanceWindow.rRule.freq !== undefined) &&
+          maintenanceWindow.events.length
+      )
+      .map((filteredMaintenanceWindow) => {
+        const { rRule, duration, expirationDate: oldExpirationDate } = filteredMaintenanceWindow;
 
-      const newEvents = generateMaintenanceWindowEvents({
-        rRule,
-        expirationDate: newExpirationDate,
-        duration,
-        startDate: startRangeDate, // here start range date is 1 week before current expiration date
-      });
+        const newEvents = generateMaintenanceWindowEventsViaRRule({
+          rRule,
+          expirationDate: newExpirationDate,
+          duration,
+          startDate: startRangeDate, // here start range date is 1 week before current expiration date
+        });
 
-      return {
-        ...filteredMaintenanceWindow,
-        expirationDate: newEvents.length ? newExpirationDate : oldExpirationDate,
-        events: [...newEvents],
-      };
-    })
-    .filter((mappedMW) => mappedMW.expirationDate === newExpirationDate);
+        return {
+          ...filteredMaintenanceWindow,
+          expirationDate: newEvents.length ? newExpirationDate : oldExpirationDate,
+          events: [...newEvents],
+        };
+      })
+      .filter((mappedMW) => mappedMW.expirationDate === newExpirationDate);
 
-  return mwWithGeneratedEvents;
-}
-
-export const updateMaintenanceWindowsEvents = async ({
-  filter,
-  savedObjectsClient,
-  logger,
-  startRangeDate,
-}: {
-  logger: Logger;
-  savedObjectsClient: ISavedObjectsRepository;
-  filter: KueryNode;
-  startRangeDate: string;
-}) => {
-  let totalUpdatedMaintenanceWindows = 0;
-  let mwsWithNewEvents = [];
-  const soFinder = await getSOFinder({
-    savedObjectsClient,
-    logger,
-    filter,
-  });
-
-  if (soFinder) {
-    for await (const findResults of soFinder.find()) {
-      mwsWithNewEvents = await generateEvents({
-        maintenanceWindowsSO: findResults.saved_objects,
-        startRangeDate,
-      });
-
-      try {
-        if (mwsWithNewEvents.length) {
-          const bulkUpdateReq = mwsWithNewEvents.map((mw) => {
-            const updatedMaintenanceWindowAttributes =
-              transformMaintenanceWindowToMaintenanceWindowAttributes({
-                ...mw,
-              });
-
-            return {
-              type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-              id: mw.id,
-              attributes: updatedMaintenanceWindowAttributes,
-            };
-          });
-
-          const result = await savedObjectsClient.bulkUpdate<MaintenanceWindowAttributes>(
-            bulkUpdateReq
-          );
-
-          totalUpdatedMaintenanceWindows =
-            totalUpdatedMaintenanceWindows + result.saved_objects.length;
-        }
-      } catch (e) {
-        logger.error(
-          `MW event generator: Failed to update events in maintenance windows saved object". Error: ${e.message}`
-        );
-      }
-    }
-
-    await soFinder.close();
+    return mwWithGeneratedEvents;
+  } catch (e) {
+    throw new Error(`Failed to generate events for maintenance windows. Error: ${e.message}`);
   }
-
-  logger.debug(`Total updated maintenance windows "${totalUpdatedMaintenanceWindows}"`);
-
-  return totalUpdatedMaintenanceWindows;
-};
+}

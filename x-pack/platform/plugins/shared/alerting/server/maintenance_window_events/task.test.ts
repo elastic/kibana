@@ -147,6 +147,31 @@ const finishedWithEventsMaintenanceWindowMock = {
   references: [],
 };
 
+const runningMaintenanceWindowMock1 = {
+  id: '6',
+  type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  attributes: getMockMaintenanceWindow({
+    title: 'MW 6',
+    enabled: true,
+    duration: 28800000,
+    expirationDate: '2025-04-16T15:00:00.000Z', // expiration date is 1 week before current date
+    events: [
+      {
+        gte: '2025-04-15T05:00:00.000Z',
+        lte: '2025-04-15T13:00:00.000Z',
+      },
+    ],
+    rRule: {
+      until: '2025-05-30T12:00:00.000Z',
+      interval: 1,
+      freq: 2,
+      dtstart: '2025-04-15T05:00:00.000Z',
+      tzid: 'UTC',
+    },
+  }),
+  references: [],
+};
+
 const statusFilter = {
   arguments: [
     {
@@ -327,7 +352,7 @@ describe('Maintenance window events generator task', () => {
       expect(totalMWs).toEqual([]);
     });
 
-    test('should return 0 when finished maintenance window', async () => {
+    test('should not generate events when finished maintenance window', async () => {
       const totalMWs = await generateEvents({
         maintenanceWindowsSO: [finishedWithEventsMaintenanceWindowMock],
         startRangeDate: '2025-04-23T09:00:00.000Z',
@@ -407,7 +432,7 @@ describe('Maintenance window events generator task', () => {
             lte: '2026-04-20T11:00:00.000Z',
           },
         ],
-        expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+        expirationDate: moment(mockCurrentDate).tz('UTC').endOf('day').add(1, 'year').toISOString(),
       };
 
       const total = await generateEvents({
@@ -434,13 +459,65 @@ describe('Maintenance window events generator task', () => {
           eventStartTime: '2025-04-23T05:00:00.000Z',
           status: 'running',
           ...runningMaintenanceWindowMock.attributes,
-          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+          expirationDate: moment(mockCurrentDate)
+            .tz('UTC')
+            .endOf('day')
+            .add(1, 'year')
+            .toISOString(),
           events: [
             {
               gte: '2026-04-23T05:00:00.000Z',
               lte: '2026-04-23T13:00:00.000Z',
             },
           ],
+        },
+      ]);
+    });
+
+    test('should generate events for 2 weeks maintenance window', async () => {
+      const totalMWs = await generateEvents({
+        maintenanceWindowsSO: [runningMaintenanceWindowMock1],
+        startRangeDate: '2025-04-23T09:00:00.000Z',
+      });
+
+      expect(totalMWs).toEqual([
+        {
+          id: '6',
+          ...runningMaintenanceWindowMock1.attributes,
+          eventEndTime: '2025-04-15T13:00:00.000Z',
+          eventStartTime: '2025-04-15T05:00:00.000Z',
+          expirationDate: moment(mockCurrentDate)
+            .tz('UTC')
+            .endOf('day')
+            .add(1, 'year')
+            .toISOString(),
+          events: [
+            {
+              gte: '2025-04-29T05:00:00.000Z',
+              lte: '2025-04-29T13:00:00.000Z',
+            },
+            {
+              gte: '2025-05-06T05:00:00.000Z',
+              lte: '2025-05-06T13:00:00.000Z',
+            },
+            {
+              gte: '2025-05-13T05:00:00.000Z',
+              lte: '2025-05-13T13:00:00.000Z',
+            },
+            {
+              gte: '2025-05-20T05:00:00.000Z',
+              lte: '2025-05-20T13:00:00.000Z',
+            },
+            {
+              gte: '2025-05-27T05:00:00.000Z',
+              lte: '2025-05-27T13:00:00.000Z',
+            },
+            {
+              gte: '2025-06-03T05:00:00.000Z',
+              lte: '2025-06-03T13:00:00.000Z',
+            },
+          ],
+          status: 'archived',
         },
       ]);
     });
@@ -519,7 +596,11 @@ describe('Maintenance window events generator task', () => {
                 lte: '2025-04-28T02:00:00.011Z',
               },
             ],
-            expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+            expirationDate: moment(mockCurrentDate)
+              .tz('UTC')
+              .endOf('day')
+              .add(1, 'year')
+              .toISOString(),
           },
         },
       ]);
@@ -580,7 +661,7 @@ describe('Maintenance window events generator task', () => {
             lte: '2026-04-20T11:00:00.000Z',
           },
         ],
-        expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+        expirationDate: moment(mockCurrentDate).tz('UTC').endOf('day').add(1, 'year').toISOString(),
       };
 
       mockCreatePointInTimeFinderAsInternalUser();
@@ -598,7 +679,11 @@ describe('Maintenance window events generator task', () => {
             id: '4',
             attributes: {
               ...runningMaintenanceWindowMock.attributes,
-              expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+              expirationDate: moment(mockCurrentDate)
+                .tz('UTC')
+                .endOf('day')
+                .add(1, 'year')
+                .toISOString(),
               events: [
                 {
                   gte: '2026-04-23T05:00:00.000Z',
@@ -630,7 +715,11 @@ describe('Maintenance window events generator task', () => {
           id: '4',
           attributes: {
             ...runningMaintenanceWindowMock.attributes,
-            expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+            expirationDate: moment(mockCurrentDate)
+              .tz('UTC')
+              .endOf('day')
+              .add(1, 'year')
+              .toISOString(),
             events: [
               {
                 gte: '2026-04-23T05:00:00.000Z',
