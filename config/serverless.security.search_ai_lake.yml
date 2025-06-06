@@ -8,9 +8,9 @@ xpack.ml.dfa.enabled: false
 ## Plugins that are inaccessible in the UI
 xpack.securitySolutionServerless.inaccessibleApps:
   - dashboards
-  - visualize
+#  - visualize
   - maps
-  - lens
+#  - lens
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
