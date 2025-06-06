@@ -29,5 +29,12 @@
       "spaces",
       "security"
     ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Only include the encoded versions in the build due to https://github.com/elastic/kibana/issues/202114
+      "**/knowledge_base/security_labs/*.md",
+      "!**/knowledge_base/security_labs/*.encoded.md"
+    ]
   }
 }
