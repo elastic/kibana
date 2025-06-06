@@ -68,11 +68,9 @@ import { Y_AXIS_LABEL_WIDTH } from './constants';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
-import {
-  useSeverityOptions,
-  useThresholdToSeverity,
-  type TableSeverity,
-} from '../components/controls/select_severity/select_severity';
+import type { SeverityOption } from './hooks/use_severity_options';
+import { useSeverityOptions } from './hooks/use_severity_options';
+import { useThresholdToSeverity } from './hooks/use_threshold_to_severity';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -174,7 +172,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     }, [swimLaneSeverity, severityOptions, thresholdToSeverity]);
 
     const handleSeverityChange = useCallback(
-      (newSelectedSeverities: TableSeverity[]) => {
+      (newSelectedSeverities: SeverityOption[]) => {
         const thresholds = newSelectedSeverities.map((severity) => severity.threshold);
         anomalyTimelineStateService.setSeverity(thresholds);
       },

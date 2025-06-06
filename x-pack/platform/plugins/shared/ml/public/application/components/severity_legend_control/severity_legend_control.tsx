@@ -16,16 +16,14 @@ import {
   EuiFormControlLayout,
   EuiIcon,
 } from '@elastic/eui';
-import {
-  getSeverityRangeDisplay,
-  type TableSeverity,
-} from '../controls/select_severity/select_severity';
+import { getSeverityRangeDisplay } from '../controls/select_severity/select_severity';
 import { useSeverityLegendControlStyles } from './severity_legend_control_styles';
+import type { SeverityOption } from '../../explorer/hooks/use_severity_options';
 
 export interface SeverityControlProps {
-  allSeverityOptions: TableSeverity[];
-  selectedSeverities: TableSeverity[];
-  onChange: (selectedSeverities: TableSeverity[]) => void;
+  allSeverityOptions: SeverityOption[];
+  selectedSeverities: SeverityOption[];
+  onChange: (selectedSeverities: SeverityOption[]) => void;
   dataTestSubj?: string;
 }
 
@@ -39,12 +37,12 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
   const styles = useSeverityLegendControlStyles();
 
   const handleSeverityClick = useCallback(
-    (clickedSeverity: TableSeverity) => {
+    (clickedSeverity: SeverityOption) => {
       const isCurrentlySelected = selectedSeverities.some(
         (severity) => severity.val === clickedSeverity.val
       );
 
-      let newSelectedSeverities: TableSeverity[];
+      let newSelectedSeverities: SeverityOption[];
       if (isCurrentlySelected) {
         newSelectedSeverities = selectedSeverities.filter(
           (severity) => severity.val !== clickedSeverity.val

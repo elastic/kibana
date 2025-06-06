@@ -37,7 +37,7 @@ import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { useMlJobService } from '../../application/services/job_service';
-import { useThresholdToSeverity } from '../../application/components/controls/select_severity/select_severity';
+import { useThresholdToSeverity } from '../../application/explorer/hooks/use_threshold_to_severity';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 

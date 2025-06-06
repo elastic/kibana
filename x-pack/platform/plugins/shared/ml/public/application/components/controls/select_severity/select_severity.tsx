@@ -12,30 +12,14 @@ import type { FC } from 'react';
 import React, { Fragment, useMemo, useCallback } from 'react';
 
 import type { EuiSelectableOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiHealth, useEuiTheme } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '../../../../../common/types/anomalies';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
-
-const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
-  defaultMessage: 'warning',
-});
-const minorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
-  defaultMessage: 'minor',
-});
-const majorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
-  defaultMessage: 'major',
-});
-const criticalLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
-  defaultMessage: 'critical',
-});
-
-const lowLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.lowLabel', {
-  defaultMessage: 'low',
-});
+import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
 
 export interface TableSeverityPageUrlState {
   pageKey: 'mlSelectSeverity';
@@ -54,118 +38,9 @@ export interface TableSeverityState {
 }
 
 /**
- * React hook that returns severity options with their display values and colors
- */
-export const useSeverityOptions = (): TableSeverity[] => {
-  const { euiTheme } = useEuiTheme();
-
-  return useMemo(
-    () => [
-      {
-        val: ML_ANOMALY_THRESHOLD.LOW,
-        display: lowLabel,
-        rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.LOW),
-        // TODO: SKY20
-        color: '#CFEEF7',
-        threshold: {
-          min: ML_ANOMALY_THRESHOLD.LOW,
-          max: ML_ANOMALY_THRESHOLD.WARNING,
-        },
-      },
-      {
-        val: ML_ANOMALY_THRESHOLD.WARNING,
-        display: warningLabel,
-        rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.WARNING),
-        // TODO: SKY40
-        color: '#94D8EB',
-        threshold: {
-          min: ML_ANOMALY_THRESHOLD.WARNING,
-          max: ML_ANOMALY_THRESHOLD.MINOR,
-        },
-      },
-      {
-        val: ML_ANOMALY_THRESHOLD.MINOR,
-        display: minorLabel,
-        rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.MINOR),
-        color: euiTheme.colors.severity.warning,
-        threshold: {
-          min: ML_ANOMALY_THRESHOLD.MINOR,
-          max: ML_ANOMALY_THRESHOLD.MAJOR,
-        },
-      },
-      {
-        val: ML_ANOMALY_THRESHOLD.MAJOR,
-        display: majorLabel,
-        rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.MAJOR),
-        color: euiTheme.colors.severity.risk,
-        threshold: {
-          min: ML_ANOMALY_THRESHOLD.MAJOR,
-          max: ML_ANOMALY_THRESHOLD.CRITICAL,
-        },
-      },
-      {
-        val: ML_ANOMALY_THRESHOLD.CRITICAL,
-        display: criticalLabel,
-        rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.CRITICAL),
-        color: euiTheme.colors.severity.danger,
-        threshold: {
-          min: ML_ANOMALY_THRESHOLD.CRITICAL,
-        },
-      },
-    ],
-    [
-      euiTheme.colors.severity.danger,
-      euiTheme.colors.severity.risk,
-      euiTheme.colors.severity.warning,
-    ]
-  );
-};
-
-/**
- * React hook that returns a function to find a severity option by value
- */
-export const useThresholdToSeverity = () => {
-  const severityOptions = useSeverityOptions();
-
-  return useMemo(() => {
-    return (thresholds: SeverityThreshold[] | number) => {
-      // Handle legacy case where threshold is a single number
-      if (typeof thresholds === 'number') {
-        // Find all severity options with min value >= the provided threshold
-        const matchingSeverities = severityOptions.filter(
-          (severity) => severity.threshold.min >= thresholds
-        );
-
-        // Default to lowest severity if no matches found
-        if (matchingSeverities.length === 0) {
-          return [severityOptions[0]];
-        }
-
-        return matchingSeverities;
-      }
-
-      // Handle the new format with threshold objects
-      // Get corresponding severity objects that match the thresholds
-      const matchingSeverities = severityOptions.filter((severity) =>
-        thresholds.some(
-          (threshold) =>
-            threshold.min === severity.threshold.min && threshold.max === severity.threshold.max
-        )
-      );
-      // Default to lowest severity if no matches found
-      if (matchingSeverities.length === 0) {
-        return [severityOptions[0]];
-      }
-
-      return matchingSeverities;
-    };
-  }, [severityOptions]);
-};
-
-/**
  * React hook that returns the default table severity state
  */
-export const useTableSeverityDefault = () => {
+const useTableSeverityDefault = () => {
   const severityOptions = useSeverityOptions();
   return useMemo(
     () => ({
@@ -203,7 +78,7 @@ export const getSeverityRangeDisplay = (val: number): string => {
   }
 };
 
-export const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
+const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
   const severityOptions = useSeverityOptions();
 
   return useMemo<EuiSelectableOption[]>(() => {
