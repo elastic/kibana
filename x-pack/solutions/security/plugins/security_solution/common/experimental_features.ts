@@ -91,7 +91,7 @@ export const allowedExperimentalValues = Object.freeze({
    * and Fleet must set it runtime mode to spaces by calling the following API:
    * - `POST /internal/fleet/enable_space_awareness`
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: true,
 
   /**
    * Disables new notes
