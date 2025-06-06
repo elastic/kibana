@@ -11,16 +11,19 @@ import { CommandSuggestParams, Location } from '../../../definitions/types';
 import { noCaseCompare } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
-import { getFieldsOrFunctionsSuggestions, handleFragment, pushItUpInTheList } from '../../helper';
+import {
+  getFieldsOrFunctionsSuggestions,
+  handleFragment,
+  pushItUpInTheList,
+  suggestForExpression,
+} from '../../helper';
 import type { SuggestionRawDefinition } from '../../types';
 import { getSortPos, sortModifierSuggestions } from './helper';
 
-export async function suggest({
-  innerText,
-  getColumnsByType,
-  columnExists,
-  command,
-}: CommandSuggestParams<'sort'>): Promise<SuggestionRawDefinition[]> {
+export async function suggest(
+  params: CommandSuggestParams<'sort'>
+): Promise<SuggestionRawDefinition[]> {
+  const { command, innerText, getColumnsByType, getExpressionType, columnExists } = params;
   const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
 
   const commandText = innerText.slice(command.location.min);
@@ -29,7 +32,7 @@ export async function suggest({
 
   switch (pos) {
     case 'space2': {
-      return [
+      const commandSuggestions = [
         sortModifierSuggestions.ASC,
         sortModifierSuggestions.DESC,
         sortModifierSuggestions.NULLS_FIRST,
@@ -37,6 +40,19 @@ export async function suggest({
         pipeCompleteItem,
         { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
+
+      const suggestions = await suggestForExpression({
+        ...params,
+        expressionRoot: command.args[0],
+        location: Location.WHERE,
+        preferredExpressionType: 'boolean',
+      });
+
+      if (getExpressionType(command.args[0]) !== 'unknown') {
+        suggestions.push(...commandSuggestions);
+      }
+
+      return suggestions;
     }
     case 'order': {
       return handleFragment(
@@ -112,6 +128,7 @@ export async function suggest({
   const fieldSuggestions = await getColumnsByType('any', [], {
     openSuggestions: true,
   });
+
   const functionSuggestions = await getFieldsOrFunctionsSuggestions(
     ['any'],
     Location.SORT,
@@ -122,26 +139,18 @@ export async function suggest({
     }
   );
 
+  const expressionSuggestions = await suggestForExpression({
+    ...params,
+    expressionRoot: command.args[0],
+    location: Location.WHERE,
+    preferredExpressionType: 'boolean',
+  });
+
   return await handleFragment(
     innerText,
-    columnExists,
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // SORT fie<suggest>
-      return [
-        ...pushItUpInTheList(
-          fieldSuggestions.map((suggestion) => {
-            // if there is already a command, we don't want to override it
-            if (suggestion.command) return suggestion;
-            return {
-              ...suggestion,
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            };
-          }),
-          true
-        ),
-        ...functionSuggestions,
-      ];
+    (fragment) => getExpressionType(command.args[0]) !== 'unknown',
+    () => {
+      return expressionSuggestions;
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // SORT field<suggest>
@@ -152,6 +161,7 @@ export async function suggest({
         prependSpace(sortModifierSuggestions.DESC),
         prependSpace(sortModifierSuggestions.NULLS_FIRST),
         prependSpace(sortModifierSuggestions.NULLS_LAST),
+        ...expressionSuggestions.map(prependSpace),
       ].map<SuggestionRawDefinition>((s) => ({
         ...s,
         filterText: fragment,
