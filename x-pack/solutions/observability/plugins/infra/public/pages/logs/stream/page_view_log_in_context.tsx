@@ -18,28 +18,49 @@ import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import type { LogEntry } from '@kbn/logs-shared-plugin/common';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useDatePickerContext } from '../../../components/asset_details/hooks/use_date_picker';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const [{ contextEntry, startTimestamp, endTimestamp, logViewReference }, { setContextEntry }] =
-    useViewLogInProviderContext();
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
+  const { dateRange } = useDatePickerContext();
+
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+  const [{ contextEntry }, { setContextEntry }] = useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
 
   const contextQuery = useMemo(() => {
     if (contextEntry && !isEmpty(contextEntry.context)) {
-      return Object.entries(contextEntry.context).reduce((kuery, [key, value]) => {
-        const currentExpression = `${key} : "${value}"`;
-        if (kuery.length > 0) {
-          return `${kuery} AND ${currentExpression}`;
-        } else {
-          return currentExpression;
-        }
-      }, '');
+      return {
+        language: 'kuery',
+        query: Object.entries(contextEntry.context).reduce((kuery, [key, value]) => {
+          const currentExpression = `${key} : "${value}"`;
+          if (kuery.length > 0) {
+            return `${kuery} AND ${currentExpression}`;
+          } else {
+            return currentExpression;
+          }
+        }, ''),
+      };
     }
   }, [contextEntry]);
 
@@ -50,20 +71,25 @@ export const PageViewLogInContext: React.FC = () => {
   return (
     <EuiModal onClose={closeModal} maxWidth={false}>
       <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
-        <EuiFlexGroup direction="column" responsive={false} wrap={false} style={{ height: '100%' }}>
+        <EuiFlexGroup direction="column" responsive={false} wrap={false} css={{ height: '100%' }}>
           <EuiFlexItem grow={false}>
             <LogEntryContext context={contextEntry.context} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <LogStream
-              logView={logViewReference}
-              startTimestamp={startTimestamp}
-              endTimestamp={endTimestamp}
-              query={contextQuery}
-              center={contextEntry.cursor}
-              highlight={contextEntry.id}
-              height="100%"
-            />
+            {logSources.value ? (
+              <LazySavedSearchComponent
+                dependencies={{ embeddable, searchSource, dataViews }}
+                index={logSources.value}
+                timeRange={dateRange}
+                query={contextQuery}
+                height={'100%'}
+                displayOptions={{
+                  solutionNavIdOverride: 'oblt',
+                  enableDocumentViewer: false,
+                  enableFilters: false,
+                }}
+              />
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </LogInContextWrapper>

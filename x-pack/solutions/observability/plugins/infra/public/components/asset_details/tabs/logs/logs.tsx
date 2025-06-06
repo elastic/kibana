@@ -154,7 +154,7 @@ export const Logs = () => {
             height={'60vh'}
             displayOptions={{
               solutionNavIdOverride: 'oblt',
-              enableDocumentViewer: true,
+              enableDocumentViewer: false,
               enableFilters: false,
             }}
           />
