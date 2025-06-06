@@ -23,15 +23,11 @@ import type { APMConfig } from '../..';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 
-const fields = asMutableArray([
-  '@timestamp',
-  'trace.id',
-  'service.name',
-  'span.id',
-  'span.name',
-] as const);
+const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
 const optionalFields = asMutableArray([
+  'span.id',
+  'span.name',
   'duration',
   'span.duration.us',
   'transaction.duration.us',
@@ -115,9 +111,9 @@ export async function getUnifiedTraceItems({
     const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
 
     return {
-      id: event.span.id ?? event.transaction?.id,
+      id: event.span?.id ?? event.transaction?.id,
       timestamp: event['@timestamp'],
-      name: event.span.name ?? event.transaction?.name,
+      name: event.span?.name ?? event.transaction?.name,
       traceId: event.trace.id,
       duration:
         apmDuration !== undefined
