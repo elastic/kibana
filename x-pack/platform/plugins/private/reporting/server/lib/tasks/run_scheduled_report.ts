@@ -128,7 +128,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         });
       }
     } catch (error) {
-      const message = `Error sending scheduled report: ${error.message}`;
+      const message = `Error sending notification for scheduled report: ${error.message}`;
       await this.saveExecutionWarning(
         report,
         {
