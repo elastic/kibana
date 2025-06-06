@@ -24,6 +24,7 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -43,7 +44,6 @@ import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
-import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -78,7 +78,7 @@ export class AnomalyTimelineStateService extends StateService {
   private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined | null>(
     undefined
   );
-  private _swimLaneSeverity$ = new BehaviorSubject<TableSeverityThreshold[]>([]);
+  private _swimLaneSeverity$ = new BehaviorSubject<SeverityThreshold[]>([]);
   private _swimLanePagination$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
@@ -285,7 +285,7 @@ export class AnomalyTimelineStateService extends StateService {
           TimeBucketsInterval,
           TimeRangeBounds,
           Refresh,
-          TableSeverityThreshold[]
+          SeverityThreshold[]
         ]
       >
     )
@@ -637,11 +637,11 @@ export class AnomalyTimelineStateService extends StateService {
     return this._selectedCells$.getValue();
   }
 
-  public getSwimLaneSeverity$(): Observable<TableSeverityThreshold[]> {
+  public getSwimLaneSeverity$(): Observable<SeverityThreshold[]> {
     return this._swimLaneSeverity$.asObservable();
   }
 
-  public getSwimLaneSeverity(): TableSeverityThreshold[] {
+  public getSwimLaneSeverity(): SeverityThreshold[] {
     return this._swimLaneSeverity$.getValue();
   }
 
@@ -734,7 +734,7 @@ export class AnomalyTimelineStateService extends StateService {
    * Updates the URL state.
    * @param value
    */
-  public setSeverity(value: TableSeverityThreshold[]) {
+  public setSeverity(value: SeverityThreshold[]) {
     this._explorerURLStateCallback({ severity: value, viewByFromPage: 1 });
   }
 

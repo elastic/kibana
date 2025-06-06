@@ -18,6 +18,7 @@ import type {
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
@@ -27,7 +28,6 @@ import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApi } from './ml_api_service';
 import type { MlResultsService } from './results_service';
-import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 const MAX_CHARTS_PER_ROW = 4;
 const OPTIMAL_CHART_WIDTH = 550;
@@ -111,7 +111,7 @@ export class AnomalyExplorerChartsService {
     chartsContainerWidth: number,
     selectedEarliestMs: number,
     selectedLatestMs: number,
-    severity: TableSeverityThreshold[],
+    severity: SeverityThreshold[],
     influencerFilterQuery?: InfluencersFilterQuery,
     influencers?: MlEntityField[],
     maxSeries?: number

@@ -36,6 +36,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -44,7 +45,6 @@ import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   ExplorerQueryBar,
@@ -140,7 +140,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 
 interface ExplorerUIProps {
   explorerState: ExplorerState;
-  severity: TableSeverityThreshold[];
+  severity: SeverityThreshold[];
   showCharts: boolean;
   selectedJobsRunning: boolean;
   overallSwimlaneData: OverallSwimlaneData | null;

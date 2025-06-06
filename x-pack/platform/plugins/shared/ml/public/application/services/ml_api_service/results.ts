@@ -12,6 +12,7 @@ import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
+import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
@@ -26,7 +27,6 @@ import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
 import type { CriteriaField } from '../results_service';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
-import type { TableSeverityThreshold } from '../../components/controls/select_severity/select_severity';
 
 export interface CategoryDefinition {
   categoryId: number;
@@ -41,7 +41,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     criteriaFields: string[],
     influencers: MlEntityField[],
     aggregationInterval: string,
-    threshold: TableSeverityThreshold[],
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     dateFormatTz: string,
@@ -188,7 +188,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomalyCharts$(
     jobIds: string[],
     influencers: MlEntityField[],
-    threshold: TableSeverityThreshold[],
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     timeBounds: { min?: number; max?: number },

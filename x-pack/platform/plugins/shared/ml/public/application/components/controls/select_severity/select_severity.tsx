@@ -17,6 +17,7 @@ import { EuiHealth, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import type { SeverityThreshold } from '../../../../../common/types/anomalies';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 
 const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
@@ -45,16 +46,11 @@ export interface TableSeverity {
   val: number;
   display: string;
   color: string;
-  threshold: TableSeverityThreshold;
-}
-
-export interface TableSeverityThreshold {
-  min: number;
-  max?: number;
+  threshold: SeverityThreshold;
 }
 
 export interface TableSeverityState {
-  val: TableSeverityThreshold[];
+  val: SeverityThreshold[];
 }
 
 /**
@@ -132,7 +128,7 @@ export const useThresholdToSeverity = () => {
   const severityOptions = useSeverityOptions();
 
   return useMemo(() => {
-    return (thresholds: TableSeverityThreshold[] | number) => {
+    return (thresholds: SeverityThreshold[] | number) => {
       // Handle legacy case where threshold is a single number
       if (typeof thresholds === 'number') {
         // Find all severity options with min value >= the provided threshold
@@ -256,7 +252,7 @@ export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) =
 export const SelectSeverityUI: FC<
   Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
     classNames?: string;
-    severity: TableSeverityThreshold[];
+    severity: SeverityThreshold[];
     onChange: (selectedSeverities: TableSeverity[]) => void;
   }
 > = ({ classNames = '', severity, onChange }) => {

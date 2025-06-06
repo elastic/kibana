@@ -19,6 +19,7 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -48,11 +49,6 @@ export interface CriteriaField {
 interface Influencer {
   fieldName: string;
   fieldValue: any;
-}
-
-export interface SeverityThreshold {
-  min: number;
-  max?: number;
 }
 
 /**

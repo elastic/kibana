@@ -14,11 +14,9 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import type {
-  TableSeverity,
-  TableSeverityThreshold,
-} from '../../components/controls/select_severity/select_severity';
+import type { TableSeverity } from '../../components/controls/select_severity/select_severity';
 import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
@@ -28,7 +26,7 @@ interface ExplorerAnomaliesContainerProps {
   id: string;
   chartsData: ExplorerChartsData;
   showCharts: boolean;
-  severity: TableSeverityThreshold[];
+  severity: SeverityThreshold[];
   setSeverity: (severity: TableSeverity[]) => void;
   mlLocator: MlLocator;
   tableData: AnomaliesTableData;

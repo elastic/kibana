@@ -12,9 +12,9 @@ import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-u
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import type { TableSeverityThreshold } from '../../public/application/components/controls/select_severity/select_severity';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ML_PAGES } from '../constants/locator';
+import type { SeverityThreshold } from './anomalies';
 
 type OptionalPageState = (object & { globalState?: MlCommonGlobalState }) | undefined;
 
@@ -120,7 +120,7 @@ export interface ExplorerAppState {
     /**
      * Indicated severity threshold for both swim lanes
      */
-    severity?: TableSeverityThreshold[];
+    severity?: SeverityThreshold[];
   };
   mlExplorerFilter: {
     influencersFilterQuery?: InfluencersFilterQuery;

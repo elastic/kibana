@@ -13,6 +13,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type {
   ExplorerJob,
   OverallSwimlaneData,
@@ -21,7 +22,6 @@ import type {
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import type { MlResultsService } from './results_service';
-import type { TableSeverityThreshold } from '../components/controls/select_severity/select_severity';
 
 /**
  * Service for retrieving anomaly swim lanes data.
@@ -114,7 +114,7 @@ export class AnomalyTimelineService {
     selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
-    overallScore?: TableSeverityThreshold[]
+    overallScore?: SeverityThreshold[]
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -185,7 +185,7 @@ export class AnomalyTimelineService {
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
-    swimLaneSeverity?: TableSeverityThreshold[]
+    swimLaneSeverity?: SeverityThreshold[]
   ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
     if (timefilterBounds === undefined) {
@@ -264,7 +264,7 @@ export class AnomalyTimelineService {
     bucketInterval: TimeBucketsInterval,
     selectionInfluencers: MlEntityField[],
     influencersFilterQuery: InfluencersFilterQuery,
-    swimLaneSeverity: TableSeverityThreshold[]
+    swimLaneSeverity: SeverityThreshold[]
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -319,7 +319,7 @@ export class AnomalyTimelineService {
     scoresByTime: { [timeMs: number]: number },
     searchBounds: Required<TimeRangeBounds>,
     interval: number,
-    selectedSeverity: TableSeverityThreshold[]
+    selectedSeverity: SeverityThreshold[]
   ): OverallSwimlaneData {
     const overallLabel = OVERALL_LABEL;
     const dataset: OverallSwimlaneData = {

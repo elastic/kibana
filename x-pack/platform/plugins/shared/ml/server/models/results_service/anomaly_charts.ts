@@ -28,6 +28,7 @@ import {
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
@@ -48,7 +49,7 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField, SeverityThreshold } from './results_service';
+import type { CriteriaField } from './results_service';
 import type { CombinedJob, Datafeed } from '../../shared';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';

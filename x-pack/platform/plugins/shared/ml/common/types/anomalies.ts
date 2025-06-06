@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { CheckboxShowCharts } from './checkbox_showcharts';
-export { SelectInterval } from './select_interval';
-export { SelectSeverity } from './select_severity';
+export interface SeverityThreshold {
+  min: number;
+  max?: number;
+}
