@@ -45,7 +45,6 @@ export const FullScreenWaterfall = ({
   const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [scrollElement, setScrollElement] = useState(null);
   const overlayMaskRef = useRef(null);
   let flyout;
 
@@ -58,7 +57,7 @@ export const FullScreenWaterfall = ({
           rangeTo,
           serviceName: transaction?.[SERVICE_NAME_FIELD],
           entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
-          scrollElement,
+          scrollElement: overlayMaskRef.current,
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
@@ -66,7 +65,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, transaction, scrollElement]
+    [traceId, rangeFrom, rangeTo, transaction]
   );
 
   if (isFlyoutVisible && spanId) {
@@ -81,13 +80,6 @@ export const FullScreenWaterfall = ({
       />
     );
   }
-
-  useEffect(() => {
-    if (overlayMaskRef.current) {
-      setScrollElement(overlayMaskRef.current);
-    }
-  }, []);
-
   return (
     <>
       <EuiOverlayMask
