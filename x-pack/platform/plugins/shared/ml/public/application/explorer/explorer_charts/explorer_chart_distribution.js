@@ -21,8 +21,8 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
-  getSeverityColor,
   getSeverityWithLow,
+  getThemeResolvedSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
@@ -69,6 +69,7 @@ export class ExplorerChartDistribution extends React.Component {
     tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
+    euiTheme: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -115,6 +116,7 @@ export class ExplorerChartDistribution extends React.Component {
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
+    const euiTheme = this.props.euiTheme;
 
     if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
       // just return so the empty directive renders without an error later on
@@ -613,7 +615,7 @@ export class ExplorerChartDistribution extends React.Component {
             defaultMessage: 'anomaly score',
           }),
           value: displayScore,
-          color: getSeverityColor(score),
+          color: getThemeResolvedSeverityColor(score, euiTheme),
           seriesIdentifier: {
             key: seriesKey,
           },

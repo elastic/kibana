@@ -6,56 +6,49 @@
  */
 
 import { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 
-// Define the return type for all severity colors
-export interface SeverityColors {
-  CRITICAL: string;
-  MAJOR: string;
-  MINOR: string;
-  WARNING: string;
-  LOW: string;
-  UNKNOWN: string;
+/**
+ * Resolves severity color based on normalized score and EUI theme colors.
+ * This function can be used in contexts where the EuiTheme object is available,
+ * for example, within class components that receive the theme via props or context.
+ *
+ * @param normalizedScore The anomaly score, normalized (typically 0-100).
+ * @param euiTheme The EuiTheme object.
+ * @returns The hex color string for the severity.
+ */
+export function getThemeResolvedSeverityColor(
+  normalizedScore: number,
+  euiTheme: EuiThemeComputed
+): string {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
+    return euiTheme.colors.severity.danger;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
+    return euiTheme.colors.severity.risk;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
+    return euiTheme.colors.severity.warning;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
+    return '#94D8EB'; // TODO: Corresponds to SKY/40
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
+    return '#CFEEF7'; // TODO: Corresponds to SKY/20
+  } else {
+    return euiTheme.colors.severity.unknown;
+  }
 }
 
 /**
- * React hook that returns severity colors for anomaly scores.
- * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ * A React hook to get a theme-aware severity color string directly.
+ * This hook computes the color based on the normalized score and the current EUI theme.
+ *
+ * @param normalizedScore The anomaly score, normalized (typically 0-100).
+ * @returns The hex color string for the severity, corresponding to the current theme.
  */
-export function useSeverityColor(normalizedScore: number): string {
+export const useSeverityColor = (normalizedScore: number): string => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    // Define all severity colors
-    const allColors: SeverityColors = {
-      CRITICAL: euiTheme.colors.severity.danger,
-      MAJOR: euiTheme.colors.severity.risk,
-      MINOR: euiTheme.colors.severity.warning,
-      WARNING: '#94D8EB', // TODO SKY/40
-      LOW: '#CFEEF7', // TODO SKY/20
-      UNKNOWN: euiTheme.colors.severity.unknown,
-    };
-
-    // Otherwise, return the specific color based on the score
-    if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
-      return allColors.CRITICAL;
-    } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
-      return allColors.MAJOR;
-    } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
-      return allColors.MINOR;
-    } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
-      return allColors.WARNING;
-    } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-      return allColors.LOW;
-    } else {
-      return allColors.UNKNOWN;
-    }
-  }, [
-    euiTheme.colors.severity.danger,
-    euiTheme.colors.severity.risk,
-    euiTheme.colors.severity.unknown,
-    euiTheme.colors.severity.warning,
-    normalizedScore,
-  ]);
-}
+    return getThemeResolvedSeverityColor(normalizedScore, euiTheme);
+  }, [normalizedScore, euiTheme]);
+};

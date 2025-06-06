@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -69,6 +70,8 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
     services: { fieldFormats },
   } = useMlKibana();
 
+  const { euiTheme } = useEuiTheme();
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { anomalyDetectionAlertsStateService, anomalyTimelineStateService } =
@@ -88,7 +91,10 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
 
   const popoverOpen = !!selection && !!selectedAlerts?.length;
 
-  const alertFormatter = useMemo(() => getAlertEntryFormatter(fieldFormats), [fieldFormats]);
+  const alertFormatter = useMemo(
+    () => getAlertEntryFormatter(fieldFormats, euiTheme),
+    [fieldFormats, euiTheme]
+  );
 
   const viewType = 'table';
 
@@ -229,7 +235,12 @@ export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
     services: { fieldFormats },
   } = useMlKibana();
 
-  const alertValueFormatter = useMemo(() => getAlertFormatters(fieldFormats), [fieldFormats]);
+  const { euiTheme } = useEuiTheme();
+
+  const alertValueFormatter = useMemo(
+    () => getAlertFormatters(fieldFormats, euiTheme),
+    [fieldFormats, euiTheme]
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<AnomalyDetectionAlert>>>(() => {
     return [
