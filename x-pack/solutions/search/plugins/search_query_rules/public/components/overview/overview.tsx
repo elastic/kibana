@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -30,7 +30,20 @@ import { CreateRulesetModal } from '../query_rules_sets/create_ruleset_modal';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 
 export const QueryRulesOverview = () => {
-  const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
+  const {
+    data: queryRulesData,
+    isInitialLoading,
+    isError,
+    error,
+    refetch,
+  } = useFetchQueryRulesSets();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [refetch]);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const backgroundProps = css({
     backgroundImage: `url(${queryRulesBackground})`,
