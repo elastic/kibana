@@ -82,7 +82,7 @@ export function DashboardEmptyScreen() {
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
-      : i18n.translate('dashboclassard.emptyScreen.noPermissionsSubtitle', {
+      : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
           defaultMessage: 'You need additional privileges to edit this dashboard.',
         });
     return (

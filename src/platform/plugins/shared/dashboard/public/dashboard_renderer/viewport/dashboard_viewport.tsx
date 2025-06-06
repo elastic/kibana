@@ -182,11 +182,11 @@ const dashboardViewportStyles = {
         display: 'block !important',
       },
       '.kbnGridSectionHeader, .kbnGridSectionFooter': {
-        display: 'none'
+        display: 'none',
       },
       '.kbnGridPanel': {
         height: '100% !important',
-      }
-    }
+      },
+    },
   },
 };

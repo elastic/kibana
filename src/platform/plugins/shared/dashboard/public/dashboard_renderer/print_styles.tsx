@@ -10,16 +10,14 @@
 import { Global, css } from '@emotion/react';
 import React from 'react';
 
-
 /** Print media
-  *
-  * The code here is designed to be movable outside the domain of Dashboard. Currently,
-  * the components and styles are only used by Dashboard but we may choose to move them to,
-  * for example, a Kibana package in the future.
-  *
-  * Any changes to this code must be tested by generating a print-optimized PDF in dashboard.
-  */
-
+ *
+ * The code here is designed to be movable outside the domain of Dashboard. Currently,
+ * the components and styles are only used by Dashboard but we may choose to move them to,
+ * for example, a Kibana package in the future.
+ *
+ * Any changes to this code must be tested by generating a print-optimized PDF in dashboard.
+ */
 
 // A4 page dimensions in mm
 const a4PageHeight = '297mm';
@@ -59,7 +57,7 @@ const styles = css({
   },
   '@media print': {
     html: {
-      backgroundColor: 'red',
+      backgroundColor: '#FFF',
     },
     'a[href]:after': {
       content: 'attr(href, url)',
@@ -71,7 +69,52 @@ const styles = css({
       printColorAdjust: 'exact !important',
     },
   },
-})
+});
 
-export const PrintStyles = React.memo(() => <Global styles={styles} />);
+export const GlobalPrintStyles = React.memo(() => <Global styles={styles} />);
 
+const a4PageContentHeight = `calc(${a4PageHeight} - ${a4PageHeaderHeight} - ${a4PageFooterHeight})`;
+const a4PageContentWidth = a4PageWidth;
+
+const visualisationsPerPage = 2;
+const visPadding = '4mm';
+
+export const printViewportVisStyles = css({
+  '&.printViewport__vis': {
+    '@media screen, projection, print': {
+      // Open space from page margin
+      paddingLeft: visPadding,
+      paddingRight: visPadding,
+
+      // Last vis on the page
+      [`&:nth-child(${visualisationsPerPage}n)`]: {
+        pageBreakAfter: 'always',
+        paddingTop: visPadding,
+        paddingBottom: visPadding,
+      },
+
+      '&:last-child': {
+        pageBreakAfter: 'avoid',
+      },
+      height: `calc(${a4PageContentHeight} / ${visualisationsPerPage})`,
+      width: a4PageContentWidth,
+      '& .embPanel__header button': {
+        display: 'none',
+      },
+    },
+    '@media screen, projection': {
+      margin: '24px',
+      padding: visPadding,
+    },
+    '@media print': {
+      '.euiPanel': {
+        boxShadow: 'none !important',
+      },
+      pageBreakInside: 'avoid',
+
+      '*': {
+        overflow: 'hidden !important',
+      },
+    },
+  },
+});

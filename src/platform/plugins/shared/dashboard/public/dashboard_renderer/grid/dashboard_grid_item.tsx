@@ -19,6 +19,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { printViewportVisStyles } from '../print_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -140,7 +141,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <div
-        css={[focusStyles, styles.item]}
+        css={[focusStyles, styles.item, printViewportVisStyles]}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
