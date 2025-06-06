@@ -128,6 +128,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
           rect: { fill: euiTheme.colors.success },
           displayValue: { fill: euiTheme.colors.success },
         }}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
@@ -146,6 +147,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
           rect: { fill: euiTheme.colors.danger },
           displayValue: { fill: euiTheme.colors.danger },
         }}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
