@@ -201,9 +201,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, [
-      'microsoft_defender_endpoint',
-    ]);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToMsDefenderAgentIdMap[agentInfo.elasticAgentId];

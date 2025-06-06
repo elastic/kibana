@@ -43,6 +43,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -236,17 +237,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Fetches Fleet agent information for each of the Fleet agent ids provided on input.
    * @param agentIds
-   * @param integrations
    * @protected
    */
   protected async fetchFleetInfoForAgents(
     /** Fleet Agent IDs */
-    agentIds: string[],
-    /** A list of integration names (value found in `package.name` in an integration policy) */
-    integrations: string[]
+    agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const integrations = [...RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES[this.agentType]];
+
     if (integrations.length === 0) {
-      throw new ResponseActionsClientError(`'integrations' argument can not be empty`);
+      throw new ResponseActionsClientError(
+        `No integration names defined for agent type [${this.agentType}]`
+      );
     }
 
     const spaceId = this.options.spaceId;
@@ -283,7 +285,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .list(soClient, { perPage: 10_000, kuery })
       .catch(catchAndWrapError);
 
-    this.log.debug(() => `Integration policies found:\n${stringify(integrationPolicies)}`);
+    this.log.debug(() => `Integration policies found ${integrationPolicies.items.length}`);
 
     const agentPolicyToIntegrationPolicyMap: Record<string, PackagePolicy> = {};
 

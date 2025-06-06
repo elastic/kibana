@@ -185,7 +185,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
