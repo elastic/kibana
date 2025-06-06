@@ -4,7 +4,7 @@ navigation_title: "Elastic Managed LLM"
 
 # Elastic Managed LLM
 
-Elastic provides a default LLM optimized for product features.
+Elastic provides a default LLM vetted for GenAI product features across our platform.
 Details of the currently used model are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/Elastic_Managed_LLM_model_card.pdf).
 
 ::::{note}
