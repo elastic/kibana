@@ -155,7 +155,6 @@ describe('XYChart component', () => {
       syncColors: false,
       syncTooltips: false,
       syncCursor: true,
-      useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -332,7 +331,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(0);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
       test('it should enable the new time axis for a line time layer when isHistogram is set to true', () => {
         const timeLayerArgs = createArgsWithLayers([defaultTimeLayer]);
@@ -352,7 +352,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(2);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
       test('it should disable the new time axis for a vertical bar with break down dimension', () => {
         const timeLayer: DataLayerConfig = {
@@ -376,7 +377,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(0);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
 
       test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
@@ -402,7 +404,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(2);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
     });
     describe('endzones', () => {
