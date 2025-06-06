@@ -29,7 +29,8 @@ export default ({ getService }: FtrProviderContext) => {
       return supertest
         .post(`/api/fleet/epm/packages/${name}/${version}`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ force: true });
+        .send({ force: true })
+        .expect(200);
     };
 
     async function createRemoteServiceToken(): Promise<string> {
@@ -115,11 +116,14 @@ export default ({ getService }: FtrProviderContext) => {
     async function createFollowerIndex() {
       const resp = await remoteEs.ccr.follow({
         index: 'fleet-synced-integrations-ccr-local',
-        body: {
-          remote_cluster: 'local',
-          leader_index: 'fleet-synced-integrations',
-        },
-        wait_for_active_shards: '1',
+        leader_index: 'fleet-synced-integrations',
+        remote_cluster: 'local',
+        // body: {
+        // remote_cluster: 'local',
+        // leader_index: 'fleet-synced-integrations',
+        // wait_for_active_shards: 'all',
+        // },
+        wait_for_active_shards: 'all',
       });
       expect(resp.follow_index_created).to.be(true);
     }
@@ -149,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
         index: '.kibana_ingest',
       });
       expect(resp.found).to.be(true);
-      expect(resp._source?.['epm-packages'].install_status).to.be('installed');
+      expect((resp._source as any)?.['epm-packages'].install_status).to.be('installed');
     }
 
     it('should sync integrations to remote cluster when enabled on remote ES output', async () => {
