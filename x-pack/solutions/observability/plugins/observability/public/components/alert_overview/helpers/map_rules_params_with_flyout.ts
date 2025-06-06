@@ -254,7 +254,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.ErrorCount:
       const APMFlyoutMapErrorCount = {
-        field: 'APM Error Count',
+        fields: ['APM Error Count'],
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
@@ -268,7 +268,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.TransactionErrorRate:
       const APMFlyoutMapTransactionErrorRate = {
-        field: 'APM Transaction Error Rate',
+        fields: ['APM Transaction Error Rate'],
         observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
         comparator: COMPARATORS.GREATER_THAN,
@@ -282,7 +282,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.TransactionDuration:
       const APMFlyoutMapTransactionDuration = {
-        field: 'APM Transaction Duration',
+        fields: ['APM Transaction Duration'],
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
         comparator: COMPARATORS.GREATER_THAN,
@@ -297,7 +297,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
     case '.es-query':
       const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
-        fields: 'Query field',
+        fields: ['Query field'],
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [threshold].flat().join(' AND '),
         comparator: thresholdComparator,
@@ -311,7 +311,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case SLO_BURN_RATE_RULE_TYPE_ID:
       const SLOBurnRateFlyoutMap = {
-        fields: 'Burn rate threshold',
+        fields: ['Burn rate threshold'],
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
