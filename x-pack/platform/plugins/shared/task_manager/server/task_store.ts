@@ -28,6 +28,7 @@ import type {
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
@@ -493,31 +494,33 @@ export class TaskStore {
     docs: ConcreteTaskInstance[],
     { validate }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
-    const attributesByDocId = docs.reduce((attrsById, doc) => {
-      try {
-        const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-          validate,
-        });
-        attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
-      } catch (e) {
-        this.logger.error(
-          `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
-        );
-      }
-
-      return attrsById;
-    }, new Map());
+    const newDocs = docs.reduce(
+      (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
+        try {
+          const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+            validate,
+          });
+          acc.set(doc.id, {
+            type: 'task',
+            id: doc.id,
+            version: doc.version,
+            attributes: taskInstanceToAttributes(taskInstance, doc.id),
+          });
+        } catch (e) {
+          this.logger.error(
+            `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
+          );
+        }
+        return acc;
+      },
+      new Map()
+    );
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-          docs.map((doc) => ({
-            type: 'task',
-            id: doc.id,
-            version: doc.version,
-            attributes: attributesByDocId.get(doc.id)!,
-          })),
+          Array.from(newDocs.values()),
           {
             refresh: false,
           }
@@ -540,7 +543,7 @@ export class TaskStore {
         ...updatedSavedObject,
         attributes: defaults(
           updatedSavedObject.attributes,
-          attributesByDocId.get(updatedSavedObject.id)!
+          newDocs.get(updatedSavedObject.id)?.attributes as SerializedConcreteTaskInstance
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {

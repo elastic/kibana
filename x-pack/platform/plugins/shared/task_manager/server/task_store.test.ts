@@ -37,19 +37,10 @@ import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
 } from '@kbn/encrypted-saved-objects-shared';
+import { TaskValidator } from './task_validator';
 
-const mockGetValidatedTaskInstanceFromReading = jest.fn();
-const mockGetValidatedTaskInstanceForUpdating = jest.fn();
-jest.mock('./task_validator', () => {
-  return {
-    TaskValidator: jest.fn().mockImplementation(() => {
-      return {
-        getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-        getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-      };
-    }),
-  };
-});
+let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
+let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 
 jest.mock('./lib/api_key_utils', () => ({
   getApiKeyAndUserScope: jest.fn(),
@@ -77,14 +68,14 @@ const coreStart = coreMock.createStart();
 
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
-    return {
-      getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-      getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-    };
-  });
-  mockGetValidatedTaskInstanceFromReading.mockImplementation((task) => task);
-  mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => task);
+
+  mockGetValidatedTaskInstanceFromReading = jest
+    .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceFromReading')
+    .mockImplementation((task) => task);
+
+  mockGetValidatedTaskInstanceForUpdating = jest
+    .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceForUpdating')
+    .mockImplementation((task) => task);
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -425,6 +416,21 @@ describe('TaskStore', () => {
 
       await testSchedule(task);
       expect(adHocTaskCounter.count).toEqual(1);
+    });
+
+    test('throws an error when an invalid interval is provided', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        schedule: { interval: 'invalid-interval' },
+      };
+      await expect(testSchedule(task)).rejects.toThrowError(
+        `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
+      );
     });
 
     test('does not increment adHocTaskCounter if the task is recurring', async () => {
@@ -1045,6 +1051,45 @@ describe('TaskStore', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('throws an error when an invalid interval is provided', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+        partition: 99,
+        schedule: { interval: 'invalid-interval' },
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      await expect(store.update(task, { validate: true })).rejects.toThrowError(
+        `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
+      );
+    });
   });
 
   describe('bulkUpdate', () => {
@@ -1197,6 +1242,78 @@ describe('TaskStore', () => {
         store.bulkUpdate([task], { validate: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('skips the update with invalid interval', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
+
+      const task1 = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'yawn',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      const task2 = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+        schedule: { interval: 'invalid' }, // Invalid interval
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'task:1',
+            type: 'task',
+            attributes: {
+              ...task1,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task1, task2], { validate: true });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task task:2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
+      );
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task1.id,
+            type: 'task',
+            version: task1.version,
+            attributes: taskInstanceToAttributes(task1, task1.id),
+          },
+        ],
+        { refresh: false }
+      );
     });
   });
 
@@ -1629,6 +1746,94 @@ describe('TaskStore', () => {
       await store.bulkPartialUpdate([task]);
 
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
+    });
+
+    test('skips the update with invalid interval', async () => {
+      const task1 = {
+        id: 'task1',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+      };
+
+      const task2 = {
+        id: 'task2',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+        schedule: { interval: 'invalid-interval' },
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:task1',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:task1', if_primary_term: 1, if_seq_no: 4 } },
+          {
+            doc: {
+              task: {
+                attempts: 3,
+                ownerId: 'testtest',
+                params: '{"hello":"world"}',
+                retryAt: null,
+                runAt: '2019-02-12T21:01:22.479Z',
+                scheduledAt: '2019-02-12T21:01:22.479Z',
+                startedAt: null,
+                state: '{"foo":"bar"}',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+            },
+          },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
+      ]);
     });
   });
 
@@ -2095,10 +2300,11 @@ describe('TaskStore', () => {
 
   describe('bulkSchedule', () => {
     let store: TaskStore;
+    const logger = mockLogger();
 
     beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -2464,61 +2670,56 @@ describe('TaskStore', () => {
       await testBulkSchedule([task]);
       expect(adHocTaskCounter.count).toEqual(0);
     });
-  });
 
-  describe('TaskValidator', () => {
-    test(`should pass allowReadingInvalidState:false accordingly`, () => {
-      const logger = mockLogger();
+    test('skips the update with invalid interval', async () => {
+      mockGetValidatedTaskInstanceFromReading.mockRestore();
+      mockGetValidatedTaskInstanceForUpdating.mockRestore();
 
-      new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-      });
+      const task1 = {
+        id: 'id1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
 
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: false,
-      });
-    });
+      const task2 = {
+        id: 'id2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        schedule: { interval: 'invalid' }, // Invalid interval
+      };
+      await testBulkSchedule([task1, task2]);
 
-    test(`should pass allowReadingInvalidState:true accordingly`, () => {
-      const logger = mockLogger();
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task id2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
+      );
 
-      new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: true,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-      });
-
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: true,
-      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'id1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 49,
+              stateVersion: 1,
+            },
+          },
+        ],
+        { refresh: false }
+      );
     });
   });
 
