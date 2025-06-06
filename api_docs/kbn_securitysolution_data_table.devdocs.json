@@ -666,7 +666,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
@@ -1245,7 +1245,7 @@
           },
           " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
           "AlertPageFilterType",
-          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1526,7 +1526,7 @@
             "label": "graphEventId",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
