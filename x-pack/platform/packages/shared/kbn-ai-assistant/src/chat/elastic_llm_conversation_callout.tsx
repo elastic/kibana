@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,29 +18,17 @@ import {
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmConversationCallout = () => {
-  const { http, spaces, application, docLinks } = useKibana().services;
+  const { http, docLinks } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
 
   const [dismissed, setDismissed] = useElasticLlmCalloutDismissed(
     ElasticLlmCalloutKey.CONVERSATION_CALLOUT
   );
-  const [currentSpaceId, setCurrentSpaceId] = useState('default');
 
   const onDismiss = () => {
     setDismissed(true);
   };
-
-  useEffect(() => {
-    const getCurrentSpace = async () => {
-      if (spaces) {
-        const space = await spaces.getActiveSpace();
-        setCurrentSpaceId(space.id);
-      }
-    };
-
-    getCurrentSpace();
-  }, [spaces]);
 
   if (dismissed) {
     return;
