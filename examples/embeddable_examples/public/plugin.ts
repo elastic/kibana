@@ -33,8 +33,6 @@ import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
-import { bookCmDefinitions } from '../common/book/content_management/cm_services';
-import { fieldListCmDefinitions } from '../common/field_list/content_management/cm_services';
 import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
 import { setKibanaServices } from './kibana_services';
 import { BookSerializedState } from './react_embeddables/saved_book/types';
@@ -103,8 +101,16 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
 
-    embeddable.registerEmbeddableContentManagementDefinition(bookCmDefinitions);
-    embeddable.registerEmbeddableContentManagementDefinition(fieldListCmDefinitions);
+    embeddable.registerEmbeddableContentManagementDefinition('book', async () => {
+      const { bookCmDefinitions } = await import('../common/book/content_management/cm_services');
+      return bookCmDefinitions;
+    });
+    embeddable.registerEmbeddableContentManagementDefinition('field_list', async () => {
+      const { fieldListCmDefinitions } = await import(
+        '../common/field_list/content_management/cm_services'
+      );
+      return fieldListCmDefinitions;
+    });
 
     contentManagement.registry.register({
       id: BOOK_CONTENT_ID,

@@ -65,5 +65,5 @@ export interface CommonEmbeddableStartContract {
 export interface CanGetEmbeddableContentManagementDefinition {
   getEmbeddableContentManagementDefinition: (
     id: string
-  ) => EmbeddableContentManagementDefinition | undefined;
+  ) => Promise<EmbeddableContentManagementDefinition | undefined>;
 }

@@ -10,26 +10,31 @@
 import { EmbeddableContentManagementDefinition } from '..';
 
 export class EmbeddableContentManagementRegistry {
-  private registry: Map<string, EmbeddableContentManagementDefinition> = new Map();
+  private registry: Map<string, () => Promise<EmbeddableContentManagementDefinition>> = new Map();
 
   public registerContentManagementDefinition = (
-    definition: EmbeddableContentManagementDefinition
+    id: string,
+    getDefinition: () => Promise<EmbeddableContentManagementDefinition>
   ) => {
-    if (this.registry.has(definition.id)) {
-      throw new Error(
-        `Content management definition for type "${definition.id}" is already registered.`
-      );
+    if (this.registry.has(id)) {
+      throw new Error(`Content management definition for type "${id}" is already registered.`);
     }
 
-    if (!(definition.latestVersion in definition.versions)) {
-      throw new Error(
-        `Content management definition for type "${definition.id}" does not include the current version "${definition.latestVersion}".`
-      );
-    }
-    this.registry.set(definition.id, definition);
+    // if (!(definition.latestVersion in definition.versions)) {
+    //   throw new Error(
+    //     `Content management definition for type "${definition.id}" does not include the current version "${definition.latestVersion}".`
+    //   );
+    // }
+    this.registry.set(id, getDefinition);
   };
 
-  public getContentManagementDefinition = (id: string) => {
-    return this.registry.get(id);
+  public getContentManagementDefinition = async (
+    id: string
+  ): Promise<EmbeddableContentManagementDefinition | undefined> => {
+    const getDefinition = this.registry.get(id);
+    if (!getDefinition) {
+      return;
+    }
+    return await getDefinition();
   };
 }

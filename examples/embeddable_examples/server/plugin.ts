@@ -44,7 +44,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerEmbeddableContentManagementDefinition(bookCmDefinitionsWithSchemas);
+    embeddable.registerEmbeddableContentManagementDefinition('book', () =>
+      Promise.resolve(bookCmDefinitionsWithSchemas)
+    );
 
     return {};
   }
