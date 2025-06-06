@@ -7,7 +7,7 @@
 
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
-import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
+import { ReportingFunctionalProvider } from './reporting';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
