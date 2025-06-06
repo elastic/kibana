@@ -38,25 +38,6 @@ import { createServerSideFunctionResponseError } from '../../util/create_server_
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 
-// build a hash map from any detectedEntities present
-// in the message history we already have
-function buildHashMap(messages: Message[]): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const msg of messages) {
-    msg.message.detected_entities?.forEach((ent) => {
-      if (!map.has(ent.hash)) {
-        map.set(ent.hash, ent.entity);
-      }
-    });
-  }
-  return map;
-}
-
-// reverse placeholders
-function unhashPlaceholders(json: string, map: Map<string, string>): string {
-  return json.replace(/[0-9a-f]{40}/g, (hash) => map.get(hash) ?? hash);
-}
-
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
 function executeFunctionAndCatchError({
@@ -80,12 +61,6 @@ function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
-  // Build hash map from the messages we already anonymized
-  const hashMap = buildHashMap(messages);
-
-  // If the function arguments contain placeholders, swap them for real values
-  const unhashedArgs = args ? unhashPlaceholders(args, hashMap) : undefined;
-
   // hide token count events from functions to prevent them from
   // having to deal with it as well
 
@@ -99,7 +74,7 @@ function executeFunctionAndCatchError({
             connectorId,
           });
         },
-        args: unhashedArgs,
+        args,
         signal,
         logger,
         messages,
