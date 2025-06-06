@@ -13,6 +13,7 @@ src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+x-pack/packages/security/ai_security_labs_content @elastic/security-generative-ai
 x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/packages/ml/aiops_common @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
