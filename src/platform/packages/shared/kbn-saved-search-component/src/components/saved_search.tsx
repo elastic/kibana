@@ -16,6 +16,7 @@ import type {
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
