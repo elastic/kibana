@@ -17,11 +17,12 @@ import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedroc
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { SLACK_API_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/slack_api/constants';
 import {
   EmailConnectorTypeId,
   JiraConnectorTypeId,
   PagerDutyConnectorTypeId,
+  SlackApiConnectorTypeId,
+  SlackWebhookConnectorTypeId,
   WebhookConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { CompatibleJSONSchema } from '../../common/functions/types';
@@ -69,11 +70,11 @@ export const connectorParamsSchemas: Record<
   string,
   { params: CompatibleJSONSchema; description: string }
 > = {
-  '.slack': {
+  [SlackWebhookConnectorTypeId]: {
     params: convertSchemaToOpenApi(SlackParamsSchema),
     description: 'Use this connector to send messages to Slack channels.',
   },
-  [SLACK_API_CONNECTOR_ID]: {
+  [SlackApiConnectorTypeId]: {
     params: convertSchemaToOpenApi(SlackApiParamsSchema),
     description: 'Use this connector to send messages to Slack channels using the Slack API.',
   },
