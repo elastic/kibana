@@ -445,7 +445,7 @@ export class ReportingCore {
       const spaceId = spacesService?.getSpaceId(request);
 
       if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
+        logger.debug(`Request uses Space ID: ${spaceId}`);
         return spaceId;
       } else {
         logger.debug(`Request uses default Space`);

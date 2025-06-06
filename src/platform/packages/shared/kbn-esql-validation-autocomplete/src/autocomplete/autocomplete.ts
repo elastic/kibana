@@ -80,9 +80,14 @@ import {
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  FunctionParameterType,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
-import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import {
+  getRecommendedQueriesSuggestionsFromStaticTemplates,
+  mapRecommendedQueriesFromExtensions,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -137,8 +142,19 @@ export async function suggest(
           resourceRetriever,
           innerText
         );
+        const editorExtensions =
+          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
+        const recommendedQueriesSuggestionsFromExtensions =
+          mapRecommendedQueriesFromExtensions(editorExtensions);
+
+        const recommendedQueriesSuggestionsFromStaticTemplates =
+          await getRecommendedQueriesSuggestionsFromStaticTemplates(
+            getFieldsByTypeEmptyState,
+            fromCommand
+          );
         recommendedQueriesSuggestions.push(
-          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+          ...recommendedQueriesSuggestionsFromExtensions,
+          ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
@@ -336,6 +352,18 @@ async function getSuggestionsWithinCommandExpression(
     });
   }
 
+  // Function returning suggestions from static templates and editor extensions
+  const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
+    const recommendedQueriesFromExtensions =
+      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
+
+    const recommendedQueriesFromTemplates =
+      await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
+
+    return [...recommendedQueriesFromExtensions, ...recommendedQueriesFromTemplates];
+  };
+
   return commandDef.suggest({
     innerText,
     command: astContext.command,
@@ -360,8 +388,8 @@ async function getSuggestionsWithinCommandExpression(
     getPreferences,
     definition: commandDef,
     getSources,
-    getRecommendedQueriesSuggestions: (prefix) =>
-      getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+    getRecommendedQueriesSuggestions: (queryString, prefix) =>
+      getRecommendedQueries(queryString, prefix),
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,
@@ -477,17 +505,25 @@ async function getFunctionArgsSuggestions(
     const finalCommandArg = command.args[finalCommandArgIndex];
 
     const fnToIgnore = [];
-    // just ignore the current function
+
+    if (node.subtype === 'variadic-call') {
+      // for now, this getFunctionArgsSuggestions is being used in STATS to suggest for
+      // operators. When that is fixed, we can remove this "is variadic-call" check
+      // and always exclude the grouping functions
+      fnToIgnore.push(
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+      );
+    }
+
     if (
       command.name !== 'stats' ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
+      // ignore the current function
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-        // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
@@ -524,8 +560,17 @@ async function getFunctionArgsSuggestions(
       )
     );
 
-    // Fields
+    const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+      if (types.includes('keyword') && !types.includes('text')) {
+        types.push('text');
+      }
+      if (types.includes('text') && !types.includes('keyword')) {
+        types.push('keyword');
+      }
+      return types;
+    };
 
+    // Fields
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
@@ -534,9 +579,11 @@ async function getFunctionArgsSuggestions(
           canBeBooleanCondition
             ? ['any']
             : // @TODO: have a way to better suggest constant only params
-              (getTypesFromParamDefs(
-                typesToSuggestNext.filter((d) => !d.constantOnly)
-              ) as string[]),
+              ensureKeywordAndText(
+                getTypesFromParamDefs(
+                  typesToSuggestNext.filter((d) => !d.constantOnly)
+                ) as FunctionParameterType[]
+              ),
           [],
           {
             addComma: shouldAddComma,
@@ -555,7 +602,9 @@ async function getFunctionArgsSuggestions(
           location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
-            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+            : (ensureKeywordAndText(
+                getTypesFromParamDefs(typesToSuggestNext)
+              ) as FunctionParameterType[]),
           ignored: fnToIgnore,
         }).map((suggestion) => ({
           ...suggestion,
