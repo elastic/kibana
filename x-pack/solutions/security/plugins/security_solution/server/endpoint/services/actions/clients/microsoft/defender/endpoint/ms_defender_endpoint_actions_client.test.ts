@@ -591,6 +591,78 @@ describe('MS Defender response actions client', () => {
         }
       );
     });
+
+    describe('for Runscript', () => {
+      let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
+
+      beforeEach(() => {
+        // @ts-expect-error assign to readonly property
+        clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+          true;
+
+        const generator = new EndpointActionGenerator('seed');
+
+        const actionRequestsSearchResponse = generator.toEsSearchResponse([
+          generator.generateActionEsHit<
+          { scriptName: string },
+          {},
+          MicrosoftDefenderEndpointActionRequestCommonMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: {
+              data: { command: 'runscript', parameters: { scriptName: 'test-script.ps1' } },
+              input_type: 'microsoft_defender_endpoint',
+            },
+            meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+          }),
+        ]);
+
+        applyEsClientSearchMock({
+          esClientMock: clientConstructorOptionsMock.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: actionRequestsSearchResponse,
+          pitUsage: true,
+        });
+
+        msMachineActionsApiResponse = microsoftDefenderMock.createGetActionsApiResponse();
+        // Override the default machine action to be runscript-specific
+        msMachineActionsApiResponse.value[0] = {
+          ...msMachineActionsApiResponse.value[0],
+          type: 'LiveResponse',
+          commands: ['RunScript'],
+        };
+
+        responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+          connectorActionsMock,
+          MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+          msMachineActionsApiResponse
+        );
+
+        const msGetActionResultsApiResponse =
+          microsoftDefenderMock.createGetActionResultsApiResponse();
+
+        // Set the mock response for GET_ACTION_RESULTS
+        responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+          connectorActionsMock,
+          MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+          msGetActionResultsApiResponse
+        );
+      });
+
+      it('should include script execution results when fetchResult is true', async () => {
+        // Test that runscript actions fetch results (unlike isolate/release)
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        // Verify that GET_ACTION_RESULTS was called for runscript actions
+        expect(connectorActionsMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            params: expect.objectContaining({
+              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+            }),
+          })
+        );
+      });
+    });
   });
 
   describe('and space awareness is enabled', () => {
