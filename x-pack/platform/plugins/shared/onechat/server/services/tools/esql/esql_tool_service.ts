@@ -14,7 +14,7 @@ import type {
   import { createStorage } from './storage';
   
   export interface EsqlToolService {
-    getClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
+    getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
   }
   
   export class EsqlToolServiceImpl implements EsqlToolService {
@@ -32,7 +32,7 @@ import type {
       this.elasticsearch = elasticsearch;
     }
   
-    async getClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
+    async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
         try {
             const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
             const storage = createStorage({ 
@@ -42,8 +42,11 @@ import type {
             const client = createClient({ storage, esClient });
             return client;
         } catch (error) {
-            this.logger.error('Failed to create ESQL tool client:' + error);
+            this.logger.error(error);
             throw error;
             }
         }
+        
     }   
+
+    

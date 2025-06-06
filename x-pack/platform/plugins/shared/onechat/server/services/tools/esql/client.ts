@@ -113,7 +113,6 @@ export const createClient = ({
             if (error.statusCode === 404) {
                 throw new Error(`Tool with ID ${esqlToolId} not found`);
             }
-            logger.error(`Error retrieving ESQL tool with ID ${esqlToolId}: ${error}`);
             throw error;
         }
         
