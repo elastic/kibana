@@ -84,9 +84,9 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
     },
     wrapHandler(async (ctx, request, response) => {
       try {
-        const { tools: toolService, esql: esqlToolClientService } = getInternalServices();
-        const registry = toolService.registry.asScopedPublicRegistry({ request });
-        const client = await esqlToolClientService.getClient({ request });
+        const { tools: toolService, esql: esqlToolService } = getInternalServices();
+        // const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const client = await esqlToolService.getClient({ request });
         const tool = await client.create(request.body);
         
 

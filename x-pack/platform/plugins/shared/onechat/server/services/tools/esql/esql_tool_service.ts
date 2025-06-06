@@ -13,11 +13,11 @@ import type {
   import { EsqlToolClient, createClient } from './client';
   import { createStorage } from './storage';
   
-  export interface EsqlToolClientService {
+  export interface EsqlToolService {
     getClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
   }
   
-  export class EsqlToolClientServiceImpl implements EsqlToolClientService {
+  export class EsqlToolServiceImpl implements EsqlToolService {
     private readonly logger: Logger;
     private readonly elasticsearch: ElasticsearchServiceStart;
   

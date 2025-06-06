@@ -12,7 +12,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
-import { EsqlToolClientService } from './tools/esql/esql_tool_service';
+import { EsqlToolService } from './tools/esql/esql_tool_service';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -21,7 +21,7 @@ export interface InternalSetupServices {
 export interface InternalStartServices {
   tools: ToolsServiceStart;
   runnerFactory: RunnerFactory; 
-  esql: EsqlToolClientService;
+  esql: EsqlToolService;
 }
 
 export interface ServicesStartDeps {

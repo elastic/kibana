@@ -34,13 +34,18 @@ export interface EsqlToolClient {
     }
 
     async get(esqlToolId: string): Promise<EsqlTool> {
-        const document = await this.storage.getClient().get({ id: esqlToolId });
-        
-        if (!document._source) {
-            throw new Error(`Tool with ID ${esqlToolId} not found`);
-        }
 
-        return document._source as EsqlTool;
+        try {
+            const document = await this.storage.getClient().get({ id: esqlToolId });
+            return document._source as EsqlTool;
+        } catch (error) {
+            if (error.statusCode === 404) {
+                throw new Error(`Tool with ID ${esqlToolId} not found`);
+            }
+            logger.error(`Error retrieving ESQL tool with ID ${esqlToolId}: ${error}`);
+            throw error;
+        }
+        
       }
 
       async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {

@@ -9,7 +9,7 @@ import type { Runner } from '@kbn/onechat-server';
 import type { InternalSetupServices, InternalStartServices, ServicesStartDeps } from './types';
 import { ToolsService } from './tools';
 import { RunnerFactoryImpl } from './runner';
-import { EsqlToolClientServiceImpl } from './tools/esql/esql_tool_service';
+import { EsqlToolServiceImpl } from './tools/esql/esql_tool_service';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -63,8 +63,8 @@ export class ServiceManager {
       toolsService: tools,
     });
     runner = runnerFactory.getRunner();
-    
-    const esql = new EsqlToolClientServiceImpl({
+
+    const esql = new EsqlToolServiceImpl({
       logger: logger.get('esql'),
       elasticsearch,
     });
