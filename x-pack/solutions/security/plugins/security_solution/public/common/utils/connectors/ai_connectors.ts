@@ -11,7 +11,7 @@ import {
   type ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
 type PreConfiguredInferenceConnector = ActionConnector & {
   actionTypeId: '.inference';

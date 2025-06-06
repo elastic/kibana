@@ -113,7 +113,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                   refetchData={refetchData}
                   integrations={integrations}
                   isIntegrationsLoading={isIntegrationsLoading}
-                  stats={migrationStats}
+                  migrationStats={migrationStats}
                 />
               </>
             )}

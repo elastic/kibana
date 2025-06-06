@@ -28,7 +28,7 @@ const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
   return (
     <EuiLink
       onClick={() => {
-        openMigrationRuleDetails?.(rule);
+        openMigrationRuleDetails(rule);
       }}
       data-test-subj="ruleName"
     >
