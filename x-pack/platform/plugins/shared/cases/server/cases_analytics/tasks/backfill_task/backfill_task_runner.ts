@@ -55,20 +55,16 @@ export class BackfillTaskRunner implements CancellableTask {
         state: {}, // ?
       };
     } catch (e) {
-      this.logger.error(`Backfill reindex of ${this.destIndex} failed. Error: ${e.message}`, {
-        tags: ['backfill-run-failed', `${this.errorSource}-error`],
-      });
-
       if (isRetryableEsClientError(e)) {
         throwRetryableError(
-          createTaskRunError(
-            new Error(`Backfill reindex of ${this.destIndex} failed. Error: ${e.message}`),
-            this.errorSource
-          ),
+          createTaskRunError(new Error(this.getErrorMessage(e.message)), this.errorSource),
           true
         );
       }
 
+      this.logger.error(`[${this.destIndex}] Backfill reindex failed. Error: ${e.message}`, {
+        tags: ['cai-backfill', 'cai-backfill-error', this.destIndex],
+      });
       throwUnrecoverableError(createTaskRunError(e, this.errorSource));
     }
   }
@@ -79,7 +75,7 @@ export class BackfillTaskRunner implements CancellableTask {
     const painlessScript = await this.getPainlessScript(esClient);
 
     if (painlessScript.found) {
-      this.logger.debug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
+      this.handleDebug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
       const painlessScriptId = await this.getPainlessScriptId(esClient);
 
       await esClient.reindex({
@@ -96,9 +92,7 @@ export class BackfillTaskRunner implements CancellableTask {
       });
     } else {
       throw createTaskRunError(
-        new Error(
-          `Backfill reindex of ${this.destIndex} failed. Error: Painless script not found.`
-        ),
+        new Error(this.getErrorMessage('Painless script not found.')),
         this.errorSource
       );
     }
@@ -107,7 +101,7 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getPainlessScript(esClient: ElasticsearchClient) {
     const painlessScriptId = await this.getPainlessScriptId(esClient);
 
-    this.logger.debug(`Getting painless script with id ${painlessScriptId}.`);
+    this.handleDebug(`Getting painless script with id ${painlessScriptId}.`);
     return esClient.getScript({
       id: painlessScriptId,
     });
@@ -119,9 +113,7 @@ export class BackfillTaskRunner implements CancellableTask {
 
     if (!painlessScriptId) {
       throw createTaskRunError(
-        new Error(
-          `Backfill reindex of ${this.destIndex} failed. Error: Painless script id missing from mapping.`
-        ),
+        new Error(this.getErrorMessage('Painless script id missing from mapping.')),
         this.errorSource
       );
     }
@@ -132,21 +124,35 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getCurrentMapping(
     esClient: ElasticsearchClient
   ): Promise<IndicesGetMappingResponse> {
-    this.logger.debug(`Getting mapping of index ${this.destIndex}.`);
+    this.handleDebug('Getting index mapping.');
     return esClient.indices.getMapping({
       index: this.destIndex,
     });
   }
 
   private async waitForDestIndex(esClient: ElasticsearchClient) {
-    this.logger.debug(`Checking ${this.destIndex} availability.`, {
-      tags: ['cai-backfill-debug'],
-    });
+    this.handleDebug('Checking index availability.');
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
       timeout: '300ms', // this is probably too much
       wait_for_active_shards: 'all',
     });
+  }
+
+  public handleDebug(message: string) {
+    this.logger.debug(`[${this.destIndex}] ${message}`, {
+      tags: ['cai-backfill', this.destIndex],
+    });
+  }
+
+  public getErrorMessage(message: string) {
+    const errorMessage = `[${this.destIndex}] Backfill reindex failed. Error: ${message}`;
+
+    this.logger.error(errorMessage, {
+      tags: ['cai-backfill', 'cai-backfill-error', this.destIndex],
+    });
+
+    return errorMessage;
   }
 }
