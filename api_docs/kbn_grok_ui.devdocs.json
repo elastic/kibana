@@ -721,7 +721,7 @@
         "label": "Expression",
         "description": [],
         "signature": [
-          "({ grokCollection, draftGrokExpression, onChange, height, }: { grokCollection: ",
+          "({ grokCollection, draftGrokExpression, onChange, height, dataTestSubj, }: { grokCollection: ",
           {
             "pluginId": "@kbn/grok-ui",
             "scope": "common",
@@ -745,7 +745,7 @@
             "section": "def-common.DraftGrokExpression",
             "text": "DraftGrokExpression"
           },
-          ") => void) | undefined; height?: string | number | undefined; }) => React.JSX.Element"
+          ") => void) | undefined; height?: string | number | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
         "deprecated": false,
@@ -756,7 +756,7 @@
             "id": "def-common.Expression.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  grokCollection,\n  draftGrokExpression,\n  onChange,\n  height = '100px',\n}",
+            "label": "{\n  grokCollection,\n  draftGrokExpression,\n  onChange,\n  height = '100px',\n  dataTestSubj,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
             "deprecated": false,
@@ -857,6 +857,20 @@
                 "description": [],
                 "signature": [
                   "string | number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-ui",
+                "id": "def-common.Expression.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-grok-ui/components/expression.tsx",
                 "deprecated": false,

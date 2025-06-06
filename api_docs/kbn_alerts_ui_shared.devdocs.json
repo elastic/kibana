@@ -1866,6 +1866,20 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionTypeModel.selectMessagePreconfigured",
+            "type": "string",
+            "tags": [],
+            "label": "selectMessagePreconfigured",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
             "id": "def-public.ActionTypeModel.actionTypeTitle",
             "type": "string",
             "tags": [],

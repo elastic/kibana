@@ -652,6 +652,20 @@
         "children": [
           {
             "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.configurationUtilities",
+            "type": "Object",
+            "tags": [],
+            "label": "configurationUtilities",
+            "description": [],
+            "signature": [
+              "ActionsConfigurationUtilities"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.SubActionConnector.kibanaRequest",
             "type": "Object",
             "tags": [],
