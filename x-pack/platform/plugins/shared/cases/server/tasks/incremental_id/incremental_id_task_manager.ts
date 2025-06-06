@@ -79,7 +79,7 @@ export class IncrementalIdTaskManager {
     });
   }
 
-  public async setupIncrementIdTask(taskManager: TaskManagerStartContract, core: CoreStart) {
+  public setupIncrementIdTask(taskManager: TaskManagerStartContract, core: CoreStart) {
     this.taskManager = taskManager;
     try {
       // Instantiate saved objects client
@@ -94,20 +94,30 @@ export class IncrementalIdTaskManager {
         this.logger
       );
 
-      const taskInstance = await this.taskManager.ensureScheduled({
-        id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
-        taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
-        schedule: {
-          interval: CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT,
-        },
-        params: {},
-        state: {},
-        scope: ['cases'],
-      });
-
-      this.logger.info(
-        `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
-      );
+      this.taskManager
+        .ensureScheduled({
+          id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
+          taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
+          schedule: {
+            interval: CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT,
+          },
+          params: {},
+          state: {},
+          scope: ['cases'],
+        })
+        .then(
+          (taskInstance) => {
+            this.logger.info(
+              `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
+            );
+          },
+          (e) => {
+            this.logger.error(
+              `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
+              e?.message ?? e
+            );
+          }
+        );
     } catch (e) {
       this.logger.error(
         `Error running task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
