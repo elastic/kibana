@@ -17,6 +17,7 @@ import {
   EuiImage,
   EuiPageTemplate,
   EuiText,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -27,6 +28,8 @@ import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import { addFromLibrary } from '../../add_panel_from_library';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -38,9 +41,9 @@ export function DashboardEmptyScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
-  const isEditMode = useMemo(() => {
-    return viewMode === 'edit';
-  }, [viewMode]);
+  const isEditMode = viewMode === 'edit';
+
+  const styles = useMemoizedStyles(emptyScreenStyles)
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
@@ -79,7 +82,7 @@ export function DashboardEmptyScreen() {
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
-      : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
+      : i18n.translate('dashboclassard.emptyScreen.noPermissionsSubtitle', {
           defaultMessage: 'You need additional privileges to edit this dashboard.',
         });
     return (
@@ -136,11 +139,11 @@ export function DashboardEmptyScreen() {
   })();
 
   return (
-    <div className="dshEmptyPromptParent">
+    <div css={emptyScreenStyles.parent}>
       <EuiPageTemplate
         grow={false}
         data-test-subj={emptyPromptTestSubject}
-        className="dshEmptyPromptPageTemplate"
+        css={styles.template}
       >
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
@@ -149,9 +152,30 @@ export function DashboardEmptyScreen() {
           actions={actions}
           titleSize="xs"
           color="transparent"
-          className="dshEmptyWidgetContainer"
+          css={styles.widgetContainer}
         />
       </EuiPageTemplate>
     </div>
   );
-}
+};
+
+const emptyScreenStyles = {
+  parent: css({
+    display: 'flex',
+    flexGrow: 1,
+    height: '100%',
+  }),
+  template: css({
+    backgroundColor: 'inherit',
+    paddingBlockStart: '0 !important',
+  }),
+  widgetContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xl,
+      paddingTop: '0 !important',
+      borderRadius: euiTheme.border.radius.medium,
+      '.euiEmptyPrompt__icon': {
+        marginBottom: 0,
+      },
+    }),
+};
