@@ -249,8 +249,7 @@ Configure Claude Desktop by adding this to its configuration:
         "Authorization: ApiKey ${API_KEY}"
       ],
       "env": {
-        "API_KEY": "...",
-        "KBN_URL": "..."
+        "API_KEY": "..."
       }
     }
   }
