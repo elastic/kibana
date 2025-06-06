@@ -227,9 +227,9 @@ export const BulkActionEditType = z.enum([
   'add_investigation_fields',
   'delete_investigation_fields',
   'set_investigation_fields',
-  'add_alert_suppression',
   'delete_alert_suppression',
   'set_alert_suppression',
+  'set_alert_suppression_for_threshold',
 ]);
 export type BulkActionEditTypeEnum = typeof BulkActionEditType.enum;
 export const BulkActionEditTypeEnum = BulkActionEditType.enum;

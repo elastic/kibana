@@ -603,10 +603,18 @@ export const useBulkActions = ({
           title: i18n.BULK_ACTION_MENU_TITLE,
           items: [
             {
-              key: i18n.BULK_ACTION_ADD_ALERT_SUPPRESSION,
-              name: i18n.BULK_ACTION_ADD_ALERT_SUPPRESSION,
-              'data-test-subj': 'addAlertSuppressionBulkEditRule',
-              onClick: handleBulkEdit(BulkActionEditTypeEnum.add_alert_suppression),
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              'data-test-subj': 'setAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression),
+              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              'data-test-subj': 'setAlertSuppressionBulkEditRuleForThreshold',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression_for_threshold),
               disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
               toolTipProps: { position: 'right' },
             },

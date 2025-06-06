@@ -194,10 +194,17 @@ export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
   }
 );
 
-export const BULK_ACTION_ADD_ALERT_SUPPRESSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addAlertSuppression',
+export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
   {
-    defaultMessage: 'Add alert suppression',
+    defaultMessage: 'Set alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
+  {
+    defaultMessage: 'Set alert suppression for threshold rule type',
   }
 );
 

@@ -1280,9 +1280,9 @@ components:
         - add_investigation_fields
         - delete_investigation_fields
         - set_investigation_fields
-        - add_alert_suppression
         - delete_alert_suppression
         - set_alert_suppression
+        - set_alert_suppression_for_threshold
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/platform/plugins/shared/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:

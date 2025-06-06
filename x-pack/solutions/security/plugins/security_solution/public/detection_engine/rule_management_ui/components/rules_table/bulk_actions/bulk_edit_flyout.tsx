@@ -45,9 +45,8 @@ const BulkEditFlyoutComponent = ({ editAction, ...props }: BulkEditFlyoutProps) 
     case BulkActionEditTypeEnum.set_investigation_fields:
       return <InvestigationFieldsForm {...props} editAction={editAction} />;
 
-    case BulkActionEditTypeEnum.add_alert_suppression:
-    case BulkActionEditTypeEnum.delete_alert_suppression:
     case BulkActionEditTypeEnum.set_alert_suppression:
+    case BulkActionEditTypeEnum.set_alert_suppression_for_threshold:
       return <AlertSuppressionForm {...props} editAction={editAction} />;
 
     case BulkActionEditTypeEnum.set_timeline:

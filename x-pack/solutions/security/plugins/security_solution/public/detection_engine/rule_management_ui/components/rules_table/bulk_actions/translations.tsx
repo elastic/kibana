@@ -255,4 +255,22 @@ export const bulkAlertSuppression = {
         'Bulk editing will not show the existing suppression on the selected rules. The message after editing has been applied will indicate the amount of changes that have been made on your selection.',
     }
   ),
+  DELETE_CONFIRMATION_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.bulkDeleteConfirmationTitle',
+    {
+      defaultMessage: 'Confirm bulk delete of alert suppression',
+    }
+  ),
+  DELETE_CONFIRMATION_CONFIRM: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteConfirmationConfirm',
+    {
+      defaultMessage: 'Delete',
+    }
+  ),
+  DELETE_CONFIRMATION_CANCEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteConfirmationCancel',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
 };
