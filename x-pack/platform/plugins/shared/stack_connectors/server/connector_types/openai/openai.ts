@@ -10,7 +10,8 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import type { IncomingMessage } from 'http';
+import type { Agent as HttpsAgent } from 'https';
+import type { Agent as HttpAgent, IncomingMessage } from 'http';
 import type {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
@@ -82,7 +83,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       let httpAgent;
       let baseURL = this.config.apiUrl;
-      let defaultHeaders = { ...this.headers };
+      const defaultHeaders = { ...this.headers };
       let defaultQuery: Record<string, string> | undefined;
 
       if (
@@ -110,11 +111,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         httpAgent = agents.httpsAgent;
         baseURL = removeEndpointFromUrl(this.url);
       } else {
-        const agents = getCustomAgents(
-          this.configurationUtilities,
-          this.logger,
-          this.url
-        );
+        const agents = getCustomAgents(this.configurationUtilities, this.logger, this.url);
         httpAgent = agents.httpsAgent ?? agents.httpAgent;
         if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
           baseURL = this.config.apiUrl;
@@ -153,7 +150,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     apiKey: string;
     baseURL: string;
     defaultHeaders: Record<string, string>;
-    httpAgent?: any;
+    httpAgent?: HttpsAgent | HttpAgent;
     defaultQuery?: Record<string, string>;
   }): OpenAI {
     return new OpenAI({
