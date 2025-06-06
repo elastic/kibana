@@ -10,7 +10,6 @@ import type { RegisteredTool } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
-import { addBuiltinSystemMeta } from './utils/tool_conversion';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
@@ -32,9 +31,7 @@ describe('BuiltinToolRegistry', () => {
       };
 
       registry.register(mockTool);
-      await expect(registry.list({ request: mockRequest })).resolves.toEqual([
-        addBuiltinSystemMeta(mockTool),
-      ]);
+      await expect(registry.list({ request: mockRequest })).resolves.toEqual([mockTool]);
     });
   });
 
@@ -80,7 +77,7 @@ describe('BuiltinToolRegistry', () => {
 
       registry.register(mockTool);
       const tool = await registry.get({ toolId: 'test-tool', request: mockRequest });
-      expect(tool).toEqual(addBuiltinSystemMeta(mockTool));
+      expect(tool).toEqual(mockTool);
     });
 
     it('should throw an error when tool does not exist', async () => {
@@ -121,7 +118,7 @@ describe('BuiltinToolRegistry', () => {
       registry.register(mockTool2);
 
       const tools = await registry.list({ request: mockRequest });
-      expect(tools).toEqual([addBuiltinSystemMeta(mockTool1), addBuiltinSystemMeta(mockTool2)]);
+      expect(tools).toEqual([mockTool1, mockTool2]);
     });
 
     it('should return empty array when no tools are registered', async () => {

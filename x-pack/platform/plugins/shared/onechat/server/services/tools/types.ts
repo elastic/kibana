@@ -11,6 +11,7 @@ import type { ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type {
   ToolProvider,
   RegisteredTool,
+  RegisteredToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
   ToolProviderListOptions,
@@ -18,9 +19,8 @@ import type {
 } from '@kbn/onechat-server';
 
 export interface ToolsServiceSetup {
-  register<RunInput extends ZodObject<any>, RunOutput = unknown>(
-    tool: RegisteredTool<RunInput, RunOutput>
-  ): void;
+  register(tool: RegisteredTool): void;
+  registerProvider(id: string, provider: RegisteredToolProvider): void;
 }
 
 export interface ToolsServiceStart {
@@ -47,6 +47,10 @@ export interface InternalToolProvider {
   has(options: ToolProviderHasOptions): Promise<boolean>;
   get(options: ToolProviderGetOptions): Promise<RegisteredToolWithMeta>;
   list(options: ToolProviderListOptions): Promise<RegisteredToolWithMeta[]>;
+}
+
+export interface RegisteredToolProviderWithId extends RegisteredToolProvider {
+  id: string;
 }
 
 /**
