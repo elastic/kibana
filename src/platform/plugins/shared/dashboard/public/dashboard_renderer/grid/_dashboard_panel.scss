@@ -11,24 +11,6 @@
   }
 }
 
-// Remove border color unless in editing mode
-.dshLayout-withoutMargins:not(.dshLayout--editing),
-.dshDashboardGrid__item--expanded,
-.dshDashboardGrid__item--blurred,
-.dshDashboardGrid__item--focused {
-  .embPanel--dragHandle {
-    visibility: hidden;
-  }
-}
-
-// Hide hover actions when dashboard has an overlay
-.dshDashboardGrid__item--blurred,
-.dshDashboardGrid__item--focused {
-  .embPanel__hoverActions {
-    visibility: hidden !important;
-  }
-}
-
 @keyframes highlightOutline {
   0% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);

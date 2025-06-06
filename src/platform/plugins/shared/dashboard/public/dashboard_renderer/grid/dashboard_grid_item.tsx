@@ -141,7 +141,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <div
-        css={focusStyles}
+        css={[
+          focusStyles,
+          css({
+            // Remove padding in fullscreen mode
+            '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
+              padding: 0,
+            },
+          }),
+        ]}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
