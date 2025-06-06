@@ -114,6 +114,7 @@ export function SpanOverview({
               dataView={dataView}
               tracesIndexPattern={tracesIndexPattern}
               showWaterfall={showWaterfall}
+              showActions={showActions}
             />
           </EuiPanel>
         </FieldActionsProvider>

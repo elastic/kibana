@@ -114,6 +114,7 @@ export function TransactionOverview({
                 dataView={dataView}
                 tracesIndexPattern={tracesIndexPattern}
                 showWaterfall={showWaterfall}
+                showActions={showActions}
               />
             </>
           ) : null}
