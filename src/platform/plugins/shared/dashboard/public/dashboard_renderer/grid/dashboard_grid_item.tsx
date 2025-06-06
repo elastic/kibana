@@ -239,14 +239,15 @@ const dashboardGridItemStyles = {
   }),
 };
 
-const highlightOutline = (euiTheme: UseEuiTheme['euiTheme']) => keyframes`
-  0% {
-    outline: solid ${euiTheme.size.xs} transparent;
-  }
-   25% {
-   outline: solid ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightSuccess};
-  }
-  100% {
-    outline: solid ${euiTheme.size.xs} transparent;
-  }
-`;
+const highlightOutline = (euiTheme: UseEuiTheme['euiTheme']) =>
+  keyframes({
+    '0%': {
+      outline: `solid ${euiTheme.size.xs} transparent`,
+    },
+    '25%': {
+      outline: `solid ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightSuccess}`,
+    },
+    '100%': {
+      outline: `solid ${euiTheme.size.xs} transparent`,
+    },
+  });
