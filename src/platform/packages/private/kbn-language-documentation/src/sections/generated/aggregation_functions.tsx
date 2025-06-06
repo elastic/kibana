@@ -467,7 +467,8 @@ export const functions = {
               defaultMessage: `
   ### VALUES
   Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.
-  If you need the values returned in order use [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
+  If you need the values returned in order use
+  [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
 
   \`\`\`esql
   FROM employees
