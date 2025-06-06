@@ -89,7 +89,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const hasAnyBarSetting = !!barSeriesLayers.length;
   const hasAreaSettings = hasAreaSeries(dataLayers);
-  const shouldDisplayDividerHr = !!(hasAnyBarSetting && hasAreaSettings);
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
@@ -127,10 +127,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
         {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
 
-        {isHasNonBarSeries ? (
+        {hasAreaSettings ? (
           <>
             <FillOpacityOption
-              isFillOpacityEnabled={hasAreaSettings}
+              isFillOpacityEnabled={true}
               value={state?.fillOpacity ?? 0.3}
               onChange={(newValue) => {
                 setState({
@@ -140,19 +140,20 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
               }}
             />
 
-            <PointVisibilityOption
-              selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
-              onChange={(newValue) => {
-                setState({
-                  ...state,
-                  pointVisibility: newValue,
-                });
-              }}
-            />
-
             <ToolbarDivider />
           </>
         ) : null}
+
+        <PointVisibilityOption
+          enabled={isHasNonBarSeries}
+          selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
+          onChange={(newValue) => {
+            setState({
+              ...state,
+              pointVisibility: newValue,
+            });
+          }}
+        />
 
         <LineCurveOption
           enabled={isCurveTypeEnabled}
