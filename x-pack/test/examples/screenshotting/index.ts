@@ -20,7 +20,8 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('Screenshotting Example', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/156106
+  describe.skip('Screenshotting Example', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
