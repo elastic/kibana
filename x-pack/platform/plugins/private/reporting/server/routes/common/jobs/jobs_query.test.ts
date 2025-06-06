@@ -7,12 +7,19 @@
 
 import { set } from '@kbn/safer-lodash-set';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
+
+const fakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+} as unknown as KibanaRequest;
 
 describe('jobsQuery', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -37,10 +44,11 @@ describe('jobsQuery', () => {
     });
 
     it('should pass parameters in the request body', async () => {
-      await jobsQuery.list({ username: 'somebody' }, 1, 10, ['id1', 'id2']);
-      await jobsQuery.list({ username: 'somebody' }, 1, 10, null);
+      await jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10, ['id1', 'id2']);
+      await jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10, null);
 
       expect(client.search).toHaveBeenCalledTimes(2);
+
       expect(client.search).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -52,6 +60,15 @@ describe('jobsQuery', () => {
             expect.arrayContaining([
               { term: { created_by: 'somebody' } },
               { ids: { values: ['id1', 'id2'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { space_id: 'default' } },
+                    // also show all reports created before space_id was added
+                    { bool: { must_not: { exists: { field: 'space_id' } } } },
+                  ],
+                },
+              },
             ])
           ),
         })
@@ -70,7 +87,9 @@ describe('jobsQuery', () => {
     });
 
     it('should return reports list', async () => {
-      await expect(jobsQuery.list({ username: 'somebody' }, 0, 10, [])).resolves.toEqual(
+      await expect(
+        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
+      ).resolves.toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: 'id1', jobtype: 'pdf' }),
           expect.objectContaining({ id: 'id2', jobtype: 'csv' }),
@@ -81,7 +100,9 @@ describe('jobsQuery', () => {
     it('should return an empty array when there are no hits', async () => {
       client.search.mockResponse({} as Awaited<ReturnType<ElasticsearchClient['search']>>);
 
-      await expect(jobsQuery.list({ username: 'somebody' }, 0, 10, [])).resolves.toHaveLength(0);
+      await expect(
+        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
+      ).resolves.toHaveLength(0);
     });
 
     it('should reject if the report source is missing', async () => {
@@ -89,9 +110,9 @@ describe('jobsQuery', () => {
         set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'hits.hits', [{}])
       );
 
-      await expect(jobsQuery.list({ username: 'somebody' }, 0, 10, [])).rejects.toBeInstanceOf(
-        Error
-      );
+      await expect(
+        jobsQuery.list(fakeRawRequest, { username: 'somebody' }, 0, 10, [])
+      ).rejects.toBeInstanceOf(Error);
     });
   });
 
