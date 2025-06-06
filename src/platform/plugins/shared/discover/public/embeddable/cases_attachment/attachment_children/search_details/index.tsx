@@ -13,7 +13,8 @@ import type { TimeRange, Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterBadge } from './filter_badge/filter_badge';
+import { FilterBadge } from '../filter_badge/filter_badge';
+import { ReadOnlyTimeRange } from './read_only_time_range';
 
 interface SearchDetailsProps {
   index: string;
@@ -55,16 +56,7 @@ export const SearchDetails: React.FC<SearchDetailsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">
-          <EuiFlexGroup gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">{TIME_RANGE_LABEL}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="success">
-                {`${timeRange.from} to ${timeRange.to}`}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ReadOnlyTimeRange timeRange={timeRange} />
         </EuiBadge>
       </EuiFlexItem>
       {hasQuery && (
@@ -115,8 +107,4 @@ const QUERY_LABEL = i18n.translate('discover.cases.attachment.queryLabel', {
 
 const INDEX_PATTERN_LABEL = i18n.translate('discover.cases.attachment.indexPatternLabel', {
   defaultMessage: 'Index pattern',
-});
-
-const TIME_RANGE_LABEL = i18n.translate('discover.cases.attachment.timeRangeLabel', {
-  defaultMessage: 'Time range',
 });

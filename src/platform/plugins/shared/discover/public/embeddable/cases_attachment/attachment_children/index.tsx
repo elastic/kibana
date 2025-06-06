@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import type { CasesPublicStartDependencies } from '@kbn/cases-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -30,7 +31,7 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
       search: { searchSource },
       dataViews: dataViewsService,
     },
-  } = useKibana<CasesPublicStartDependencies>().services; // Component is rendered with the cases app. Type for Kibana services must match CasesPublicStartDependencies
+  } = useKibana<CoreStart & CasesPublicStartDependencies>().services; // Component is rendered with the cases app. Type for Kibana services must match CasesPublicStartDependencies
   const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
 
   useEffect(() => {
@@ -44,6 +45,10 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
     };
     setAdHocDataView();
   }, [dataView, index, timestampField, dataViewsService]);
+
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <>
