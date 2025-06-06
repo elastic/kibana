@@ -18,6 +18,7 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   type ESQLAstCommand,
+  lastItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -236,6 +237,11 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
+  if (bothStringTypes(argType, item.literalType)) {
+    // all functions accept keyword literals for text parameters
+    return true;
+  }
+
   if (item.literalType === 'null') {
     // all parameters accept null, but this is not yet reflected
     // in our function definitions so we let it through here
@@ -426,6 +432,18 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
 }
 
 /**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+/**
  * Checks if an AST function argument is of the correct type
  * given the definition.
  */
@@ -450,7 +468,10 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'unknown' || parameterType === signature.returnType
+        (signature) =>
+          signature.returnType === 'unknown' ||
+          parameterType === signature.returnType ||
+          bothStringTypes(parameterType, signature.returnType)
       );
     }
   }
@@ -467,7 +488,13 @@ export function checkFunctionArgMatchesDefinition(
       ? validHit.type
       : [validHit.type];
 
-    return wrappedTypes.some((ct) => ct === parameterType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some(
+      (ct) =>
+        ct === parameterType ||
+        bothStringTypes(ct, parameterType) ||
+        ct === 'null' ||
+        ct === 'unknown'
+    );
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = parameterType?.toLowerCase();
@@ -803,6 +830,13 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+// --- Expression types helpers ---
+
+/**
+ * Type guard to check if the type is 'param'
+ */
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
 /**
  * Determines the type of the expression
  */
@@ -822,7 +856,7 @@ export function getExpressionType(
     return getExpressionType(root[0], fields, userDefinedColumns);
   }
 
-  if (isLiteralItem(root) && root.literalType !== 'param') {
+  if (isLiteralItem(root)) {
     return root.literalType;
   }
 
@@ -850,6 +884,12 @@ export function getExpressionType(
 
   if (isColumnItem(root) && fields && userDefinedColumns) {
     const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+    const lastArg = lastItem(root.args);
+    // If the last argument is a param, we return its type (param literal type)
+    // This is useful for cases like `where ??field`
+    if (isParam(lastArg)) {
+      return lastArg.literalType;
+    }
     if (!column) {
       return 'unknown';
     }
@@ -899,7 +939,6 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
 
     // When functions are passed null for any argument, they generally return null
@@ -913,7 +952,8 @@ export function getExpressionType(
           param &&
           (param.type === 'any' ||
             param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
+            isParamExpressionType(argType))
         );
       });
     });
@@ -927,6 +967,8 @@ export function getExpressionType(
 
   return 'unknown';
 }
+
+// --- Fields helpers ---
 
 export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>
