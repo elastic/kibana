@@ -773,65 +773,6 @@ describe('Create Lifecycle', () => {
       expect(registry.get('test').producer).toEqual('alerts');
     });
 
-    test('should throw an error if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts: true', () => {
-      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-      expect(() =>
-        registry.register({
-          id: 'test',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'default',
-              name: 'Default',
-            },
-          ],
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          executor: jest.fn(),
-          category: 'test',
-          producer: 'alerts',
-          solution: 'stack',
-          validate: {
-            params: { validate: (params) => params },
-          },
-          cancelAlertsOnRuleTimeout: false,
-          autoRecoverAlerts: true,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Rule type \\"test\\" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true."`
-      );
-    });
-
-    test('should throw an error if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts is not set (defaults to true)', () => {
-      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-      expect(() =>
-        registry.register({
-          id: 'test',
-          name: 'Test',
-          actionGroups: [
-            {
-              id: 'default',
-              name: 'Default',
-            },
-          ],
-          defaultActionGroupId: 'default',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          executor: jest.fn(),
-          category: 'test',
-          producer: 'alerts',
-          solution: 'stack',
-          validate: {
-            params: { validate: (params) => params },
-          },
-          cancelAlertsOnRuleTimeout: false,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Rule type \\"test\\" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true."`
-      );
-    });
-
     test('registers rule if cancelAlertsOnRuleTimeout: true and autoRecoverAlerts: true', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register({

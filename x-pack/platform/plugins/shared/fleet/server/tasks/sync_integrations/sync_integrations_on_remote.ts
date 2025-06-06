@@ -39,6 +39,7 @@ export const getFollowerIndex = async (
   const indices = await esClient.indices.get(
     {
       index: FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX,
+      expand_wildcards: 'all',
     },
     { signal: abortController.signal }
   );
