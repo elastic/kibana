@@ -20,11 +20,13 @@ import {
   EuiTitle,
   EuiTourStep,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
 import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
@@ -36,6 +38,7 @@ import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 export const QueryRulesetDetail: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { application, http },
   } = useKibana();
@@ -122,7 +125,9 @@ export const QueryRulesetDetail: React.FC = () => {
 
   const items = [
     <EuiContextMenuItem
-      color="danger"
+      css={css`
+        color: ${euiTheme.colors.danger};
+      `}
       key="delete"
       icon="trash"
       onClick={() => setRulesetToDelete(rulesetId)}
