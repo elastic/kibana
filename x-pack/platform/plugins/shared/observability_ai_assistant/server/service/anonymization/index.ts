@@ -12,10 +12,12 @@ import { OperatorFunction, map } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { ChatCompletionEvent, ChatCompletionEventType } from '@kbn/inference-common';
+import { ChatCompletionUnredactedMessageEvent } from '@kbn/inference-common/src/chat_complete/events';
 import { unhashString, redactEntities } from '../../../common/utils/anonymization/redaction';
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
 import { chunkText } from './chunk_text';
+import { getRedactableMessageEventParts } from './get_redactable_message_parts';
 import {
   type DetectedEntity,
   DetectedEntityType,
@@ -27,7 +29,6 @@ import { getEntityHash } from './get_entity_hash';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
-
 export interface Dependencies {
   esClient: {
     asCurrentUser: ElasticsearchClient;
@@ -227,40 +228,57 @@ export class AnonymizationService {
     }
     return { unredactedMessages: messages };
   }
-
-  unredactChatCompletionEvent(): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
+  unredactChatCompletionEvent(): OperatorFunction<
+    ChatCompletionEvent,
+    ChatCompletionEvent | ChatCompletionUnredactedMessageEvent
+  > {
     return (source$) => {
       return source$.pipe(
-        map((event): ChatCompletionEvent => {
+        map((event): ChatCompletionEvent | ChatCompletionUnredactedMessageEvent => {
           if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
-            if (event.toolCalls?.length > 0) {
-              const unredactedToolCalls = event.toolCalls.map((toolCall) => {
-                const args = toolCall.function?.arguments;
-                if (args && typeof args === 'object' && 'text' in args) {
-                  const { unhashedText } = deanonymizeText(
-                    args.text as string,
-                    this.currentHashMap
-                  );
-                  args.text = unhashedText;
-                }
-                return {
-                  ...toolCall,
-                  function: {
-                    ...toolCall.function,
-                    arguments: JSON.stringify(args),
-                  },
-                };
-              });
+            const redacted = getRedactableMessageEventParts(event);
+            const contentUnredaction =
+              'content' in redacted && redacted.content && typeof redacted.content === 'string'
+                ? deanonymizeText(redacted.content, this.currentHashMap)
+                : undefined;
+            const unredaction = deanonymizeText(JSON.stringify(redacted), this.currentHashMap);
+            const unredactedObj = JSON.parse(unredaction.unhashedText);
 
-              return {
-                ...event,
-                toolCalls: unredactedToolCalls,
-              };
+            // Ensure tool call arguments are always strings, even if they're objects in the JSON
+            if (unredactedObj.toolCalls) {
+              unredactedObj.toolCalls = unredactedObj.toolCalls.map(
+                (toolCall: {
+                  function?: {
+                    name?: string;
+                    arguments?: any;
+                  };
+                }) => {
+                  if (toolCall.function && typeof toolCall.function.arguments === 'object') {
+                    // Convert object arguments to strings to maintain compatibility in redactMessages and unredactMessages
+                    return {
+                      ...toolCall,
+                      function: {
+                        ...toolCall.function,
+                        arguments: JSON.stringify(toolCall.function.arguments),
+                      },
+                    };
+                  }
+                  return toolCall;
+                }
+              );
             }
-            if ('content' in event && typeof event.content === 'string') {
-              const { unhashedText } = deanonymizeText(event.content, this.currentHashMap);
-              event.content = unhashedText;
+
+            const redactedEvent: ChatCompletionUnredactedMessageEvent = {
+              ...event,
+              ...unredactedObj,
+            };
+            if (contentUnredaction && contentUnredaction.detectedEntities.length > 0) {
+              redactedEvent.unredactions = contentUnredaction.detectedEntities;
+              // TODO: not being passed through due to concatenateChatCompletionChunks filtering out non chunk events
+              // causing knowledge base entities to be stored with redactions
+              // and having to call undreactMessages outside chat
             }
+            return redactedEvent;
           }
           return event;
         })
