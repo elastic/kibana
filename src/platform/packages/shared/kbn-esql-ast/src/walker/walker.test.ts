@@ -8,6 +8,7 @@
  */
 
 import { parse } from '../parser';
+import { Parser } from '../parser/parser';
 import {
   ESQLColumn,
   ESQLCommand,
@@ -104,6 +105,21 @@ describe('structurally can walk all nodes', () => {
       expect(sources.map(({ name }) => name).sort()).toStrictEqual(['a', 'index']);
       expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
+    });
+
+    test('can traverse SAMPLE command', () => {
+      const { root } = Parser.parse('FROM index | SAMPLE 0.25');
+      const commands: ESQLCommand[] = [];
+      const literals: ESQLLiteral[] = [];
+
+      walk(root, {
+        visitCommand: (cmd) => commands.push(cmd),
+        visitLiteral: (lit) => literals.push(lit),
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'sample']);
+      expect(literals.length).toBe(1);
+      expect(literals[0].value).toBe(0.25);
     });
 
     test('"visitAny" can capture command nodes', () => {

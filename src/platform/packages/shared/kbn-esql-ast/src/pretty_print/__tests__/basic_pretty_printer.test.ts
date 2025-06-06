@@ -236,6 +236,22 @@ describe('single line query', () => {
       });
     });
 
+    describe('SAMPLE', () => {
+      test('from single line', () => {
+        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| SAMPLE 0.1 123
+          `);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+    });
+
     describe('RRF', () => {
       test('from single line', () => {
         const { text } =
