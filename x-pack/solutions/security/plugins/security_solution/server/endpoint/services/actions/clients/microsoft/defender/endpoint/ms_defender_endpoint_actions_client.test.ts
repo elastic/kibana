@@ -214,7 +214,7 @@ describe('MS Defender response actions client', () => {
 
     it('should write action request doc. to endpoint index', async () => {
       await msClientMock.runscript(
-        responseActionsClientMock.createRunScriptOptions({
+        microsoftDefenderMock.createRunScriptOptions({
           parameters: { scriptName: 'test-script.ps1' },
         })
       );
@@ -234,6 +234,7 @@ describe('MS Defender response actions client', () => {
                   },
                 },
                 parameters: {
+                  args: 'test-args',
                   scriptName: 'test-script.ps1',
                 },
               },

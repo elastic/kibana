@@ -300,6 +300,9 @@ const createRunScriptOptionsMock = (
 ): RunScriptActionRequestBody => {
   const options: RunScriptActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      raw: 'ls',
+    },
   };
   return merge(options, overrides);
 };
