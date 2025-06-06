@@ -16,9 +16,9 @@ import {
   EuiFormControlLayout,
   EuiIcon,
 } from '@elastic/eui';
-import { getSeverityRangeDisplay } from '../controls/select_severity/select_severity';
+import { getSeverityRangeDisplay } from '../../../components/controls/select_severity/select_severity';
 import { useSeverityLegendControlStyles } from './severity_legend_control_styles';
-import type { SeverityOption } from '../../explorer/hooks/use_severity_options';
+import type { SeverityOption } from '../../hooks/use_severity_options';
 
 export interface SeverityControlProps {
   allSeverityOptions: SeverityOption[];

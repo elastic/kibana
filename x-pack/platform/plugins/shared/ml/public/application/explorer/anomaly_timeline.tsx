@@ -56,7 +56,7 @@ import {
   type ViewBySwimLaneData,
 } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
-import { SeverityLegendControl } from '../components/severity_legend_control/severity_legend_control';
+import { SeverityLegendControl } from './components/severity_legend_control/severity_legend_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
