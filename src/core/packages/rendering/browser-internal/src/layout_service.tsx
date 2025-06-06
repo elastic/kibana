@@ -29,7 +29,7 @@ const FOOTER_HEIGHT = 0;
 const HEADER_HEIGHT = 96;
 const NAVIGATION_WIDTH = 0; // TODO
 const NAVIGATION_PANEL_WIDTH = 0;
-const SIDEBAR_WIDTH = 0;
+const SIDEBAR_WIDTH = 48;
 const SIDEBAR_PANEL_WIDTH = 0;
 
 /**
@@ -85,6 +85,7 @@ export class LayoutService {
                   </>
                 );
               },
+              Sidebar: () => <div>Sidebar</div>,
             }}
           </ChromeLayout>
         </>

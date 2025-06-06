@@ -35,6 +35,7 @@ export const renderingOverrides = (
   }
 
   // Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
+  // TODO: make sure this covers only application content
   #app-fixed-viewport {
     pointer-events: none;
     visibility: hidden;
