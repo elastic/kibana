@@ -397,6 +397,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
@@ -571,6 +572,7 @@ async function getFunctionArgsSuggestions(
     };
 
     // Fields
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
