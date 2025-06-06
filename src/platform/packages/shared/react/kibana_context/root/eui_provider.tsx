@@ -43,7 +43,7 @@ const sharedCacheOptions = {
 
   // Enables Emotion's speedy mode in dev (same as prod).
   // This uses `insertRule` instead of default injecting <style> tags for better performance (~10x faster).
-  // Historically disabled in dev for easier inspection, but modern dev tools still support editing styles.
+  // Historically disabled in dev for easier inspection, but it's no longer the issue: modern dev tools support editing styles.
   // docs: https://github.com/emotion-js/emotion/blob/main/packages/sheet/README.md#speedy
   speedy: true, // Enable speedy mode for better performance
 };
