@@ -134,7 +134,7 @@ export const Trace = ({
           <EmbeddableRenderer
             type="APM_TRACE_WATERFALL_EMBEDDABLE"
             getParentApi={getParentApi}
-            hidePanelChrome={true}
+            hidePanelChrome
           />
         </>
       )}
