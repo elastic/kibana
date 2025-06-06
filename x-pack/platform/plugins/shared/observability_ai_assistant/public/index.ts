@@ -91,7 +91,6 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
-export { buildDetectedEntitiesMap } from '../common/utils/anonymization/build_detected_entities_map';
 export { redactEntities, unhashString } from '../common/utils/anonymization/redaction';
 
 export type {
