@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiButtonIcon,
@@ -46,7 +46,6 @@ export const FullScreenWaterfall = ({
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef(null);
-  let flyout;
 
   const getParentApi = useCallback(
     () => ({
@@ -68,18 +67,6 @@ export const FullScreenWaterfall = ({
     [traceId, rangeFrom, rangeTo, transaction]
   );
 
-  if (isFlyoutVisible && spanId) {
-    flyout = (
-      <SpanFlyout
-        tracesIndexPattern={tracesIndexPattern}
-        spanId={spanId}
-        dataView={dataView}
-        onCloseFlyout={() => {
-          setIsFlyoutVisible(false);
-        }}
-      />
-    );
-  }
   return (
     <>
       <EuiOverlayMask
@@ -133,7 +120,16 @@ export const FullScreenWaterfall = ({
         </EuiFocusTrap>
       </EuiOverlayMask>
 
-      {flyout}
+      {isFlyoutVisible && spanId && (
+        <SpanFlyout
+          tracesIndexPattern={tracesIndexPattern}
+          spanId={spanId}
+          dataView={dataView}
+          onCloseFlyout={() => {
+            setIsFlyoutVisible(false);
+          }}
+        />
+      )}
     </>
   );
 };
