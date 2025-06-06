@@ -12,7 +12,6 @@
  */
 import numeral from '@elastic/numeral';
 
-// TODO: Might be able to delete this
 export function abbreviateWholeNumber(value: number, maxDigits = 3) {
   if (Math.abs(value) < Math.pow(10, maxDigits)) {
     return value;
