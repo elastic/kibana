@@ -48,19 +48,7 @@ xpack.features.overrides:
   observability.hidden: true
   ### Stack alerts is hidden in Role management since it's not needed.
   stackAlerts.hidden: true
-  ### Synthetics feature privileges are fine-tuned to grant access to Observability app.
-  uptime:
-    ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
-    name: "Synthetics"
-    privileges:
-      # Synthetics `All` feature privilege should implicitly grant `All` access to Observability app.
-      all.composedOf:
-        - feature: "observability"
-          privileges: [ "all" ]
-      # Synthetics `Read` feature privilege should implicitly grant `Read` access to Observability app.
-      read.composedOf:
-        - feature: "observability"
-          privileges: [ "read" ]
+
 
 
 ## Cloud settings

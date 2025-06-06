@@ -5,3 +5,15 @@ xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.apm.enabled: false
 uiSettings.overrides.defaultRoute: /app/observability/overview
+
+xpack.legacy_uptime.enabled: false
+# xpack.uptime.enabled: false
+xpack.ux.enabled: false
+xpack.uptime.enabled: false
+
+xpack.fleet.internal.registry.excludePackages: [
+  # Oblt integrations
+  'synthetics',
+  'uptime',
+  'synthetics_dashboards',
+]

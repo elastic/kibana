@@ -74,14 +74,6 @@ export class APMPlugin
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
 
-    core.pricing.registerProductFeatures([
-      {
-        id: 'observability-complete-apm',
-        products: [{ name: 'observability', tier: 'complete' }],
-        description: 'APM features only available in the Observability Complete license.',
-      },
-    ]);
-
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
