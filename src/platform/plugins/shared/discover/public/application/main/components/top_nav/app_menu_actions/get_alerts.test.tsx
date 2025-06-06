@@ -26,6 +26,7 @@ const mount = (dataView = dataViewMock, isEsqlMode = false) => {
     dataView,
     adHocDataViews: [],
     isEsqlMode,
+    authorizedRuleTypeIds: [],
     onNewSearch: jest.fn(),
     onOpenSavedSearch: jest.fn(),
     onUpdateAdHocDataViews: jest.fn(),
