@@ -122,8 +122,11 @@ export function Waterfall({
       <div
         css={css`
           display: flex;
-          position: ${isEmbeddable ? 'relative' : 'sticky'};
-          ${!isEmbeddable && 'top: var(--euiFixedHeadersOffset, 0);'}
+          ${isEmbeddable
+            ? 'position: relative'
+            : `
+            position: sticky;
+            top: var(--euiFixedHeadersOffset, 0);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};
