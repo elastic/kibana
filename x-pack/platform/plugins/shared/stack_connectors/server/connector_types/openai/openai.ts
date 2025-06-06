@@ -348,6 +348,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
+
+      // Based on the OpenAI API documentation, the error contains the status code in the `status` property
       if (e.status === 429) {
         throw createTaskRunError(new Error(errorMessage), TaskErrorSource.USER);
       }
