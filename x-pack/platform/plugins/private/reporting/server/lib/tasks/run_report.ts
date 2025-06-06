@@ -133,8 +133,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected abstract notify(
     report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
     output: TaskRunResult,
-    runAt: Date,
     byteSize: number,
     reportSO?: SavedObject<ScheduledReportType>,
     spaceId?: string
@@ -570,8 +570,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
               await this.notify(
                 report,
+                taskInstance,
                 output,
-                taskInstance.runAt,
                 byteSize,
                 reportSO,
                 task.payload.spaceId

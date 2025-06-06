@@ -94,8 +94,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
   protected async notify(
     report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
     output: TaskRunResult,
-    runAt: Date,
     byteSize: number,
     reportSO?: SavedObject<ScheduledReportType>,
     spaceId?: string
@@ -108,8 +108,20 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         throw new Error('Reporting notification service has not been initialized.');
       }
 
-      if (reportSO && reportSO.attributes.notification && reportSO.attributes.notification.email) {
-        const { email } = reportSO.attributes.notification;
+      const { runAt, params } = taskInstance;
+      const task = params as ScheduledReportTaskParams;
+      if (!reportSO) {
+        const internalSoClient = await this.opts.reporting.getInternalSoClient();
+        reportSO = await internalSoClient.get<ScheduledReportType>(
+          SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+          task.id,
+          { namespace: spaceId }
+        );
+      }
+
+      const { notification } = reportSO.attributes;
+      if (notification && notification.email) {
+        const email = notification.email;
         const title = reportSO.attributes.title;
 
         await this.emailNotificationService.notify({
@@ -118,6 +130,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           id: report._id,
           jobType: report.jobtype,
           contentType: output.content_type,
+          relatedObject: {
+            id: reportSO.id,
+            type: reportSO.type,
+            namespace: spaceId,
+          },
           emailParams: {
             to: email.to,
             cc: email.cc,
@@ -128,7 +145,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         });
       }
     } catch (error) {
-      const message = `Error sending scheduled report: ${error.message}`;
+      const message = `Error sending notification for scheduled report: ${error.message}`;
       await this.saveExecutionWarning(
         report,
         {

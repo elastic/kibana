@@ -208,7 +208,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
-    ...(attachments && { attachments }),
+    ...(attachments.length > 0 && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

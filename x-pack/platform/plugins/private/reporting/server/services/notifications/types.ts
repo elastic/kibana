@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RelatedSavedObject } from '@kbn/notifications-plugin/server/services/types';
 import { ReportingCore } from '../..';
 
 export interface NotifyArgs {
@@ -12,6 +13,7 @@ export interface NotifyArgs {
   id: string;
   contentType?: string | null;
   jobType: string;
+  relatedObject: RelatedSavedObject;
   emailParams: {
     to?: string[];
     bcc?: string[];

@@ -90,7 +90,6 @@ describe('send_email module', () => {
     expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "attachments": Array [],
           "bcc": Array [],
           "cc": Array [
             "bob@example.com",
@@ -140,7 +139,6 @@ describe('send_email module', () => {
     expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "attachments": Array [],
           "bcc": Array [],
           "cc": Array [
             "bob@example.com",
@@ -471,7 +469,6 @@ describe('send_email module', () => {
     expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "attachments": Array [],
           "bcc": Array [],
           "cc": Array [
             "bob@example.com",
@@ -525,7 +522,6 @@ describe('send_email module', () => {
     expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "attachments": Array [],
           "bcc": Array [],
           "cc": Array [
             "bob@example.com",
@@ -581,7 +577,6 @@ describe('send_email module', () => {
     expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "attachments": Array [],
           "bcc": Array [],
           "cc": Array [
             "bob@example.com",

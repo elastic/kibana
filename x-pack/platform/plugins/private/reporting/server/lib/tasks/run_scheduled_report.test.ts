@@ -135,9 +135,6 @@ describe('Run Scheduled Report Task', () => {
     mockReporting = await createMockReportingCore(configType);
 
     soClient = await mockReporting.getInternalSoClient();
-    soClient.get = jest.fn().mockImplementation(async () => {
-      return reportSO;
-    });
 
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
@@ -153,6 +150,9 @@ describe('Run Scheduled Report Task', () => {
   });
 
   beforeEach(async () => {
+    soClient.get = jest.fn().mockImplementation(async () => {
+      return reportSO;
+    });
     reportStore = await mockReporting.getStore();
     reportStore.addReport = jest.fn().mockImplementation(async () => {
       return savedReport;
@@ -468,12 +468,17 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('2025-06-04T00:00:00Z');
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      expect(soClient.get).not.toHaveBeenCalled();
       expect(emailNotificationService.notify).toHaveBeenCalledWith({
         contentType: 'application/pdf',
         emailParams: {
@@ -486,6 +491,51 @@ describe('Run Scheduled Report Task', () => {
         id: '290357209345723095',
         index: '.reporting-fantastic',
         jobType: 'test1',
+        relatedObject: {
+          id: 'report-so-id',
+          namespace: 'default',
+          type: 'scheduled-report',
+        },
+        reporting: mockReporting,
+      });
+    });
+
+    it("gets the report SO if it's not defined", async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const byteSize = 2097152; // 2MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, taskInstance, output, byteSize, undefined, 'default');
+      expect(soClient.get).toHaveBeenCalled();
+      expect(emailNotificationService.notify).toHaveBeenCalledWith({
+        contentType: 'application/pdf',
+        emailParams: {
+          bcc: ['test2@test.com'],
+          cc: undefined,
+          spaceId: 'default',
+          subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
+          to: ['test1@test.com'],
+        },
+        id: '290357209345723095',
+        index: '.reporting-fantastic',
+        jobType: 'test1',
+        relatedObject: {
+          id: 'report-so-id',
+          namespace: 'default',
+          type: 'scheduled-report',
+        },
         reporting: mockReporting,
       });
     });
@@ -498,19 +548,24 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('2025-06-04T00:00:00Z');
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
       const byteSize = 11534336; // 11MB
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending scheduled report: The report is larger than the 10MB limit.'
+        'Error sending notification for scheduled report: The report is larger than the 10MB limit.'
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 11534336 },
-        warning: 'Error sending scheduled report: The report is larger than the 10MB limit.',
+        warning:
+          'Error sending notification for scheduled report: The report is larger than the 10MB limit.',
       });
     });
 
@@ -522,20 +577,24 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager);
-      const runAt = new Date('2025-06-04T00:00:00Z');
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending scheduled report: Reporting notification service has not been initialized.'
+        'Error sending notification for scheduled report: Reporting notification service has not been initialized.'
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 2097152 },
         warning:
-          'Error sending scheduled report: Reporting notification service has not been initialized.',
+          'Error sending notification for scheduled report: Reporting notification service has not been initialized.',
       });
     });
 
@@ -550,12 +609,16 @@ describe('Run Scheduled Report Task', () => {
       });
       const mockTaskManager = taskManagerMock.createStart();
       await task.init(mockTaskManager, emailNotificationService);
-      const runAt = new Date('2025-06-04T00:00:00Z');
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, output, runAt, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
       expect(emailNotificationService.notify).toHaveBeenCalledWith({
         contentType: 'application/pdf',
         emailParams: {
@@ -568,14 +631,19 @@ describe('Run Scheduled Report Task', () => {
         id: '290357209345723095',
         index: '.reporting-fantastic',
         jobType: 'test1',
+        relatedObject: {
+          id: 'report-so-id',
+          namespace: 'default',
+          type: 'scheduled-report',
+        },
         reporting: mockReporting,
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending scheduled report: This is a test error!'
+        'Error sending notification for scheduled report: This is a test error!'
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 2097152 },
-        warning: 'Error sending scheduled report: This is a test error!',
+        warning: 'Error sending notification for scheduled report: This is a test error!',
       });
     });
   });

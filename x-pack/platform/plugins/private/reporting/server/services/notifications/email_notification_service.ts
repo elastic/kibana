@@ -54,7 +54,19 @@ export class EmailNotificationService implements NotificationService {
     ];
   }
 
-  public async notify({ reporting, index, id, contentType, jobType, emailParams }: NotifyArgs) {
+  public async notify({
+    reporting,
+    index,
+    id,
+    contentType,
+    jobType,
+    relatedObject,
+    emailParams,
+  }: NotifyArgs) {
+    if (!this.notifications.isEmailServiceAvailable()) {
+      throw new Error('Email notification service is not available');
+    }
+
     const attachments = await this.getAttachments(reporting, index, id, jobType, contentType);
     const { to, bcc, cc, subject, spaceId } = emailParams;
     const message = "Here's your report!";
@@ -66,6 +78,9 @@ export class EmailNotificationService implements NotificationService {
       message,
       attachments,
       spaceId: spaceId ?? DEFAULT_SPACE_ID,
+      context: {
+        relatedObjects: [relatedObject],
+      },
     });
   }
 }
