@@ -30,19 +30,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getConnectorDescription } from '../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 import type { RuleMigrationSettings } from '../../types';
-import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 
 interface StartMigrationModalProps {
+  /** Initial connector Id that should be selected */
   lastConnectorId?: RuleMigrationSettings['connectorId'];
+  /** initial value to be used for start migration settings */
   skipPrebuiltRulesMatching?: RuleMigrationSettings['skipPrebuiltRulesMatching'];
-  startMigrationWithSettings: (settings: RuleMigrationSettings) => void;
+  /** Callback to start the migrations with chosen settings */
+  onStartMigrationWithSettings: (settings: RuleMigrationSettings) => void;
+  /** Callback called when closing the modal */
   onClose: () => void;
+  /** List of available connectors to choose from */
   availableConnectors: ActionConnector[];
+  /** Number of rules that will be process in this migration */
   numberOfRules: number;
 }
 
@@ -53,15 +57,22 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     lastConnectorId,
     skipPrebuiltRulesMatching = false,
     onClose: closeModal,
-    startMigrationWithSettings,
+    onStartMigrationWithSettings: startMigrationWithSettings,
     numberOfRules = 0,
     availableConnectors = [],
   }) {
-    const spaceId = useSpaceId() ?? 'default';
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
-    const [siemMigrationsDefaultConnectorId] = useStoredAssistantConnectorId(spaceId);
-    const [selectedConnectorId, setSelectedConnectorId] = useState<string>(
-      lastConnectorId || siemMigrationsDefaultConnectorId || ''
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+      siemMigrations,
+    } = useKibana().services;
+
+    const siemMigrationsDefaultConnectorId = useMemo(
+      () => siemMigrations.rules.connectorIdStorage.get(),
+      [siemMigrations.rules.connectorIdStorage]
+    );
+
+    const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
+      lastConnectorId || siemMigrationsDefaultConnectorId || availableConnectors[0]?.id
     );
     const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
       !skipPrebuiltRulesMatching
@@ -92,6 +103,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
     }, [actionTypeRegistry, availableConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+
     const { onClick: onClickSetupAIConnector, href: setupAIConnectorLink } =
       getSecuritySolutionLinkProps({
         deepLinkId: SecurityPageName.landing,
@@ -99,6 +111,9 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
       });
 
     const onStartMigrationWithSettings = useCallback(() => {
+      if (!selectedConnectorId) {
+        return;
+      }
       startMigrationWithSettings({
         connectorId: selectedConnectorId,
         skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
@@ -134,12 +149,14 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                 }}
               />
             }
+            isInvalid={!selectedConnectorId}
           >
             <EuiSuperSelect
               options={selectOptions}
               valueOfSelected={selectedConnectorId}
               onChange={setSelectedConnectorId}
               data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
+              isInvalid={!selectedConnectorId}
             />
           </EuiFormRow>
           <EuiFormRow>

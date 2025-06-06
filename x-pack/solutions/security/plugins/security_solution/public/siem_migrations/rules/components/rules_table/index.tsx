@@ -336,8 +336,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             lastConnectorId={migrationStats?.last_execution?.connector_id}
             skipPrebuiltRulesMatching={migrationStats?.last_execution?.skip_prebuilt_rules_matching}
             onClose={closeModal}
-            startMigrationWithSettings={startMigrationWithSettings}
-            numberOfRules={translationStats?.rules.total ?? 0}
+            onStartMigrationWithSettings={startMigrationWithSettings}
+            numberOfRules={translationStats?.rules.failed ?? 0}
           />
         )}
 

@@ -44,7 +44,7 @@ const availableConnectorsMock: AIConnector[] = [
 const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigrationModal>> = {}) => {
   const finalProps = {
     availableConnectors: availableConnectorsMock,
-    startMigrationWithSettings: startMigrationWithSettingsMock,
+    onStartMigrationWithSettings: startMigrationWithSettingsMock,
     onClose: onCloseMock,
     lastConnectorId: 'connector-1',
     numberOfRules: 10,
@@ -57,9 +57,18 @@ const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigration
     </IntlProvider>
   );
 };
+const siemMigrationsServiceMock = {
+  rules: {
+    connectorIdStorage: {
+      get: jest.fn(),
+    },
+  },
+};
 
 describe('StartMigrationModal', () => {
   beforeEach(() => {
+    siemMigrationsServiceMock.rules.connectorIdStorage.get.mockReturnValue('connector-2');
+
     useKibanaMock.mockReturnValue({
       services: {
         triggersActionsUi: {
@@ -67,6 +76,7 @@ describe('StartMigrationModal', () => {
             get: jest.fn().mockReturnValue('Mock Action Type'),
           },
         },
+        siemMigrations: siemMigrationsServiceMock,
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -162,5 +172,27 @@ describe('StartMigrationModal', () => {
     });
 
     expect(onCloseMock).toHaveBeenCalled();
+  });
+
+  it('should show the first connector if no lastConnectorId and no stored connector', () => {
+    siemMigrationsServiceMock.rules.connectorIdStorage.get.mockReturnValue(undefined);
+
+    renderTestComponent({
+      lastConnectorId: undefined,
+    });
+
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
+      'Connector 1'
+    );
+  });
+
+  it('should show the stored connector if no lastConnectorId is provided', () => {
+    renderTestComponent({
+      lastConnectorId: undefined,
+    });
+
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
+      'Connector 2'
+    );
   });
 });

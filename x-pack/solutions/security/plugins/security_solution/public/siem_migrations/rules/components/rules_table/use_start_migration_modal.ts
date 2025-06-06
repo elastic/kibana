@@ -15,6 +15,10 @@ interface UseStartMigrationModal {
   migrationId: string;
 }
 
+/**
+ * Accompanying hook for the StartMigrationModal component.
+ * Helps manage the visibility and actions related to modal.
+ */
 export const useStartMigrationModal = ({ migrationId, startMigration }: UseStartMigrationModal) => {
   const [isVisible, setIsVisible] = useState(false);
 
