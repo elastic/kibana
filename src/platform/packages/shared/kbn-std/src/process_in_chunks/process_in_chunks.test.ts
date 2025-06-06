@@ -57,4 +57,14 @@ describe('processInChunks', () => {
     expect(res).toEqual(expected);
     expect(spyChunkExecutor).toHaveBeenCalledTimes(expectedChunks);
   });
+
+  it('should handle empty array input', async () => {
+    const input: string[] = [];
+    const expected: string[] = [];
+
+    const res = await processInChunks(input, spyChunkExecutor);
+
+    expect(res).toEqual(expected);
+    expect(spyChunkExecutor).toHaveBeenCalledTimes(1);
+  });
 });

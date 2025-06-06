@@ -30,7 +30,7 @@ export const processInChunks = async <TResult>(
 ): Promise<TResult> => {
   const { chunkSize } = options;
 
-  const chunks = createChunks(list, chunkSize);
+  const chunks = bytePartition(list, chunkSize);
 
   const chunkResults = await Promise.all(chunks.map(chunkExecutor));
 
@@ -45,7 +45,11 @@ export const processInChunks = async <TResult>(
  * Creates chunks from a list of strings, where each chunk contains as many items
  * as possible without exceeding the specified chunk size limit.
  */
-const createChunks = (list: string[], chunkSize: number): string[][] => {
+const bytePartition = (list: string[], chunkSize: number): string[][] => {
+  if (list.length === 0) {
+    return [[]];
+  }
+
   const chunks: string[][] = [];
   let currentChunk: string[] = [];
   let currentChunkLength = 0;
