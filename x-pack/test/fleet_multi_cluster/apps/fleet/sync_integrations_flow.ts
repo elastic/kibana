@@ -4,128 +4,191 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import axios from 'axios';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  // const pageObjects = getPageObjects([
-  // 'common',
-  // 'remoteClusters',
-  // 'indexManagement',
-  // 'crossClusterReplication',
-  //   'fleetSettingsPage',
-  // ]);
+interface IntegrationPackage {
+  name: string;
+  version: string;
+}
+
+export default ({ getService }: FtrProviderContext) => {
   const security = getService('security');
   const retry = getService('retry');
-  // const testSubjects = getService('testSubjects');
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
   const supertest = getService('supertest');
 
-  describe('Fleet Multi Cluster Sync Integrations', function () {
-    // const leaderName = 'my-index';
-    // const followerName = 'my-follower';
+  describe('Fleet Multi Cluster Sync Integrations E2E', function () {
     before(async () => {
       await security.testUser.setRoles(['superuser']);
-      // This test is temporarily using superuser because of an issue with the permissions
-      // of the follower index creation wizard. There is an open issue to address the issue.
-      // We can change the permissions to use follower_index_user once the issue is fixed.
-      // https://github.com/elastic/kibana/issues/143720
-      // await security.testUser.setRoles(['follower_index_user']);
     });
 
-    describe('Sync integrations', function () {
-      before(async () => {
-        // await pageObjects.fleetSettingsPage.navigateToSettingsPage();
+    const installPackage = ({ name, version }: IntegrationPackage) => {
+      return supertest
+        .post(`/api/fleet/epm/packages/${name}/${version}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true });
+    };
+
+    async function createRemoteServiceToken(): Promise<string> {
+      const { token } = await remoteEs.security.createServiceToken({
+        namespace: 'elastic',
+        service: 'fleet-server-remote',
       });
+      return token.value;
+    }
 
-      it('should add Remote ES output with sync integrations', async () => {
-        // await pageObjects.fleetSettingsPage.addRemoteESOutput();
-
-        const { token } = await remoteEs.security.createServiceToken({
-          namespace: 'elastic',
-          service: 'fleet-server-remote',
-        });
-
-        const apiKeyResp = await remoteEs.security.createApiKey({
-          name: 'integration_sync_api_key',
-          role_descriptors: {
-            integration_writer: {
-              cluster: [],
-              indices: [],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_fleet.read', 'feature_fleetv2.read'],
-                  resources: ['*'],
-                },
-              ],
-            },
+    async function createRemoteAPIKey(): Promise<string> {
+      const apiKeyResp = await remoteEs.security.createApiKey({
+        name: 'integration_sync_api_key',
+        role_descriptors: {
+          integration_writer: {
+            cluster: [],
+            indices: [],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_fleet.read', 'feature_fleetv2.read'],
+                resources: ['*'],
+              },
+            ],
           },
-        });
+        },
+      });
+      return apiKeyResp.encoded;
+    }
 
-        await supertest
-          .post('/api/fleet/outputs')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            id: 'remote-elasticsearch1',
-            name: 'Remote ES Output',
-            type: 'remote_elasticsearch',
-            hosts: ['http://localhost:9221'],
-            kibana_api_key: apiKeyResp.encoded,
-            kibana_url: 'http://localhost:5601/julia',
-            sync_integrations: true,
-            sync_uninstalled_integrations: true,
-            secrets: {
-              service_token: token.value,
-            },
-          })
-          .expect(200);
+    async function createRemoteOutput() {
+      await supertest
+        .post('/api/fleet/outputs')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'remote-elasticsearch1',
+          name: 'Remote ES Output',
+          type: 'remote_elasticsearch',
+          hosts: ['http://localhost:9221'],
+          kibana_api_key: await createRemoteAPIKey(),
+          kibana_url: 'http://localhost:5621',
+          sync_integrations: true,
+          sync_uninstalled_integrations: true,
+          secrets: {
+            service_token: await createRemoteServiceToken(),
+          },
+        })
+        .expect(200);
+    }
 
-        let resp = await remoteEs.cluster.putSettings({
-          persistent: {
-            cluster: {
-              remote: {
-                local: {
-                  seeds: ['localhost:9300'],
-                },
+    async function createLocalOutputOnRemote() {
+      const response = await axios.post(
+        'http://localhost:5621/api/fleet/outputs',
+        {
+          id: 'es',
+          type: 'elasticsearch',
+          name: 'Local ES Output',
+          hosts: ['http://localhost:9221'],
+        },
+        {
+          auth: { username: 'elastic', password: 'changeme' },
+          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
+        }
+      );
+      expect(response.status).to.be(200);
+    }
+
+    async function addRemoteCluster() {
+      const resp = await remoteEs.cluster.putSettings({
+        persistent: {
+          cluster: {
+            remote: {
+              local: {
+                seeds: ['localhost:9300'],
               },
             },
           },
-        });
-        expect(resp.acknowledged).to.be(true);
+        },
+      });
+      expect(resp.acknowledged).to.be(true);
+    }
 
-        resp = await remoteEs.ccr.follow({
-          index: 'fleet-synced-integrations-ccr-local',
-          body: {
-            remote_cluster: 'local',
-            leader_index: 'fleet-synced-integrations',
-          },
-          wait_for_active_shards: '1',
-        });
-        expect(resp.follow_index_created).to.be(true);
+    async function createFollowerIndex() {
+      const resp = await remoteEs.ccr.follow({
+        index: 'fleet-synced-integrations-ccr-local',
+        body: {
+          remote_cluster: 'local',
+          leader_index: 'fleet-synced-integrations',
+        },
+        wait_for_active_shards: '1',
+      });
+      expect(resp.follow_index_created).to.be(true);
+    }
 
-        await retry.tryForTime(10000, async () => {
-          resp = await remoteEs.get({
-            id: 'fleet-synced-integrations',
-            index: 'fleet-synced-integrations-ccr-local',
-          });
-          expect(resp.found).to.be(true);
-        });
+    async function queryFollowerIndexDoc() {
+      const resp = await remoteEs.get({
+        id: 'fleet-synced-integrations',
+        index: 'fleet-synced-integrations-ccr-local',
+      });
+      expect(resp.found).to.be(true);
+    }
 
-        // TODO need remote kibana to let sync task run on remote
+    async function verifySyncIntegrationsStatus() {
+      const resp = await supertest
+        .get('/api/fleet/remote_synced_integrations/remote-elasticsearch1/remote_status')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      const respJson = JSON.parse(resp.text);
+      expect(
+        respJson.integrations.find((int: any) => int.package_name === 'nginx')?.sync_status
+      ).to.be('completed');
+    }
+
+    async function verifyPackageInstalledOnRemote() {
+      const resp = await remoteEs.get({
+        id: 'epm-packages:nginx',
+        index: '.kibana_ingest',
+      });
+      expect(resp.found).to.be(true);
+      expect(resp._source?.['epm-packages'].install_status).to.be('installed');
+    }
+
+    it('should sync integrations to remote cluster when enabled on remote ES output', async () => {
+      await installPackage({ name: 'nginx', version: '2.0.0' });
+
+      await createRemoteOutput();
+
+      await createLocalOutputOnRemote();
+
+      await addRemoteCluster();
+
+      await createFollowerIndex();
+
+      await retry.tryForTime(10000, async () => {
+        await queryFollowerIndexDoc();
       });
 
-      after(async () => {
-        // Clean up the remote output
-        await supertest
-          .delete('/api/fleet/outputs/remote-elasticsearch1')
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
+      // check nginx package is installed on remote
+      await retry.tryForTime(10000, async () => {
+        await verifySyncIntegrationsStatus();
+
+        await verifyPackageInstalledOnRemote();
       });
     });
 
     after(async () => {
+      // Clean up the remote output
+      await supertest
+        .delete('/api/fleet/outputs/remote-elasticsearch1')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      // Clean up the local output on remote
+      const response = await axios.delete('http://localhost:5621/api/fleet/outputs/es', {
+        auth: { username: 'elastic', password: 'changeme' },
+        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
+      });
+      expect(response.status).to.be(200);
+
       await localEs.indices.delete({
         index: 'fleet-synced-integrations',
       });

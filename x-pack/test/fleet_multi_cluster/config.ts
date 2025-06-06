@@ -7,10 +7,8 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
-import { pageObjects as functionalPageObjects } from '../functional/page_objects';
 import { RemoteEsArchiverProvider } from '../functional/services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from '../functional/services/remote_es/remote_es';
-import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -19,10 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    pageObjects: {
-      ...functionalPageObjects,
-      ...pageObjects,
-    },
     testFiles: [resolve(__dirname, './apps/fleet/sync_integrations_flow')],
     junit: {
       reportName: 'X-Pack Fleet Multi Cluster Tests',
