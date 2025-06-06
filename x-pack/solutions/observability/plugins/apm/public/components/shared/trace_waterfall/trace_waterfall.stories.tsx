@@ -28,6 +28,35 @@ const stories: Meta = {
 
 export default stories;
 
+export const ManyChildren: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: '1',
+          timestamp: '2025-05-21T18:50:00.660Z',
+          name: 'Root',
+          duration: 5000000,
+          serviceName: 'frontend',
+          traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          hasError: true,
+        },
+        ...Array(200)
+          .fill(0)
+          .map((_, index) => ({
+            id: `child-${index}`,
+            timestamp: `2025-05-21T18:50:00.${660 + index}Z`,
+            name: `Child ${index + 1}`,
+            duration: 1000000 + index * 1000,
+            parentId: '1',
+            serviceName: 'child-service',
+            traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+          })),
+      ]}
+    />
+  );
+};
+
 export const ExampleClockSkew: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
