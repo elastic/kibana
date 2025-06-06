@@ -110,40 +110,67 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                   // No need for i18n as we are using the enum value, we only need a space.
                   formattedComparator = 'NOT BETWEEN';
                 }
+
+                const displayObservedValue = () => {
+                  return (
+                    <EuiText size="s" key={`${threshold}-${criteriaIndex}`}>
+                      <h4>{`${
+                        fields[criteriaIndex]?.toUpperCase() ?? ''
+                      } ${formattedComparator} ${threshold}`}</h4>
+                    </EuiText>
+                  );
+                };
+
                 return (
                   <EuiText size="s" key={`${observedValue}-${criteriaIndex}`}>
-                    <EuiToolTip
-                      title={i18n.translate(
-                        'xpack.observability.alertFlyout.overviewTab.conditionCounterTitle',
-                        {
-                          defaultMessage: 'Condition {index}',
-                          values: {
-                            index: ruleCriteria.length > 1 ? `${' '}${criteriaIndex + 1}` : '',
-                          },
-                        }
-                      )}
-                      content={
-                        <EuiText size="s" key={`${threshold}-${criteriaIndex}`}>
-                          <h4>{`${
-                            fields[criteriaIndex].toUpperCase() ?? ''
-                          } ${formattedComparator} ${threshold}`}</h4>
-                        </EuiText>
-                      }
-                    >
-                      <a css={{ marginRight: '5px' }}>
-                        {i18n.translate(
-                          'xpack.observability.alertFlyout.overviewTab.conditionCounterLabel',
+                    {ruleCriteria.length > 1 && (
+                      <EuiToolTip
+                        title={i18n.translate(
+                          'xpack.observability.alertFlyout.overviewTab.multiConditionCounterTitle',
                           {
-                            defaultMessage: 'Condition{index}: ',
+                            defaultMessage: 'Condition {index}',
                             values: {
-                              index: ruleCriteria.length > 1 ? `${' '}${criteriaIndex + 1}` : '',
+                              index: criteriaIndex + 1,
                             },
                           }
                         )}
-                      </a>
-                    </EuiToolTip>
+                        content={displayObservedValue()}
+                      >
+                        <a css={{ marginRight: '5px' }}>
+                          {i18n.translate(
+                            'xpack.observability.alertFlyout.overviewTab.multiConditionCounterLabel',
+                            {
+                              defaultMessage: 'Condition {index}: ',
+                              values: {
+                                index: criteriaIndex + 1,
+                              },
+                            }
+                          )}
+                        </a>
+                      </EuiToolTip>
+                    )}
                     <h4 style={{ display: 'inline' }}>{observedValue}</h4>
                     <span>{pctAboveThreshold}</span>
+                    {ruleCriteria.length === 1 && (
+                      <EuiToolTip
+                        title={i18n.translate(
+                          'xpack.observability.alertFlyout.overviewTab.conditionCounterTitle',
+                          {
+                            defaultMessage: 'Condition',
+                          }
+                        )}
+                        content={displayObservedValue()}
+                      >
+                        <a css={{ marginLeft: '5px' }}>
+                          {i18n.translate(
+                            'xpack.observability.alertFlyout.overviewTab.conditionCounterLabel',
+                            {
+                              defaultMessage: 'View Condition',
+                            }
+                          )}
+                        </a>
+                      </EuiToolTip>
+                    )}
                   </EuiText>
                 );
               })}
