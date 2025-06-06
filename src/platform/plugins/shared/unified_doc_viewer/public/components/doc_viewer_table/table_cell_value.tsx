@@ -216,11 +216,10 @@ const componentStyles = {
     css({
       fontWeight: euiTheme.font.weight.bold,
     }),
-  docViewerValueTruncated: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      overflow: 'hidden',
-      maxHeight: DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT,
-    }),
+  docViewerValueTruncated: css({
+    overflow: 'hidden',
+    maxHeight: DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT,
+  }),
   collapseButtonWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: -euiTheme.size.xxs,
