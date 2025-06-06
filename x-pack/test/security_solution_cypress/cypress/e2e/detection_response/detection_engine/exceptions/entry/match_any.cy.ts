@@ -45,7 +45,6 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
         index: ['auditbeat-exceptions-*'],
         enabled: false,
         query: '*',
-        from: 'now-438300h',
       })
     ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     cy.get(RULE_STATUS).should('have.text', '—');

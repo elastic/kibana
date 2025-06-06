@@ -19,7 +19,7 @@ import apm from 'elastic-apm-node';
 import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
-import type { AgentlessApiResponse } from '../../../common/types';
+import type { AgentlessApiDeploymentResponse } from '../../../common/types';
 import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
@@ -143,7 +143,7 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios<AgentlessApiResponse>(requestConfig).catch(
+    const response = await axios<AgentlessApiDeploymentResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         this.catchAgentlessApiError(
           'create',

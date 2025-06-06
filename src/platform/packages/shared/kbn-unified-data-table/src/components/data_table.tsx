@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -93,13 +91,12 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
+  getActionsColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
-const THEME_DEFAULT = { darkMode: false };
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   // Allowing some additional rows to be rendered outside
   // the view minimizes pop-in when scrolling quickly
@@ -520,7 +517,6 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
@@ -686,7 +682,6 @@ export const UnifiedDataTable = ({
       getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
-      isDarkMode: darkMode,
       selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
@@ -696,7 +691,6 @@ export const UnifiedDataTable = ({
     }),
     [
       componentsTourSteps,
-      darkMode,
       dataView,
       isPlainRecord,
       isPaginationEnabled,
@@ -955,34 +949,32 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
-    const internalControlColumns = controlColumnIds
-      ? // reorder the default controls as per controlColumnIds
-        controlColumnIds.reduce((acc, id) => {
-          const controlColumn = defaultControlColumns.find((col) => col.id === id);
-          if (controlColumn) {
-            acc.push(controlColumn);
-          }
-          return acc;
-        }, [] as EuiDataGridControlColumn[])
-      : defaultControlColumns;
+    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+      rows: displayedRows,
+      canSetExpandedDoc,
+    });
 
-    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    const filteredLeadColumns = leadColumns.filter((column) =>
+      controlColumnIds.includes(column.id)
+    );
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadingColumns.unshift(colorIndicatorControlColumn);
+      filteredLeadColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (rowAdditionalLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+    const actionsColumn = getActionsColumn({
+      baseColumns: leadColumnsExtraContent,
+      rowAdditionalLeadingControls,
+      externalControlColumns,
+    });
+    if (actionsColumn) {
+      filteredLeadColumns.push(actionsColumn);
     }
 
-    return leadingColumns;
+    return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
     controlColumnIds,

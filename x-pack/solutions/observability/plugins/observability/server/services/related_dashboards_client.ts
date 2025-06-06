@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectsFindResult } from '@kbn/core/server';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
+import { isDashboardSection } from '@kbn/dashboard-plugin/common';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
-import type { Logger } from '@kbn/core/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { RelevantPanel, RelatedDashboard } from '@kbn/observability-schema';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { InvestigateAlertsClient } from './investigate_alerts_client';
+import type { RelatedDashboard, RelevantPanel } from '@kbn/observability-schema';
+import { v4 as uuidv4 } from 'uuid';
 import type { AlertData } from './alert_data';
+import type { InvestigateAlertsClient } from './investigate_alerts_client';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
-  private dashboardsById = new Map<string, Dashboard>();
+  public dashboardsById = new Map<string, Dashboard>();
   private alert: AlertData | null = null;
 
   constructor(
@@ -31,28 +31,32 @@ export class RelatedDashboardsClient {
     private alertId: string
   ) {}
 
+  setAlert(alert: AlertData) {
+    this.alert = alert;
+  }
+
   async fetchSuggestedDashboards(): Promise<{ suggestedDashboards: RelatedDashboard[] }> {
     const allRelatedDashboards = new Set<RelatedDashboard>();
     const relevantDashboardsById = new Map<string, RelatedDashboard>();
     const [alert] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
-      this.fetchAllDashboards(),
+      this.fetchFirst500Dashboards(),
     ]);
-    this.alert = alert;
+    this.setAlert(alert);
     if (!this.alert) {
-      return { suggestedDashboards: [] };
+      throw new Error(
+        `Alert with id ${this.alertId} not found. Could not fetch related dashboards.`
+      );
     }
     const index = await this.getRuleQueryIndex();
-    const relevantRuleFields = this.alert.getRelevantRuleFields();
-    const relevantAlertFields = this.alert.getRelevantAADFields();
-    const allRelevantFields = new Set([...relevantRuleFields, ...relevantAlertFields]);
+    const allRelevantFields = this.alert.getAllRelevantFields();
 
     if (index) {
       const { dashboards } = this.getDashboardsByIndex(index);
       dashboards.forEach((dashboard) => allRelatedDashboards.add(dashboard));
     }
-    if (allRelevantFields.size > 0) {
-      const { dashboards } = this.getDashboardsByField(Array.from(allRelevantFields));
+    if (allRelevantFields.length > 0) {
+      const { dashboards } = this.getDashboardsByField(allRelevantFields);
       dashboards.forEach((dashboard) => allRelatedDashboards.add(dashboard));
     }
     allRelatedDashboards.forEach((dashboard) => {
@@ -69,13 +73,24 @@ export class RelatedDashboardsClient {
         },
         relevantPanelCount,
         relevantPanels: dedupedPanels,
+        score: this.getScore(dashboard),
       });
     });
-    return { suggestedDashboards: Array.from(relevantDashboardsById.values()) };
+    const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
+      return b.score - a.score;
+    });
+    return { suggestedDashboards: sortedDashboards.slice(0, 10) };
   }
 
-  async fetchDashboards(page: number) {
-    const perPage = 1000;
+  async fetchDashboards({
+    page,
+    perPage = 20,
+    limit,
+  }: {
+    page: number;
+    perPage?: number;
+    limit?: number;
+  }) {
     const dashboards = await this.dashboardClient.search(
       { limit: perPage, cursor: `${page}` },
       { spaces: ['*'] }
@@ -91,11 +106,14 @@ export class RelatedDashboardsClient {
     if (dashboards.result.pagination.total <= fetchedUntil) {
       return;
     }
-    await this.fetchDashboards(page + 1);
+    if (limit && fetchedUntil >= limit) {
+      return;
+    }
+    await this.fetchDashboards({ page: page + 1, perPage, limit });
   }
 
-  async fetchAllDashboards() {
-    await this.fetchDashboards(1);
+  async fetchFirst500Dashboards() {
+    await this.fetchDashboards({ page: 1, perPage: 500, limit: 500 });
   }
 
   getDashboardsByIndex(index: string): {
@@ -123,6 +141,7 @@ export class RelatedDashboardsClient {
             },
             matchedBy: { index: [index] },
           })),
+          score: 0, // scores are computed when dashboards are deduplicated
         });
       }
     });
@@ -171,25 +190,28 @@ export class RelatedDashboardsClient {
             },
             matchedBy: { fields: Array.from(p.matchingFields) },
           })),
+          score: 0, // scores are computed when dashboards are deduplicated
         });
       }
     });
     return { dashboards: relevantDashboards };
   }
 
-  getPanelsByIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
+  getPanelsByIndex(index: string, panels: DashboardAttributes['panels']): DashboardPanel[] {
     const panelsByIndex = panels.filter((p) => {
+      if (isDashboardSection(p)) return false; // filter out sections
       const panelIndices = this.getPanelIndices(p);
       return panelIndices.has(index);
-    });
+    }) as DashboardPanel[]; // filtering with type guard doesn't actually limit type, so need to cast
     return panelsByIndex;
   }
 
   getPanelsByField(
     fields: string[],
-    panels: DashboardPanel[]
+    panels: DashboardAttributes['panels']
   ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
     const panelsByField = panels.reduce((acc, p) => {
+      if (isDashboardSection(p)) return acc; // filter out sections
       const panelFields = this.getPanelFields(p);
       const matchingFields = fields.filter((f) => panelFields.has(f));
       if (matchingFields.length) {
@@ -227,12 +249,12 @@ export class RelatedDashboardsClient {
     }
   }
 
-  async getRuleQueryIndex(): Promise<string> {
+  getRuleQueryIndex(): string | null {
     if (!this.alert) {
       throw new Error('Alert not found. Could not get the rule query index.');
     }
     const index = this.alert.getRuleQueryIndex();
-    return typeof index === 'string' ? index : index.id || '';
+    return index;
   }
 
   getLensVizIndices(lensAttr: LensAttributes): Set<string> {
@@ -241,9 +263,6 @@ export class RelatedDashboardsClient {
         .filter((r) => r.name.match(`indexpattern`))
         .map((reference) => reference.id)
     );
-    if (indices.size === 0) {
-      throw new Error('No index patterns found in lens visualization');
-    }
     return indices;
   }
 
@@ -263,5 +282,33 @@ export class RelatedDashboardsClient {
       });
     });
     return fields;
+  }
+
+  getMatchingFields(dashboard: RelatedDashboard): string[] {
+    const matchingFields = new Set<string>();
+    // grab all the top level arrays from the matchedBy object via Object.values
+    Object.values(dashboard.matchedBy).forEach((match) => {
+      // add the values of each array to the matchingFields set
+      match.forEach((value) => {
+        matchingFields.add(value);
+      });
+    });
+    return Array.from(matchingFields);
+  }
+
+  getScore(dashboard: RelatedDashboard): number {
+    if (!this.alert) {
+      throw new Error(
+        `Alert with id ${this.alertId} not found. Could not compute the relevance score for suggested dashboard.`
+      );
+    }
+    const allRelevantFields = this.alert.getAllRelevantFields();
+    const index = this.getRuleQueryIndex();
+    const setA = new Set<string>([...allRelevantFields, ...(index ? [index] : [])]);
+    const setB = new Set<string>(this.getMatchingFields(dashboard));
+    const intersection = new Set([...setA].filter((item) => setB.has(item)));
+    const union = new Set([...setA, ...setB]);
+
+    return intersection.size / union.size;
   }
 }

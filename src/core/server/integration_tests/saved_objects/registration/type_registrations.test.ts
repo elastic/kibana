@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -38,6 +38,7 @@ const previouslyRegisteredTypes = [
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -55,6 +56,7 @@ const previouslyRegisteredTypes = [
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
   'entity-definition',
   'entity-discovery-api-key',
   'epm-packages',
@@ -85,6 +87,8 @@ const previouslyRegisteredTypes = [
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',

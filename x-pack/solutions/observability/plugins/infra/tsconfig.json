@@ -84,8 +84,6 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
-    "@kbn/management-settings-components-field-row",
-    "@kbn/core-ui-settings-browser",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
@@ -120,7 +118,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/coloring"
   ],
   "exclude": ["target/**/*"]
 }
