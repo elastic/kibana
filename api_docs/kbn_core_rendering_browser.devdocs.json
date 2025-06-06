@@ -21,7 +21,54 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.RenderingService",
+        "type": "Interface",
+        "tags": [],
+        "label": "RenderingService",
+        "description": [],
+        "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-browser",
+            "id": "def-public.RenderingService.addContext",
+            "type": "Function",
+            "tags": [],
+            "label": "addContext",
+            "description": [],
+            "signature": [
+              "(element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-rendering-browser",
+                "id": "def-public.RenderingService.addContext.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Mappings } from '@kbn/observability-plugin/server';
 import { createOrUpdateIndex } from '@kbn/observability-plugin/server';
-import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/apm_system_index_constants';
+import { APM_CUSTOM_LINK_INDEX } from '@kbn/apm-sources-access-plugin/server';
 
 export const createApmCustomLinkIndex = async ({
   client,

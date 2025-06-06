@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TestProviders } from '../../../../common/mock';
 import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
@@ -31,7 +32,6 @@ jest.mock('../../../../common/components/link_to');
 
 describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
-  const mount = useMountAppended();
 
   const defaultProps = {
     data: mockData.edges,
@@ -48,105 +48,110 @@ describe('Uncommon Process Table Component', () => {
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
-      const wrapper = shallow(
+      render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('UncommonProcessTable')).toMatchSnapshot();
+      expect(screen.getByTestId('table-uncommonProcesses-loading-false')).toMatchSnapshot();
     });
 
     test('it has a double dash (empty value) without any hosts at all', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
-      expect(wrapper.find('tr.euiTableRow').at(0).find('td.euiTableRowCell').at(3).text()).toBe(
-        `${getEmptyValue()}`
-      );
+      expect(
+        container.querySelector('tr.euiTableRow:first-child td.euiTableRowCell:nth-child(4)')
+          ?.textContent
+      ).toBe(`${getEmptyValue()}`);
     });
 
     test('it has a single host without any extra comma when the number of hosts is exactly 1', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('tr.euiTableRow').at(1).find('td.euiTableRowCell').at(3).text()).toBe(
-        'hello-world '
-      );
+      expect(
+        container.querySelector('tr.euiTableRow:nth-child(2) td.euiTableRowCell:nth-child(4)')
+          ?.textContent
+      ).toBe('hello-world ');
     });
 
     test('it has a single link when the number of hosts is exactly 1', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
       expect(
-        wrapper.find('tr.euiTableRow').at(1).find('td.euiTableRowCell').at(3).find('a').length
-      ).toBe(1);
+        container.querySelectorAll('tr.euiTableRow:nth-child(2) td.euiTableRowCell:nth-child(4) a')
+      ).toHaveLength(1);
     });
 
     test('it has a comma separated list of hosts when the number of hosts is greater than 1', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('tr.euiTableRow').at(2).find('td.euiTableRowCell').at(3).text()).toBe(
-        'hello-worldhello-world-2 '
-      );
+      expect(
+        container.querySelector('tr.euiTableRow:nth-child(3) td.euiTableRowCell:nth-child(4)')
+          ?.textContent
+      ).toBe('hello-worldhello-world-2 ');
     });
 
     test('it has 2 links when the number of hosts is equal to 2', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
 
       expect(
-        wrapper.find('tr.euiTableRow').at(2).find('td.euiTableRowCell').at(3).find('a').length
-      ).toBe(2);
+        container.querySelectorAll('tr.euiTableRow:nth-child(3) td.euiTableRowCell:nth-child(4) a')
+      ).toHaveLength(2);
     });
 
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <UncommonProcessTable {...defaultProps} />
-        </TestProviders>
-      );
-      expect(wrapper.find('tr.euiTableRow').at(3).find('td.euiTableRowCell').at(3).text()).toBe(
-        `${getEmptyValue()}`
-      );
-    });
-
-    test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
       expect(
-        wrapper.find('tr.euiTableRow').at(3).find('td.euiTableRowCell').at(3).find('a').length
-      ).toBe(0);
+        container.querySelector('tr.euiTableRow:nth-child(4) td.euiTableRowCell:nth-child(4)')
+          ?.textContent
+      ).toBe(`${getEmptyValue()}`);
     });
 
-    test('it is returns two hosts when others are invalid because they do not contain an id and a name', () => {
-      const wrapper = mount(
+    test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
+      const { container } = render(
         <TestProviders>
           <UncommonProcessTable {...defaultProps} />
         </TestProviders>
       );
-      expect(wrapper.find('tr.euiTableRow').at(4).find('td.euiTableRowCell').at(3).text()).toBe(
-        'hello-worldhello-world-2 '
+      expect(
+        container.querySelectorAll('tr.euiTableRow:nth-child(4) td.euiTableRowCell:nth-child(4) a')
+      ).toHaveLength(0);
+    });
+
+    test('it is returns two hosts when others are invalid because they do not contain an id and a name', () => {
+      const { container } = render(
+        <TestProviders>
+          <UncommonProcessTable {...defaultProps} />
+        </TestProviders>
       );
+      expect(
+        container.querySelector('tr.euiTableRow:nth-child(5) td.euiTableRowCell:nth-child(4)')
+          ?.textContent
+      ).toBe('hello-worldhello-world-2 ');
     });
   });
 });

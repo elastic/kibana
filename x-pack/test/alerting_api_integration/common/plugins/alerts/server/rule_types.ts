@@ -306,7 +306,7 @@ function getExceedsAlertLimitRuleType() {
         limit = services.alertFactory.alertLimit.getValue();
       }
 
-      const alertsToCreate = limit ? limit : 25;
+      const alertsToCreate = limit ? limit : 115;
 
       range(alertsToCreate)
         .map(() => uuidv4())
@@ -808,11 +808,34 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     isExportable: true,
     ruleTaskTimeout: '3s',
     cancelAlertsOnRuleTimeout,
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.patternfiring',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          patternIndex: {
+            required: false,
+            type: 'long',
+          },
+          instancePattern: {
+            required: false,
+            type: 'boolean',
+            array: true,
+          },
+        },
+      },
+    },
     async executor(ruleExecutorOptions) {
       const { services, params } = ruleExecutorOptions;
       const pattern = params.pattern;
       if (!Array.isArray(pattern)) {
         throw new Error(`pattern is not an array`);
+      }
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) {
+        throw new Error(`Expected alertsClient to be defined but it is not`);
       }
 
       // get the pattern index, return if past it
@@ -821,7 +844,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return { state: {} };
       }
 
-      services.alertFactory.create('alert').scheduleActions('default', {});
+      alertsClient.report({ id: `alert_${globalPatternIndex}`, actionGroup: 'default' });
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {
@@ -948,6 +971,79 @@ function getAlwaysFiringAlertAsDataRuleType() {
         fieldMap: {},
       },
       useLegacyAlerts: true,
+      shouldWrite: true,
+    },
+  };
+  return result;
+}
+
+function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
+  const paramsSchema = schema.object({
+    dynamic_fields: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    RuleTypeState,
+    {},
+    {},
+    'default',
+    'recovered',
+    { 'kibana.alert.dynamic': { [key: string]: any } }
+  > = {
+    id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+    name: 'Test: Rule with dynamicTemplates and writing Alerts as Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'management',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: {
+      params: paramsSchema,
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+
+      services.alertsClient?.report({
+        id: '1',
+        actionGroup: 'default',
+        payload: { 'kibana.alert.dynamic': params.dynamic_fields },
+      });
+
+      return { state: {} };
+    },
+    alerts: {
+      context: 'observability.test.alerts.dynamic.templates',
+      mappings: {
+        dynamic: false,
+        fieldMap: {
+          ['kibana.alert.dynamic']: {
+            type: 'object',
+            dynamic: true,
+            array: false,
+            required: false,
+          },
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.dynamic.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
+      useLegacyAlerts: false,
+      useEcs: false,
       shouldWrite: true,
     },
   };
@@ -1181,6 +1277,40 @@ export function defineRuleTypes(
       params: schema.any(),
     },
   };
+  const artifactsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifacts',
+    name: 'Test: Artifacts',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
+  const artifactsAndActionsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifactsAndActions',
+    name: 'Test: Artifacts and Actions',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
   const goldNoopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
@@ -1380,6 +1510,8 @@ export function defineRuleTypes(
   alerting.registerType(getValidationRuleType());
   alerting.registerType(getAuthorizationRuleType(core));
   alerting.registerType(noopRuleType);
+  alerting.registerType(artifactsRuleType);
+  alerting.registerType(artifactsAndActionsRuleType);
   alerting.registerType(onlyContextVariablesRuleType);
   alerting.registerType(onlyStateVariablesRuleType);
   alerting.registerType(getPatternFiringRuleType());
@@ -1394,6 +1526,7 @@ export function defineRuleTypes(
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType());
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));

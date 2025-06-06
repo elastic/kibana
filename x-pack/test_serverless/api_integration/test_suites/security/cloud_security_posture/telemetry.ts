@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { data as telemetryMockData } from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
-import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { data as telemetryMockData } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/telemetry/data';
+import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
 import {
   waitForPluginInitialized,
   EsIndexDataProvider,
-} from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+} from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
+import { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 

@@ -8,7 +8,7 @@
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -20,7 +20,7 @@ export interface SLORepository {
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
-  deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
+  deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search(
     search: string,
     pagination: Pagination,
@@ -79,7 +79,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return slo;
   }
 
-  async deleteById(id: string, ignoreNotFound = false): Promise<void> {
+  async deleteById(id: string, { ignoreNotFound = false }): Promise<void> {
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: 1,
@@ -116,9 +116,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     search: string,
     pagination: Pagination,
     options: {
-      includeOutdatedOnly: boolean;
+      includeOutdatedOnly?: boolean;
       tags: string[];
-    } = { includeOutdatedOnly: false, tags: [] }
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
     const { includeOutdatedOnly, tags } = options;
     const filter = [];

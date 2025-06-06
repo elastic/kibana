@@ -118,3 +118,76 @@ export const scheduleRequestSchema = schema.object(
     validate: validateScheduleV1,
   }
 );
+
+// The response schema has the same fields but without validation
+export const scheduleResponseSchema = schema.object({
+  start: schema.string({
+    meta: {
+      description:
+        'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.',
+    },
+  }),
+  duration: schema.string({
+    meta: {
+      description:
+        'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.',
+    },
+  }),
+  timezone: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The timezone of the schedule. The default timezone is UTC.',
+      },
+    })
+  ),
+  recurring: schema.maybe(
+    schema.object({
+      end: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.',
+          },
+        })
+      ),
+      every: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.',
+          },
+        })
+      ),
+      onWeekDay: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: {
+            description:
+              'The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.',
+          },
+        })
+      ),
+      onMonthDay: schema.maybe(
+        schema.arrayOf(schema.number(), {
+          meta: {
+            description:
+              'The specific days of the month for a recurring schedule. Valid values are 1-31.',
+          },
+        })
+      ),
+      onMonth: schema.maybe(
+        schema.arrayOf(schema.number(), {
+          meta: {
+            description: 'The specific months for a recurring schedule. Valid values are 1-12.',
+          },
+        })
+      ),
+      occurrences: schema.maybe(
+        schema.number({
+          meta: {
+            description: 'The total number of recurrences of the schedule.',
+          },
+        })
+      ),
+    })
+  ),
+});

@@ -31,8 +31,6 @@ import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
-import { registerLegacyImportRoute } from './legacy_import_export/import';
-import { registerLegacyExportRoute } from './legacy_import_export/export';
 import { registerBulkResolveRoute } from './bulk_resolve';
 import { registerDeleteUnknownTypesRoute } from './deprecations';
 
@@ -66,14 +64,6 @@ export function registerRoutes({
     severity: 'warning' as const, // will not break deployment upon upgrade
     reason: {
       type: 'deprecate' as const,
-    },
-  };
-
-  const legacyDeprecationInfo = {
-    documentationUrl: `${docLinks.links.kibana.dashboardImportExport}`,
-    severity: 'warning' as const, // will not break deployment upon upgrade
-    reason: {
-      type: 'remove' as const, // no alternative for posting `.json`, requires file format change to `.ndjson`
     },
   };
 
@@ -158,22 +148,6 @@ export function registerRoutes({
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
-
-  const legacyRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>('');
-  registerLegacyImportRoute(legacyRouter, {
-    maxImportPayloadBytes: config.maxImportPayloadBytes,
-    coreUsageData,
-    logger,
-    access: internalOnServerless,
-    legacyDeprecationInfo,
-  });
-  registerLegacyExportRoute(legacyRouter, {
-    kibanaVersion,
-    coreUsageData,
-    logger,
-    access: internalOnServerless,
-    legacyDeprecationInfo,
-  });
 
   const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
     '/internal/saved_objects/'

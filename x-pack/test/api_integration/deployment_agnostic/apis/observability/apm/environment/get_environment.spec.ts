@@ -104,10 +104,10 @@ export default function environmentsAPITests({ getService }: DeploymentAgnosticF
         expect(body.environments.length).to.be.equal(4);
         expectSnapshot(body.environments).toMatchInline(`
             Array [
+              "custom-go-environment",
               "development",
               "production",
               "staging",
-              "custom-go-environment",
             ]
           `);
       });

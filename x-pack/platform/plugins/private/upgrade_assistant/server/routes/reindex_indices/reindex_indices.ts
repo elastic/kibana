@@ -113,7 +113,8 @@ export function registerReindexIndicesRoutes(
       const asCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser
+        asCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
@@ -126,7 +127,8 @@ export function registerReindexIndicesRoutes(
           : [];
 
         const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
-        const { aliases, settings, isInDataStream } = await reindexService.getIndexInfo(indexName);
+        const { aliases, settings, isInDataStream, isFollowerIndex } =
+          await reindexService.getIndexInfo(indexName);
 
         const body: ReindexStatusResponse = {
           reindexOp: reindexOp ? reindexOp.attributes : undefined,
@@ -139,6 +141,7 @@ export function registerReindexIndicesRoutes(
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),
             isInDataStream,
+            isFollowerIndex,
           },
         };
 
@@ -184,7 +187,8 @@ export function registerReindexIndicesRoutes(
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser
+        callAsCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(
         callAsCurrentUser,

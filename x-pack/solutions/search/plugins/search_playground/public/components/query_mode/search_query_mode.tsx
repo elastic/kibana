@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { css } from '@emotion/react';
+import { useController } from 'react-hook-form';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,15 +22,41 @@ import { ElasticsearchQueryViewer } from './query_viewer';
 import { ElasticsearchQueryOutput } from './query_output';
 import { QuerySidePanel } from './query_side_panel';
 import { useElasticsearchQuery } from '../../hooks/use_elasticsearch_query';
-import { FullHeight, QueryViewContainer, QueryViewSidebarContainer } from './styles';
+import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
+import {
+  FullHeight,
+  QueryViewContainer,
+  QueryViewSidebarContainer,
+  PanelFillContainer,
+} from './styles';
+import { disableExecuteQuery } from '../../utils/user_query';
 
-export const SearchQueryMode: React.FC = () => {
+export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) => {
   const { euiTheme } = useEuiTheme();
   const usageTracker = useUsageTracker();
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.queryModeLoaded);
   }, [usageTracker]);
-  const { executeQuery, data, error, isError, fetchStatus } = useElasticsearchQuery();
+  const { executeQuery, data, error, isError, fetchStatus } = useElasticsearchQuery(pageMode);
+  const {
+    field: { value: searchQuery },
+  } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
+    name: PlaygroundFormFields.searchQuery,
+  });
+  const {
+    field: { value: question },
+  } = useController<PlaygroundForm, PlaygroundFormFields.question>({
+    name: PlaygroundFormFields.question,
+  });
+  const {
+    field: { value: userElasticsearchQueryValidations },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
+    name: PlaygroundFormFields.userElasticsearchQueryValidations,
+  });
+  const executeQueryDisabled = disableExecuteQuery(
+    userElasticsearchQueryValidations,
+    pageMode === PlaygroundPageMode.chat ? question : searchQuery
+  );
   const isLoading = fetchStatus !== 'idle';
 
   return (
@@ -40,19 +66,16 @@ export const SearchQueryMode: React.FC = () => {
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={6} css={QueryViewContainer(euiTheme)}>
-          <EuiPanel
-            paddingSize="none"
-            hasShadow={false}
-            css={css({
-              // This is needed to maintain the resizable container height when rendering output editor with larger content
-              height: '95%',
-            })}
-          >
+          <EuiPanel paddingSize="none" hasShadow={false} css={PanelFillContainer}>
             <EuiResizableContainer direction="vertical" css={FullHeight}>
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
                   <EuiResizablePanel initialSize={60} minSize="20%" tabIndex={0} paddingSize="none">
-                    <ElasticsearchQueryViewer executeQuery={executeQuery} isLoading={isLoading} />
+                    <ElasticsearchQueryViewer
+                      executeQuery={executeQuery}
+                      executeQueryDisabled={executeQueryDisabled}
+                      isLoading={isLoading}
+                    />
                   </EuiResizablePanel>
                   <EuiResizableButton accountForScrollbars="both" />
                   <EuiResizablePanel initialSize={40} minSize="25%" tabIndex={0} paddingSize="none">
@@ -69,7 +92,12 @@ export const SearchQueryMode: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3} className="eui-yScroll" css={QueryViewSidebarContainer(euiTheme)}>
-          <QuerySidePanel executeQuery={executeQuery} />
+          <QuerySidePanel
+            pageMode={pageMode}
+            executeQuery={executeQuery}
+            executeQueryDisabled={executeQueryDisabled}
+            isLoading={isLoading}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </PlaygroundBodySection>

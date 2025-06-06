@@ -240,9 +240,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
+          const currentTabId = stateContainer.getCurrentTab().id;
           const dataView = useObservable(
-            stateContainer.runtimeStateManager.currentDataView$,
-            stateContainer.runtimeStateManager.currentDataView$.getValue()
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
           );
 
           useEffect(() => {

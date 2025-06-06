@@ -88,7 +88,6 @@ export const createThreatSignals = async ({
     enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
-    lastLookBackDate: null,
     createdSignalsCount: 0,
     suppressedAlertsCount: 0,
     createdSignals: [],
@@ -277,7 +276,7 @@ export const createThreatSignals = async ({
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
         // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
-        const hasNegativeDateSort = sortIds?.some((val) => val < 0);
+        const hasNegativeDateSort = sortIds?.some((val) => Number(val) < 0);
 
         if (hasNegativeDateSort) {
           ruleExecutionLogger.debug(

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { OverviewNetworkStats } from '.';
 import { mockData } from './mock';
@@ -15,51 +15,47 @@ import { TestProviders } from '../../../common/mock/test_providers';
 describe('Overview Network Stat Data', () => {
   describe('rendering', () => {
     test('it renders the default OverviewNetworkStats', () => {
-      const wrapper = shallow(<OverviewNetworkStats data={mockData} loading={false} />);
-      expect(wrapper).toMatchSnapshot();
+      render(
+        <TestProviders>
+          <OverviewNetworkStats data={mockData} loading={false} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('overview-network-stats')).toMatchSnapshot();
     });
   });
   describe('loading', () => {
     test('it does NOT show loading indicator when loading is false', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <OverviewNetworkStats data={mockData} loading={false} />
         </TestProviders>
       );
 
       // click the accordion to expand it
-      wrapper.find('button').first().simulate('click');
-      wrapper.update();
+      fireEvent.click(container.querySelector('button')!);
 
       expect(
-        wrapper
-          .find('[data-test-subj="network-stat-auditbeatSocket"]')
-          .first()
-          .find('[data-test-subj="stat-value-loading-spinner"]')
-          .first()
-          .exists()
-      ).toBe(false);
+        within(screen.getByTestId('network-stat-auditbeatSocket')).queryByTestId(
+          'stat-value-loading-spinner'
+        )
+      ).not.toBeInTheDocument();
     });
 
     test('it shows the loading indicator when loading is true', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <OverviewNetworkStats data={mockData} loading={true} />
         </TestProviders>
       );
 
       // click the accordion to expand it
-      wrapper.find('button').first().simulate('click');
-      wrapper.update();
+      fireEvent.click(container.querySelector('button')!);
 
       expect(
-        wrapper
-          .find('[data-test-subj="network-stat-auditbeatSocket"]')
-          .first()
-          .find('[data-test-subj="stat-value-loading-spinner"]')
-          .first()
-          .exists()
-      ).toBe(true);
+        within(screen.getByTestId('network-stat-auditbeatSocket')).getByTestId(
+          'stat-value-loading-spinner'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

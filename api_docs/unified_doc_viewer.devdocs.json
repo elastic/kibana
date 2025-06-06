@@ -137,7 +137,7 @@
         "label": "UnifiedDocViewerLogsOverview",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
           " & { renderAIAssistant?: ((deps: ",
           {
@@ -149,7 +149,39 @@
           },
           ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
           "StreamsFeatureRenderDeps",
-          ") => JSX.Element) | undefined; } & React.RefAttributes<{}>>"
+          ") => JSX.Element) | undefined; } & React.RefAttributes<",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.LogsOverviewApi",
+            "text": "LogsOverviewApi"
+          },
+          ">, \"ref\"> & { ref?: ((instance: ",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.LogsOverviewApi",
+            "text": "LogsOverviewApi"
+          },
+          " | null) => void) | React.RefObject<",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.LogsOverviewApi",
+            "text": "LogsOverviewApi"
+          },
+          "> | null | undefined; }, \"ref\"> & React.RefAttributes<",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.LogsOverviewApi",
+            "text": "LogsOverviewApi"
+          },
+          ">>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
         "deprecated": false,
@@ -217,7 +249,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & React.RefAttributes<{}>>"
+          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
         "deprecated": false,
@@ -251,7 +283,7 @@
           "\nCustom react hook for querying a single doc in ElasticSearch"
         ],
         "signature": [
-          "({\n  id,\n  index,\n  dataView,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
+          "({\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
           "EsDocSearchProps",
           ") => [",
           {
@@ -280,7 +312,7 @@
             "id": "def-public.useEsDocSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  index,\n  dataView,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}",
+            "label": "{\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}",
             "description": [],
             "signature": [
               "EsDocSearchProps"
@@ -295,7 +327,54 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.LogsOverviewApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsOverviewApi",
+        "description": [],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.LogsOverviewApi.openAndScrollToSection",
+            "type": "Function",
+            "tags": [],
+            "label": "openAndScrollToSection",
+            "description": [],
+            "signature": [
+              "(section: \"stacktrace\" | \"quality_issues\") => void"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.LogsOverviewApi.openAndScrollToSection.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "section",
+                "description": [],
+                "signature": [
+                  "\"stacktrace\" | \"quality_issues\""
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

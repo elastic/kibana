@@ -36,6 +36,7 @@ import {
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
@@ -57,6 +58,8 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -139,6 +142,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -202,6 +206,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -230,9 +235,10 @@ export function XYChart({
     singleTable,
     annotations,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
-  const darkMode = chartsThemeService.useDarkMode();
+  const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
@@ -655,12 +661,16 @@ export function XYChart({
         ? getAccessorByDimension(dataLayers[0].xAccessor, table.columns)
         : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
-
     const context: BrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(isEsqlMode ? { timeFieldName: table.columns[xAxisColumnIndex].name } : {}),
+      ...(isEsqlMode
+        ? {
+            timeFieldName:
+              table.columns[xAxisColumnIndex].meta.sourceParams?.sourceField?.toString(),
+          }
+        : {}),
     };
     onSelectRange(context);
   };
@@ -747,6 +757,14 @@ export function XYChart({
     formatFactory
   );
 
+  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
+  const applicationQuery = data.query.queryString.getQuery();
+  const canCreateFilters =
+    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+  // ES|QL charts are allowed to create alert rules only in dashboards
+  const canCreateAlerts =
+    isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
+
   return (
     <>
       <GlobalXYChartStyles />
@@ -787,11 +805,14 @@ export function XYChart({
               actions={getTooltipActions(
                 dataLayers,
                 onClickMultiValue,
+                onCreateAlertRule,
                 fieldFormats,
                 formattedDatatables,
                 xAxisFormatter,
                 formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
+                isEsqlMode,
+                canCreateAlerts,
+                interactive && !args.detailedTooltip
               )}
               customTooltip={
                 args.detailedTooltip
@@ -873,7 +894,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive
+                interactive && canCreateFilters
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,

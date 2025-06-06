@@ -9,12 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { isEmpty } from 'lodash';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
+import { SchemaField } from '../../../schema_editor/types';
+import { getMappedSchemaFields } from './utils';
+import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
 export interface SimulationRunnerInput {
   streamName: string;
+  detectedFields?: SchemaField[];
   documents: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];
 }
@@ -30,6 +35,13 @@ export function createSimulationRunnerActor({
         body: {
           documents: input.documents,
           processing: input.processors.map(processorConverter.toSimulateDefinition),
+          detected_fields:
+            input.detectedFields && !isEmpty(input.detectedFields)
+              ? getMappedSchemaFields(input.detectedFields).map((field) => ({
+                  name: field.name,
+                  ...convertToFieldDefinitionConfig(field),
+                }))
+              : undefined,
         },
       },
     })

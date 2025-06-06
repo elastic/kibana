@@ -22,12 +22,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
   ]);
+  const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const browser = getService('browser');
+  const retry = getService('retry');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   let roleAuthc: RoleCredentials;
 
@@ -42,9 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       proxy = await createLlmProxy(log);
       await pageObjects.svlCommonPage.loginWithRole('admin');
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchPlayground',
-      });
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -57,9 +56,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       };
     });
+    beforeEach(async () => {
+      await svlSearchNavigation.navigateToSearchPlayground();
+    });
 
     after(async () => {
-      // await removeOpenAIConnector?.();
+      try {
+        await removeOpenAIConnector?.();
+      } catch {
+        // we can ignore  if this fails
+      }
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -84,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
         it('show success llm button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -188,19 +194,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
         });
 
-        it('show fields and code in view query', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
-        });
-
         it('show edit context', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.openChatMode();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
-            ['baz']
+            ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
           );
         });
 
         it('save selected fields between modes', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('show fields and code in view query', async () => {
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectViewQueryHasFields();
+        });
+
+        it('allows running the elasticsearch query', async () => {
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.setQueryModeQuestion('hello');
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectCanRunQuery();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectQueryModeResultsContains(
+            '"took":'
+          );
+        });
+
+        it('allows user to edit the elasticsearch query', async () => {
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          const newQuery = `{"query":{"multi_match":{"query":"{query}","fields":["baz"]}}}`;
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectCanEditElasticsearchQuery(
+            newQuery
+          );
+          await pageObjects.searchPlayground.PlaygroundQueryPage.resetElasticsearchQuery();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectQueryCodeToBe(
+            '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
+          );
         });
 
         it('loads a session from localstorage', async () => {
@@ -218,8 +247,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
           await pageObjects.searchPlayground.PlaygroundChatPage.updatePrompt("You're a doctor");
           await pageObjects.searchPlayground.PlaygroundChatPage.updateQuestion('i have back pain');
-          await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
-          await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+          // wait for session debounce before trying to load new session state.
+          await retry.try(
+            async () => {
+              await pageObjects.searchPlayground.session.expectInSession(
+                'prompt',
+                "You're a doctor"
+              );
+              await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+            },
+            undefined,
+            200
+          );
         });
 
         it('click on manage connector button', async () => {

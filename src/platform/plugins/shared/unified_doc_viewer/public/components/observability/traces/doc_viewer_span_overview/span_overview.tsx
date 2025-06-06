@@ -7,16 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  SERVICE_NAME_FIELD,
+  SPAN_DURATION_FIELD,
+  SPAN_ID_FIELD,
+  SPAN_NAME_FIELD,
+  TRACE_ID_FIELD,
+  TRANSACTION_ID_FIELD,
+  getSpanDocumentOverview,
+} from '@kbn/discover-utils';
+import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { TRANSACTION_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
+import React, { useMemo } from 'react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { Trace } from '../components/trace';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
-import { SpanSummary } from './sub_components/span_summary';
+import { SpanDurationSummary } from './sub_components/span_duration_summary';
+import { SpanSummaryField } from './sub_components/span_summary_field';
+import { SpanSummaryTitle } from './sub_components/span_summary_title';
+
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
 };
@@ -28,18 +41,26 @@ export function SpanOverview({
   onAddColumn,
   onRemoveColumn,
   transactionIndexPattern,
+  dataView,
 }: SpanOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const { fieldFormats } = getUnifiedDocViewerServices();
+  const { formattedDoc, flattenedDoc } = useMemo(
+    () => ({
+      formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
+      flattenedDoc: getFlattenedSpanDocumentOverview(hit),
+    }),
+    [dataView, fieldFormats, hit]
+  );
+  const fieldConfigurations = useMemo(
+    () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
+    [formattedDoc, flattenedDoc]
+  );
 
-  const detailTitle = i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
-    defaultMessage: 'Span detail',
-  });
+  const spanDuration = flattenedDoc[SPAN_DURATION_FIELD];
+  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
-    <TransactionProvider
-      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
-      indexPattern={transactionIndexPattern}
-    >
+    <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -48,21 +69,38 @@ export function SpanOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <EuiTitle size="s">
-            <h2>{detailTitle}</h2>
-          </EuiTitle>
+          <SpanSummaryTitle
+            spanName={flattenedDoc[SPAN_NAME_FIELD]}
+            formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
+            spanId={flattenedDoc[SPAN_ID_FIELD]}
+            formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
+          />
           <EuiSpacer size="m" />
-          {spanFields.map((fieldId) => {
-            const fieldConfiguration = getSpanFieldConfiguration(parsedDoc)[fieldId];
+          {spanFields.map((fieldId) => (
+            <SpanSummaryField
+              key={fieldId}
+              fieldId={fieldId}
+              fieldConfiguration={fieldConfigurations[fieldId]}
+            />
+          ))}
 
-            return (
-              <SpanSummary
-                key={fieldId}
-                fieldId={fieldId}
-                fieldConfiguration={fieldConfiguration}
+          {spanDuration && (
+            <>
+              <EuiSpacer size="m" />
+              <SpanDurationSummary
+                spanDuration={spanDuration}
+                spanName={formattedDoc[SPAN_NAME_FIELD]}
+                serviceName={formattedDoc[SERVICE_NAME_FIELD]}
               />
-            );
-          })}
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <Trace
+            fields={fieldConfigurations}
+            traceId={flattenedDoc[TRACE_ID_FIELD]}
+            docId={flattenedDoc[SPAN_ID_FIELD]}
+            displayType="span"
+          />
         </EuiPanel>
       </FieldActionsProvider>
     </TransactionProvider>

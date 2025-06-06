@@ -75,20 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.getEditorText()).to.be.empty();
     });
 
-    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
-      const expectedResponseContains = '"statusCode": 400';
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('OPTIONS /');
-      await PageObjects.console.clickPlay();
-      await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getOutputText();
-        log.debug(actualResponse);
-        expect(actualResponse).to.contain(expectedResponseContains);
-
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
-      });
-    });
-
     describe('tabs navigation', () => {
       let currentUrl: string;
 
@@ -282,6 +268,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualResponse = await PageObjects.console.getOutputText();
         log.debug(actualResponse);
         expect(actualResponse).to.contain('OK');
+      });
+    });
+
+    it('Shows error body if HTTP request to server fails', async () => {
+      await PageObjects.console.clearEditorText();
+
+      // This request will return 200 but with an empty body
+      await PageObjects.console.enterText(
+        'POST kbn:/api/alerting/rule/3603c386-9102-4c74-800d-2242e52bec98\n' +
+          '{\n' +
+          '  "name": "Alert on status change",\n' +
+          '  "rule_type_id": ".es-querya"\n' +
+          '}'
+      );
+      await PageObjects.console.clickPlay();
+
+      await retry.try(async () => {
+        const actualResponse = await PageObjects.console.getOutputText();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain('"statusCode": 400');
       });
     });
   });

@@ -14,10 +14,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
 import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlApi, useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import type { Dictionary } from '../../../../../common/types/common';
@@ -57,6 +56,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
     services: { charts: chartsService },
   } = useMlKibana();
   const mlApi = useMlApi();
+  const mlManagementLocator = useMlManagementLocator();
 
   const { displayErrorToast } = useToastNotificationService();
   const { showNodeInfo } = useEnabledFeatures();
@@ -68,8 +68,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
     TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
   >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
 
-  const manageJobsLink = useMlLink({
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  const manageJobsLink = mlManagementLocator?.useUrl({
+    sectionId: 'ml',
+    appId: 'anomaly_detection',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -181,6 +182,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
 
   return (
     <CollapsiblePanel
+      dataTestSubj={'mlAnomalyDetectionPanel'}
       isOpen={panelsState.adJobs}
       onToggle={(update) => {
         setPanelsState({ ...panelsState, adJobs: update });

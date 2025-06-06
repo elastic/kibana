@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { getChartHidden } from '@kbn/unified-histogram';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,

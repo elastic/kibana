@@ -21,6 +21,9 @@
     "actions.actionTypeId",
     "actions.group",
     "alertTypeId",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "consumer",
     "createdAt",
     "createdBy",
@@ -171,6 +174,7 @@
     "external_service.pushed_by.full_name",
     "external_service.pushed_by.profile_uid",
     "external_service.pushed_by.username",
+    "incremental_id",
     "observables",
     "observables.typeKey",
     "observables.value",
@@ -212,6 +216,11 @@
   ],
   "cases-connector-mappings": [
     "owner"
+  ],
+  "cases-incrementing-id": [
+    "@timestamp",
+    "last_id",
+    "updated_at"
   ],
   "cases-rules": [
     "counter",
@@ -282,6 +291,7 @@
     "refreshInterval.pause",
     "refreshInterval.section",
     "refreshInterval.value",
+    "sections",
     "timeFrom",
     "timeRestore",
     "timeTo",
@@ -299,6 +309,19 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-analytics-monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.fields",
+    "matchers.values",
+    "name",
+    "type"
+  ],
   "entity-definition": [
     "description",
     "filter",
@@ -743,6 +766,13 @@
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
+  "intercept_interaction_record": [],
+  "intercept_trigger_record": [
+    "firstRegisteredAt",
+    "installedOn",
+    "recurrent",
+    "triggerAfter"
+  ],
   "inventory-view": [],
   "kql-telemetry": [],
   "legacy-url-alias": [
@@ -811,6 +841,19 @@
     "job.job_id",
     "model_id"
   ],
+  "monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.fields",
+    "matchers.values",
+    "name",
+    "type"
+  ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
@@ -818,6 +861,13 @@
     "progress",
     "state",
     "type"
+  ],
+  "onechat_workflow": [
+    "access_control",
+    "access_control.public",
+    "categories",
+    "user_id",
+    "workflow_id"
   ],
   "osquery-manager-usage-metric": [
     "count",
@@ -873,6 +923,9 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "privilege-monitoring-status": [
+    "status"
+  ],
   "product-doc-install-status": [
     "index_name",
     "installation_status",
@@ -917,6 +970,9 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
   "security-ai-prompt": [
     "description",
     "model",
@@ -1168,6 +1224,38 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "workchat_agent": [
+    "access_control",
+    "access_control.public",
+    "agent_id",
+    "agent_name",
+    "configuration",
+    "description",
+    "last_updated",
+    "user_id",
+    "user_name"
+  ],
+  "workchat_conversation": [
+    "access_control",
+    "access_control.public",
+    "agent_id",
+    "conversation_id",
+    "events",
+    "last_updated",
+    "title",
+    "user_id",
+    "user_name"
+  ],
+  "workchat_integration": [
+    "configuration",
+    "created_at",
+    "created_by",
+    "description",
+    "integration_id",
+    "name",
+    "type",
+    "updated_at"
   ],
   "workplace_search_telemetry": []
 }

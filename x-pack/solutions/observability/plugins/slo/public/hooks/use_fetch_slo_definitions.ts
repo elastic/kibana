@@ -45,7 +45,7 @@ export function useFetchSloDefinitions({
           params: {
             query: {
               ...(search !== undefined && { search }),
-              ...(includeOutdatedOnly !== undefined && { includeOutdatedOnly }),
+              ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
               ...(validTags?.length && { tags: validTags }),
               ...(page !== undefined && { page: String(page) }),
               ...(perPage !== undefined && { perPage: String(perPage) }),

@@ -13,6 +13,7 @@ import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
 
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
@@ -126,17 +127,19 @@ describe('SavedObjectSaveModal', () => {
     const onSave = jest.fn();
 
     render(
-      <I18nProvider>
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => void 0}
-          title={'Saved Object title'}
-          objectType="visualization"
-          showDescription={true}
-          showCopyOnSave={true}
-          mustCopyOnSaveMessage="You must save a copy of the object."
-        />
-      </I18nProvider>
+      <EuiProvider>
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => void 0}
+            title={'Saved Object title'}
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+            mustCopyOnSaveMessage="You must save a copy of the object."
+          />
+        </I18nProvider>
+      </EuiProvider>
     );
 
     expect(onSave).not.toHaveBeenCalled();

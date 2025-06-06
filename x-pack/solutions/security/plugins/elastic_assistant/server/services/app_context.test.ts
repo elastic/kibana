@@ -55,7 +55,6 @@ describe('AppContextService', () => {
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       });
       appContextService.stop();
 
@@ -107,7 +106,6 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
 
       appContextService.start(mockAppContext);
@@ -124,14 +122,12 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
         defendInsights: false,
-        assistantAttackDiscoverySchedulingEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -148,13 +144,11 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
         defendInsights: false,
-        assistantAttackDiscoverySchedulingEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -177,7 +171,6 @@ describe('AppContextService', () => {
       const featuresSubset: Partial<AssistantFeatures> = {
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
 
       appContextService.start(mockAppContext);

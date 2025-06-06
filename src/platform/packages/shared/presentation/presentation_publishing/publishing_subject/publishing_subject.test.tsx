@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -17,9 +17,71 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
-import { PublishingSubject } from './types';
 
 describe('publishing subject', () => {
+  describe('setup', () => {
+    let subject1: BehaviorSubject<number>;
+    beforeEach(() => {
+      subject1 = new BehaviorSubject<number>(0);
+    });
+
+    function emitEvent() {
+      subject1.next(subject1.getValue() + 1);
+    }
+
+    test('useStateFromPublishingSubject should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const value1 = useStateFromPublishingSubject(subject1);
+
+        // synchronously emit new value for observable
+        // this will cause test to fail if subscriptions are not setup synchronously
+        useMemo(() => {
+          emitEvent();
+        }, []);
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
+    });
+
+    test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const [value1] = useBatchedPublishingSubjects(subject1);
+
+        // synchronously emit new value for observable
+        // this will cause test to fail if subscriptions are not setup synchronously
+        useMemo(() => {
+          emitEvent();
+        }, []);
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('render', () => {
     let subject1: BehaviorSubject<number>;
     let subject2: BehaviorSubject<number>;
@@ -194,7 +256,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(renderCount).toBe(7);
+      expect(renderCount).toBe(2);
     });
   });
 
@@ -234,38 +296,6 @@ describe('publishing subject', () => {
         expect(screen.getByText('valueFoo: foo2')).toBeInTheDocument();
       });
       expect(renderCount).toBe(4);
-    });
-
-    test('useStateFromPublishingSubject should update state when publishing subject is provided', async () => {
-      let renderCount = 0;
-      function Component() {
-        // When subject is expected to change, subject must be part of react state.
-        const [subjectFoo, setSubjectFoo] = useState<PublishingSubject<string> | undefined>(
-          undefined
-        );
-        const valueFoo = useStateFromPublishingSubject(subjectFoo);
-
-        renderCount++;
-        return (
-          <>
-            <button
-              onClick={() => {
-                setSubjectFoo(new BehaviorSubject<string>('foo'));
-              }}
-            />
-            <span>{`valueFoo: ${valueFoo}`}</span>
-          </>
-        );
-      }
-      render(<Component />);
-      await waitFor(() => {
-        expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
-      });
-      await userEvent.click(screen.getByRole('button'));
-      await waitFor(() => {
-        expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
-      });
-      expect(renderCount).toBe(3);
     });
   });
 });

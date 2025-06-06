@@ -12,7 +12,7 @@ import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices, sendPutOutput } from '../../../../hooks';
+import { useStartServices, sendPutOutput, licenseService } from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
@@ -99,6 +99,7 @@ describe('EditOutputFlyout', () => {
   beforeEach(() => {
     mockStartServices(false);
     jest.clearAllMocks();
+    jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
   });
@@ -144,6 +145,10 @@ describe('EditOutputFlyout', () => {
       id: 'output123',
       is_default: false,
       is_default_monitoring: false,
+      ssl: {
+        certificate: 'ssl-cert-value',
+        key: 'ssl-key-value',
+      },
     });
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
@@ -318,10 +323,11 @@ describe('EditOutputFlyout', () => {
     expect(utils.getByText('Additional setup required')).not.toBeNull();
   });
 
-  it('should render the flyout if the output provided is a remote ES output', async () => {
+  it('should render the flyout if the output provided is a remote ES output and license is at least enterprise', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -355,7 +361,6 @@ describe('EditOutputFlyout', () => {
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost');
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
 
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
@@ -377,10 +382,48 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not render the flyout if the output is a remote ES output and the license is not at least enterprise', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
+    });
+
+    remoteEsOutputLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+    expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
+      'Remote Elasticsearch'
+    );
+
+    expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeInTheDocument();
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeInTheDocument();
+  });
+
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -405,13 +448,11 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
 
     fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost:5601');
-    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -420,9 +461,9 @@ describe('EditOutputFlyout', () => {
         'outputR',
         expect.objectContaining({
           sync_integrations: true,
-          secrets: { service_token: '1234', kibana_api_key: 'key' },
+          secrets: { service_token: '1234' },
           service_token: undefined,
-          kibana_api_key: undefined,
+          kibana_api_key: 'key',
           kibana_url: 'http://localhost:5601',
         })
       );

@@ -175,7 +175,7 @@ describe('initNavigation()', () => {
         path: 'group1.foo',
         href: '/app/foo',
         deepLink: getNavLink({ id: 'foo', title: 'FOO' }),
-        isElasticInternalLink: false,
+        isExternalLink: false,
         sideNavStatus: 'visible',
       });
       expect(node.children![0].href).toBe(node.children![0]!.deepLink!.href);
@@ -237,17 +237,15 @@ describe('initNavigation()', () => {
       const nodesBody = treeDefinition.body as ChromeProjectNavigationNode[];
       expect(nodesBody[1]).toEqual({
         id: 'node-1', // auto generated
-        title: '',
         path: 'node-1',
         type: 'navGroup',
-        isElasticInternalLink: false,
+        isExternalLink: false,
         sideNavStatus: 'visible',
         children: [
           {
             id: 'node-0', // auto generated
             path: 'node-1.node-0',
-            title: '',
-            isElasticInternalLink: false,
+            isExternalLink: false,
             sideNavStatus: 'visible',
             children: [
               {
@@ -261,7 +259,7 @@ describe('initNavigation()', () => {
                 },
                 href: '/app/foo',
                 id: 'foo',
-                isElasticInternalLink: false,
+                isExternalLink: false,
                 path: 'node-1.node-0.foo',
                 sideNavStatus: 'visible',
                 title: 'FOO',
@@ -277,21 +275,20 @@ describe('initNavigation()', () => {
         title: 'Footer group',
         path: 'node-4',
         type: 'navGroup',
-        isElasticInternalLink: false,
+        isExternalLink: false,
         sideNavStatus: 'visible',
         children: [
           {
             id: 'node-0', // auto generated
             path: 'node-4.node-0',
-            title: '',
-            isElasticInternalLink: false,
+            isExternalLink: false,
             sideNavStatus: 'visible',
             children: [
               {
                 deepLink: expect.any(Object), // we are not testing the deepLink here
                 href: '/app/foo',
                 id: 'foo',
-                isElasticInternalLink: false,
+                isExternalLink: false,
                 path: 'node-4.node-0.foo',
                 sideNavStatus: 'visible',
                 title: 'FOO',
@@ -330,7 +327,7 @@ describe('initNavigation()', () => {
               },
               "href": "/app/discover",
               "id": "discover",
-              "isElasticInternalLink": false,
+              "isExternalLink": false,
               "onClick": undefined,
               "path": "rootNav:analytics.discover",
               "sideNavStatus": "visible",
@@ -349,7 +346,7 @@ describe('initNavigation()', () => {
               },
               "href": "/app/dashboards",
               "id": "dashboards",
-              "isElasticInternalLink": false,
+              "isExternalLink": false,
               "onClick": undefined,
               "path": "rootNav:analytics.dashboards",
               "sideNavStatus": "visible",
@@ -368,7 +365,7 @@ describe('initNavigation()', () => {
               },
               "href": "/app/visualize",
               "id": "visualize",
-              "isElasticInternalLink": false,
+              "isExternalLink": false,
               "onClick": undefined,
               "path": "rootNav:analytics.visualize",
               "sideNavStatus": "visible",
@@ -379,7 +376,7 @@ describe('initNavigation()', () => {
           "href": undefined,
           "icon": "stats",
           "id": "rootNav:analytics",
-          "isElasticInternalLink": false,
+          "isExternalLink": false,
           "onClick": undefined,
           "path": "rootNav:analytics",
           "renderAs": "accordion",
@@ -457,7 +454,7 @@ describe('initNavigation()', () => {
       deepLink: undefined,
       href: 'https://cloud.elastic.co/userAndRoles',
       id: 'node-0',
-      isElasticInternalLink: true,
+      isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
       title: 'Users and roles',
@@ -468,7 +465,7 @@ describe('initNavigation()', () => {
       deepLink: undefined,
       href: 'https://cloud.elastic.co/performance',
       id: 'node-1',
-      isElasticInternalLink: true,
+      isExternalLink: true,
       path: 'group1.node-1',
       sideNavStatus: 'visible',
       title: 'Performance',
@@ -479,7 +476,7 @@ describe('initNavigation()', () => {
       deepLink: undefined,
       href: 'https://cloud.elastic.co/billing',
       id: 'node-2',
-      isElasticInternalLink: true,
+      isExternalLink: true,
       path: 'group1.node-2',
       sideNavStatus: 'visible',
       title: 'Billing and subscription',
@@ -490,7 +487,7 @@ describe('initNavigation()', () => {
       deepLink: undefined,
       href: 'https://cloud.elastic.co/deployment',
       id: 'node-3',
-      isElasticInternalLink: true,
+      isExternalLink: true,
       path: 'group1.node-3',
       sideNavStatus: 'visible',
       title: 'Project',
@@ -804,7 +801,7 @@ describe('getActiveNodes$()', () => {
           id: 'root',
           title: 'Root',
           path: 'root',
-          isElasticInternalLink: false,
+          isExternalLink: false,
           sideNavStatus: 'visible',
           type: 'navGroup',
         },
@@ -812,7 +809,7 @@ describe('getActiveNodes$()', () => {
           id: 'item1',
           title: 'ITEM1',
           path: 'root.item1',
-          isElasticInternalLink: false,
+          isExternalLink: false,
           sideNavStatus: 'visible',
           href: '/app/item1',
           deepLink: {
@@ -861,7 +858,7 @@ describe('getActiveNodes$()', () => {
           id: 'root',
           title: 'Root',
           path: 'root',
-          isElasticInternalLink: false,
+          isExternalLink: false,
           sideNavStatus: 'visible',
           type: 'navGroup',
         },
@@ -869,7 +866,7 @@ describe('getActiveNodes$()', () => {
           id: 'item1',
           title: 'ITEM1',
           path: 'root.item1',
-          isElasticInternalLink: false,
+          isExternalLink: false,
           sideNavStatus: 'visible',
           href: '/app/item1',
           deepLink: {

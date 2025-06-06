@@ -113,13 +113,13 @@ export const validateWithScoutCiConfig = (
   const allRegisteredPlugins = new Set([...enabledPlugins, ...disabledPlugins]);
 
   const unregisteredPlugins: string[] = [];
-  const filteredPlugins = new Map<string, PluginScoutConfig>();
+  const runnablePlugins = new Map<string, PluginScoutConfig>();
 
   for (const [pluginName, config] of pluginsWithConfigs.entries()) {
     if (!allRegisteredPlugins.has(pluginName)) {
       unregisteredPlugins.push(pluginName);
     } else if (enabledPlugins.has(pluginName)) {
-      filteredPlugins.set(pluginName, config);
+      runnablePlugins.set(pluginName, config);
     }
   }
 
@@ -145,5 +145,5 @@ export const validateWithScoutCiConfig = (
     );
   }
 
-  return filteredPlugins;
+  return runnablePlugins;
 };

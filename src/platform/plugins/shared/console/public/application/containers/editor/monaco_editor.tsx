@@ -222,6 +222,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
           hover: {
             above: false,
           },
+          lineHeight: 24,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

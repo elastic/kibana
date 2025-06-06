@@ -28,6 +28,7 @@ import {
   stringifyAfterKey,
 } from '../utils/utils';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import { buildEventsSearchQuery } from '../utils/build_events_query';
 
 import type {
   SecurityRuleServices,
@@ -135,12 +136,7 @@ const multiTermsCompositeNonRetryable = async ({
     // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
     // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
     // response correspond to each new term.
-    const {
-      searchResult: pageSearchResult,
-      searchDuration: pageSearchDuration,
-      searchErrors: pageSearchErrors,
-      loggedRequests: pageSearchLoggedRequests = [],
-    } = await singleSearchAfter({
+    const searchRequest = buildEventsSearchQuery({
       aggregations: buildCompositeNewTermsAgg({
         newValueWindowStart: tuple.from,
         timestampField: aggregatableTimestampField,
@@ -155,12 +151,20 @@ const multiTermsCompositeNonRetryable = async ({
       // in addition to the rule interval
       from: parsedHistoryWindowSize.toISOString(),
       to: tuple.to.toISOString(),
-      services,
-      ruleExecutionLogger,
       filter: esFilterForBatch,
-      pageSize: 0,
+      size: 0,
       primaryTimestamp,
       secondaryTimestamp,
+    });
+    const {
+      searchResult: pageSearchResult,
+      searchDuration: pageSearchDuration,
+      searchErrors: pageSearchErrors,
+      loggedRequests: pageSearchLoggedRequests = [],
+    } = await singleSearchAfter({
+      searchRequest,
+      services,
+      ruleExecutionLogger,
       loggedRequestsConfig: isLoggedRequestsEnabled
         ? {
             type: 'findNewTerms',
@@ -187,12 +191,7 @@ const multiTermsCompositeNonRetryable = async ({
     // become the basis of the resulting alert.
     // One document could become multiple alerts if the document contains an array with multiple new terms.
     if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
-      const {
-        searchResult: docFetchSearchResult,
-        searchDuration: docFetchSearchDuration,
-        searchErrors: docFetchSearchErrors,
-        loggedRequests: docFetchLoggedRequests = [],
-      } = await singleSearchAfter({
+      const searchRequestPhase3 = buildEventsSearchQuery({
         aggregations: buildCompositeDocFetchAgg({
           newValueWindowStart: tuple.from,
           timestampField: aggregatableTimestampField,
@@ -205,12 +204,20 @@ const multiTermsCompositeNonRetryable = async ({
         index: inputIndex,
         from: parsedHistoryWindowSize.toISOString(),
         to: tuple.to.toISOString(),
-        services,
-        ruleExecutionLogger,
         filter: esFilterForBatch,
-        pageSize: 0,
+        size: 0,
         primaryTimestamp,
         secondaryTimestamp,
+      });
+      const {
+        searchResult: docFetchSearchResult,
+        searchDuration: docFetchSearchDuration,
+        searchErrors: docFetchSearchErrors,
+        loggedRequests: docFetchLoggedRequests = [],
+      } = await singleSearchAfter({
+        searchRequest: searchRequestPhase3,
+        services,
+        ruleExecutionLogger,
         loggedRequestsConfig: isLoggedRequestsEnabled
           ? {
               type: 'findDocuments',

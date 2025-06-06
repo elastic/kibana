@@ -6,7 +6,7 @@ exports[`EntryContent should render a nested value 1`] = `
     data-test-subj="EntryContentlistlist_id0EntryContent"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-center-row-nestedGroupSpaceStyles"
       data-test-subj="EntryContentNestedEntry"
     >
       <span
@@ -18,7 +18,7 @@ exports[`EntryContent should render a nested value 1`] = `
         />
       </span>
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
+        class="euiFlexItem emotion-euiFlexItem-grow-1-valueContainerStyles"
       >
         <span
           class="euiExpression emotion-euiExpression-subdued"

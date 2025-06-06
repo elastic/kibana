@@ -29,6 +29,8 @@ export const EPM_API_ROUTES = {
   BULK_INSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk`,
   BULK_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade`,
   BULK_UPGRADE_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade/{taskId}`,
+  BULK_UNINSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall`,
+  BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -38,6 +40,7 @@ export const EPM_API_ROUTES = {
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE_WITH_OPTIONAL_VERSION,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
   CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
+  UPDATE_CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations/{pkgName}`,
   DELETE_PATTERN: EPM_PACKAGES_ONE_WITH_OPTIONAL_VERSION,
   INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
@@ -47,6 +50,7 @@ export const EPM_API_ROUTES = {
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
   BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
   INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
+  PACKAGES_DATASTREAM_ASSETS: `${EPM_API_ROOT}/packages/{pkgName}/{pkgVersion}/datastream_assets`,
 
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
@@ -136,6 +140,7 @@ export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   AGENT_POLICIES_SPACES: `${INTERNAL_ROOT}/agent_policies_spaces`,
+  SPACE_AWARENESS_MIGRATION: `${INTERNAL_ROOT}/enable_space_awareness`,
 };
 
 // Agent API routes
@@ -148,6 +153,7 @@ export const AGENT_API_ROUTES = {
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
+  MIGRATE_PATTERN: `${API_ROOT}/agents/{agentId}/migrate`,
   CANCEL_ACTIONS_PATTERN: `${API_ROOT}/agents/actions/{actionId}/cancel`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
@@ -207,6 +213,11 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+};
+
+export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
+  STATUS_PATTERN: `${API_ROOT}/remote_synced_integrations/status`,
+  INFO_PATTERN: `${API_ROOT}/remote_synced_integrations/{outputId}/remote_status`,
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;

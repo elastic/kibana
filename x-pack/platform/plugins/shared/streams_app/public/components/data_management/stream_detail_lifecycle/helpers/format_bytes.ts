@@ -8,7 +8,7 @@
 import { formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const formatBytes = (value: number) => formatNumber(value, '0.0 b');
+export const formatBytes = (value: number) => formatNumber(value, '0.0 ib');
 
 export const formatIngestionRate = (bytesPerDay: number, perDayOnly = false) => {
   const perDay = formatBytes(bytesPerDay);

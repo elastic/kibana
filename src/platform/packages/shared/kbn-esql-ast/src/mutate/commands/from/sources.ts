@@ -52,10 +52,10 @@ export const find = (
   cluster?: string
 ): ESQLSource | undefined => {
   return findByPredicate(ast, (source) => {
-    if (index !== source.index) {
+    if (index !== source.index?.valueUnquoted) {
       return false;
     }
-    if (typeof cluster === 'string' && cluster !== source.cluster) {
+    if (cluster && typeof cluster === 'string' && cluster !== source.cluster?.valueUnquoted) {
       return false;
     }
 
@@ -91,7 +91,7 @@ export const insert = (
     return;
   }
 
-  const source = Builder.expression.indexSource(indexName, clusterName);
+  const source = Builder.expression.source.index(indexName, clusterName);
 
   if (index === -1) {
     generic.commands.args.append(command, source);

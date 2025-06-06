@@ -340,7 +340,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 
@@ -367,7 +367,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 

@@ -23,7 +23,8 @@ export const getDocLinksMeta = ({
     ecs_version: 'current',
     elasticWebsiteUrl: 'https://www.elastic.co/',
     elasticGithubUrl: 'https://github.com/elastic/',
-    docsWebsiteUrl: 'https://docs.elastic.co/',
+    docsWebsiteUrl: 'https://www.elastic.co/docs/',
     searchLabsUrl: 'https://search-labs.elastic.co/',
+    apiDocsUrl: 'https://www.elastic.co/docs/api/',
   };
 };

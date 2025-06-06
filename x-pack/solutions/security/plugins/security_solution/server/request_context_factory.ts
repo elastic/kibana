@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
@@ -37,6 +38,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -139,6 +141,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return endpointAuthz;
       },
 
+      getEndpointService: () => endpointAppContextService,
+
       getConfig: () => config,
 
       getFrameworkRequest: () => frameworkRequest,
@@ -156,6 +160,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,
+
+      getProductFeatureService: () => productFeaturesService,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -249,7 +255,28 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
+      getPrivilegeMonitoringDataClient: memoize(() => {
+        return new PrivilegeMonitoringDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient: coreContext.savedObjects.client,
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
+          telemetry: core.analytics,
+        });
+      }),
+      getMonitoringEntitySourceDataClient: memoize(() => {
+        return new MonitoringEntitySourceDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient: coreContext.savedObjects.client,
+        });
+      }),
       getEntityStoreDataClient: memoize(() => {
+        // why are we defining this here, but other places we do it inline?
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
 
@@ -273,17 +300,17 @@ export class RequestContextFactory implements IRequestContextFactory {
           apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
       }),
-      getAssetInventoryClient: memoize(() => {
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-        return new AssetInventoryDataClient({
-          clusterClient,
-          logger,
-          experimentalFeatures: config.experimentalFeatures,
-        });
-      }),
+      getAssetInventoryClient: memoize(
+        () =>
+          new AssetInventoryDataClient({
+            logger: options.logger,
+            clusterClient: coreContext.elasticsearch.client,
+            uiSettingsClient: coreContext.uiSettings.client,
+          })
+      ),
     };
   }
 }

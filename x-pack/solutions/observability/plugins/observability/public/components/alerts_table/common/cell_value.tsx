@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -21,20 +21,31 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_UUID,
+  ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
+import type { JsonValue } from '@kbn/utility-types';
+import {
+  RELATED_ACTIONS_COL,
+  RELATED_ALERT_REASON,
+  RELATION_COL,
+} from '../../../pages/alert_details/components/related_alerts/get_related_columns';
+import { RelationCol } from '../../../pages/alert_details/components/related_alerts/relation_col';
+import { paths } from '../../../../common/locators/paths';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import type { GetObservabilityAlertsTableProp } from '../types';
+import { GetObservabilityAlertsTableProp } from '../types';
+import AlertActions from '../../alert_actions/alert_actions';
 
-const getAlertFieldValue = (alert: Alert, fieldName: string) => {
+export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
-  const rawValue = alert[fieldName];
+  const rawValue = alert[fieldName] as JsonValue[];
   const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {
@@ -51,40 +62,49 @@ const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   return '--';
 };
 
+export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
 // eslint-disable-next-line react/function-component-definition
-export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = ({
-  columnId,
-  alert,
-  openAlertInFlyout,
-  observabilityRuleTypeRegistry,
-}) => {
-  const value = getAlertFieldValue(alert, columnId);
+export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
+  const {
+    columnId,
+    alert,
+    openAlertInFlyout,
+    observabilityRuleTypeRegistry,
+    services: { http },
+    parentAlert,
+  } = props;
 
-  switch (columnId) {
-    case ALERT_STATUS:
+  const cellRenderers: AlertCellRenderers = {
+    [ALERT_STATUS]: (value) => {
       if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
         // NOTE: This should only be needed to narrow down the type.
         // Status should be either "active" or "recovered".
         return null;
       }
       return <AlertStatusIndicator alertStatus={value} />;
-    case TIMESTAMP:
-    case ALERT_START:
-    case ALERT_RULE_EXECUTION_TIMESTAMP:
-      return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
-    case ALERT_DURATION:
-      return <>{asDuration(Number(value))}</>;
-    case ALERT_SEVERITY:
-      return <AlertSeverityBadge severityLevel={value ?? undefined} />;
-    case ALERT_EVALUATION_VALUE:
+    },
+    [TIMESTAMP]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_START]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_DURATION]: (value) => <>{asDuration(Number(value))}</>,
+    [ALERT_SEVERITY]: (value) => <AlertSeverityBadge severityLevel={value ?? undefined} />,
+    [ALERT_EVALUATION_VALUE]: (value) => {
       const multipleValues = getAlertFieldValue(alert, ALERT_EVALUATION_VALUES);
       return <>{multipleValues ?? value}</>;
-    case ALERT_REASON:
+    },
+    [ALERT_REASON]: (value) => {
       if (!observabilityRuleTypeRegistry) return <>{value}</>;
       const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
       return (
@@ -96,10 +116,42 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
           {parsedAlert.reason}
         </EuiLink>
       );
-    case ALERT_RULE_NAME:
+    },
+    [ALERT_RULE_NAME]: (value) => {
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
-      return <CellTooltip value={value} tooltipContent={ruleCategory} />;
-    default:
+      const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
+      const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
+      return (
+        <CellTooltip
+          value={
+            <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
+              {value}
+            </EuiLink>
+          }
+          tooltipContent={ruleCategory}
+        />
+      );
+    },
+    [RELATION_COL]: (value) => {
+      return <RelationCol alert={alert} parentAlert={parentAlert!} />;
+    },
+    [RELATED_ALERT_REASON]: (value) => {
+      const val = getAlertFieldValue(alert, ALERT_REASON);
+      return <EuiText size="s">{val}</EuiText>;
+    },
+    [RELATED_ACTIONS_COL]: (val) => {
+      return (
+        <EuiFlexGroup gutterSize="none">
+          <AlertActions {...props} />
+        </EuiFlexGroup>
+      );
+    },
+    [ALERT_CASE_IDS]: (value) => {
       return <>{value}</>;
-  }
+    },
+  };
+
+  const val = getAlertFieldValue(alert, columnId);
+
+  return cellRenderers[columnId] ? cellRenderers[columnId](val) : <>{val}</>;
 };

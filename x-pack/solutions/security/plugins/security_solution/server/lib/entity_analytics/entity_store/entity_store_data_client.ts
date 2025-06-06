@@ -12,6 +12,7 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AuditEvent,
+  IUiSettingsClient,
   AnalyticsServiceSetup,
   KibanaRequest,
 } from '@kbn/core/server';
@@ -26,18 +27,19 @@ import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../common/entity_analytics/entity_store/constants';
+import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
   getAllMissingPrivileges,
   getMissingPrivilegesErrorMessage,
 } from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
-import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -143,6 +145,7 @@ interface EntityStoreClientOpts {
   apiKeyManager?: ApiKeyManager;
   security: SecurityPluginStart;
   request: KibanaRequest;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 interface SearchEntitiesParams {
@@ -161,6 +164,7 @@ export class EntityStoreDataClient {
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
   private apiKeyGenerator?: ApiKeyManager;
+  private uiSettingsClient: IUiSettingsClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
     const {
@@ -171,9 +175,11 @@ export class EntityStoreDataClient {
       kibanaVersion,
       namespace,
       apiKeyManager,
+      uiSettingsClient,
     } = options;
     this.esClient = clusterClient.asCurrentUser;
     this.apiKeyGenerator = apiKeyManager;
+    this.uiSettingsClient = uiSettingsClient;
 
     this.entityClient = new EntityClient({
       clusterClient,
@@ -252,8 +258,7 @@ export class EntityStoreDataClient {
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
-    const { experimentalFeatures } = this.options;
-    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
 
     // When entityTypes param is defined it only enables the engines that are provided
     const enginesTypes = requestBodyOverrides.entityTypes
@@ -270,26 +275,39 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
+  private async getEnabledEntityTypes(): Promise<EntityType[]> {
+    const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
+  }
+
   public async status({
     include_components: withComponents = false,
   }: GetEntityStoreStatusRequestQuery): Promise<GetEntityStoreStatusResponse> {
     const { namespace } = this.options;
-    const { engines, count } = await this.engineClient.list();
+    const { engines } = await this.engineClient.list();
+
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
+    const enabledEngines = engines.filter((engine) => {
+      return enabledEntityTypes.indexOf(EntityType[engine.type]) > -1;
+    });
 
     let status = ENTITY_STORE_STATUS.RUNNING;
-    if (count === 0) {
+    if (enabledEngines.length === 0) {
       status = ENTITY_STORE_STATUS.NOT_INSTALLED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
       status = ENTITY_STORE_STATUS.ERROR;
-    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+    } else if (enabledEngines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
       status = ENTITY_STORE_STATUS.STOPPED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
       status = ENTITY_STORE_STATUS.INSTALLING;
     }
 
     if (withComponents) {
       const enginesWithComponents = await Promise.all(
-        engines.map(async (engine) => {
+        enabledEngines.map(async (engine) => {
           const id = buildEntityDefinitionId(engine.type, namespace);
           const {
             definitions: [definition],
@@ -314,7 +332,7 @@ export class EntityStoreDataClient {
 
       return { engines: enginesWithComponents, status };
     } else {
-      return { engines, status };
+      return { engines: enabledEngines, status };
     }
   }
 
@@ -498,7 +516,6 @@ export class EntityStoreDataClient {
         status: ENGINE_STATUS.ERROR,
         error: {
           message: err.message,
-          stack: err.stack,
           action: 'init',
         },
       });

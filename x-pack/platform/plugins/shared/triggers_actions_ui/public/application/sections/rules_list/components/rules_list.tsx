@@ -69,7 +69,6 @@ import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_m
 import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -125,6 +124,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export const percentileFields = {
@@ -166,6 +166,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -300,6 +301,11 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
+    if (navigateToEditRuleForm) {
+      navigateToEditRuleForm(ruleItem.id);
+      return;
+    }
+
     navigateToApp('management', {
       path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
       state: {

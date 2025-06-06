@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -15,22 +15,24 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
-type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor' | 'lifecycle';
+const wiredStreamManagementSubTabs = ['route', 'enrich', 'schemaEditor', 'lifecycle'] as const;
 
-function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
+type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
+
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
+  return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
 export function WiredStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
-    path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+    path: { key, tab },
+  } = useStreamsAppParams('/{key}/management/{tab}');
 
   const tabs = {
     route: {
@@ -38,7 +40,7 @@ export function WiredStreamDetailManagement({
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
-        defaultMessage: 'Streams Partitioning',
+        defaultMessage: 'Partitioning',
       }),
     },
     enrich: {
@@ -67,11 +69,9 @@ export function WiredStreamDetailManagement({
     },
   };
 
-  if (!isValidManagementSubTab(subtab)) {
-    return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
-    );
+  if (!isValidManagementSubTab(tab)) {
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }

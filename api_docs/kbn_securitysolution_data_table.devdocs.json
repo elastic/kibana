@@ -666,7 +666,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
@@ -798,21 +798,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.DataTableModel.sessionViewConfig",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "SessionViewConfig",
-              " | null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
@@ -1260,7 +1245,7 @@
           },
           " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
           "AlertPageFilterType",
-          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1268,9 +1253,7 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[]>; readonly sessionViewConfig: ",
-          "SessionViewConfig",
-          " | null; }"
+          "[]>; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
@@ -1297,6 +1280,8 @@
           ".alertsOnRuleDetailsPage | ",
           "TableId",
           ".alertsOnAlertsPage | ",
+          "TableId",
+          ".alertsOnAlertSummaryPage | ",
           "TableId",
           ".test | ",
           "TableId",
@@ -1541,21 +1526,7 @@
             "label": "graphEventId",
             "description": [],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.tableDefaults.sessionViewConfig",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "null"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
@@ -1686,6 +1657,8 @@
           "; \"alerts-rules-details-page\": ",
           "TableEntityType",
           "; \"alerts-page\": ",
+          "TableEntityType",
+          "; \"alert-summary-page\": ",
           "TableEntityType",
           "; \"table-test\": ",
           "TableEntityType",

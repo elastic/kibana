@@ -14,7 +14,7 @@ import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { EmbeddableApiContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
@@ -62,7 +62,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
       });
   }, [api, isEditable]);
 
-  const panelTitle = useStateFromPublishingSubject(api?.title$);
+  const panelTitle = useStateFromPublishingSubject(api?.title$ ?? new BehaviorSubject(undefined));
   const ariaLabel = useMemo(
     () =>
       panelTitle

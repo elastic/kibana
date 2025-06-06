@@ -771,6 +771,62 @@ describe('Create Lifecycle', () => {
       registry.register(ruleType);
       expect(registry.get('test').producer).toEqual('alerts');
     });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: true and autoRecoverAlerts: true', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: true,
+        autoRecoverAlerts: true,
+      });
+      expect(registry.has('foo')).toEqual(true);
+    });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts: false', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: false,
+        autoRecoverAlerts: false,
+      });
+      expect(registry.has('foo')).toEqual(true);
+    });
   });
 
   describe('register() with overwriteProducer', () => {
@@ -947,9 +1003,7 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
-            "fieldsForAAD": undefined,
             "hasAlertsMappings": true,
-            "hasFieldsForAAD": false,
             "id": "test",
             "isExportable": true,
             "minimumLicenseRequired": "basic",

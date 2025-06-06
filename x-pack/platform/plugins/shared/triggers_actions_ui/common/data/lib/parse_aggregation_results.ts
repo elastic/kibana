@@ -20,6 +20,7 @@ export interface ParsedAggregationGroup {
   hits: Array<SearchHit<unknown>>;
   sourceFields: string[];
   groups?: Group[];
+  groupingObject?: Record<string, unknown>;
   value?: number;
 }
 
@@ -28,7 +29,7 @@ export interface ParsedAggregationResults {
   truncated: boolean;
 }
 
-interface ParseAggregationResultsOpts {
+export interface ParseAggregationResultsOpts {
   isCountAgg: boolean;
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
@@ -87,16 +88,28 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName = `${groupBucket?.key}`;
+    const groupKeys = [termField ?? []].flat();
+    const groupValues = [groupBucket.key].flat();
+
     const groups =
       termField && groupBucket?.key
-        ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
+        ? groupKeys.reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
             resultGroups.push({
               field: groupByItem,
-              value: [groupBucket.key].flat()[groupIndex],
+              value: groupValues[groupIndex],
             });
             return resultGroups;
           }, [])
         : undefined;
+
+    const groupingObject =
+      termField && groupBucket?.key
+        ? groupKeys.reduce<Record<string, unknown>>((resultGroups, groupByItem, groupIndex) => {
+            resultGroups[groupByItem] = groupValues[groupIndex];
+            return resultGroups;
+          }, {})
+        : undefined;
+
     const sourceFields: { [key: string]: string[] } = {};
 
     sourceFieldsParams.forEach((field) => {
@@ -120,6 +133,7 @@ export const parseAggregationResults = ({
     const groupResult: any = {
       group: groupName,
       groups,
+      groupingObject,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),

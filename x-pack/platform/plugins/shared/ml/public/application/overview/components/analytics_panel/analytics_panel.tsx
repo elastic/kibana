@@ -22,8 +22,7 @@ import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
 import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { useMlLink } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefresh } from '../../../routing/use_refresh';
 import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/ml_api_service/data_frame_analytics';
 import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
@@ -35,14 +34,16 @@ interface Props {
 }
 export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   const refresh = useRefresh();
+  const mlManagementLocator = useMlManagementLocator();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<StatEntry[] | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<GetDataFrameAnalyticsStatsResponseError>();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const manageJobsLink = useMlLink({
-    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  const manageJobsLink = mlManagementLocator?.useUrl({
+    sectionId: 'ml',
+    appId: 'analytics',
   });
 
   const [panelsState, setPanelsState] = useStorage<
@@ -94,6 +95,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
 
   return (
     <CollapsiblePanel
+      dataTestSubj={'mlDataFrameAnalyticsPanel'}
       isOpen={panelsState.dfaJobs}
       onToggle={(update) => {
         setPanelsState({ ...panelsState, dfaJobs: update });

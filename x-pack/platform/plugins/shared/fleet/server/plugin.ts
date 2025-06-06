@@ -28,7 +28,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-
+import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -49,9 +49,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -150,7 +148,7 @@ import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_ag
 import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
-import { registerBulkUpgradePackagesTask } from './tasks/bulk_upgrade_packages_task';
+import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -207,6 +205,7 @@ export interface FleetAppContext {
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
+  lockManagerService?: LockManagerService;
 }
 
 export type FleetSetupContract = void;
@@ -317,6 +316,7 @@ export class FleetPlugin
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -640,7 +640,7 @@ export class FleetPlugin
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesTask(deps.taskManager);
-    registerBulkUpgradePackagesTask(deps.taskManager);
+    registerPackagesBulkOperationTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -672,7 +672,12 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.autoUpgrades?.taskInterval,
+        retryDelays: config.autoUpgrades?.retryDelays,
+      },
     });
+    this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
     registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
@@ -725,6 +730,7 @@ export class FleetPlugin
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
       syncIntegrationsTask: this.syncIntegrationsTask!,
+      lockManagerService: this.lockManagerService,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

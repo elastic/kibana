@@ -33,12 +33,18 @@ import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
 const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
+      defaultMessage: 'Kubernetes: OpenTelemetry',
+    }),
+  });
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
@@ -297,7 +303,12 @@ spec:
                     { defaultMessage: 'Annotate all resources in a namespace' }
                   )}
                 >
-                  <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                  <EuiCodeBlock
+                    paddingSize="m"
+                    language="bash"
+                    isCopyable={true}
+                    data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                  >
                     {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
                   </EuiCodeBlock>
                 </EuiAccordion>
@@ -316,7 +327,12 @@ spec:
                   )}
                 </p>
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="bash"
+                  isCopyable={true}
+                  data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
+                >
                   {`kubectl rollout restart deployment myapp -n my-namespace
 
 kubectl describe pod <myapp-pod-name> -n my-namespace`}

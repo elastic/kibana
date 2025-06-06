@@ -10,7 +10,8 @@ import {
   buildMutedRulesFilter,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { UseCspOptions } from '../types';
@@ -102,7 +103,7 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
@@ -192,7 +193,7 @@ export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPrevie
   sort,
 });
 
-const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+export const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
   return {
     ...query,
     bool: {
@@ -202,12 +203,78 @@ const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query'
         {
           range: {
             '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
         },
       ],
+    },
+  };
+};
+
+export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [...(query?.bool?.filter ?? [])],
+    },
+  };
+};
+
+export const createMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'rule.id': ruleId,
+          },
+        },
+        {
+          term: {
+            'resource.id': resourceId,
+          },
+        },
+      ],
+    },
+  };
+};
+
+/* 
+The event.id is important in this query because removing it can lead to unintended results—specifically, 
+if vulnerabilityId = ['a'], the query may return documents where vulnerabilityId is ['a'], ['a', 'b'], and so on. 
+This happens because the check only verifies if the value exists within the combined string representation.
+*/
+export const createGetVulnerabilityFindingsQuery = (
+  vulnerabilityId?: string | string[],
+  resourceId?: string | string[],
+  packageName?: string | string[],
+  packageVersion?: string | string[],
+  eventId?: string | string[]
+) => {
+  const filters: Array<{ terms: Record<string, string[]> }> = [];
+
+  const addTermFilter = (field: string, value?: string | string[]) => {
+    if (value !== undefined) {
+      filters.push({
+        terms: {
+          [field]: Array.isArray(value) ? value : [value],
+        },
+      });
+    }
+  };
+
+  addTermFilter('vulnerability.id', vulnerabilityId);
+  addTermFilter('resource.id', resourceId);
+  addTermFilter('package.name', packageName);
+  addTermFilter('package.version', packageVersion);
+  addTermFilter('event.id', eventId);
+
+  return {
+    bool: {
+      filter: filters,
     },
   };
 };

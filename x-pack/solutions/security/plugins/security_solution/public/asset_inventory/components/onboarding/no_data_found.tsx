@@ -16,14 +16,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { OnboardingContextProvider } from '../../../onboarding/components/onboarding_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { AssetInventoryTitle } from '../asset_inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
-import { IntegrationsCardGridTabs } from '../../../onboarding/components/onboarding_body/cards/integrations/integration_card_grid_tabs';
-import { OnboardingSuccessCallout } from './onboarding_success_callout';
 import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
+import { SecurityIntegrations } from '../../../common/lib/integrations/components';
+import { IntegrationContextProvider } from '../../../common/lib/integrations/hooks/integration_context';
+import { INTEGRATION_TABS } from '../../../common/lib/integrations/configs/integration_tabs_configs';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
@@ -36,7 +36,6 @@ export const NoDataFound = () => {
     <>
       <AssetInventoryTitle />
       <EuiSpacer size="l" />
-      <OnboardingSuccessCallout />
       <EuiPanel data-test-subj={TEST_SUBJ_ONBOARDING_NO_DATA_FOUND}>
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -44,7 +43,7 @@ export const NoDataFound = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.startOnboardingAssets"
-                  defaultMessage="Start onboarding your assets"
+                  defaultMessage="Connect Sources to Discover Assets"
                 />
               </h3>
             </EuiTitle>
@@ -53,7 +52,7 @@ export const NoDataFound = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.startOnboardingAssetsDescription"
-                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your inventory with the we discover assets."
+                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your asset inventory."
                 />
               </p>
             </EuiText>
@@ -70,9 +69,9 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <OnboardingContextProvider spaceId={spaceId}>
-          <IntegrationsCardGridTabs installedIntegrationsCount={0} isAgentRequired={false} />
-        </OnboardingContextProvider>
+        <IntegrationContextProvider spaceId={spaceId} integrationTabs={INTEGRATION_TABS}>
+          <SecurityIntegrations />
+        </IntegrationContextProvider>
       </EuiPanel>
     </>
   );

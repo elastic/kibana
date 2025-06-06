@@ -25,5 +25,6 @@
     "@kbn/i18n-react",
     "@kbn/navigation-plugin",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/data-plugin",
   ]
 }

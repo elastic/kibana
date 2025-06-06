@@ -21,6 +21,22 @@ const entity = {
   },
 };
 
+const entityWithEngineMetadata = {
+  entity: {
+    last_seen_timestamp: '2024-08-06T17:03:50.722Z',
+    schema_version: 'v1',
+    definition_version: '999.999.999',
+    display_name: 'message_processor',
+    identity_fields: ['log.logger', 'event.category'],
+    id: '6UHVPiduEC2qk6rMjs1Jzg==',
+    metrics: {},
+    definition_id: 'admin-console-services',
+    EngineMetadata: {
+      Type: 'service',
+    },
+  },
+};
+
 const metadata = {
   host: {
     os: {
@@ -62,6 +78,16 @@ describe('Entity Schemas', () => {
     it('should parse an entity with metadata', () => {
       const doc = {
         ...entity,
+        ...metadata,
+      };
+
+      const result = entityLatestSchema.safeParse(doc);
+      expect(result).toHaveProperty('success', true);
+    });
+
+    it('should parse an entity with metadata and engine metadata', () => {
+      const doc = {
+        ...entityWithEngineMetadata,
         ...metadata,
       };
 

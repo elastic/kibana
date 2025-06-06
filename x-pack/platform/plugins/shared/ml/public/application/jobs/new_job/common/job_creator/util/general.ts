@@ -21,6 +21,7 @@ import {
   SPARSE_DATA_AGGREGATIONS,
 } from '@kbn/ml-anomaly-utils';
 import { cloneDeep } from 'lodash';
+import type { MlLocatorParams } from '../../../../../../locator';
 import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type {
   Job,
@@ -28,7 +29,6 @@ import type {
   Detector,
 } from '../../../../../../../common/types/anomaly_detection_jobs';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
@@ -237,29 +237,44 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
+export type NavigateToMlManagementLink = (
+  _page: string,
+  pageState?: MlLocatorParams['pageState']
+) => Promise<void>;
+
 export function convertToMultiMetricJob(
   jobCreator: JobCreatorType,
-  navigateToPath: NavigateToPath
+  navigateToPath: NavigateToMlManagementLink
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   jobCloningService.stashJobForCloning(jobCreator, true, true);
-  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, {
+    index: jobCreator.dataViewId,
+  });
 }
 
-export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function convertToAdvancedJob(
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToMlManagementLink
+) {
   jobCreator.createdBy = null;
   jobCloningService.stashJobForCloning(jobCreator, true, true);
-  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, {
+    index: jobCreator.dataViewId,
+  });
 }
 
-export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetAdvancedJob(
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToMlManagementLink
+) {
   jobCreator.createdBy = null;
   jobCloningService.stashJobForCloning(jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
-export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToMlManagementLink) {
   jobCreator.jobId = '';
   jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
@@ -267,12 +282,12 @@ export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToP
 
 export function advancedStartDatafeed(
   jobCreator: JobCreatorType | null,
-  navigateToPath: NavigateToPath
+  navigateToPath: NavigateToMlManagementLink
 ) {
   if (jobCreator !== null) {
     jobCloningService.stashJobForCloning(jobCreator, false, false);
   }
-  navigateToPath('/jobs');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE);
 }
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {

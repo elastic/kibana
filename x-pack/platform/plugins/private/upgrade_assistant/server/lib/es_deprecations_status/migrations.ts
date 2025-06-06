@@ -22,7 +22,6 @@ import {
   isFrozenDeprecation,
 } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
-import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -31,6 +30,7 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   templates: Record<string, MigrationDeprecationsDeprecation[]>;
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
+type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
 
 export interface BaseDeprecation {
   index?: string;
@@ -38,7 +38,7 @@ export interface BaseDeprecation {
   details?: string;
   message: string;
   url: string;
-  isCritical: boolean;
+  level: DeprecationLevel;
   metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
   // these properties apply to index_settings deprecations only
@@ -65,7 +65,7 @@ const createBaseDeprecation = (
     details,
     message,
     url,
-    isCritical: level === 'critical',
+    level,
     metadata: metadata as EsMetadata,
     resolveDuringUpgrade,
   };
@@ -195,21 +195,16 @@ const excludeDeprecation = (
   deprecation: BaseDeprecation,
   correctiveAction?: CorrectiveAction
 ): boolean => {
-  if (
-    deprecation.type === 'index_settings' &&
-    correctiveAction?.type === 'reindex' &&
-    deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)
-  ) {
+  if (deprecation.type === 'index_settings' && correctiveAction?.type === 'reindex') {
     return true;
   } else if (
     deprecation.type === 'data_streams' &&
     correctiveAction?.type === 'dataStream' &&
-    correctiveAction.metadata.reindexRequired &&
-    ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix))
+    correctiveAction.metadata.reindexRequired
   ) {
     return true;
   } else if (
-    deprecation.isCritical &&
+    deprecation.level === 'critical' &&
     deprecation.type === 'index_settings' &&
     deprecation.isFrozenIndex &&
     correctiveAction?.type === 'reindex'

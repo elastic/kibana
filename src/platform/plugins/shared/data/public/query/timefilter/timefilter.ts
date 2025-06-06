@@ -77,7 +77,7 @@ export class Timefilter {
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
 
-    this.useTimefilter = createUseTimefilterHook(this);
+    this.useTimefilter = createUseTimefilterHook(this, nowProvider);
   }
 
   public isTimeRangeSelectorEnabled() {

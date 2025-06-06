@@ -1,21 +1,28 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/action-types.html
+navigation_title: Connectors
+applies_to:
+  serverless: ga
+  stack: ga
 ---
+# Kibana connectors [action-types]
 
-# Connectors (Kibana) [action-types]
-
-Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {{kib}} server when rule conditions are met. {{kib}} provides the following types of connectors:
+Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+Actions are instantiations of a connector that are linked to rules and run as background tasks on the {{kib}} server when rule conditions are met.
+{{kib}} provides the following types of connectors:
 
 * [{{bedrock}}](/reference/connectors-kibana/bedrock-action-type.md): Send a request to {{bedrock}}.
 * [Cases](/reference/connectors-kibana/cases-action-type.md): Add alerts to cases.
 * [CrowdStrike](/reference/connectors-kibana/crowdstrike-action-type.md): Send a request to CrowdStrike.
 * [D3 Security](/reference/connectors-kibana/d3security-action-type.md): Send a request to D3 Security.
 * [{{gemini}}](/reference/connectors-kibana/gemini-action-type.md): Send a request to {{gemini}}.
+* [Elastic Managed LLM](/reference/connectors-kibana/elastic-managed-llm.md): Send a request to Elastic Managed LLM.
 * [Email](/reference/connectors-kibana/email-action-type.md): Send email from your server.
 * [{{ibm-r}}](/reference/connectors-kibana/resilient-action-type.md): Create an incident in {{ibm-r}}.
 * [Index](/reference/connectors-kibana/index-action-type.md): Index data into Elasticsearch.
 * [Jira](/reference/connectors-kibana/jira-action-type.md): Create an incident in Jira.
+* [Microsoft Defender for Endpoint](/reference/connectors-kibana/defender-action-type.md): Send requests to  Microsoft Defender-enrolled hosts.
 * [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md): Send a message to a Microsoft Teams channel.
 * [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Add AI-driven insights and custom actions to your workflow.
 * [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.
@@ -46,10 +53,8 @@ Some connector types are paid commercial features, while others are free. For a 
 
 Rules use connectors to route actions to different destinations like log files, ticketing systems, and messaging tools. While each {{kib}} app can offer their own types of rules, they typically share connectors. **{{stack-manage-app}} > {{connectors-ui}}** offers a central place to view and manage all the connectors in the current space.
 
-:::{image} images/connector-listing.png
-:alt: Example connector listing in the {{rules-ui}} UI
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Example connector listing in the {{rules-ui}} UI](images/connector-listing.png)
 
 
 ## Required permissions [_required_permissions_2]
@@ -66,17 +71,13 @@ Use the [action configuration settings](/reference/configuration-reference/alert
 
 In **{{stack-manage-app}} > {{connectors-ui}}**, you can find a list of the connectors in the current space. You can use the search bar to find specific connectors by name and type. The **Type** dropdown also enables you to filter to a subset of connector types.
 
-:::{image} images/connector-filter-by-type.png
-:alt: Filtering the connector list by types of connectors
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Filtering the connector list by types of connectors](images/connector-filter-by-type.png)
 
 You can delete individual connectors using the trash icon. Alternatively, select multiple connectors and delete them in bulk using the **Delete** button.
 
-:::{image} images/connector-delete.png
-:alt: Deleting connectors individually or in bulk
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Deleting connectors individually or in bulk](images/connector-delete.png)
 
 ::::{note}
 You can delete a connector even if there are still actions referencing it. When this happens the action will fail to run and errors appear in the {{kib}} logs.
@@ -89,10 +90,8 @@ You can delete a connector even if there are still actions referencing it. When 
 
 New connectors can be created with the **Create connector** button, which guides you to select the type of connector and configure its properties.
 
-:::{image} images/connector-select-type.png
-:alt: Connector select type
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Connector select type](images/connector-select-type.png)
 
 After you create a connector, it is available for use any time you set up an action in the current space.
 
@@ -108,17 +107,13 @@ You can also manage connectors as resources with the [Elasticstack provider](htt
 
 To import and export connectors, use the [Saved Objects Management UI](docs-content://explore-analyze/find-and-organize/saved-objects.md).
 
-:::{image} images/connectors-import-banner.png
-:alt: Connectors import banner
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Connectors import banner](images/connectors-import-banner.png)
 
 If a connector is missing sensitive information after the import, a **Fix** button appears in **{{connectors-ui}}**.
 
-:::{image} images/connectors-with-missing-secrets.png
-:alt: Connectors with missing secrets
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Connectors with missing secrets](images/connectors-with-missing-secrets.png)
 
 
 ## Monitoring connectors [monitoring-connectors]

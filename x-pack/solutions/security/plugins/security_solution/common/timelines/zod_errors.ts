@@ -7,9 +7,9 @@
 
 import type { ZodError, ZodType } from '@kbn/zod';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { type Either, fold, left, right } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { type Either, fold, left, right } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 
 type ErrorFactory = (message: string) => Error;
 

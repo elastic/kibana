@@ -85,7 +85,6 @@ const listedTypes = new Map<string, RegistryRuleType>([
       solution: 'stack',
       enabledInLicense: true,
       hasAlertsMappings: false,
-      hasFieldsForAAD: false,
       validLegacyConsumers: [],
     },
   ],

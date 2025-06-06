@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/obs-ux-management-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "slo",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "slo"
-    ],
+    "configPath": ["xpack", "slo"],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -40,7 +35,8 @@
       "uiActions",
       "unifiedSearch",
       "usageCollection",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
       "cloud",

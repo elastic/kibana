@@ -38,7 +38,7 @@ export const getSavedObjectCounts = async ({
     (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const counts = buckets.reduce((memo, bucket) => {
-    memo[bucket.key] = bucket.doc_count;
+    memo[`${bucket.key}`] = bucket.doc_count;
     return memo;
   }, {} as Record<string, number>);
 

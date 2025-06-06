@@ -4,14 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
-import { isEmpty, isEqual } from 'lodash';
 import {
-  dateRangeMachine,
-  createDateRangeMachineImplementations,
-} from '../../../../../state_management/date_range_state_machine';
+  ActorRefFrom,
+  MachineImplementationsFrom,
+  SnapshotFrom,
+  assign,
+  fromEventObservable,
+  setup,
+} from 'xstate5';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import {
+  FlattenRecord,
+  SampleDocument,
+  isSchema,
+  processorDefinitionSchema,
+} from '@kbn/streams-schema';
+import { isEmpty, isEqual } from 'lodash';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
+import { BehaviorSubject, map } from 'rxjs';
+import { TimeState } from '@kbn/es-query';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import {
@@ -30,7 +41,13 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { filterSimulationDocuments, composeSamplingCondition } from './utils';
+import {
+  composeSamplingCondition,
+  getSchemaFieldsFromSimulation,
+  mapField,
+  unmapField,
+} from './utils';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -38,7 +55,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: FlattenRecord[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocument[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -54,7 +71,7 @@ export const simulationMachine = setup({
   actors: {
     fetchSamples: getPlaceholderFor(createSamplesFetchActor),
     runSimulation: getPlaceholderFor(createSimulationRunnerActor),
-    dateRangeMachine: getPlaceholderFor(() => dateRangeMachine),
+    subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
   },
   actions: {
     notifySamplesFetchFailure: getPlaceholderFor(createSamplesFetchFailureNofitier),
@@ -66,24 +83,33 @@ export const simulationMachine = setup({
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: FlattenRecord[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
-    derivePreviewDocuments: assign(({ context }) => {
-      return {
-        previewDocuments: context.simulation
-          ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
-          : context.samples,
-      };
-    }),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
+    deriveDetectedSchemaFields: assign(({ context }) => ({
+      detectedSchemaFields: context.simulation
+        ? getSchemaFieldsFromSimulation(
+            context.simulation.detected_fields,
+            context.detectedSchemaFields,
+            context.streamName
+          )
+        : context.detectedSchemaFields,
+    })),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
+      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
+    })),
+    unmapField: assign(({ context }, params: { fieldName: string }) => ({
+      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+    })),
     resetSimulation: assign({
       processors: [],
+      detectedSchemaFields: [],
       simulation: undefined,
       samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
@@ -108,12 +134,7 @@ export const simulationMachine = setup({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBFlHSXplFXVDPRl1ZVlNUwsES2VJR3oRw0dDeXUXR04ZX390MODSUKCI+hTYMDxy0WqUYLrEKdcx9T15ecNJPVlO6X6rQ3V6SddDdzd5K-llRyLEDrcIkUhMJJ5OCwQhJWD0ABU+0qh2OlXqkhmikc8kkhmU6hm+n08meg3xzU4-3aUy0kmmyiBINWEKhsBhSWitCiYCwyP4giOtXRpxGynoBhmhkMsipLlJ5isb2U13u8mk6qmRl0TOWGzBrJ57Nh0TidA4PAOgrRoHqhL07w6elpBL0GjJlkcDoBvWkcr0k0ahl1gVBZEN0JNEF5uwtFQFNREIoQ0oU9GmOlusr9KrJNkULlkmLdk2l6g0IZWEXBkKNHPo0awsfYknjVWtwttpzmdnkuNubk6KscZL7dkL8g+-3V0hllf1kRQxCFOCwKAAXkuoKR+e3E8QTggRo43r9NGOs6m87J6L0epxnZcFPIOvOw-Qlyu15u6DvW1b90PMVmnUdwvC8GxnSuMkXCUSCvE6B4mimN9ggbMAACNCAwYgoi3ABhM0YFgGs2XrWJ4jjAChSTLsEF+aQJXuTgNT0J9Og9HF7FVV4Az9RwCVkVDNmjLCcLwuhCMokixFgPBKHoHAADNSgAClE7DcLAAAVdAwAASjWPV3w08SCKIuBd1RTtxCkWwQJfRxpFAjwNUmPNOBvGQix0dUNHuV5hJIdCxNw8zpNIWT5LYRSVLAJJ1MwzSeV0tADKM0M0NMsLJIs2AWzbazaNso8WJvbR-leTRhlkExFRTXp7G0bQOmkcZXCEvxgWMtCsEIHAIC3ABlHA0CYJsSIgEgwA-YhUkIABrGbYFG8a4AKXZYnigBBKI8FhKyO2KjEVE4JrGnmRwvSuiYPLsVRJ1eB9XAEq4gsiPqBuG1aJtIeLIU5cb8CU2E0HoFaxomja8C2pJdv2spLRRI6D2TQx5jeSQeh6X4XxkBUBhse6qUmctB1e+R3sU9l4oIOghp6iIqDAABHDAUBSNLiDwEjDsA5N6SaehbhYr08SlOqBiLM7CU8kYri+Nr1CpnAaaSOmoAZzKmdZ9nObAbnef-ZH+bowWzvslVZVuFVMRgnRhZmOR3AZS6qaSHDl3pxmwSm4gZqXealvBn3iCoT2dr2g6kYTGjUbouQb1UVQ5g8IwVFkUdJiUUDdCcAE3Wmd3PeG0O-qSAH6CBvAQaSMHmSZiO4ajxHCpRw9nbGDx5kHbQvT0MkCUYrHrnkHR3C0QEgWIQho3gSoG+Kor45KvsHT0ZjWPYyROJPFpqSxhRug1Tgp6WbXgs-AhVw3LdqJtEqxRvOZBJUMeRnUAmlRvNr+-+XRMTlmkFTFAEAmz3xsvUQs9BP7qjxP8DeFIyQakUAhF2fxdAbyptlCSUApLmnnrHB+doRhKF6P8ekWhuh23qpILG6YaqT0QqfZ0VNPqDXpj9OAEDjpSF6M0CYk41StC9EYD01wmq2FlAGB4rw+yUy6ovSIqsdjq1LhfMOusOZgC5jzHhK8MQPAdNoDebhpTox6E8eqXxRi3BGM5U+E8R7F2IF7TWod9FAVsGdAk-9nSunlIPboYw5jZjmE5ekytfDeCAA */
   id: 'simulation',
   context: ({ input, self, spawn }) => ({
-    dateRangeRef: spawn('dateRangeMachine', {
-      id: 'dateRange',
-      input: {
-        parentRef: self,
-      },
-    }),
+    detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
@@ -121,18 +142,19 @@ export const simulationMachine = setup({
     samplingCondition: composeSamplingCondition(input.processors),
     streamName: input.streamName,
   }),
-  initial: 'initializing',
+  initial: 'loadingSamples',
+  invoke: {
+    id: 'subscribeTimeUpdatesActor',
+    src: 'subscribeTimeUpdates',
+  },
   on: {
     'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
-      actions: [
-        { type: 'storePreviewDocsFilter', params: ({ event }) => event },
-        { type: 'derivePreviewDocuments' },
-      ],
+      actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+      actions: [{ type: 'resetSimulation' }],
     },
     // Handle adding/reordering processors
     'processors.*': {
@@ -158,25 +180,23 @@ export const simulationMachine = setup({
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+        actions: [{ type: 'resetSimulation' }],
       },
     ],
   },
   states: {
-    initializing: {
-      always: [
-        {
-          guard: {
-            type: 'hasProcessors',
-            params: ({ context }) => ({ processors: context.processors }),
-          },
-          target: 'loadingSamples',
+    idle: {
+      on: {
+        'simulation.fields.map': {
+          target: 'assertingSimulationRequirements',
+          actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
-        { target: 'idle' },
-      ],
+        'simulation.fields.unmap': {
+          target: 'assertingSimulationRequirements',
+          actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+      },
     },
-
-    idle: {},
 
     debouncingChanges: {
       on: {
@@ -206,15 +226,21 @@ export const simulationMachine = setup({
         input: ({ context }) => ({
           condition: context.samplingCondition,
           streamName: context.streamName,
-          absoluteTimeRange: context.dateRangeRef.getSnapshot().context.absoluteTimeRange,
         }),
-        onDone: {
-          target: 'assertingSimulationRequirements',
-          actions: [
-            { type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) },
-            { type: 'derivePreviewDocuments' },
-          ],
-        },
+        onDone: [
+          {
+            guard: {
+              type: 'hasProcessors',
+              params: ({ context }) => ({ processors: context.processors }),
+            },
+            target: 'assertingSimulationRequirements',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+          {
+            target: 'idle',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+        ],
         onError: {
           target: 'idle',
           actions: [
@@ -244,14 +270,15 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples,
+          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
+          detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
           target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
-            { type: 'derivePreviewDocuments' },
+            { type: 'deriveDetectedSchemaFields' },
           ],
         },
         onError: {
@@ -264,17 +291,21 @@ export const simulationMachine = setup({
 });
 
 export const createSimulationMachineImplementations = ({
-  data,
   streamsRepositoryClient,
   toasts,
+  timeState$,
 }: SimulationMachineDeps): MachineImplementationsFrom<typeof simulationMachine> => ({
   actors: {
-    fetchSamples: createSamplesFetchActor({ streamsRepositoryClient }),
+    fetchSamples: createSamplesFetchActor({ streamsRepositoryClient, timeState$ }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
-    dateRangeMachine: dateRangeMachine.provide(createDateRangeMachineImplementations({ data })),
+    subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
   actions: {
     notifySamplesFetchFailure: createSamplesFetchFailureNofitier({ toasts }),
     notifySimulationRunFailure: createSimulationRunFailureNofitier({ toasts }),
   },
 });
+
+function createTimeUpdatesActor({ timeState$ }: { timeState$: BehaviorSubject<TimeState> }) {
+  return fromEventObservable(() => timeState$.pipe(map(() => ({ type: 'dateRange.update' }))));
+}

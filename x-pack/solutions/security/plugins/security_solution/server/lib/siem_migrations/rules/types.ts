@@ -11,19 +11,20 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
+  RuleMigration,
+  RuleMigrationRule,
   RuleMigrationTranslationResult,
-  UpdateRuleMigrationData,
+  UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import {
-  type RuleMigration,
-  type RuleMigrationResource,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
+import type { Stored } from '../types';
 
-export type Stored<T extends object> = T & { id: string };
+export type StoredSiemMigration = Stored<RuleMigration>;
 
-export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface SiemRuleMigrationsClientDependencies {
@@ -53,7 +54,7 @@ export interface RuleMigrationPrebuiltRule {
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
-export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
   translation_result?: RuleMigrationTranslationResult;
 };
 
@@ -71,3 +72,16 @@ export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
  *
  **/
 export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';
+
+export interface Adapters {
+  rules: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
+  integrations: IndexAdapter;
+  prebuiltrules: IndexAdapter;
+  migrations: IndexPatternAdapter;
+}
+
+export type AdapterId = keyof Adapters;
+
+export type IndexNameProvider = () => Promise<string>;
+export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;

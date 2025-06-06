@@ -24,4 +24,7 @@ properties:
   etag:
     type: string
     example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
-    description: Etag
+    description: >
+      `etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration.
+      If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`.
+      Every time a configuration is edited `applied_by_agent` is reset to `false`.

@@ -7,28 +7,52 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
-import { APIRoutes, ChatFormFields, QueryTestResponse } from '../types';
+import {
+  APIRoutes,
+  PlaygroundForm,
+  PlaygroundFormFields,
+  PlaygroundPageMode,
+  QueryTestResponse,
+} from '../types';
 import { useKibana } from './use_kibana';
+import { elasticsearchQueryString } from '../utils/user_query';
 
-export const useElasticsearchQuery = () => {
+export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   const { http } = useKibana().services;
-  const { getValues } = useFormContext();
+  const { getValues } = useFormContext<PlaygroundForm>();
   const executeEsQuery = () => {
-    const indices = getValues(ChatFormFields.indices);
-    const elasticsearchQuery = getValues(ChatFormFields.elasticsearchQuery);
-    const query = getValues(ChatFormFields.searchQuery);
+    const formValues = getValues();
+    const esQuery = elasticsearchQueryString(
+      formValues[PlaygroundFormFields.elasticsearchQuery],
+      formValues[PlaygroundFormFields.userElasticsearchQuery],
+      formValues[PlaygroundFormFields.userElasticsearchQueryValidations]
+    );
+    const body =
+      pageMode === PlaygroundPageMode.chat
+        ? JSON.stringify({
+            elasticsearch_query: esQuery,
+            indices: formValues[PlaygroundFormFields.indices],
+            query: formValues[PlaygroundFormFields.question],
+            chat_context: {
+              source_fields: JSON.stringify(formValues[PlaygroundFormFields.sourceFields]),
+              doc_size: formValues[PlaygroundFormFields.docSize],
+            },
+          })
+        : JSON.stringify({
+            elasticsearch_query: esQuery,
+            indices: formValues[PlaygroundFormFields.indices],
+            query: formValues[PlaygroundFormFields.searchQuery],
+          });
+
     return http.post<QueryTestResponse>(APIRoutes.POST_QUERY_TEST, {
-      body: JSON.stringify({
-        elasticsearch_query: JSON.stringify(elasticsearchQuery),
-        indices,
-        query,
-      }),
+      body,
     });
   };
 
   const { refetch: executeQuery, ...rest } = useQuery({
     queryFn: executeEsQuery,
     enabled: false,
+    retry: false,
   });
 
   return {

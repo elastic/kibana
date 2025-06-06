@@ -7,22 +7,13 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
 import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
 import type { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
-
-export async function getRenderedHref(Component: React.FC, selector: string) {
-  const el = render(<Component />);
-
-  await waitFor(() => el.container.querySelector(selector));
-
-  const a = el.container.querySelector(selector);
-  return a?.getAttribute('href') ?? '';
-}
 
 describe('JobsTableComponent', () => {
   let securityJobs: SecurityJob[];
@@ -31,25 +22,6 @@ describe('JobsTableComponent', () => {
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
     onJobStateChangeMock = jest.fn();
-  });
-
-  test('should render the hyperlink which points specifically to the job id', async () => {
-    const href = await getRenderedHref(
-      () => (
-        <JobsTableComponent
-          isLoading={true}
-          jobs={securityJobs}
-          onJobStateChange={onJobStateChangeMock}
-          mlNodesAvailable={true}
-        />
-      ),
-      '[data-test-subj="jobs-table-link"]'
-    );
-    await waitFor(() =>
-      expect(href).toEqual(
-        "/app/ml/jobs?_a=(jobs:(queryText:'id:linux_anomalous_network_activity_ecs'))"
-      )
-    );
   });
 
   test('should display the job friendly name', async () => {
@@ -66,24 +38,6 @@ describe('JobsTableComponent', () => {
       expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().text()).toContain(
         'Unusual Network Activity'
       )
-    );
-  });
-
-  test('should render the hyperlink with URI encodings which points specifically to the job id', async () => {
-    securityJobs[0].id = 'job id with spaces';
-    const href = await getRenderedHref(
-      () => (
-        <JobsTableComponent
-          isLoading={true}
-          jobs={securityJobs}
-          onJobStateChange={onJobStateChangeMock}
-          mlNodesAvailable={true}
-        />
-      ),
-      '[data-test-subj="jobs-table-link"]'
-    );
-    await waitFor(() =>
-      expect(href).toEqual("/app/ml/jobs?_a=(jobs:(queryText:'id:job%20id%20with%20spaces'))")
     );
   });
 

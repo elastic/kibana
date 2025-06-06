@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { escapeRegExp } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TabsBar, type TabsBarProps } from '../tabs_bar';
+import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
 import {
   addTab,
   closeTab,
   selectTab,
+  selectRecentlyClosedTab,
   insertTabAfter,
   replaceTabWith,
   closeOtherTabs,
@@ -24,8 +27,9 @@ import {
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
-  initialItems: TabItem[];
-  initialSelectedItemId?: string;
+  items: TabItem[];
+  selectedItemId?: string;
+  recentlyClosedItems: TabItem[];
   'data-test-subj'?: string;
   services: TabsServices;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
@@ -40,8 +44,9 @@ export interface TabbedContentState {
 }
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
-  initialItems,
-  initialSelectedItemId,
+  items: managedItems,
+  selectedItemId: managedSelectedItemId,
+  recentlyClosedItems,
   maxItemsCount,
   services,
   renderContent,
@@ -49,15 +54,12 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onChanged,
   getPreviewData,
 }) => {
+  const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
-  const [state, _setState] = useState<TabbedContentState>(() => {
-    return {
-      items: initialItems,
-      selectedItem:
-        (initialSelectedItemId && initialItems.find((item) => item.id === initialSelectedItemId)) ||
-        initialItems[0],
-    };
-  });
+  const state = useMemo(
+    () => prepareStateFromProps(managedItems, managedSelectedItemId),
+    [managedItems, managedSelectedItemId]
+  );
   const { items, selectedItem } = state;
   const stateRef = React.useRef<TabbedContentState>();
   stateRef.current = state;
@@ -69,15 +71,15 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       }
 
       const nextState = getNextState(stateRef.current);
-      _setState(nextState);
       onChanged(nextState);
     },
-    [_setState, onChanged]
+    [onChanged]
   );
 
   const onLabelEdited = useCallback(
     async (item: TabItem, newLabel: string) => {
       const editedItem = { ...item, label: newLabel };
+      tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
     },
     [changeState]
@@ -90,32 +92,84 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     [changeState]
   );
 
+  const onSelectRecentlyClosed = useCallback(
+    async (item: TabItem) => {
+      changeState((prevState) => selectRecentlyClosedTab(prevState, item));
+    },
+    [changeState]
+  );
+
   const onClose = useCallback(
     async (item: TabItem) => {
-      changeState((prevState) => closeTab(prevState, item));
+      changeState((prevState) => {
+        const nextState = closeTab(prevState, item);
+        if (nextState.selectedItem) {
+          tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
+        }
+        return nextState;
+      });
+    },
+    [changeState]
+  );
+
+  const onReorder = useCallback(
+    (reorderedItems: TabItem[]) => {
+      changeState((prevState) => ({
+        ...prevState,
+        items: reorderedItems,
+      }));
     },
     [changeState]
   );
 
   const onAdd = useCallback(async () => {
     const newItem = createItem();
+    tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
   }, [changeState, createItem, maxItemsCount]);
+
+  const onDuplicate = useCallback(
+    (item: TabItem) => {
+      const newItem = createItem();
+      const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
+      const escapedCopyLabel = escapeRegExp(copyLabel);
+      const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
+      const baseLabel = item.label.replace(baseRegex, '');
+      const escapedBaseLabel = escapeRegExp(baseLabel);
+
+      // Find all existing copies to determine next number
+      const copyRegex = new RegExp(`^${escapedBaseLabel}\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
+      const copyNumberRegex = new RegExp(`\\(${escapedCopyLabel}\\) (\\d+)$`);
+      const copies = state.items
+        .filter((tab) => copyRegex.test(tab.label))
+        .map((tab) => {
+          const match = tab.label.match(copyNumberRegex);
+          return match && match[1] ? Number(match[1]) : 1; // match[1] is the number after (copy)
+        });
+
+      // Determine the next copy number
+      const nextNumber = copies.length > 0 ? Math.max(...copies) + 1 : null;
+
+      newItem.label = nextNumber
+        ? `${baseLabel} (${copyLabel}) ${nextNumber}`
+        : `${baseLabel} (${copyLabel})`;
+
+      tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
+      changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
+    },
+    [changeState, createItem, maxItemsCount, state.items]
+  );
 
   const getTabMenuItems = useMemo(() => {
     return getTabMenuItemsFn({
       tabsState: state,
       maxItemsCount,
-      onDuplicate: (item) => {
-        const newItem = createItem();
-        newItem.label = `${item.label} (copy)`;
-        changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
-      },
+      onDuplicate,
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem, state, maxItemsCount]);
+  }, [state, maxItemsCount, onDuplicate, changeState]);
 
   return (
     <EuiFlexGroup
@@ -126,8 +180,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     >
       <EuiFlexItem grow={false}>
         <TabsBar
+          ref={tabsBarApi}
           items={items}
           selectedItem={selectedItem}
+          recentlyClosedItems={recentlyClosedItems}
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
@@ -135,6 +191,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onReorder={onReorder}
           onClose={onClose}
           getPreviewData={getPreviewData}
         />
@@ -152,3 +210,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 };
+
+function prepareStateFromProps(items: TabItem[], selectedItemId?: string): TabbedContentState {
+  const selectedItem = selectedItemId && items.find((item) => item.id === selectedItemId);
+  return {
+    items,
+    selectedItem: selectedItem || items[0],
+  };
+}

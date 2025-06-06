@@ -25,10 +25,16 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.
- * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true}} options Options impacting the outgoing config list
+ * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true, securityProductTier?: ServerlessSecurityTier}} options Options impacting the outgoing config list
  * @returns List of paths to configurations to be merged, from left to right.
  */
-export function compileConfigStack({ configOverrides, devConfig, dev, serverless }) {
+export function compileConfigStack({
+  configOverrides,
+  devConfig,
+  dev,
+  serverless,
+  securityProductTier,
+}) {
   const cliConfigs = configOverrides || [];
   const envConfigs = getEnvConfigs();
   const defaultConfig = getConfigPath();
@@ -53,15 +59,29 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     }
   }
 
+  // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
-    const serverlessSecurityTier = getSecurityTierFromCfg(configs);
+    const serverlessSecurityTier = securityProductTier || getSecurityTierFromCfg(configs);
     if (serverlessSecurityTier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
       if (dev && devConfig !== false) {
         configs.push(
           resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.dev.yml`)
         );
+      }
+    }
+  }
+
+  // Pricing specific tier configs
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+  const isPricingTiersEnabled = _.get(config, 'pricing.tiers.enabled', false);
+  if (isPricingTiersEnabled) {
+    const tier = getServerlessProjectTierFromConfig(config);
+    if (tier) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
+      if (dev && devConfig !== false) {
+        configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
       }
     }
   }
@@ -87,8 +107,29 @@ function getServerlessModeFromCfg(configs) {
 function getSecurityTierFromCfg(configs) {
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
+  // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
+  // and is the only element in the array, which is why we can access the first element for product type/tier
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
+}
+
+/** @typedef {'essentials' | 'complete' | 'search_ai_lake' | 'ai_soc'} ServerlessProjectTier */
+/**
+ * @param {string[]} config Configuration object from merged configs
+ * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
+ */
+function getServerlessProjectTierFromConfig(config) {
+  const products = _.get(config, 'pricing.tiers.products', []);
+
+  // Constraint tier to be the same for
+  const uniqueTiers = _.uniqBy(products, 'tier');
+  if (uniqueTiers.length > 1) {
+    throw new Error(
+      'Multiple tiers found in pricing.tiers.products, the applied tier should be the same for all the products.'
+    );
+  }
+
+  return uniqueTiers.at(0)?.tier;
 }
 
 /**

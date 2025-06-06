@@ -1610,7 +1610,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toBeNull();
     });
-    it('should accept a secret ref instead of a text value for a secret field', () => {
+    it('should accept a secret ref id instead of a text value for a secret field', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true, id: 'secret1' },
@@ -1626,7 +1626,24 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toBeNull();
     });
-    it('secret refs should always have an id', () => {
+    it('should accept secret ref ids instead of a text value for a secret field', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['secret1', 'secret2'] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+    it('secret refs should always have an id or ids', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true },
@@ -1640,7 +1657,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
         load
       );
 
-      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+      expect(res).toEqual(['Secret reference is invalid, id or ids must be provided']);
     });
     it('secret ref id should be a string', () => {
       const res = validatePackagePolicyConfig(
@@ -1657,6 +1674,23 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       );
 
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
+    it('secret ref ids should all be strings', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['someid', 123] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        load
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, ids must be an array of strings']);
     });
   });
 

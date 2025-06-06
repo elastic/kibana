@@ -42,13 +42,20 @@ const bucketParameterTypes: Array<
   ]
 > = [
   // field   // bucket   //from    // to   //result
-  ['date', 'date_period', null, null, 'date'],
-  ['date', 'integer', 'date', 'date', 'date'],
+  // 2-param signatures
   ['date_nanos', 'date_period', null, null, 'date_nanos'],
-  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
-  // Modified time_duration to time_literal
+  ['date', 'date_period', null, null, 'date'],
+  ['date_nanos', 'time_literal', null, null, 'date_nanos'],
   ['date', 'time_literal', null, null, 'date'],
   ['double', 'double', null, null, 'double'],
+  ['double', 'integer', null, null, 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', null, null, 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', null, null, 'double'],
+  // 4-param signatures
+  ['date', 'integer', 'date', 'date', 'date'],
+  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
   ['double', 'integer', 'double', 'double', 'double'],
   ['double', 'integer', 'double', 'integer', 'double'],
   ['double', 'integer', 'double', 'long', 'double'],
@@ -58,7 +65,6 @@ const bucketParameterTypes: Array<
   ['double', 'integer', 'long', 'double', 'double'],
   ['double', 'integer', 'long', 'integer', 'double'],
   ['double', 'integer', 'long', 'long', 'double'],
-  ['integer', 'double', null, null, 'double'],
   ['integer', 'integer', 'double', 'double', 'double'],
   ['integer', 'integer', 'double', 'integer', 'double'],
   ['integer', 'integer', 'double', 'long', 'double'],
@@ -68,7 +74,6 @@ const bucketParameterTypes: Array<
   ['integer', 'integer', 'long', 'double', 'double'],
   ['integer', 'integer', 'long', 'integer', 'double'],
   ['integer', 'integer', 'long', 'long', 'double'],
-  ['long', 'double', null, null, 'double'],
   ['long', 'integer', 'double', 'double', 'double'],
   ['long', 'integer', 'double', 'integer', 'double'],
   ['long', 'integer', 'double', 'long', 'double'],
@@ -94,7 +99,7 @@ const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['case']);
+const excludedFunctions = new Set(['case', 'cast']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -317,7 +322,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE];
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,
@@ -709,10 +714,14 @@ const enrichOperators = (
     const isComparisonOperator =
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
+    // IS NULL | IS NOT NULL
+    const arePredicates =
+      op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
+
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
     const isNotOperator =
-      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isInOperator);
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isLikeOperator);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
@@ -729,6 +738,7 @@ const enrichOperators = (
         Location.WHERE,
         Location.ROW,
         Location.SORT,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
@@ -738,13 +748,20 @@ const enrichOperators = (
         Location.EVAL,
         Location.WHERE,
         Location.ROW,
-        Location.STATS,
         Location.SORT,
+        Location.STATS,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
-    if (isInOperator || isLikeOperator || isNotOperator) {
-      locationsAvailable = [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW];
+    if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
+      locationsAvailable = [
+        Location.EVAL,
+        Location.WHERE,
+        Location.SORT,
+        Location.ROW,
+        Location.STATS_WHERE,
+      ];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular
@@ -826,7 +843,7 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not')) {
+    if (functionName.includes('not') && functionName !== 'is not null') {
       functionName = name;
     }
     if (name.toLowerCase() === 'match') {
@@ -844,7 +861,7 @@ function printGeneratedFunctionsFile(
     name: '${functionName}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
     preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
@@ -939,6 +956,32 @@ ${
 
   const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
 
+  const functionNames = allFunctionDefinitions.map((def) => def.name.toUpperCase());
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/function_names.ts'),
+    `/**
+ * __AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.__
+ *
+ * @note This file is generated by the \`generate_function_definitions.ts\`
+ * script. Do not edit it manually.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
+`
+  );
+
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
   const operatorDefinitions: FunctionDefinition[] = [];
@@ -951,6 +994,10 @@ ${
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
+    const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
+    if (arePredicates) {
+      continue;
+    }
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
@@ -959,6 +1006,7 @@ ${
       });
       continue;
     }
+
     if (functionDefinition.type === FunctionDefinitionTypes.OPERATOR || isLikeOperator) {
       operatorDefinitions.push(functionDefinition);
     }
