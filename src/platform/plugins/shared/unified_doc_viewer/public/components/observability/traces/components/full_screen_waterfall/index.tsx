@@ -45,7 +45,7 @@ export const FullScreenWaterfall = ({
   const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const overlayMaskRef = useRef(null);
+  const overlayMaskRef = useRef<HTMLDivElement>(null);
 
   const getParentApi = useCallback(
     () => ({
