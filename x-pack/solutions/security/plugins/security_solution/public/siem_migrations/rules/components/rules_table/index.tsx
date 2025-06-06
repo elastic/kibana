@@ -35,15 +35,17 @@ import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_preb
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import {
+  RuleTranslationResult,
+  SiemMigrationRetryFilter,
+} from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import type { FilterOptions, RuleMigrationStats } from '../../types';
+import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { StartMigrationModal } from './start_migration_modal';
-import { useStartMigrationModal } from './use_start_migration_modal';
+import { useStartMigrationModal } from './start_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -228,15 +230,22 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const {
-      isVisible: isStartMigrationModalVisible,
-      showStartMigrationModal,
-      startMigrationWithSettings,
-      closeModal,
-    } = useStartMigrationModal({
-      migrationId,
-      startMigration,
+    const reprocessFailedRulesWithSettings = useCallback(
+      (settings: RuleMigrationSettings) => {
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationId, startMigration]
+    );
+
+    const { getModal, showStartMigrationModal } = useStartMigrationModal({
+      availableConnectors: aiConnectors,
+      lastConnectorId: migrationStats?.last_execution?.connector_id,
+      skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
+      onStartMigrationWithSettings: reprocessFailedRulesWithSettings,
+      numberOfRules: translationStats?.rules.failed ?? 0,
     });
+
+    const ReprocessFailedRulesModal = useMemo(() => getModal(), [getModal]);
 
     const isRulesLoading =
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -330,16 +339,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
-        {isStartMigrationModalVisible && (
-          <StartMigrationModal
-            availableConnectors={aiConnectors}
-            lastConnectorId={migrationStats?.last_execution?.connector_id}
-            skipPrebuiltRulesMatching={migrationStats?.last_execution?.skip_prebuilt_rules_matching}
-            onClose={closeModal}
-            onStartMigrationWithSettings={startMigrationWithSettings}
-            numberOfRules={translationStats?.rules.failed ?? 0}
-          />
-        )}
+        <ReprocessFailedRulesModal />
 
         {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
 

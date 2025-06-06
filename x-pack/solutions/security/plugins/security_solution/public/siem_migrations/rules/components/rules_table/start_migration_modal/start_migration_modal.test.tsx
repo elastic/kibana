@@ -7,20 +7,20 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from './start_migration_modal';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-jest.mock('../../../../common/hooks/use_space_id');
+jest.mock('../../../../../common/hooks/use_space_id');
 const useSpaceIdMock = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
 
-jest.mock('../../../../common/components/links/link_props');
+jest.mock('../../../../../common/components/links/link_props');
 
 const startMigrationWithSettingsMock = jest.fn().mockResolvedValue(undefined);
 const onCloseMock = jest.fn();
