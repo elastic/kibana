@@ -10,3 +10,10 @@ xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
 # user experience plugin
 xpack.ux.enabled: false
+
+
+xpack.fleet.internal.registry.excludePackages: [
+  # Oblt integrations
+  'synthetics',
+  'synthetics_dashboards',
+]
