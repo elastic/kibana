@@ -39,6 +39,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ruleTypeRegistry,
     hideEditButton = false,
     filteredRuleTypes = INITIAL_FILTERED_RULE_TYPES,
+    navigateToEditRuleForm,
   }) => {
     const {
       application: { capabilities, navigateToApp },
@@ -112,6 +113,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     }, [rule, ruleTypeRegistry]);
 
     const onEditRuleClick = () => {
+      if (navigateToEditRuleForm) {
+        navigateToEditRuleForm(rule.id);
+        return;
+      }
+
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
         state: {
