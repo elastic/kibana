@@ -185,7 +185,11 @@ export function HeaderActions({
 
   return (
     <>
-      <EuiFlexGroup direction="rowReverse" alignItems="center">
+      <EuiFlexGroup
+        direction="rowReverse"
+        alignItems="center"
+        data-test-subj={`ruleType_${rule.ruleTypeId}`}
+      >
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
@@ -207,16 +211,14 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <div data-test-subj={`ruleType_${rule.ruleTypeId}`}>
-              <EuiContextMenu
-                initialPanelId={0}
-                panels={panels}
-                className="actDetailsCollapsedItemActions"
-                data-test-subj="detailsCollapsedActionPanel"
-                data-testid="detailsCollapsedActionPanel"
-                css={collapsedItemActionsCss}
-              />
-            </div>
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={panels}
+              className="actDetailsCollapsedItemActions"
+              data-test-subj="detailsCollapsedActionPanel"
+              data-testid="detailsCollapsedActionPanel"
+              css={collapsedItemActionsCss}
+            />
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
