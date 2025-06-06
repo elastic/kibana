@@ -35,7 +35,7 @@ export function BarDetails({
     <div
       css={css`
         position: relative;
-        height: 24px;
+        height: ${theme.euiTheme.size.l};
       `}
     >
       <EuiFlexGroup
@@ -47,7 +47,7 @@ export function BarDetails({
           position: absolute;
           right: 0;
           & > div:last-child {
-            margin-right: 8px;
+            margin-right: ${theme.euiTheme.size.s};
           }
         `}
       >

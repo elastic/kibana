@@ -7,6 +7,7 @@
 
 import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
+import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
 import { traceOtelSample } from './mock/trace_otel_sample';
 import { traceSample } from './mock/trace_sample';
@@ -30,14 +31,8 @@ export default stories;
 export const ExampleClockSkew: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      onClick={(params) => {
-        // eslint-disable-next-line no-console
-        console.log('##### Clicked:', params);
-      }}
-      onErrorClick={(params) => {
-        // eslint-disable-next-line no-console
-        console.log('##### Error clicked:', params);
-      }}
+      onClick={action('onClick')}
+      onErrorClick={action('onErrorClick')}
       traceItems={[
         {
           id: 'd2efb76164a77608',

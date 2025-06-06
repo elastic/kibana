@@ -154,6 +154,7 @@ export async function getTraceItems({
 }
 
 export const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
+const excludedLogLevels = ['debug', 'info', 'warning'];
 
 export function getApmTraceError({
   apmEventClient,
@@ -166,8 +167,6 @@ export function getApmTraceError({
   start: number;
   end: number;
 }) {
-  const excludedLogLevels = ['debug', 'info', 'warning'];
-
   return apmEventClient.search('get_errors_docs', {
     apm: {
       sources: [

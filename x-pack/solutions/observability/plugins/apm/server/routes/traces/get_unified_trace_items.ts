@@ -12,12 +12,18 @@ import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import {
+  AT_TIMESTAMP,
+  DURATION,
   PARENT_ID,
   PROCESSOR_EVENT,
   SPAN_DURATION,
-  SPAN_LINKS,
+  SPAN_ID,
+  SPAN_NAME,
+  STATUS_CODE,
   TRACE_ID,
   TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMConfig } from '../..';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -26,21 +32,20 @@ import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
 const optionalFields = asMutableArray([
-  'span.id',
-  'span.name',
-  'duration',
-  'span.duration.us',
-  'transaction.duration.us',
-  'transaction.id',
-  'transaction.name',
-  'processor.event',
-  'parent.id',
-  'status.code',
+  SPAN_ID,
+  SPAN_NAME,
+  DURATION,
+  SPAN_DURATION,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  PROCESSOR_EVENT,
+  PARENT_ID,
+  STATUS_CODE,
 ] as const);
 
 /**
- *
- * @param param0 Returns both APM documents and unprocessed OTEL spans
+ * Returns both APM documents and unprocessed OTEL spans
  */
 export async function getUnifiedTraceItems({
   apmEventClient,
@@ -68,7 +73,6 @@ export async function getUnifiedTraceItems({
       },
       track_total_hits: true,
       size,
-      _source: [SPAN_LINKS],
       query: {
         bool: {
           must: [
@@ -94,12 +98,12 @@ export async function getUnifiedTraceItems({
             type: 'number',
             script: {
               lang: 'painless',
-              source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', $('duration', 0)))`,
+              source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', $('${DURATION}', 0)))`,
             },
             order: 'desc',
           },
         },
-        { '@timestamp': 'asc' },
+        { [AT_TIMESTAMP]: 'asc' },
         { _doc: 'asc' },
       ] as Sort,
     },
@@ -112,7 +116,7 @@ export async function getUnifiedTraceItems({
 
     return {
       id: event.span?.id ?? event.transaction?.id,
-      timestamp: event['@timestamp'],
+      timestamp: event[AT_TIMESTAMP],
       name: event.span?.name ?? event.transaction?.name,
       traceId: event.trace.id,
       duration:

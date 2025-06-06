@@ -6,6 +6,7 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { useMemo } from 'react';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 export interface TraceWaterfallItem extends TraceItem {
@@ -16,20 +17,23 @@ export interface TraceWaterfallItem extends TraceItem {
 }
 
 export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
-  const serviceColors = getServiceColors(traceItems);
-  const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
-  const rootItem = traceParentChildrenMap.root?.[0];
-  const traceWaterfall = rootItem
-    ? getTraceWaterfall(rootItem, traceParentChildrenMap, serviceColors)
-    : [];
-  const duration = getTraceWaterfallDuration(traceWaterfall);
-  const maxDepth = Math.max(...traceWaterfall.map((item) => item.depth));
-  return {
-    rootItem,
-    traceWaterfall,
-    duration,
-    maxDepth,
-  };
+  const waterfall = useMemo(() => {
+    const serviceColors = getServiceColors(traceItems);
+    const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
+    const rootItem = traceParentChildrenMap.root?.[0];
+    const traceWaterfall = rootItem
+      ? getTraceWaterfall(rootItem, traceParentChildrenMap, serviceColors)
+      : [];
+
+    return {
+      rootItem,
+      traceWaterfall,
+      duration: getTraceWaterfallDuration(traceWaterfall),
+      maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
+    };
+  }, [traceItems]);
+
+  return waterfall;
 }
 
 export function getServiceColors(traceItems: TraceItem[]) {

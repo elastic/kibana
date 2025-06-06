@@ -9,7 +9,14 @@ import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { getApmTraceError } from './get_trace_items';
-import { PROCESSOR_EVENT, TRACE_ID } from '../../../common/es_fields/apm';
+import {
+  PROCESSOR_EVENT,
+  TRACE_ID,
+  EXCEPTION_MESSAGE,
+  EXCEPTION_TYPE,
+  ERROR_MESSAGE,
+  STATUS_CODE,
+} from '../../../common/es_fields/apm';
 
 export async function getUnifiedTraceErrors({
   apmEventClient,
@@ -60,10 +67,10 @@ function getUnprocessedOtelErrors({
                 filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
                 must_not: existsQuery(PROCESSOR_EVENT),
                 should: [
-                  ...termQuery('status.code', 'Error'),
-                  ...existsQuery('error.message'),
-                  ...existsQuery('exception.type'),
-                  ...existsQuery('exception.message'),
+                  ...termQuery(STATUS_CODE, 'Error'),
+                  ...existsQuery(ERROR_MESSAGE),
+                  ...existsQuery(EXCEPTION_TYPE),
+                  ...existsQuery(EXCEPTION_MESSAGE),
                 ],
                 minimum_should_match: 1,
               },
