@@ -47,7 +47,7 @@ export const concatenateChatCompletionChunks =
             }
           } else if (event.type === StreamingChatResponseEventType.ChatCompletionMessage) {
             if (event.message.content) {
-              acc.message.content = event.message.content; 
+              acc.message.content = event.message.content;
             }
             if (event.message.function_call?.name && event.message.function_call?.arguments) {
               acc.message.function_call.name = event.message.function_call.name;
