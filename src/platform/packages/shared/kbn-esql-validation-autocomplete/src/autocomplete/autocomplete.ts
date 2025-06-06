@@ -391,19 +391,11 @@ async function getSuggestionsWithinCommandExpression(
     getRecommendedQueriesSuggestions: (queryString, prefix) =>
       getRecommendedQueries(queryString, prefix),
     suggestFieldsOrFunctionsByType: async (types: string[], location: Location) => {
-      const userDefinedColumnsExceptCurrentCommandOnes =
-        excludeUserDefinedColumnsFromCurrentCommand(
-          commands,
-          astContext.command,
-          fieldsMap,
-          innerText
-        );
-
       return uniqBy(
         await getFieldsOrFunctionsSuggestions(types, location, getColumnsByType, {
           functions: true,
           fields: true,
-          userDefinedColumns: userDefinedColumnsExceptCurrentCommandOnes,
+          userDefinedColumns: anyUserDefinedColumns,
         }),
         'label'
       );
