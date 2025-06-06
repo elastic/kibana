@@ -121,7 +121,15 @@ export const SpanFlyout = ({
                 {
                   defaultMessage: '{docType} document',
                   values: {
-                    docType: isSpan ? 'Span' : 'Transaction',
+                    docType: isSpan
+                      ? i18n.translate(
+                          'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.span',
+                          { defaultMessage: 'Span' }
+                        )
+                      : i18n.translate(
+                          'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.transction',
+                          { defaultMessage: 'Transaction' }
+                        ),
                   },
                 }
               )}
