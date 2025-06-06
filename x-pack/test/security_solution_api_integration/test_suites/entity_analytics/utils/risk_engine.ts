@@ -23,7 +23,7 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
@@ -564,28 +564,15 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
   },
 });
 
-export const downgradeRiskEngineMappingsVersion = async ({
+export const downgradeRiskEngineIndexVersion = async ({
   es,
-  log,
   space = 'default',
   mappingsVersion,
-  otherProps,
 }: {
   es: Client;
-  log: ToolingLog;
   space?: string;
   mappingsVersion?: number;
-  otherProps?: Record<string, any>;
 }): Promise<void> => {
-  let painless = `ctx._source._meta.mappingsVersion = ${mappingsVersion ?? 4}`;
-
-  if (otherProps) {
-    const otherPropsString = Object.entries(otherProps)
-      .map(([key, value]) => `ctx._source.${key} = ${JSON.stringify(value)}`)
-      .join('; ');
-    painless = `${otherPropsString}; ${painless}`;
-  }
-
   await es.updateByQuery({
     index: '.kibana_security_solution_*',
     query: {
@@ -597,12 +584,23 @@ export const downgradeRiskEngineMappingsVersion = async ({
       },
     },
     script: {
-      source: 'ctx._source._meta.mappingsVersion = 4',
+      source: `ctx._source["risk-engine-configuration"]._meta.mappingsVersion =  ${mappingsVersion}`,
       lang: 'painless',
     },
     conflicts: 'proceed',
     refresh: true,
   });
+};
+
+export const getRiskEngineIndexVersion = async ({
+  kibanaServer,
+  space = 'default',
+}: {
+  kibanaServer: KbnClient;
+  space?: string;
+}): Promise<number | undefined> => {
+  const so = await getRiskEngineConfigSO({ kibanaServer, space });
+  return so?.attributes?._meta?.mappingsVersion;
 };
 
 export const deleteEventIngestedPipeline = async ({
@@ -749,7 +747,7 @@ const removeDefaultPipelineFromAssetCriticalityIndex = async ({
   log.info(`Removed default pipeline from asset criticality index: ${assetCriticalityIndex}`);
 };
 
-const removeDefaultPipelineFromRiskScoreIndices = async ({
+export const removeDefaultPipelineFromRiskScoreIndices = async ({
   es,
   log,
   space = 'default',
@@ -844,4 +842,39 @@ export const simulateMissingPipelineBug = async ({
     'Simulating missing pipeline bug by re-adding default pipeline back to risk score indices'
   );
   await addDefaultPipelineToRiskScoreIndices({ es, log, space });
+};
+
+export const getRiskScoreWriteIndexMappingAndSettings = async (
+  es: Client,
+  space = 'default'
+): Promise<{ mappings?: MappingTypeMapping; settings?: IndicesIndexSettings | undefined }> => {
+  // resolve the latest backing index for the risk score datastream
+  const riskScoreBackingIndex = await getBackingIndexFromDataStream({
+    es,
+    datastreamName: `risk-score.risk-score-${space}`,
+  });
+  if (!riskScoreBackingIndex) {
+    throw new Error(`Risk score backing index not found for space: ${space}`);
+  }
+  const indexInfo = await es.indices.get({
+    index: riskScoreBackingIndex,
+  });
+  return {
+    mappings: indexInfo[riskScoreBackingIndex]?.mappings,
+    settings: indexInfo[riskScoreBackingIndex]?.settings,
+  };
+};
+
+export const getRiskScoreLatestIndexMappingAndSettings = async (
+  es: Client,
+  space = 'default'
+): Promise<{ mappings?: MappingTypeMapping; settings?: IndicesIndexSettings | undefined }> => {
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${space}`;
+  const indexInfo = await es.indices.get({
+    index: riskScoreLatestIndex,
+  });
+  return {
+    mappings: indexInfo[riskScoreLatestIndex]?.mappings,
+    settings: indexInfo[riskScoreLatestIndex]?.settings,
+  };
 };
