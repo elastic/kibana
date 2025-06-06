@@ -23,6 +23,8 @@ export interface PrintableStream {
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
+export type StreamChanges = Record<string, boolean>;
+
 /**
  * The StreamActiveRecord is responsible for maintaining the change status of a stream
  * And routing change requests (with cascading changes), validation requests and requests to determine Elasticsearch actions
@@ -33,6 +35,7 @@ export abstract class StreamActiveRecord<
 > {
   protected dependencies: StateDependencies;
   protected _definition: TDefinition;
+  protected _changes: StreamChanges = {};
   private _changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StateDependencies) {
@@ -165,6 +168,14 @@ export abstract class StreamActiveRecord<
   }
 
   abstract clone(): StreamActiveRecord;
+
+  getChanges(): StreamChanges {
+    return this._changes;
+  }
+
+  setChanges(changes: StreamChanges) {
+    this._changes = changes;
+  }
 
   protected abstract doHandleUpsertChange(
     definition: Streams.all.Definition,
