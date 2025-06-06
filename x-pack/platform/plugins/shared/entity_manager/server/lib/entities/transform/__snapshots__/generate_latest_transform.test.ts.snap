@@ -149,6 +149,7 @@ Object {
   "settings": Object {
     "deduce_mappings": false,
     "docs_per_second": undefined,
+    "max_page_search_size": undefined,
     "unattended": true,
   },
   "source": Object {
