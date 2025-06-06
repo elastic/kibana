@@ -11,7 +11,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { ValueListsForm } from './form';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 
