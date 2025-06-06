@@ -30,8 +30,19 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
         },
       ];
 
-    case BulkActionEditTypeEnum.add_alert_suppression:
+    case BulkActionEditTypeEnum.set_alert_suppression_for_threshold:
+      return [
+        {
+          type: editAction,
+          value: { duration: { unit: 'm', value: 4 } },
+        },
+      ];
     case BulkActionEditTypeEnum.delete_alert_suppression:
+      return [
+        {
+          type: editAction,
+        },
+      ];
     case BulkActionEditTypeEnum.set_alert_suppression:
       return [
         {
