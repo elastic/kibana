@@ -238,7 +238,7 @@ export const DashboardGrid = ({
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
       })}
-      css={[styles.dashboard]}
+      css={styles.dashboard}
     >
       {memoizedGridLayout}
     </div>
