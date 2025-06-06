@@ -44,7 +44,7 @@ interface State {
   selectedJob: undefined | Job;
 }
 
-export class ReportListingTable extends Component<ListingPropsInternal, State> {
+export class ReportExportsTable extends Component<ListingPropsInternal, State> {
   private isInitialJobsFetch: boolean;
   private licenseSubscription?: Subscription;
   private mounted?: boolean;
@@ -438,3 +438,6 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     );
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export { ReportExportsTable as default };
