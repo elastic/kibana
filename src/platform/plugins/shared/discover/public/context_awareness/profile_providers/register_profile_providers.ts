@@ -70,18 +70,21 @@ export const registerProfileProviders = async ({
     profileService: rootProfileService,
     providers: rootProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
     providers: dataSourceProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
     providers: documentProfileProviders,
     enabledExperimentalProfileIds,
+    services,
   });
 };
 
@@ -96,6 +99,7 @@ export const registerEnabledProfileProviders = <
   profileService,
   providers: availableProviders,
   enabledExperimentalProfileIds = [],
+  services,
 }: {
   /**
    * Profile service to register providers
@@ -109,9 +113,16 @@ export const registerEnabledProfileProviders = <
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds?: string[];
+  services: DiscoverServices;
 }) => {
   for (const provider of availableProviders) {
-    if (!provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId)) {
+    const checkForExperimentalProfile =
+      !provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId);
+    const checkForProductFeature =
+      !provider.restrictedToProductFeature ||
+      services.core.pricing.isFeatureAvailable(provider.restrictedToProductFeature);
+
+    if (checkForExperimentalProfile && checkForProductFeature) {
       profileService.registerProvider(provider);
     }
   }
