@@ -21,6 +21,10 @@ export enum ToolSourceType {
    */
   builtIn = 'builtIn',
   /**
+   * Source used for built-in tools
+   */
+  esql = 'esql',
+  /**
    * Unknown source - used when converting plain ids to structured or serialized format.
    */
   unknown = 'unknown',
@@ -170,6 +174,44 @@ export interface ToolDescriptor {
    * Meta associated with this tool
    */
   meta: ToolDescriptorMeta;
+}
+
+/**
+ * Serializable representation of an ESQL tool.
+ * 
+ * This provides the structure for executing SQL queries with parameterized inputs.
+ */
+export interface EsqlTool extends ToolDescriptor {
+  /**
+   * The SQL query to be executed.
+   */
+  query: string;
+  
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: {
+    /**
+     * The parameter identifier used in the query.
+     */
+    key: string;
+    
+    /**
+     * Metadata about the parameter.
+     */
+    value: {
+      /**
+       * The data type of the parameter.
+       */
+      type: string;
+      
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
+  }[];
 }
 
 /**

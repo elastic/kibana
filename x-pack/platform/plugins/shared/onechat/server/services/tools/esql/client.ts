@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import { EsqlToolStorage } from './storage';
+import {
+    ToolSourceType,
+    type EsqlTool,
+  } from '@kbn/onechat-common';
+import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
+
+export interface EsqlToolClient {
+    get(esqlToolId: string): Promise<EsqlTool>;
+    create(esqlTool: EsqlToolCreateRequest): Promise<EsqlTool>;
+  }
+
+  export const createClient = ({
+    storage,
+  }: {
+    storage: EsqlToolStorage;
+  }): EsqlToolClient => {
+    return new EsqlToolClientImpl({ storage });
+  };
+
+  class EsqlToolClientImpl {
+    private readonly storage: EsqlToolStorage;
+
+    constructor({ storage }: { storage: EsqlToolStorage; }) {
+        this.storage = storage;
+    }
+
+    async get(esqlToolId: string): Promise<EsqlTool> {
+        const document = await this.storage.getClient().get({ id: esqlToolId });
+        
+        if (!document._source) {
+            throw new Error(`Tool with ID ${esqlToolId} not found`);
+        }
+
+        const returnDoc = {
+            id: esqlToolId,
+            name: document._source!.name,
+            description: document._source!.description,
+            query: document._source!.query,
+            params: document._source!.params,
+            meta: {
+                sourceType: ToolSourceType.esql,
+                sourceId: esqlToolId,
+                tags: ["POC"],
+            }
+        };
+
+        return returnDoc;
+      }
+
+      async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {
+        const now = new Date();
+        const id = tool.id ?? uuidv4();
+    
+        const attributes = {
+            id,
+            name: tool.name,
+            description: tool.description,
+            query: tool.query,
+            params: tool.params.map(param => ({
+                key: param.key,
+                value: {
+                    type: param.value.type,
+                    description: param.value.description,
+                }
+            })),
+            created_at: now.toISOString(),
+            updated_at: now.toISOString(),
+        };
+    
+        await this.storage.getClient().index({
+            id,
+            document: attributes,
+        });
+    
+        return this.get(id);
+    }
+  }
+    

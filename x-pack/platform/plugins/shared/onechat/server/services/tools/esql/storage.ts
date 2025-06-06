@@ -1,0 +1,69 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
+
+export const esqlToolIndexName = '.kibana_onechat_esql_tools';
+
+const storageSettings = {
+    name: esqlToolIndexName,
+    schema: {
+      properties: {
+        id: types.keyword({}),
+        name: types.keyword({}),
+        description: types.text({}),
+        query: types.text({}),
+        params: types.object({
+            properties: {
+              key: types.keyword({}),
+              value: types.object({
+                properties: {
+                  type: types.keyword({}),
+                  description: types.text({})
+                }
+              })
+            }
+        })
+      }
+    }
+  } satisfies IndexStorageSettings;
+
+export interface EsqlToolProperties {
+  id: string;
+  name: string;
+  description: string;
+  query: string;
+  params: {
+    key: string;
+    value: {
+      type: string;
+      description: string;
+    }
+  }[];
+}
+
+export type EsqlToolStorageSettings = typeof storageSettings;
+
+export type EsqlToolStorage = StorageIndexAdapter<
+  EsqlToolStorageSettings,
+  EsqlToolProperties
+>;
+
+export const createStorage = ({
+  logger,
+  esClient,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+}): EsqlToolStorage => {
+  return new StorageIndexAdapter<EsqlToolStorageSettings, EsqlToolProperties>(
+    esClient,
+    logger,
+    storageSettings
+  );
+};
