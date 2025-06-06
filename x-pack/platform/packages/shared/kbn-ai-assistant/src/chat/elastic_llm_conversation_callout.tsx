@@ -10,19 +10,25 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  getConnectorsManagementHref,
+  useElasticLlmCalloutDismissed,
+  ElasticLlmCalloutKey,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
-export const ElasticLlmCallout = () => {
+export const ElasticLlmConversationCallout = () => {
   const { http, spaces, application, docLinks } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
 
-  const [showCallOut, setShowCallOut] = useState(true);
+  const [dismissed, setDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.CONVERSATION_CALLOUT
+  );
   const [currentSpaceId, setCurrentSpaceId] = useState('default');
 
   const onDismiss = () => {
-    setShowCallOut(false);
+    setDismissed(true);
   };
 
   useEffect(() => {
@@ -36,7 +42,7 @@ export const ElasticLlmCallout = () => {
     getCurrentSpace();
   }, [spaces]);
 
-  if (!showCallOut) {
+  if (dismissed) {
     return;
   }
 
@@ -52,7 +58,7 @@ export const ElasticLlmCallout = () => {
       onDismiss={onDismiss}
       iconType="iInCircle"
       title={i18n.translate('xpack.aiAssistant.elasticLlmCallout.title', {
-        defaultMessage: 'You are now using the Elastic-managed LLM connector',
+        defaultMessage: `You're using the Elastic-managed LLM connector`,
       })}
       size="s"
       className={elasticLlmCalloutClassName}
@@ -60,7 +66,7 @@ export const ElasticLlmCallout = () => {
       <p>
         <FormattedMessage
           id="xpack.aiAssistant.tour.elasticLlmDescription"
-          defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. By default, Elastic uses its Elastic-managed LLM connector (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can always configure and use your own <connectorLink>connector</connectorLink> and change the default in <settingsLink>Settings</settingsLink>."
+          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic-managed LLM connector is used by default (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can configure a <connectorLink>custom connector</connectorLink> if you prefer."
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink

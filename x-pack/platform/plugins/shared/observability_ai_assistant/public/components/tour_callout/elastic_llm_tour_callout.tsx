@@ -28,7 +28,7 @@ export const ElasticLlmTourCallout = ({
   return (
     <TourCallout
       title={i18n.translate('xpack.observabilityAiAssistant.tour.elasticLlmTitle', {
-        defaultMessage: 'Elastic-managed LLM connector',
+        defaultMessage: 'Elastic-managed LLM connector now available',
       })}
       subtitle={i18n.translate('xpack.observabilityAiAssistant.tour.subtitle', {
         defaultMessage: 'New AI feature!',
@@ -36,7 +36,7 @@ export const ElasticLlmTourCallout = ({
       content={
         <FormattedMessage
           id="xpack.observabilityAiAssistant.tour.elasticLlmContent"
-          defaultMessage="Elastic LLM is our new default, pre-configured LLM connector (<costLink>additional costs incur</costLink>). You can continue to use other LLM connectors as normal. <learnMoreLink>Learn more</learnMoreLink>"
+          defaultMessage="This new default LLM connector is optimized for Elastic AI features (<costLink>additional costs incur</costLink>). You can continue using existing LLM connectors if you prefer. <learnMoreLink>Learn more</learnMoreLink>"
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink

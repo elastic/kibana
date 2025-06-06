@@ -19,7 +19,7 @@ import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
-import { ElasticLlmCallout } from './elastic_llm_callout';
+import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -78,7 +78,7 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
-        {showElasticLlmCalloutInChat ? <ElasticLlmCallout /> : null}
+        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>

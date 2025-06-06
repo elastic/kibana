@@ -25,7 +25,8 @@ import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistan
 import {
   ElasticLlmTourCallout,
   getElasticManagedLlmConnector,
-  useElasticLlmTourCalloutDismissed,
+  ElasticLlmCalloutKey,
+  useElasticLlmCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
@@ -112,7 +113,10 @@ export function ChatHeader({
   };
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmTourCalloutDismissed(false);
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.TOUR_CALLOUT,
+    false
+  );
 
   return (
     <EuiPanel

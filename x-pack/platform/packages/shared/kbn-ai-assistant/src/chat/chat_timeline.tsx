@@ -22,7 +22,7 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
-import { ElasticLlmCallout } from './elastic_llm_callout';
+import { ElasticLlmCallout } from './elastic_llm_conversation_callout';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {

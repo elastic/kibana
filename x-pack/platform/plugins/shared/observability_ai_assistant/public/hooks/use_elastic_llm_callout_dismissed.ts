@@ -7,13 +7,17 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-const TOUR_DISMISSED_KEY = 'observabilityAIAssistant_elasticLlmTourDismissed';
+export enum ElasticLlmCalloutKey {
+  TOUR_CALLOUT = 'observabilityAIAssistant_elasticLlmTourCalloutDismissed',
+  CONVERSATION_CALLOUT = 'observabilityAIAssistant_elasticLlmConversationCalloutDismissed',
+}
 
-export function useElasticLlmTourCalloutDismissed(
+export function useElasticLlmCalloutDismissed(
+  storageKey: ElasticLlmCalloutKey,
   defaultValue = false
 ): [boolean, (isDismissed: boolean) => void] {
   const [dismissed = defaultValue, setDismissed] = useLocalStorage<boolean>(
-    TOUR_DISMISSED_KEY,
+    storageKey,
     defaultValue
   );
 

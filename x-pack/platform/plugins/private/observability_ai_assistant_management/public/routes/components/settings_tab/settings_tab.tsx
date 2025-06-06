@@ -128,7 +128,7 @@ export function SettingsTab() {
             <p>
               <FormattedMessage
                 id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
-                defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. By default, Elastic uses its Elastic Managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
+                defaultMessage={`Elastic AI Assistant and other AI features are powered by an LLM. The Elastic-managed LLM connector is used by default ({link}) when no custom connectors are available. Select "Manage connectors" to configure and use a custom connector.`}
                 values={{
                   link: (
                     <EuiLink

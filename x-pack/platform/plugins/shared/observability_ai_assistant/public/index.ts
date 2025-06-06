@@ -132,4 +132,7 @@ export {
 
 export { navigateToSettingsManagementApp } from './utils/navigate_to_settings';
 
-export { useElasticLlmTourCalloutDismissed } from './hooks/use_elastic_llm_tour_callout_dismissed';
+export {
+  useElasticLlmCalloutDismissed,
+  ElasticLlmCalloutKey,
+} from './hooks/use_elastic_llm_callout_dismissed';
