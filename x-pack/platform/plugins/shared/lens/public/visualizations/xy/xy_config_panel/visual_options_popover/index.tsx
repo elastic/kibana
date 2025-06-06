@@ -127,10 +127,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
         {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
 
-        {hasAreaSettings ? (
+        {isHasNonBarSeries ? (
           <>
             <FillOpacityOption
-              isFillOpacityEnabled={true}
+              isFillOpacityEnabled={hasAreaSettings}
               value={state?.fillOpacity ?? 0.3}
               onChange={(newValue) => {
                 setState({
@@ -140,12 +140,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
               }}
             />
 
-            <ToolbarDivider />
-          </>
-        ) : null}
-
-        {isHasNonBarSeries ? (
-          <>
             <PointVisibilityOption
               selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
               onChange={(newValue) => {
