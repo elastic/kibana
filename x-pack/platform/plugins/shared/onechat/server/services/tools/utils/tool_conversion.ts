@@ -36,6 +36,6 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
 export const toolToDescriptor = <T extends ToolDescriptor>(tool: T): ToolDescriptor => {
-  const { id, name, description, meta } = tool;
-  return { id, name, description, meta };
+  const { id, description, meta } = tool;
+  return { id, description, meta };
 };

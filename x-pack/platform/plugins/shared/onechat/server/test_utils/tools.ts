@@ -78,7 +78,6 @@ export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
 export const createMockedTool = (parts: Partial<RegisteredToolWithMeta> = {}): MockedTool => {
   return {
     id: 'test-tool',
-    name: 'my test tool',
     description: 'test description',
     schema: z.object({}),
     meta: {
@@ -95,7 +94,6 @@ export const createMockedExecutableTool = (
 ): MockedExecutableTool => {
   return {
     id: 'test-tool',
-    name: 'my test tool',
     description: 'test description',
     schema: z.object({}),
     meta: {

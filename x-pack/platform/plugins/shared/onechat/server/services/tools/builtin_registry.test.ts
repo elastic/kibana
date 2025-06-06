@@ -24,7 +24,6 @@ describe('BuiltinToolRegistry', () => {
     it('should register a tool', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -39,7 +38,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return true when tool exists', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -53,7 +51,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return false when tool does not exist', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -69,7 +66,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return the tool when it exists', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -83,7 +79,6 @@ describe('BuiltinToolRegistry', () => {
     it('should throw an error when tool does not exist', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -100,7 +95,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return all registered tools', async () => {
       const mockTool1: RegisteredTool = {
         id: 'test-tool-1',
-        name: 'Test Tool 1',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test1',
@@ -108,7 +102,6 @@ describe('BuiltinToolRegistry', () => {
 
       const mockTool2: RegisteredTool = {
         id: 'test-tool-2',
-        name: 'Test Tool 2',
         description: 'Another test tool',
         schema: z.object({}),
         handler: async () => 'test2',

@@ -22,7 +22,6 @@ describe('combineToolProviders', () => {
 
   const createMockTool = (id: string): RegisteredTool => ({
     id,
-    name: `Tool ${id}`,
     description: `Description for tool ${id}`,
     schema: z.object({}),
     handler: jest.fn(),

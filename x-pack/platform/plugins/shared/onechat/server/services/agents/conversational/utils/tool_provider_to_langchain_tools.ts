@@ -66,7 +66,7 @@ export const toLangchainTool = ({
         const toolReturn = await tool.execute({ toolParams: input });
         return JSON.stringify(toolReturn.result);
       } catch (e) {
-        logger.warn(`error calling tool ${tool.name}: ${e.message}`);
+        logger.warn(`error calling tool ${tool.id}: ${e.message}`);
         throw e;
       }
     },

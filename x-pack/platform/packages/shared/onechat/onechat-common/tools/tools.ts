@@ -141,10 +141,6 @@ export interface ToolDescriptor {
    */
   id: PlainIdToolIdentifier;
   /**
-   * Name of the tool, which will be exposed to the LLM.
-   */
-  name: string;
-  /**
    * The description for this tool, which will be exposed to the LLM.
    */
   description: string;
