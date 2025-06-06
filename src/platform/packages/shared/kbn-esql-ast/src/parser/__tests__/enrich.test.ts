@@ -128,7 +128,6 @@ describe('ENRICH', () => {
       const enrich = Walker.match(root, { type: 'command', name: 'enrich' })! as ESQLCommand;
 
       expect(errors.length > 0).toBe(true);
-      // expect(enrich.incomplete).toBe(true);
 
       expect(src.slice(enrich.location.min, enrich.location.max + 1)).toEqual(
         'ENRICH cluster: ON b WITH c, d'
