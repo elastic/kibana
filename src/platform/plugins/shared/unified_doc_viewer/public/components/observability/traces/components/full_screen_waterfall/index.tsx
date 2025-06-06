@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiButtonIcon,
