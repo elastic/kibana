@@ -97,6 +97,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .send(body);
 
     if (response.status !== expectStatusCode) {
+      // eslint-disable-next-line no-console
       console.log(`Unexpected status code: ${response.status}. Response body:`, response.body);
     }
 
@@ -300,4 +301,36 @@ export const setAssetCriticalityIndexVersion = async ({
       version,
     },
   });
+};
+
+/**
+ * Function to get an asset criticality record from ES by its ID.
+ * Only use this if you wish to see the document as it is stored in ES.
+ * If you want to use the asset criticality record in your tests, use the
+ * API helper `get` instead.
+ */
+export const getAssetCriticalityEsDocument = async ({
+  es,
+  idField,
+  idValue,
+  space = 'default',
+}: {
+  es: Client;
+  idField: string;
+  idValue: string;
+  space?: string;
+}): Promise<AssetCriticalityRecord | undefined> => {
+  const index = getAssetCriticalityIndex(space);
+  try {
+    const doc = await es.get({
+      index,
+      id: `${idField}:${idValue}`,
+    });
+
+    console.log(`Retrieved asset criticality document: ${JSON.stringify(doc)}`);
+
+    return doc._source as AssetCriticalityRecord;
+  } catch (e) {
+    return undefined;
+  }
 };

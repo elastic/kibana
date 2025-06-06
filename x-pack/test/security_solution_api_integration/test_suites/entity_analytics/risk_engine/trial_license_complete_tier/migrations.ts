@@ -21,6 +21,7 @@ import {
   getAssetCriticalityIndexVersion,
   setAssetCriticalityIndexVersion,
   getAssetCriticalityMappingAndSettings,
+  getAssetCriticalityEsDocument,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -383,6 +384,35 @@ export default ({ getService }: FtrProviderContext) => {
         expect(settings?.index?.default_pipeline).to.be(
           `entity_analytics_create_eventIngest_from_timestamp-pipeline-default`
         );
+      });
+
+      it('Asset criticality assignment should work after the event ingested ingest pipeline is installed', async () => {
+        await assetCriticalityRoutesForSpace('default').upsert({
+          id_field: 'host.name',
+          id_value: 'some-host',
+          criticality_level: 'high_impact',
+        });
+        await simulateMissingPipelineBug({ es, log, space: 'default' });
+        await downgradeIndexVersion('default');
+        await entityAnalyticsRoutes.runMigrations();
+
+        await assetCriticalityRoutesForSpace('default').upsert({
+          id_field: 'host.name',
+          id_value: 'some-other-host',
+          criticality_level: 'medium_impact',
+        });
+
+        const criticalityRecord = await getAssetCriticalityEsDocument({
+          es,
+          idField: 'host.name',
+          idValue: 'some-other-host',
+          space: 'default',
+        });
+
+        expect(criticalityRecord).not.to.be(undefined);
+        expect(criticalityRecord!.criticality_level).to.be('medium_impact');
+        // @ts-expect-error - event.ingested is not in the types, but should be set by the ingest pipeline
+        expect(criticalityRecord!.event.ingested).not.to.be(undefined);
       });
     });
   });
