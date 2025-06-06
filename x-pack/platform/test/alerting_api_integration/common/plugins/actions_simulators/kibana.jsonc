@@ -2,6 +2,13 @@
   "type": "plugin",
   "id": "@kbn/actions-simulators-plugin",
   "owner": "@elastic/response-ops",
+  "include": [
+    "server/**/*.ts",
+    "../../../../../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
   "plugin": {
     "id": "actionsSimulators",
     "server": true,
