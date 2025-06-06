@@ -241,6 +241,19 @@ describe('OpenAIConnector', () => {
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
+
+      it('passes timeout and signal to runApi', async () => {
+        const signal = jest.fn();
+        const timeout = 12345;
+        await connector.runApi(
+          { body: JSON.stringify({ messages: [] }), signal, timeout },
+          new ConnectorUsageCollector({ logger, connectorId: 'test' })
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ signal, timeout }),
+          expect.anything()
+        );
+      });
     });
 
     describe('streamApi', () => {
@@ -1504,6 +1517,155 @@ describe('OpenAIConnector', () => {
         },
       });
       expect(response).toEqual({ available: false });
+    });
+  });
+
+  describe('PKI/SSL overrides', () => {
+    const config = {
+      apiUrl: 'https://other-openai.local/v1/chat/completions',
+      apiProvider: OpenAiProviderType.Other,
+      defaultModel: DEFAULT_OTHER_OPENAI_MODEL,
+      verificationMode: 'full' as const,
+      headers: {},
+    };
+    const secrets = {
+      certificateData: Buffer.from(
+        '-----BEGIN CERTIFICATE-----cert-----END CERTIFICATE-----'
+      ).toString('base64'),
+      privateKeyData: Buffer.from(
+        '-----BEGIN PRIVATE KEY-----key-----END PRIVATE KEY-----'
+      ).toString('base64'),
+      caData: Buffer.from('-----BEGIN CERTIFICATE-----ca-----END CERTIFICATE-----').toString(
+        'base64'
+      ),
+    };
+    it('should initialize PKI SSL overrides when PKI secrets are present', () => {
+      const connector = new OpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config,
+        secrets,
+        logger,
+        services: actionsMock.createServices(),
+      });
+      expect(connector).toBeDefined();
+      // @ts-ignore
+      expect(connector.sslOverrides).toBeDefined();
+    });
+    it('should throw and log error when PKI secrets are invalid', () => {
+      const badSecrets = { ...secrets, certificateData: undefined };
+      expect(() => {
+        new OpenAIConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+          config,
+          secrets: badSecrets,
+          logger,
+          services: actionsMock.createServices(),
+        });
+      }).toThrow();
+    });
+    it('should call runApi with sslOverrides when they exist', async () => {
+      const connector = new OpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config,
+        secrets,
+        logger,
+        services: actionsMock.createServices(),
+      });
+      // @ts-ignore
+      connector.request = jest.fn().mockResolvedValue({ data: {} });
+      // @ts-ignore
+      connector.request = mockRequest;
+      await connector.runApi(
+        { body: JSON.stringify({ messages: [] }) },
+        new ConnectorUsageCollector({ logger, connectorId: 'test' })
+      );
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sslOverrides: expect.objectContaining({
+            verificationMode: 'full',
+          }),
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('Organization/Project headers', () => {
+    it('should include OpenAI-Organization and OpenAI-Project headers if present', async () => {
+      const connector = new OpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config: {
+          apiUrl: 'https://api.openai.com/v1/chat/completions',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_OPENAI_MODEL,
+          organizationId: 'org-id',
+          projectId: 'proj-id',
+          headers: { 'X-My-Custom-Header': 'foo' },
+        },
+        secrets: { apiKey: '123' },
+        logger,
+        services: actionsMock.createServices(),
+      });
+      // @ts-ignore
+      connector.request = jest.fn().mockResolvedValue({ data: {} });
+      // @ts-ignore
+      connector.request = mockRequest;
+      await connector.runApi(
+        { body: JSON.stringify({ messages: [] }) },
+        new ConnectorUsageCollector({ logger, connectorId: 'test' })
+      );
+      const callArgs = mockRequest.mock.calls[0][0];
+      expect(callArgs.headers['OpenAI-Organization']).toBe('org-id');
+      expect(callArgs.headers['OpenAI-Project']).toBe('proj-id');
+    });
+  });
+
+  describe('Enhanced error handling', () => {
+    const connector = new OpenAIConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      config: {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+        headers: {},
+      },
+      secrets: { apiKey: '123' },
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+    });
+    it('returns Azure function error message', () => {
+      const err = { message: '404 Unrecognized request argument supplied: functions' };
+      // @ts-ignore
+      expect(connector.getResponseErrorMessage(err)).toContain(
+        'Function support with Azure OpenAI API was added'
+      );
+    });
+    it('returns LM Studio error message', () => {
+      const err = {
+        response: {
+          status: 400,
+          statusText: 'Bad Request',
+          data: { error: 'LM Studio error' },
+        },
+      };
+      // @ts-ignore
+      expect(connector.getResponseErrorMessage(err)).toContain('LM Studio error');
+    });
+    it('returns Unauthorized error message', () => {
+      const err = {
+        response: {
+          status: 401,
+          statusText: 'Unauthorized',
+          data: { error: { message: 'Invalid key' } },
+        },
+      };
+      // @ts-ignore
+      expect(connector.getResponseErrorMessage(err)).toContain('Unauthorized API Error');
     });
   });
 });
