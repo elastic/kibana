@@ -54,7 +54,7 @@ export interface AgentHandlerContext {
    */
   modelProvider: ModelProvider;
   /**
-   * Tool provider that should be used to list of execute tools.
+   * Tool provider that can be used to list or execute tools.
    */
   toolProvider: ToolProvider;
   /**
