@@ -172,7 +172,6 @@ export abstract class StreamActiveRecord<
   getChanges(): StreamChanges {
     return this._changes;
   }
-
   setChanges(changes: StreamChanges) {
     this._changes = changes;
   }
