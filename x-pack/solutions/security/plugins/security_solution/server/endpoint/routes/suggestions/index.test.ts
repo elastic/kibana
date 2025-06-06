@@ -32,11 +32,7 @@ import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
-import {
-  getEndpointSuggestionsRequestHandler,
-  registerEndpointSuggestionsRoutes,
-  getLogger,
-} from '.';
+import { getEndpointSuggestionsRequestHandler, registerEndpointSuggestionsRoutes } from '.';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import {
@@ -84,7 +80,7 @@ describe('when calling the Suggestions route handler', () => {
       .createSetupContract()
       .autocomplete.getInitializerContextConfig()
       .create();
-    suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, getLogger(mockContext));
+    suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, mockContext);
   });
 
   describe('having right privileges', () => {

@@ -27,6 +27,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import { combineIndexWithNamespaces } from './utils';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('suggestions');
@@ -58,14 +59,14 @@ export function registerEndpointSuggestionsRoutes(
       withEndpointAuthz(
         { any: ['canWriteEventFilters'] },
         endpointContext.logFactory.get('endpointSuggestions'),
-        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
+        getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
     );
 }
 
 export const getEndpointSuggestionsRequestHandler = (
   config$: Observable<ConfigSchema>,
-  logger: Logger
+  endpointContext: EndpointAppContext
 ): RequestHandler<
   TypeOf<typeof EndpointSuggestionsSchema.params>,
   never,
@@ -73,12 +74,39 @@ export const getEndpointSuggestionsRequestHandler = (
   SecuritySolutionRequestHandlerContext
 > => {
   return async (context, request, response) => {
+    const logger = getLogger(endpointContext);
+
     const config = await firstValueFrom(config$);
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
 
     if (request.params.suggestion_type === 'eventFilters') {
-      index = eventsIndexPattern;
+      if (!endpointContext.experimentalFeatures?.endpointManagementSpaceAwarenessEnabled) {
+        index = eventsIndexPattern;
+      } else {
+        logger.debug('Using space-aware index pattern');
+
+        const spaceId = (await context.securitySolution).getSpaceId();
+        const integrationNamespaces = await endpointContext.service
+          .getInternalFleetServices(spaceId)
+          .getIntegrationNamespaces(['endpoint']);
+
+        const indexPattern = combineIndexWithNamespaces(
+          eventsIndexPattern,
+          integrationNamespaces,
+          'endpoint'
+        );
+
+        if (indexPattern) {
+          logger.debug(`Index pattern to be used: ${indexPattern}`);
+          index = indexPattern;
+        } else {
+          logger.error('Failed to retrieve current space index patterns');
+          return response.badRequest({
+            body: 'Failed to retrieve current space index patterns',
+          });
+        }
+      }
     } else {
       return response.badRequest({
         body: `Invalid suggestion_type: ${request.params.suggestion_type}`,

@@ -143,7 +143,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentPolicyIds = [],
       agentIds = [],
       options,
-    }): Promise<void> => {
+    }: CheckInCurrentSpaceOptions): Promise<void> => {
       this.logger.debug(`EnsureInCurrentSpace(): Checking access for space [${spaceId}]`);
 
       return checkInCurrentSpace({
@@ -355,9 +355,9 @@ const fetchIntegrationPolicyNamespace = async ({
     for (const packagePolicy of packagePolicies) {
       retrievedIntegrationPolicies[packagePolicy.id] = packagePolicy;
 
-      // Integration policy does not have an explicit namespace, which means it
-      // inherits it from the associated agent policies, so lets retrieve those
-      if (!packagePolicy.namespace) {
+      // Integration policy does not have explicit spaceIds, which means it
+      // inherits them from the associated agent policies, so lets retrieve those
+      if (!packagePolicy.spaceIds || packagePolicy.spaceIds.length === 0) {
         packagePolicy.policy_ids.forEach((agentPolicyId) => {
           agentPolicyIdsToRetrieve.add(agentPolicyId);
         });
@@ -384,13 +384,14 @@ const fetchIntegrationPolicyNamespace = async ({
   }
 
   for (const integrationPolicyId of integrationPolicies) {
-    const integrationPolicyNamespace = retrievedIntegrationPolicies[integrationPolicyId].namespace;
+    const integrationPolicySpaceIds = retrievedIntegrationPolicies[integrationPolicyId].spaceIds;
 
-    response.integrationPolicy[integrationPolicyId] = integrationPolicyNamespace
-      ? [integrationPolicyNamespace]
-      : retrievedIntegrationPolicies[integrationPolicyId].policy_ids.map((agentPolicyId) => {
-          return retrievedAgentPolicies[agentPolicyId].namespace;
-        });
+    response.integrationPolicy[integrationPolicyId] =
+      integrationPolicySpaceIds && integrationPolicySpaceIds.length > 0
+        ? integrationPolicySpaceIds
+        : retrievedIntegrationPolicies[integrationPolicyId].policy_ids.flatMap((agentPolicyId) => {
+            return retrievedAgentPolicies[agentPolicyId].space_ids || [];
+          });
   }
 
   logger.debug(() => `Policy namespaces:\n${stringify(response)}`);
@@ -442,11 +443,13 @@ const fetchIntegrationNamespaces = async ({
       if (packagePolicy.package?.name) {
         const integrationName = packagePolicy.package.name;
 
-        if (packagePolicy.namespace) {
-          integrationToNamespaceMap[integrationName].add(packagePolicy.namespace);
+        if (packagePolicy.spaceIds && packagePolicy.spaceIds.length > 0) {
+          packagePolicy.spaceIds.forEach((spaceId) => {
+            integrationToNamespaceMap[integrationName].add(spaceId);
+          });
         } else {
-          // Integration policy does not have an explicit namespace, which means it
-          // inherits it from the associated agent policies. We'll retrieve these next
+          // Integration policy does not have explicit space IDs, which means it
+          // inherits them from the associated agent policies. We'll retrieve these next
           packagePolicy.policy_ids.forEach((agentPolicyId) => {
             if (!agentPolicyIdsToRetrieve[agentPolicyId]) {
               agentPolicyIdsToRetrieve[agentPolicyId] = new Set();
@@ -472,7 +475,11 @@ const fetchIntegrationNamespaces = async ({
 
     for (const agentPolicy of agentPolicies) {
       for (const nameSpaceSet of agentPolicyIdsToRetrieve[agentPolicy.id]) {
-        nameSpaceSet.add(agentPolicy.namespace);
+        if (agentPolicy.space_ids && agentPolicy.space_ids.length > 0) {
+          agentPolicy.space_ids.forEach((spaceId) => {
+            nameSpaceSet.add(spaceId);
+          });
+        }
       }
     }
   }
