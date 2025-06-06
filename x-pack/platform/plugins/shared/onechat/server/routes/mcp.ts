@@ -6,14 +6,12 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
+import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import {
-  KibanaMcpHttpTransport,
-  CONNECTION_CLOSED,
-  INTERNAL_ERROR,
-} from '../utils/kibana_mcp_http_transport';
+import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
 
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
@@ -29,10 +27,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .post({
       path: MCP_SERVER_PATH,
       security: {
-        authz: {
-          enabled: false,
-          reason: 'todo',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'MCP server',
@@ -89,7 +84,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             await transport?.close().catch((error) => {
               logger.error('MCP Server: Error closing transport', { error });
             });
-            await server?.close();
+            await server?.close().catch((error) => {
+              logger.error('MCP Server: Error closing server', { error });
+            });
           });
 
           await server.connect(transport);
@@ -120,7 +117,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             body: {
               message: `Internal server error: ${error}`,
               attributes: {
-                code: INTERNAL_ERROR,
+                code: ErrorCode.InternalError,
               },
             },
           });
@@ -132,10 +129,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .get({
       path: MCP_SERVER_PATH,
       security: {
-        authz: {
-          enabled: false,
-          reason: 'todo',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'MCP server',
@@ -158,7 +152,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           body: {
             message: 'Method not allowed',
             attributes: {
-              code: CONNECTION_CLOSED,
+              code: ErrorCode.ConnectionClosed,
             },
           },
         });
@@ -169,10 +163,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .delete({
       path: MCP_SERVER_PATH,
       security: {
-        authz: {
-          enabled: false,
-          reason: 'todo',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'MCP server',
@@ -196,7 +187,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           body: {
             message: 'Method not allowed',
             attributes: {
-              code: CONNECTION_CLOSED,
+              code: ErrorCode.ConnectionClosed,
             },
           },
         });

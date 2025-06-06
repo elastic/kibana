@@ -58,7 +58,7 @@ function createMinimalResponseFactory(): KibanaResponseFactory {
         headers: options?.headers || {},
       },
     }),
-  } as any as KibanaResponseFactory;
+  } as unknown as KibanaResponseFactory;
 }
 
 async function createTestServer(
