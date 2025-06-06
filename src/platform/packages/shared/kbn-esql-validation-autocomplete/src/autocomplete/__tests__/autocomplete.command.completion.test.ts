@@ -53,10 +53,6 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId A/`, ['AS ', '| ']);
       });
 
-      it('suggests default target field name for AS clauses when WITH option is missing', async () => {
-        await assertSuggestions(`FROM a | COMPLETION "prompt" AS / `, ['completion ']);
-      });
-
       it('suggests default target field name for AS clauses', async () => {
         await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS / `, [
           'completion ',

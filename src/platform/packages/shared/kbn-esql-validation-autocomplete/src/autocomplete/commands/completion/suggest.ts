@@ -28,40 +28,35 @@ export enum CompletionPosition {
   AFTER_PROMPT = 'after_prompt',
   AFTER_WITH = 'with',
   AFTER_INFERENCE_ID = 'inference_id',
-  AS = 'as',
+  AFTER_AS = 'as',
   AFTER_TARGET_ID = 'target_id',
 }
 
 function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosition | undefined {
   const { innerText, getExpressionType } = params;
-  const command = params.command as ESQLAstCompletionCommand;
+  const { prompt, inferenceId, targetField } = params.command as ESQLAstCompletionCommand;
 
-  // COMPLETION <prompt> WITH^ (no AS after WITH)
-  if (/WITH\s*$/i.test(innerText)) {
+  if (targetField) {
+    return targetField.incomplete
+      ? CompletionPosition.AFTER_AS
+      : CompletionPosition.AFTER_TARGET_ID;
+  }
+
+  if (inferenceId.incomplete && /WITH\s*$/i.test(innerText)) {
     return CompletionPosition.AFTER_WITH;
   }
-  // COMPLETION <prompt> WITH <inferenceId>^ (allow multiple words after WITH, but not AS)
-  if (/WITH\s+(?:(?!\bAS\b).)+$/i.test(innerText)) {
+
+  if (!inferenceId.incomplete) {
     return CompletionPosition.AFTER_INFERENCE_ID;
   }
-  // COMPLETION <prompt> WITH <inferenceId> AS^
-  if (/AS\s*$/i.test(innerText)) {
-    return CompletionPosition.AS;
-  }
-  // COMPLETION <prompt> WITH <inferenceId> AS <targetId>^
-  if (/AS\s+\S*\s*$/i.test(innerText)) {
-    return CompletionPosition.AFTER_TARGET_ID;
-  }
 
-  // COMPLETION <prompt>^
-  const expressionRoot = command.prompt?.text !== EDITOR_MARKER ? command.prompt : undefined;
+  const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
   const expressionType = getExpressionType(expressionRoot);
 
-  if (isExpressionComplete(expressionType, innerText) && command.inferenceId.incomplete) {
+  if (isExpressionComplete(expressionType, innerText) && inferenceId.incomplete) {
     return CompletionPosition.AFTER_PROMPT;
   }
 
-  // COMPLETION ^
   if (!isExpressionComplete(expressionType, innerText)) {
     return CompletionPosition.PROMPT;
   }
@@ -124,7 +119,7 @@ export async function suggest(
     case CompletionPosition.AFTER_INFERENCE_ID:
       return [asCompletionItem, pipeCompleteItem];
 
-    case CompletionPosition.AS:
+    case CompletionPosition.AFTER_AS:
       return [targetIdCompletionItem];
 
     case CompletionPosition.AFTER_TARGET_ID:
