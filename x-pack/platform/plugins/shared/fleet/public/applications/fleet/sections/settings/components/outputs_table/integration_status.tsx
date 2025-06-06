@@ -38,6 +38,8 @@ import { PackageIcon } from '../../../../../../components';
 
 import { sendGetPackageInfoByKeyForRq, useStartServices } from '../../../../hooks';
 
+import { Loading } from '../../../agents/components';
+
 import { IntegrationStatusBadge } from './integration_status_badge';
 import { getIntegrationStatus } from './integration_sync_status';
 
@@ -155,14 +157,18 @@ export const IntegrationStatus: React.FunctionComponent<{
                       />
                     </EuiFlexItem>
                     <EuiFlexItem className="eui-textTruncate">
-                      <EuiTitle
-                        size="xs"
-                        css={css`
-                          color: ${titleTextColor};
-                        `}
-                      >
-                        <p>{packageInfo?.title ?? integration.package_name}</p>
-                      </EuiTitle>
+                      {!packageInfo ? (
+                        <Loading />
+                      ) : (
+                        <EuiTitle
+                          size="xs"
+                          css={css`
+                            color: ${titleTextColor};
+                          `}
+                        >
+                          <p>{packageInfo?.title ?? ''}</p>
+                        </EuiTitle>
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  ESQLCommandMode,
   ESQLCommandOption,
   isFunctionExpression,
   isWhereExpression,
@@ -15,6 +14,7 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
+  ESQLSource,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,9 +25,6 @@ import {
   isInlineCastItem,
   isLiteralItem,
   isOptionItem,
-  isSingleItem,
-  isSourceItem,
-  noCaseCompare,
 } from '../shared/helpers';
 
 import {
@@ -69,6 +66,8 @@ import {
   suggest as suggestForRename,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
 } from '../autocomplete/commands/rename';
+import { suggest as suggestForRrf } from '../autocomplete/commands/rrf';
+import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
@@ -81,6 +80,7 @@ import {
   suggest as suggestForChangePoint,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
 } from '../autocomplete/commands/change_point';
+import { suggest as suggestForSample } from '../autocomplete/commands/sample';
 
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
@@ -484,49 +484,49 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForEnrich,
     validate: (command: ESQLCommand, { policies }) => {
       const messages: ESQLMessage[] = [];
+      const source = command.args[0] as ESQLSource;
+      const cluster = source.cluster;
+      const index = source.index;
 
-      const sources = command.args.filter(isSourceItem);
-      sources.forEach((source) => {
-        if (hasWildcard(source.name)) {
+      if (index) {
+        if (hasWildcard(index.valueUnquoted)) {
           messages.push(
             getMessageFromId({
               messageId: 'wildcardNotSupportedForCommand',
-              values: { command: 'ENRICH', value: source.name },
-              locations: source.location,
+              values: { command: 'ENRICH', value: index.valueUnquoted },
+              locations: index.location,
             })
           );
-        } else if (!policies.has(source.name)) {
+        } else if (!policies.has(index.valueUnquoted)) {
           messages.push(
             getMessageFromId({
               messageId: 'unknownPolicy',
-              values: { name: source.name },
-              locations: source.location,
+              values: { name: index.valueUnquoted },
+              locations: index.location,
             })
           );
         }
-      });
-
-      const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
-        | ESQLCommandMode
-        | undefined;
-
-      if (!modeArg) {
-        return messages;
       }
 
-      const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
-      if (!acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedMode',
-            values: {
-              command: 'ENRICH',
-              value: modeArg.text,
-              expected: acceptedValues.join(', '),
-            },
-            locations: modeArg.location,
-          })
+      if (cluster) {
+        const acceptedModes = new Set<string>(
+          ENRICH_MODES.map(({ name }) => '_' + name.toLowerCase())
         );
+        const isValidMode = acceptedModes.has(cluster.valueUnquoted.toLowerCase());
+
+        if (!isValidMode) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unsupportedMode',
+              values: {
+                command: 'ENRICH',
+                value: cluster.valueUnquoted,
+                expected: [...acceptedModes].join(', '),
+              },
+              locations: cluster.location,
+            })
+          );
+        }
       }
 
       return messages;
@@ -705,5 +705,30 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
 
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
+  },
+  {
+    hidden: true,
+    name: 'sample',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {
+      defaultMessage:
+        'Samples a percentage of the results, optionally with a seed for reproducibility.',
+    }),
+    declaration: `SAMPLE <percentage> [<seed>]`,
+    examples: [],
+    suggest: suggestForSample,
+  },
+  {
+    hidden: true,
+    preview: true,
+    name: 'rrf',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
+      defaultMessage:
+        'Combines multiple result sets with different scoring functions into a single result set.',
+    }),
+    declaration: `RRF`,
+    examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
+    suggest: suggestForRrf,
+    validate: validateRrf,
   },
 ];
