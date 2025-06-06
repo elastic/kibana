@@ -969,8 +969,7 @@ security:
   - BasicAuth: []
 tags:
   - description: >-
-      Endpoint Exceptions API allows you to manage detection rule endpoint
-      exceptions to prevent a rule from generating an alert from incoming events
+      The Endpoint Exceptions API allows you to manage exceptions for the Elastic Endpoint rule. Elastic Endpoint exceptions prevent the Elastic Endpoint rule from generating alerts from incoming events
       even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
     x-displayName: Security endpoint exceptions
