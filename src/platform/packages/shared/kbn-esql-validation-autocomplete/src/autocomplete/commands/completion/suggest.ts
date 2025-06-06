@@ -123,7 +123,7 @@ export async function suggest(
 
 const defaultPrompt: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.promptDoc', {
-    defaultMessage: 'Prompt',
+    defaultMessage: 'Your prompt to the LLM',
   }),
   kind: 'Constant',
   asSnippet: true,
@@ -134,7 +134,7 @@ const defaultPrompt: SuggestionRawDefinition = {
 
 const withCompletionItem: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionWithDoc', {
-    defaultMessage: 'With',
+    defaultMessage: 'Provide additional parameters for the LLM prompt.',
   }),
   kind: 'Reference',
   label: 'WITH',
@@ -144,7 +144,7 @@ const withCompletionItem: SuggestionRawDefinition = {
 
 const asCompletionItem: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionAsDoc', {
-    defaultMessage: 'As',
+    defaultMessage: 'Name the result group, or use the default provided.',
   }),
   kind: 'Reference',
   label: 'AS',

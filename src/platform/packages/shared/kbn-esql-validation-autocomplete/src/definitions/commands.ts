@@ -719,7 +719,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     name: 'completion',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
-      defaultMessage: 'Executes a completion through an LLM.',
+      defaultMessage:
+        'Send prompts to an LLM. Requires an inference endpoint set up for `completion` tasks.',
     }),
     declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
     examples: [],
