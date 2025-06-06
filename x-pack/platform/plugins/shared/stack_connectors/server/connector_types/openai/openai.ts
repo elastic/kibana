@@ -118,22 +118,32 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           throw error;
         }
       } else {
+        const { httpAgent, httpsAgent } = getCustomAgents(
+          this.configurationUtilities,
+          this.logger,
+          this.url
+        );
+
         this.openAI =
           this.config.apiProvider === OpenAiProviderType.AzureAi
             ? new OpenAI({
-                apiKey: this.key,
-                baseURL: this.config.apiUrl,
-                defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
-                defaultHeaders: {
-                  ...this.headers,
-                  'api-key': this.key,
-                },
-              })
+              apiKey: this.key,
+              baseURL: this.config.apiUrl,
+              defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
+              defaultHeaders: {
+                ...this.headers,
+                'api-key': this.key,
+              },
+              httpAgent: httpsAgent ?? httpAgent,
+            })
             : new OpenAI({
-                baseURL: removeEndpointFromUrl(this.config.apiUrl),
-                apiKey: this.key,
-                defaultHeaders: this.headers,
-              });
+              baseURL: removeEndpointFromUrl(this.config.apiUrl),
+              apiKey: this.key,
+              defaultHeaders: {
+                ...this.headers,
+              },
+              httpAgent: httpsAgent ?? httpAgent,
+            });
       }
     } catch (error) {
       this.logger.error(`Error initializing OpenAI client: ${error.message}`);
