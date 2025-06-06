@@ -123,7 +123,7 @@ export function Waterfall({
         css={css`
           display: flex;
           ${isEmbeddable
-            ? 'position: relative'
+            ? 'position: relative;'
             : `
             position: sticky;
             top: var(--euiFixedHeadersOffset, 0);`}
