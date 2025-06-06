@@ -38,7 +38,7 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
 
 const sharedCacheOptions = {
   // Set up the caches.
-  // https://eui.elastic.co/#/utilities/provider#cache-location
+  // https://eui.elastic.co/docs/utilities/provider/#emotioncache-customization
   stylisPlugins: [euiStylisPrefixer], // https://emotion.sh/docs/@emotion/cache#stylisplugins
 
   // Enables Emotion's speedy mode in dev (same as prod).
