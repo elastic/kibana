@@ -69,7 +69,7 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
           <EuiBadge color="hollow">
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">{'Index pattern:'}</EuiText>
+                <EuiText size="xs">{INDEX_PATTERN_LABEL}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="success">
@@ -83,7 +83,7 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
           <EuiBadge color="hollow">
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">{'Time range:'}</EuiText>
+                <EuiText size="xs">{TIME_RANGE_LABEL}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="success">
@@ -132,28 +132,6 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
             </EuiFlexItem>
           ))}
       </EuiFlexGroup>
-      {/* {hasFilters && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">
-                <EuiFlexGroup gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">{'Filters:'}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCodeBlock language="json" paddingSize="none">
-                      {JSON.stringify(filters, null, 2)}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )} */}
 
       <LazySavedSearchComponent
         dependencies={{ embeddable, dataViews: dataViewsService, searchSource }}
@@ -171,6 +149,15 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
 const QUERY_LABEL = i18n.translate('discover.cases.attachment.queryLabel', {
   defaultMessage: 'Query',
 });
+
+const INDEX_PATTERN_LABEL = i18n.translate('discover.cases.attachment.indexPatternLabel', {
+  defaultMessage: 'Index pattern',
+});
+
+const TIME_RANGE_LABEL = i18n.translate('discover.cases.attachment.timeRangeLabel', {
+  defaultMessage: 'Time range',
+});
+
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default CommentChildren;
