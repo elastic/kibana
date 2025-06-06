@@ -63,6 +63,7 @@ export class StreamsService {
       assetClient,
       logger,
       scopedClusterClient,
+      coreSetup: this.coreSetup,
       storageClient: storageAdapter.getClient(),
       request,
       isServerless,

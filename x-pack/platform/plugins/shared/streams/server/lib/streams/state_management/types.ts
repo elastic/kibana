@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { Streams } from '@kbn/streams-schema';
 import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
@@ -25,6 +25,7 @@ export type StreamChange = StreamUpsertChange | StreamDeleteChange;
 
 export interface StateDependencies {
   logger: Logger;
+  coreSetup: CoreSetup;
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;

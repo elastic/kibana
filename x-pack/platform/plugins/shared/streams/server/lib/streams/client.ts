@@ -11,7 +11,7 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, KibanaRequest, CoreSetup } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { Condition, getAncestors, getParentId, Streams } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
@@ -57,6 +57,7 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
 export class StreamsClient {
   constructor(
     private readonly dependencies: {
+      coreSetup: CoreSetup;
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
       storageClient: StreamsStorageClient;
