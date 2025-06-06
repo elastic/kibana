@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, OperatorFunction, from, lastValueFrom, mergeMap, reduce } from 'rxjs';
 import deepMerge from 'deepmerge';
 
 type CallbackFn<TResult> = (chunk: string[], id: number) => Promise<TResult>;
@@ -22,22 +21,20 @@ export const MAX_HTTP_LINE_CHUNK_SIZE = MAX_HTTP_LINE_LENGTH * 0.75; // 4096 *0.
  * 1. Create chunks from the original list. Each chunk will contain as many items until their summed length hits the limit.
  * 2. Provide each chunk in parallel to the chunkExecutor callback and resolve the result, which for our use case performs HTTP requests for data stream stats.
  * 3. Deep merge the result of each response into the same data structure, which is defined by the first item in the list.
- * 4. Once the observable used for these steps complete, we get the last value and returns it.
+ * 4. Once all chunks are processed, return the merged result.
  */
-export const processInChunks = <TResult>(
+export const processInChunks = async <TResult>(
   list: string[],
   chunkExecutor: CallbackFn<TResult>,
   options: { chunkSize: number } = { chunkSize: MAX_HTTP_LINE_CHUNK_SIZE }
-) => {
+): Promise<TResult> => {
   const { chunkSize } = options;
 
-  const result$ = from(list).pipe(
-    bufferUntil((chunk, currentItem) => isLessThanMaxChunkLength(chunk, currentItem, chunkSize)),
-    mergeMap((chunk, id) => from(chunkExecutor(chunk, id))),
-    reduce((result, chunkResult) => deepMerge(result, chunkResult))
-  );
+  const chunks = createChunks(list, chunkSize);
 
-  return lastValueFrom(result$);
+  const chunkResults = await Promise.all(chunks.map(chunkExecutor));
+
+  return chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
 };
 
 /**
@@ -45,38 +42,38 @@ export const processInChunks = <TResult>(
  */
 
 /**
- * This function supports the steps piped in the resolution performed by processInChunks.
- * It returns a rxjs operator that, given a predicate callback as an argument that takes the current chunk and the current Item from the list,
- * uses this callback predicate to compute whether the current item fits in the current chunk,
- * or whether we need to consider the current chunk filled and start a new one.
+ * Creates chunks from a list of strings, where each chunk contains as many items
+ * as possible without exceeding the specified chunk size limit.
  */
-const bufferUntil = <TItem>(
-  predicate: (chunk: TItem[], currentItem: TItem) => boolean
-): OperatorFunction<TItem, TItem[]> => {
-  return (source) =>
-    new Observable((observer) => {
-      let chunk: TItem[] = [];
+const createChunks = (list: string[], chunkSize: number): string[][] => {
+  const chunks: string[][] = [];
+  let currentChunk: string[] = [];
 
-      return source.subscribe({
-        next(currentItem) {
-          if (predicate(chunk, currentItem)) {
-            chunk.push(currentItem);
-          } else {
-            // Emit the current chunk, start a new one
-            if (chunk.length > 0) observer.next(chunk);
-            chunk = [currentItem]; // Reset the chunk with the current item
-          }
-        },
-        complete() {
-          // Emit the final chunk if it has any items
-          if (chunk.length > 0) observer.next(chunk);
-          observer.complete();
-        },
-      });
-    });
+  list.forEach((item) => {
+    if (isLessThanMaxChunkLength(currentChunk, item, chunkSize)) {
+      currentChunk.push(item);
+    } else {
+      // Current chunk is full, start a new one
+      if (currentChunk.length > 0) {
+        chunks.push(currentChunk);
+      }
+      currentChunk = [item];
+    }
+  });
+
+  // Add the final chunk if it has any items
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
 };
 
-const isLessThanMaxChunkLength = (chunk: string[], currentItem: string, chunkSize: number) => {
+const isLessThanMaxChunkLength = (
+  chunk: string[],
+  currentItem: string,
+  chunkSize: number
+): boolean => {
   const totalLength = [...chunk, currentItem].join().length;
   return totalLength <= chunkSize; // Allow the chunk until it exceeds the max chunk length
 };
