@@ -55,7 +55,7 @@ describe('archiveMaintenanceWindowRoute', () => {
       Object {
         "access": "public",
         "availability": Object {
-          "since": "9.1.0",
+          "since": "8.19.0",
           "stability": "stable",
         },
         "summary": "Archive a maintenance window.",
