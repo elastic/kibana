@@ -83,7 +83,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -130,7 +129,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           ...kb.status.value,
           enabled: true,
-          endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.READY,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -156,7 +154,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -190,7 +187,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.ERROR,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -226,7 +222,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -258,7 +253,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           kbState: KnowledgeBaseState.READY,
-          endpoint: { inference_id: 'inference_id' },
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
