@@ -251,6 +251,7 @@ export class State {
         // Bring streams back to their starting state or delete newly added streams
         if (startingState.has(stream.definition.name)) {
           const changedStreamToRevert = startingState.get(stream.definition.name)!.clone();
+          changedStreamToRevert.setChanges(stream.getChanges());
           changedStreamToRevert.markAsUpserted();
           return changedStreamToRevert;
         } else {

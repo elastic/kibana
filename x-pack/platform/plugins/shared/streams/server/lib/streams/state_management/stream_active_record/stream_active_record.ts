@@ -173,7 +173,7 @@ export abstract class StreamActiveRecord<
     return this._changes;
   }
   setChanges(changes: StreamChanges) {
-    this._changes = changes;
+    this._changes = { ...changes };
   }
 
   protected abstract doHandleUpsertChange(
