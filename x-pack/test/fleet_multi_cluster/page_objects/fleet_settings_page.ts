@@ -16,7 +16,7 @@ export interface IntegrationPackage {
 export function FleetSettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
+  // const browser = getService('browser');
   const supertest = getService('supertest');
 
   return {

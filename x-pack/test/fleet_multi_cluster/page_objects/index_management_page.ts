@@ -113,36 +113,36 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('indexActionsContextMenuButton');
     },
 
-    async getIndexList() {
-      const table = await find.byCssSelector('table');
-      const rows = await table.findAllByTestSubject('indexTableRow');
-      return await Promise.all(
-        rows.map(async (row) => {
-          return {
-            indexLink: await row.findByTestSubject('indexTableIndexNameLink'),
-            indexName: await (
-              await row.findByTestSubject('indexTableIndexNameLink')
-            ).getVisibleText(),
-            indexHealth: await (
-              await row.findByTestSubject('indexTableCell-health')
-            ).getVisibleText(),
-            indexStatus: await (
-              await row.findByTestSubject('indexTableCell-status')
-            ).getVisibleText(),
-            indexPrimary: await (
-              await row.findByTestSubject('indexTableCell-primary')
-            ).getVisibleText(),
-            indexReplicas: await (
-              await row.findByTestSubject('indexTableCell-replica')
-            ).getVisibleText(),
-            indexDocuments: await (
-              await (await row.findByTestSubject('indexTableCell-documents')).getVisibleText()
-            ).replace('documents', ''),
-            indexSize: await (await row.findByTestSubject('indexTableCell-size')).getVisibleText(),
-          };
-        })
-      );
-    },
+    // async getIndexList() {
+    //   const table = await find.byCssSelector('table');
+    //   const rows = await table.findAllByTestSubject('indexTableRow');
+    //   return await Promise.all(
+    //     rows.map(async (row) => {
+    //       return {
+    //         indexLink: await row.findByTestSubject('indexTableIndexNameLink'),
+    //         indexName: await (
+    //           await row.findByTestSubject('indexTableIndexNameLink')
+    //         ).getVisibleText(),
+    //         indexHealth: await (
+    //           await row.findByTestSubject('indexTableCell-health')
+    //         ).getVisibleText(),
+    //         indexStatus: await (
+    //           await row.findByTestSubject('indexTableCell-status')
+    //         ).getVisibleText(),
+    //         indexPrimary: await (
+    //           await row.findByTestSubject('indexTableCell-primary')
+    //         ).getVisibleText(),
+    //         indexReplicas: await (
+    //           await row.findByTestSubject('indexTableCell-replica')
+    //         ).getVisibleText(),
+    //         indexDocuments: await (
+    //           await (await row.findByTestSubject('indexTableCell-documents')).getVisibleText()
+    //         ).replace('documents', ''),
+    //         indexSize: await (await row.findByTestSubject('indexTableCell-size')).getVisibleText(),
+    //       };
+    //     })
+    //   );
+    // },
 
     async changeTabs(
       tab:
@@ -239,16 +239,16 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         timeout: 30_000,
       });
     },
-    async expectIndexToExist(indexName: string) {
-      const table = await find.byCssSelector('table');
-      const rows = await table.findAllByTestSubject('indexTableRow');
-      const indexNames: string[] = await Promise.all(
-        rows.map(async (row) => {
-          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
-        })
-      );
-      expect(indexNames.some((i) => i === indexName)).to.be(true);
-    },
+    // async expectIndexToExist(indexName: string) {
+    //   const table = await find.byCssSelector('table');
+    //   const rows = await table.findAllByTestSubject('indexTableRow');
+    //   const indexNames: string[] = await Promise.all(
+    //     rows.map(async (row) => {
+    //       return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
+    //     })
+    //   );
+    //   expect(indexNames.some((i) => i === indexName)).to.be(true);
+    // },
 
     async confirmDeleteModalIsVisible() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
@@ -262,35 +262,35 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.missingOrFail('confirmModalConfirmButton');
     },
 
-    async expectIndexIsDeleted(indexName: string) {
-      try {
-        const table = await find.byCssSelector('table');
-        const rows = await table.findAllByTestSubject('indexTableRow');
+    // async expectIndexIsDeleted(indexName: string) {
+    //   try {
+    //     const table = await find.byCssSelector('table');
+    //     const rows = await table.findAllByTestSubject('indexTableRow');
 
-        const indexNames = await Promise.all(
-          rows.map(async (row) => {
-            try {
-              return await (
-                await row.findByTestSubject('indexTableIndexNameLink')
-              ).getVisibleText();
-            } catch (error) {
-              // If the current row is stale, it has already been removed
-              if (error.name === 'StaleElementReferenceError') return undefined;
-              throw error; // Rethrow unexpected errors
-            }
-          })
-        ).then((names) => names.filter((name) => name !== undefined));
+    //     const indexNames = await Promise.all(
+    //       rows.map(async (row) => {
+    //         try {
+    //           return await (
+    //             await row.findByTestSubject('indexTableIndexNameLink')
+    //           ).getVisibleText();
+    //         } catch (error) {
+    //           // If the current row is stale, it has already been removed
+    //           if (error.name === 'StaleElementReferenceError') return undefined;
+    //           throw error; // Rethrow unexpected errors
+    //         }
+    //       })
+    //     ).then((names) => names.filter((name) => name !== undefined));
 
-        expect(indexNames.includes(indexName)).to.be(false);
-      } catch (error) {
-        if (error.name === 'StaleElementReferenceError') {
-          // If the table itself is stale, it means all rows have been removed
-          return; // Pass the test since the table is gone
-        } else {
-          throw error; // Rethrow unexpected errors
-        }
-      }
-    },
+    //     expect(indexNames.includes(indexName)).to.be(false);
+    //   } catch (error) {
+    //     if (error.name === 'StaleElementReferenceError') {
+    //       // If the table itself is stale, it means all rows have been removed
+    //       return; // Pass the test since the table is gone
+    //     } else {
+    //       throw error; // Rethrow unexpected errors
+    //     }
+    //   }
+    // },
     async manageIndex(indexName: string) {
       const id = `checkboxSelectIndex-${indexName}`;
       const checkbox = await find.byCssSelector(`input[id="${id}"]`);

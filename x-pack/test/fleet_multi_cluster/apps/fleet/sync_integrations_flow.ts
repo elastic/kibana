@@ -8,16 +8,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects([
-    // 'common',
-    // 'remoteClusters',
-    // 'indexManagement',
-    // 'crossClusterReplication',
-    'fleetSettingsPage',
-  ]);
+  // const pageObjects = getPageObjects([
+  // 'common',
+  // 'remoteClusters',
+  // 'indexManagement',
+  // 'crossClusterReplication',
+  //   'fleetSettingsPage',
+  // ]);
   const security = getService('security');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
+  // const testSubjects = getService('testSubjects');
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
   const supertest = getService('supertest');
@@ -111,7 +111,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             index: 'fleet-synced-integrations-ccr-local',
           });
           expect(resp.found).to.be(true);
-          // console.log(JSON.stringify(resp, null, 2));
         });
 
         // TODO need remote kibana to let sync task run on remote
