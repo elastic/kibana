@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
+import { uniqBy } from 'lodash';
 import { findFinalWord, getFunctionDefinition } from '../../../shared/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { EDITOR_MARKER } from '../../../shared/constants';
@@ -16,7 +17,11 @@ import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
-import { handleFragment, isExpressionComplete } from '../../helper';
+import {
+  getFieldsOrFunctionsSuggestions,
+  handleFragment,
+  isExpressionComplete,
+} from '../../helper';
 
 export enum CompletionPosition {
   PROMPT = 'prompt',
@@ -67,15 +72,24 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const { suggestFieldsOrFunctionsByType, innerText, columnExists } = params;
+  const { references, innerText, columnExists, getColumnsByType } = params;
 
   const position = getPosition(params);
 
   switch (position) {
     case CompletionPosition.PROMPT:
-      const fieldsAndFunctionsSuggestions = await suggestFieldsOrFunctionsByType(
-        ['text', 'keyword', 'unknown'],
-        Location.COMPLETION
+      const fieldsAndFunctionsSuggestions = uniqBy(
+        await getFieldsOrFunctionsSuggestions(
+          ['text', 'keyword', 'unknown'],
+          Location.COMPLETION,
+          getColumnsByType,
+          {
+            functions: true,
+            fields: true,
+            userDefinedColumns: references?.userDefinedColumns,
+          }
+        ),
+        'label'
       );
 
       const suggestions = await handleFragment(

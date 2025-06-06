@@ -17,7 +17,12 @@ import {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps, ESQLFieldWithMetadata } from '../validation/types';
+import type {
+  ESQLPolicy,
+  ReferenceMaps,
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -378,17 +383,6 @@ export interface CommandSuggestParams<CommandName extends string> {
     queryString: string,
     prefix?: string
   ) => Promise<SuggestionRawDefinition[]>;
-
-  /**
-   * Returns a list of recommended fields or functions based on the type.
-   * @param type - The type to suggest fields or functions for.
-   * @returns
-   */
-  suggestFieldsOrFunctionsByType: (
-    types: string[],
-    location: Location
-  ) => Promise<SuggestionRawDefinition[]>;
-
   /**
    * The AST for the query behind the cursor.
    */
@@ -396,6 +390,10 @@ export interface CommandSuggestParams<CommandName extends string> {
   callbacks?: ESQLCallbacks;
   getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
+  references?: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  };
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (

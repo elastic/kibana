@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq, uniqBy } from 'lodash';
+import { uniq } from 'lodash';
 import {
   parse,
   type ESQLAstItem,
@@ -81,7 +81,6 @@ import {
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
   FunctionParameterType,
-  Location,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
@@ -391,16 +390,6 @@ async function getSuggestionsWithinCommandExpression(
     getSources,
     getRecommendedQueriesSuggestions: (queryString, prefix) =>
       getRecommendedQueries(queryString, prefix),
-    suggestFieldsOrFunctionsByType: async (types: string[], location: Location) => {
-      return uniqBy(
-        await getFieldsOrFunctionsSuggestions(types, location, getColumnsByType, {
-          functions: true,
-          fields: true,
-          userDefinedColumns: anyUserDefinedColumns,
-        }),
-        'label'
-      );
-    },
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,
@@ -408,6 +397,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
