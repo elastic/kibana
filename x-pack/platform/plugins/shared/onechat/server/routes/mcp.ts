@@ -85,11 +85,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             );
           }
 
-          request.events.aborted$.subscribe(() => {
-            transport?.close().catch((error) => {
+          request.events.aborted$.subscribe(async () => {
+            await transport?.close().catch((error) => {
               logger.error('MCP Server: Error closing transport', { error });
             });
-            server?.close();
+            await server?.close();
           });
 
           await server.connect(transport);
@@ -106,7 +106,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           }
           if (server) {
             try {
-              server.close();
+              await server.close();
             } catch (closeError) {
               logger.error('MCP Server: Error closing server during error handling', {
                 error: closeError,
