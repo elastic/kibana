@@ -127,7 +127,6 @@ Credentials: \`$VAULT_READ_COMMAND\`
 
 Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
-Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
