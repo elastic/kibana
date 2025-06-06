@@ -118,11 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
         index: 'fleet-synced-integrations-ccr-local',
         leader_index: 'fleet-synced-integrations',
         remote_cluster: 'local',
-        // body: {
-        // remote_cluster: 'local',
-        // leader_index: 'fleet-synced-integrations',
-        // wait_for_active_shards: 'all',
-        // },
         wait_for_active_shards: 'all',
       });
       expect(resp.follow_index_created).to.be(true);
