@@ -370,6 +370,7 @@ const validateParameter = (
     if (!isList(argument)) {
       return [parameter, argument];
     }
+
     const arrayElementParameter: ValidationParameter = {
       ...parameter,
       type: unwrapArrayOneLevel(parameter.type),
@@ -393,10 +394,11 @@ const validateParameter = (
       if (isStringLiteral(argument)) {
         return;
       }
-      return [parameter, argument];
     }
     case 'integer': {
-      if (isIntegerLiteral(argument)) return;
+      if (isIntegerLiteral(argument)) {
+        return;
+      }
     }
     case 'double': {
       if (isDoubleLiteral(argument)) {
@@ -559,43 +561,41 @@ function validateInlineCastArg(
 
 function validateNestedFunctionArg(
   astFunction: ESQLFunction,
-  actualArg: ESQLAstItem,
-  parameterDefinition: FunctionParameter,
+  argument: ESQLAstItem,
+  parameter: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (
-    isFunctionItem(actualArg) &&
+    isFunctionItem(argument) &&
     // no need to check the reason here, it is checked already above
-    isSupportedFunction(actualArg.name, parentCommand).supported
+    isSupportedFunction(argument.name, parentCommand).supported
   ) {
     // The isSupported check ensure the definition exists
-    const argFn = getFunctionDefinition(actualArg.name)!;
+    const argFn = getFunctionDefinition(argument.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
     if (fnDef.type === FunctionDefinitionTypes.AGG && argFn.type === FunctionDefinitionTypes.AGG) {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
-          locations: actualArg.location,
+          values: { name: argument.text, argType: argFn.signatures[0].returnType as string },
+          locations: argument.location,
         })
       );
     }
-    if (
-      !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
-    ) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: parameterDefinition.type as string,
-            value: actualArg.text,
+            argType: parameter.type as string,
+            value: argument.text,
             givenType: argFn.signatures[0].returnType as string,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
