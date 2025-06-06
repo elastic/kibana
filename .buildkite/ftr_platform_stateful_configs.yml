@@ -170,7 +170,6 @@ enabled:
   - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
-  - x-pack/test/fleet_multi_cluster/config.ts
   - x-pack/test/fleet_tasks/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
@@ -392,6 +391,7 @@ enabled:
   - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
+  - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
