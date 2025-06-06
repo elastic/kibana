@@ -335,7 +335,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('row var = 1 in (', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Error: [in] function expects at least 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('row var = 1 not in ', [
         "SyntaxError: mismatched input '<EOF>' expecting '('",
