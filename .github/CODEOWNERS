@@ -1037,6 +1037,7 @@ x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/searc
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/search/test @elastic/search-kibana
+x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
@@ -2552,7 +2553,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/functional/es_archives/entity/host_risk @elastic/security-detection-engine
 /x-pack/test/api_integration/apis/lists @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/value_list @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/value_lists_management_flyout @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/public/common/components/reference_error_modal @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
@@ -2662,7 +2663,6 @@ x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
 ## Kubernetes Security tests
 x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture

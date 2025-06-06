@@ -11,7 +11,6 @@ import {
   ESQLAstCommand,
   ESQLAstQueryExpression,
   ESQLColumn,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLIdentifier,
@@ -36,7 +35,6 @@ export type NodeMatchKeys =
   | keyof ESQLList
   | keyof ESQLLiteral
   | keyof ESQLIdentifier
-  | keyof ESQLCommandMode
   | keyof ESQLInlineCast
   | keyof ESQLOrderExpression
   | keyof ESQLUnknownItem;
