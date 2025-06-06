@@ -1,4 +1,11 @@
-@import './print_media/styling/index';
+$a4PageHeight: 297mm;
+$a4PageWidth: 210mm;
+$a4PageHeaderHeight: 15mm;
+$a4PageFooterHeight: 20mm;
+
+$a4PageContentHeight: $a4PageHeight - $a4PageHeaderHeight - $a4PageFooterHeight;
+$a4PageContentWidth: $a4PageWidth;
+
 
 $visualisationsPerPage: 2;
 $visPadding: 4mm;

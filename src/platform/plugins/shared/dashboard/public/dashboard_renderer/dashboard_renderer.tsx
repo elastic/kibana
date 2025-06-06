@@ -30,6 +30,7 @@ import { DashboardViewport } from './viewport/dashboard_viewport';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import { DashboardRedirect } from '../dashboard_app/types';
+import { PrintStyles } from './print_styles';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -133,7 +134,8 @@ export function DashboardRenderer({
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => (dashboardContainerRef.current = e)}
-      >
+      > 
+        <PrintStyles/>
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
@@ -200,3 +202,4 @@ const ParentClassController = ({
   }, [maximizedPanelId, viewportRef.parentElement]);
   return null;
 };
+
