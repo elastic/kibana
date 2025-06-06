@@ -455,7 +455,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 class="euiPagination__item"
               >
                 <button
-                  aria-current="true"
+                  aria-current="page"
                   aria-label="Page 1 of 10"
                   class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"

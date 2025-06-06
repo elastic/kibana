@@ -14,16 +14,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
-import { ApmOnboardingLocatorCategory } from '../../../locator/onboarding_locator';
 
-export const addApmDataProps = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
+export const addApmDataProps = (
+  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
+) => {
   return {
     name: i18n.translate('xpack.apm.add.apm.agent.button.', {
       defaultMessage: 'Add APM',
     }),
-    link: locator?.getRedirectUrl({ category: ApmOnboardingLocatorCategory.Apm }),
+    link: locator?.getRedirectUrl({ category: 'application' }),
   };
 };
 
@@ -34,11 +35,18 @@ export const associateServiceLogsProps = {
   link: 'https://ela.st/new-experience-associate-service-logs',
 };
 
-export const collectServiceLogsProps = {
-  name: i18n.translate('xpack.apm.collect.service.logs.button', {
-    defaultMessage: 'Collect new service logs',
-  }),
-  link: '/app/observabilityOnboarding/customLogs/?category=logs',
+export const collectServiceLogsProps = (
+  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
+) => {
+  return {
+    name: i18n.translate('xpack.apm.collect.service.logs.button', {
+      defaultMessage: 'Collect new service logs',
+    }),
+    link:
+      locator?.getRedirectUrl({
+        source: 'auto-detect',
+      }) ?? '',
+  };
 };
 
 interface AddApmDataProps {
@@ -55,7 +63,7 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
     },
   } = useApmPluginContext();
 
-  const onboardingLocator = locators.get<ApmOnboardingLocatorParams>(
+  const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 
@@ -95,17 +103,27 @@ export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
 }
 
 export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useApmPluginContext();
+
+  const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
+  const { name, link } = collectServiceLogsProps(onboardingLocator);
 
   return (
     <EuiButton
       data-test-subj="collectServiceLogsPropsButton"
       size="s"
       onClick={onClick}
-      href={basePath.prepend(collectServiceLogsProps.link)}
+      href={basePath.prepend(link)}
     >
-      {collectServiceLogsProps.name}
+      {name}
     </EuiButton>
   );
 }

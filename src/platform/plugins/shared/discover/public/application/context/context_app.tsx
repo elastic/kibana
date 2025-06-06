@@ -9,7 +9,14 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+  useEuiPaddingSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -43,6 +50,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+  const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const {
     analytics,
@@ -257,26 +265,37 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage css={dscDocsPageCss}>
+          <EuiPage css={styles.docsPage}>
             <EuiPageBody
               panelled
               paddingSize="none"
-              css={dscDocsContentCss}
+              css={styles.docsContent}
               panelProps={{ role: 'main' }}
             >
               <EuiText
                 data-test-subj="contextDocumentSurroundingHeader"
                 css={css`
                   padding: ${titlePadding} ${titlePadding} 0;
+                  font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                <strong>
-                  <FormattedMessage
-                    id="discover.context.contextOfTitle"
-                    defaultMessage="Documents surrounding #{anchorId}"
-                    values={{ anchorId }}
-                  />
-                </strong>
+                <FormattedMessage
+                  id="discover.context.contextOfTitle"
+                  defaultMessage="Documents surrounding {anchorId}"
+                  values={{
+                    anchorId: (
+                      <span
+                        css={css`
+                          background-color: ${euiTheme.colors.backgroundBaseWarning};
+                          color: ${euiTheme.colors.textWarning};
+                          padding: 0 ${euiTheme.size.xs};
+                        `}
+                      >
+                        #{anchorId}
+                      </span>
+                    ),
+                  }}
+                />
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
@@ -306,12 +325,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const dscDocsPageCss = css`
-  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
-`;
-
-const dscDocsContentCss = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
+const styles = {
+  docsContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
+  docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
+};

@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LANDING_PAGE_PATH = '/list';
-
-export const DASHBOARD_APP_ID = 'dashboards';
-export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
-export const SEARCH_SESSION_ID = 'searchSessionId';
-
 export enum PanelPlacementStrategy {
   /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
   placeAtTop = 'placeAtTop',

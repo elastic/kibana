@@ -7,15 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import {
-  IngestStreamGetResponse,
-  IngestStreamLifecycle,
-  IngestUpsertRequest,
-  isIlmLifecycle,
-  isRoot,
-  isUnwiredStreamGetResponse,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
@@ -32,7 +24,7 @@ function useLifecycleState({
   definition,
   isServerless,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   isServerless: boolean;
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
@@ -40,20 +32,16 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isWired = isWiredStreamGetResponse(definition);
-    const isUnwired = isUnwiredStreamGetResponse(definition);
-    const isIlm = isIlmLifecycle(definition.effective_lifecycle);
+    const isWired = Streams.WiredStream.GetResponse.is(definition);
 
-    if (isWired || (isUnwired && !isIlm)) {
-      actions.push({
-        name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
-          defaultMessage: 'Set specific retention days',
-        }),
-        action: 'dsl',
-      });
-    }
+    actions.push({
+      name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
+        defaultMessage: 'Set specific retention days',
+      }),
+      action: 'dsl',
+    });
 
-    if (isWired && !isServerless) {
+    if (!isServerless) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
           defaultMessage: 'Use a lifecycle policy',
@@ -62,7 +50,7 @@ function useLifecycleState({
       });
     }
 
-    if (!isRoot(definition.stream.name) || (isUnwired && !isIlm)) {
+    if (isWired && !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
@@ -87,7 +75,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -130,7 +118,7 @@ export function StreamDetailLifecycle({
           ...definition.stream.ingest,
           lifecycle,
         },
-      } as IngestUpsertRequest;
+      };
 
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {

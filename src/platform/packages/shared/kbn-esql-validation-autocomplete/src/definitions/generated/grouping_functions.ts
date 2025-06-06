@@ -44,44 +44,6 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
-        },
-        {
-          name: 'buckets',
-          type: 'date_period',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          constantOnly: true,
-        },
-        {
-          name: 'startDate',
-          type: 'date',
-          constantOnly: true,
-        },
-        {
-          name: 'endDate',
-          type: 'date',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date_nanos',
         },
         {
@@ -96,21 +58,25 @@ const bucketDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+        },
+        {
+          name: 'buckets',
+          type: 'date_period',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date_nanos',
         },
         {
           name: 'buckets',
-          type: 'integer',
-          constantOnly: true,
-        },
-        {
-          name: 'startDate',
-          type: 'date',
-          constantOnly: true,
-        },
-        {
-          name: 'endDate',
-          type: 'date',
+          type: 'time_literal',
           constantOnly: true,
         },
       ],
@@ -155,6 +121,124 @@ const bucketDefinition: FunctionDefinition = {
           type: 'integer',
           constantOnly: true,
         },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+        },
+        {
+          name: 'buckets',
+          type: 'double',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+        {
+          name: 'startDate',
+          type: 'date',
+          constantOnly: true,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
+        {
+          name: 'startDate',
+          type: 'date',
+          constantOnly: true,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+        },
+        {
+          name: 'buckets',
+          type: 'integer',
+          constantOnly: true,
+        },
         {
           name: 'startDate',
           type: 'double',
@@ -368,20 +452,6 @@ const bucketDefinition: FunctionDefinition = {
         },
         {
           name: 'buckets',
-          type: 'double',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-        },
-        {
-          name: 'buckets',
           type: 'integer',
           constantOnly: true,
         },
@@ -585,20 +655,6 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'endDate',
           type: 'long',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-        },
-        {
-          name: 'buckets',
-          type: 'double',
           constantOnly: true,
         },
       ],
@@ -824,16 +880,16 @@ const bucketDefinition: FunctionDefinition = {
   locationsAvailable: [Location.STATS, Location.STATS_BY],
   validate: undefined,
   examples: [
-    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT hire_date',
+    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT month',
-    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT week',
+    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)\n| SORT week',
     'FROM employees\n| STATS COUNT(*) by bs = BUCKET(salary, 20, 25324, 74999)\n| SORT bs',
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)\n| SORT b',
     'FROM sample_data\n| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()\n| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())',
-    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT bucket',
+    'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)\n| SORT b1, b2\n| KEEP s1, b1, s2, b2',
-    'FROM employees\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)\n| SORT d_count, b\n| LIMIT 3',
+    'FROM employees\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)',
   ],
 };
 
@@ -855,6 +911,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
     {
@@ -865,6 +922,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
   ],

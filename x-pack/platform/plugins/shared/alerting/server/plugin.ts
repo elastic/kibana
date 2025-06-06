@@ -232,6 +232,7 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private readonly disabledRuleTypes: Set<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -248,6 +249,7 @@ export class AlertingPlugin {
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
   }
 
   public setup(
@@ -279,6 +281,12 @@ export class AlertingPlugin {
     }
     if (this.config.maintenanceWindow.enabled) {
       plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    }
+
+    if (this.config.cancelAlertsOnRuleTimeout === false) {
+      this.logger.warn(
+        `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false can lead to unexpected behavior for certain rule types. This setting will be deprecated in a future version and will be ignored for rule types that do not support it.`
+      );
     }
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
@@ -441,18 +449,46 @@ export class AlertingPlugin {
           AlertData
         >
       ) => {
+        if (this.disabledRuleTypes.has(ruleType.id)) {
+          this.logger.info(`rule type "${ruleType.id}" disabled by configuration`);
+          return;
+        }
+
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
+
+        // validate cancelAlertsOnTimeout if set explicitly on the rule type definition
+        if (
+          ruleType.cancelAlertsOnRuleTimeout === false &&
+          (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
+        ) {
+          throw new Error(
+            `Rule type "${ruleType.id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.`
+          );
+        }
+
         ruleType.ruleTaskTimeout = getRuleTaskTimeout({
           config: this.config.rules,
           ruleTaskTimeout: ruleType.ruleTaskTimeout,
           ruleTypeId: ruleType.id,
         });
-        ruleType.cancelAlertsOnRuleTimeout =
-          ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
         ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
+
+        if (
+          ruleType.autoRecoverAlerts === true &&
+          this.config.cancelAlertsOnRuleTimeout === false
+        ) {
+          this.logger.debug(
+            `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false is incompatible with rule type "${ruleType.id}" and will be ignored.`
+          );
+          ruleType.cancelAlertsOnRuleTimeout = true;
+        } else {
+          ruleType.cancelAlertsOnRuleTimeout =
+            ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
+        }
+
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {

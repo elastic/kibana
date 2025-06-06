@@ -11,10 +11,12 @@ import { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
@@ -42,6 +44,9 @@ export interface GetDefaultAssistantGraphParams {
   tools: StructuredTool[];
   replacements: Replacements;
   getFormattedTime?: () => string;
+  contentReferencesStore: ContentReferencesStore;
+  telemetryParams?: TelemetryParams;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -49,12 +54,15 @@ export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
 export const getDefaultAssistantGraph = ({
   actionsClient,
   agentRunnable,
+  contentReferencesStore,
   dataClients,
   createLlmInstance,
   logger,
   savedObjectsClient,
   // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
   signal,
+  telemetryParams,
+  telemetry,
   tools,
   replacements,
   getFormattedTime,
@@ -65,6 +73,7 @@ export const getDefaultAssistantGraph = ({
       actionsClient,
       logger,
       savedObjectsClient,
+      contentReferencesStore,
     };
 
     const stateAnnotation = getStateAnnotation({ getFormattedTime });
@@ -79,7 +88,13 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.GENERATE_CHAT_TITLE, (state: AgentState) =>
-        generateChatTitle({ ...nodeParams, state, model: createLlmInstance() })
+        generateChatTitle({
+          ...nodeParams,
+          state,
+          model: createLlmInstance(),
+          telemetryParams,
+          telemetry,
+        })
       )
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
@@ -99,7 +114,14 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools })
+        executeTools({
+          ...nodeParams,
+          config: { signal },
+          state,
+          tools,
+          telemetryParams,
+          telemetry,
+        })
       )
       .addNode(NodeType.RESPOND, (state: AgentState) =>
         respond({ ...nodeParams, config: { signal }, state, model: createLlmInstance() })

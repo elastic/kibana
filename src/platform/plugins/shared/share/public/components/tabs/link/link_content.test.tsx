@@ -54,6 +54,8 @@ describe('LinkContent', () => {
       }),
   }));
 
+  const shortUrlService = urlService.shortUrls.get(null)!;
+
   beforeAll(() => {
     Object.defineProperty(document, 'execCommand', {
       value: jest.fn(() => true),
@@ -71,11 +73,13 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {
+        delegatedShareUrlHandler,
+      },
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
-      delegatedShareUrlHandler,
     });
 
     await user.click(screen.getByTestId('copyShareUrlButton'));
@@ -92,9 +96,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: false,
     });
 
@@ -131,9 +136,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
       // @ts-ignore this locator is passed mainly to test the code path that invokes createWithLocator
       shareableUrlLocatorParams,
@@ -170,9 +176,10 @@ describe('LinkContent', () => {
     renderComponent({
       objectType,
       objectId,
+      objectConfig: {},
       isDirty,
       shareableUrl,
-      urlService,
+      shortUrlService,
       allowShortUrl: true,
     });
 

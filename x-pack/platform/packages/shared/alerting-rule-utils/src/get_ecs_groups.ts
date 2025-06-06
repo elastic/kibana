@@ -6,11 +6,7 @@
  */
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
-
-export interface Group {
-  field: string;
-  value: string;
-}
+import { Group } from './types';
 
 export const getEcsGroups = (groups: Group[] = []): Record<string, string> => {
   const ecsGroups = groups.filter((group) => {

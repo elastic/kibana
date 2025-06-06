@@ -8,6 +8,8 @@
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { FiltersGlobal } from './filters_global';
 import { TestProviders } from '../../mock/test_providers';
@@ -40,23 +42,6 @@ describe('rendering', () => {
       expect(
         wrapper.find('[data-test-subj="filters-global-container"]').first()
       ).not.toHaveStyleRule('display', 'none');
-    });
-  });
-
-  describe('when show is false', () => {
-    test('it renders the container with a `display: none` style', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FiltersGlobal show={false}>
-            <p>{'Filter content'}</p>
-          </FiltersGlobal>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="filters-global-container"]').first()).toHaveStyleRule(
-        'display',
-        'none'
-      );
     });
   });
 });

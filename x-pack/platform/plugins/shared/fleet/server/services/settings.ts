@@ -173,5 +173,13 @@ function getConfigFleetServerHosts() {
 
 export function createDefaultSettings(): BaseSettings {
   const config = appContextService.getConfig();
-  return { prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault };
+  const settings: BaseSettings = {
+    prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault,
+  };
+
+  if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
+    settings.use_space_awareness_migration_status = 'success';
+  }
+
+  return settings;
 }

@@ -109,7 +109,6 @@ describe('TopN', () => {
     options: defaultOptions,
     query,
     setAbsoluteRangeDatePickerTarget: InputsModelId.global,
-    setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
   };

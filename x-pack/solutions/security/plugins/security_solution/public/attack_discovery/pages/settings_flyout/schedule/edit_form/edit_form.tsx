@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -26,6 +27,7 @@ import {
   useForm,
   useFormData,
 } from '../../../../../shared_imports';
+import { getMessageVariables } from './message_variables';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -52,7 +54,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     schema: getSchema({ actionTypeRegistry }),
   });
 
-  const [{ value }] = useFormData({ form });
+  const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
   const { isValid, setFieldValue, submit } = form;
 
   useEffect(() => {
@@ -75,8 +77,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     [setFieldValue]
   );
 
-  const { settingsView } = useSettingsView({ settings, onSettingsChanged });
-
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
     initialValue?.connectorId
   );
@@ -89,12 +89,17 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     [setFieldValue]
   );
 
+  const { settingsView } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsChanged,
+    settings,
+    showConnectorSelector: false,
+    stats: null,
+  });
+
   const messageVariables = useMemo(() => {
-    return {
-      state: [],
-      params: [],
-      context: [],
-    };
+    return getMessageVariables();
   }, []);
 
   return (
@@ -133,8 +138,8 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
             path="actions"
             component={RuleActionsField}
             componentProps={{
+              ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
               messageVariables,
-              summaryMessageVariables: messageVariables,
             }}
           />
         </EuiFlexItem>

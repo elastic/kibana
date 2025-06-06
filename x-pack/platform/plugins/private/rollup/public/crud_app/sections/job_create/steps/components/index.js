@@ -7,3 +7,4 @@
 
 export { FieldChooser } from './field_chooser';
 export { StepError } from './step_error';
+export { JobWizardStepAction } from './job_wizard_step_action';

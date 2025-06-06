@@ -23,7 +23,11 @@ export const RISK_ENGINE_CONFIGURE_SO_URL =
 type ClusterPrivilege = 'manage_index_templates' | 'manage_transform' | 'manage_ingest_pipelines';
 // These are the required privileges to install the risk engine - enabling and running require less privileges
 // However, we check the full set for simplicity, since the UI does not distinguish between installing and enabling
-export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+export const TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+  'manage_transform',
+] as ClusterPrivilege[];
+
+export const TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
   'manage_ingest_pipelines',

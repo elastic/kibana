@@ -60,6 +60,20 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [toasts]
   );
 
+  const uniqueProvidersAndTaskTypes = useMemo(() => {
+    return inferenceEndpoints.reduce(
+      (acc, { service, task_type: taskType }) => {
+        acc.providers.add(service as ServiceProviderKeys);
+        acc.taskTypes.add(taskType);
+        return acc;
+      },
+      {
+        providers: new Set<ServiceProviderKeys>(),
+        taskTypes: new Set<InferenceTaskType>(),
+      }
+    );
+  }, [inferenceEndpoints]);
+
   const onCancelDeleteModal = useCallback(() => {
     setSelectedInferenceEndpoint(undefined);
     setShowDeleteAction(false);
@@ -211,11 +225,16 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             <EuiFlexItem grow={false}>
               <ServiceProviderFilter
                 optionKeys={filterOptions.provider}
+                uniqueProviders={uniqueProvidersAndTaskTypes.providers}
                 onChange={onFilterChangedCallback}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TaskTypeFilter optionKeys={filterOptions.type} onChange={onFilterChangedCallback} />
+              <TaskTypeFilter
+                optionKeys={filterOptions.type}
+                onChange={onFilterChangedCallback}
+                uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

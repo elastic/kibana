@@ -62,7 +62,7 @@
           "\nAn AI Assistant icon with a pulsing ring around it, used in \"hero\" areas promoting functionality or prompting interaction."
         ],
         "signature": [
-          "({ backgroundColor, size }: ",
+          "({ backgroundColor, size, ringsColor, }: ",
           {
             "pluginId": "@kbn/ai-assistant-icon",
             "scope": "public",
@@ -81,7 +81,7 @@
             "id": "def-public.AssistantBeacon.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ backgroundColor, size = 'xxl' }",
+            "label": "{\n  backgroundColor,\n  size = 'xxl',\n  ringsColor,\n}",
             "description": [],
             "signature": [
               {
@@ -244,6 +244,22 @@
             ],
             "signature": [
               "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-icon",
+            "id": "def-public.AssistantBeaconProps.ringsColor",
+            "type": "string",
+            "tags": [],
+            "label": "ringsColor",
+            "description": [
+              "\nColor of the rings around the icon."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.tsx",
             "deprecated": false,

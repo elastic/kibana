@@ -43,7 +43,8 @@ export default ({ getService }: FtrProviderContext) => {
     let defaultPipeline: string;
     let finalPipeline: string;
 
-    describe('@ess @serverless indices metadata', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/216044
+    describe.skip('@ess @serverless indices metadata', () => {
       beforeEach(async () => {
         dsName = await randomDatastream(es);
         await ensureBackingIndices(dsName, NUM_INDICES, es);
@@ -226,6 +227,16 @@ export default ({ getService }: FtrProviderContext) => {
           NUM_INDICES
         );
         expect(events.filter((v) => v.final_pipeline === finalPipeline)).toHaveLength(NUM_INDICES);
+      });
+
+      it('should publish index mode as part of index settings', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_INDEX_SETTINGS_EVENT],
+          index: dsName,
+        });
+
+        expect(events.length).toEqual(NUM_INDICES);
+        expect(events.filter((v) => v.index_mode !== undefined)).toHaveLength(NUM_INDICES);
       });
 
       it('should publish index templates', async () => {

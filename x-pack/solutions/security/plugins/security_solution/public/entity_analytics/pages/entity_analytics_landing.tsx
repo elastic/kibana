@@ -16,7 +16,7 @@ import { trackLandingLinkClick } from '../../common/lib/telemetry/trackers';
 import { useGlobalQueryString } from '../../common/utils/global_query_string';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.landing.pageTitle', {
-  defaultMessage: 'Entity Analytics',
+  defaultMessage: 'Entity analytics',
 });
 
 export const EntityAnalyticsLandingPage = () => {

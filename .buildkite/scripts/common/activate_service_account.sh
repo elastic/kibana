@@ -76,6 +76,9 @@ if [[ -z "$EMAIL" ]]; then
     "ci-artifacts.kibana.dev")
       EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
+    "kibana-ci-access-chromium-blds")
+      EMAIL="kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
+      ;;
     *)
       EMAIL="$BUCKET_NAME@$GCLOUD_EMAIL_POSTFIX"
       ;;

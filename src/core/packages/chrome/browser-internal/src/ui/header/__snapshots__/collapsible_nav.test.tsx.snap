@@ -902,10 +902,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
                 
                 @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
-              <style
-                data-styled="active"
-                data-styled-version="5.3.11"
-              />
             </head>,
             "ctr": 2,
             "insertionPoint": undefined,
@@ -1173,10 +1169,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                 
                 @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
               </style>
-              <style
-                data-styled="active"
-                data-styled-version="5.3.11"
-              />
             </head>,
             "ctr": 2,
             "insertionPoint": undefined,

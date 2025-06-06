@@ -40,8 +40,6 @@ const INVALID_TUTORIAL: TutorialSchema = {
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const VALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -62,8 +60,6 @@ const VALID_TUTORIAL: TutorialSchema = {
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;
