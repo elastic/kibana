@@ -229,6 +229,7 @@ describe('ReportingStore', () => {
         "process_expiration": undefined,
         "queue_time_ms": undefined,
         "scheduled_report_id": undefined,
+        "space_id": undefined,
         "started_at": undefined,
         "status": "pending",
         "timeout": 30000,

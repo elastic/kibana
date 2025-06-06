@@ -2408,7 +2408,7 @@
             "signature": [
               "() => ",
               "Observable",
-              "<string | null>"
+              "<\"security\" | \"oblt\" | \"es\" | \"chat\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
@@ -2784,7 +2784,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"security\" | \"es\" | \"oblt\" | \"chat\""
+              "\"security\" | \"oblt\" | \"es\" | \"chat\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3114,7 +3114,7 @@
               "Unique id for the solution navigation."
             ],
             "signature": [
-              "\"security\" | \"es\" | \"oblt\" | \"chat\""
+              "\"security\" | \"oblt\" | \"es\" | \"chat\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3543,7 +3543,7 @@
         "label": "SolutionId",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\" | \"chat\""
+          "\"security\" | \"oblt\" | \"es\" | \"chat\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3562,11 +3562,11 @@
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
-          "> | undefined; es?: ",
+          "> | undefined; oblt?: ",
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
-          "> | undefined; oblt?: ",
+          "> | undefined; es?: ",
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",

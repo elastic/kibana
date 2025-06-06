@@ -2172,7 +2172,7 @@
     {
       "query": "from index | limit ",
       "error": [
-        "SyntaxError: missing INTEGER_LITERAL at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2182,30 +2182,23 @@
       "warning": []
     },
     {
-      "query": "from index | limit 4.5",
-      "error": [
-        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit a",
       "error": [
-        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit doubleField",
       "error": [
-        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit textField",
       "error": [
-        "SyntaxError: mismatched input 'textField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
