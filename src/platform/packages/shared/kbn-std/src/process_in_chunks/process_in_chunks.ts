@@ -48,16 +48,20 @@ export const processInChunks = async <TResult>(
 const createChunks = (list: string[], chunkSize: number): string[][] => {
   const chunks: string[][] = [];
   let currentChunk: string[] = [];
+  let currentChunkLength = 0;
 
   list.forEach((item) => {
-    if (isLessThanMaxChunkLength(currentChunk, item, chunkSize)) {
+    // Is less than max chunk length
+    if (currentChunkLength + item.length <= chunkSize) {
       currentChunk.push(item);
+      currentChunkLength += item.length;
     } else {
       // Current chunk is full, start a new one
       if (currentChunk.length > 0) {
         chunks.push(currentChunk);
       }
       currentChunk = [item];
+      currentChunkLength = item.length;
     }
   });
 
@@ -67,13 +71,4 @@ const createChunks = (list: string[], chunkSize: number): string[][] => {
   }
 
   return chunks;
-};
-
-const isLessThanMaxChunkLength = (
-  chunk: string[],
-  currentItem: string,
-  chunkSize: number
-): boolean => {
-  const totalLength = [...chunk, currentItem].join().length;
-  return totalLength <= chunkSize; // Allow the chunk until it exceeds the max chunk length
 };
