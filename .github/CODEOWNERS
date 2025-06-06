@@ -993,6 +993,7 @@ test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
+x-pack/packages/security/ai-security-labs-content @elastic/security-generative-ai
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations

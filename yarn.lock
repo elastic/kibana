@@ -3864,9 +3864,13 @@
   version "0.0.0"
   uid ""
 
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+
+"@kbn/ai-security-labs-content@link:x-pack/packages/security/ai-security-labs-content":
   version "0.0.0"
   uid ""
+
 
 "@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
   version "0.0.0"

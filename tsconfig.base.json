@@ -20,6 +20,8 @@
       "@kbn/ai-assistant-common/*": ["x-pack/packages/kbn-ai-assistant-common/*"],
       "@kbn/ai-assistant-management-plugin": ["src/plugins/ai_assistant_management/selection"],
       "@kbn/ai-assistant-management-plugin/*": ["src/plugins/ai_assistant_management/selection/*"],
+      "@kbn/ai-security-labs-content": ["x-pack/packages/security/ai-security-labs-content"],
+      "@kbn/ai-security-labs-content/*": ["x-pack/packages/security/ai-security-labs-content/*"],
       "@kbn/aiops-change-point-detection": ["x-pack/packages/ml/aiops_change_point_detection"],
       "@kbn/aiops-change-point-detection/*": ["x-pack/packages/ml/aiops_change_point_detection/*"],
       "@kbn/aiops-common": ["x-pack/packages/ml/aiops_common"],
