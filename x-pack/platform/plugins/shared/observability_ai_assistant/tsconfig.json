@@ -58,5 +58,7 @@
     "@kbn/lock-manager",
     "@kbn/i18n-react"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

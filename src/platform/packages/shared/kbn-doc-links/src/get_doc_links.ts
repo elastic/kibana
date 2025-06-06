@@ -813,6 +813,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
       pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
+      conditionalProcessor: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#conditionally-run-processor`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
       arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
       dataEnrichment: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-enrichment`,
