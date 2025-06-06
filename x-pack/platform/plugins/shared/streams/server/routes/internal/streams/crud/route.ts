@@ -9,10 +9,10 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
 import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { processInChunks } from '@kbn/std';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
-import { processInChunks } from '@kbn/std';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
@@ -35,12 +35,10 @@ export const listStreamsRoute = createServerRoute({
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const streams = await streamsClient.listStreamsWithDataStreamExistence();
 
-    const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name)
+    const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
-    const dataStreams = await processInChunks(
-      streamNames,
-      (streamNamesChunk) =>
-        scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk})
+    const dataStreams = await processInChunks(streamNames, (streamNamesChunk) =>
+      scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
     );
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
