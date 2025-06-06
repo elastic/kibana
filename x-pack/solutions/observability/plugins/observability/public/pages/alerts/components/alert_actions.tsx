@@ -253,13 +253,3 @@ export function AlertActions({
     </>
   );
 }
-
-// Default export used for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default AlertActions;
-
-const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
-  defaultMessage: 'Alert details',
-});
-
-export type AlertActions = typeof AlertActions;
