@@ -12,8 +12,7 @@ import { OperatorFunction, map } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { ChatCompletionEvent, ChatCompletionEventType } from '@kbn/inference-common';
-import { unhashString } from '../../../common/utils/anonymization/redaction';
-import { redactEntities } from '../../../common/utils/anonymization/redaction';
+import { unhashString, redactEntities } from '../../../common/utils/anonymization/redaction';
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
 import { chunkText } from './chunk_text';
@@ -161,13 +160,13 @@ export class AnonymizationService {
    * Redacts all user messages by replacing detected entities with {hash} placeholders
    */
   async redactMessages(messages: Message[]): Promise<{ redactedMessages: Message[] }> {
-    this.logger.debug(`Redacting ${messages.length} messages (per‑message detection)`);
     if (!this.rules.length) {
       return { redactedMessages: messages };
     }
 
     for (const msg of messages) {
-      if (msg.message.role !== 'user' || !msg.message.content) {
+      // we may want to ignore assistant responses in the future
+      if (!msg.message.content) {
         continue;
       }
 
@@ -199,7 +198,6 @@ export class AnonymizationService {
       });
       msg.message.function_call!.arguments = redactedArgs;
     }
-
     return { redactedMessages: messages };
   }
 
