@@ -263,6 +263,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Automatically installs the security AI prompts package
    */
   securityAIPromptsEnabled: false,
+
+  /**
+   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Release: 8.19/9.1
+   */
+  microsoftDefenderEndpointRunScriptEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -21,7 +21,8 @@ import {
   AgentDetailsParamsSchema,
   AgentListParamsSchema,
   RunScriptParamsSchema,
-  MicrosoftDefenderEndpointBaseApiResponseSchema,
+  MicrosoftDefenderEndpointEmptyParamsSchema,
+  GetActionResultsParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -112,19 +113,19 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
       method: 'getLibraryFiles',
-      schema: TestConnectorParamsSchema, // Empty schema
+      schema: MicrosoftDefenderEndpointEmptyParamsSchema,
     });
 
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
       method: 'runScript',
-      schema: RunScriptParamsSchema, // Empty schema
+      schema: RunScriptParamsSchema,
     });
 
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
       method: 'getActionResults',
-      schema: MicrosoftDefenderEndpointBaseApiResponseSchema, // Empty schema
+      schema: GetActionResultsParamsSchema,
     });
   }
 

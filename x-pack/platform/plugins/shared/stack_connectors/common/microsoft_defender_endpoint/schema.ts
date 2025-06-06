@@ -31,6 +31,8 @@ export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );
 
+export const MicrosoftDefenderEndpointEmptyParamsSchema = schema.object({});
+
 export const TestConnectorParamsSchema = schema.object({});
 
 export const AgentDetailsParamsSchema = schema.object({
@@ -148,11 +150,10 @@ export const ReleaseHostParamsSchema = schema.object({
 
 export const RunScriptParamsSchema = schema.object({
   id: schema.string({ minLength: 1 }),
-  comment: schema.string({ minLength: 1 }),
+  comment: schema.maybe(schema.string({ minLength: 1 })),
   parameters: schema.object({
     scriptName: schema.string({ minLength: 1 }),
     args: schema.maybe(schema.string({ minLength: 1 })),
-    comment: schema.maybe(schema.string({ minLength: 1 })),
   }),
 });
 
