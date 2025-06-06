@@ -2199,6 +2199,8 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc/privileges @elastic/security-generative-ai
+/x-pack/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
