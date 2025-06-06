@@ -10,6 +10,7 @@ import { useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
+import * as i18n from './translations';
 
 const QUERY_KEY = ['siem_migrations', 'ai_connectors'];
 
@@ -20,9 +21,10 @@ export const useGetAIConnectors = (http: HttpSetup) => {
     queryFn: () => loadAiConnectors(http),
     onError: (error) => {
       addError(error, {
-        title: 'Error loading AI connectors',
+        title: i18n.ERROR_FETCH_AI_CONNECTORS,
       });
     },
+    refetchOnWindowFocus: false,
   });
 
   return useMemo(
