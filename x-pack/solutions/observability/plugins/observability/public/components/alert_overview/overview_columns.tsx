@@ -101,7 +101,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               {ruleCriteria.map((criteria, criteriaIndex) => {
                 const observedValue = criteria.observedValue;
                 const pctAboveThreshold = criteria.pctAboveThreshold;
-                const { threshold, comparator } = criteria;
+                const { threshold, comparator, fields } = criteria;
                 let formattedComparator = comparator.toUpperCase();
                 if (
                   comparator === COMPARATORS.NOT_BETWEEN ||
@@ -124,7 +124,9 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                       )}
                       content={
                         <EuiText size="s" key={`${threshold}-${criteriaIndex}`}>
-                          <h4>{`${formattedComparator} ${threshold}`}</h4>
+                          <h4>{`${
+                            fields[criteriaIndex].toUpperCase() ?? ''
+                          } ${formattedComparator} ${threshold}`}</h4>
                         </EuiText>
                       }
                     >

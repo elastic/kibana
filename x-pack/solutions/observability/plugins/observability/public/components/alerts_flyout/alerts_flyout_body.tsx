@@ -11,6 +11,7 @@ import {
   AlertFieldsTable,
   ScrollableFlyoutTabbedContent,
 } from '@kbn/alerts-ui-shared/src/alert_fields_table';
+import { Rule } from '@kbn/alerts-ui-shared';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { AlertOverview } from '../alert_overview/alert_overview';
@@ -20,7 +21,9 @@ type TabId = 'overview' | 'table';
 export type AlertsFlyoutBodyProps = Pick<
   ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutBody'>>,
   'alert' | 'tableId' | 'observabilityRuleTypeRegistry'
->;
+> & {
+  rule?: Rule;
+};
 
 export function AlertsFlyoutBody({
   alert,

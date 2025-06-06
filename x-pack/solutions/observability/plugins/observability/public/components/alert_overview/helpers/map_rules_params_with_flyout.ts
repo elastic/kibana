@@ -43,6 +43,7 @@ export interface FlyoutThresholdData {
   threshold: string[];
   comparator: string;
   pctAboveThreshold: string;
+  fields: string[];
 }
 
 const getI18nComparator = (comparator?: COMPARATORS) => {
@@ -105,8 +106,8 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
             metricValueFormatter(thresholdWithRange, isSameFieldsType ? fields[0] : 'noType')
           )
           .join(' AND ');
-
         return {
+          fields,
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
@@ -154,6 +155,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           .join(' AND ');
 
         return {
+          fields,
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
@@ -218,6 +220,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         }
 
         return {
+          fields: [metricField],
           observedValue: observedValueFormatted,
           threshold: thresholdFormattedAsString,
           comparator,
@@ -231,7 +234,13 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case LOG_THRESHOLD_ALERT_TYPE_ID:
       const { comparator } = ruleParams?.count as { comparator: COMPARATORS };
+      const { field } = ruleParams.criteria as {
+        field: string;
+        comparator: COMPARATORS;
+        value: string;
+      };
       const flyoutMap = {
+        fields: [field],
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator,
@@ -245,6 +254,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.ErrorCount:
       const APMFlyoutMapErrorCount = {
+        field: 'APM Error Count',
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
@@ -258,6 +268,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.TransactionErrorRate:
       const APMFlyoutMapTransactionErrorRate = {
+        field: 'APM Transaction Error Rate',
         observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
         comparator: COMPARATORS.GREATER_THAN,
@@ -271,6 +282,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case ApmRuleType.TransactionDuration:
       const APMFlyoutMapTransactionDuration = {
+        field: 'APM Transaction Duration',
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
         comparator: COMPARATORS.GREATER_THAN,
@@ -285,6 +297,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
     case '.es-query':
       const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
+        fields: 'Query field',
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [threshold].flat().join(' AND '),
         comparator: thresholdComparator,
@@ -298,6 +311,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case SLO_BURN_RATE_RULE_TYPE_ID:
       const SLOBurnRateFlyoutMap = {
+        fields: 'Burn rate threshold',
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
