@@ -115,7 +115,12 @@ export const FullScreenWaterfall = ({
                   display="base"
                   iconSize="m"
                   iconType="fullScreenExit"
-                  aria-label="fullScreenExit"
+                  aria-label={i18n.translate(
+                    'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
+                    {
+                      defaultMessage: 'Exit full screen waterfall',
+                    }
+                  )}
                   onClick={() => {
                     onCloseFullScreen();
                   }}
