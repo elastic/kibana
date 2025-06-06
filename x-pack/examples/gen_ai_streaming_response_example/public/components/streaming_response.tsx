@@ -18,7 +18,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
