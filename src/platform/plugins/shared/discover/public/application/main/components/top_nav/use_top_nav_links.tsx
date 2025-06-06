@@ -110,9 +110,8 @@ export const useTopNavLinks = ({
 
       if (
         services.triggersActionsUi &&
-        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
         !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+        discoverParams.authorizedRuleTypeIds.length
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
