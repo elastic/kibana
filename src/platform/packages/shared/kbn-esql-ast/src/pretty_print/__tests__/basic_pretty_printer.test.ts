@@ -141,6 +141,16 @@ describe('single line query', () => {
       });
     });
 
+    describe('ENRICH', () => {
+      test('policy name with colon', () => {
+        const { text } = reprint(
+          'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
+        );
+
+        expect(text).toBe('FROM a | ENRICH _coordinator:woof ON category WITH col0 = category');
+      });
+    });
+
     describe('CHANGE_POINT', () => {
       test('value only', () => {
         const { text } = reprint(`FROM a | CHANGE_POINT value`);

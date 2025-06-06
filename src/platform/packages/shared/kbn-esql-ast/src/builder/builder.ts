@@ -439,15 +439,16 @@ export namespace Builder {
           Partial<Pick<ESQLStringLiteral, 'name'>>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLStringLiteral => {
-        const value =
-          '"' +
-          valueUnquoted
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t') +
-          '"';
+        const value = !!template?.unquoted
+          ? valueUnquoted
+          : '"' +
+            valueUnquoted
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\r')
+              .replace(/\t/g, '\\t') +
+            '"';
         const name = template?.name ?? value;
         const node: ESQLStringLiteral = {
           ...template,
