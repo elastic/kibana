@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLControlVariable, IndexAutocompleteItem, RecommendedQuery } from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '../validation/types';
 
 /** @internal **/
@@ -50,6 +50,7 @@ export interface ESQLCallbacks {
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getEditorExtensions?: (queryString: string) => Promise<RecommendedQuery[]>;
   /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
   getCurrentAppId?: () => Promise<string | undefined>;
 }
