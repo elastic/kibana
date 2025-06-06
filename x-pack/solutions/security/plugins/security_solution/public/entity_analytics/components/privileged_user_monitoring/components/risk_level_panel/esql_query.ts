@@ -6,14 +6,11 @@
  */
 
 import { RiskScoreFields } from '../../../../../../common/search_strategy';
+import { getPrivilegedMonitorUsersJoin } from '../../helpers';
 
-export const RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY = `
+export const getRiskLevelsPrivilegedUsersQueryBody = (namespace: string) => `
 | WHERE ${RiskScoreFields.userName} IS NOT NULL
-| RENAME ${RiskScoreFields.timestamp} AS event_timestamp
-| LOOKUP JOIN privileged-users ON ${RiskScoreFields.userName}
-| RENAME event_timestamp AS ${RiskScoreFields.timestamp}
-| EVAL is_privileged = COALESCE(labels.is_privileged, false)
-| WHERE is_privileged == true
+${getPrivilegedMonitorUsersJoin(namespace)}
 | STATS count = COUNT_DISTINCT(${RiskScoreFields.userName}) BY ${RiskScoreFields.userRisk}
 | RENAME ${RiskScoreFields.userRisk} AS level`;
 
