@@ -156,10 +156,10 @@ export interface Signature {
      */
     acceptedValues?: string[];
     /**
-     * Must only be included _in addition to_ literalOptions.
+     * Must only be included _in addition to_ acceptedValues.
      *
      * If provided this is the list of suggested values that
-     * will show up in the autocomplete. If omitted, the literalOptions
+     * will show up in the autocomplete. If omitted, the acceptedValues
      * will be used as suggestions.
      *
      * This is useful for functions that accept

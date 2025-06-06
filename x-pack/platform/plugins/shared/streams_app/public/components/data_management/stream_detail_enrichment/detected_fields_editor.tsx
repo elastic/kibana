@@ -16,7 +16,7 @@ import { SchemaField } from '../schema_editor/types';
 import { useStreamEnrichmentEvents } from './state_management/stream_enrichment_state_machine';
 
 interface DetectedFieldsEditorProps {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   detectedFields: SchemaField[];
 }
 
@@ -24,6 +24,7 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
+  const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
 
   const hasFields = detectedFields.length > 0;
 
@@ -49,26 +50,32 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
 
   return (
     <>
-      <EuiText
-        component="p"
-        color="subdued"
-        size="xs"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
-      >
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
-          { defaultMessage: 'You can review and adjust saved fields further in the Schema Editor.' }
-        )}
-      </EuiText>
+      {isWiredStream && (
+        <EuiText
+          component="p"
+          color="subdued"
+          size="xs"
+          css={css`
+            margin-bottom: ${euiTheme.size.base};
+          `}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
+            {
+              defaultMessage:
+                'You can review and adjust saved fields further in the Schema Editor.',
+            }
+          )}
+        </EuiText>
+      )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status']}
+        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'type']}
         fields={detectedFields}
         stream={definition.stream}
         onFieldUnmap={unmapField}
         onFieldUpdate={mapField}
-        withTableActions
+        withTableActions={isWiredStream}
+        withToolbar={isWiredStream}
       />
     </>
   );
