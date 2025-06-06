@@ -122,9 +122,7 @@ export async function suggest(
 }
 
 const defaultPrompt: SuggestionRawDefinition = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.promptDoc', {
-    defaultMessage: 'Your prompt to the LLM',
-  }),
+  detail: '',
   kind: 'Constant',
   asSnippet: true,
   label: 'Your prompt to the LLM',
