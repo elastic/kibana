@@ -7,6 +7,7 @@
 
 import deepMerge from 'deepmerge';
 import { bytePartition } from '@kbn/std';
+import { isEmpty } from 'lodash';
 
 type CallbackFn<TResult> = (chunk: string[], id: number) => Promise<TResult>;
 
@@ -22,6 +23,10 @@ export const processAsyncInChunks = async <TResult>(
   chunkExecutor: CallbackFn<TResult>
 ): Promise<TResult> => {
   const chunks = bytePartition(list);
+
+  if (isEmpty(chunks)) {
+    return chunkExecutor([], 0);
+  }
 
   const chunkResults = await Promise.all(chunks.map(chunkExecutor));
 
