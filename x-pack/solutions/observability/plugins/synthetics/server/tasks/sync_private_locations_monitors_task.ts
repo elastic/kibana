@@ -34,6 +34,7 @@ import {
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 const TASK_ID = `${TASK_TYPE}-single-instance`;
+const TASK_SCHEDULE = '5m';
 
 interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -41,7 +42,9 @@ interface TaskState extends Record<string, unknown> {
   lastTotalMWs: number;
 }
 
-type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & { state: Partial<TaskState> };
+export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
+  state: Partial<TaskState>;
+};
 
 export class SyncPrivateLocationMonitorsTask {
   constructor(
@@ -142,7 +145,7 @@ export class SyncPrivateLocationMonitorsTask {
       id: TASK_ID,
       state: {},
       schedule: {
-        interval: '10m',
+        interval: TASK_SCHEDULE,
       },
       taskType: TASK_TYPE,
       params: {},
