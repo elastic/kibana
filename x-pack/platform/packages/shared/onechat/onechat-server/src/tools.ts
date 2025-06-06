@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptor, ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
-import type { RunEventEmitter } from './events';
+import type { ToolEventEmitter } from './events';
 
 /**
  * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
@@ -101,6 +101,10 @@ export interface ToolHandlerContext {
    */
   modelProvider: ModelProvider;
   /**
+   * Tool provider that can be used to list or execute tools.
+   */
+  toolProvider: ToolProvider;
+  /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
    */
@@ -108,7 +112,7 @@ export interface ToolHandlerContext {
   /**
    * Event emitter that can be used to emits custom events
    */
-  events: RunEventEmitter;
+  events: ToolEventEmitter;
 }
 
 /**
