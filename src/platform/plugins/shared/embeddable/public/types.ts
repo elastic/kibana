@@ -19,11 +19,11 @@ import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type {
-  EmbeddableContentManagementDefinition,
   EmbeddableStateWithType,
   CanGetEmbeddableContentManagementDefinition,
 } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
+import { EmbeddableContentManagementRegistry } from '../common/embeddable_content_management/registry';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -72,9 +72,7 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
-  registerEmbeddableContentManagementDefinition: (
-    definition: EmbeddableContentManagementDefinition
-  ) => void;
+  registerEmbeddableContentManagementDefinition: EmbeddableContentManagementRegistry['registerContentManagementDefinition'];
 
   /**
    * @deprecated

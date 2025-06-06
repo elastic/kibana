@@ -196,10 +196,15 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false, {
-      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-        this.getTagNamesFromReferences(references, allTags),
-    });
+    const { item, error: itemError } = await savedObjectToItem(
+      savedObject,
+      this.embeddable,
+      false,
+      {
+        getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+          this.getTagNamesFromReferences(references, allTags),
+      }
+    );
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -286,10 +291,15 @@ export class DashboardStorage {
       { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false, {
-      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-        this.getTagNamesFromReferences(references, allTags),
-    });
+    const { item, error: itemError } = await savedObjectToItem(
+      savedObject,
+      this.embeddable,
+      false,
+      {
+        getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+          this.getTagNamesFromReferences(references, allTags),
+      }
+    );
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -373,7 +383,7 @@ export class DashboardStorage {
       }
     );
 
-    const { item, error: itemError } = savedObjectToItem(
+    const { item, error: itemError } = await savedObjectToItem(
       partialSavedObject,
       this.embeddable,
       true,
@@ -448,7 +458,7 @@ export class DashboardStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const { item } = savedObjectToItem(so, this.embeddable, false, {
+          const { item } = await savedObjectToItem(so, this.embeddable, false, {
             allowedAttributes: soQuery.fields,
             allowedReferences: optionsToLatest?.includeReferences,
             getTagNamesFromReferences: (references: SavedObjectReference[]) =>

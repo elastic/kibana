@@ -33,7 +33,7 @@ import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
-import { getResultV3ToV2 } from './transform_utils';
+// import { getResultV3ToV2 } from './transform_utils';
 
 const apiError = schema.object({
   error: schema.string(),
@@ -230,7 +230,7 @@ const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-const sectionGridDataSchema = schema.object({
+export const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
   i: schema.maybe(
     schema.string({
@@ -564,8 +564,8 @@ export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefin
     out: {
       result: {
         schema: dashboardGetResultSchema,
-        // TODO Ignoring references for now...
-        down: (data) => getResultV3ToV2(data, embeddable),
+        // TODO Ignoring down transforms for now since it needs to be a promise.
+        // down: (data) => getResultV3ToV2(data, embeddable),
       },
     },
   },

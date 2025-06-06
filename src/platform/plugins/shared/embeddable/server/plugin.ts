@@ -31,25 +31,20 @@ import {
   EmbeddableStateWithType,
   CommonEmbeddableStartContract,
   EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
+  CanGetEmbeddableContentManagementDefinition,
 } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { EmbeddableContentManagementRegistry } from '../common/embeddable_content_management/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  registerEmbeddableContentManagementDefinition: (
-    definition: EmbeddableContentManagementDefinition
-  ) => void;
+  registerEmbeddableContentManagementDefinition: EmbeddableContentManagementRegistry['registerContentManagementDefinition'];
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
-  getEmbeddableContentManagementDefinition: (
-    id: string
-  ) => EmbeddableContentManagementDefinition | undefined;
-};
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
+  CanGetEmbeddableContentManagementDefinition;
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();

@@ -23,6 +23,7 @@ import {
   dashboardItemSchema,
   controlGroupInputSchema,
   panelGridDataSchema,
+  sectionGridDataSchema,
   panelSchema,
   sectionSchema,
   dashboardAttributesSchema,
@@ -45,7 +46,9 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
   panelConfig: TypeOf<typeof panelSchema>['panelConfig'] & { [key: string]: any };
   gridData: GridData;
 };
-export type DashboardSection = TypeOf<typeof sectionSchema>;
+export type DashboardSection = Omit<TypeOf<typeof sectionSchema>, 'gridData'> & {
+  gridData: SectionGridData;
+};
 export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
@@ -58,6 +61,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
+export type SectionGridData = WithRequiredProperty<TypeOf<typeof sectionGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;
