@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render control column with proper header', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           // First control column has no title, so empty string, leading control column has title
-          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', '', '', '']);
+          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', 'Actions']);
         });
       });
 
