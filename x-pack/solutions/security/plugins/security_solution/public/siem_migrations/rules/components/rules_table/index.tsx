@@ -237,7 +237,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationId, startMigration]
     );
 
-    const { getModal, showModal: showReprocessFailedRulesModal } = useStartMigrationModal({
+    const { getModal, show: showReprocessFailedRulesModalsModal } = useStartMigrationModal({
       availableConnectors: aiConnectors,
       lastConnectorId: migrationStats?.last_execution?.connector_id,
       skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
@@ -379,7 +379,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       numberOfSelectedRules={selectedMigrationRules.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
-                      reprocessFailedRules={showReprocessFailedRulesModal}
+                      reprocessFailedRules={showReprocessFailedRulesModalsModal}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
