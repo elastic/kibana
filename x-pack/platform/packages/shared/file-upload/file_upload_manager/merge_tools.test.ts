@@ -10,6 +10,7 @@ import {
   getMappingClashInfo,
   getFormatClashes,
   CLASH_TYPE,
+  CLASH_ERROR_TYPE,
 } from './merge_tools';
 import type { FileWrapper, FileAnalysis } from './file_wrapper';
 
@@ -25,7 +26,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -40,7 +41,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -55,7 +56,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -72,7 +73,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([
         {
@@ -99,7 +100,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
 
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([
@@ -154,12 +155,12 @@ describe('merge_tools', () => {
         { fileName: 'file3', supportedFormat: true } as FileAnalysis,
       ];
 
-      const result = getMappingClashInfo(mappingClashes, filesStatus);
+      const result = getMappingClashInfo(mappingClashes, undefined, filesStatus);
 
       expect(result).toEqual([
-        { fileName: 'file1', clash: true, clashType: CLASH_TYPE.MAPPING },
-        { fileName: 'file2', clash: false, clashType: CLASH_TYPE.MAPPING },
-        { fileName: 'file3', clash: false, clashType: CLASH_TYPE.MAPPING },
+        { fileName: 'file1', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.MAPPING },
+        { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE, clashType: CLASH_TYPE.MAPPING },
+        { fileName: 'file3', clash: CLASH_ERROR_TYPE.NONE, clashType: CLASH_TYPE.MAPPING },
       ]);
     });
   });
@@ -181,8 +182,8 @@ describe('merge_tools', () => {
 
       const result = getFormatClashes(files);
       expect(result).toEqual([
-        { fileName: 'file1', clash: false },
-        { fileName: 'file2', clash: false },
+        { fileName: 'file1', clash: CLASH_ERROR_TYPE.NONE },
+        { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE },
       ]);
     });
 
@@ -202,8 +203,8 @@ describe('merge_tools', () => {
 
       const result = getFormatClashes(files);
       expect(result).toEqual([
-        { fileName: 'file1', clash: true, clashType: CLASH_TYPE.FORMAT },
-        { fileName: 'file2', clash: true, clashType: CLASH_TYPE.FORMAT },
+        { fileName: 'file1', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.FORMAT },
+        { fileName: 'file2', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.FORMAT },
       ]);
     });
 
@@ -229,9 +230,9 @@ describe('merge_tools', () => {
       const result = getFormatClashes(files);
 
       expect(result).toEqual([
-        { fileName: 'file1', clash: false, clashType: undefined },
-        { fileName: 'file2', clash: false, clashType: undefined },
-        { fileName: 'file3', clash: true, clashType: 1 },
+        { fileName: 'file1', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
+        { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
+        { fileName: 'file3', clash: CLASH_ERROR_TYPE.ERROR, clashType: 1 },
       ]);
     });
 
@@ -260,9 +261,9 @@ describe('merge_tools', () => {
       const result = getFormatClashes(files);
 
       expect(result).toEqual([
-        { fileName: 'file1', clash: false, clashType: undefined },
-        { fileName: 'file2', clash: false, clashType: undefined },
-        { fileName: 'file3', clash: true, clashType: CLASH_TYPE.UNSUPPORTED },
+        { fileName: 'file1', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
+        { fileName: 'file2', clash: CLASH_ERROR_TYPE.NONE, clashType: undefined },
+        { fileName: 'file3', clash: CLASH_ERROR_TYPE.ERROR, clashType: CLASH_TYPE.UNSUPPORTED },
       ]);
     });
   });

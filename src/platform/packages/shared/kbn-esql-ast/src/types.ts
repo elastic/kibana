@@ -14,7 +14,8 @@ export type ESQLAstCommand =
   | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
-  | ESQLAstRerankCommand;
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -108,6 +109,12 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
     type: ESQLColumn;
     pvalue: ESQLColumn;
   };
+}
+
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
 }
 
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
