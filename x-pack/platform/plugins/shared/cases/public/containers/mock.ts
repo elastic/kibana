@@ -628,6 +628,7 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
+    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],

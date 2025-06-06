@@ -31,6 +31,7 @@ describe('allCasesUrlStateDeserializer', () => {
           "searchFields": Array [
             "title",
             "description",
+            "incremental_id",
           ],
           "severity": Array [],
           "status": Array [],
