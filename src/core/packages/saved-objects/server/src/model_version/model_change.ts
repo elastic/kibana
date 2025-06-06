@@ -11,6 +11,8 @@ import type { SavedObjectsMappingProperties } from '../mapping_definition';
 import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectModelUnsafeTransformFn,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationDoc,
 } from './transformations';
 
 /**
@@ -168,5 +170,18 @@ export interface SavedObjectsModelUnsafeTransformChange<
   /**
    * The transform function to execute.
    */
-  transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
+  transformFn: UnsafeTransformFunction<PreviousAttributes, NewAttributes>;
+}
+
+export class UnsafeTransformFunction<A, B> extends Function {
+  private constructor(private fn: SavedObjectModelUnsafeTransformFn<A, B>) {
+    super('...args', 'return this.fn(...args)');
+    return this.bind(this);
+  }
+
+  public static createTransformFunction<InputType = unknown, OutputType = unknown>(
+    fn: SavedObjectModelUnsafeTransformFn<InputType, OutputType>
+  ) {
+    return new UnsafeTransformFunction(fn);
+  }
 }
