@@ -8,7 +8,10 @@
  */
 
 import { SAVED_SEARCH_ATTACHMENT_TYPE } from '@kbn/discover-utils';
-import type { PersistableStateAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type {
+  PersistableStateAttachmentType,
+  PersistableStateAttachmentViewProps,
+} from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
 import { EuiAvatar, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +29,9 @@ export const generateAttachmentType = (): PersistableStateAttachmentType => ({
       />
     ),
     timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshairs" />,
-    children: AttachmentChildrenLazy,
+    children: AttachmentChildrenLazy as unknown as React.LazyExoticComponent<
+      React.FC<PersistableStateAttachmentViewProps>
+    >,
     actions: AttachmentActions,
   }),
   icon: 'crosshairs',
