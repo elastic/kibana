@@ -53,11 +53,6 @@ const DEFAULT_SORT_DIRECTION = 'desc';
 
 export interface MigrationRulesTableProps {
   /**
-   * Selected rule migration id
-   */
-  migrationId: string;
-
-  /**
    * Re-fetches latest rule migration data
    */
   refetchData?: () => void;
@@ -82,7 +77,8 @@ export interface MigrationRulesTableProps {
  * Table Component for displaying SIEM rules migrations
  */
 export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
-  ({ migrationId, refetchData, integrations, isIntegrationsLoading, migrationStats }) => {
+  ({ refetchData, integrations, isIntegrationsLoading, migrationStats }) => {
+    const migrationId = migrationStats.id;
     const { addError } = useAppToasts();
 
     const {
