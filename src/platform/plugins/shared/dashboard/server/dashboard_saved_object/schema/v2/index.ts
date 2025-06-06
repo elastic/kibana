@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardAttributes, GridData, SavedDashboardPanel } from './types';
-export { controlGroupInputSchema, dashboardAttributesSchema } from './v2';
+export { dashboardAttributesSchema } from './v2';
+export type { DashboardAttributes } from './types';

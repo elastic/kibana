@@ -13,7 +13,7 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
-export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
+const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
   {
     showApplySelections: schema.maybe(schema.boolean()),
   },
@@ -26,11 +26,3 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   },
   { unknowns: 'ignore' }
 );
-
-export const gridDataSchema = schema.object({
-  x: schema.number(),
-  y: schema.number(),
-  w: schema.number(),
-  h: schema.number(),
-  i: schema.string(),
-});

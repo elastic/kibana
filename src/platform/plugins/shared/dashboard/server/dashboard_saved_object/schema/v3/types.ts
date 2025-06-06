@@ -8,18 +8,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
-import { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
+import { dashboardAttributesSchema } from './v3';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
-export type GridData = TypeOf<typeof gridDataSchema>;
-
-/**
- * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
- */
-export type SavedDashboardPanel = Omit<SavedDashboardPanelV2, 'gridData'> & { gridData: GridData };
-
-/**
- * A saved dashboard section parsed directly from the Dashboard Attributes
- */
-export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
