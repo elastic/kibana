@@ -109,9 +109,7 @@ describe('Alerts', () => {
   });
 
   it('filtered alerts', async () => {
-    let conversation = await chatClient.complete(
-      'Do I have any active threshold alerts?'
-    );
+    let conversation = await chatClient.complete('Do I have any active threshold alerts?');
 
     conversation = await chatClient.complete(
       conversation.conversationId!,
