@@ -6,4 +6,6 @@
  */
 import React from 'react';
 
-export const WithFilteredIntegrations = () => <div data-test-subj="withFilteredIntegrations" />;
+export const SecurityIntegrationsGridTabs = jest.fn(() => (
+  <div data-test-subj="securityIntegrationsGridTabs" />
+));

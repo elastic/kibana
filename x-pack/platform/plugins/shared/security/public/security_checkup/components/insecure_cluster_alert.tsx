@@ -18,6 +18,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type {
   AnalyticsServiceStart,
+  CoreStart,
   DocLinksStart,
   I18nStart,
   MountPoint,
@@ -26,7 +27,6 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',
@@ -39,6 +39,7 @@ interface Deps {
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
   userProfile: UserProfileService;
+  rendering: CoreStart['rendering'];
 }
 
 export const insecureClusterAlertText = (deps: Deps, onDismiss: (persist: boolean) => void) =>
@@ -49,57 +50,55 @@ export const insecureClusterAlertText = (deps: Deps, onDismiss: (persist: boolea
       const enableSecurityDocLink = `${docLinks.links.security.elasticsearchEnableSecurity}?blade=kibanasecuritymessage`;
 
       return (
-        <KibanaRenderContextProvider {...startServices}>
-          <div data-test-subj="insecureClusterAlertText">
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.security.checkup.insecureClusterMessage"
-                defaultMessage="Don’t lose one bit. Enable our free security features."
-              />
-            </EuiText>
-            <EuiSpacer />
-            <EuiCheckbox
-              id="persistDismissedAlertPreference"
-              checked={persist}
-              onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
-              label={i18n.translate('xpack.security.checkup.dontShowAgain', {
-                defaultMessage: `Don't show again`,
-              })}
+        <div data-test-subj="insecureClusterAlertText">
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.security.checkup.insecureClusterMessage"
+              defaultMessage="Don’t lose one bit. Enable our free security features."
             />
-            <EuiSpacer />
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="primary"
-                  fill
-                  href={enableSecurityDocLink}
-                  target="_blank"
-                  data-test-subj="learnMoreButton"
-                >
-                  {i18n.translate('xpack.security.checkup.enableButtonText', {
-                    defaultMessage: `Enable security`,
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={() => onDismiss(persist)}
-                  data-test-subj="dismissAlertButton"
-                >
-                  {i18n.translate('xpack.security.checkup.dismissButtonText', {
-                    defaultMessage: `Dismiss`,
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </KibanaRenderContextProvider>
+          </EuiText>
+          <EuiSpacer />
+          <EuiCheckbox
+            id="persistDismissedAlertPreference"
+            checked={persist}
+            onChange={(changeEvent) => setPersist(changeEvent.target.checked)}
+            label={i18n.translate('xpack.security.checkup.dontShowAgain', {
+              defaultMessage: `Don't show again`,
+            })}
+          />
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="primary"
+                fill
+                href={enableSecurityDocLink}
+                target="_blank"
+                data-test-subj="learnMoreButton"
+              >
+                {i18n.translate('xpack.security.checkup.enableButtonText', {
+                  defaultMessage: `Enable security`,
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                onClick={() => onDismiss(persist)}
+                data-test-subj="dismissAlertButton"
+              >
+                {i18n.translate('xpack.security.checkup.dismissButtonText', {
+                  defaultMessage: `Dismiss`,
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       );
     };
 
-    render(<AlertText />, e);
+    render(startServices.rendering.addContext(<AlertText />), e);
 
     return () => unmountComponentAtNode(e);
   }) as MountPoint;
