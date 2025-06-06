@@ -21,6 +21,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
@@ -116,14 +117,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
-    useSourcererDataView();
+  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
-          indexPattern,
+          dataViewSpecToViewBase(sourcererDataView),
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -132,7 +132,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
+  }, [globalFilters, sourcererDataView, query, uiSettings, usersDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -292,7 +292,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
-              indexPattern={indexPattern}
+              dataViewSpec={sourcererDataView}
               isInitializing={isInitializing}
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}

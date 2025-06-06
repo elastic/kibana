@@ -13,26 +13,6 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
-// sections only include y + i for grid data
-export const sectionGridDataSchema = schema.object({
-  y: schema.number(),
-  i: schema.string(),
-});
-
-// panels include all grid data keys, including those that sections use
-export const gridDataSchema = sectionGridDataSchema.extends({
-  x: schema.number(),
-  w: schema.number(),
-  h: schema.number(),
-  sectionId: schema.maybe(schema.string()),
-});
-
-export const sectionSchema = schema.object({
-  title: schema.string(),
-  collapsed: schema.maybe(schema.boolean()),
-  gridData: sectionGridDataSchema,
-});
-
 export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
   {
     showApplySelections: schema.maybe(schema.boolean()),
@@ -43,7 +23,14 @@ export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   {
     controlGroupInput: schema.maybe(controlGroupInputSchema),
-    sections: schema.maybe(schema.arrayOf(sectionSchema)),
   },
   { unknowns: 'ignore' }
 );
+
+export const gridDataSchema = schema.object({
+  x: schema.number(),
+  y: schema.number(),
+  w: schema.number(),
+  h: schema.number(),
+  i: schema.string(),
+});

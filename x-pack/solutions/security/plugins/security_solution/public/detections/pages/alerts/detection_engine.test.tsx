@@ -196,7 +196,6 @@ describe('DetectionEnginePageComponent', () => {
     ]);
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
-      indexPattern: {},
       browserFields: mockBrowserFields,
       sourcererDataView: {
         fields: {},
