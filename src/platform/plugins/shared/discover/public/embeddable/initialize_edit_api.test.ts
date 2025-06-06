@@ -77,14 +77,14 @@ describe('initialize edit api', () => {
       editUrl: string;
       urlWithoutLocationState: string;
     }) => {
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(1);
+      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(2);
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith({});
       expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
-      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('');
 
       expect(editApp).toBe('discover');
       expect(editPath).toBe('/mock-url');
-      expect(editUrl).toBe('/base/mock-url');
+      expect(editUrl).toBe('');
       expect(urlWithoutLocationState).toBe('/base/mock-url');
     };
 
