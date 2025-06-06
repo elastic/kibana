@@ -141,7 +141,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <div
-        css={[focusStyles, styles.item, printViewportVisStyles]}
+        css={[focusStyles, styles.item]}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
@@ -215,15 +215,15 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
 });
 
 const dashboardGridItemStyles = {
-  item: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  item: (context: UseEuiTheme) =>
+    css([{
       height: '100%',
       '&.dshDashboardGrid__item--highlighted .embPanel': {
-        borderRadius: euiTheme.border.radius.small,
-        animationName: highlightOutline(euiTheme),
+        borderRadius: context.euiTheme.border.radius.small,
+        animationName: highlightOutline(context.euiTheme),
         animationDuration: '4s',
         animationTimingFunction: 'ease-out',
-        zIndex: euiTheme.levels.mask,
+        zIndex: context.euiTheme.levels.mask,
       },
       // Remove padding in fullscreen mode
       '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
@@ -232,7 +232,7 @@ const dashboardGridItemStyles = {
       '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
         padding: 0,
       },
-    }),
+    }, printViewportVisStyles(context)]),
   focusPanelBlur: css({
     pointerEvents: 'none',
     opacity: '0.25',

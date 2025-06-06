@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { UseEuiTheme } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import React from 'react';
 
@@ -57,10 +58,11 @@ const styles = css({
   },
   '@media print': {
     html: {
-      backgroundColor: '#FFF',
+      backgroundColor: '#FFF !important',
     },
-    'a[href]:after': {
-      content: 'attr(href, url)',
+    // It is good practice to show the full URL in the final, printed output
+    ['a[href]:after']: {
+      content: '" [" attr(href) "]"',
     },
     figure: {
       'page-break-inside': 'avoid',
@@ -79,42 +81,43 @@ const a4PageContentWidth = a4PageWidth;
 const visualisationsPerPage = 2;
 const visPadding = '4mm';
 
-export const printViewportVisStyles = css({
-  '&.printViewport__vis': {
-    '@media screen, projection, print': {
-      // Open space from page margin
-      paddingLeft: visPadding,
-      paddingRight: visPadding,
+export const printViewportVisStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '&.printViewport__vis': {
+      '@media screen, projection, print': {
+        // Open space from page margin
+        paddingLeft: visPadding,
+        paddingRight: visPadding,
 
-      // Last vis on the page
-      [`&:nth-child(${visualisationsPerPage}n)`]: {
-        pageBreakAfter: 'always',
-        paddingTop: visPadding,
-        paddingBottom: visPadding,
-      },
+        // Last vis on the page
+        [`&:nth-child(${visualisationsPerPage}n)`]: {
+          pageBreakAfter: 'always',
+          paddingTop: visPadding,
+          paddingBottom: visPadding,
+        },
 
-      '&:last-child': {
-        pageBreakAfter: 'avoid',
+        '&:last-child': {
+          pageBreakAfter: 'avoid',
+        },
+        height: `calc(${a4PageContentHeight} / ${visualisationsPerPage})`,
+        width: a4PageContentWidth,
+        '& .embPanel__header button': {
+          display: 'none',
+        },
       },
-      height: `calc(${a4PageContentHeight} / ${visualisationsPerPage})`,
-      width: a4PageContentWidth,
-      '& .embPanel__header button': {
-        display: 'none',
+      '@media screen, projection': {
+        margin: euiTheme.size.s,
+        padding: visPadding,
+      },
+      '@media print': {
+        '.euiPanel': {
+          boxShadow: 'none !important',
+        },
+        pageBreakInside: 'avoid',
+
+        '*': {
+          overflow: 'hidden !important',
+        },
       },
     },
-    '@media screen, projection': {
-      margin: '24px',
-      padding: visPadding,
-    },
-    '@media print': {
-      '.euiPanel': {
-        boxShadow: 'none !important',
-      },
-      pageBreakInside: 'avoid',
-
-      '*': {
-        overflow: 'hidden !important',
-      },
-    },
-  },
-});
+  });
