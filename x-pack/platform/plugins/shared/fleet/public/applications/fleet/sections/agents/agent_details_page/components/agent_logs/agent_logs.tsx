@@ -42,6 +42,7 @@ const WrapperFlexGroup = styled(EuiFlexGroup)`
 const DatePickerFlexItem = styled(EuiFlexItem)`
   max-width: 312px;
 `;
+
 export interface AgentLogsProps {
   agent: Agent;
   agentPolicy?: AgentPolicy;
@@ -313,10 +314,11 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                 query={logStreamQuery}
                 height={'60vh'}
                 displayOptions={{
-                  solutionNavIdOverride: 'fleet-agent-logs',
+                  solutionNavIdOverride: null,
                   enableDocumentViewer: true,
                   enableFilters: false,
                 }}
+                columns={['@timestamp', 'message']}
               />
             ) : null}
           </EuiPanel>

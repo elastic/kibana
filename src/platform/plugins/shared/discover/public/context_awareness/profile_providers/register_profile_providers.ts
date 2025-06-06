@@ -29,7 +29,6 @@ import { createObservabilityRootProfileProvider } from './observability/observab
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
-import { createFleetAgentLogsRootProfileProvider } from './common/fleet-agent-logs';
 import { createObservabilityTracesSpanDocumentProfileProvider } from './observability/traces_document_profile/span_document_profile';
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './observability/traces_document_profile/transaction_document_profile';
 
@@ -127,7 +126,6 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
   createClassicNavRootProfileProvider(providerServices),
-  createFleetAgentLogsRootProfileProvider(providerServices),
   createSecurityRootProfileProvider(providerServices),
   createObservabilityRootProfileProvider(providerServices),
 ];

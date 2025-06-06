@@ -68,7 +68,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 // These are options that are not persisted in the saved object, but can be used by solutions
 // when utilising the SavedSearchComponent package outside of dashboard contexts.
 export interface NonPersistedDisplayOptions {
-  solutionNavIdOverride?: 'oblt' | 'security' | 'search' | 'fleet-agent-logs' | null;
+  solutionNavIdOverride?: 'oblt' | 'security' | 'search' | null;
   enableDocumentViewer?: boolean;
   enableFilters?: boolean;
 }
@@ -105,7 +105,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesBlockingError &
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
-  PublishesSavedSearch &
+  PublishesWritableSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -117,6 +117,10 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
+}
+
+export interface PublishesWritableSavedSearch extends PublishesSavedSearch {
+  setColumns: (columns: string[] | undefined) => void;
 }
 
 export const apiPublishesSavedSearch = (
