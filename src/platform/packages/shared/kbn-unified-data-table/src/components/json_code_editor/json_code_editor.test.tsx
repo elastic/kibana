@@ -7,8 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Mock the code editor component
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value }: { value: string }) => <div data-test-subj="codeEditor">{value}</div>,
+}));
+
+// Mock Monaco editor
+jest.mock('@kbn/monaco', () => ({
+  monaco: {
+    editor: {
+      create: jest.fn(),
+      defineTheme: jest.fn(),
+      setTheme: jest.fn(),
+    },
+    languages: {
+      register: jest.fn(),
+      setMonarchTokensProvider: jest.fn(),
+      setLanguageConfiguration: jest.fn(),
+    },
+  },
+  XJsonLang: 'json',
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  toMountPoint: jest.fn((element) => element),
+}));
+
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import JsonCodeEditor from './json_code_editor';
 
 it('returns the `JsonCodeEditor` component', () => {
@@ -19,5 +45,6 @@ it('returns the `JsonCodeEditor` component', () => {
     _score: 1,
     _source: { test: 123 },
   };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+  const { container } = render(<JsonCodeEditor json={value} />);
+  expect(container.firstChild).toMatchSnapshot();
 });

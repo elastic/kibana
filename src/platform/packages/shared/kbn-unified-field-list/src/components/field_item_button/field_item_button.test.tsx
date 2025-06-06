@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -20,7 +20,7 @@ const conflictField = dataView.getFieldByName('custom_user_field')!;
 
 describe('UnifiedFieldList FieldItemButton', () => {
   test('renders properly', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight="by"
@@ -30,11 +30,12 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly when empty', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight={undefined}
@@ -44,11 +45,12 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-script date-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly when a conflict field', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={conflictField}
         fieldSearchHighlight={undefined}
@@ -58,11 +60,12 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-custom_user_field-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly for Records (Lens field)', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={
           new DataViewField({
@@ -80,11 +83,12 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={jest.fn()}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-___records___-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly with an action when selected', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight={undefined}
@@ -96,61 +100,62 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly with an action when deselected', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={bytesField}
         fieldSearchHighlight={undefined}
         isEmpty={false}
         isSelected={false}
         isActive={false}
-        onClick={undefined}
-        shouldAlwaysShowAction
+        onClick={jest.fn().mockName('click')}
         onAddFieldToWorkspace={jest.fn().mockName('add')}
         onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly with a drag icon', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         size="xs"
         className="custom"
-        dataTestSubj="test-subj"
-        withDragIcon={true}
         field={bytesField}
         fieldSearchHighlight={undefined}
         isEmpty={false}
         isSelected={false}
         isActive={false}
+        isDragDisabled={false}
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly for text-based column field', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton<DatatableColumn>
         field={{ id: 'test', name: 'agent', meta: { type: 'string' } }}
         fieldSearchHighlight="ag"
-        getCustomFieldType={(f) => f.meta.type}
         isEmpty={false}
         isSelected={false}
         isActive={false}
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-agent-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly for wildcard search', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight="sc*te"
@@ -160,11 +165,12 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-script date-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders properly for search with spaces', () => {
-    const component = shallow(
+    const { container, getByTestId } = render(
       <FieldItemButton
         field={scriptedField}
         fieldSearchHighlight="sc te"
@@ -174,6 +180,7 @@ describe('UnifiedFieldList FieldItemButton', () => {
         onClick={undefined}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId('field-script date-showDetails')).toBeInTheDocument();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

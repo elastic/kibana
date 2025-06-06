@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { DocViewerError } from './doc_viewer_error';
 
 test('DocViewerError should wrap error in boundary', () => {
@@ -17,9 +17,10 @@ test('DocViewerError should wrap error in boundary', () => {
   };
 
   expect(() => {
-    const wrapper = mount(<DocViewerError {...props} />);
-    const html = wrapper.html();
-    expect(html).toContain('euiErrorBoundary');
-    expect(html).toContain('my error');
+    const { container, getByText } = render(<DocViewerError {...props} />);
+    expect(container.querySelector('.euiErrorBoundary')).toBeInTheDocument();
+    expect(
+      getByText((content, element) => content.includes('Error: my error'))
+    ).toBeInTheDocument();
   }).not.toThrowError();
 });

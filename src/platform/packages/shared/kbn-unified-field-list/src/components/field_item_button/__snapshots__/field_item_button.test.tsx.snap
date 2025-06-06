@@ -1,443 +1,553 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UnifiedFieldList FieldItemButton renders properly 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview bytes: number",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
-  dataTestSubj="field-bytes-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+>
+  <button
+    aria-label="Preview bytes: number"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-bytes-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="number"
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
         />
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-bytes"
-      search="by"
-      title="bytes"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      bytes
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-bytes"
-  onClick={[MockFunction]}
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-bytes"
+          title="bytes"
+        >
+          <mark
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+          >
+            by
+          </mark>
+          tes
+        </span>
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly for Records (Lens field) 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview Records: document",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--document unifiedFieldListItemButton--exists"
-  dataTestSubj="field-___records___-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s kbnFieldButton-isActive unifiedFieldListItemButton unifiedFieldListItemButton--document unifiedFieldListItemButton--exists"
+>
+  <button
+    aria-label="Preview Records: document"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-___records___-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="document"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          >
+            <span
+              data-euiicon-type="tokenNumber"
+              title="Records"
+            >
+              Records
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-___records___"
-      search="re"
-      title="Records"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      Records
-    </EuiHighlight>
-  }
-  isActive={true}
-  key="field-item-button-___records___"
-  onClick={[MockFunction]}
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-___records___"
+          title="Records"
+        >
+          <mark
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+          >
+            Re
+          </mark>
+          cords
+        </span>
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly for search with spaces 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview script date: date",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
-  dataTestSubj="field-script date-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+>
+  <div
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-script date-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={true}
-          type="date"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-dark-s-euiColorVis8"
+          >
+            <span
+              data-euiicon-type="tokenDate"
+              title="Date"
+            >
+              Date
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-script date"
-      search="script date"
-      title="script date"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      script date
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-script date"
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-script date"
+          title="script date"
+        >
+          <mark
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+          >
+            script date
+          </mark>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly for text-based column field 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview agent: string",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--string unifiedFieldListItemButton--exists"
-  dataTestSubj="field-agent-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--string unifiedFieldListItemButton--exists"
+>
+  <div
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-agent-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          type="string"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
+          >
+            <span
+              data-euiicon-type="tokenString"
+              title="String"
+            >
+              String
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-agent"
-      search="ag"
-      title="agent"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      agent
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-agent"
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-agent"
+          title="agent"
+        >
+          <mark
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+          >
+            ag
+          </mark>
+          ent
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly for wildcard search 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview script date: date",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
-  dataTestSubj="field-script date-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+>
+  <div
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-script date-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={true}
-          type="date"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-dark-s-euiColorVis8"
+          >
+            <span
+              data-euiicon-type="tokenDate"
+              title="Date"
+            >
+              Date
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-script date"
-      search="script date"
-      title="script date"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      script date
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-script date"
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-script date"
+          title="script date"
+        >
+          <mark
+            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+          >
+            script date
+          </mark>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly when a conflict field 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview custom_user_field: conflict",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--conflict unifiedFieldListItemButton--exists"
-  dataTestSubj="field-custom_user_field-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s kbnFieldButton-isActive unifiedFieldListItemButton unifiedFieldListItemButton--conflict unifiedFieldListItemButton--exists"
+>
+  <button
+    aria-label="Preview custom_user_field: conflict"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-custom_user_field-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="conflict"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis9"
+          >
+            <span
+              data-euiicon-type="warning"
+              title="Conflict"
+            >
+              Conflict
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldInfoIcon={
-    <FieldConflictInfoIcon
-      conflictDescriptions={
-        Object {
-          "keyword": Array [
-            "index_a",
-          ],
-          "long": Array [
-            "index_b",
-          ],
-        }
-      }
-    />
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-custom_user_field"
-      search=""
-      title="custom_user_field"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      custom_user_field
-    </EuiHighlight>
-  }
-  isActive={true}
-  key="field-item-button-custom_user_field"
-  onClick={[MockFunction]}
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-custom_user_field"
+          title="custom_user_field"
+        >
+          custom_user_field
+        </span>
+      </span>
+    </span>
+    <div
+      class="kbnFieldButton__infoIcon"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span
+          data-euiicon-type="warning"
+          tabindex="0"
+        />
+      </span>
+    </div>
+  </button>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly when empty 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview script date: date",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--missing"
-  dataTestSubj="field-script date-showDetails"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--missing"
+>
+  <button
+    aria-label="Preview script date: date"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-script date-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={true}
-          type="date"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-dark-s-euiColorVis8"
+          >
+            <span
+              data-euiicon-type="tokenDate"
+              title="Date"
+            >
+              Date
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-script date"
-      search=""
-      title="script date"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      script date
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-script date"
-  onClick={[MockFunction]}
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-script date"
+          title="script date"
+        >
+          script date
+        </span>
+      </span>
+    </span>
+  </button>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly with a drag icon 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview bytes: number",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragIcon custom"
-  dataTestSubj="test-subj"
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--xs unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists custom"
+>
+  <div
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-bytes-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="number"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          >
+            <span
+              data-euiicon-type="tokenNumber"
+              title="Number"
+            >
+              Number
+            </span>
+          </span>
+        </div>
       </div>
-      <div
-        className="unifiedFieldListItemButton__fieldIconDrag"
-      >
-        <EuiIcon
-          size="m"
-          type="grabOmnidirectional"
-        />
-      </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-bytes"
-      search=""
-      title="bytes"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      bytes
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-bytes"
-  size="xs"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-bytes"
+          title="bytes"
+        >
+          bytes
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly with an action when deselected 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview bytes: number",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
-  dataTestSubj="field-bytes-showDetails"
-  fieldAction={
-    <EuiToolTip
-      content="Add \\"bytes\\" field"
-      delay="regular"
-      disableScreenReaderOutput={false}
-      display="inlineBlock"
-      position="top"
-    >
-      <EuiButtonIcon
-        aria-label="Add \\"bytes\\" field"
-        className="unifiedFieldListItemButton__action unifiedFieldListItemButton__action--always"
-        color="text"
-        data-test-subj="fieldToggle-bytes"
-        iconType="plusInCircle"
-        onClick={[Function]}
-      />
-    </EuiToolTip>
-  }
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+>
+  <button
+    aria-label="Preview bytes: number"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-bytes-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="number"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          >
+            <span
+              data-euiicon-type="tokenNumber"
+              title="Number"
+            >
+              Number
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-bytes"
-      search=""
-      title="bytes"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      bytes
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-bytes"
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-bytes"
+          title="bytes"
+        >
+          bytes
+        </span>
+      </span>
+    </span>
+  </button>
+  <div
+    class="kbnFieldButton__fieldAction"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        aria-label="Add \\"bytes\\" field"
+        class="euiButtonIcon unifiedFieldListItemButton__action emotion-euiButtonIcon-xs-empty-text"
+        data-test-subj="fieldToggle-bytes"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+      </button>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly with an action when selected 1`] = `
-<FieldButton
-  buttonProps={
-    Object {
-      "aria-label": "Preview bytes: number",
-    }
-  }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
-  dataTestSubj="field-bytes-showDetails"
-  fieldAction={
-    <EuiToolTip
-      content="Remove \\"bytes\\" field"
-      delay="regular"
-      disableScreenReaderOutput={false}
-      display="inlineBlock"
-      position="top"
-    >
-      <EuiButtonIcon
-        aria-label="Remove \\"bytes\\" field"
-        className="unifiedFieldListItemButton__action"
-        color="danger"
-        data-test-subj="fieldToggle-bytes"
-        iconType="cross"
-        onClick={[Function]}
-      />
-    </EuiToolTip>
-  }
-  fieldIcon={
-    <div
-      className="unifiedFieldListItemButton__fieldIconContainer"
+<div
+  class="kbnFieldButton kbnFieldButton--s unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+>
+  <button
+    aria-label="Preview bytes: number"
+    class="kbn-resetFocusState kbnFieldButton__button"
+    data-test-subj="field-bytes-showDetails"
+  >
+    <span
+      class="kbnFieldButton__fieldIcon"
     >
       <div
-        className="unifiedFieldListItemButton__fieldIcon"
+        class="unifiedFieldListItemButton__fieldIconContainer"
       >
-        <WrappedFieldIcon
-          scripted={false}
-          type="number"
-        />
+        <div
+          class="unifiedFieldListItemButton__fieldIcon"
+        >
+          <span
+            class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+          >
+            <span
+              data-euiicon-type="tokenNumber"
+              title="Number"
+            >
+              Number
+            </span>
+          </span>
+        </div>
       </div>
-    </div>
-  }
-  fieldName={
-    <EuiHighlight
-      data-test-subj="field-bytes"
-      search=""
-      title="bytes"
+    </span>
+    <span
+      class="kbnFieldButton__name eui-textBreakAll"
     >
-      bytes
-    </EuiHighlight>
-  }
-  isActive={false}
-  key="field-item-button-bytes"
-  onClick={[MockFunction click]}
-  size="s"
-/>
+      <span
+        class="kbnFieldButton__nameInner"
+      >
+        <span
+          data-test-subj="field-bytes"
+          title="bytes"
+        >
+          bytes
+        </span>
+      </span>
+    </span>
+  </button>
+  <div
+    class="kbnFieldButton__fieldAction"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        aria-label="Remove \\"bytes\\" field"
+        class="euiButtonIcon unifiedFieldListItemButton__action emotion-euiButtonIcon-xs-empty-danger"
+        data-test-subj="fieldToggle-bytes"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+      </button>
+    </span>
+  </div>
+</div>
 `;

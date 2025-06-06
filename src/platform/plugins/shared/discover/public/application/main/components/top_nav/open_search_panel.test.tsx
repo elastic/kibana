@@ -8,7 +8,39 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+
+// Mock react-intl components
+jest.mock('@kbn/i18n-react', () => ({
+  FormattedMessage: ({ defaultMessage }: { defaultMessage?: string }) => <span>{defaultMessage}</span>,
+}));
+
+// Mock EUI components to avoid theme context issues
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiFlyout: ({ children, ...props }: React.PropsWithChildren<unknown>) => (
+      <div {...props}>{children}</div>
+    ),
+    EuiFlyoutHeader: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    EuiFlyoutBody: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    EuiFlyoutFooter: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    EuiTitle: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    EuiButton: ({ children, ...props }: React.PropsWithChildren<unknown>) => (
+      <button {...props}>{children}</button>
+    ),
+    EuiFlexGroup: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+    EuiFlexItem: ({ children }: React.PropsWithChildren<unknown>) => <div>{children}</div>,
+  };
+});
+
+// Mock SavedObjectFinder to avoid complex dependencies
+jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
+  SavedObjectFinder: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="savedObjectFinder">{children}</div>
+  ),
+}));
 
 describe('OpenSearchPanel', () => {
   beforeEach(() => {
@@ -20,16 +52,17 @@ describe('OpenSearchPanel', () => {
       useDiscoverServices: jest.fn().mockImplementation(() => ({
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: true } },
-        savedObjectsFinder: { Finder: jest.fn() },
-        core: {},
+        savedObjectsTagging: {},
+        contentClient: {},
+        uiSettings: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
 
-    const component = shallow(
+    const { container } = render(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('should not render manage searches button without permissions', async () => {
@@ -37,15 +70,16 @@ describe('OpenSearchPanel', () => {
       useDiscoverServices: jest.fn().mockImplementation(() => ({
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: false, delete: false } },
-        savedObjectsFinder: { Finder: jest.fn() },
-        core: {},
+        savedObjectsTagging: {},
+        contentClient: {},
+        uiSettings: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
 
-    const component = shallow(
+    const { queryByTestId } = render(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );
-    expect(component.find('[data-test-subj="manageSearches"]').exists()).toBe(false);
+    expect(queryByTestId('manageSearches')).not.toBeInTheDocument();
   });
 });
