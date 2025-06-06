@@ -144,10 +144,16 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFV2) => {
+  const generatePdf = async (
+    username: string,
+    password: string,
+    job: JobParamsPDFV2,
+    spaceId: string = 'default'
+  ) => {
     const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdfV2`)
+      .post(`${spacePrefix}/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -165,10 +171,16 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams, schedule });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
+  const generatePng = async (
+    username: string,
+    password: string,
+    job: JobParamsPNGV2,
+    spaceId: string = 'default'
+  ) => {
     const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/pngV2`)
+      .post(`${spacePrefix}/api/reporting/generate/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -189,12 +201,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const generateCsv = async (
     job: JobParamsCSV,
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    spaceId: string = 'default'
   ) => {
     const jobParams = rison.encode(job);
-
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/csv_searchsource`)
+      .post(`${spacePrefix}/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -253,6 +266,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send()
       .expect(200);
     return job?.output?.error_code;
+  };
+
+  const listReports = async (
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    spaceId: string = 'default'
+  ) => {
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+    return await supertestWithoutAuth
+      .get(`${spacePrefix}${INTERNAL_ROUTES.JOBS.LIST}?page=0`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send()
+      .expect(200);
   };
 
   const deleteAllReports = async () => {
@@ -348,6 +375,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     schedulePdf,
     schedulePng,
     scheduleCsv,
+    listReports,
     postJob,
     postJobJSON,
     getCompletedJobOutput,
