@@ -23,8 +23,7 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../../../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/195830
-describe.skip('Header', () => {
+describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
   const getWrapper = async (childrenComponent: JSX.Element) => {
