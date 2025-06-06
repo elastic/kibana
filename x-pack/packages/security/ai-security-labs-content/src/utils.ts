@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import crypto from 'crypto';
 
 const key = crypto.createHash('sha256').update('ELASTIC').digest();

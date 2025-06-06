@@ -45,7 +45,7 @@ describe('Security labs content', () => {
         const split = content.split('---');
         const yamlString = split[1];
         const article = split[2];
-        const parsed = yaml.load(yamlString) as {
+        const parsed = yaml.safeLoad(yamlString) as {
           slug: string;
           title: string;
           date: string;
