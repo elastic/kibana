@@ -30,7 +30,10 @@ describe('autocomplete.suggest', () => {
         }).map((fn) => `${fn.text} `),
       ];
 
-      await assertSuggestions(`FROM a | COMPLETION /`, ['"$0"', ...expectedSuggestions]);
+      await assertSuggestions(`FROM a | COMPLETION /`, [
+        '"${0:Your prompt to the LLM.}"',
+        ...expectedSuggestions,
+      ]);
 
       await assertSuggestions(`FROM a | COMPLETION kubernetes.some/`, expectedSuggestions);
     });

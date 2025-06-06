@@ -95,7 +95,7 @@ export async function suggest(
       );
 
       if (!findFinalWord(innerText)) {
-        suggestions.push(emptyText);
+        suggestions.push(defaultPrompt);
       }
 
       return suggestions;
@@ -121,15 +121,15 @@ export async function suggest(
   }
 }
 
-const emptyText: SuggestionRawDefinition = {
+const defaultPrompt: SuggestionRawDefinition = {
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.promptDoc', {
     defaultMessage: 'Prompt',
   }),
   kind: 'Constant',
   asSnippet: true,
-  label: '""',
+  label: 'Your prompt to the LLM',
   sortText: '1',
-  text: '"$0"',
+  text: '"${0:Your prompt to the LLM.}"',
 };
 
 const withCompletionItem: SuggestionRawDefinition = {
