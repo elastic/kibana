@@ -44,7 +44,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
         [SECURITY_FEATURE_ID]: [
-          'minimal_all',
+          'all',
           'endpoint_list_all',
           'endpoint_list_read',
           'trusted_applications_all',

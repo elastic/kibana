@@ -65,6 +65,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
             'read_alerts',
             'policy_management_all',
             'endpoint_list_all',
+            'global_artifact_management_all',
             'trusted_applications_all',
             'event_filters_all',
             'host_isolation_exceptions_all',

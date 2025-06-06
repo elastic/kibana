@@ -23,6 +23,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'read_alerts',
             'crud_alerts',
             'endpoint_list_all',
+            'global_artifact_management_all',
             'trusted_applications_all',
             'event_filters_all',
             'host_isolation_exceptions_all',

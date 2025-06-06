@@ -19,7 +19,7 @@ export const getWithArtifactReadPrivilegesRole: () => Omit<Role, 'name'> = () =>
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
           [SECURITY_FEATURE_ID]: [
-            'minimal_all',
+            'all',
             'blocklist_read',
             'trusted_applications_read',
             'host_isolation_exceptions_read',

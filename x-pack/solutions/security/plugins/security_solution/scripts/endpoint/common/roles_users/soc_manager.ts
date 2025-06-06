@@ -19,10 +19,11 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
           [SECURITY_FEATURE_ID]: [
-            'minimal_all',
+            'all',
 
             'policy_management_all',
 
+            'global_artifact_management_all',
             'trusted_applications_all',
             'event_filters_all',
             'host_isolation_exceptions_all',
