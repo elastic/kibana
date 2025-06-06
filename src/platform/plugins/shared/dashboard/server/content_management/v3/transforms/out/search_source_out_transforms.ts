@@ -7,17 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TypeOf, schema } from '@kbn/config-schema';
 import {
+  parseSearchSourceJSON,
   type Query,
   type SerializedSearchSourceFields,
-  parseSearchSourceJSON,
 } from '@kbn/data-plugin/common';
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { DashboardAttributes } from '../../types';
 
+const kibanaSavedObjectMetaSchema = schema.object({
+  searchSourceJSON: schema.maybe(schema.string()),
+});
+type KibanaSavedObjectMeta = TypeOf<typeof kibanaSavedObjectMetaSchema>;
+
+const isKibanaSavedObjectMeta = (
+  kibanaSavedObjectMeta: unknown
+): kibanaSavedObjectMeta is KibanaSavedObjectMeta => {
+  try {
+    return Boolean(kibanaSavedObjectMetaSchema.validate(kibanaSavedObjectMeta));
+  } catch {
+    return false;
+  }
+};
+
 export function transformSearchSourceOut(
-  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta']
-): DashboardAttributes['kibanaSavedObjectMeta'] {
+  kibanaSavedObjectMeta: unknown
+): DashboardAttributes['kibanaSavedObjectMeta'] | undefined {
+  if (!isKibanaSavedObjectMeta(kibanaSavedObjectMeta)) return undefined;
+
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};

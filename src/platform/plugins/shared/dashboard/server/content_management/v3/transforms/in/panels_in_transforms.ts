@@ -10,18 +10,18 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
+// transforms panels from the content management schema to the generic types stored in the saved object
 export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
   dropSections: boolean = false
 ): {
-  panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
-  sections: DashboardSavedObjectAttributes['sections'];
+  panelsJSON: string;
+  sections: any[];
 } {
-  const panels: unknown[] = [];
-  const sections: unknown[] = [];
+  const panels: any[] = [];
+  const sections: any[] = [];
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
@@ -43,8 +43,8 @@ export function transformPanelsIn(
   return { panelsJSON: JSON.stringify(panels), sections };
 }
 
-function transformPanel(panel: DashboardPanel): unknown {
-  const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
+function transformPanel(panel: DashboardPanel): { gridData: any; [key: string]: any } {
+  const { panelIndex, gridData, panelConfig, ...restPanel } = panel;
   const idx = panelIndex ?? uuidv4();
   return {
     ...restPanel,

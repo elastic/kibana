@@ -8,6 +8,8 @@
  */
 
 import { flow } from 'lodash';
+
+import { TypeOf, schema } from '@kbn/config-schema';
 import {
   ControlGroupChainingSystem,
   ControlLabelPosition,
@@ -17,21 +19,41 @@ import {
   DEFAULT_IGNORE_PARENT_SETTINGS,
   type ParentIgnoreSettings,
 } from '@kbn/controls-plugin/common';
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+
 import type { ControlGroupAttributes } from '../../types';
 import { transformControlsState } from './control_state_out_transforms';
 
+/**
+ * Transform an unknown `controlGroupInput` from the dashboard SO to a valid `controlGroupInput` for the CM schema
+ */
+const controlGroupSavedObjectSchema = schema.object({
+  panelsJSON: schema.string(),
+  controlStyle: schema.maybe(schema.string()),
+  chainingSystem: schema.maybe(schema.string()),
+  ignoreParentSettingsJSON: schema.maybe(schema.string()),
+  showApplySelections: schema.maybe(schema.boolean()),
+});
+type ControlGroupSavedObject = TypeOf<typeof controlGroupSavedObjectSchema>;
+
+const isControlGroupSavedObject = (
+  controlGroupInput: unknown
+): controlGroupInput is ControlGroupSavedObject => {
+  try {
+    return Boolean(controlGroupSavedObjectSchema.validate(controlGroupInput));
+  } catch {
+    return false;
+  }
+};
+
 export const transformControlGroupOut: (
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) => ControlGroupAttributes = flow(
-  transformControlGroupSetDefaults,
-  transformControlGroupProperties
-);
+  controlGroupInput: unknown
+) => ControlGroupAttributes | undefined = (controlGroupInput: unknown) => {
+  if (!isControlGroupSavedObject(controlGroupInput)) return undefined;
+  return flow(transformControlGroupSetDefaults, transformControlGroupProperties)(controlGroupInput);
+};
 
 // TODO We may want to remove setting defaults in the future
-function transformControlGroupSetDefaults(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
+function transformControlGroupSetDefaults(controlGroupInput: ControlGroupSavedObject) {
   return {
     controlStyle: DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem: DEFAULT_CONTROL_CHAINING,
@@ -46,9 +68,7 @@ function transformControlGroupProperties({
   showApplySelections,
   ignoreParentSettingsJSON,
   panelsJSON,
-}: Required<
-  NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
->): ControlGroupAttributes {
+}: ControlGroupSavedObject): ControlGroupAttributes {
   return {
     labelPosition: controlStyle as ControlLabelPosition,
     chainingSystem: chainingSystem as ControlGroupChainingSystem,

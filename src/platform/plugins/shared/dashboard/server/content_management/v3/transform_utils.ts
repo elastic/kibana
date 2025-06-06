@@ -9,6 +9,7 @@
 
 import { pick } from 'lodash';
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
   ControlGroupAttributes as ControlGroupAttributesV2,
@@ -35,25 +36,13 @@ import type {
   SavedObjectToItemReturn,
 } from './types';
 
+// transforms dashboard from the unknown types stored in the saved object to the content management schema
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references?: SavedObjectReference[],
   getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
-  const {
-    controlGroupInput,
-    description,
-    kibanaSavedObjectMeta,
-    optionsJSON,
-    panelsJSON,
-    sections,
-    refreshInterval,
-    timeFrom,
-    timeRestore,
-    timeTo,
-    title,
-    version,
-  } = attributes;
+  const { description, title, version } = attributes;
   // Inject any tag names from references into the attributes
   let tags: string[] | undefined;
   if (getTagNamesFromReferences && references && references.length) {
@@ -62,24 +51,56 @@ export function dashboardAttributesOut(
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
+    ...('controlGroupInput' in attributes && {
+      controlGroupInput: transformControlGroupOut(attributes.controlGroupInput),
+    }),
     ...(description && { description }),
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
+    ...('kibanaSavedObjectMeta' in attributes && {
+      kibanaSavedObjectMeta: transformSearchSourceOut(attributes.kibanaSavedObjectMeta),
     }),
-    ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...((panelsJSON || sections) && { panels: transformPanelsOut(panelsJSON, sections) }),
-    ...(refreshInterval && {
-      refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
+    ...('optionsJSON' in attributes && { options: transformOptionsOut(attributes.optionsJSON) }),
+    ...(('panelsJSON' in attributes || 'sections' in attributes) && {
+      panels: transformPanelsOut(attributes.panelsJSON, attributes.sections),
     }),
+    ...('refreshInterval' in attributes &&
+      isRefreshIntervalSavedObject(attributes.refreshInterval) && {
+        refreshInterval: {
+          pause: attributes.refreshInterval.pause,
+          value: attributes.refreshInterval.value,
+        },
+      }),
     ...(tags && tags.length && { tags }),
-    ...(timeFrom && { timeFrom }),
-    timeRestore: timeRestore ?? false,
-    ...(timeTo && { timeTo }),
+    ...('timeFrom' in attributes &&
+      typeof attributes.timeFrom === 'string' && { timeFrom: attributes.timeFrom }),
+    timeRestore:
+      'timeRestore' in attributes && typeof attributes.timeRestore === 'boolean'
+        ? attributes.timeRestore
+        : false,
+    ...('timeTo' in attributes &&
+      typeof attributes.timeTo === 'string' && { timeTo: attributes.timeTo }),
     title,
     ...(version && { version }),
   };
 }
+
+const isRefreshIntervalSavedObject = (
+  refreshInterval: unknown
+): refreshInterval is { pause: boolean; value: number } => {
+  try {
+    return Boolean(
+      schema
+        .object({
+          pause: schema.boolean(),
+          value: schema.number(),
+          display: schema.maybe(schema.string()),
+          section: schema.maybe(schema.number()),
+        })
+        .validate(refreshInterval)
+    );
+  } catch {
+    return false;
+  }
+};
 
 export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
@@ -124,6 +145,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   };
 };
 
+// transforms dashboard from the content management schema to the unknown types stored in the saved object
 export const itemAttrsToSavedObject = ({
   attributes,
   incomingReferences = [],
