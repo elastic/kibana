@@ -131,7 +131,6 @@ describe('UnifiedFieldList FieldItemButton', () => {
         isEmpty={false}
         isSelected={false}
         isActive={false}
-        isDragDisabled={false}
         onClick={undefined}
       />
     );

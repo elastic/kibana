@@ -12,7 +12,9 @@ import { render } from '@testing-library/react';
 
 // Mock react-intl components
 jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage?: string }) => <span>{defaultMessage}</span>,
+  FormattedMessage: ({ defaultMessage }: { defaultMessage?: string }) => (
+    <span>{defaultMessage}</span>
+  ),
 }));
 
 // Mock EUI components to avoid theme context issues
