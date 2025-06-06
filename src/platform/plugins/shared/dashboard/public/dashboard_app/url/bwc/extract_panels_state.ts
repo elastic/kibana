@@ -12,6 +12,8 @@ import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/das
 import { DashboardState } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedObject } from '@kbn/core/server';
 
 type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
@@ -37,7 +39,10 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
+export async function extractPanelsState(
+  state: { [key: string]: unknown },
+  embeddableService: EmbeddableStart
+): Promise<Partial<PanelState>> {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -50,16 +55,31 @@ export function extractPanelsState(state: { [key: string]: unknown }): Partial<P
   }
 
   // < 8.17 panels state stored panelConfig as embeddableConfig
-  const standardizedPanels = panels.map((panel) => {
-    if (typeof panel === 'object' && panel?.embeddableConfig) {
-      const { embeddableConfig, ...rest } = panel;
-      return {
-        ...rest,
-        panelConfig: embeddableConfig,
-      };
-    }
-    return panel;
-  });
+  const standardizedPanels = await Promise.all(
+    panels.map(async (panel) => {
+      if (typeof panel === 'object' && panel?.embeddableConfig) {
+        const { embeddableConfig, ...rest } = panel;
+        return {
+          ...rest,
+          panelConfig: embeddableConfig,
+        };
+      } else if (typeof panel === 'object' && panel?.panelConfig) {
+        const { panelConfig, type, ...rest } = panel;
+
+        const embeddableCmDefintions =
+          await embeddableService.getEmbeddableContentManagementDefinition(type);
+        if (!embeddableCmDefintions) return panel;
+        const { savedObjectToItem } =
+          embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
+        return {
+          ...rest,
+          type,
+          panelConfig: savedObjectToItem?.(panelConfig as unknown as SavedObject) ?? panelConfig,
+        };
+      }
+      return panel;
+    })
+  );
 
   return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
 }

@@ -64,7 +64,7 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
-  const overrideState = creationOptions?.getInitialInput?.();
+  const overrideState = await creationOptions?.getInitialInput?.();
 
   // Back up any view mode passed in explicitly.
   if (overrideState?.viewMode) {

@@ -22,14 +22,40 @@ const injectReferences = (attributes: SavedBookAttributes, references: SavedObje
   return injectedParams;
 };
 
-export const savedObjectToItem = ({
-  attributes,
-  references,
-}: SavedObjectAttributesWithReferences<SavedBookAttributes>): BookAttributes => ({
-  bookTitle: attributes.bookTitleAsArray.join(''),
-  author: attributes.metadata.text.authorName,
-  pages: attributes.metadata.numbers.numberOfPages,
-  synopsis: attributes.metadata.text.bookSynopsis,
-  published: attributes.metadata.numbers.publicationYear ?? null,
-  ...injectReferences(attributes, references),
+// 8.x used this SavedObject schema to store Book embeddables in URLs
+// It is NOT recommended to radically change SavedObject schemas other than adding additional optional fields,
+// but legacy URL handling is a special case
+interface BookSavedURLObjectAttributes {
+  bookTitle: string;
+  bookSynopsis?: string;
+  numberOfPages: number;
+  authorName: string;
+}
+const isUrlObject = (so: unknown): so is BookSavedURLObjectAttributes =>
+  !!(so as BookSavedURLObjectAttributes).bookTitle;
+
+const savedURLObjectToItem = ({
+  bookTitle,
+  bookSynopsis,
+  numberOfPages,
+  authorName,
+}: BookSavedURLObjectAttributes): BookAttributes => ({
+  bookTitle,
+  synopsis: bookSynopsis,
+  author: authorName,
+  pages: numberOfPages,
 });
+
+export const savedObjectToItem = (
+  so: SavedObjectAttributesWithReferences<SavedBookAttributes> | BookSavedURLObjectAttributes
+): BookAttributes =>
+  isUrlObject(so)
+    ? savedURLObjectToItem(so)
+    : {
+        bookTitle: so.attributes.bookTitleAsArray.join(''),
+        author: so.attributes.metadata.text.authorName,
+        pages: so.attributes.metadata.numbers.numberOfPages,
+        synopsis: so.attributes.metadata.text.bookSynopsis,
+        published: so.attributes.metadata.numbers.publicationYear ?? null,
+        ...injectReferences(so.attributes, so.references),
+      };
