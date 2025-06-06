@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         observabilityCases: 0,
         observabilityCasesV2: 0,
         observabilityCasesV3: 0,
+        onechat: 0,
         uptime: 0,
         slo: 0,
         infrastructure: 0,
