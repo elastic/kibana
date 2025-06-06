@@ -12,14 +12,17 @@ import type {
   InspectorSession,
   RequestAdapter,
   Start as InspectorPublicPluginStart,
+  Adapters,
 } from '@kbn/inspector-plugin/public';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
+import type { ProfilesAdapter } from './use_active_profiles';
+import { useActiveProfiles } from './use_active_profiles';
 
-export interface InspectorAdapters {
-  requests: RequestAdapter;
+export interface InspectorAdapters extends Adapters {
   lensRequests?: RequestAdapter;
+  profiles?: ProfilesAdapter;
 }
 
 export function useInspector({
@@ -32,6 +35,10 @@ export function useInspector({
   const dispatch = useInternalStateDispatch();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
+  const getProfilesAdapter = useActiveProfiles({
+    stateContainer,
+  });
+
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
@@ -43,7 +50,15 @@ export function useInspector({
       : [inspectorAdapters.requests];
 
     const session = inspector.open(
-      { requests: new AggregateRequestAdapter(requestAdapters) },
+      {
+        requests: new AggregateRequestAdapter(requestAdapters),
+        profiles: getProfilesAdapter({
+          onOpenDocDetails: (record) => {
+            session?.close();
+            dispatch(internalStateActions.setExpandedDoc({ expandedDoc: record }));
+          },
+        }),
+      },
       { title: stateContainer.savedSearchState.getTitle() }
     );
 
@@ -53,6 +68,7 @@ export function useInspector({
     stateContainer.dataState.inspectorAdapters,
     stateContainer.savedSearchState,
     inspector,
+    getProfilesAdapter,
   ]);
 
   useEffect(() => {
