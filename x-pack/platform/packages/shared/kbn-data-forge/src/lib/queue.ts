@@ -15,7 +15,6 @@ import { indices } from './indices';
 import { INDEX_PREFIX } from '../constants';
 
 type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
-let queue: CargoQueue;
 
 function calculateIndexName(config: Config, doc: Doc) {
   if (config.indexing.slashLogs) {
@@ -33,8 +32,7 @@ function calculateIndexName(config: Config, doc: Doc) {
 }
 
 export const createQueue = (config: Config, client: Client, logger: ToolingLog): CargoQueue => {
-  if (queue != null) return queue;
-  queue = cargoQueue<Doc, Error>(
+  return cargoQueue<Doc, Error>(
     (docs, callback) => {
       const operations: object[] = [];
       const startTs = Date.now();
@@ -65,5 +63,4 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
     config.indexing.concurrency,
     config.indexing.payloadSize
   );
-  return queue;
 };
