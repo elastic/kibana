@@ -197,7 +197,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-      this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      await this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
     }
 
     this.userProfileService.initialize({
@@ -262,8 +262,8 @@ export class CasePlugin
             savedObjectsService: savedObjects,
           });
         },
-        scheduleIdCrementerTask: () => {
-          this.incrementalIdTaskManager?.scheduleIdCrementerTask();
+        scheduleIdCrementerTask: async () => {
+          await this.incrementalIdTaskManager?.scheduleIdCrementerTask();
         },
       };
     };
