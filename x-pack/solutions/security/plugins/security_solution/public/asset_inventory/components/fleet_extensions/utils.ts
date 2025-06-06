@@ -17,7 +17,8 @@ import merge from 'lodash/merge';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+
 import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   ASSET_POLICY_TEMPLATE,
@@ -37,7 +38,11 @@ import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form
 import type { AssetInput, AssetInventoryInputTypes, NewPackagePolicyAssetInput } from './types';
 import type { AwsCredentialsType } from './aws_credentials_form/types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
-import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import {
+  AWS_CREDENTIALS_TYPE,
+  AWS_SINGLE_ACCOUNT,
+  CLOUDBEAT_AWS,
+} from './aws_credentials_form/constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import {
@@ -80,7 +85,7 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyAssetInput;
-  cloud: Pick<CloudSetup, 'isCloudEnabled' | 'deploymentId' | 'serverless'>;
+  cloud: Pick<CloudStart, 'isCloudEnabled' | 'cloudId' | 'serverless'>;
   packageInfo: PackageInfo;
 }
 
@@ -545,12 +550,23 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const SINGLE_ACCOUNT = 'single_account';
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
+  const encodedCloudId = cloud?.cloudId?.split(':')[1];
 
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless?.projectId;
+  if (!encodedCloudId) return undefined;
+
+  // Decode the base64 encoded cloudId
+  // region-1.cloudprovider.env.example.com:443$es-cluster-id-1234567890abcdef$deployment-id-abcdef1234567890
+  const decodedCloudId = atob(encodedCloudId);
+  const providerMatch = decodedCloudId.match(/\.(aws|gcp|azure)\./);
+  const cloudProvider = providerMatch?.[1];
+  const cloudResources = decodedCloudId.split('$');
+  const deploymentId = cloudResources[cloudResources.length - 1];
+
+  const elasticResourceId =
+    cloud?.isCloudEnabled && cloudProvider !== 'aws' && !!deploymentId
+      ? deploymentId
+      : cloud?.serverless?.projectId;
 
   if (!elasticResourceId) return undefined;
 
@@ -560,5 +576,5 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, 'elasticResourceId');
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };

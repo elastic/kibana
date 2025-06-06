@@ -761,8 +761,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       cloud,
       packageInfo,
     });
-    const showCloudConnectors =
-      cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+
+    const showCloudConnectors = cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
     /**
      * - Updates policy inputs by user selection

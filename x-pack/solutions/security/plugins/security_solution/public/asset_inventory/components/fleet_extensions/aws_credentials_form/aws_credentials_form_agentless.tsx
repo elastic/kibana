@@ -18,7 +18,6 @@ import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from '../constants';
 import {
   getAwsAgentlessFormOptions,
@@ -32,6 +31,7 @@ import {
   getAssetPolicy,
   getTemplateUrlFromPackageInfo,
   getCloudCredentialVarsConfig,
+  getCloudConnectorRemoteRoleTemplate,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
@@ -255,20 +255,7 @@ export const AwsCredentialsFormAgentless = ({
 }: AwsAgentlessFormProps) => {
   const { cloud } = useKibana().services;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-  // Elastic Service ID refers to the deployment ID or project ID
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless.projectId;
 
-  const cloudConnectorRemoteRoleTemplate = elasticResourceId
-    ? getTemplateUrlFromPackageInfo(
-        packageInfo,
-        input.policy_template,
-        SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-      )
-        ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-        ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
-    : undefined;
   const awsCredentialsType = getAgentlessCredentialsType(input, !!showCloudConnectors);
   const documentationLink = assetIntegrationDocsNavigation.awsGetStartedPath;
 
@@ -293,6 +280,9 @@ export const AwsCredentialsFormAgentless = ({
     input.policy_template,
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
+
+  const cloudConnectorRemoteRoleTemplate =
+    getCloudConnectorRemoteRoleTemplate({ input, cloud, packageInfo }) || undefined;
 
   const cloudFormationSettings: Record<
     string,

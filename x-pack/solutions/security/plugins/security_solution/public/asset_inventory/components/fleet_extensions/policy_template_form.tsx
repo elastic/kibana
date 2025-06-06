@@ -121,8 +121,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
         packageInfo,
       });
 
-      const showCloudConnectors =
-        cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+      const showCloudConnectors = cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
       // /**
       //  * - Updates policy inputs by user selection

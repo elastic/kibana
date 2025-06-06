@@ -20,7 +20,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudStart } from '@kbn/cloud-plugin/public';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -28,7 +28,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SINGLE_ACCOUNT,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -56,6 +55,7 @@ import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../common/utils/get_template_url_package_info';
+import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -72,7 +72,7 @@ export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_c
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyPostureInput;
-  cloud: Pick<CloudSetup, 'isCloudEnabled' | 'deploymentId' | 'serverless'>;
+  cloud: Pick<CloudStart, 'isCloudEnabled' | 'cloudId' | 'serverless'>;
   packageInfo: PackageInfo;
 }
 
@@ -490,11 +490,23 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
+  const encodedCloudId = cloud?.cloudId?.split(':')[1];
 
-  const elasticResourceId = cloud?.isCloudEnabled
-    ? cloud?.deploymentId
-    : cloud?.serverless?.projectId;
+  if (!encodedCloudId) return undefined;
+
+  // Decode the base64 encoded cloudId
+  // region-1.cloudprovider.env.example.com:443$es-cluster-id-1234567890abcdef$deployment-id-abcdef1234567890
+  const decodedCloudId = atob(encodedCloudId);
+  const providerMatch = decodedCloudId.match(/\.(aws|gcp|azure)\./);
+  const cloudProvider = providerMatch?.[1];
+  const cloudResources = decodedCloudId.split('$');
+  const deploymentId = cloudResources[cloudResources.length - 1];
+
+  const elasticResourceId =
+    cloud?.isCloudEnabled && cloudProvider !== 'aws' && !!deploymentId
+      ? deploymentId
+      : cloud?.serverless?.projectId;
 
   if (!elasticResourceId) return undefined;
 
@@ -504,7 +516,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, 'elasticResourceId');
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 export const getCloudProvider = (type: string): string | undefined => {
