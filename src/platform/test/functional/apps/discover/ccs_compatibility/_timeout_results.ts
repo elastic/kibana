@@ -177,7 +177,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await timePicker.setDefaultAbsoluteRange();
-        await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
         // Warning callout is shown
         await testSubjects.exists('searchResponseWarningsCallout');
