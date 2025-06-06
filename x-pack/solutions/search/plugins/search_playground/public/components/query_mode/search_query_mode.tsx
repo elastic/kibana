@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useController } from 'react-hook-form';
 import {
   EuiFlexGroup,
@@ -49,12 +49,13 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
     name: PlaygroundFormFields.question,
   });
   const {
-    field: { value: userElasticsearchQueryValidations },
-  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
-    name: PlaygroundFormFields.userElasticsearchQueryValidations,
+    field: { value: userElasticsearchQuery },
+    fieldState: { invalid: userElasticsearchQueryInvalid },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const executeQueryDisabled = disableExecuteQuery(
-    userElasticsearchQueryValidations,
+    userElasticsearchQuery === null || !userElasticsearchQueryInvalid,
     pageMode === PlaygroundPageMode.chat ? question : searchQuery
   );
   const isLoading = fetchStatus !== 'idle';

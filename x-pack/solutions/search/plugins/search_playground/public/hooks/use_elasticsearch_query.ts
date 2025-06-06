@@ -19,13 +19,16 @@ import { elasticsearchQueryString } from '../utils/user_query';
 
 export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   const { http } = useKibana().services;
-  const { getValues } = useFormContext<PlaygroundForm>();
+  const {
+    getValues,
+    formState: { errors: formErrors },
+  } = useFormContext<PlaygroundForm>();
   const executeEsQuery = () => {
     const formValues = getValues();
     const esQuery = elasticsearchQueryString(
       formValues[PlaygroundFormFields.elasticsearchQuery],
       formValues[PlaygroundFormFields.userElasticsearchQuery],
-      formValues[PlaygroundFormFields.userElasticsearchQueryValidations]
+      formErrors[PlaygroundFormFields.userElasticsearchQuery]
     );
     const body =
       pageMode === PlaygroundPageMode.chat
