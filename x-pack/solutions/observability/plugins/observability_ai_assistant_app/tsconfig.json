@@ -83,7 +83,6 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/rule-data-utils",
     "@kbn/i18n-react",
-    "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client"
   ],
