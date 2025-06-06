@@ -8,6 +8,10 @@
     "public/**/**/*",
     "server/**/**/*",
     "common/**/*",
+    "../../../../../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -19,7 +23,4 @@
     "@kbn/expect",
     "@kbn/dev-utils",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
 }
