@@ -6,7 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { type ToolIdentifier, toSerializedToolIdentifier } from '@kbn/onechat-common';
+import {
+  type ToolIdentifier,
+  type AgentIdentifier,
+  toSerializedToolIdentifier,
+  toSerializedAgentIdentifier,
+} from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
 
 export const createEmptyRunContext = ({
@@ -28,5 +33,21 @@ export const forkContextForToolRun = ({
   return {
     ...parentContext,
     stack: [...parentContext.stack, { type: 'tool', toolId: toSerializedToolIdentifier(toolId) }],
+  };
+};
+
+export const forkContextForAgentRun = ({
+  agentId,
+  parentContext,
+}: {
+  agentId: AgentIdentifier;
+  parentContext: RunContext;
+}): RunContext => {
+  return {
+    ...parentContext,
+    stack: [
+      ...parentContext.stack,
+      { type: 'agent', agentId: toSerializedAgentIdentifier(agentId) },
+    ],
   };
 };
