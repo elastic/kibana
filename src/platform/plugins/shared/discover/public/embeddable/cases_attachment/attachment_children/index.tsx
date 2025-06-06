@@ -8,11 +8,12 @@
  */
 
 import React, { useEffect } from 'react';
+import type { CasesPublicStartDependencies } from '@kbn/cases-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import type { SavedSearchCasesAttachmentPersistedState } from '@kbn/discover-utils';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SearchDetails } from './search_details';
 
 interface SavedSearchPersistableStateAttachmentViewProps {
@@ -29,7 +30,7 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
       search: { searchSource },
       dataViews: dataViewsService,
     },
-  } = useDiscoverServices();
+  } = useKibana<CasesPublicStartDependencies>().services; // Component is rendered with the cases app. Type for Kibana services must match CasesPublicStartDependencies
   const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
 
   useEffect(() => {
