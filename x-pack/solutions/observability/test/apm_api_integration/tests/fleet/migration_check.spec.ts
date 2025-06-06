@@ -24,11 +24,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
   registry.when('Fleet migration check - basic', { config: 'basic', archives: [] }, () => {
-    before(async () => {
-      await setupFleet(bettertest);
-    });
-
     describe('cloud_apm_migration_enabled - basic', () => {
+      before(async () => {
+        await setupFleet(bettertest);
+      });
+
       it('should be false when when config not set', async () => {
         const { body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',
@@ -39,11 +39,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   });
 
   registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
-    before(async () => {
-      await setupFleet(bettertest);
-    });
-
     describe('migration check properties', () => {
+      before(async () => {
+        await setupFleet(bettertest);
+      });
+
       it('should contain all expected properties', async () => {
         const { status, body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',
