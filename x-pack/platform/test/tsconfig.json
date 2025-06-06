@@ -83,5 +83,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/alerting-state-types",
     "@kbn/std",
+    "@kbn/es-archiver",
   ]
 }
