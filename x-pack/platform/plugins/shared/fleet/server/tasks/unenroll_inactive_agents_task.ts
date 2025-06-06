@@ -30,12 +30,12 @@ import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.1';
+export const POLICIES_BATCHSIZE = 500;
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
-const POLICIES_BATCHSIZE = 500;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
