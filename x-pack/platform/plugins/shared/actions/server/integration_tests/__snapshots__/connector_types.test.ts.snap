@@ -9935,11 +9935,16 @@ Object {
   "keys": Object {
     "comment": Object {
       "flags": Object {
+        "default": [Function],
         "error": [Function],
+        "presence": "optional",
       },
       "metas": Array [
         Object {
           "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -10022,36 +10027,6 @@ Object {
           ],
           "type": "string",
         },
-        "comment": Object {
-          "flags": Object {
-            "default": [Function],
-            "error": [Function],
-            "presence": "optional",
-          },
-          "metas": Array [
-            Object {
-              "x-oas-min-length": 1,
-            },
-            Object {
-              "x-oas-optional": true,
-            },
-          ],
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "scriptName": Object {
           "flags": Object {
             "error": [Function],
@@ -10088,20 +10063,98 @@ Object {
 exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 9`] = `
 Object {
   "flags": Object {
-    "default": [Function],
+    "default": Object {
+      "special": "deep",
+    },
     "error": [Function],
     "presence": "optional",
-    "unknown": true,
   },
-  "keys": Object {},
-  "metas": Array [
-    Object {
-      "x-oas-optional": true,
-    },
-  ],
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
     },
   },
   "type": "object",
