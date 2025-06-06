@@ -795,7 +795,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       <EuiFlexGroup
         gutterSize="none"
         css={{
-          zIndex: theme.euiTheme.levels.content,
+          zIndex: theme.euiTheme.levels.flyout,
           position: 'relative',
         }}
         responsive={false}
