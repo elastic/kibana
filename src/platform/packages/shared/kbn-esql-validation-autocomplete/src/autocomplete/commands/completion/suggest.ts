@@ -23,7 +23,6 @@ import {
   handleFragment,
   isExpressionComplete,
 } from '../../helper';
-import { isExpressionComplete } from '../../helper';
 
 export enum CompletionPosition {
   PROMPT = 'prompt',
