@@ -6,26 +6,30 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { EsqlDashboardPanel, DEFAULT_PAGE_SIZE } from './esql_dashboard_panel';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => (
-    <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
-  )),
-}));
+jest.mock(
+  '../../../../../common/components/visualization_actions/visualization_embeddable',
+  () => ({
+    VisualizationEmbeddable: jest.fn(() => (
+      <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
+    )),
+  })
+);
 
-jest.mock('../../../../common/hooks/use_error_toast', () => ({
+jest.mock('../../../../../common/hooks/use_error_toast', () => ({
   useErrorToast: jest.fn(),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: jest.fn(() => ({
       services: {
+        ...actual.useKibana().services,
         data: {
           search: {
             search: jest.fn(),
@@ -67,6 +71,7 @@ describe('EsqlDashboardPanel', () => {
       { text: 'Option 1', value: 'option1' },
       { text: 'Option 2', value: 'option2' },
     ],
+    stackByField: 'option1',
     generateVisualizationQuery: jest.fn(),
     generateTableQuery: jest.fn(),
     getLensAttributes: jest.fn(),
@@ -81,22 +86,15 @@ describe('EsqlDashboardPanel', () => {
   it('renders the component with default props', () => {
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Test Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    expect(screen.getByTestId('genericDashboardSections')).toBeInTheDocument();
+    expect(screen.getByText('Field 1')).toBeInTheDocument();
+    expect(screen.getByText('Field 2')).toBeInTheDocument();
   });
 
   it('calls generateVisualizationQuery with the selected stackBy option', () => {
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
     expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith('option1');
-  });
-
-  it('updates the selected stackBy option when a new option is selected', () => {
-    render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
-
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'option2' } });
-
-    expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith('option2');
   });
 
   it('renders the table with the provided columns', () => {
@@ -136,7 +134,7 @@ describe('EsqlDashboardPanel', () => {
     expect(screen.getByText('Error loading data')).toBeInTheDocument();
   });
 
-  it('renders the "Load more" button when there are more items to load', () => {
+  it('renders the "Show more" button when there are more items to load', () => {
     const values = Array(DEFAULT_PAGE_SIZE + 1).fill([]);
 
     mockUseQuery.mockReturnValue({
@@ -155,6 +153,6 @@ describe('EsqlDashboardPanel', () => {
 
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Load more')).toBeInTheDocument();
+    expect(screen.getByText('Show more')).toBeInTheDocument();
   });
 });

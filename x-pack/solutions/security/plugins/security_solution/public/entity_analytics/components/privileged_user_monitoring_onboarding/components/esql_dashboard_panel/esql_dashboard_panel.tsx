@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,20 +16,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiSelect,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { take } from 'lodash/fp';
-import { getESQLResults } from '@kbn/esql-utils';
-import { esqlResponseToRecords } from '../../../../common/utils/esql';
-import type { GetLensAttributes } from '../../../../common/components/visualization_actions/types';
-import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { useKibana } from '../../../../common/lib/kibana';
-import { HeaderSection } from '../../../../common/components/header_section';
+import { css } from '@emotion/react';
+import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
+import type { GetLensAttributes } from '../../../../../common/components/visualization_actions/types';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
+import { DASHBOARD_TABLE_QUERY_ID, useDashboardTableQuery } from './hooks';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -38,17 +36,18 @@ export interface VisualizationStackByOption {
 }
 
 export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>({
-  title,
-  stackByOptions,
+  stackByField,
   generateVisualizationQuery,
   generateTableQuery,
   getLensAttributes,
   columns,
   timerange,
   pageSize = DEFAULT_PAGE_SIZE,
+  showInspectTable = false,
+  title,
 }: {
-  title: string | React.ReactNode;
-  stackByOptions: VisualizationStackByOption[];
+  title: ReactNode;
+  stackByField: string;
   generateVisualizationQuery: (stackByValue: string) => string;
   generateTableQuery: (
     sortField: keyof TableItemType,
@@ -59,54 +58,31 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   getLensAttributes: GetLensAttributes;
   timerange: { from: string; to: string };
   pageSize?: number;
+  showInspectTable?: boolean;
 }) => {
-  const { data } = useKibana().services;
-  const defaultStackByOption = stackByOptions[0];
-  const [selectedStackByOption, setSelectedStackByOption] =
-    useState<VisualizationStackByOption>(defaultStackByOption);
   const [sortField, setSortField] = useState<keyof TableItemType>('@timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState<number>(1);
-
-  const visualizationQuery = useMemo(
-    () => generateVisualizationQuery(selectedStackByOption.value),
-    [selectedStackByOption, generateVisualizationQuery]
-  );
+  const { euiTheme } = useEuiTheme();
 
   const tableQuery = useMemo(
     () => generateTableQuery(sortField, sortDirection, currentPage),
     [sortField, sortDirection, currentPage, generateTableQuery]
   );
 
-  const setSelectedChartOptionCallback = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedStackByOption(
-        stackByOptions.find((co) => co.value === event.target.value) ?? stackByOptions[0]
-      );
-    },
-    [stackByOptions]
+  const visualizationQuery = useMemo(
+    () => generateVisualizationQuery(stackByField),
+    [generateVisualizationQuery, stackByField]
   );
 
   const {
-    isInitialLoading,
-    isLoading,
-    isError,
-    isRefetching,
-    data: result,
+    records: items,
     error,
-  } = useQuery(
-    [tableQuery],
-    async ({ signal }) =>
-      getESQLResults({
-        esqlQuery: tableQuery,
-        search: data.search.search,
-        signal,
-      }),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    }
-  );
+    isLoading,
+    isInitialLoading,
+    isRefetching,
+    isError,
+  } = useDashboardTableQuery<TableItemType>(tableQuery);
 
   const onTableChange = ({ sort }: Criteria<TableItemType>) => {
     if (sort) {
@@ -116,8 +92,6 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
     }
   };
 
-  const items = esqlResponseToRecords<TableItemType>(result?.response);
-
   useErrorToast(
     i18n.translate('xpack.securitySolution.genericDashboard.queryError', {
       defaultMessage: 'There was an error loading the data',
@@ -126,28 +100,12 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   );
 
   return (
-    <EuiPanel hasBorder={true} hasShadow={false}>
-      <HeaderSection title={title} titleSize="s" showInspectButton={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            {stackByOptions.length > 1 && (
-              <EuiSelect
-                onChange={setSelectedChartOptionCallback}
-                options={stackByOptions}
-                prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
-                  defaultMessage: 'Stack by',
-                })}
-                value={selectedStackByOption?.value}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </HeaderSection>
+    <>
       <EuiFlexGroup direction="column" data-test-subj="genericDashboardSections">
         <VisualizationEmbeddable
-          stackByField={selectedStackByOption.value}
+          stackByField={stackByField}
           esql={visualizationQuery}
-          data-test-subj="embeddable-matrix-histogram"
+          data-test-subj="genericDashboardEmbeddableHistogram"
           getLensAttributes={getLensAttributes}
           height={260}
           id="GenericDashboard"
@@ -171,18 +129,40 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
               />
             </div>
           ) : (
-            <EuiBasicTable
-              loading={isInitialLoading || isRefetching}
-              items={take(currentPage * pageSize, items) || []}
-              onChange={onTableChange}
-              sorting={{
-                sort: {
-                  field: sortField,
-                  direction: sortDirection,
-                },
-              }}
-              columns={columns}
-            />
+            <InspectButtonContainer>
+              <div
+                // Anchors the position absolute inspect button (nearest positioned ancestor)
+                css={css`
+                  position: relative;
+                `}
+              >
+                <div
+                  // Position the inspect button above the table
+                  css={css`
+                    position: absolute;
+                    right: 0;
+                    top: -${euiTheme.size.base};
+                  `}
+                >
+                  {showInspectTable && (
+                    <InspectButton queryId={DASHBOARD_TABLE_QUERY_ID} title={title} />
+                  )}
+                </div>
+                <EuiBasicTable
+                  id={DASHBOARD_TABLE_QUERY_ID}
+                  loading={isInitialLoading || isRefetching}
+                  items={take(currentPage * pageSize, items) || []}
+                  onChange={onTableChange}
+                  sorting={{
+                    sort: {
+                      field: sortField,
+                      direction: sortDirection,
+                    },
+                  }}
+                  columns={columns}
+                />
+              </div>
+            </InspectButtonContainer>
           )}
           <EuiSpacer size="s" />
         </EuiFlexItem>
@@ -197,15 +177,18 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
               flush="right"
               color="primary"
               size="s"
+              iconType="sortDown"
+              iconSide="right"
+              iconSize="s"
             >
               <FormattedMessage
-                id="xpack.securitySolution.genericDashboard.loadMore"
-                defaultMessage="Load more"
+                id="xpack.securitySolution.genericDashboard.showMore"
+                defaultMessage="Show more"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 };
