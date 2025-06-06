@@ -293,7 +293,9 @@ export class AlertingPlugin {
     }
 
     if (this.config.enabledRuleTypes && this.config.enabledRuleTypes.length === 0) {
-      this.logger.warn(``);
+      this.logger.warn(
+        `xpack.alerting.enabledRuleTypes is empty. No rule types will be enabled in the configuration.`
+      );
     }
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
@@ -485,14 +487,14 @@ export class AlertingPlugin {
           }
 
           // validate cancelAlertsOnTimeout if set explicitly on the rule type definition
-        if (
-          ruleType.cancelAlertsOnRuleTimeout === false &&
-          (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
-        ) {
-          throw new Error(
-            `Rule type "${ruleType.id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.`
-          );
-        }
+          if (
+            ruleType.cancelAlertsOnRuleTimeout === false &&
+            (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
+          ) {
+            throw new Error(
+              `Rule type "${ruleType.id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.`
+            );
+          }
 
           ruleType.ruleTaskTimeout = getRuleTaskTimeout({
             config: this.config.rules,
@@ -503,17 +505,17 @@ export class AlertingPlugin {
           ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
 
           if (
-          ruleType.autoRecoverAlerts === true &&
-          this.config.cancelAlertsOnRuleTimeout === false
-        ) {
-          this.logger.debug(
-            `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false is incompatible with rule type "${ruleType.id}" and will be ignored.`
-          );
-          ruleType.cancelAlertsOnRuleTimeout = true;
-        } else {
-          ruleType.cancelAlertsOnRuleTimeout =
-            ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
-        }
+            ruleType.autoRecoverAlerts === true &&
+            this.config.cancelAlertsOnRuleTimeout === false
+          ) {
+            this.logger.debug(
+              `Setting xpack.alerting.cancelAlertsOnRuleTimeout=false is incompatible with rule type "${ruleType.id}" and will be ignored.`
+            );
+            ruleType.cancelAlertsOnRuleTimeout = true;
+          } else {
+            ruleType.cancelAlertsOnRuleTimeout =
+              ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
+          }
 
           ruleTypeRegistry.register(ruleType);
         }

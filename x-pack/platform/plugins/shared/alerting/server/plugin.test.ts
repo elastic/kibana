@@ -301,6 +301,29 @@ describe('Alerting Plugin', () => {
         });
 
         describe('enabledRuleTypes', () => {
+          it('should log warning if enabledRuleTypes is empty array', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: [] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.getAllTypes()).toEqual([]);
+            expect(context.logger.get().warn).toHaveBeenCalledWith(
+              `xpack.alerting.enabledRuleTypes is empty. No rule types will be enabled in the configuration.`
+            );
+          });
+
           it('should not register type if type is not in enabled config', async () => {
             const context = coreMock.createPluginInitializerContext<AlertingConfig>(
               generateAlertingConfig({ enabledRuleTypes: ['not-test'] })
