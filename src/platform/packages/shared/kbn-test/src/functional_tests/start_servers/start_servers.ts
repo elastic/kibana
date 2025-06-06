@@ -59,37 +59,41 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           ],
     });
 
-    await runKibanaServer({
-      procs,
-      config: new Config({
-        settings: {
-          ...config.getAll(),
-          kbnTestServer: {
-            sourceArgs: ['--no-base-path'],
-            serverArgs: [
-              ...config.get('kbnTestServer.serverArgs'),
-              `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-              `--elasticsearch.hosts=http://localhost:9221`,
-              `--server.port=5621`,
-            ],
+    const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
+
+    if (startRemoteKibana) {
+      await runKibanaServer({
+        procs,
+        config: new Config({
+          settings: {
+            ...config.getAll(),
+            kbnTestServer: {
+              sourceArgs: ['--no-base-path'],
+              serverArgs: [
+                ...config.get('kbnTestServer.serverArgs'),
+                `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                `--elasticsearch.hosts=http://localhost:9221`,
+                `--server.port=5621`,
+              ],
+            },
           },
-        },
-        path: config.path,
-        module: config.module,
-      }),
-      installDir: options.installDir,
-      extraKbnOpts: options.installDir
-        ? []
-        : [
-            '--dev',
-            '--no-dev-config',
-            '--no-dev-credentials',
-            config.get('serverless')
-              ? '--server.versioned.versionResolution=newest'
-              : '--server.versioned.versionResolution=oldest',
-          ],
-      remote: true,
-    });
+          path: config.path,
+          module: config.module,
+        }),
+        installDir: options.installDir,
+        extraKbnOpts: options.installDir
+          ? []
+          : [
+              '--dev',
+              '--no-dev-config',
+              '--no-dev-credentials',
+              config.get('serverless')
+                ? '--server.versioned.versionResolution=newest'
+                : '--server.versioned.versionResolution=oldest',
+            ],
+        remote: true,
+      });
+    }
 
     reportTime(runStartTime, 'ready', {
       success: true,

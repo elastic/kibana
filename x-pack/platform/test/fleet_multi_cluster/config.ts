@@ -36,7 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.enableExperimental=${JSON.stringify(['enableSyncIntegrationsOnRemote'])}`,
         `--xpack.fleet.syncIntegrations.taskInterval=5s`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
@@ -49,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           },
         ])}`,
       ],
+      startRemoteKibana: true,
     },
     security: {
       ...xpackFunctionalConfig.get('security'),
