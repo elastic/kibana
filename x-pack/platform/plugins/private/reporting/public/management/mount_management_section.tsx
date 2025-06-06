@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import React, { Suspense, lazy } from 'react';
+import ReactDOM from 'react-dom';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -23,6 +23,21 @@ import {
 } from '@kbn/reporting-public';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
+import {
+  APP_PATH,
+  HOME_PATH,
+  REPORTING_EXPORTS_PATH,
+  REPORTING_SCHEDULES_PATH,
+  SCHEDULES_TAB_ID,
+  Section,
+} from '../constants';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPage } from '@elastic/eui';
+import { suspendedComponentWithProps } from '../suspended_component_with_props';
+import { Redirect, match } from 'react-router';
+import { MatchParams } from './components/reporting_tabs';
+
+const ReportingTabs = lazy(() => import('./components/reporting_tabs'));
 
 export async function mountManagementSection(
   coreStart: CoreStart,
@@ -40,30 +55,57 @@ export async function mountManagementSection(
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
+    chrome: coreStart.chrome,
   };
+  const sections: Section[] = ['exports', 'schedules'];
+  const { element, history } = params;
 
-  render(
+  const sectionsRegex = sections.join('|');
+
+  ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
-            <ReportListing
-              apiClient={apiClient}
-              toasts={coreStart.notifications.toasts}
-              license$={license$}
-              config={config}
-              redirect={coreStart.application.navigateToApp}
-              navigateToUrl={coreStart.application.navigateToUrl}
-              urlService={shareService.url}
-            />
+            <Router history={history}>
+              <Routes>
+                <Route
+                  path={`/:section(${sectionsRegex})`}
+                  render={(routerProps) => {
+                    console.log('Redirecting to Reporting Home', {
+                      routerProps: params,
+                      history,
+                      coreStart,
+                      config,
+                      apiClient,
+                      license$,
+                    });
+                    return (
+                      <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+                        <ReportingTabs
+                          coreStart={coreStart}
+                          apiClient={apiClient}
+                          license$={license$}
+                          config={config}
+                          dataService={dataService}
+                          shareService={shareService}
+                          {...routerProps}
+                        />
+                      </Suspense>
+                    );
+                  }}
+                />
+                <Redirect from={'/'} to="/exports" />
+              </Routes>
+            </Router>
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
-    params.element
+    element
   );
 
   return () => {
-    unmountComponentAtNode(params.element);
+    ReactDOM.unmountComponentAtNode(element);
   };
 }

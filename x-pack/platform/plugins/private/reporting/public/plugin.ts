@@ -33,6 +33,9 @@ import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
+import { APP_DESC, APP_TITLE } from './translations';
+import { APP_PATH } from './constants';
+import { setBreadcrumbs } from '@kbn/discover-plugin/public/utils/breadcrumbs';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -118,6 +121,7 @@ export class ReportingPublicPlugin
             notifications: start.notifications,
             rendering: start.rendering,
             uiSettings: start.uiSettings,
+            chrome: start.chrome,
           },
           ...rest,
         ];
@@ -129,14 +133,10 @@ export class ReportingPublicPlugin
 
     homeSetup.featureCatalogue.register({
       id: 'reporting',
-      title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
-        defaultMessage: 'Reporting',
-      }),
-      description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
-        defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
-      }),
+      title: APP_TITLE,
+      description: APP_DESC,
       icon: 'reportingApp',
-      path: '/app/management/insightsAndAlerting/reporting',
+      path: APP_PATH,
       showOnHomePage: false,
       category: 'admin',
     });
