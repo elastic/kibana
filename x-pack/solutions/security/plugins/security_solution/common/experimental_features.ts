@@ -269,6 +269,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: false,
+  
+  /**
+   * Enables advanced mode for Trusted Apps creation and update
+   */
+  trustedAppsAdvancedMode: false,
+
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
