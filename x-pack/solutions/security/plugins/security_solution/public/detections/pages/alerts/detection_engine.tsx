@@ -161,7 +161,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
   const sourcererDataViewSpec: DataViewSpec = sourcererDataView.sourcererDataView as DataViewSpec;
   const isLoadingIndexPattern = sourcererDataView.loading;
-  const indexPattern = sourcererDataView.indexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -427,7 +426,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 query={query}
                 timeRange={pageFiltersTimerange}
                 onInit={setDetectionPageFilterHandler}
-                indexPattern={indexPattern}
+                dataViewSpec={sourcererDataViewSpec}
               />
               <EuiSpacer size="l" />
               <ChartPanels
