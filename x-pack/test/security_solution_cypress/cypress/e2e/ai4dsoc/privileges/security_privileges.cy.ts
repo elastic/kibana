@@ -14,7 +14,8 @@ import { visit } from '../../../tasks/navigation';
 import { selectAllSpaces } from '../../../tasks/select_all_spaces';
 import { CUSTOM_ROLES_URL } from '../../../urls/navigation';
 
-describe('Custom role creation', { tags: '@serverless' }, () => {
+// TODO: Do not run on 8.19
+describe.skip('Custom role creation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
     visit(CUSTOM_ROLES_URL);
