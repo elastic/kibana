@@ -72,6 +72,7 @@ import {
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
+import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -1076,6 +1077,31 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               </EuiFormRow>
             </EuiAccordion>
           </>
+        )}
+
+        {shouldRenderAgentlessSelector && (
+          <SetupTechnologySelector
+            showLimitationsMessage={!isServerless}
+            disabled={isEditPage}
+            setupTechnology={setupTechnology}
+            isAgentless={!!newPolicy?.supports_agentless}
+            onSetupTechnologyChange={(value) => {
+              updateSetupTechnology(value);
+              updatePolicy(
+                getPosturePolicy(
+                  newPolicy,
+                  input.type,
+                  getDefaultCloudCredentialsType(
+                    value === SetupTechnology.AGENTLESS,
+                    input.type as Extract<
+                      PostureInput,
+                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                    >
+                  )
+                )
+              );
+            }}
+          />
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
