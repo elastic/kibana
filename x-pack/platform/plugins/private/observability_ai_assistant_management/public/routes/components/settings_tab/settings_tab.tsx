@@ -19,7 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  getConnectorsManagementHref,
+  getElasticManagedLlmConnector,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -57,6 +60,8 @@ export function SettingsTab() {
 
   const knowledgeBase = useKnowledgeBase();
   const connectors = useGenAIConnectors();
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
   const getUrlForSpaces = () => {
     return getUrlForApp('management', {
@@ -119,32 +124,41 @@ export function SettingsTab() {
           </EuiFlexGroup>
         }
         description={
-          <p>
-            <FormattedMessage
-              id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
-              defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. This is a space setting and, by default, Elastic uses its Elastic-managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
-              values={{
-                link: (
-                  <EuiLink
-                    href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.observabilityAiAssistantManagement.settingsPage.additionalCostsLink',
-                      { defaultMessage: 'additional costs incur' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          !!elasticManagedLlm ? (
+            <p>
+              <FormattedMessage
+                id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
+                defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. By default, Elastic uses its Elastic Managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
+                values={{
+                  link: (
+                    <EuiLink
+                      href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityAiAssistantManagement.settingsPage.additionalCostsLink',
+                        { defaultMessage: 'additional costs incur' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          ) : (
+            <p>
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescription',
+                {
+                  defaultMessage:
+                    'A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must set up a Generative AI connector.',
+                }
+              )}
+            </p>
+          )
         }
       >
         <EuiFormRow fullWidth>
           <EuiFlexGroup gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="popout"
