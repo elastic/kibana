@@ -70,7 +70,7 @@ export const updateRiskScoreMappings = async ({
       await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
       await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
       await riskScoreDataClient.createOrUpdateRiskScoreComponentTemplate();
-      await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();
+      await riskScoreDataClient.rolloverRiskScoreTimeSeriesIndex();
       await riskEngineDataClient.updateConfiguration({
         _meta: {
           mappingsVersion: newConfig._meta.mappingsVersion,

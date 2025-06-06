@@ -26,7 +26,7 @@ import {
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
-import { createDataStream, updateUnderlyingMapping } from '../utils/create_datastream';
+import { createDataStream, rolloverDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import {
@@ -163,11 +163,11 @@ export class RiskScoreDataClient {
     });
   };
 
-  public updateRiskScoreTimeSeriesIndexMappings = async () =>
-    updateUnderlyingMapping({
+  public rolloverRiskScoreTimeSeriesIndex = async () =>
+    rolloverDataStream({
       esClient: this.options.esClient,
       logger: this.options.logger,
-      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+      dataStreamName: getRiskScoreTimeSeriesIndex(this.options.namespace),
     });
 
   public async init() {

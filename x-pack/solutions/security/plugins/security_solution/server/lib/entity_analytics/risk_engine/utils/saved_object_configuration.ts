@@ -117,7 +117,7 @@ export const getConfiguration = async ({
   }
 };
 
-export const getAllConfigurations = async ({
+export const getAllSpaceConfigurations = async ({
   savedObjectsClient,
 }: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskEngineConfiguration>>> => {
   const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
