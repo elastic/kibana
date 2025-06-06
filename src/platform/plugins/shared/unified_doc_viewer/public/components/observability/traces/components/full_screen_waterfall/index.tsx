@@ -100,9 +100,7 @@ export const FullScreenWaterfall = ({
                       defaultMessage: 'Exit full screen waterfall',
                     }
                   )}
-                  onClick={() => {
-                    onCloseFullScreen();
-                  }}
+                  onClick={onCloseFullScreen}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
