@@ -17,6 +17,7 @@ export interface UseCasesFeatures {
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
+  isObservablesFeatureEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -43,6 +44,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
+      isObservablesFeatureEnabled: features.observables.enabled,
     }),
     [
       features.alerts.enabled,
@@ -50,6 +52,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       features.metrics,
       hasLicenseGreaterThanPlatinum,
       assign,
+      features.observables?.enabled,
     ]
   );
 
