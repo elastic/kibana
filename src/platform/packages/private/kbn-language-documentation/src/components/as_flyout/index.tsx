@@ -81,7 +81,7 @@ function DocumentationFlyout({
           onClose={() => onHelpMenuVisibilityChange(false)}
           aria-labelledby="esqlInlineDocumentationFlyout"
           data-test-subj="esqlInlineDocumentationFlyout"
-          css={{ zIndex: 1002 }}
+          css={{ zIndex: 1 }}
           type="push"
           size={DEFAULT_WIDTH}
           paddingSize="m"
