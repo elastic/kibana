@@ -3621,16 +3621,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DateProcessorConfig",
-            "text": "DateProcessorConfig"
+            "section": "def-common.GrokProcessorConfig",
+            "text": "GrokProcessorConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorConfig",
-            "text": "GrokProcessorConfig"
+            "section": "def-common.DateProcessorConfig",
+            "text": "DateProcessorConfig"
           },
           " | ",
           {
