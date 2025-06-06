@@ -19,7 +19,9 @@ import type {
 } from '@kbn/onechat-server';
 
 export interface ToolsServiceSetup {
-  register(tool: RegisteredTool): void;
+  register<RunInput extends ZodObject<any>, RunOutput = unknown>(
+    tool: RegisteredTool<RunInput, RunOutput>
+  ): void;
   registerProvider(id: string, provider: RegisteredToolProvider): void;
 }
 
