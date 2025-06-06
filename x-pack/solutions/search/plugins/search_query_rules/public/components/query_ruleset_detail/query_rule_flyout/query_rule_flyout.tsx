@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
@@ -291,103 +292,120 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   />
                 </b>
               </EuiText>
-
-              <EuiDragDropContext
-                onDragEnd={({ source, destination }) => {
-                  if (source && destination && ruleFromRuleset) {
-                    if (isDocRule) {
-                      const newActions = euiDragDropReorder(
-                        actionFields,
-                        source.index,
-                        destination.index
-                      );
-                      replaceAction(newActions);
-                    } else if (isIdRule && actionIdsFields) {
-                      const newActions = euiDragDropReorder(
-                        actionIdsFields,
-                        source.index,
-                        destination.index
-                      );
-                      setValue('actions.ids', newActions);
-                    }
-                  }
-                }}
+              <EuiFlexItem
+                css={css`
+                  background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
+                `}
               >
-                <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
-                  {isIdRule && actionIdsFields
-                    ? actionIdsFields.map((doc, index) => (
-                        <EuiDraggable
-                          usePortal
-                          spacing="m"
-                          index={index}
-                          hasInteractiveChildren={true}
-                          draggableId={'queryRuleDocumentDraggable-' + doc + '-' + index}
-                          key={doc + '-' + index}
-                        >
-                          {() => (
-                            <DocumentSelector
-                              initialDocId={doc}
-                              hasIndexSelector={false}
-                              onDeleteDocument={() => {
-                                if (ruleFromRuleset) {
-                                  const updatedActions = actionIdsFields.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  setValue('actions.ids', updatedActions);
-                                }
-                              }}
-                              onIdSelectorChange={(id) => {
-                                if (ruleFromRuleset) {
-                                  const updatedActions = actionIdsFields.map((value, i) =>
-                                    i === index ? id : value
-                                  );
-                                  setValue('actions.ids', updatedActions);
-                                }
-                              }}
-                            />
-                          )}
-                        </EuiDraggable>
-                      ))
-                    : actionFields.map((doc, index) => (
-                        <EuiDraggable
-                          usePortal
-                          spacing="m"
-                          index={index}
-                          hasInteractiveChildren={true}
-                          draggableId={'queryRuleDocumentDraggable-' + doc._id + '-' + index}
-                          key={doc._id}
-                        >
-                          {() => (
-                            <DocumentSelector
-                              initialDocId={doc._id}
-                              index={doc._index}
-                              onDeleteDocument={() => {
-                                removeAction(index);
-                              }}
-                              onIndexSelectorChange={(indexName) => {
-                                if (ruleFromRuleset) {
-                                  const updatedActions = actionFields.map((action, i) =>
-                                    i === index ? { ...action, _index: indexName } : action
-                                  );
-                                  replaceAction(updatedActions);
-                                }
-                              }}
-                              onIdSelectorChange={(id) => {
-                                if (ruleFromRuleset) {
-                                  const updatedActions = actionFields.map((action, i) =>
-                                    i === index ? { ...action, _id: id } : action
-                                  );
-                                  replaceAction(updatedActions);
-                                }
-                              }}
-                              indices={indexNames}
-                            />
-                          )}
-                        </EuiDraggable>
-                      )) || <></>}
-                </EuiDroppable>
-              </EuiDragDropContext>
-
+                <EuiDragDropContext
+                  onDragEnd={({ source, destination }) => {
+                    if (source && destination && ruleFromRuleset) {
+                      if (isDocRule) {
+                        const newActions = euiDragDropReorder(
+                          actionFields,
+                          source.index,
+                          destination.index
+                        );
+                        replaceAction(newActions);
+                      } else if (isIdRule && actionIdsFields) {
+                        const newActions = euiDragDropReorder(
+                          actionIdsFields,
+                          source.index,
+                          destination.index
+                        );
+                        setValue('actions.ids', newActions);
+                      }
+                    }
+                  }}
+                >
+                  <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
+                    {isIdRule && actionIdsFields
+                      ? actionIdsFields.map((doc, index) => (
+                          <EuiDraggable
+                            usePortal
+                            spacing="m"
+                            index={index}
+                            hasInteractiveChildren={true}
+                            draggableId={'queryRuleDocumentDraggable-' + doc + '-' + index}
+                            key={doc + '-' + index}
+                          >
+                            {() => (
+                              <DocumentSelector
+                                initialDocId={doc}
+                                hasIndexSelector={false}
+                                onDeleteDocument={() => {
+                                  if (ruleFromRuleset) {
+                                    const updatedActions = actionIdsFields.filter(
+                                      (_, i) => i !== index
+                                    );
+                                    setValue('actions.ids', updatedActions);
+                                  }
+                                }}
+                                onIdSelectorChange={(id) => {
+                                  if (ruleFromRuleset) {
+                                    const updatedActions = actionIdsFields.map((value, i) =>
+                                      i === index ? id : value
+                                    );
+                                    setValue('actions.ids', updatedActions);
+                                  }
+                                }}
+                              />
+                            )}
+                          </EuiDraggable>
+                        ))
+                      : actionFields.map((doc, index) => (
+                          <EuiDraggable
+                            usePortal
+                            spacing="m"
+                            index={index}
+                            hasInteractiveChildren={true}
+                            draggableId={'queryRuleDocumentDraggable-' + doc._id + '-' + index}
+                            key={doc._id}
+                          >
+                            {() => (
+                              <DocumentSelector
+                                initialDocId={doc._id}
+                                index={doc._index}
+                                onDeleteDocument={() => {
+                                  removeAction(index);
+                                }}
+                                onIndexSelectorChange={(indexName) => {
+                                  if (ruleFromRuleset) {
+                                    const updatedActions = actionFields.map((action, i) =>
+                                      i === index ? { ...action, _index: indexName } : action
+                                    );
+                                    replaceAction(updatedActions);
+                                  }
+                                }}
+                                onIdSelectorChange={(id) => {
+                                  if (ruleFromRuleset) {
+                                    const updatedActions = actionFields.map((action, i) =>
+                                      i === index ? { ...action, _id: id } : action
+                                    );
+                                    replaceAction(updatedActions);
+                                  }
+                                }}
+                                indices={indexNames}
+                              />
+                            )}
+                          </EuiDraggable>
+                        )) || <></>}
+                  </EuiDroppable>
+                </EuiDragDropContext>
+              </EuiFlexItem>
+              {getValues('type') === 'pinned' ? (
+                <EuiCallOut
+                  iconType="transitionTopIn"
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.organicResultsCallout"
+                      defaultMessage="All other organic results will be displayed below"
+                    />
+                  }
+                />
+              ) : null}
+              <EuiSpacer size="m" />
               <EuiButton
                 data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
                 iconType="plusInCircle"
