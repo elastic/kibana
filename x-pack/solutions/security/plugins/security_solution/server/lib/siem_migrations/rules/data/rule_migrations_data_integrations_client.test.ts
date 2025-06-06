@@ -99,6 +99,54 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   });
 
   describe('populate', () => {
+    it('should index integrations with at least on logs data stream', async () => {
+      mockGetPackages.mockResolvedValue([
+        createMockPackage({
+          data_streams: [
+            { type: 'metrics', dataset: 'metrics.dataset', title: 'Metrics' } as RegistryDataStream,
+          ],
+        }),
+      ]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+
+      await client.populate();
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should only index logs data streams', async () => {
+      mockGetPackages.mockResolvedValue([
+        createMockPackage({
+          data_streams: [
+            { type: 'logs', dataset: 'logs.dataset', title: 'Logs' } as RegistryDataStream,
+            { type: 'metrics', dataset: 'metrics.dataset', title: 'Metrics' } as RegistryDataStream,
+          ],
+        }),
+      ]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+
+      await client.populate();
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith(
+        {
+          refresh: 'wait_for',
+          operations: [
+            // only the logs data stream operation should be included
+            expect.objectContaining({ update: expect.any(Object) }),
+            expect.objectContaining({
+              doc: expect.objectContaining({
+                data_streams: [
+                  { dataset: 'logs.dataset', index_pattern: 'logs-logs.dataset-*', title: 'Logs' },
+                ],
+              }),
+              doc_as_upsert: true,
+            }),
+          ],
+        },
+        { requestTimeout: 600000 }
+      );
+    });
+
     it('should call bulk with transformed logs packages', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
       esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });

@@ -55,6 +55,11 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
         return acc;
       }, []);
 
+      if (ragIntegrations.length === 0) {
+        this.logger.debug('No security integrations with logs data streams found to index');
+        return;
+      }
+
       await this.esClient
         .bulk(
           {
