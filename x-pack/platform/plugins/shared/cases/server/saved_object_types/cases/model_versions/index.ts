@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './v3';
+export { modelVersion1 } from './model_version_1';
+export { modelVersion2 } from './model_version_2';
+export { modelVersion3 } from './model_version_3';
