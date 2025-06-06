@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { reduceAsyncChunks } from './reduce_async_chunks';
+import { processInChunks } from './process_in_chunks';
 
-describe('reduceAsyncChunks', () => {
+describe('processInChunks', () => {
   const spyChunkExecutor = jest
     .fn()
     .mockImplementation((chunk: string[]) =>
@@ -22,7 +24,7 @@ describe('reduceAsyncChunks', () => {
     const input = Array(20).fill('logs-dataset-default');
     const expected = Array(20).fill('LOGS-DATASET-DEFAULT');
 
-    const res = await reduceAsyncChunks(input, spyChunkExecutor);
+    const res = await processInChunks(input, spyChunkExecutor);
 
     expect(res).toEqual(expected);
     expect(spyChunkExecutor).toHaveBeenCalledTimes(1);
@@ -33,7 +35,7 @@ describe('reduceAsyncChunks', () => {
     const expected = Array(1000).fill('LOGS-DATASET-DEFAULT');
     const expectedChunks = 7;
 
-    const res = await reduceAsyncChunks(input, spyChunkExecutor);
+    const res = await processInChunks(input, spyChunkExecutor);
 
     expect(res).toEqual(expected);
     expect(spyChunkExecutor).toHaveBeenCalledTimes(expectedChunks);
@@ -50,7 +52,7 @@ describe('reduceAsyncChunks', () => {
     ];
     const expectedChunks = 17;
 
-    const res = await reduceAsyncChunks(input, spyChunkExecutor);
+    const res = await processInChunks(input, spyChunkExecutor);
 
     expect(res).toEqual(expected);
     expect(spyChunkExecutor).toHaveBeenCalledTimes(expectedChunks);
