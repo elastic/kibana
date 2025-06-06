@@ -12,13 +12,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
-import { packagePolicyService } from '../package_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
@@ -63,8 +61,9 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const savedObjectType = await getAgentPolicySavedObjectType();
-  const objects = policyIds.map((id) => ({ id, type: savedObjectType }));
+  const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
+  const objects = policyIds.map((id) => ({ id, type: agentPolicySavedObjectType }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
       acc.set(so.id, false);
@@ -81,7 +80,7 @@ async function _deleteGhostPackagePolicies(
         packagePolicy.policy_ids.every((policyId) => agentPolicyExistsMap.get(policyId) === false)
       ) {
         logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
-        return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
+        return soClient.delete(packagePolicySavedObjectType, packagePolicy.id);
       }
     },
     {
@@ -146,10 +145,11 @@ async function _deleteExistingData(
       existingPolicies = [policy];
     }
   } else {
+    const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
     existingPolicies = (
       await agentPolicyService.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
-        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
+        kuery: `${agentPolicySavedObjectType}.is_preconfigured:true`,
       })
     ).items;
   }
