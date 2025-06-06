@@ -57,12 +57,12 @@
           {
             "parentPluginId": "remoteClusters",
             "id": "def-public.Cluster.nodeConnections",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "nodeConnections",
             "description": [],
             "signature": [
-              "number | undefined"
+              "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
@@ -85,12 +85,12 @@
           {
             "parentPluginId": "remoteClusters",
             "id": "def-public.Cluster.proxySocketConnections",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "proxySocketConnections",
             "description": [],
             "signature": [
-              "number | undefined"
+              "number | null | undefined"
             ],
             "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
@@ -186,6 +186,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "maxConnectionsPerCluster",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "remoteClusters",
+            "id": "def-public.Cluster.maxProxySocketConnections",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "maxProxySocketConnections",
             "description": [],
             "signature": [
               "string | number | undefined"

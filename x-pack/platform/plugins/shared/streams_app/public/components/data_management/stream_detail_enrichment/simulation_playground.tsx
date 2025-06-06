@@ -22,7 +22,6 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -57,8 +56,6 @@ export const SimulationPlayground = () => {
     (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
   );
 
-  const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
-
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -71,22 +68,20 @@ export const SimulationPlayground = () => {
                   { defaultMessage: 'Data preview' }
                 )}
               </EuiTab>
-              {canViewDetectedFields && (
-                <EuiTab
-                  isSelected={isViewingDetectedFields}
-                  onClick={viewSimulationDetectedFields}
-                  append={
-                    detectedFields.length > 0 ? (
-                      <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
-                    ) : undefined
-                  }
-                >
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                    { defaultMessage: 'Detected fields' }
-                  )}
-                </EuiTab>
-              )}
+              <EuiTab
+                isSelected={isViewingDetectedFields}
+                onClick={viewSimulationDetectedFields}
+                append={
+                  detectedFields.length > 0 ? (
+                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                  ) : undefined
+                }
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+                  { defaultMessage: 'Detected fields' }
+                )}
+              </EuiTab>
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -97,7 +92,7 @@ export const SimulationPlayground = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && canViewDetectedFields && (
+      {isViewingDetectedFields && (
         <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
       )}
     </>
