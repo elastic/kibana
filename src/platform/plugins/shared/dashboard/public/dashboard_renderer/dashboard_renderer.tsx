@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_dashboard_container.scss';
+import './viewport/_print_viewport.scss';
 
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
