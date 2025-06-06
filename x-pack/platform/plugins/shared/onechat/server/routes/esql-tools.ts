@@ -49,6 +49,43 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
     })
   );
 
+  router.get(
+    {
+      path: '/api/chat/tools/esql/{id}/_execute',
+      security: {
+        authz: {
+          enabled: false,
+          reason: '',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      try {
+        const { esql: esqlToolClientService } = getInternalServices();
+        const client = await esqlToolClientService.getClient({ request });
+        const responseDoc = await client.execute(request.params.id);
+
+        return response.ok({
+          body: {
+            response: responseDoc,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: { 
+            message: 'Error retrieving ESQL tool ' + error,
+          }
+        });
+      }
+    })
+  );
+
   router.post(
     {
       path: '/api/chat/tools/esql',

@@ -39,7 +39,7 @@ import type {
                 logger: this.logger, 
                 esClient,
             });
-            const client = createClient({ storage });
+            const client = createClient({ storage, esClient });
             return client;
         } catch (error) {
             this.logger.error('Failed to create ESQL tool client:' + error);

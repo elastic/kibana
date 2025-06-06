@@ -12,25 +12,31 @@ import {
   } from '@kbn/onechat-common';
 import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 import { logger } from 'elastic-apm-node';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface EsqlToolClient {
     get(esqlToolId: string): Promise<EsqlTool>;
     create(esqlTool: EsqlToolCreateRequest): Promise<EsqlTool>;
+    execute(esqlToolId: string): Promise<any>;
   }
 
-  export const createClient = ({
+export const createClient = ({
     storage,
+    esClient,
   }: {
     storage: EsqlToolStorage;
+    esClient: ElasticsearchClient
   }): EsqlToolClient => {
-    return new EsqlToolClientImpl({ storage });
+    return new EsqlToolClientImpl({ storage, esClient });
   };
 
   class EsqlToolClientImpl {
     private readonly storage: EsqlToolStorage;
+    private readonly esClient: ElasticsearchClient;
 
-    constructor({ storage }: { storage: EsqlToolStorage; }) {
+    constructor({ storage, esClient }: { storage: EsqlToolStorage; esClient: ElasticsearchClient }) {
         this.storage = storage;
+        this.esClient = esClient;
     }
 
     async get(esqlToolId: string): Promise<EsqlTool> {
@@ -48,7 +54,7 @@ export interface EsqlToolClient {
         
       }
 
-      async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {
+    async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {
         try {
             const now = new Date();
             const id = tool.id ?? uuidv4();
@@ -81,5 +87,36 @@ export interface EsqlToolClient {
             throw error; 
         }
     }
+
+    async execute(esqlToolId: string): Promise<any> {
+        try {
+            const document = await this.storage.getClient().get({ id: esqlToolId });
+            const tool = document._source
+
+            if (!tool) {
+                throw new Error(`ESQL tool not found: ${esqlToolId}`);
+            }
+
+            logger.info("Tool found: " + JSON.stringify(tool));
+
+            const esqlResponse = await this.esClient.transport.request({
+                method: 'POST',
+                path: '/_query',
+                body: {
+                  query: tool.query
+                }
+              });
+          
+            logger.info("ESQL Response: " + JSON.stringify(esqlResponse));
+            return esqlResponse;
+        } catch (error) {
+            if (error.statusCode === 404) {
+                throw new Error(`Tool with ID ${esqlToolId} not found`);
+            }
+            logger.error(`Error retrieving ESQL tool with ID ${esqlToolId}: ${error}`);
+            throw error;
+        }
+        
+      }
   }
     
