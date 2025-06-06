@@ -64,9 +64,8 @@ export interface WrapperProps {
  */
 export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
   const spaceId = useSpaceId();
-  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
-
   const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const dataViewSpec = useMemo(() => ({ title: signalIndexName }), [signalIndexName]);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
