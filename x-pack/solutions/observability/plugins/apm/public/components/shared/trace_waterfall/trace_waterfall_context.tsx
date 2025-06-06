@@ -15,7 +15,6 @@ import { useTraceWaterfall } from './use_trace_waterfall';
 interface TraceWaterfallContextProps {
   duration: number;
   traceWaterfall: TraceWaterfallItem[];
-  // maxDepth: number;
   rootItem?: TraceItem;
   margin: { left: number; right: number };
   traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
@@ -27,7 +26,6 @@ interface TraceWaterfallContextProps {
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   duration: 0,
-  // maxDepth: 0,
   traceWaterfall: [],
   rootItem: undefined,
   margin: { left: 0, right: 0 },

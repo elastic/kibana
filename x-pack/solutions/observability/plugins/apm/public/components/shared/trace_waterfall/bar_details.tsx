@@ -65,10 +65,10 @@ export function BarDetails({
           <EuiFlexItem grow={false}>
             {onErrorClick ? (
               <EuiButtonIcon
-                data-test-subj="apmBarDetailsButton"
-                aria-label={i18n.translate('xpack.apm.barDetails.[objectObject]Button.ariaLabel', {
-                  defaultMessage: '[object Object]',
+                aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
+                  defaultMessage: 'View error details',
                 })}
+                data-test-subj="apmBarDetailsButton"
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"

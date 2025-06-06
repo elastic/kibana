@@ -43,7 +43,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
 
   const content = (
     <div
-      id="caue-123"
       css={css`
         border-bottom: ${euiTheme.border.thin};
         ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
