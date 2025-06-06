@@ -33,12 +33,17 @@ import type {
     }
   
     async getClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
-      const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
-      const storage = createStorage({ 
-        logger: this.logger, 
-        esClient,
-      });
-  
-      return createClient({ storage });
-    }
-  }
+        try {
+            const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
+            const storage = createStorage({ 
+                logger: this.logger, 
+                esClient,
+            });
+            const client = createClient({ storage });
+            return client;
+        } catch (error) {
+            this.logger.error('Failed to create ESQL tool client:' + error);
+            throw error;
+            }
+        }
+    }   

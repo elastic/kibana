@@ -7,15 +7,51 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { EsqlToolClientService } from '../services/tools/esql/esql_tool_service';
 import { ToolSourceType } from '@kbn/onechat-common';
 
 export function registerESQLToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
+  router.get(
+    {
+      path: '/api/chat/tools/esql/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: '',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      try {
+        const { esql: esqlToolClientService } = getInternalServices();
+        const client = await esqlToolClientService.getClient({ request });
+        const tool = await client.get(request.params.id);
+
+        return response.ok({
+          body: {
+            esqlTool: tool,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: { 
+            message: 'Error retrieving ESQL tool',
+          }
+        });
+      }
+    })
+  );
+
   router.post(
     {
-      path: '/api/chat/tools/esql/create',
+      path: '/api/chat/tools/esql',
       security: {
         authz: {
           enabled: false,
@@ -47,16 +83,26 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { tools: toolService, esql: esqlToolService } = getInternalServices();
-      const registry = toolService.registry.asScopedPublicRegistry({ request });
-      const client = await esqlToolService.getClient({ request });
-      const tool = await client.create(request.body);
-      
-      return response.ok({
-        body: {
-          esql: {tool},
-        },
-      });
+      try {
+        const { tools: toolService, esql: esqlToolClientService } = getInternalServices();
+        const registry = toolService.registry.asScopedPublicRegistry({ request });
+        const client = await esqlToolClientService.getClient({ request });
+        const tool = await client.create(request.body);
+        
+
+        return response.ok({
+          body: {
+            esqlTool: {tool},
+          },
+        });
+    } catch (error) {
+        return response.customError({
+            statusCode: 500,
+            body: { 
+                message: 'Failed to initialize ESQL client',
+            }
+        });
+      }
     })
   );
 }

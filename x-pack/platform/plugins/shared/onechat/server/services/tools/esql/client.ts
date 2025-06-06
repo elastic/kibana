@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EsqlToolStorage } from './storage';
 import {
-    ToolSourceType,
     type EsqlTool,
   } from '@kbn/onechat-common';
 import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
+import { logger } from 'elastic-apm-node';
 
 export interface EsqlToolClient {
     get(esqlToolId: string): Promise<EsqlTool>;
@@ -40,48 +40,41 @@ export interface EsqlToolClient {
             throw new Error(`Tool with ID ${esqlToolId} not found`);
         }
 
-        const returnDoc = {
-            id: esqlToolId,
-            name: document._source!.name,
-            description: document._source!.description,
-            query: document._source!.query,
-            params: document._source!.params,
-            meta: {
-                sourceType: ToolSourceType.esql,
-                sourceId: esqlToolId,
-                tags: ["POC"],
-            }
-        };
-
-        return returnDoc;
+        return document._source as EsqlTool;
       }
 
       async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {
-        const now = new Date();
-        const id = tool.id ?? uuidv4();
-    
-        const attributes = {
-            id,
-            name: tool.name,
-            description: tool.description,
-            query: tool.query,
-            params: tool.params.map(param => ({
-                key: param.key,
-                value: {
-                    type: param.value.type,
-                    description: param.value.description,
-                }
-            })),
-            created_at: now.toISOString(),
-            updated_at: now.toISOString(),
-        };
-    
-        await this.storage.getClient().index({
-            id,
-            document: attributes,
-        });
-    
-        return this.get(id);
+        try {
+            const now = new Date();
+            const id = tool.id ?? uuidv4();
+        
+            const attributes = {
+                id,
+                name: tool.name,
+                description: tool.description,
+                query: tool.query,
+                params: tool.params.map(param => ({
+                    key: param.key,
+                    value: {
+                        type: param.value.type,
+                        description: param.value.description,
+                    }
+                })),
+                created_at: now.toISOString(),
+                updated_at: now.toISOString(),
+            };
+        
+            await this.storage.getClient().index({
+                id,
+                document: attributes,
+            });
+        
+            return this.get(id);
+        
+        } catch (error: any) {
+            logger.info('Error creating ESQL tool:' + error);
+            throw error; 
+        }
     }
   }
     

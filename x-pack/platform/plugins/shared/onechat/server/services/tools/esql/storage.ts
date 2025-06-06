@@ -28,7 +28,9 @@ const storageSettings = {
                 }
               })
             }
-        })
+        }),
+        created_at: types.date({}),
+        updated_at: types.date({})
       }
     }
   } satisfies IndexStorageSettings;
