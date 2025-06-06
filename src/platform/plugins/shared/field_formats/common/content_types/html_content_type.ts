@@ -8,7 +8,6 @@
  */
 
 import { escape, isFunction } from 'lodash';
-import { css } from '@emotion/css';
 import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
@@ -30,16 +29,12 @@ const getConvertFn = (
   return (convert || fallbackHtml) as HtmlContextTypeConvert;
 };
 
-const highlightClass = css({
-  color: 'red',
-});
-
 export const setup = (
   format: IFieldFormat,
   htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
-  const highlight = (text: string) => `<span class="${highlightClass}">${text}</span>`;
+  const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
