@@ -172,5 +172,9 @@
     "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-server",
   ]
 }
