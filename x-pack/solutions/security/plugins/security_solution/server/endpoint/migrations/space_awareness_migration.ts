@@ -11,7 +11,7 @@ import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../common/endpoint/service/response_actions/constants';
@@ -56,6 +56,8 @@ export const migrateEndpointDataToSupportSpaces = async (
     logger.debug('Space awareness feature flag is disabled. Nothing to do.');
     return;
   }
+
+  // TODO:PT should we have a brief delay here before staring migration to give fleet a chance to complete its migration?
 
   // TODO:PT should the migration state be deleted if one of the below migrations fails?
 
@@ -298,8 +300,44 @@ const migrateResponseActionsToSpaceAware = async (
     logger,
     batchHandler: async ({ data: actionUpdates }) => {
       migrationStats.itemsNeedingUpdates += actionUpdates.length;
+      const docIdToResponseActionIdMap: Record<string, string> = {};
+      const bulkOperations: Required<BulkRequest>['operations'] = [];
 
-      // const bulkUpdateResponse
+      for (const actionUpdateInfo of actionUpdates) {
+        docIdToResponseActionIdMap[actionUpdateInfo.docId] = actionUpdateInfo.actionId;
+
+        bulkOperations.push(
+          { update: { _index: actionUpdateInfo.index, _id: actionUpdateInfo.docId } },
+          { doc: actionUpdateInfo.update }
+        );
+      }
+
+      try {
+        const bulkUpdateResponse = await esClient.bulk({ operations: bulkOperations });
+
+        if (!bulkUpdateResponse.errors) {
+          migrationStats.successUpdates += actionUpdates.length;
+        } else {
+          for (const operationResult of bulkUpdateResponse.items) {
+            const updateResponse = operationResult.update;
+
+            if (updateResponse?.error) {
+              migrationStats.failedUpdates++;
+              migrationStats.errors.push(
+                `Update to response action [${
+                  docIdToResponseActionIdMap[updateResponse._id ?? '']
+                }] _id [${updateResponse._id}] failed: ${updateResponse.error.reason}`
+              );
+            } else {
+              migrationStats.successUpdates++;
+            }
+          }
+        }
+      } catch (err) {
+        logger.error(`ES Bulk update failed with: ${stringify(err)}`);
+
+        // TODO:PT implement
+      }
     },
   });
 
@@ -357,7 +395,7 @@ const migrateResponseActionsToSpaceAware = async (
   await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
-    `migration of endpoint response actions in support of space done.\n${JSON.stringify(
+    `migration of endpoint response actions in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
       2
