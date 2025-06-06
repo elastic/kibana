@@ -9,7 +9,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
+import {
+  KibanaMcpHttpTransport,
+  CONNECTION_CLOSED,
+  INTERNAL_ERROR,
+} from '../utils/kibana_mcp_http_transport';
 
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
@@ -116,7 +120,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             body: {
               message: `Internal server error: ${error}`,
               attributes: {
-                code: -32603,
+                code: INTERNAL_ERROR,
               },
             },
           });
@@ -154,7 +158,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           body: {
             message: 'Method not allowed',
             attributes: {
-              code: -32000,
+              code: CONNECTION_CLOSED,
             },
           },
         });
@@ -192,7 +196,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
           body: {
             message: 'Method not allowed',
             attributes: {
-              code: -32000,
+              code: CONNECTION_CLOSED,
             },
           },
         });

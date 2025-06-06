@@ -20,6 +20,16 @@ import { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types';
 import { randomUUID } from 'node:crypto';
 import type { IKibanaResponse } from '@kbn/core/server';
 
+// SDK error codes
+export const CONNECTION_CLOSED = -32000;
+
+// Standard JSON-RPC error codes
+export const PARSE_ERROR = -32700;
+export const INVALID_REQUEST = -32600;
+export const METHOD_NOT_FOUND = -32601;
+export const INVALID_PARAMS = -32602;
+export const INTERNAL_ERROR = -32603;
+
 /**
  * Server transport for Streamable HTTP: this implements the MCP Streamable HTTP transport specification.
  * It supports direct HTTP responses. It doesn't support SSE streaming.
@@ -129,7 +139,7 @@ export class KibanaMcpHttpTransport implements Transport {
           body: JSON.stringify({
             jsonrpc: '2.0',
             error: {
-              code: -32000,
+              code: CONNECTION_CLOSED,
               message: 'Not Acceptable: Client must accept application/json',
             },
             id: null,
@@ -146,7 +156,7 @@ export class KibanaMcpHttpTransport implements Transport {
           body: JSON.stringify({
             jsonrpc: '2.0',
             error: {
-              code: -32000,
+              code: CONNECTION_CLOSED,
               message: 'Unsupported Media Type: Content-Type must be application/json',
             },
             id: null,
@@ -176,7 +186,7 @@ export class KibanaMcpHttpTransport implements Transport {
             body: JSON.stringify({
               jsonrpc: '2.0',
               error: {
-                code: -32600,
+                code: INVALID_REQUEST,
                 message: 'Invalid Request: Server already initialized',
               },
               id: null,
@@ -189,7 +199,7 @@ export class KibanaMcpHttpTransport implements Transport {
             body: JSON.stringify({
               jsonrpc: '2.0',
               error: {
-                code: -32600,
+                code: INVALID_REQUEST,
                 message: 'Invalid Request: Only one initialization request is allowed',
               },
               id: null,
@@ -254,7 +264,7 @@ export class KibanaMcpHttpTransport implements Transport {
         body: JSON.stringify({
           jsonrpc: '2.0',
           error: {
-            code: -32700,
+            code: PARSE_ERROR,
             message: 'Parse error',
             data: String(error),
           },
@@ -357,7 +367,7 @@ export class KibanaMcpHttpTransport implements Transport {
       body: JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: CONNECTION_CLOSED,
           message: 'Method not allowed.',
         },
         id: null,
