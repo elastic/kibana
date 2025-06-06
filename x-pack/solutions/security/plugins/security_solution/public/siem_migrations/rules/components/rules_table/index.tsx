@@ -237,7 +237,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationId, startMigration]
     );
 
-    const { getModal, show: showReprocessFailedRulesModal } = useStartMigrationModal({
+    const { getModal, showModal: showReprocessFailedRulesModal } = useStartMigrationModal({
       availableConnectors: aiConnectors,
       lastConnectorId: migrationStats?.last_execution?.connector_id,
       skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
