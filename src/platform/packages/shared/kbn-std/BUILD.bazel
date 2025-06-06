@@ -21,7 +21,6 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "@npm//deepmerge",
   "@npm//lodash",
   "@npm//query-string",
   "@npm//rxjs",
