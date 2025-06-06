@@ -31,15 +31,27 @@ import type {
       this.logger = logger;
       this.elasticsearch = elasticsearch;
     }
+
+    getScopedUsers({ request }: { request: KibanaRequest }) {
+        return {
+          internalUser: this.elasticsearch.client.asScoped(request).asInternalUser,
+          currentUser: this.elasticsearch.client.asScoped(request).asCurrentUser,
+        };
+      }
   
     async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
         try {
-            const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
+            const { internalUser, currentUser } = this.getScopedUsers({ request });
             const storage = createStorage({ 
                 logger: this.logger, 
-                esClient,
+                esClient: internalUser,
             });
-            const client = createClient({ storage, esClient });
+
+            const client = createClient({ 
+                storage, 
+                esClient: currentUser 
+            });
+
             return client;
         } catch (error) {
             this.logger.error(error);
