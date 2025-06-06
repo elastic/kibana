@@ -268,9 +268,8 @@ describe('LogsOverview', () => {
       const accordion = accordions[accordions.length - 1];
       const button = within(accordion).getByRole('button', { name: /quality issues/i });
 
-      act(() => {
-        button?.click();
-      });
+      const user = userEvent.setup();
+      await user.click(button);
 
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
@@ -303,12 +302,10 @@ describe('LogsOverview', () => {
 
       const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
       const accordion = accordions[accordions.length - 1];
-      const button = accordion.querySelector('button');
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
 
-      act(() => {
-        button?.click();
-      });
-
+      const user = userEvent.setup();
+      await user.click(button);
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
       ).not.toBeInTheDocument();
