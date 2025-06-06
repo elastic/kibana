@@ -25,18 +25,6 @@ is being formed. This can result in parts of the vis being cut out.
   }
 }
 
-.dshDashboardViewport--print {
-  .kbnGrid {
-    display: block !important;
-  }
-  .kbnGridSectionHeader, .kbnGridSectionFooter {
-    display: none;
-  }
-  .kbnGridPanel {
-    height: 100% !important;
-  }
-}
-
 @media screen, projection {
   .printViewport {
     &__vis {

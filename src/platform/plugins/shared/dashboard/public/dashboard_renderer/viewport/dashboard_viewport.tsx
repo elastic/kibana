@@ -177,5 +177,16 @@ const dashboardViewportStyles = {
     '&.dshDashboardViewport--panelExpanded': {
       flex: 1,
     },
+    '&.dshDashboardViewport--print': {
+      '.kbnGrid': {
+        display: 'block !important',
+      },
+      '.kbnGridSectionHeader, .kbnGridSectionFooter': {
+        display: 'none'
+      },
+      '.kbnGridPanel': {
+        height: '100% !important',
+      }
+    }
   },
 };
