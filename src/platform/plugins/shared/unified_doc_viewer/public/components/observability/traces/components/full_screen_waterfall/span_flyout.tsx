@@ -93,9 +93,9 @@ export const SpanFlyout = ({
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
   const renderTabs = () => {
-    return tabs.map((tab, index) => (
+    return tabs.map((tab) => (
       <EuiTab
-        key={index}
+        key={tab.id}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
       >
