@@ -17,6 +17,7 @@ import type {
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { apiKeysManagementApp } from './api_keys';
+import { changeRequestsManagementApp } from './change_requests';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
@@ -76,6 +77,8 @@ export class ManagementService {
     if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     }
+
+    this.securitySection.registerApp(changeRequestsManagementApp.create({ getStartServices }));
   }
 
   start({ capabilities }: StartParams) {

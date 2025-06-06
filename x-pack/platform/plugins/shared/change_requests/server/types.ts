@@ -56,6 +56,7 @@ export const statusRt = z.union([
   z.literal('rejected'),
   z.literal('failed'),
   // Maybe in the future we'll also have a status like "exported" for GitOps
+  // What if the user wants to cancel or update their request before the admin looks at it?
 ]);
 
 export type Status = z.TypeOf<typeof statusRt>;
