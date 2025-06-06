@@ -66,6 +66,7 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
+  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -39651,6 +39652,233 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
+      parameters:
+        - in: path
+          name: outputId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                            - warning
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                            - warning
+                          type: string
+                        updated_at:
+                          type: string
+                        warning:
+                          type: string
+                      required:
+                        - sync_status
+                        - install_status
+                    type: array
+                  warning:
+                    type: string
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status by outputId
+      tags:
+        - CCR Remote synced integrations
+  /api/fleet/remote_synced_integrations/status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                            - warning
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                            - warning
+                          type: string
+                        updated_at:
+                          type: string
+                        warning:
+                          type: string
+                      required:
+                        - sync_status
+                        - install_status
+                    type: array
+                  warning:
+                    type: string
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status
+      tags:
+        - CCR Remote synced integrations
   /api/fleet/service_tokens:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -42563,7 +42791,7 @@ paths:
       summary: Create a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}:
     delete:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -42594,7 +42822,7 @@ paths:
       summary: Delete a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     get:
       description: '[Required authorization] Route required privileges: read-maintenance-window.'
       operationId: get-maintenance-window-id
@@ -42735,7 +42963,7 @@ paths:
       summary: Get maintenance window details.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
     patch:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
       operationId: patch-maintenance-window-id
@@ -42976,7 +43204,7 @@ paths:
       summary: Update a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_archive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43125,7 +43353,7 @@ paths:
       summary: Archive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/maintenance_window/{id}/_unarchive:
     post:
       description: '[Required authorization] Route required privileges: write-maintenance-window.'
@@ -43274,7 +43502,7 @@ paths:
       summary: Unarchive a maintenance window.
       tags:
         - maintenance-window
-      x-state: Generally available; added in 9.1.0
+      x-state: Generally available
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -43961,7 +44189,7 @@ paths:
   /api/saved_objects/_export:
     post:
       description: |-
-        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.
+        Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
@@ -44108,7 +44336,10 @@ paths:
         - saved objects
   /api/saved_objects/_import:
     post:
-      description: Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+      description: |-
+        Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47023,6 +47254,205 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      manual_ingest_pipeline:
+                                                        allOf:
+                                                          - type: object
+                                                            properties:
+                                                              description:
+                                                                type: string
+                                                              if:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          operator:
+                                                                            enum:
+                                                                              - exists
+                                                                              - notExists
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                          - operator
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          operator:
+                                                                            enum:
+                                                                              - eq
+                                                                              - neq
+                                                                              - lt
+                                                                              - lte
+                                                                              - gt
+                                                                              - gte
+                                                                              - contains
+                                                                              - startsWith
+                                                                              - endsWith
+                                                                            type: string
+                                                                          value:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                        required:
+                                                                          - field
+                                                                          - operator
+                                                                          - value
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                              ignore_failure:
+                                                                type: boolean
+                                                          - type: object
+                                                            properties:
+                                                              on_failure:
+                                                                items:
+                                                                  additionalProperties: {}
+                                                                  type: object
+                                                                type: array
+                                                              processors:
+                                                                items:
+                                                                  additionalProperties: false
+                                                                  type: object
+                                                                  properties:
+                                                                    append: {}
+                                                                    attachment: {}
+                                                                    bytes: {}
+                                                                    circle: {}
+                                                                    community_id: {}
+                                                                    convert: {}
+                                                                    csv: {}
+                                                                    date: {}
+                                                                    date_index_name: {}
+                                                                    dissect: {}
+                                                                    dot_expander: {}
+                                                                    drop: {}
+                                                                    enrich: {}
+                                                                    fail: {}
+                                                                    fingerprint: {}
+                                                                    foreach: {}
+                                                                    geo_grid: {}
+                                                                    geoip: {}
+                                                                    grok: {}
+                                                                    gsub: {}
+                                                                    html_strip: {}
+                                                                    inference: {}
+                                                                    ip_location: {}
+                                                                    join: {}
+                                                                    json: {}
+                                                                    kv: {}
+                                                                    lowercase: {}
+                                                                    network_direction: {}
+                                                                    pipeline: {}
+                                                                    redact: {}
+                                                                    registered_domain: {}
+                                                                    remove: {}
+                                                                    rename: {}
+                                                                    reroute: {}
+                                                                    script: {}
+                                                                    set: {}
+                                                                    set_security_user: {}
+                                                                    sort: {}
+                                                                    split: {}
+                                                                    terminate: {}
+                                                                    trim: {}
+                                                                    uppercase: {}
+                                                                    uri_parts: {}
+                                                                    urldecode: {}
+                                                                    user_agent: {}
+                                                                  required:
+                                                                    - append
+                                                                    - attachment
+                                                                    - bytes
+                                                                    - circle
+                                                                    - community_id
+                                                                    - convert
+                                                                    - csv
+                                                                    - date
+                                                                    - date_index_name
+                                                                    - dissect
+                                                                    - dot_expander
+                                                                    - drop
+                                                                    - enrich
+                                                                    - fail
+                                                                    - fingerprint
+                                                                    - foreach
+                                                                    - ip_location
+                                                                    - geo_grid
+                                                                    - geoip
+                                                                    - grok
+                                                                    - gsub
+                                                                    - html_strip
+                                                                    - inference
+                                                                    - join
+                                                                    - json
+                                                                    - kv
+                                                                    - lowercase
+                                                                    - network_direction
+                                                                    - pipeline
+                                                                    - redact
+                                                                    - registered_domain
+                                                                    - remove
+                                                                    - rename
+                                                                    - reroute
+                                                                    - script
+                                                                    - set
+                                                                    - set_security_user
+                                                                    - sort
+                                                                    - split
+                                                                    - terminate
+                                                                    - trim
+                                                                    - uppercase
+                                                                    - urldecode
+                                                                    - uri_parts
+                                                                    - user_agent
+                                                                type: array
+                                                              tag:
+                                                                type: string
+                                                            required:
+                                                              - processors
+                                                    required:
+                                                      - manual_ingest_pipeline
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
                                                       kv:
                                                         allOf:
                                                           - type: object
@@ -48145,6 +48575,205 @@ paths:
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
+                                                  manual_ingest_pipeline:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                      - type: object
+                                                        properties:
+                                                          on_failure:
+                                                            items:
+                                                              additionalProperties: {}
+                                                              type: object
+                                                            type: array
+                                                          processors:
+                                                            items:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties:
+                                                                append: {}
+                                                                attachment: {}
+                                                                bytes: {}
+                                                                circle: {}
+                                                                community_id: {}
+                                                                convert: {}
+                                                                csv: {}
+                                                                date: {}
+                                                                date_index_name: {}
+                                                                dissect: {}
+                                                                dot_expander: {}
+                                                                drop: {}
+                                                                enrich: {}
+                                                                fail: {}
+                                                                fingerprint: {}
+                                                                foreach: {}
+                                                                geo_grid: {}
+                                                                geoip: {}
+                                                                grok: {}
+                                                                gsub: {}
+                                                                html_strip: {}
+                                                                inference: {}
+                                                                ip_location: {}
+                                                                join: {}
+                                                                json: {}
+                                                                kv: {}
+                                                                lowercase: {}
+                                                                network_direction: {}
+                                                                pipeline: {}
+                                                                redact: {}
+                                                                registered_domain: {}
+                                                                remove: {}
+                                                                rename: {}
+                                                                reroute: {}
+                                                                script: {}
+                                                                set: {}
+                                                                set_security_user: {}
+                                                                sort: {}
+                                                                split: {}
+                                                                terminate: {}
+                                                                trim: {}
+                                                                uppercase: {}
+                                                                uri_parts: {}
+                                                                urldecode: {}
+                                                                user_agent: {}
+                                                              required:
+                                                                - append
+                                                                - attachment
+                                                                - bytes
+                                                                - circle
+                                                                - community_id
+                                                                - convert
+                                                                - csv
+                                                                - date
+                                                                - date_index_name
+                                                                - dissect
+                                                                - dot_expander
+                                                                - drop
+                                                                - enrich
+                                                                - fail
+                                                                - fingerprint
+                                                                - foreach
+                                                                - ip_location
+                                                                - geo_grid
+                                                                - geoip
+                                                                - grok
+                                                                - gsub
+                                                                - html_strip
+                                                                - inference
+                                                                - join
+                                                                - json
+                                                                - kv
+                                                                - lowercase
+                                                                - network_direction
+                                                                - pipeline
+                                                                - redact
+                                                                - registered_domain
+                                                                - remove
+                                                                - rename
+                                                                - reroute
+                                                                - script
+                                                                - set
+                                                                - set_security_user
+                                                                - sort
+                                                                - split
+                                                                - terminate
+                                                                - trim
+                                                                - uppercase
+                                                                - urldecode
+                                                                - uri_parts
+                                                                - user_agent
+                                                            type: array
+                                                          tag:
+                                                            type: string
+                                                        required:
+                                                          - processors
+                                                required:
+                                                  - manual_ingest_pipeline
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
                                                   kv:
                                                     allOf:
                                                       - type: object
@@ -49122,6 +49751,205 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
+                                                      manual_ingest_pipeline:
+                                                        allOf:
+                                                          - type: object
+                                                            properties:
+                                                              description:
+                                                                type: string
+                                                              if:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          operator:
+                                                                            enum:
+                                                                              - exists
+                                                                              - notExists
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                          - operator
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          operator:
+                                                                            enum:
+                                                                              - eq
+                                                                              - neq
+                                                                              - lt
+                                                                              - lte
+                                                                              - gt
+                                                                              - gte
+                                                                              - contains
+                                                                              - startsWith
+                                                                              - endsWith
+                                                                            type: string
+                                                                          value:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                        required:
+                                                                          - field
+                                                                          - operator
+                                                                          - value
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                              ignore_failure:
+                                                                type: boolean
+                                                          - type: object
+                                                            properties:
+                                                              on_failure:
+                                                                items:
+                                                                  additionalProperties: {}
+                                                                  type: object
+                                                                type: array
+                                                              processors:
+                                                                items:
+                                                                  additionalProperties: false
+                                                                  type: object
+                                                                  properties:
+                                                                    append: {}
+                                                                    attachment: {}
+                                                                    bytes: {}
+                                                                    circle: {}
+                                                                    community_id: {}
+                                                                    convert: {}
+                                                                    csv: {}
+                                                                    date: {}
+                                                                    date_index_name: {}
+                                                                    dissect: {}
+                                                                    dot_expander: {}
+                                                                    drop: {}
+                                                                    enrich: {}
+                                                                    fail: {}
+                                                                    fingerprint: {}
+                                                                    foreach: {}
+                                                                    geo_grid: {}
+                                                                    geoip: {}
+                                                                    grok: {}
+                                                                    gsub: {}
+                                                                    html_strip: {}
+                                                                    inference: {}
+                                                                    ip_location: {}
+                                                                    join: {}
+                                                                    json: {}
+                                                                    kv: {}
+                                                                    lowercase: {}
+                                                                    network_direction: {}
+                                                                    pipeline: {}
+                                                                    redact: {}
+                                                                    registered_domain: {}
+                                                                    remove: {}
+                                                                    rename: {}
+                                                                    reroute: {}
+                                                                    script: {}
+                                                                    set: {}
+                                                                    set_security_user: {}
+                                                                    sort: {}
+                                                                    split: {}
+                                                                    terminate: {}
+                                                                    trim: {}
+                                                                    uppercase: {}
+                                                                    uri_parts: {}
+                                                                    urldecode: {}
+                                                                    user_agent: {}
+                                                                  required:
+                                                                    - append
+                                                                    - attachment
+                                                                    - bytes
+                                                                    - circle
+                                                                    - community_id
+                                                                    - convert
+                                                                    - csv
+                                                                    - date
+                                                                    - date_index_name
+                                                                    - dissect
+                                                                    - dot_expander
+                                                                    - drop
+                                                                    - enrich
+                                                                    - fail
+                                                                    - fingerprint
+                                                                    - foreach
+                                                                    - ip_location
+                                                                    - geo_grid
+                                                                    - geoip
+                                                                    - grok
+                                                                    - gsub
+                                                                    - html_strip
+                                                                    - inference
+                                                                    - join
+                                                                    - json
+                                                                    - kv
+                                                                    - lowercase
+                                                                    - network_direction
+                                                                    - pipeline
+                                                                    - redact
+                                                                    - registered_domain
+                                                                    - remove
+                                                                    - rename
+                                                                    - reroute
+                                                                    - script
+                                                                    - set
+                                                                    - set_security_user
+                                                                    - sort
+                                                                    - split
+                                                                    - terminate
+                                                                    - trim
+                                                                    - uppercase
+                                                                    - urldecode
+                                                                    - uri_parts
+                                                                    - user_agent
+                                                                type: array
+                                                              tag:
+                                                                type: string
+                                                            required:
+                                                              - processors
+                                                    required:
+                                                      - manual_ingest_pipeline
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
                                                       kv:
                                                         allOf:
                                                           - type: object
@@ -50094,6 +50922,205 @@ paths:
                                                           - patterns
                                                 required:
                                                   - grok
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  manual_ingest_pipeline:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                      - type: object
+                                                        properties:
+                                                          on_failure:
+                                                            items:
+                                                              additionalProperties: {}
+                                                              type: object
+                                                            type: array
+                                                          processors:
+                                                            items:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties:
+                                                                append: {}
+                                                                attachment: {}
+                                                                bytes: {}
+                                                                circle: {}
+                                                                community_id: {}
+                                                                convert: {}
+                                                                csv: {}
+                                                                date: {}
+                                                                date_index_name: {}
+                                                                dissect: {}
+                                                                dot_expander: {}
+                                                                drop: {}
+                                                                enrich: {}
+                                                                fail: {}
+                                                                fingerprint: {}
+                                                                foreach: {}
+                                                                geo_grid: {}
+                                                                geoip: {}
+                                                                grok: {}
+                                                                gsub: {}
+                                                                html_strip: {}
+                                                                inference: {}
+                                                                ip_location: {}
+                                                                join: {}
+                                                                json: {}
+                                                                kv: {}
+                                                                lowercase: {}
+                                                                network_direction: {}
+                                                                pipeline: {}
+                                                                redact: {}
+                                                                registered_domain: {}
+                                                                remove: {}
+                                                                rename: {}
+                                                                reroute: {}
+                                                                script: {}
+                                                                set: {}
+                                                                set_security_user: {}
+                                                                sort: {}
+                                                                split: {}
+                                                                terminate: {}
+                                                                trim: {}
+                                                                uppercase: {}
+                                                                uri_parts: {}
+                                                                urldecode: {}
+                                                                user_agent: {}
+                                                              required:
+                                                                - append
+                                                                - attachment
+                                                                - bytes
+                                                                - circle
+                                                                - community_id
+                                                                - convert
+                                                                - csv
+                                                                - date
+                                                                - date_index_name
+                                                                - dissect
+                                                                - dot_expander
+                                                                - drop
+                                                                - enrich
+                                                                - fail
+                                                                - fingerprint
+                                                                - foreach
+                                                                - ip_location
+                                                                - geo_grid
+                                                                - geoip
+                                                                - grok
+                                                                - gsub
+                                                                - html_strip
+                                                                - inference
+                                                                - join
+                                                                - json
+                                                                - kv
+                                                                - lowercase
+                                                                - network_direction
+                                                                - pipeline
+                                                                - redact
+                                                                - registered_domain
+                                                                - remove
+                                                                - rename
+                                                                - reroute
+                                                                - script
+                                                                - set
+                                                                - set_security_user
+                                                                - sort
+                                                                - split
+                                                                - terminate
+                                                                - trim
+                                                                - uppercase
+                                                                - urldecode
+                                                                - uri_parts
+                                                                - user_agent
+                                                            type: array
+                                                          tag:
+                                                            type: string
+                                                        required:
+                                                          - processors
+                                                required:
+                                                  - manual_ingest_pipeline
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
@@ -51320,6 +52347,205 @@ paths:
                                   - additionalProperties: false
                                     type: object
                                     properties:
+                                      manual_ingest_pipeline:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                          - type: object
+                                            properties:
+                                              on_failure:
+                                                items:
+                                                  additionalProperties: {}
+                                                  type: object
+                                                type: array
+                                              processors:
+                                                items:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    append: {}
+                                                    attachment: {}
+                                                    bytes: {}
+                                                    circle: {}
+                                                    community_id: {}
+                                                    convert: {}
+                                                    csv: {}
+                                                    date: {}
+                                                    date_index_name: {}
+                                                    dissect: {}
+                                                    dot_expander: {}
+                                                    drop: {}
+                                                    enrich: {}
+                                                    fail: {}
+                                                    fingerprint: {}
+                                                    foreach: {}
+                                                    geo_grid: {}
+                                                    geoip: {}
+                                                    grok: {}
+                                                    gsub: {}
+                                                    html_strip: {}
+                                                    inference: {}
+                                                    ip_location: {}
+                                                    join: {}
+                                                    json: {}
+                                                    kv: {}
+                                                    lowercase: {}
+                                                    network_direction: {}
+                                                    pipeline: {}
+                                                    redact: {}
+                                                    registered_domain: {}
+                                                    remove: {}
+                                                    rename: {}
+                                                    reroute: {}
+                                                    script: {}
+                                                    set: {}
+                                                    set_security_user: {}
+                                                    sort: {}
+                                                    split: {}
+                                                    terminate: {}
+                                                    trim: {}
+                                                    uppercase: {}
+                                                    uri_parts: {}
+                                                    urldecode: {}
+                                                    user_agent: {}
+                                                  required:
+                                                    - append
+                                                    - attachment
+                                                    - bytes
+                                                    - circle
+                                                    - community_id
+                                                    - convert
+                                                    - csv
+                                                    - date
+                                                    - date_index_name
+                                                    - dissect
+                                                    - dot_expander
+                                                    - drop
+                                                    - enrich
+                                                    - fail
+                                                    - fingerprint
+                                                    - foreach
+                                                    - ip_location
+                                                    - geo_grid
+                                                    - geoip
+                                                    - grok
+                                                    - gsub
+                                                    - html_strip
+                                                    - inference
+                                                    - join
+                                                    - json
+                                                    - kv
+                                                    - lowercase
+                                                    - network_direction
+                                                    - pipeline
+                                                    - redact
+                                                    - registered_domain
+                                                    - remove
+                                                    - rename
+                                                    - reroute
+                                                    - script
+                                                    - set
+                                                    - set_security_user
+                                                    - sort
+                                                    - split
+                                                    - terminate
+                                                    - trim
+                                                    - uppercase
+                                                    - urldecode
+                                                    - uri_parts
+                                                    - user_agent
+                                                type: array
+                                              tag:
+                                                type: string
+                                            required:
+                                              - processors
+                                    required:
+                                      - manual_ingest_pipeline
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
                                       kv:
                                         allOf:
                                           - type: object
@@ -52356,6 +53582,205 @@ paths:
                                               - patterns
                                     required:
                                       - grok
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      manual_ingest_pipeline:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                          - type: object
+                                            properties:
+                                              on_failure:
+                                                items:
+                                                  additionalProperties: {}
+                                                  type: object
+                                                type: array
+                                              processors:
+                                                items:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    append: {}
+                                                    attachment: {}
+                                                    bytes: {}
+                                                    circle: {}
+                                                    community_id: {}
+                                                    convert: {}
+                                                    csv: {}
+                                                    date: {}
+                                                    date_index_name: {}
+                                                    dissect: {}
+                                                    dot_expander: {}
+                                                    drop: {}
+                                                    enrich: {}
+                                                    fail: {}
+                                                    fingerprint: {}
+                                                    foreach: {}
+                                                    geo_grid: {}
+                                                    geoip: {}
+                                                    grok: {}
+                                                    gsub: {}
+                                                    html_strip: {}
+                                                    inference: {}
+                                                    ip_location: {}
+                                                    join: {}
+                                                    json: {}
+                                                    kv: {}
+                                                    lowercase: {}
+                                                    network_direction: {}
+                                                    pipeline: {}
+                                                    redact: {}
+                                                    registered_domain: {}
+                                                    remove: {}
+                                                    rename: {}
+                                                    reroute: {}
+                                                    script: {}
+                                                    set: {}
+                                                    set_security_user: {}
+                                                    sort: {}
+                                                    split: {}
+                                                    terminate: {}
+                                                    trim: {}
+                                                    uppercase: {}
+                                                    uri_parts: {}
+                                                    urldecode: {}
+                                                    user_agent: {}
+                                                  required:
+                                                    - append
+                                                    - attachment
+                                                    - bytes
+                                                    - circle
+                                                    - community_id
+                                                    - convert
+                                                    - csv
+                                                    - date
+                                                    - date_index_name
+                                                    - dissect
+                                                    - dot_expander
+                                                    - drop
+                                                    - enrich
+                                                    - fail
+                                                    - fingerprint
+                                                    - foreach
+                                                    - ip_location
+                                                    - geo_grid
+                                                    - geoip
+                                                    - grok
+                                                    - gsub
+                                                    - html_strip
+                                                    - inference
+                                                    - join
+                                                    - json
+                                                    - kv
+                                                    - lowercase
+                                                    - network_direction
+                                                    - pipeline
+                                                    - redact
+                                                    - registered_domain
+                                                    - remove
+                                                    - rename
+                                                    - reroute
+                                                    - script
+                                                    - set
+                                                    - set_security_user
+                                                    - sort
+                                                    - split
+                                                    - terminate
+                                                    - trim
+                                                    - uppercase
+                                                    - urldecode
+                                                    - uri_parts
+                                                    - user_agent
+                                                type: array
+                                              tag:
+                                                type: string
+                                            required:
+                                              - processors
+                                    required:
+                                      - manual_ingest_pipeline
                                   - additionalProperties: false
                                     type: object
                                     properties:
