@@ -21,7 +21,7 @@ export const configSchema = schema.object({
     defaultValue: true,
   }),
   interval: schema.string({
-    defaultValue: '30d',
+    defaultValue: '90d',
     validate(value) {
       if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
         return 'must be a supported duration string';
