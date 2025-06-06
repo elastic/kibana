@@ -81,6 +81,7 @@ const optionListControlStyles = {
     .euiFilterButton__wrapper {
       padding: 0;
 
+      &::before,
       &::after {
         display: none;
       }
