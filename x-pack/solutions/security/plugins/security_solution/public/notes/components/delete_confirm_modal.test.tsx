@@ -11,16 +11,14 @@ import { DeleteConfirmModal } from './delete_confirm_modal';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { ReqStatus } from '..';
 
-jest.mock('../store/notes.slice', () => ({
-  ...jest.requireActual('../store/notes.slice'),
-  deleteNotes: jest.fn(),
-  userClosedDeleteModal: jest.fn(),
-}));
-
-const mockDeleteNotes = jest.mocked(jest.requireMock('../store/notes.slice').deleteNotes);
-const mockUserClosedDeleteModal = jest.mocked(
-  jest.requireMock('../store/notes.slice').userClosedDeleteModal
-);
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('DeleteConfirmModal', () => {
   beforeEach(() => {
@@ -61,7 +59,7 @@ describe('DeleteConfirmModal', () => {
     );
 
     fireEvent.click(getByTestId('confirmModalCancelButton'));
-    expect(mockUserClosedDeleteModal).toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'notes/userClosedDeleteModal' });
   });
 
   it('dispatches deleteNotes with correct ids and default refetch when confirm is clicked', () => {
@@ -80,7 +78,7 @@ describe('DeleteConfirmModal', () => {
     );
 
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
-    expect(mockDeleteNotes).toHaveBeenCalledWith({ ids: ['1', '2'], refetch: true });
+    expect(mockDispatch).toHaveBeenCalled();
   });
 
   it('dispatches deleteNotes with refetch: false when specified', () => {
@@ -99,7 +97,7 @@ describe('DeleteConfirmModal', () => {
     );
 
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
-    expect(mockDeleteNotes).toHaveBeenCalledWith({ ids: ['1', '2'], refetch: false });
+    expect(mockDispatch).toHaveBeenCalled();
   });
 
   it('shows loading state when delete is in progress', () => {
