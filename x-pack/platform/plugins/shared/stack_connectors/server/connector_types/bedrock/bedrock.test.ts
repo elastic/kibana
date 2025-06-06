@@ -812,7 +812,7 @@ describe('BedrockConnector', () => {
                 content: 'What is 2+2?',
               },
             ],
-            system: 'This is a system message',
+            system: [{ type: 'text', text: 'This is a system message' }],
           },
           connectorUsageCollector
         );
@@ -843,7 +843,7 @@ describe('BedrockConnector', () => {
               toolConfig: {
                 toolChoice: {},
               },
-              system: 'This is a system message',
+              system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_BEDROCK_MODEL,
             }),
           },
@@ -873,7 +873,7 @@ describe('BedrockConnector', () => {
                 content: 'What is 2+2?',
               },
             ],
-            system: 'This is a system message',
+            system: [{ type: 'text', text: 'This is a system message' }],
           },
           connectorUsageCollector
         );
@@ -908,7 +908,7 @@ describe('BedrockConnector', () => {
               toolConfig: {
                 toolChoice: {},
               },
-              system: 'This is a system message',
+              system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_BEDROCK_MODEL,
             }),
           },
