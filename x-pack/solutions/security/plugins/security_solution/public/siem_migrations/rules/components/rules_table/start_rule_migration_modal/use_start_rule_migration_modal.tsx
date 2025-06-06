@@ -7,9 +7,9 @@
 
 import type { ComponentProps } from 'react';
 import React, { useState, useCallback } from 'react';
-import { StartMigrationModal } from './start_migration_modal';
+import { StartRuleMigrationModal } from './start_rule_migration_modal';
 
-type UseStartMigrationModal = Omit<ComponentProps<typeof StartMigrationModal>, 'onClose'> & {
+type UseStartMigrationModal = Omit<ComponentProps<typeof StartRuleMigrationModal>, 'onClose'> & {
   onClose?: () => void;
 };
 
@@ -27,7 +27,7 @@ export const useStartMigrationModal = ({
 }: UseStartMigrationModal) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const showStartMigrationModal = useCallback(async () => {
+  const showModal = useCallback(() => {
     setIsVisible(true);
   }, []);
 
@@ -39,7 +39,7 @@ export const useStartMigrationModal = ({
   const getModal = useCallback(() => {
     return function ModalWrapper() {
       return isVisible ? (
-        <StartMigrationModal
+        <StartRuleMigrationModal
           lastConnectorId={lastConnectorId}
           skipPrebuiltRulesMatching={skipPrebuiltRulesMatching}
           onClose={onClose}
@@ -62,7 +62,7 @@ export const useStartMigrationModal = ({
   return {
     isVisible,
     closeModal: onClose,
-    showStartMigrationModal,
+    showModal,
     getModal,
   };
 };

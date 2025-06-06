@@ -45,7 +45,7 @@ import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '.
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { useStartMigrationModal } from './start_migration_modal';
+import { useStartMigrationModal } from './start_rule_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -237,7 +237,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationId, startMigration]
     );
 
-    const { getModal, showStartMigrationModal } = useStartMigrationModal({
+    const { getModal, showModal: showReprocessFailedRulesModal } = useStartMigrationModal({
       availableConnectors: aiConnectors,
       lastConnectorId: migrationStats?.last_execution?.connector_id,
       skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
@@ -379,7 +379,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       numberOfSelectedRules={selectedMigrationRules.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
-                      reprocessFailedRules={showStartMigrationModal}
+                      reprocessFailedRules={showReprocessFailedRulesModal}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

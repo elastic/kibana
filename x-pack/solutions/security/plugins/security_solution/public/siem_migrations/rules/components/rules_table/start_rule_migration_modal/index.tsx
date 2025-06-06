@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useStartMigrationModal } from './use_start_migration_modal';
+export { useStartMigrationModal } from './use_start_rule_migration_modal';

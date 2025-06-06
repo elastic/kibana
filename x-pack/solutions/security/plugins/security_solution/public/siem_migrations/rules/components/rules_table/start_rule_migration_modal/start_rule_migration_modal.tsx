@@ -37,7 +37,7 @@ import type { RuleMigrationSettings } from '../../../types';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../../common/components/links';
 
-interface StartMigrationModalProps {
+interface StartRuleMigrationModalProps {
   /** Initial connector Id that should be selected */
   lastConnectorId?: RuleMigrationSettings['connectorId'];
   /** initial value to be used for start migration settings */
@@ -54,8 +54,8 @@ interface StartMigrationModalProps {
 
 export const DATA_TEST_SUBJ_PREFIX = 'startMigrationModal';
 
-export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
-  function StartMigrationModal({
+export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.memo(
+  function StartRuleMigrationModal({
     lastConnectorId,
     skipPrebuiltRulesMatching = false,
     onClose: closeModal,
@@ -198,7 +198,6 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                     data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Translate`}
                     color="primary"
                     fill
-                    onClick={onStartMigrationWithSettings}
                   >
                     {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
                   </EuiButton>

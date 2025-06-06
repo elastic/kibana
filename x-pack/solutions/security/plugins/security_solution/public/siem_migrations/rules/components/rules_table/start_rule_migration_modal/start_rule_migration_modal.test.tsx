@@ -10,7 +10,7 @@ import React from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { fireEvent, render, screen, act } from '@testing-library/react';
-import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from './start_migration_modal';
+import { DATA_TEST_SUBJ_PREFIX, StartRuleMigrationModal } from './start_rule_migration_modal';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -41,7 +41,9 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
-const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigrationModal>> = {}) => {
+const renderTestComponent = (
+  props: Partial<ComponentProps<typeof StartRuleMigrationModal>> = {}
+) => {
   const finalProps = {
     availableConnectors: availableConnectorsMock,
     onStartMigrationWithSettings: startMigrationWithSettingsMock,
@@ -53,7 +55,7 @@ const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigration
 
   return render(
     <IntlProvider locale="en">
-      <StartMigrationModal {...finalProps} />
+      <StartRuleMigrationModal {...finalProps} />
     </IntlProvider>
   );
 };
