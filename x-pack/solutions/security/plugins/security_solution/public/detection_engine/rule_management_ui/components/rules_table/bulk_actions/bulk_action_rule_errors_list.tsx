@@ -84,6 +84,26 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
+    case BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.thresholdRuleInSuppressionDescription"
+            defaultMessage="{rulesCount, plural, =1 {# Threshold rule} other {# Threshold rules}} can't be edited with this alert suppression action. Please use dedicated to threshold rules action."
+            values={{ rulesCount }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.unsupportedRulesInThresholdSuppressionDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited with this alert suppression action. Please use Set alert suppression action."
+            values={{ rulesCount }}
+          />
+        </li>
+      );
     default:
       return (
         <li key={message}>
