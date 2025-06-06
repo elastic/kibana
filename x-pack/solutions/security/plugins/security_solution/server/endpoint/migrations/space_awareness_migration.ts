@@ -312,6 +312,8 @@ const migrateResponseActionsToSpaceAware = async (
         );
       }
 
+      logger.debug(`Calling esClient.bulk() with [${actionUpdates.length}] updates`);
+
       try {
         const bulkUpdateResponse = await esClient.bulk({ operations: bulkOperations });
 
@@ -336,8 +338,16 @@ const migrateResponseActionsToSpaceAware = async (
       } catch (err) {
         logger.error(`ES Bulk update failed with: ${stringify(err)}`);
 
-        // TODO:PT implement
+        migrationStats.failedUpdates += actionUpdates.length;
+
+        migrationStats.errors.push(
+          `Bulk update of action ids [${Object.values(docIdToResponseActionIdMap).join(
+            ', '
+          )}] failed with: ${err.message}`
+        );
       }
+
+      // TODO:PT should we write the stats on every successful batch update? so we can keep track?
     },
   });
 
@@ -372,14 +382,15 @@ const migrateResponseActionsToSpaceAware = async (
           policyInfoBuilder.buildPolicyUpdate(action).then((updateContent) => {
             if (updateContent.warnings.length > 0) {
               migrationStats.warnings.push(...updateContent.warnings);
-              updateProcessor.addToQueue({
-                actionId: action.EndpointActions.action_id,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                docId: actionHit._id!,
-                index: actionHit._index,
-                update: updateContent.policyUpdate,
-              });
             }
+
+            updateProcessor.addToQueue({
+              actionId: action.EndpointActions.action_id,
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              docId: actionHit._id!,
+              index: actionHit._index,
+              update: updateContent.policyUpdate,
+            });
           })
         );
       }
@@ -583,7 +594,7 @@ class AgentPolicyInfoBuilder {
           return {
             found: true,
             warning: '',
-            policyId: NOT_FOUND_VALUE,
+            policyId: integrationPolicy.id,
           };
         })
         .catch((err) => {
