@@ -296,7 +296,7 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.allTabs).toHaveLength(1);
     expect(loadedProps.allTabs[0]).toEqual(
       expect.objectContaining({
-        label: 'Untitled session',
+        label: 'Untitled',
       })
     );
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
@@ -348,7 +348,7 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.allTabs).toHaveLength(1);
     expect(loadedProps.allTabs[0]).toEqual(
       expect.objectContaining({
-        label: 'Untitled session',
+        label: 'Untitled',
       })
     );
     expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);

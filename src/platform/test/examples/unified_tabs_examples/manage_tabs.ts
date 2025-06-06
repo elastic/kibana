@@ -70,16 +70,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('can edit tab label', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 1');
       await unifiedTabs.editTabLabel(3, 'Test label');
       expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled session 1',
-        'Untitled session 2',
-        'Untitled session 3',
+        'Untitled 1',
+        'Untitled 2',
+        'Untitled 3',
         'Test label',
-        'Untitled session 5',
-        'Untitled session 6',
-        'Untitled session 7',
+        'Untitled 5',
+        'Untitled 6',
+        'Untitled 7',
       ]);
     });
 
@@ -91,30 +91,30 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await browser.pressKeys(browser.keys.ENTER);
       await unifiedTabs.enterNewTabLabel('Test label');
       expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled session 1',
-        'Untitled session 2',
-        'Untitled session 3',
-        'Untitled session 4',
-        'Untitled session 5',
-        'Untitled session 6',
-        'Untitled session 7',
+        'Untitled 1',
+        'Untitled 2',
+        'Untitled 3',
+        'Untitled 4',
+        'Untitled 5',
+        'Untitled 6',
+        'Untitled 7',
         'Test label',
       ]);
     });
 
     it('should support mouse events for navigating between tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 1');
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 8');
       await unifiedTabs.selectTab(5);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 6');
       await unifiedTabs.selectTab(6);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 7');
       await unifiedTabs.closeTab(6);
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 8');
       await unifiedTabs.openTabMenu(6);
       expect(await unifiedTabs.getContextMenuItems()).to.eql([
         'Rename',
@@ -125,18 +125,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('should support keyboard events for navigating between tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 1');
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 8');
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 6');
       await browser.pressKeys(browser.keys.ARROW_RIGHT);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 7');
       await browser.pressKeys(browser.keys.DELETE);
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 8');
       await openTabContextMenuWithKeyboard();
       expect(await unifiedTabs.getContextMenuItems()).to.eql([
         'Rename',
@@ -147,51 +147,51 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('should support drag and drop for reordering tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 1');
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 8');
       expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled session 1',
-        'Untitled session 2',
-        'Untitled session 3',
-        'Untitled session 4',
-        'Untitled session 5',
-        'Untitled session 6',
-        'Untitled session 7',
-        'Untitled session 8',
+        'Untitled 1',
+        'Untitled 2',
+        'Untitled 3',
+        'Untitled 4',
+        'Untitled 5',
+        'Untitled 6',
+        'Untitled 7',
+        'Untitled 8',
       ]);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 7');
       await browser.pressKeys(browser.keys.SPACE);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(browser.keys.SPACE);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 7');
       expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled session 1',
-        'Untitled session 2',
-        'Untitled session 3',
-        'Untitled session 4',
-        'Untitled session 7',
-        'Untitled session 5',
-        'Untitled session 6',
-        'Untitled session 8',
+        'Untitled 1',
+        'Untitled 2',
+        'Untitled 3',
+        'Untitled 4',
+        'Untitled 7',
+        'Untitled 5',
+        'Untitled 6',
+        'Untitled 8',
       ]);
       await browser.pressKeys(browser.keys.ARROW_RIGHT);
-      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 5');
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled 5');
       await browser.pressKeys(browser.keys.SPACE);
       await browser.pressKeys(browser.keys.ARROW_RIGHT);
       await browser.pressKeys(browser.keys.SPACE);
       expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled session 1',
-        'Untitled session 2',
-        'Untitled session 3',
-        'Untitled session 4',
-        'Untitled session 7',
-        'Untitled session 6',
-        'Untitled session 5',
-        'Untitled session 8',
+        'Untitled 1',
+        'Untitled 2',
+        'Untitled 3',
+        'Untitled 4',
+        'Untitled 7',
+        'Untitled 6',
+        'Untitled 5',
+        'Untitled 8',
       ]);
     });
   });

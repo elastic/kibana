@@ -44,7 +44,7 @@ export const createTabActionInjector =
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
-  defaultMessage: 'Untitled session',
+  defaultMessage: 'Untitled',
 });
 const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 
