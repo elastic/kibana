@@ -12,6 +12,10 @@ import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../common/endpoint/service/response_actions/constants';
+import { EndpointError } from '../../../common/endpoint/errors';
 import type { LogsEndpointAction } from '../../../common/endpoint/types';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { stringify } from '../utils/stringify';
@@ -30,6 +34,7 @@ const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
 const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
 const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
   'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
+const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 
 interface MigrationState {
   started: string;
@@ -37,6 +42,10 @@ interface MigrationState {
   status: 'not-started' | 'complete' | 'pending';
   data?: unknown;
 }
+
+type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
+  agent: Pick<LogsEndpointAction['agent'], 'policy'>;
+};
 
 export const migrateEndpointDataToSupportSpaces = async (
   endpointService: EndpointAppContextService
@@ -47,6 +56,8 @@ export const migrateEndpointDataToSupportSpaces = async (
     logger.debug('Space awareness feature flag is disabled. Nothing to do.');
     return;
   }
+
+  // TODO:PT should the migration state be deleted if one of the below migrations fails?
 
   await Promise.all([
     migrateArtifactsToSpaceAware(endpointService),
@@ -244,6 +255,8 @@ const migrateArtifactsToSpaceAware = async (
 const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
+  // FIXME:PT how do we ensure that the new endpoint package is installed first - since we need the index mappings to be applied
+
   const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
   const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
   const migrationState = await getMigrationState(
@@ -270,18 +283,23 @@ const migrateResponseActionsToSpaceAware = async (
     itemsNeedingUpdates: 0,
     successUpdates: 0,
     failedUpdates: 0,
+    warnings: [] as string[],
+    errors: [] as string[],
   };
+  const policyInfoBuilder = new AgentPolicyInfoBuilder(endpointService, logger);
   const esClient = endpointService.getInternalEsClient();
   const updateProcessor = new QueueProcessor<{
     index: string;
-    itemId: string;
+    docId: string;
     actionId: string;
-    update: Pick<LogsEndpointAction, 'originSpaceId'> & Pick<LogsEndpointAction['agent'], 'policy'>;
+    update: PolicyPartialUpdate;
   }>({
     batchSize: 50,
     logger,
     batchHandler: async ({ data: actionUpdates }) => {
-      //
+      migrationStats.itemsNeedingUpdates += actionUpdates.length;
+
+      // const bulkUpdateResponse
     },
   });
 
@@ -297,6 +315,8 @@ const migrateResponseActionsToSpaceAware = async (
     },
   });
 
+  const updateBuilderPromises: Array<Promise<unknown>> = [];
+
   for await (const actionRequestSearchResults of responseActionsFetcher) {
     const actionRequests = actionRequestSearchResults.hits.hits;
     const totalItems = (actionRequestSearchResults.hits.total as SearchTotalHits).value ?? 0;
@@ -305,9 +325,30 @@ const migrateResponseActionsToSpaceAware = async (
       migrationStats.totalItems = totalItems;
     }
 
-    //
+    for (const actionHit of actionRequests) {
+      const action = actionHit._source;
+
+      if (action) {
+        updateBuilderPromises.push(
+          // We don't `await` here. These can just run in the background so that migration runs a little faster
+          policyInfoBuilder.buildPolicyUpdate(action).then((updateContent) => {
+            if (updateContent.warnings.length > 0) {
+              migrationStats.warnings.push(...updateContent.warnings);
+              updateProcessor.addToQueue({
+                actionId: action.EndpointActions.action_id,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                docId: actionHit._id!,
+                index: actionHit._index,
+                update: updateContent.policyUpdate,
+              });
+            }
+          })
+        );
+      }
+    }
   }
 
+  await Promise.allSettled(updateBuilderPromises);
   await updateProcessor.complete();
 
   migrationState.metadata.status = 'complete';
@@ -323,3 +364,204 @@ const migrateResponseActionsToSpaceAware = async (
     )}`
   );
 };
+
+interface AgentPolicyInfo {
+  warnings: string[];
+  agentInfo: LogsEndpointAction['agent']['policy'][number];
+}
+
+interface ActionPolicyInfo {
+  warnings: string[];
+  policyUpdate: PolicyPartialUpdate;
+}
+
+interface PolicyIdInfo {
+  found: boolean;
+  warning: string;
+  policyId: string;
+}
+
+class AgentPolicyInfoBuilder {
+  // Cache of previously processed Agent IDs
+  private agentIdCache = new Map<string, Promise<AgentPolicyInfo>>();
+  private agentIdToAgentPolicyIdCache = new Map<string, Promise<PolicyIdInfo>>();
+  private agentPolicyIdToIntegrationPolicyId = new Map<string, Promise<PolicyIdInfo>>();
+
+  constructor(
+    private readonly endpointService: EndpointAppContextService,
+    private readonly logger: Logger
+  ) {}
+
+  public async buildPolicyUpdate(actionRequest: LogsEndpointAction): Promise<ActionPolicyInfo> {
+    // TODO: trigger retrieval of agent records and package polices for those agents in bulk??
+
+    const agentsPolicyInfo = (
+      Array.isArray(actionRequest.agent.id) ? actionRequest.agent.id : [actionRequest.agent.id]
+    ).map((agentId) => {
+      let agentPolicyInfoPromise = this.agentIdCache.get(agentId);
+
+      if (!agentPolicyInfoPromise) {
+        this.logger.debug(
+          `Agent ID [${agentId}] policy info content not yet created. Building it now`
+        );
+
+        agentPolicyInfoPromise = this.fetchAgentPolicyInfo(agentId, actionRequest);
+        this.agentIdCache.set(agentId, agentPolicyInfoPromise);
+        return agentPolicyInfoPromise;
+      } else {
+        this.logger.debug(
+          `Found cached policy info for agent ID [${agentId}]. No need to build it.`
+        );
+      }
+
+      return agentPolicyInfoPromise;
+    });
+
+    const response: ActionPolicyInfo = {
+      warnings: [],
+      policyUpdate: {
+        originSpaceId: DEFAULT_SPACE_ID,
+        agent: { policy: [] },
+      },
+    };
+
+    await Promise.all(agentsPolicyInfo).then((agentsInfo) => {
+      for (const agentPolicyInfo of agentsInfo) {
+        if (agentPolicyInfo.warnings.length > 0) {
+          response.warnings.push(...agentPolicyInfo.warnings);
+        }
+
+        response.policyUpdate.agent.policy.push(agentPolicyInfo.agentInfo);
+      }
+    });
+
+    this.logger.debug(
+      () =>
+        `Action [${actionRequest.EndpointActions.action_id}] update: ${JSON.stringify(response)}`
+    );
+
+    return response;
+  }
+
+  private async fetchAgentPolicyInfo(
+    agentId: string,
+    actionRequest: LogsEndpointAction
+  ): Promise<AgentPolicyInfo> {
+    // FIXME:PT need to handle retrieval of 3rd party agents - determine what the ES agent is first before calling fetchAgentPolicyIdForAgent()
+
+    const agentPolicyId = await this.fetchAgentPolicyIdForAgent(agentId);
+
+    // If the agent policy is not found, then no need to go any further because we will not be able
+    // to determine what integration policy the agent was/is running with.
+    if (!agentPolicyId.found) {
+      return {
+        warnings: [agentPolicyId.warning],
+        agentInfo: {
+          agentId,
+          elasticAgentId: agentId,
+          agentPolicyId: NOT_FOUND_VALUE,
+          integrationPolicyId: NOT_FOUND_VALUE,
+        },
+      };
+    }
+
+    const integrationPolicyId = await this.fetchAgentPolicyIntegrationPolicyId(
+      agentPolicyId.policyId,
+      actionRequest.EndpointActions.input_type
+    );
+
+    return {
+      warnings: integrationPolicyId.found ? [] : [integrationPolicyId.warning],
+      agentInfo: {
+        agentId,
+        elasticAgentId: agentId,
+        agentPolicyId: agentPolicyId.policyId,
+        integrationPolicyId: integrationPolicyId.policyId,
+      },
+    };
+  }
+
+  private async fetchAgentPolicyIdForAgent(agentId: string): Promise<PolicyIdInfo> {
+    let agentPolicyIdPromise = this.agentIdToAgentPolicyIdCache.get(agentId);
+
+    if (!agentPolicyIdPromise) {
+      const fleetServices = this.endpointService.getInternalFleetServices(undefined, true);
+
+      agentPolicyIdPromise = fleetServices.agent
+        .getAgent(agentId)
+        .then((agent) => {
+          if (!agent.policy_id) {
+            throw new EndpointError(
+              `Agent id [${agentId}] was found, but it does not contain a 'policy_id'`
+            );
+          }
+
+          return { found: true, warning: '', policyId: agent.policy_id };
+        })
+        .catch((err) => {
+          return {
+            found: false,
+            warning: `Unable to retrieve agent id [${agentId}]: ${err.message}`,
+            policyId: NOT_FOUND_VALUE,
+          };
+        });
+
+      this.agentIdToAgentPolicyIdCache.set(agentId, agentPolicyIdPromise);
+
+      return agentPolicyIdPromise;
+    }
+
+    return agentPolicyIdPromise;
+  }
+
+  private async fetchAgentPolicyIntegrationPolicyId(
+    agentPolicyId: string,
+    agentType: ResponseActionAgentType
+  ): Promise<PolicyIdInfo> {
+    // An agent policy - especially one for agentless integration (3rd party EDRs) - could include
+    // multiple integration for the supported agent types, so we keep a cache for each agent type
+    const cacheKey = `${agentPolicyId}#${agentType}`;
+    let integrationPolicyIdPromise = this.agentPolicyIdToIntegrationPolicyId.get(cacheKey);
+
+    if (!integrationPolicyIdPromise) {
+      const fleetServices = this.endpointService.getInternalFleetServices(undefined, true);
+
+      integrationPolicyIdPromise = fleetServices.packagePolicy
+        .list(fleetServices.getSoClient(), {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES[
+            agentType
+          ].join(' OR ')}) AND (${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids:"${agentPolicyId}")`,
+          perPage: 1,
+        })
+        .then((response) => {
+          const integrationPolicy = response.items[0];
+
+          if (!integrationPolicy) {
+            throw new EndpointError(
+              `Unable to find [${agentType}] integration policies for agent policy id [${agentPolicyId}]`
+            );
+          }
+
+          return {
+            found: true,
+            warning: '',
+            policyId: NOT_FOUND_VALUE,
+          };
+        })
+        .catch((err) => {
+          return {
+            found: false,
+            warning:
+              err instanceof EndpointError
+                ? err.message
+                : `Failed to find [${agentType}] integration polices for agent policy [${agentPolicyId}]: ${err.message}`,
+            policyId: NOT_FOUND_VALUE,
+          };
+        });
+
+      this.agentPolicyIdToIntegrationPolicyId.set(cacheKey, integrationPolicyIdPromise);
+    }
+
+    return integrationPolicyIdPromise;
+  }
+}
