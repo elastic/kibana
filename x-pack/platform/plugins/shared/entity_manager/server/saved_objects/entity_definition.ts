@@ -119,7 +119,7 @@ export const entityDefinition: SavedObjectsType = {
       changes: [
         {
           type: 'unsafe_transform',
-          transformFn: removeOptionalIdentityFields,
+          transformFn: (cast) => cast(removeOptionalIdentityFields),
         },
       ],
     },

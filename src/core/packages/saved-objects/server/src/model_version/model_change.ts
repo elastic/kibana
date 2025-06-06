@@ -161,12 +161,16 @@ export interface SavedObjectsModelDataRemovalChange {
  *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
  */
 export interface SavedObjectsModelUnsafeTransformChange<
-  PreviousAttributes = any,
-  NewAttributes = any
+  PreviousAttributes = unknown,
+  NewAttributes = unknown
 > {
   type: 'unsafe_transform';
   /**
    * The transform function to execute.
    */
-  transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
+  transformFn: (
+    cast: <A, B>(
+      fn: SavedObjectModelUnsafeTransformFn<A, B>
+    ) => SavedObjectModelUnsafeTransformFn<unknown, unknown>
+  ) => SavedObjectModelUnsafeTransformFn<unknown, unknown>;
 }

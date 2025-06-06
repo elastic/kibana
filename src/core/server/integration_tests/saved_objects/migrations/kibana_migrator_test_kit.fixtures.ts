@@ -152,7 +152,7 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) =>
               },
               {
                 type: 'unsafe_transform',
-                transformFn: (doc) => {
+                transformFn: (cast) => (doc) => {
                   if (doc.attributes.value % 100 === 0) {
                     throw new Error(
                       `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
