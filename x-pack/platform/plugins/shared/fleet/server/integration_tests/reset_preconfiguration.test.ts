@@ -305,7 +305,7 @@ describe('Fleet preconfiguration reset', () => {
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
 
-      const res = await resetAPI
+      await resetAPI
         .set('kbn-sxrf', 'xx')
         .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
