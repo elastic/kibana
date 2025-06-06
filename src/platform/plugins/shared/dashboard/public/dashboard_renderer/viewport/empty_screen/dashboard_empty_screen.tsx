@@ -23,13 +23,13 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import useMountedState from 'react-use/lib/useMountedState';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import { addFromLibrary } from '../../add_panel_from_library';
-import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -43,7 +43,7 @@ export function DashboardEmptyScreen() {
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
 
-  const styles = useMemoizedStyles(emptyScreenStyles)
+  const styles = useMemoizedStyles(emptyScreenStyles);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
@@ -140,11 +140,7 @@ export function DashboardEmptyScreen() {
 
   return (
     <div css={emptyScreenStyles.parent}>
-      <EuiPageTemplate
-        grow={false}
-        data-test-subj={emptyPromptTestSubject}
-        css={styles.template}
-      >
+      <EuiPageTemplate grow={false} data-test-subj={emptyPromptTestSubject} css={styles.template}>
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
           title={title}
@@ -157,7 +153,7 @@ export function DashboardEmptyScreen() {
       </EuiPageTemplate>
     </div>
   );
-};
+}
 
 const emptyScreenStyles = {
   parent: css({

@@ -1,13 +1,2 @@
 @import './grid/index';
 @import './viewport/index';
-
-.dashboardContainer, .dashboardViewport {
-  flex: auto;
-  display: flex;
-  width: 100%;
-}
-
-.dashboardViewport--loading {
-  justify-content: center;
-  align-items: center;
-}

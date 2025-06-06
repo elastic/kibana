@@ -21,6 +21,8 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import type { DashboardAttributes } from '../../server/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
@@ -29,8 +31,6 @@ import {
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>
@@ -80,18 +80,9 @@ const DashboardUnsavedItem = ({
   const styles = useMemoizedStyles(unsavedItemStyles);
   return (
     <div css={styles.item}>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="none"
-        css={styles.heading}
-        responsive={false}
-      >
+      <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            color="text"
-            css={styles.icon}
-            type={title ? 'dashboardApp' : 'clock'}
-          />
+          <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">

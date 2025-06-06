@@ -19,6 +19,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DashboardLocatorParams } from '../../common';
 import { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
@@ -92,10 +93,12 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
+  const isDashboardViewportLoading = !dashboardApi && !error;
+
   const viewportClasses = classNames(
     'dashboardViewport',
     { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': !error && !dashboardApi }
+    { 'dashboardViewport--loading': isDashboardViewportLoading }
   );
 
   const loadingSpinner = showPlainSpinner ? (
@@ -125,7 +128,12 @@ export function DashboardRenderer({
     }
 
     return dashboardApi && dashboardInternalApi ? (
-      <div className="dashboardContainer" ref={(e) => (dashboardContainerRef.current = e)}>
+      <div
+        className="dashboardContainer"
+        data-test-subj="dashboardContainer"
+        css={styles.renderer}
+        ref={(e) => (dashboardContainerRef.current = e)}
+      >
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
@@ -142,7 +150,7 @@ export function DashboardRenderer({
   };
 
   return (
-    <div ref={dashboardViewport} className={viewportClasses}>
+    <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
       {dashboardViewport?.current && dashboardApi && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
@@ -153,6 +161,18 @@ export function DashboardRenderer({
     </div>
   );
 }
+
+const styles = {
+  renderer: css({
+    display: 'flex',
+    flex: 'auto',
+    width: '100%',
+    '&.dashboardViewport--loading': {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  }),
+};
 
 /**
  * Maximizing a panel in Dashboard only works if the parent div has a certain class. This
