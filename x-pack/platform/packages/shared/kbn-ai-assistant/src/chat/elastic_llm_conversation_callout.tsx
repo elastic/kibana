@@ -88,18 +88,6 @@ export const ElasticLlmConversationCallout = () => {
                 {chunks}
               </EuiLink>
             ),
-            settingsLink: (...chunks: React.ReactNode[]) => (
-              <EuiLink
-                href={application!.getUrlForApp('management', {
-                  path: `/kibana/spaces/edit/${currentSpaceId}`,
-                })}
-                target="_blank"
-                rel="noopener noreferrer"
-                external
-              >
-                {chunks}
-              </EuiLink>
-            ),
           }}
         />
       </p>
