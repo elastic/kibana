@@ -60,44 +60,52 @@ describe('initialize edit api', () => {
         path: editPath,
         app: editApp,
         editUrl,
+        urlWithoutLocationState,
       } = await getAppTarget(mockedApi, discoverServiceMock);
 
-      return { editPath, editApp, editUrl };
+      return { editPath, editApp, editUrl, urlWithoutLocationState };
     };
 
     const testByReference = ({
       editPath,
       editApp,
       editUrl,
+      urlWithoutLocationState,
     }: {
       editPath: string;
       editApp: string;
       editUrl: string;
+      urlWithoutLocationState: string;
     }) => {
-      const locatorParams = getDiscoverLocatorParams(mockedApi);
       expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledTimes(1);
-      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith(locatorParams);
+      expect(discoverServiceMock.locator.getUrl).toHaveBeenCalledWith({});
       expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
       expect(discoverServiceMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
 
       expect(editApp).toBe('discover');
       expect(editPath).toBe('/mock-url');
       expect(editUrl).toBe('/base/mock-url');
+      expect(urlWithoutLocationState).toBe('/base/mock-url');
     };
 
     it('should correctly output edit link params for by reference saved search', async () => {
-      const { editPath, editApp, editUrl } = await runEditLinkTest();
-      testByReference({ editPath, editApp, editUrl });
+      const { editPath, editApp, editUrl, urlWithoutLocationState } = await runEditLinkTest();
+      testByReference({ editPath, editApp, editUrl, urlWithoutLocationState });
     });
 
     it('should correctly output edit link params for by reference saved search with ad hoc data view', async () => {
-      const { editPath, editApp, editUrl } = await runEditLinkTest(dataViewAdHoc);
-      testByReference({ editPath, editApp, editUrl });
+      const { editPath, editApp, editUrl, urlWithoutLocationState } = await runEditLinkTest(
+        dataViewAdHoc
+      );
+      testByReference({ editPath, editApp, editUrl, urlWithoutLocationState });
     });
 
     it('should correctly output edit link params for by value saved search', async () => {
-      const { editPath, editApp, editUrl } = await runEditLinkTest(undefined, true);
-      testByReference({ editPath, editApp, editUrl });
+      const { editPath, editApp, editUrl, urlWithoutLocationState } = await runEditLinkTest(
+        undefined,
+        true
+      );
+      testByReference({ editPath, editApp, editUrl, urlWithoutLocationState });
     });
 
     it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
