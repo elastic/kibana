@@ -145,15 +145,19 @@ export async function getHoverItem(
     }
 
     if (!!source.cluster) {
-      const mode = ENRICH_MODES.find(({ name }) => name === source.cluster!.valueUnquoted)!;
-      hoverContent.contents.push(
-        ...[
-          { value: modeDescription },
-          {
-            value: `**${mode.name}**: ${mode.description}`,
-          },
-        ]
-      );
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.cluster!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
     }
   }
 
