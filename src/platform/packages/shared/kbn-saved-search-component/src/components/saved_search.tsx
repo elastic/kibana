@@ -66,16 +66,16 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes = {
+          const attributes: Partial<SavedSearchAttributes> = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
+            columns,
           };
           setInitialSerializedState({
             rawState: {
               attributes: { ...attributes, references },
               timeRange,
-              columns,
               nonPersistedDisplayOptions: {
                 solutionNavIdOverride,
                 enableDocumentViewer: documentViewerEnabled,
