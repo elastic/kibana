@@ -36,6 +36,7 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
   PublishesFilters,
+  PublishesTimeRange,
   PublishesQuery,
 } from '@kbn/presentation-publishing';
 import type {
@@ -264,6 +265,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesDataViews &
   PublishesQuery &
   PublishesFilters &
+  PublishesTimeRange &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -281,7 +283,7 @@ export interface HasTimeRange {
 }
 export interface SavedSearchCasesAttachmentPersistedState {
   index: string;
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   query?: Query;
   filters?: Filter[];
   timestampField?: string;

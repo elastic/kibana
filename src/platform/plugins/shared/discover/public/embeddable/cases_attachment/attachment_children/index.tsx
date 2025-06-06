@@ -9,20 +9,11 @@
 
 import React, { useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
-import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { SavedSearchCasesAttachmentPersistedState } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { FilterBadge } from './filter_badge/filter_badge';
+import { SearchDetails } from './search_details';
 
 interface SavedSearchPersistableStateAttachmentViewProps {
   persistableStateAttachmentState: SavedSearchCasesAttachmentPersistedState;
@@ -38,20 +29,12 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
       search: { searchSource },
       dataViews: dataViewsService,
     },
-  } = useDiscoverServices(); // TODO: do not use useDiscoverServices. This will be rendered in cases. Make sure it matches the cases plugin type
+  } = useDiscoverServices();
   const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
-
-  const hasESQLQuery = query?.esql;
-  const hasNonESQLQuery = query?.query;
-  const hasQuery = hasESQLQuery || hasNonESQLQuery;
-  const hasFilters = filters && filters.length > 0;
-  const hasDataView = dataView !== null && dataView !== undefined;
-  const canViewFilters = hasDataView && hasFilters;
 
   useEffect(() => {
     const setAdHocDataView = async () => {
-      if (dataView) return; // Data view already set
-      // Create an ad-hoc data view based on the index and timestamp field
+      if (dataView) return;
       const adHocDataView = await dataViewsService.create({
         title: index,
         timeFieldName: timestampField,
@@ -64,75 +47,13 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{INDEX_PATTERN_LABEL}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="success">
-                  {index}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{TIME_RANGE_LABEL}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="success">
-                  {timeRange ? `${timeRange.from} to ${timeRange.to}` : 'No time range set'}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBadge>
-        </EuiFlexItem>
-        {hasQuery && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              <EuiFlexGroup gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">{QUERY_LABEL}</EuiText>
-                </EuiFlexItem>
-                {hasESQLQuery && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCodeBlock language="esql" paddingSize="none">
-                      {query?.esql}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
-                )}
-                {hasNonESQLQuery && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="success">
-                      {query?.query}
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-        {canViewFilters &&
-          filters.map((filter, i) => (
-            <EuiFlexItem grow={false} key={i}>
-              <FilterBadge
-                filter={filter}
-                dataViews={[dataView]} // Assuming index is the data view title
-                hideAlias={true}
-                valueLabel={getDisplayValueFromFilter(filter, [dataView])}
-                filterLabelStatus={''}
-                readOnly={true}
-              />
-            </EuiFlexItem>
-          ))}
-      </EuiFlexGroup>
-
+      <SearchDetails
+        index={index}
+        timeRange={timeRange}
+        query={query}
+        filters={filters}
+        dataView={dataView}
+      />
       <LazySavedSearchComponent
         dependencies={{ embeddable, dataViews: dataViewsService, searchSource }}
         index={index}
@@ -145,18 +66,6 @@ export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentView
     </>
   );
 };
-
-const QUERY_LABEL = i18n.translate('discover.cases.attachment.queryLabel', {
-  defaultMessage: 'Query',
-});
-
-const INDEX_PATTERN_LABEL = i18n.translate('discover.cases.attachment.indexPatternLabel', {
-  defaultMessage: 'Index pattern',
-});
-
-const TIME_RANGE_LABEL = i18n.translate('discover.cases.attachment.timeRangeLabel', {
-  defaultMessage: 'Time range',
-});
 
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export
