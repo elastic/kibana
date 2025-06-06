@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import type { RouteProps, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
-import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
+import { AlertSummaryContainer } from './pages/alert_summary';
+import { ALERT_SUMMARY_PATH, ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { Alerts } from './pages/alerts';
 
@@ -33,5 +34,9 @@ export const routes: RouteProps[] = [
   {
     path: ALERTS_PATH,
     component: AlertsRoutes,
+  },
+  {
+    path: ALERT_SUMMARY_PATH,
+    component: AlertSummaryContainer,
   },
 ];
