@@ -171,9 +171,8 @@ export const getEndpointConsoleCommands = ({
   platform,
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-
   const {
-    isUploadEnabled,
+    responseActionUploadEnabled: isUploadEnabled,
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
   } = featureFlags;
