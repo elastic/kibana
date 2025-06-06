@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsClient, type ElasticsearchClient } from '@kbn/core/server';
-import { ASSET_CRITICALITY_INDEX_BASE } from '../../../../common/entity_analytics/asset_criticality';
 import type { EntityAnalyticsMigrationsParams } from '../migrations';
-import { getAllConfigurations } from '../risk_engine/utils/saved_object_configuration';
+import { getAllSpaceConfigurations } from '../risk_engine/utils/saved_object_configuration';
+import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 export const getIngestPipelineName = (namespace: string): string => {
   return `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}`;
@@ -65,41 +65,10 @@ const hasEventIngestedPipeline = async (
   }
 };
 
-const getAllAssetCriticalitySpaces = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<string[]> => {
-  try {
-    const response = await esClient.indices.get({
-      index: `${ASSET_CRITICALITY_INDEX_BASE}-*`,
-      allow_no_indices: true,
-    });
-
-    const namespaces: string[] = [];
-
-    for (const index of Object.keys(response)) {
-      const maybeNamespace = index.split(`${ASSET_CRITICALITY_INDEX_BASE}-`).at(-1);
-      if (maybeNamespace) {
-        namespaces.push(maybeNamespace);
-      } else {
-        logger.warn(
-          `Index ${index} does not follow the expected naming convention for asset criticality indices.`
-        );
-      }
-    }
-    return namespaces;
-  } catch (e) {
-    if (e.meta?.statusCode === 404) {
-      return [];
-    }
-    throw new Error(`Error fetching asset criticality spaces: ${e}`);
-  }
-};
-
 const getAllRiskEngineSpaces = async (
   internalSoClient: SavedObjectsClientContract
 ): Promise<string[]> => {
-  const allRiskEngineConfigurations = await getAllConfigurations({
+  const allRiskEngineConfigurations = await getAllSpaceConfigurations({
     savedObjectsClient: internalSoClient,
   });
   return allRiskEngineConfigurations.flatMap((config) => config.namespaces || []);
@@ -118,8 +87,13 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
   const internalSoClient = new SavedObjectsClient(savedObjectsRepo);
-
-  const assetCriticalitySpaces = await getAllAssetCriticalitySpaces(esClient, logger);
+  const assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
+    esClient,
+    logger,
+    auditLogger: undefined, // Audit logger is not used in this migration
+  });
+  const assetCriticalitySpaces =
+    await assetCriticalityMigrationClient.getAllSpacesWithAssetCriticalityInstalled();
   const riskEngineSpaces = await getAllRiskEngineSpaces(internalSoClient);
   const uniqueNamespaces = new Set([...assetCriticalitySpaces, ...riskEngineSpaces]);
 
