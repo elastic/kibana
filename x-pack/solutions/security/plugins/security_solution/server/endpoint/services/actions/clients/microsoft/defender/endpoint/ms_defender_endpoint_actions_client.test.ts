@@ -182,6 +182,295 @@ describe('MS Defender response actions client', () => {
     });
   });
 
+  describe('#runscript()', () => {
+    beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+        true;
+    });
+    it('should send runscript request to Microsoft with expected parameters', async () => {
+      await msClientMock.runscript(
+        responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1', args: 'arg1 arg2' },
+        })
+      );
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+          subActionParams: {
+            comment: expect.stringMatching(
+              /Action triggered from Elastic Security by user \[foo\] for action \[.* \(action id: .*\)\]: test comment/
+            ),
+            id: '1-2-3',
+            parameters: {
+              scriptName: 'test-script.ps1',
+              args: 'arg1 arg2',
+            },
+          },
+        },
+      });
+    });
+
+    it('should write action request doc. to endpoint index', async () => {
+      await msClientMock.runscript(
+        responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1' },
+        })
+      );
+
+      expect(clientConstructorOptionsMock.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'runscript',
+                comment: 'test comment',
+                hosts: {
+                  '1-2-3': {
+                    name: 'mymachine1.contoso.com',
+                  },
+                },
+                parameters: {
+                  scriptName: 'test-script.ps1',
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'microsoft_defender_endpoint',
+              type: 'INPUT_ACTION',
+            },
+            agent: {
+              id: ['1-2-3'],
+            },
+            meta: {
+              machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+            },
+            user: {
+              id: 'foo',
+            },
+          },
+          index: '.logs-endpoint.actions-default',
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should return action details', async () => {
+      getActionDetailsByIdMock.mockResolvedValue({
+        id: expect.any(String),
+        command: 'runscript',
+        agentType: 'microsoft_defender_endpoint',
+        isCompleted: false,
+      });
+
+      await expect(
+        msClientMock.runscript(
+          responseActionsClientMock.createRunScriptOptions({
+            parameters: { scriptName: 'test-script.ps1' },
+          })
+        )
+      ).resolves.toEqual(
+        expect.objectContaining({
+          command: 'runscript',
+          id: expect.any(String),
+        })
+      );
+    });
+
+    it('should handle Microsoft Defender API errors gracefully', async () => {
+      const apiError = new Error('Microsoft Defender API error');
+      connectorActionsMock.execute.mockRejectedValueOnce(apiError);
+
+      await expect(
+        msClientMock.runscript(
+          responseActionsClientMock.createRunScriptOptions({
+            parameters: { scriptName: 'test-script.ps1' },
+          })
+        )
+      ).rejects.toThrow('Microsoft Defender API error');
+    });
+
+    it('should handle missing machine action ID in response', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: {
+            /* missing id */
+          },
+        })
+      );
+
+      await expect(
+        msClientMock.runscript(
+          responseActionsClientMock.createRunScriptOptions({
+            parameters: { scriptName: 'test-script.ps1' },
+          })
+        )
+      ).rejects.toThrow(
+        'Run Script request was sent to Microsoft Defender, but Machine Action Id was not provided!'
+      );
+    });
+
+    it('should include args parameter when provided', async () => {
+      await msClientMock.runscript(
+        responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1', args: 'param1 param2' },
+        })
+      );
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subActionParams: expect.objectContaining({
+              parameters: {
+                scriptName: 'test-script.ps1',
+                args: 'param1 param2',
+              },
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should omit args parameter when not provided', async () => {
+      await msClientMock.runscript(
+        responseActionsClientMock.createRunScriptOptions({
+          parameters: { scriptName: 'test-script.ps1' },
+        })
+      );
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subActionParams: expect.objectContaining({
+              parameters: {
+                scriptName: 'test-script.ps1',
+                args: undefined,
+              },
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('#getCustomScripts()', () => {
+    it('should retrieve custom scripts from Microsoft Defender', async () => {
+      const result = await msClientMock.getCustomScripts();
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+          subActionParams: {},
+        },
+      });
+
+      expect(result).toEqual({
+        data: [
+          {
+            id: 'test-script-1.ps1',
+            name: 'test-script-1.ps1',
+            description: 'Test PowerShell script for demonstration',
+          },
+          {
+            id: 'test-script-2.py',
+            name: 'test-script-2.py',
+            description: 'Test Python script for automation',
+          },
+        ],
+      });
+    });
+
+    it('should handle empty library files response', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: { '@odata.context': 'some-context', value: [] },
+        })
+      );
+
+      const result = await msClientMock.getCustomScripts();
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should handle missing data in library files response', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: {},
+        })
+      );
+
+      const result = await msClientMock.getCustomScripts();
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should handle Microsoft Defender API errors gracefully', async () => {
+      const apiError = new Error('Microsoft Defender API error');
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES) {
+          throw apiError;
+        }
+        return responseActionsClientMock.createConnectorActionExecuteResponse();
+      });
+
+      await expect(msClientMock.getCustomScripts()).rejects.toThrow(
+        'Failed to fetch Crowdstrike scripts, failed with: Microsoft Defender API error'
+      );
+    });
+
+    it('should handle null response data', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: null,
+        })
+      );
+
+      const result = await msClientMock.getCustomScripts();
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should handle undefined response data', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: undefined,
+        })
+      );
+
+      const result = await msClientMock.getCustomScripts();
+
+      expect(result).toEqual({ data: [] });
+    });
+
+    it('should throw ResponseActionsClientError on API failure', async () => {
+      const apiError = new Error('Microsoft Defender API error');
+
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES) {
+          throw apiError;
+        }
+        return responseActionsClientMock.createConnectorActionExecuteResponse();
+      });
+
+      await expect(msClientMock.getCustomScripts()).rejects.toThrow(
+        'Failed to fetch Crowdstrike scripts, failed with: Microsoft Defender API error'
+      );
+    });
+  });
+
   describe('#processPendingActions()', () => {
     let abortController: AbortController;
     let processPendingActionsOptions: ProcessPendingActionsMethodOptions;
@@ -312,7 +601,6 @@ describe('MS Defender response actions client', () => {
 
       getActionDetailsByIdMock.mockResolvedValue({});
     });
-
     afterEach(() => {
       getActionDetailsByIdMock.mockReset();
     });

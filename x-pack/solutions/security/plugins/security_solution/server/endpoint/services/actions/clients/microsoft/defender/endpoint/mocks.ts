@@ -17,6 +17,7 @@ import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
@@ -124,6 +125,16 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
             },
           });
 
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftMachineActionMock({ type: 'LiveResponse' }),
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftGetLibraryFilesApiResponseMock(),
+          });
+
         default:
           return responseActionsClientMock.createConnectorActionExecuteResponse();
       }
@@ -224,6 +235,27 @@ const createMicrosoftGetMachineListApiResponseMock = (
   };
 };
 
+const createMicrosoftGetLibraryFilesApiResponseMock =
+  (): MicrosoftDefenderGetLibraryFilesResponse => {
+    return {
+      '@odata.context': 'some-context',
+      value: [
+        {
+          fileName: 'test-script-1.ps1',
+          description: 'Test PowerShell script for demonstration',
+          creationTime: '2023-01-01T10:00:00Z',
+          createdBy: 'user@example.com',
+        },
+        {
+          fileName: 'test-script-2.py',
+          description: 'Test Python script for automation',
+          creationTime: '2023-01-02T10:00:00Z',
+          createdBy: 'admin@example.com',
+        },
+      ],
+    };
+  };
+
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
   createMsConnectorActionsClient: createMsConnectorActionsClientMock,
@@ -232,4 +264,5 @@ export const microsoftDefenderMock = {
   createGetActionsApiResponse: createMicrosoftGetActionsApiResponseMock,
   createGetActionResultsApiResponse: createMicrosoftGetActionResultsApiResponseMock,
   createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
+  createGetLibraryFilesApiResponse: createMicrosoftGetLibraryFilesApiResponseMock,
 };
