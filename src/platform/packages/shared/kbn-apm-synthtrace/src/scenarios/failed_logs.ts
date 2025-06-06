@@ -179,7 +179,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .defaults({
             ...commonLongEntryFields,
             'cloud.availability_zone': `${cloudRegion}a`,
-            'log.level': isFailed ? null : level, // "fail_processor_exception": Log level is required
+            'log.level': isFailed ? undefined : level, // "fail_processor_exception": Log level is required
           })
           .timestamp(timestamp);
       };
