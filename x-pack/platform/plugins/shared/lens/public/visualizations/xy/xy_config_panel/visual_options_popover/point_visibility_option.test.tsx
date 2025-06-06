@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const renderComponent = (propsOverrides?: Partial<PointVisibilityOptionProps>) => {
-  return render(<PointVisibilityOption onChange={jest.fn()} {...propsOverrides} />);
+  return render(<PointVisibilityOption enabled={true} onChange={jest.fn()} {...propsOverrides} />);
 };
 
 describe('Point visibility option', () => {
@@ -31,5 +31,10 @@ describe('Point visibility option', () => {
 
     expect(onChange).toBeCalledTimes(1);
     expect(onChange).toBeCalledWith('always');
+  });
+
+  it(`should be hidden when not enabled`, async () => {
+    renderComponent({enabled: false});
+    expect(screen.queryByTestId('lnsPointVisibilityOption')).not.toBeInTheDocument();
   });
 });

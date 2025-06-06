@@ -40,15 +40,17 @@ const pointVisibilityOptions: Array<{
 ];
 
 export interface PointVisibilityOptionProps {
+  enabled: boolean;
   selectedPointVisibility?: PointVisibility;
   onChange: (value: PointVisibility) => void;
 }
 
 export const PointVisibilityOption: React.FC<PointVisibilityOptionProps> = ({
+  enabled = true,
   selectedPointVisibility = PointVisibilityOptions.AUTO,
   onChange,
 }) => {
-  return (
+  return enabled ? (
     <EuiFormRow
       display="columnCompressed"
       label={i18n.translate('xpack.lens.xyChart.pointVisibilityLabel', {
@@ -77,5 +79,5 @@ export const PointVisibilityOption: React.FC<PointVisibilityOptionProps> = ({
         }}
       />
     </EuiFormRow>
-  );
+  ) : null;
 };
