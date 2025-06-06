@@ -12,14 +12,14 @@ describe('helpers', () => {
   describe('getStepStatus', () => {
     it('should return "disabled" for other steps when currentStep is 3', () => {
       const step = FileUploaderSteps.VALIDATION;
-      const currentStep = FileUploaderSteps.RESULT;
+      const currentStep = FileUploaderSteps.ERROR;
       const status = getStepStatus(step, currentStep);
       expect(status).toBe('disabled');
     });
 
     it('should return "current" if step is equal to currentStep', () => {
-      const step = FileUploaderSteps.RESULT;
-      const currentStep = FileUploaderSteps.RESULT;
+      const step = FileUploaderSteps.ERROR;
+      const currentStep = FileUploaderSteps.ERROR;
       const status = getStepStatus(step, currentStep);
       expect(status).toBe('current');
     });

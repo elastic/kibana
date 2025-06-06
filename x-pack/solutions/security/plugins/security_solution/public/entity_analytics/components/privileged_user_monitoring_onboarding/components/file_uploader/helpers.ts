@@ -34,12 +34,14 @@ export const isErrorStep = (state: ReducerState): state is ErrorStepState =>
   state.step === FileUploaderSteps.ERROR;
 
 export const buildAnnotationsFromError = (
-  errors: Array<{ message: string; index: number }>
+  errors: Array<{ message: string; index: number | null }>
 ): Record<number, string> => {
   const annotations: Record<number, string> = {};
 
   errors.forEach((e) => {
-    annotations[e.index] = e.message;
+    if (e.index) {
+      annotations[e.index] = e.message;
+    }
   });
 
   return annotations;

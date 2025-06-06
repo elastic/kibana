@@ -9,10 +9,8 @@ import * as E from 'fp-ts/Either';
 
 import { i18n } from '@kbn/i18n';
 import type { Either } from 'fp-ts/Either';
-import type { BulkPrivMonUser } from '../../../server/lib/entity_analytics/privilege_monitoring/users/bulk/types';
-export const parseMonitoredPrivilegedUserCsvRow = (
-  row: string[]
-): Either<string, BulkPrivMonUser> => {
+
+export const parseMonitoredPrivilegedUserCsvRow = (row: string[]): Either<string, string> => {
   if (row.length !== 1) {
     return E.left(expectedColumnsError(row.length));
   }
@@ -22,7 +20,7 @@ export const parseMonitoredPrivilegedUserCsvRow = (
     return E.left(missingUserNameError());
   }
 
-  return E.right({ name: username });
+  return E.right(username);
 };
 
 const expectedColumnsError = (rowLength: number) =>

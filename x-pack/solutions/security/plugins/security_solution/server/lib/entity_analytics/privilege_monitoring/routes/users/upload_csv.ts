@@ -74,8 +74,8 @@ export const uploadUsersCSVRoute = (
 
           return response.ok({ body });
         } catch (e) {
+          // TODO TEST THIS ERROR SCENARIO
           const error = transformError(e);
-          console.error(error);
           logger.error(`Error uploading users via CSV: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,

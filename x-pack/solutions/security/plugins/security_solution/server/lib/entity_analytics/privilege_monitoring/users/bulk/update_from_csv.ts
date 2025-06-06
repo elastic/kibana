@@ -29,11 +29,11 @@ export const bulkBatchUpsertFromCSV =
       flushBytes,
       retries,
       datasource: Readable.from(batch.uploaded)
-        .filter((either: Either<string, string>) => {
+        .filter((either: Either<BulkProcessingError, BulkPrivMonUser>) => {
           if (isRight(either)) {
             return true;
           }
-          errors.push({ message: either.left });
+          errors.push(either.left);
           parsingFailures++;
           return false;
         })
@@ -42,11 +42,12 @@ export const bulkBatchUpsertFromCSV =
       onDrop: ({ error, document }) => {
         errors.push({
           message: error?.message || 'Unknown error',
-          username: document.name,
+          username: document.username,
+          index: document.index,
         });
       },
-      onDocument: (user) => {
-        const id = batch.existingUsers[user.name];
+      onDocument: (row) => {
+        const id = batch.existingUsers[row.username];
         const labels = {
           monitoring: { privileged_users: 'privileged_user_monitored' },
           sources: ['csv'],
@@ -55,7 +56,7 @@ export const bulkBatchUpsertFromCSV =
           return [
             { create: {} },
             {
-              user,
+              user: { username: row.username },
               labels,
             },
           ];
@@ -65,13 +66,14 @@ export const bulkBatchUpsertFromCSV =
           { update: { _id: id } },
           {
             doc: {
-              user,
+              user: { username: row.username },
               labels,
             },
           },
         ];
       },
     });
+
     return {
       failed: failed + parsingFailures,
       successful,

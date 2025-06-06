@@ -27,7 +27,7 @@ export const softDeleteOmittedUsers =
       if (!isRight(either)) {
         return acc;
       }
-      acc.push(either.right.name);
+      acc.push(either.right.username);
       return acc;
     }, []);
     const res = await esClient.helpers.search<MonitoredUserDoc>({
@@ -64,6 +64,7 @@ export const softDeleteOmittedUsers =
         errors.push({
           message: error?.message || 'Unknown error',
           username: document,
+          index: null, // The error is not related to a specific row in a CSV
         });
       },
     });
