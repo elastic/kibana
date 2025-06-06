@@ -46,7 +46,10 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
 
       if (id && panelRef) {
         untilLoaded(id).then(() => {
+          console.log('Highlighting panel:', id);
+          setTimeout(() => {
           panelRef.classList.add('dshDashboardGrid__item--highlighted');
+          }, 1);
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
             panelRef.classList.remove('dshDashboardGrid__item--highlighted');
