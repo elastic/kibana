@@ -88,22 +88,27 @@ export class FileUploadManager {
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
-  private readonly settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
+  private readonly _settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
     json: {},
     valid: false,
   });
-  private readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
+  public readonly settings$ = this._settings$.asObservable();
+
+  private readonly _mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
     json: {},
     valid: false,
   });
-  private readonly existingIndexName$ = new BehaviorSubject<string | null>(null);
+  public readonly mappings$ = this._mappings$.asObservable();
+
+  private readonly _existingIndexName$ = new BehaviorSubject<string | null>(null);
+  public readonly existingIndexName$ = this._existingIndexName$.asObservable();
 
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
 
-  private readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
+  private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
     overallImportStatus: STATUS.NOT_STARTED,
     indexCreated: STATUS.NOT_STARTED,
@@ -120,6 +125,8 @@ export class FileUploadManager {
     pipelinesJsonValid: true,
     errors: [],
   });
+  public readonly uploadStatus$ = this._uploadStatus$.asObservable();
+
   private autoAddSemanticTextField: boolean = false;
 
   constructor(
@@ -152,7 +159,7 @@ export class FileUploadManager {
         });
 
         this.analysisValid$.next(true);
-        const uploadStatus = this.uploadStatus$.getValue();
+        const uploadStatus = this._uploadStatus$.getValue();
         if (uploadStatus.overallImportStatus === STATUS.STARTED) {
           return;
         }
@@ -200,15 +207,15 @@ export class FileUploadManager {
   destroy() {
     this.files$.complete();
     this.analysisValid$.complete();
-    this.settings$.complete();
-    this.mappings$.complete();
+    this._settings$.complete();
+    this._mappings$.complete();
     this.existingIndexMappings$.complete();
-    this.uploadStatus$.complete();
+    this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
   }
   private setStatus(status: Partial<UploadStatus>) {
-    this.uploadStatus$.next({
-      ...this.uploadStatus$.getValue(),
+    this._uploadStatus$.next({
+      ...this._uploadStatus$.getValue(),
       ...status,
     });
   }
@@ -245,7 +252,7 @@ export class FileUploadManager {
   }
 
   public async removeClashingFiles() {
-    const fileClashes = this.uploadStatus$.getValue().fileClashes;
+    const fileClashes = this._uploadStatus$.getValue().fileClashes;
     const filesToDestroy: FileWrapper[] = [];
     const files = this.getFiles();
     const newFiles = files.filter((file, i) => {
@@ -274,24 +281,18 @@ export class FileUploadManager {
     };
   }
 
-  public getUploadStatus$() {
-    return this.uploadStatus$.asObservable();
-  }
   public getUploadStatus() {
-    return this.uploadStatus$.getValue();
+    return this._uploadStatus$.getValue();
   }
 
-  public getExistingIndexName$() {
-    return this.existingIndexName$.asObservable();
-  }
   public getExistingIndexName() {
-    return this.existingIndexName$.getValue();
+    return this._existingIndexName$.getValue();
   }
   public setExistingIndexName(name: string | null) {
     this.setStatus({
       analysisStatus: STATUS.NOT_STARTED,
     });
-    this.existingIndexName$.next(name);
+    this._existingIndexName$.next(name);
     if (name === null) {
       this.existingIndexMappings$.next(null);
     } else {
@@ -349,22 +350,16 @@ export class FileUploadManager {
     });
   }
 
-  public getMappings$() {
-    return this.mappings$.asObservable();
-  }
   public getMappings() {
-    return this.mappings$.getValue();
+    return this._mappings$.getValue();
   }
 
   public updateMappings(mappings: MappingTypeMapping | string) {
     this.updateSettingsOrMappings('mappings', mappings);
   }
 
-  public getSettings$() {
-    return this.settings$.asObservable();
-  }
   public getSettings() {
-    return this.settings$.getValue();
+    return this._settings$.getValue();
   }
 
   public updateSettings(settings: IndicesIndexSettings | string) {
@@ -375,7 +370,7 @@ export class FileUploadManager {
     mode: 'settings' | 'mappings',
     config: IndicesIndexSettings | MappingTypeMapping | string
   ) {
-    const config$ = mode === 'settings' ? this.settings$ : this.mappings$;
+    const config$ = mode === 'settings' ? this._settings$ : this._mappings$;
     const jsonValidKey = mode === 'settings' ? 'settingsJsonValid' : 'mappingsJsonValid';
     const currentConfig = config$.getValue();
     if (typeof config === 'string') {

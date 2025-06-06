@@ -58,7 +58,7 @@ export function useFileUpload(
 
   const filesStatus = useObservable(fileUploadManager.fileAnalysisStatus$, []);
   const uploadStatus = useObservable(
-    fileUploadManager.getUploadStatus$(),
+    fileUploadManager.uploadStatus$,
     fileUploadManager.getUploadStatus()
   );
   const fileClashes = useMemo(
@@ -143,7 +143,7 @@ export function useFileUpload(
   ]);
 
   const existingIndexName = useObservable(
-    fileUploadManager.getExistingIndexName$(),
+    fileUploadManager.existingIndexName$,
     fileUploadManager.getExistingIndexName()
   );
 
@@ -168,8 +168,8 @@ export function useFileUpload(
     existingIndexName,
   ]);
 
-  const mappings = useObservable(fileUploadManager.getMappings$(), fileUploadManager.getMappings());
-  const settings = useObservable(fileUploadManager.getSettings$(), fileUploadManager.getSettings());
+  const mappings = useObservable(fileUploadManager.mappings$, fileUploadManager.getMappings());
+  const settings = useObservable(fileUploadManager.settings$, fileUploadManager.getSettings());
 
   const setExistingIndexName = useCallback(
     (idxName: string | null) => {
