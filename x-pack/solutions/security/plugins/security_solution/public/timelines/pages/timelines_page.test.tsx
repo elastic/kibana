@@ -32,6 +32,7 @@ describe('TimelinesPage', () => {
   it('should render landing page if no indicesExist', () => {
     (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
       indicesExist: false,
+      sourcererDataView: {},
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
@@ -49,6 +50,7 @@ describe('TimelinesPage', () => {
   it('should show the correct elements if user has crud', () => {
     (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
       indicesExist: true,
+      sourcererDataView: {},
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {

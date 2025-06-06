@@ -85,7 +85,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteCompleteText}</EuiText>
@@ -102,7 +102,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteFailedText}</EuiText>
