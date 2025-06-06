@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EDOT_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
 import { loggingLevelRt } from '../runtime_types/logging_level_rt';
