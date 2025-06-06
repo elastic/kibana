@@ -1834,6 +1834,10 @@ describe('TaskStore', () => {
         // New version returned after update
         asOk({ ...task1, version: 'Wzg0LDFd' }),
       ]);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] Invalid interval "invalid-interval". Task task2 will not be updated.'
+      );
     });
   });
 
