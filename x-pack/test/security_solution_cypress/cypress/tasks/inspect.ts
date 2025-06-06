@@ -28,7 +28,7 @@ export const openTableInspectModal = (table: InspectTableMetadata) => {
   // wait for table to load
   cy.get(table.id).then(($table) => {
     if ($table.find(TABLE_LOADER).length > 0) {
-      cy.get(TABLE_LOADER).should('not.exist');
+      cy.get(TABLE_LOADER).should('not.be.visible');
     }
   });
 
@@ -44,11 +44,12 @@ export const openLensVisualizationsInspectModal = (
     .each(($el) => {
       // wait for visualization to load
       if ($el.find(LOADER_ARIA).length > 0) {
-        cy.get(LOADER_ARIA).should('not.exist');
+        cy.get(LOADER_ARIA).should('not.be.visible');
       }
 
       cy.wrap($el).realHover();
-      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
+      // eslint-disable-next-line cypress/no-force
+      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click({ force: true });
       cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
       onOpen();
