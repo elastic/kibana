@@ -80,6 +80,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
 
     try {
+      let httpAgent;
+      let baseURL = this.config.apiUrl;
+      let defaultHeaders = { ...this.headers };
+      let defaultQuery: Record<string, string> | undefined;
+
       if (
         this.provider === OpenAiProviderType.Other &&
         (('certificateData' in this.secrets && this.secrets.certificateData) ||
@@ -102,55 +107,62 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           this.url,
           this.sslOverrides
         );
-        try {
-          this.openAI = new OpenAI({
-            apiKey: this.key,
-            baseURL: removeEndpointFromUrl(this.url),
-            defaultHeaders: this.headers,
-            httpAgent: agents.httpsAgent,
-          });
-        } catch (error) {
-          this.logger.error(`Error initializing OpenAI client: ${error.message}`);
-          this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
-          if (error.cause) {
-            this.logger.error(`Error cause: ${JSON.stringify(error.cause, null, 2)}`);
-          }
-          throw error;
-        }
+        httpAgent = agents.httpsAgent;
+        baseURL = removeEndpointFromUrl(this.url);
       } else {
-        const { httpAgent, httpsAgent } = getCustomAgents(
+        const agents = getCustomAgents(
           this.configurationUtilities,
           this.logger,
           this.url
         );
-
-        this.openAI =
-          this.config.apiProvider === OpenAiProviderType.AzureAi
-            ? new OpenAI({
-              apiKey: this.key,
-              baseURL: this.config.apiUrl,
-              defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
-              defaultHeaders: {
-                ...this.headers,
-                'api-key': this.key,
-              },
-              httpAgent: httpsAgent ?? httpAgent,
-            })
-            : new OpenAI({
-              baseURL: removeEndpointFromUrl(this.config.apiUrl),
-              apiKey: this.key,
-              defaultHeaders: {
-                ...this.headers,
-              },
-              httpAgent: httpsAgent ?? httpAgent,
-            });
+        httpAgent = agents.httpsAgent ?? agents.httpAgent;
+        if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
+          baseURL = this.config.apiUrl;
+          defaultHeaders['api-key'] = this.key;
+          const apiVersion = getAzureApiVersionParameter(this.config.apiUrl);
+          if (apiVersion) {
+            defaultQuery = { 'api-version': apiVersion };
+          }
+        } else {
+          baseURL = removeEndpointFromUrl(this.config.apiUrl);
+        }
       }
+
+      this.openAI = this.createOpenAIClient({
+        apiKey: this.key,
+        baseURL,
+        defaultHeaders,
+        httpAgent,
+        defaultQuery,
+      });
     } catch (error) {
       this.logger.error(`Error initializing OpenAI client: ${error.message}`);
       throw error;
     }
 
     this.registerSubActions();
+  }
+
+  private createOpenAIClient({
+    apiKey,
+    baseURL,
+    defaultHeaders,
+    httpAgent,
+    defaultQuery,
+  }: {
+    apiKey: string;
+    baseURL: string;
+    defaultHeaders: Record<string, string>;
+    httpAgent?: any;
+    defaultQuery?: Record<string, string>;
+  }): OpenAI {
+    return new OpenAI({
+      apiKey,
+      baseURL,
+      defaultHeaders,
+      httpAgent,
+      defaultQuery,
+    });
   }
 
   private registerSubActions() {
