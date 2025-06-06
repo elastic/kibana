@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { DocViewerError } from './doc_viewer_error';
 
@@ -19,8 +20,6 @@ test('DocViewerError should wrap error in boundary', () => {
   expect(() => {
     const { container, getByText } = render(<DocViewerError {...props} />);
     expect(container.querySelector('.euiErrorBoundary')).toBeInTheDocument();
-    expect(
-      getByText((content, element) => content.includes('Error: my error'))
-    ).toBeInTheDocument();
+    expect(getByText((content) => content.includes('Error: my error'))).toBeInTheDocument();
   }).not.toThrowError();
 });
