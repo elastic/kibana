@@ -175,11 +175,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .create({ isLogsDb })
           .dataset('synth.3')
           .message(message)
-          .logLevel(isFailed ? null : level) // "fail_processor_exception": Log level is required
           .service(serviceName)
           .defaults({
             ...commonLongEntryFields,
             'cloud.availability_zone': `${cloudRegion}a`,
+            'log.level': isFailed ? null : level, // "fail_processor_exception": Log level is required
           })
           .timestamp(timestamp);
       };
