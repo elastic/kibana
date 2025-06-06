@@ -98,7 +98,7 @@ export class UiSettingsService
     savedObjects.registerType(uiSettingsType);
     savedObjects.registerType(uiSettingsGlobalType);
 
-    const router = http.createRouter<InternalUiSettingsRequestHandlerContext>('');
+    const router = http.router.create<InternalUiSettingsRequestHandlerContext>('');
     registerInternalRoutes(router);
 
     // Register public routes by default unless the publicApiEnabled config setting is set to false
