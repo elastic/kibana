@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
@@ -37,7 +38,7 @@ import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
@@ -50,8 +51,11 @@ interface StreamDetailEnrichmentContentProps {
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
   const { core, dependencies } = useKibana();
   const {
+    data,
     streams: { streamsRepositoryClient },
   } = dependencies.start;
+
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const timefilterHook = useTimefilter();
 
@@ -77,8 +81,10 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
       core={core}
+      data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       timeState$={timeState$}
+      urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -90,17 +96,14 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const canManage = useStreamsEnrichmentSelector(
+  const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
   );
-  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+  const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
-
-  const isInitializing = useStreamsEnrichmentSelector((state) => {
-    return !state.matches('ready');
-  });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -110,7 +113,7 @@ export function StreamDetailEnrichmentContentImpl() {
     openConfirm: core.overlays.openConfirm,
   });
 
-  if (isInitializing) {
+  if (!isReady) {
     return null;
   }
 
@@ -166,9 +169,9 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const processorsRefs = useStreamsEnrichmentSelector((state) =>
+  const processorsRefs = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
       processorRef.getSnapshot().matches('configured')
     )

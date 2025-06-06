@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGrid, EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
@@ -13,11 +13,13 @@ import React, { useMemo } from 'react';
 export function PreviewTable({
   documents,
   displayColumns,
+  height,
   renderCellValue,
   rowHeightsOptions,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
+  height?: EuiDataGridProps['height'];
   renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
 }) {
@@ -56,6 +58,7 @@ export function PreviewTable({
         setVisibleColumns: () => {},
         canDragAndDropColumns: false,
       }}
+      height={height}
       toolbarVisibility={false}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}

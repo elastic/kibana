@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Condition, FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
-import { TimeState } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
+import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];
 
 export interface SimulationMachineDeps {
-  timeState$: BehaviorSubject<TimeState>;
+  data: DataPublicPluginStart;
   streamsRepositoryClient: StreamsRepositoryClient;
   toasts: IToasts;
 }
@@ -26,13 +26,16 @@ export interface SimulationMachineDeps {
 export type ProcessorMetrics =
   Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
+export interface SimulationSearchParams extends Required<QueryState> {
+  query: Query;
+}
+
 export interface SimulationInput {
   processors: ProcessorDefinitionWithUIAttributes[];
   streamName: string;
 }
 
 export type SimulationEvent =
-  | { type: 'dateRange.update' }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
@@ -40,7 +43,8 @@ export type SimulationEvent =
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
-  | { type: 'simulation.reset' };
+  | { type: 'simulation.reset' }
+  | { type: 'simulation.receive_samples'; samples: SampleDocument[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
@@ -48,7 +52,6 @@ export interface SimulationContext {
   previewDocuments: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
-  samplingCondition?: Condition;
   simulation?: Simulation;
   streamName: string;
 }

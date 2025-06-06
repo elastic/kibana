@@ -9,10 +9,10 @@ import { DraftGrokExpression, SampleInput } from '@kbn/grok-ui';
 import React, { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { GrokFormState } from '../../types';
-import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 
 export const CustomSampleData = () => {
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
   const [sample, setSample] = useState<string>('');

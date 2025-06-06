@@ -20,13 +20,14 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { GrokCollection } from '@kbn/grok-ui';
+import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { processorConverter } from '../../utils';
+import { dataSourceConverter, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -39,7 +40,19 @@ import {
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
-import { getConfiguredProcessors, getStagedProcessors, getUpsertWiredFields } from './utils';
+import {
+  defaultEnrichmentUrlState,
+  getConfiguredProcessors,
+  getDataSourcesSamples,
+  getDataSourcesUrlState,
+  getStagedProcessors,
+  getUpsertWiredFields,
+} from './utils';
+import { createUrlInitializerActor, createUrlUpdaterAction } from './url_state_actor';
+import {
+  createDataSourceMachineImplementations,
+  dataSourceMachine,
+} from '../data_source_state_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 
 const createId = htmlIdGenerator();
@@ -53,7 +66,9 @@ export const streamEnrichmentMachine = setup({
     events: {} as StreamEnrichmentEvent,
   },
   actors: {
+    initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     processorMachine: getPlaceholderFor(() => processorMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
@@ -70,6 +85,7 @@ export const streamEnrichmentMachine = setup({
           },
         }),
     })),
+    updateUrlState: getPlaceholderFor(createUrlUpdaterAction),
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
@@ -97,6 +113,46 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
+    setupDataSources: assign(({ context, self, spawn }) => {
+      const dataSourcesRefs = context.urlState.dataSources.map((dataSource) => {
+        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+        return spawn('dataSourceMachine', {
+          id: dataSourceWithUIAttributes.id,
+          input: {
+            parentRef: self,
+            streamName: context.definition.stream.name,
+            dataSource: dataSourceWithUIAttributes,
+          },
+        });
+      });
+
+      return {
+        dataSourcesRefs,
+      };
+    }),
+    addDataSource: assign(
+      ({ context, spawn, self }, { dataSource }: { dataSource: EnrichmentDataSource }) => {
+        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+        const dataSourcesRefs = context.dataSourcesRefs.slice();
+
+        dataSourcesRefs.unshift(
+          spawn('dataSourceMachine', {
+            id: dataSourceWithUIAttributes.id,
+            input: {
+              parentRef: self,
+              streamName: context.definition.stream.name,
+              dataSource: dataSourceWithUIAttributes,
+            },
+          })
+        );
+
+        return { dataSourcesRefs };
+      }
+    ),
+    stopDataSource: stopChild((_, params: { id: string }) => params.id),
+    deleteDataSource: assign(({ context }, params: { id: string }) => ({
+      dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
+    })),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -127,13 +183,20 @@ export const streamEnrichmentMachine = setup({
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
-    forwardProcessorsEventToSimulator: sendTo(
+    storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
+      urlState: params.urlState,
+    })),
+    sendProcessorsEventToSimulator: sendTo(
       'simulator',
       ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
         type: params.type,
         processors: getStagedProcessors(context),
       })
     ),
+    sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
+      type: 'simulation.receive_samples',
+      samples: getDataSourcesSamples(context),
+    })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
   },
   guards: {
@@ -168,24 +231,40 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATAE4K3AGzdlizQBYAjPoCsi7voA0IAJ4KAzIoomT3cwHYdixfferFAL4B1qiYuITE5FQ0dIwsbFyG-EggImJ0ktJyCErGzpqGqoaa7u7KmkWG1nYIyiYUytwmFX7mjZqK+kEh6Nj4RKSUkRA27LADUcRYYBgAbpA8yUKi4pkp2fJ13BSObib6Ksr6+o3u1QrHFO6Kqi6q+h0PBcrd4L3hE0OkIxTjkZQYCAMMBjT4UYiwMAERbSNKrKTrRDKPL6biqVTKTE6AyKExnWyIQz2PImZH7Y76Rz2VSvUJ9CKDcHfGy-MGA4Gg-4UACugggJAIYBhKThGQRoA23mUV3cRJMGMaWiK5wQxl0FBOJnsakMWmJD1p736XOGLL+jN5-LoKA4EEkYGis2EAGsHbzIWgCAzyABBLAEYRoYXLdIScWyBQuexXezcNyqdz6VSaeymFVE1TR-RlZSy3GGYp4w1hY2M02srmWgUJMBoNCBiiCBgCgBmgco7trXs+foDQb4sJWYqyDgLFEzufs2k0zWuePTqM044O2nMqh01y6wTeJe9XxIPzpuDIqAIFAgGFgTZINjYAAV69NYLBA7B2IJH3AX2hYBQDxBg1SIcwxHHJOm2bhSn2TxjmUex7BMFUp3cDVzCnApiR8SCTGLekwXLI8cBPFAzwvK9m1vG0H2EJ9vzfD8aK-V8mUDCBa0A0UQMRHJjiXLUmmpA5KQqQx8RqMwnG4QozDjbUzGKXCPhNZkKEI4jSMva9KKgajaNfd9P2fBs2OBQUOOAtYJQcfYdmg1wkzjbhqSQmzZOudxmiaAxDBw7dCL3JkDxZNTT3PTSKPvQy6IMxijLQVkSBgczQ0siMcmubZ-F8DzikaSlFBVeVo2gjpCk8dzAj8o0AoIo11LC8ibzYPAMDIblmzFGK9J-CgACpkvhUDUSueUigqfY0SkzQVXRPjvFlPF-BMYwtx6Xd8JUkKSIarTmta9rq0kLqmPi-qBxFCzw2yYaPPRYpblRdciRVTpoxW1c-EMNQ0UU0tJk2urQrI3abRatqOrDChZgwMAAHcABEBRIB8wGhuGxn2iHJChmGEahMB-UgAAxGGGAgWABuHbj5BcaVdSwtFTHKE4ZtuVDdQQ5oVFXX6aoBkt6uBiLQcxw6UBxuHEYIZHiDR2GMfBsWKFwEgbTAFG5fhmjYBJhhBX7JYgJSq6FB8fQKG8WNCng65iXsF6imcXMikcUlmkKXmNqC1TAe2oWmpFxWxQlvHBUJiASbAMm3zEIPIc1pGNdxymuKsnJ9mlMabj8eD7hudMtEMHZ3G1ODY2ze5fO3FBhDY+AUn8z5B2N0D5F1NQrgqOCvrlRRjBVNvtQaG5mljdcEPsT2uWocQ4lYG1m8G6n-CL9wu+JZEEL7+2CR47ZzDcRmNzqeDfLWvDlKCxeqbT+QEycS2pMzXwfGe3fdSXNyXALOpF0nqr1qXx+Oacg19U5pTvrGGUcoFRxhEumOCKEEylGxK0MwU8ywqRAQCIEYAwGpQ2JoOC44iGzTRCoL6Vh35yQ1KUdyGdFDuAwf9b22CeR8mrAvC6LdqYGHULKDyWoDCOFzAVd+Lh6hJlRFJbMahkyrR3BfTB3stoEHwSbHImZ95YWti-O2Kpyh8ScmvNe64mb-3PkpZRh5fYaUatpXSJ164hiXrfAokibglGTGibUjDCo6AtlzLQTkfK3DPooqxLCbECyBuFAOUAwYHRvkbVxECpQWx0c-W2b8ageRQhuPwiYiidANAApRUTgq2J2sLBJotg4J2lknOG6jW6lCXPBFa2ZZIVGmrvdEHiOYuA6OUNwzD9zRL6ILOJ2lElY3FprfG4dI7RxadTTE5tn5FUMHoTEahWYDKckM7mWgxlMhfAweYEAABKwhhDdn+KstxRxaGlFEo8PQLNd7yBOBoVwfh3ZTgsH4IIQQgA */
+  /** @xstate-layout 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-btygS5KxgTzi4meWPTRHiok-GhdPaU8L57XDeSXPoIVN7b3GLvE+B84CAoUegpwTQ9bFFZiYNoWiqjajxKnBM8SjBkgMMkgiDAkQQAAEpiDEOeNkfLAm+ElIGWMjRPzBi+NgjxJJ8HBhcHKG4oC-BAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
+    dataSourcesRefs: [],
     grokCollection: new GrokCollection(),
     initialProcessorsRefs: [],
     processorsRefs: [],
+    urlState: defaultEnrichmentUrlState,
   }),
-  initial: 'initializing',
+  initial: 'initializingStream',
   states: {
-    initializing: {
+    initializingStream: {
       always: [
         {
           target: 'resolvedRootStream',
           guard: 'isRootStream',
         },
-        { target: 'setupGrokCollection' },
+        { target: 'initializingFromUrl' },
       ],
+    },
+    initializingFromUrl: {
+      invoke: {
+        src: 'initializeUrl',
+      },
+      on: {
+        'url.initialized': {
+          target: 'setupGrokCollection',
+          actions: [
+            { type: 'storeUrlState', params: ({ event }) => event },
+            { type: 'updateUrlState' },
+          ],
+        },
+      },
     },
     setupGrokCollection: {
       invoke: {
@@ -209,6 +288,7 @@ export const streamEnrichmentMachine = setup({
       entry: [
         { type: 'stopProcessors' },
         { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
+        { type: 'setupDataSources' },
       ],
       on: {
         'stream.received': {
@@ -261,52 +341,68 @@ export const streamEnrichmentMachine = setup({
           },
         },
         enrichment: {
-          type: 'parallel',
+          initial: 'displayingSimulation',
+          on: {
+            'dataSource.change': {
+              actions: [
+                {
+                  type: 'storeUrlState',
+                  params: ({ context }) => ({
+                    urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
+                  }),
+                },
+                { type: 'updateUrlState' },
+              ],
+            },
+            'dataSource.dataChange': {
+              actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
+            },
+          },
           states: {
-            displayingProcessors: {
+            displayingSimulation: {
+              entry: [{ type: 'spawnSimulationMachine' }],
+              initial: 'viewDataPreview',
               on: {
                 'processors.add': {
                   guard: '!hasPendingDraft',
-                  actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+                  actions: [
+                    { type: 'addProcessor', params: ({ event }) => event },
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
                 },
                 'processors.reorder': {
                   guard: 'hasMultipleProcessors',
-                  actions: [{ type: 'reorderProcessors', params: ({ event }) => event }],
+                  actions: [
+                    { type: 'reorderProcessors', params: ({ event }) => event },
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
+                'processor.change': {
+                  guard: { type: 'isStagedProcessor', params: ({ event }) => event },
+                  actions: [
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
                 },
                 'processor.delete': {
                   actions: [
                     { type: 'stopProcessor', params: ({ event }) => event },
                     { type: 'deleteProcessor', params: ({ event }) => event },
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
                 'processor.stage': {
-                  actions: [{ type: 'reassignProcessors' }],
+                  actions: [
+                    { type: 'reassignProcessors' },
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
                 },
                 'processor.update': {
-                  actions: [{ type: 'reassignProcessors' }],
-                },
-              },
-            },
-            displayingSimulation: {
-              entry: [{ type: 'spawnSimulationMachine' }],
-              initial: 'viewDataPreview',
-              on: {
-                'processor.change': {
-                  guard: { type: 'isStagedProcessor', params: ({ event }) => event },
                   actions: [
-                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                    { type: 'reassignProcessors' },
+                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'processor.*': {
-                  actions: [
-                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
-                  ],
-                },
-                'processors.*': {
-                  actions: [
-                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
-                  ],
-                },
+                'simulation.manageDataSources': 'managingDataSources',
               },
               states: {
                 viewDataPreview: {
@@ -327,6 +423,36 @@ export const streamEnrichmentMachine = setup({
                 },
               },
             },
+            managingDataSources: {
+              on: {
+                'dataSources.closeManagement': 'displayingSimulation',
+                'dataSources.add': {
+                  actions: [
+                    { type: 'addDataSource', params: ({ event }) => event },
+                    {
+                      type: 'storeUrlState',
+                      params: ({ context }) => ({
+                        urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
+                      }),
+                    },
+                    { type: 'updateUrlState' },
+                  ],
+                },
+                'dataSource.delete': {
+                  actions: [
+                    { type: 'stopDataSource', params: ({ event }) => event },
+                    { type: 'deleteDataSource', params: ({ event }) => event },
+                    {
+                      type: 'storeUrlState',
+                      params: ({ context }) => ({
+                        urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
+                      }),
+                    },
+                    { type: 'updateUrlState' },
+                  ],
+                },
+              },
+            },
           },
         },
       },
@@ -341,17 +467,22 @@ export const createStreamEnrichmentMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
-  timeState$,
+  data,
+  urlStateStorageContainer,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
   typeof streamEnrichmentMachine
 > => ({
   actors: {
+    initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
     processorMachine,
+    dataSourceMachine: dataSourceMachine.provide(
+      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+    ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
-        timeState$,
+        data,
         streamsRepositoryClient,
         toasts: core.notifications.toasts,
       })
@@ -359,6 +490,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
   actions: {
     refreshDefinition,
+    updateUrlState: createUrlUpdaterAction({ urlStateStorageContainer }),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),

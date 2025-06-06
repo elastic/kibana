@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
@@ -22,7 +23,7 @@ const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
-export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
+export const useStreamEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
@@ -62,6 +63,15 @@ export const useStreamEnrichmentEvents = () => {
       },
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
+      },
+      manageDataSources: () => {
+        service.send({ type: 'simulation.manageDataSources' });
+      },
+      closeDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.closeManagement' });
+      },
+      addDataSource: (dataSource: EnrichmentDataSource) => {
+        service.send({ type: 'dataSources.add', dataSource });
       },
     }),
     [service]
@@ -103,7 +113,7 @@ const ListenForDefinitionChanges = ({
 };
 
 export const useSimulatorRef = () => {
-  return useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+  return useStreamEnrichmentSelector((state) => state.context.simulatorRef);
 };
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
