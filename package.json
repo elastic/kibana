@@ -554,6 +554,7 @@
     "@kbn/field-types": "link:src/platform/packages/shared/kbn-field-types",
     "@kbn/field-utils": "link:src/platform/packages/shared/kbn-field-utils",
     "@kbn/fields-metadata-plugin": "link:x-pack/platform/plugins/shared/fields_metadata",
+    "@kbn/file-upload": "link:x-pack/platform/packages/shared/file-upload",
     "@kbn/file-upload-common": "link:x-pack/platform/packages/shared/file-upload-common",
     "@kbn/file-upload-plugin": "link:x-pack/platform/plugins/private/file_upload",
     "@kbn/files-example-plugin": "link:examples/files_example",
