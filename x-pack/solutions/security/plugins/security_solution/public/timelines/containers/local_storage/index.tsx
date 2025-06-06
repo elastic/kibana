@@ -50,7 +50,6 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         itemsPerPage: timelineModel.itemsPerPage,
         itemsPerPageOptions: timelineModel.itemsPerPageOptions,
         showCheckboxes: timelineModel.showCheckboxes,
-        graphEventId: timelineModel.graphEventId,
         selectAll: timelineModel.selectAll,
         id: timelineModel.id,
         title: timelineModel.title,
