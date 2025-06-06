@@ -1,7 +1,7 @@
 ---
 title: "Callout example"
 slug: "callout-example"
-date: "1883-1-1"
+date: "1883-01-01"
 description: "This is an article with callout examples."
 author:
   - slug: andrew-pease

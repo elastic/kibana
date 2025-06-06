@@ -73,7 +73,8 @@
     "@kbn/search-response-warnings",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/content-management-utils",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }
