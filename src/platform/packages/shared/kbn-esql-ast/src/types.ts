@@ -34,7 +34,6 @@ export type ESQLSingleAstItem =
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
-  | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
   | ESQLUnknownItem
@@ -137,10 +136,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
  */
 export interface ESQLAstRenameExpression extends ESQLCommandOption {
   name: 'as';
-}
-
-export interface ESQLCommandMode extends ESQLAstBaseItem {
-  type: 'mode';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {

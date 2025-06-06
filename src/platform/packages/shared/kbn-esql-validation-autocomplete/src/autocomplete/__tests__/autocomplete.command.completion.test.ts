@@ -22,41 +22,45 @@ describe('autocomplete.suggest', () => {
     });
 
     it('suggests columns of STRING types and functions with STRING or UNKNOWN types for the prompt', async () => {
-      await assertSuggestions(`from a | completion /`, [
-        '"$0"',
-        ...getFieldNamesByType(ESQL_STRING_TYPES),
+      const expectedSuggestions = [
+        ...getFieldNamesByType(ESQL_STRING_TYPES).map((v) => `${v} `),
         ...getFunctionSuggestions({
           location: Location.COMPLETION,
           returnTypes: ['text', 'keyword', 'unknown'],
-        }).map((fn) => fn.text),
+        }).map((fn) => `${fn.text} `),
+      ];
+
+      await assertSuggestions(`FROM a | COMPLETION /`, [
+        '"${0:Your prompt to the LLM.}"',
+        ...expectedSuggestions,
       ]);
+
+      await assertSuggestions(`FROM a | COMPLETION kubernetes.some/`, expectedSuggestions);
     });
 
     it('suggests WITH after the prompt', async () => {
-      await assertSuggestions(`from a | completion "prompt" /`, ['WITH ']);
+      await assertSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
+      await assertSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
     });
 
     it('suggests inference endpoints after WITH', async () => {
-      await assertSuggestions(`from a | completion "prompt" WITH /`, ['`inference_1` ']);
+      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH /`, ['`inference_1` ']);
     });
 
     describe('optional AS', () => {
       it('suggests AS after WITH <inferenceId>', async () => {
-        await assertSuggestions(`from a | completion "prompt" WITH inferenceId /`, ['AS ', '| ']);
-      });
-
-      it('suggests default target field name for AS clauses when WITH option is missing', async () => {
-        await assertSuggestions(`from a | completion "prompt" AS / `, ['completion ']);
+        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId /`, ['AS ', '| ']);
+        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId A/`, ['AS ', '| ']);
       });
 
       it('suggests default target field name for AS clauses', async () => {
-        await assertSuggestions(`from a | completion "prompt" WITH inferenceId AS / `, [
+        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS / `, [
           'completion ',
         ]);
       });
 
       it('suggests pipe after complete command', async () => {
-        await assertSuggestions(`from a | completion "prompt" WITH inferenceId AS completion /`, [
+        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`, [
           '| ',
         ]);
       });

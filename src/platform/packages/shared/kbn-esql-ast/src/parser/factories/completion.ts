@@ -52,12 +52,16 @@ export const createCompletionCommand = (
 
   if (ctx._targetField) {
     const targetField = createColumn(ctx._targetField);
+    targetField.incomplete =
+      targetField.text.length === 0 || targetField.text.includes(EDITOR_MARKER);
+
     const option = Builder.option(
       {
         name: 'as',
         args: [targetField],
       },
       {
+        incomplete: targetField.incomplete,
         location: getPosition(ctx.AS().symbol, ctx._targetField.stop),
       }
     );
