@@ -8,7 +8,7 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { APP_NOT_FOUND_PAGE } from '../../../screens/ai_soc';
-import { DASHBOARDS_URL, VISUALIZE_URL, MAPS_URL, LENS_URL } from '../../../urls/navigation';
+import { APP_DASHBOARDS_URL, VISUALIZE_URL, MAPS_URL, LENS_URL } from '../../../urls/navigation';
 
 describe('Disabled features', { tags: '@serverless' }, () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('Disabled features', { tags: '@serverless' }, () => {
   });
 
   it('dashboards app should not be available', () => {
-    visit(DASHBOARDS_URL);
+    visit(APP_DASHBOARDS_URL);
     cy.get(APP_NOT_FOUND_PAGE).should('exist');
   });
   it('visualize app should not be available', () => {
