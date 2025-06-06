@@ -3,3 +3,10 @@
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
+
+# this key is actually for synthetics
+xpack.uptime.enabled: false
+# uptime plugin
+xpack.legacy_uptime.enabled: false
+# user experience plugin
+xpack.ux.enabled: false
