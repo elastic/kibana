@@ -187,24 +187,26 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
       rateLimiter: config.rateLimiter,
-      registerOnPostValidation: (cb) => {
-        Router.on('onPostValidate', cb);
+      router: {
+        create: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
+          path: string,
+          pluginId: PluginOpaqueId = this.coreContext.coreId
+        ) => {
+          const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
+          const router = new Router<Context>(path, this.log, enhanceHandler, {
+            env: this.env,
+            versionedRouterOptions: getVersionedRouterOptions(config),
+            pluginId,
+          });
+          registerRouter(router);
+          return router;
+        },
+        registerOnPostValidation: (cb) => {
+          Router.on('onPostValidate', cb);
+        },
       },
       getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
       externalUrl: new ExternalUrlConfig(config.externalUrl),
-      createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
-        path: string,
-        pluginId: PluginOpaqueId = this.coreContext.coreId
-      ) => {
-        const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router<Context>(path, this.log, enhanceHandler, {
-          env: this.env,
-          versionedRouterOptions: getVersionedRouterOptions(config),
-          pluginId,
-        });
-        registerRouter(router);
-        return router;
-      },
 
       registerRouteHandlerContext: <
         Context extends RequestHandlerContextBase,

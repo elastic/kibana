@@ -187,7 +187,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
   plugin: PluginWrapper<TPlugin, TPluginDependencies>;
   runtimeResolver: IRuntimePluginContractResolver;
 }): CoreSetup {
-  const router = deps.http.createRouter('', plugin.opaqueId);
+  const router = deps.http.router.create('', plugin.opaqueId);
 
   return {
     analytics: {

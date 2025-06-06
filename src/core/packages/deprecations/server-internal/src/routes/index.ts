@@ -24,7 +24,7 @@ export function registerRoutes({
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
 }) {
-  const router = http.createRouter<InternalDeprecationRequestHandlerContext>('/api/deprecations');
+  const router = http.router.create<InternalDeprecationRequestHandlerContext>('/api/deprecations');
   registerGetRoute(router);
 
   registerApiDeprecationsPostValidationHandler({ http, coreUsageData, logger });
