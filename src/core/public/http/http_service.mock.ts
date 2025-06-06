@@ -37,6 +37,7 @@ const createServiceMock = ({
   },
   externalUrl: {
     validateUrl: jest.fn(),
+    isInternalUrl: jest.fn(),
   },
   addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
