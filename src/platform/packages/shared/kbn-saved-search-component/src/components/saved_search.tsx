@@ -16,6 +16,7 @@ import type {
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -66,16 +67,16 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes = {
+          const attributes: Partial<SavedSearchAttributes> = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
+            columns,
           };
           setInitialSerializedState({
             rawState: {
               attributes: { ...attributes, references },
               timeRange,
-              columns,
               nonPersistedDisplayOptions: {
                 solutionNavIdOverride,
                 enableDocumentViewer: documentViewerEnabled,
