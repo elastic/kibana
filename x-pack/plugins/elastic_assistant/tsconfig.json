@@ -50,6 +50,8 @@
     "@kbn/zod",
     "@kbn/inference-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/ai-security-labs-content",
+    "@kbn/core-analytics-server",
   ],
   "exclude": [
     "target/**/*",
