@@ -72,7 +72,8 @@ export type MetricsLinkId =
   | 'hosts'
   | 'settings'
   | 'assetDetails'
-  | 'kubernetes';
+  | 'kubernetes'
+  | `kubernetes${string}`;
 
 export type ApmLinkId =
   | 'services'

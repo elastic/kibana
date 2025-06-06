@@ -132,6 +132,19 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     const logRoutes = getLogsAppRoutes();
+    // TODO: Remove and use `getIntegrationDashboardIds`
+    const integrationDashboardDeeplink = [
+      'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+      'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+      'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
+      'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+      'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+    ].map((dashboardId) => ({
+      id: dashboardId,
+      // TODO Add title (proposal)
+      title: `Dashboard: ${dashboardId}`,
+      path: `/kubernetes/${dashboardId}`,
+    }));
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
@@ -184,16 +197,12 @@ export class Plugin implements InfraClientPluginClass {
                               app: 'metrics',
                               path: '/kubernetes',
                               deepLinks: [
-                                {
-                                  id: 'dashboards',
-                                  title: 'Kubernetes Dashboards',
-                                  path: '/kubernetes/:dashboardId',
-                                },
-                                {
-                                  id: 'kubernetes_otel-cluster-overview',
-                                  title: 'Static id: kubernetes_otel-cluster-overview',
-                                  path: '/kubernetes/kubernetes_otel-cluster-overview',
-                                },
+                                // {
+                                //   id: 'dashboards',
+                                //   title: 'Kubernetes Dashboards',
+                                //   path: '/kubernetes/:dashboardId',
+                                // },
+                                ...integrationDashboardDeeplink,
                               ],
                             },
                           ]
@@ -252,11 +261,13 @@ export class Plugin implements InfraClientPluginClass {
     const getInfraDeepLinks = ({
       metricsExplorerEnabled,
       isKubernetesIntgegrationsInstalled,
+      installedDashboardIds = [],
     }: {
       metricsExplorerEnabled: boolean;
       isKubernetesIntgegrationsInstalled: boolean;
+      installedDashboardIds?: string[];
     }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'sideNav', 'home'];
+      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
       return [
         {
@@ -292,21 +303,12 @@ export class Plugin implements InfraClientPluginClass {
                 path: '/kubernetes',
                 // visibleIn,
                 deepLinks: [
-                  {
-                    id: 'dashboards',
-                    title: 'Kubernetes Dashboards',
-                    path: '/kubernetes/:dashboardId',
-                  },
-                  {
-                    id: 'test',
-                    title: 'Kubernetes test',
-                    path: '/kubernetes/test',
-                  },
-                  {
-                    id: 'kubernetes_otel-cluster-overview',
-                    title: 'Static title: kubernetes_otel-cluster-overview',
-                    path: '/kubernetes/kubernetes_otel-cluster-overview',
-                  },
+                  // {
+                  //   id: 'dashboards',
+                  //   title: 'Kubernetes Dashboards',
+                  //   path: '/kubernetes/:dashboardId',
+                  // },
+                  ...integrationDashboardDeeplink,
                 ],
               },
             ]
@@ -340,6 +342,13 @@ export class Plugin implements InfraClientPluginClass {
       deepLinks: getInfraDeepLinks({
         metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
         isKubernetesIntgegrationsInstalled: this.isKubernetesIntgegrationsInstalled,
+        installedDashboardIds: [
+          'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+          'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+          'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
+          'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+          'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+        ],
       }),
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
@@ -349,6 +358,10 @@ export class Plugin implements InfraClientPluginClass {
           'kubernetes',
           core.http
         );
+
+        const installedDashboardIds = await getIntegrationDashboardIds('kubernetes', core.http);
+
+        // console.log('installedDashboardIds:', installedDashboardIds);
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
@@ -453,6 +466,28 @@ const isIntegrationInstalled = async (packageName: string, http: CoreStart['http
     });
     // console.log('integration:', JSON.stringify(integration, null, 2));
     return integration.status === 'installed';
+  } catch (error) {
+    return false;
+  }
+};
+const getIntegrationDashboardIds = async (packageName: string, http: CoreStart['http']) => {
+  try {
+    const { item: integration } = await http.get<{
+      item: {
+        installationInfo: {
+          installationInfo: { installed_kibana: Array<{ id: string; type: string }> };
+        };
+        status: string;
+      };
+    }>(`/api/fleet/epm/packages/${packageName}`, {
+      headers: { 'Elastic-Api-Version': '2023-10-31' },
+    });
+    // console.log('integration:', JSON.stringify(integration?.installationInfo, null, 2));
+    if (integration?.installationInfo?.installed_kibana) {
+      return integration.installationInfo.installed_kibana
+        .filter((item) => item.type === 'dashboard')
+        .map((item) => item.id);
+    }
   } catch (error) {
     return false;
   }

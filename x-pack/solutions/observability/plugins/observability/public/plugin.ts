@@ -185,6 +185,7 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
 
+  private kubernetesDashboardIds: string[] = [];
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
@@ -254,6 +255,8 @@ export class Plugin
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
+      this.kubernetesDashboardIds = kubernetesDashboardIds || [];
 
       return renderApp({
         appMountParameters: params,
@@ -449,8 +452,19 @@ export class Plugin
       updater$: this.appUpdater$,
     });
 
+    // const kubernetesDashboardIds = getIntegrationDashboardIds(
+    //   'kubernetes',
+    //   coreStart.http,
+    //   this.kubernetesDashboardIds
+    // );
+    // this.kubernetesDashboardIds = kubernetesDashboardIds || [];
+    // console.log('kubernetesDashboardIds', kubernetesDashboardIds);
+    // console.log('this.kubernetesDashboardIds', this.kubernetesDashboardIds);
+
     import('./navigation_tree').then(({ createDefinition }) => {
-      return pluginsStart.navigation.addSolutionNavigation(createDefinition(pluginsStart));
+      return pluginsStart.navigation.addSolutionNavigation(
+        createDefinition(pluginsStart, this.kubernetesDashboardIds)
+      );
     });
 
     return {
@@ -460,3 +474,29 @@ export class Plugin
     };
   }
 }
+const getIntegrationDashboardIds = async (
+  packageName: string,
+  http: CoreStart['http'],
+  kubernetesDashboardIds: string[]
+) => {
+  try {
+    const { item: integration } = await http
+      .get<{
+        item: {
+          installationInfo: {
+            installationInfo: { installed_kibana: Array<{ id: string; type: string }> };
+          };
+          status: string;
+        };
+      }>(`/api/fleet/epm/packages/${packageName}`, {
+        headers: { 'Elastic-Api-Version': '2023-10-31' },
+      })
+      .then((res) => {
+        return res;
+      });
+
+    // TODO finish
+  } catch (error) {
+    return false;
+  }
+};

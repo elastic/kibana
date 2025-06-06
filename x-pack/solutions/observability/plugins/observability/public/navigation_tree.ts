@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
@@ -18,7 +18,34 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
+function createNavTree({
+  streamsAvailable,
+  kubernetesDashboardIds,
+}: {
+  streamsAvailable?: boolean;
+  kubernetesDashboardIds?: string[];
+}) {
+  // TODO use kubernetesDashboardIds
+  console.log('kubernetesDashboardIds', kubernetesDashboardIds);
+  const kubernetesDashboardIdsMock = [
+    'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+    'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+    'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
+    'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+    'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+  ];
+  const childrenK =
+    kubernetesDashboardIdsMock?.map((id) => ({
+      link: (id.startsWith('kubernetes')
+        ? `metrics:${id}`
+        : `metrics:kubernetes_${id}`) as AppDeepLinkId,
+      title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetesDashboard', {
+        defaultMessage: '{id}',
+        values: { id: id.substring(0, 15) },
+      }),
+    })) ?? [];
+
+  console.log('tree childrenK', childrenK);
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -155,50 +182,57 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'accordion',
+            defaultIsCollapsed: false,
             children: [
               {
-                link: 'metrics:inventory',
-                title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                  defaultMessage: 'Infrastructure Inventory',
-                }),
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-                },
-              },
-              {
-                link: 'metrics:hosts',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-                },
-              },
-              {
-                link: 'metrics:metrics-explorer',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.infrastructure.metricsExplorer',
+                children: [
                   {
-                    defaultMessage: 'Metrics explorer',
-                  }
-                ),
+                    link: 'metrics:inventory',
+                    title: i18n.translate('xpack.observability.infrastructure.inventory', {
+                      defaultMessage: 'Infrastructure Inventory',
+                    }),
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                    },
+                  },
+                  {
+                    link: 'metrics:hosts',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    },
+                  },
+                  {
+                    link: 'metrics:metrics-explorer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.infrastructure.metricsExplorer',
+                      {
+                        defaultMessage: 'Metrics explorer',
+                      }
+                    ),
+                  },
+                ],
               },
               {
                 id: 'kubernetes',
-                renderAs: 'panelOpener',
+                renderAs: 'accordion',
+                defaultIsCollapsed: false,
                 title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
                   defaultMessage: 'Kubernetes',
                 }),
                 children: [
-                  {
-                    link: 'metrics:kubernetes',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/metrics/kubernetes'));
-                    },
-                    title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
-                      defaultMessage: 'Kubernetes Dashboards List',
-                    }),
-                  },
-                  {
-                    link: 'metrics:kubernetes_otel-cluster-overview',
-                  },
+                  // {
+                  //   link: 'metrics:kubernetes',
+                  //   getIsActive: ({ pathNameSerialized, prepend }) => {
+                  //     return pathNameSerialized.startsWith(prepend('/app/metrics/kubernetes'));
+                  //   },
+                  //   title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
+                  //     defaultMessage: 'Kubernetes Dashboards List',
+                  //   }),
+                  // },
+                  // {
+                  //   link: 'metrics:kubernetes_otel-cluster-overview',
+                  // },
+                  ...childrenK,
                 ],
               },
               {
@@ -483,14 +517,17 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
 }
 
 export const createDefinition = (
-  pluginsStart: ObservabilityPublicPluginsStart
+  pluginsStart: ObservabilityPublicPluginsStart,
+  kubernetesDashboardIds?: string[]
 ): AddSolutionNavigationArg => ({
   id: 'oblt',
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
   navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
-    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
+    map(({ status }) =>
+      createNavTree({ streamsAvailable: status === 'enabled', kubernetesDashboardIds })
+    )
   ),
   dataTestSubj: 'observabilitySideNav',
 });
