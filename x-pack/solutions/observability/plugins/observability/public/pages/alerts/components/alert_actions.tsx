@@ -30,7 +30,6 @@ import { parseAlert } from '../helpers/parse_alert';
 import { observabilityFeatureId, type ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 export interface ObservabilityAlertActionsProps extends AlertActionsProps {
   config: ConfigSchema;
@@ -196,25 +195,8 @@ export function AlertActions({
           defaultMessage: 'More actions',
         });
 
-  const onExpandEvent = () => {
-    const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-
-    openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
-  };
-
   return (
     <>
-      <EuiFlexItem>
-        <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
-          <EuiButtonIcon
-            data-test-subj="expand-event"
-            iconType="expand"
-            onClick={onExpandEvent}
-            size="s"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
       {viewInAppUrl !== '' && !isInApp ? (
         <EuiFlexItem>
           <EuiToolTip
