@@ -30,7 +30,8 @@ export abstract class NumeralFormat extends FieldFormat {
   abstract title: string;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
+    // While this should be always defined, it is not guaranteed in testing that the function is available
+    pattern: this.getConfig?.(`format:${this.id}:defaultPattern`),
     alwaysShowSign: false,
   });
 
@@ -51,9 +52,9 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    let pattern = this.param('pattern');
+    let pattern: string = this.param('pattern');
     if (this.param('alwaysShowSign')) {
-      pattern = /^\+/.test(pattern) || val === 0 ? pattern : `+ ${pattern}`;
+      pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
     }
 
     const formatted = numeralInst.set(val).format(pattern);
