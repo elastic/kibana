@@ -9,13 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
+import { findFinalWord, getFunctionDefinition } from '../../../shared/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { EDITOR_MARKER } from '../../../shared/constants';
 import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
-import { isExpressionComplete } from '../../helper';
+import { handleFragment, isExpressionComplete } from '../../helper';
 
 export enum CompletionPosition {
   PROMPT = 'prompt',
@@ -30,12 +31,12 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
   const { innerText, getExpressionType } = params;
   const command = params.command as ESQLAstCompletionCommand;
 
-  // COMPLETION <prompt> WITH^
+  // COMPLETION <prompt> WITH^ (no AS after WITH)
   if (/WITH\s*$/i.test(innerText)) {
     return CompletionPosition.AFTER_WITH;
   }
-  // COMPLETION <prompt> WITH <inferenceId>^
-  if (/WITH\s+\S*\s*$/i.test(innerText)) {
+  // COMPLETION <prompt> WITH <inferenceId>^ (allow multiple words after WITH, but not AS)
+  if (/WITH\s+(?:(?!\bAS\b).)+$/i.test(innerText)) {
     return CompletionPosition.AFTER_INFERENCE_ID;
   }
   // COMPLETION <prompt> WITH <inferenceId> AS^
@@ -66,19 +67,38 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const { suggestFieldsOrFunctionsByType } = params;
+  const { suggestFieldsOrFunctionsByType, innerText, columnExists } = params;
 
   const position = getPosition(params);
 
   switch (position) {
     case CompletionPosition.PROMPT:
-      return [
-        ...(await suggestFieldsOrFunctionsByType(
-          ['text', 'keyword', 'unknown'],
-          Location.COMPLETION
-        )),
-        emptyText,
-      ];
+      const fieldsAndFunctionsSuggestions = await suggestFieldsOrFunctionsByType(
+        ['text', 'keyword', 'unknown'],
+        Location.COMPLETION
+      );
+
+      const suggestions = await handleFragment(
+        innerText,
+        (fragment) => Boolean(columnExists(fragment) || getFunctionDefinition(fragment)),
+        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          return fieldsAndFunctionsSuggestions.map((suggestion) => {
+            return {
+              ...suggestion,
+              text: `${suggestion.text} `,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            };
+          });
+        },
+        () => []
+      );
+
+      if (!findFinalWord(innerText)) {
+        suggestions.push(emptyText);
+      }
+
+      return suggestions;
 
     case CompletionPosition.AFTER_PROMPT:
       return [withCompletionItem];
