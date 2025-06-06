@@ -28,7 +28,7 @@ import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';
-import { recordHasContext } from './record_has_context';
+import { recordHasContext } from '../record_has_context';
 
 interface SerializedDataSourceProfileParams {
   dataViewId: string | undefined;

@@ -13,3 +13,4 @@ export * from './additional_field_groups';
 export * from './logs_context_service';
 export * from './traces_context_service';
 export * from './apm_errors_context_service';
+export * from './data_table_record';
