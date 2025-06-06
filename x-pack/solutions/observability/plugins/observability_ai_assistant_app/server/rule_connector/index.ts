@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, tap } from 'rxjs';
+import { filter } from 'rxjs';
 import { get } from 'lodash';
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
@@ -28,8 +28,6 @@ import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { ALERT_STATUSES } from '../../common/constants';
 
@@ -159,9 +157,6 @@ async function executor(
     screenContexts: [],
     scopes: ['observability'],
   });
-  const actionsClient = await (
-    await resources.plugins.actions.start()
-  ).getActionsClientWithRequest(request);
 
   await Promise.all(
     params.prompts.map((prompt) =>
@@ -172,7 +167,6 @@ async function executor(
         alertDetailsContextService,
         client,
         functionClient,
-        actionsClient,
         execOptions.logger
       )
     )
@@ -188,7 +182,6 @@ async function executeAlertsChatCompletion(
   alertDetailsContextService: AlertDetailsContextualInsightsService,
   client: ObservabilityAIAssistantClient,
   functionClient: ChatFunctionClient,
-  actionsClient: PublicMethodsOf<ActionsClient>,
   logger: Logger
 ): Promise<void> {
   const alerts = {
@@ -208,8 +201,6 @@ async function executeAlertsChatCompletion(
   if (alerts.new.length === 0 && alerts.recovered.length === 0) {
     return;
   }
-
-  const connectorsList = await actionsClient.getAll();
 
   const backgroundInstruction = dedent(
     `You are called as a background process because alerts have changed state.
@@ -282,25 +273,6 @@ If available, include the link of the conversation at the end of your answer.`
       ],
     })
     .pipe(
-      tap((event) => {
-        if (event.type === StreamingChatResponseEventType.ChatCompletionMessage) {
-          const slackConnectors = connectorsList.filter(
-            (connector) => connector.actionTypeId === '.slack'
-          );
-
-          if (slackConnectors.length > 0) {
-            for (const slackConnector of slackConnectors) {
-              // Execute the Slack connector with the message content
-              actionsClient
-                .execute({
-                  actionId: slackConnector.id,
-                  params: { message: event.message.content },
-                })
-                .catch((err) => logger.error(`Error executing connector: ${err}`));
-            }
-          }
-        }
-      }),
       filter(
         (event): event is ChatCompletionChunkEvent =>
           event.type === StreamingChatResponseEventType.ChatCompletionChunk
