@@ -1660,6 +1660,21 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.COMPATIBILITY_PALETTE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COMPATIBILITY_PALETTE_ID",
+        "description": [],
+        "signature": [
+          "\"kibana_palette\""
+        ],
+        "path": "src/platform/plugins/shared/charts/public/services/palettes/palettes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.defaultCountLabel",
         "type": "string",
         "tags": [],

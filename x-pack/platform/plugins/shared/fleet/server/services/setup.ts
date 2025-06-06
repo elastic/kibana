@@ -66,10 +66,7 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
-import {
-  createCCSIndexPatterns,
-  createOrUpdateFleetSyncedIntegrationsIndex,
-} from './setup/fleet_synced_integrations';
+import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 
@@ -262,8 +259,13 @@ async function createSetupSideEffects(
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
-  logger.debug('Backfilling package policy supports_agentless field');
-  await backfillPackagePolicySupportsAgentless(esClient);
+  let backfillPackagePolicySupportsAgentlessError;
+  try {
+    logger.debug('Backfilling package policy supports_agentless field');
+    await backfillPackagePolicySupportsAgentless(esClient);
+  } catch (error) {
+    backfillPackagePolicySupportsAgentlessError = { error };
+  }
 
   let ensureCorrectAgentlessSettingsIdsError;
   try {
@@ -276,9 +278,6 @@ async function createSetupSideEffects(
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
-  logger.debug('Create or update fleet-synced-integrations index');
-  await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
-
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
@@ -286,6 +285,9 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(backfillPackagePolicySupportsAgentlessError
+      ? [backfillPackagePolicySupportsAgentlessError]
+      : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
 

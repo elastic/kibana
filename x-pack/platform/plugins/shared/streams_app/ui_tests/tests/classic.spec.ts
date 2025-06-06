@@ -67,10 +67,9 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
     await page.getByText('Add a processor').click();
 
-    await page.locator('input[name="field"]').fill('message');
-    await page
-      .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:method} %{URIPATH:request}');
+    await page.locator('input[name="field"]').fill('body.text');
+    await page.getByTestId('streamsAppPatternExpression').click();
+    await page.keyboard.type('%{WORD:attributes.method}', { delay: 150 }); // Simulate real typing
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
 
