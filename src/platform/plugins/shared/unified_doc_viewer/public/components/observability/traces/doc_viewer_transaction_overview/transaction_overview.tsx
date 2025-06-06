@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
@@ -74,50 +74,52 @@ export function TransactionOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <TransactionSummaryTitle
-            serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-            transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
-            formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-            id={transactionId}
-            formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
-            showActions={showActions}
-          />
-          <EuiSpacer size="m" />
-          {transactionFields.map((fieldId) => (
-            <TransactionSummaryField
-              key={fieldId}
-              fieldId={fieldId}
-              fieldConfiguration={fieldConfigurations[fieldId]}
-              showActions={showActions}
-            />
-          ))}
-
-          {transactionDuration !== undefined && (
-            <>
-              <EuiSpacer size="m" />
-              <TransactionDurationSummary
-                transactionDuration={transactionDuration}
-                transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
-                serviceName={formattedDoc[SERVICE_NAME_FIELD]}
-              />
-            </>
-          )}
-          {traceId && transactionId ? (
-            <>
-              <EuiSpacer size="m" />
-              <Trace
-                fields={fieldConfigurations}
-                traceId={traceId}
-                docId={transactionId}
-                displayType="transaction"
-                dataView={dataView}
-                tracesIndexPattern={tracesIndexPattern}
-                showWaterfall={showWaterfall}
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <TransactionSummaryTitle
+                serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
+                formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                id={transactionId}
+                formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
                 showActions={showActions}
               />
-            </>
-          ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {transactionFields.map((fieldId) => (
+                <TransactionSummaryField
+                  key={fieldId}
+                  fieldId={fieldId}
+                  fieldConfiguration={fieldConfigurations[fieldId]}
+                  showActions={showActions}
+                />
+              ))}
+            </EuiFlexItem>
+            {transactionDuration !== undefined && (
+              <EuiFlexItem>
+                <TransactionDurationSummary
+                  transactionDuration={transactionDuration}
+                  transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                  transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
+                  serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              {traceId && transactionId && (
+                <Trace
+                  fields={fieldConfigurations}
+                  traceId={traceId}
+                  docId={transactionId}
+                  displayType="transaction"
+                  dataView={dataView}
+                  tracesIndexPattern={tracesIndexPattern}
+                  showWaterfall={showWaterfall}
+                  showActions={showActions}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       </FieldActionsProvider>
     </RootTransactionProvider>
