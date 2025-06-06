@@ -9,24 +9,54 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
+import {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from '../../../../dashboard_saved_object';
+import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
 export function transformPanelsIn(
-  panels: DashboardAttributes['panels']
-): DashboardSavedObjectAttributes['panelsJSON'] {
-  const updatedPanels = panels.map(({ panelIndex, gridData, panelConfig, ...restPanel }) => {
-    const idx = panelIndex ?? uuidv4();
-    return {
-      ...restPanel,
-      embeddableConfig: panelConfig,
-      panelIndex: idx,
-      gridData: {
-        ...gridData,
-        i: idx,
-      },
-    };
-  });
+  widgets: DashboardAttributes['panels'] | undefined,
+  dropSections: boolean = false
+): {
+  panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
+  sections: DashboardSavedObjectAttributes['sections'];
+} {
+  const panels: SavedDashboardPanel[] = [];
+  const sections: SavedDashboardSection[] = [];
 
-  return JSON.stringify(updatedPanels);
+  widgets?.forEach((widget) => {
+    if (isDashboardSection(widget)) {
+      const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
+      const idx = gridData.i ?? uuidv4();
+      sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
+      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+        const transformed = transformPanel(panel);
+        panels.push({
+          ...transformed,
+          gridData: { ...transformed.gridData, ...(!dropSections && { sectionId: idx }) },
+        });
+      });
+    } else {
+      // widget is a panel
+      panels.push(transformPanel(widget));
+    }
+  });
+  return { panelsJSON: JSON.stringify(panels), sections };
+}
+
+function transformPanel(panel: DashboardPanel): SavedDashboardPanel {
+  const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
+  const idx = panelIndex ?? uuidv4();
+  return {
+    ...restPanel,
+    embeddableConfig: panelConfig,
+    panelIndex: idx,
+    gridData: {
+      ...gridData,
+      i: idx,
+    },
+  };
 }
