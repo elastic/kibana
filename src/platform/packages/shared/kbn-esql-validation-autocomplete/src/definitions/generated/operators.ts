@@ -968,6 +968,62 @@ const equalsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -1289,6 +1345,62 @@ const greaterThanDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
         },
       ],
       returnType: 'boolean',
@@ -1617,6 +1729,62 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
         },
       ],
       returnType: 'boolean',
@@ -2537,6 +2705,62 @@ const lessThanDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -2861,6 +3085,62 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
         },
       ],
       returnType: 'boolean',
@@ -4627,6 +4907,62 @@ const notEqualsDefinition: FunctionDefinition = {
           name: 'right',
           type: 'version',
           optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
         },
       ],
       returnType: 'boolean',

@@ -14,7 +14,6 @@ import _ from 'lodash';
 import {
   FunctionDefinition,
   FunctionParameterType,
-  FunctionReturnType,
   FunctionDefinitionTypes,
   Location,
 } from '../src/definitions/types';
@@ -23,66 +22,15 @@ import { mathValidators } from './validators';
 import {
   aliasTable,
   aliases,
+  bucketParameterTypes,
   defaultScalarFunctionLocations,
   defaultAggFunctionLocations,
   MATH_OPERATORS,
   COMPARISON_OPERATORS,
   mathOperatorsExtraSignatures,
+  comparisonOperatorSignatures,
 } from './constants';
 import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
-
-const bucketParameterTypes: Array<
-  [
-    FunctionParameterType,
-    FunctionParameterType,
-    FunctionParameterType | null,
-    FunctionParameterType | null,
-    FunctionReturnType
-  ]
-> = [
-  // field   // bucket   //from    // to   //result
-  // 2-param signatures
-  ['date_nanos', 'date_period', null, null, 'date_nanos'],
-  ['date', 'date_period', null, null, 'date'],
-  ['date_nanos', 'time_literal', null, null, 'date_nanos'],
-  ['date', 'time_literal', null, null, 'date'],
-  ['double', 'double', null, null, 'double'],
-  ['double', 'integer', null, null, 'double'],
-  ['integer', 'double', null, null, 'double'],
-  ['integer', 'integer', null, null, 'double'],
-  ['long', 'double', null, null, 'double'],
-  ['long', 'integer', null, null, 'double'],
-  // 4-param signatures
-  ['date', 'integer', 'date', 'date', 'date'],
-  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
-  ['double', 'integer', 'double', 'double', 'double'],
-  ['double', 'integer', 'double', 'integer', 'double'],
-  ['double', 'integer', 'double', 'long', 'double'],
-  ['double', 'integer', 'integer', 'double', 'double'],
-  ['double', 'integer', 'integer', 'integer', 'double'],
-  ['double', 'integer', 'integer', 'long', 'double'],
-  ['double', 'integer', 'long', 'double', 'double'],
-  ['double', 'integer', 'long', 'integer', 'double'],
-  ['double', 'integer', 'long', 'long', 'double'],
-  ['integer', 'integer', 'double', 'double', 'double'],
-  ['integer', 'integer', 'double', 'integer', 'double'],
-  ['integer', 'integer', 'double', 'long', 'double'],
-  ['integer', 'integer', 'integer', 'double', 'double'],
-  ['integer', 'integer', 'integer', 'integer', 'double'],
-  ['integer', 'integer', 'integer', 'long', 'double'],
-  ['integer', 'integer', 'long', 'double', 'double'],
-  ['integer', 'integer', 'long', 'integer', 'double'],
-  ['integer', 'integer', 'long', 'long', 'double'],
-  ['long', 'integer', 'double', 'double', 'double'],
-  ['long', 'integer', 'double', 'integer', 'double'],
-  ['long', 'integer', 'double', 'long', 'double'],
-  ['long', 'integer', 'integer', 'double', 'double'],
-  ['long', 'integer', 'integer', 'integer', 'double'],
-  ['long', 'integer', 'integer', 'long', 'double'],
-  ['long', 'integer', 'long', 'double', 'double'],
-  ['long', 'integer', 'long', 'integer', 'double'],
-  ['long', 'integer', 'long', 'long', 'double'],
-];
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
@@ -231,6 +179,8 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
+      // Adding comparison operator signatures for ip and version types
+      signatures.push(...comparisonOperatorSignatures);
     }
     if (isMathOperator) {
       locationsAvailable = _.uniq([
