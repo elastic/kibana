@@ -193,6 +193,10 @@ describe('AllCasesListGeneric', () => {
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
 
+    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(1);
+    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
+
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
       useGetCasesMockState.data.cases[0].tags[0]
@@ -515,7 +519,6 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: ['title', 'description'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,

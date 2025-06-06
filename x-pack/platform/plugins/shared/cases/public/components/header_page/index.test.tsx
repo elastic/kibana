@@ -34,6 +34,16 @@ describe('HeaderPage', () => {
     expect(screen.getByText('Test supplement')).toBeInTheDocument();
   });
 
+  it('renders the `incremental_id` when provided', () => {
+    renderWithTestingProviders(
+      <TestProviders>
+        <HeaderPage border title="Test title" incrementalId={1337} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('#1337')).toBeInTheDocument();
+  });
+
   it('DOES NOT render the back link when not provided', () => {
     const wrapper = mount(
       <TestProviders>

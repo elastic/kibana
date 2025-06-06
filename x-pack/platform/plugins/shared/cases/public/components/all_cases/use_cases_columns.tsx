@@ -40,7 +40,7 @@ import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { IncrementalIdText } from '../incremental_id/incremental_id_text';
+import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>

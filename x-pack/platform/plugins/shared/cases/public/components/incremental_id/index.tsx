@@ -8,7 +8,7 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 export const IncrementalIdText = React.memo<{ incrementalId: number }>(({ incrementalId }) => (
-  <EuiText color="subdued" size="s">
+  <EuiText color="subdued" size="s" data-test-subj="cases-incremental-id-text">
     {'#'}
     {incrementalId}
   </EuiText>

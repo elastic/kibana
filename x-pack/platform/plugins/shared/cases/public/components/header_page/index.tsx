@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 
 import { Title } from './title';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { IncrementalIdText } from '../incremental_id/incremental_id_text';
+import { IncrementalIdText } from '../incremental_id';
 
 interface HeaderProps {
   border?: boolean;
