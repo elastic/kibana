@@ -712,8 +712,8 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions = useMemo(
-    (): NonNullable<CodeEditorProps['options']> => ({
+  const codeEditorOptions: CodeEditorProps['options'] = useMemo(
+    () => ({
       hover: {
         above: false,
       },
@@ -727,7 +727,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       // this becomes confusing with multiple markers, so quick fixes
       // will be proposed only within the tooltip
       lightbulb: {
-        enabled: monaco.editor.ShowLightbulbIconMode.Off,
+        enabled: false,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',

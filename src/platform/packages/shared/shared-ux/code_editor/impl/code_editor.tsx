@@ -536,7 +536,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 // outer scrollbars.
                 alwaysConsumeMouseWheel: false,
               },
-              wordBasedSuggestions: 'off',
+              wordBasedSuggestions: false,
               wordWrap: 'on',
               wrappingIndent: 'indent',
               matchBrackets: 'never',
