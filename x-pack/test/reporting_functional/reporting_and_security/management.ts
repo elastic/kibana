@@ -39,7 +39,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
-      await PageObjects.reporting.openExportTab();
+      await PageObjects.reporting.selectExportItem('PDF');
       await PageObjects.reporting.clickGenerateReportButton();
 
       await PageObjects.common.navigateToApp('reporting');
