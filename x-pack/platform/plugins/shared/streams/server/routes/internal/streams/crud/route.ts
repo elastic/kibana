@@ -9,7 +9,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
 import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { processInChunks } from '@kbn/std';
+import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
@@ -37,7 +37,7 @@ export const listStreamsRoute = createServerRoute({
 
     const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
 
-    const dataStreams = await processInChunks(streamNames, (streamNamesChunk) =>
+    const dataStreams = await processAsyncInChunks(streamNames, (streamNamesChunk) =>
       scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
     );
 

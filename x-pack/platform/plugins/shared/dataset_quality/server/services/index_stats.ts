@@ -7,8 +7,8 @@
 
 import { chain, sumBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { processInChunks } from '@kbn/std';
 import { extractIndexNameFromBackingIndex } from '../../common/utils';
+import { processAsyncInChunks } from '../utils/process_async_in_chunks';
 
 interface IndexStatsResponse {
   docsCountPerDataStream: { [indexName: string]: number };
@@ -20,7 +20,7 @@ class IndexStatsService {
     dataStreams: string[]
   ): Promise<IndexStatsResponse> {
     try {
-      const { indices } = await processInChunks(dataStreams, (indexChunk) =>
+      const { indices } = await processAsyncInChunks(dataStreams, (indexChunk) =>
         esClient.indices.stats({ index: indexChunk, metric: ['docs'] })
       );
 
