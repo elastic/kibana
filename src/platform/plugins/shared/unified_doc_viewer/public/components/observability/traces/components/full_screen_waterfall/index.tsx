@@ -112,7 +112,7 @@ export const FullScreenWaterfall = ({
                 <EmbeddableRenderer
                   type="APM_TRACE_WATERFALL_EMBEDDABLE"
                   getParentApi={getParentApi}
-                  hidePanelChrome={true}
+                  hidePanelChrome
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
