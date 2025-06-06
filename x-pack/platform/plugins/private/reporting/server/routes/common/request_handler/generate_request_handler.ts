@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getCounters } from '..';
 import { Report, SavedReport } from '../../../lib/store';
 import type { ReportingJobResponse } from '../../../types';
@@ -39,6 +40,8 @@ export class GenerateRequestHandler extends RequestHandler<
     const store = await reporting.getStore();
     const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
+    const spaceId = reporting.getSpaceId(req, logger);
+
     // Encrypt request headers to store for the running report job to authenticate itself with Kibana
     const headers = await this.encryptHeaders();
 
@@ -49,7 +52,7 @@ export class GenerateRequestHandler extends RequestHandler<
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version,
-      spaceId: reporting.getSpaceId(req, logger),
+      spaceId,
     };
 
     // Add the report to ReportingStore to show as pending
@@ -59,6 +62,7 @@ export class GenerateRequestHandler extends RequestHandler<
         created_by: user ? user.username : false,
         payload,
         migration_version: version,
+        space_id: spaceId || DEFAULT_SPACE_ID,
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,
