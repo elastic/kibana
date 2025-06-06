@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import { FileUploaderSteps } from './types';
 import type { ValidatedFile } from './types';
 import { isFilePickerStep, isValidationStep } from './helpers';
@@ -25,7 +26,9 @@ export interface ValidationStepState {
 
 export interface ErrorStepState {
   step: FileUploaderSteps.ERROR;
-  uploadError: string;
+  fileUploadError?: string;
+  fileUploadResponse?: PrivmonBulkUploadUsersCSVResponse;
+  validLinesAsText: string;
 }
 
 export type ReducerState = FilePickerState | ValidationStepState | ErrorStepState;
@@ -43,7 +46,7 @@ export type ReducerAction =
   | { type: 'uploadingFile' }
   | {
       type: 'fileUploadError';
-      payload: { errorMessage: string };
+      payload: { errorMessage?: string; response?: PrivmonBulkUploadUsersCSVResponse };
     };
 
 export const INITIAL_STATE: FilePickerState = {
@@ -92,8 +95,10 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
     case 'fileUploadError':
       if (isValidationStep(state)) {
         return {
-          uploadError: action.payload.errorMessage,
+          fileUploadError: action.payload.errorMessage,
           step: FileUploaderSteps.ERROR,
+          fileUploadResponse: action.payload.response,
+          validLinesAsText: state.validatedFile.validLines.text,
         };
       }
       break;

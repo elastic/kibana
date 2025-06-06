@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiStepsHorizontal,
-  EuiCallOut,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import React, { useCallback, useReducer } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useKibana } from '../../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../../api/api';
@@ -25,6 +17,7 @@ import type { OnCompleteParams } from './types';
 import { isErrorStep, isFilePickerStep, isValidationStep } from './helpers';
 import { PrivilegedUserMonitoringFilePickerStep } from './components/file_picker_step';
 import { PrivilegedUserMonitoringValidationStep } from './components/validation_step';
+import { PrivilegedUserMonitoringErrorStep } from './components/error_step';
 
 interface PrivilegedUsersFileUploaderProps {
   onFileUploaded: (userCount: number) => void;
@@ -126,11 +119,13 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
         if (result.stats.failed > 0) {
           dispatch({
             type: 'fileUploadError',
-            payload: { errorMessage: result.errors.map((e) => e.message).join(', ') },
+            payload: {
+              response: result,
+            },
           });
+        } else {
+          onFileUploaded(result.stats.successful);
         }
-
-        onFileUploaded(result.stats.successful);
       } catch (e) {
         dispatch({
           type: 'fileUploadError',
@@ -143,65 +138,37 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
   const steps = useNavigationSteps(state, goToFirstStep);
 
   return (
-    <div>
+    <>
       {!isErrorStep(state) && <EuiStepsHorizontal size="s" steps={steps} />}
 
       <EuiSpacer size="m" />
-      <div>
-        {isFilePickerStep(state) && (
-          <PrivilegedUserMonitoringFilePickerStep
-            onFileChange={onFileChange}
-            isLoading={state.isLoading}
-            errorMessage={state.fileError}
-          />
-        )}
 
-        {isValidationStep(state) && (
-          <PrivilegedUserMonitoringValidationStep
-            validatedFile={state.validatedFile}
-            isLoading={state.isLoading}
-            onReturn={goToFirstStep}
-            onConfirm={onUploadFile}
-          />
-        )}
+      {isFilePickerStep(state) && (
+        <PrivilegedUserMonitoringFilePickerStep
+          onFileChange={onFileChange}
+          isLoading={state.isLoading}
+          errorMessage={state.fileError}
+        />
+      )}
 
-        {isErrorStep(state) && ( // TODO Wait for design and implement error step
-          <div>
-            <EuiCallOut
-              color="danger"
-              iconType="cross"
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorTitle"
-                  defaultMessage="Error uploading file"
-                />
-              }
-            >
-              <p>{state.uploadError}</p>
-            </EuiCallOut>
+      {isValidationStep(state) && (
+        <PrivilegedUserMonitoringValidationStep
+          validatedFile={state.validatedFile}
+          isLoading={state.isLoading}
+          onReturn={goToFirstStep}
+          onConfirm={onUploadFile}
+        />
+      )}
 
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.cancelButton"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={goToFirstStep} color="primary" fill>
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.tryAgainButton"
-                    defaultMessage="Try again"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        )}
-      </div>
-    </div>
+      {isErrorStep(state) && (
+        <PrivilegedUserMonitoringErrorStep
+          result={state.fileUploadResponse}
+          validLinesAsText={state.validLinesAsText}
+          errorMessage={state.fileUploadError}
+          goToFirstStep={goToFirstStep}
+          onClose={onClose}
+        />
+      )}
+    </>
   );
 };

@@ -33,6 +33,7 @@ paths:
                   errors:
                     - message: "Invalid monitored field"
                       username: "john.doe"
+                      index: 1
                   stats:
                     successful: 1
                     failed: 1
@@ -59,8 +60,14 @@ components:
           type: string
         username:
           type: string
+          nullable: true
+        index:
+          type: integer
+          nullable: true
       required:
         - message
+        - index
+        - username
 
     PrivmonUserCsvUploadStats:
       type: object

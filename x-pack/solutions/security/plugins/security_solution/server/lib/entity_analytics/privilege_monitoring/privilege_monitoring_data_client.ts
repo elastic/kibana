@@ -23,7 +23,6 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
-import { parseMonitoredPrivilegedUserCsvRow } from '../../../../common/entity_analytics/privileged_user_monitoring/parse_privileged_user_monitoring_csv_row';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
@@ -61,6 +60,7 @@ import { queryExistingUsers } from './users/query_existing_users';
 import { bulkBatchUpsertFromCSV } from './users/bulk/update_from_csv';
 import type { SoftDeletionResults } from './users/bulk/soft_delete_omitted_usrs';
 import { softDeleteOmittedUsers } from './users/bulk/soft_delete_omitted_usrs';
+import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -283,7 +283,7 @@ export class PrivilegeMonitoringDataClient {
     });
 
     return Readable.from(stream.pipe(csvStream))
-      .map(parseMonitoredPrivilegedUserCsvRow)
+      .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
       .map(queryExistingUsers(this.esClient, this.getIndex()))
       .map(bulkBatchUpsertFromCSV(this.esClient, this.getIndex(), { flushBytes, retries }))
