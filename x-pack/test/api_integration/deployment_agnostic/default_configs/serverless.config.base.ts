@@ -133,6 +133,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
