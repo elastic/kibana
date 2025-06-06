@@ -34,7 +34,7 @@ describe('Point visibility option', () => {
   });
 
   it(`should be hidden when not enabled`, async () => {
-    renderComponent({enabled: false});
+    renderComponent({ enabled: false });
     expect(screen.queryByTestId('lnsPointVisibilityOption')).not.toBeInTheDocument();
   });
 });
