@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useController } from 'react-hook-form';
 import {
   EuiFlexGroup,

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiPageHeaderSection,
@@ -32,6 +33,7 @@ interface HeaderProps {
   onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
   isActionsDisabled?: boolean;
   playgroundName?: string;
+  hasChanges?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   isActionsDisabled = false,
   onSelectPageModeChange,
   playgroundName,
+  hasChanges,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
@@ -108,6 +111,14 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
+          {isSearchModeEnabled && playgroundName !== undefined && hasChanges ? (
+            <EuiBadge color="warning">
+              <FormattedMessage
+                id="xpack.searchPlayground.header.unsavedChangesBadge"
+                defaultMessage="Unsaved changes"
+              />
+            </EuiBadge>
+          ) : null}
         </EuiFlexGroup>
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>
