@@ -19,11 +19,13 @@ import type {
   MicrosoftDefenderEndpointMachineAction,
   MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+import { merge } from 'lodash';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
 import type { NormalizedExternalConnectorClient } from '../../../../..';
+import type { MSDefenderRunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {
@@ -256,6 +258,21 @@ const createMicrosoftGetLibraryFilesApiResponseMock =
     };
   };
 
+const createMicrosoftRunScriptOptionsMock = (
+  overrides: Partial<MSDefenderRunScriptActionRequestBody> = {}
+): MSDefenderRunScriptActionRequestBody => {
+  const options: MSDefenderRunScriptActionRequestBody = {
+    endpoint_ids: ['1-2-3'],
+    comment: 'test comment',
+    agent_type: 'microsoft_defender_endpoint',
+    parameters: {
+      scriptName: 'test-script.ps1',
+      args: 'test-args',
+    },
+  };
+  return merge(options, overrides);
+};
+
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
   createMsConnectorActionsClient: createMsConnectorActionsClientMock,
@@ -265,4 +282,5 @@ export const microsoftDefenderMock = {
   createGetActionResultsApiResponse: createMicrosoftGetActionResultsApiResponseMock,
   createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
   createGetLibraryFilesApiResponse: createMicrosoftGetLibraryFilesApiResponseMock,
+  createRunScriptOptions: createMicrosoftRunScriptOptionsMock,
 };
