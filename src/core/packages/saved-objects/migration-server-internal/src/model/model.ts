@@ -71,7 +71,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (Either.isLeft<unknown, unknown>(resW)) {
+  if (Either.isLeft<unknown>(resW)) {
     if (isTypeof(resW.left, 'retryable_es_client_error')) {
       // Retry the same step after an exponentially increasing delay.
       return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);

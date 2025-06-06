@@ -250,6 +250,7 @@ const DraggablePatternInput = ({
               <Expression
                 draftGrokExpression={field.draftGrokExpression}
                 grokCollection={grokCollection}
+                dataTestSubj="streamsAppPatternExpression"
               />
             </EuiFlexItem>
             {onRemove && (
