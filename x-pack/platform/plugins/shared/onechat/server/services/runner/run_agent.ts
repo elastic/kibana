@@ -11,6 +11,7 @@ import type {
   ConversationalAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
+import { internalProviderToPublic } from '../tools/utils';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
@@ -29,7 +30,10 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
-    toolProvider: toolsService.registry.asPublicRegistry(),
+    toolProvider: internalProviderToPublic({
+      provider: toolsService.registry,
+      getRunner: manager.getRunner,
+    }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };
