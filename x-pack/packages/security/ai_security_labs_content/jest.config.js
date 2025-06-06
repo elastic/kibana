@@ -7,6 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/ai-security-labs-content'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/security/ai_security_labs_content'],
 };
+
