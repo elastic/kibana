@@ -15,7 +15,6 @@ import {
   catchError,
   defer,
   filter,
-  finalize,
   forkJoin,
   from,
   map,
@@ -330,9 +329,13 @@ export class ObservabilityAIAssistantClient {
               systemMessage$,
             ]).pipe(
               switchMap(([addedMessages, title, systemMessage]) => {
-                const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+                const { unredactedMessages } =
+                  this.dependencies.anonymizationService.unredactMessages(
+                    initialMessages.concat(addedMessages)
+                  );
+                const lastMessage = last(unredactedMessages);
 
-                const lastMessage = last(initialMessagesWithAddedMessages); // if a function request is at the very end, close the stream to consumer
+                // if a function request is at the very end, close the stream to consumer
                 // without persisting or updating the conversation. we need to wait
                 // on the function response to have a valid conversation
                 const isFunctionRequest = !!lastMessage?.message.function_call?.name;
@@ -353,7 +356,7 @@ export class ObservabilityAIAssistantClient {
                         omit(conversation._source, 'messages'),
 
                         // update messages and system message
-                        { messages: initialMessagesWithAddedMessages, systemMessage },
+                        { messages: unredactedMessages, systemMessage },
 
                         // update title
                         {
@@ -384,7 +387,7 @@ export class ObservabilityAIAssistantClient {
                     labels: {},
                     numeric_labels: {},
                     systemMessage,
-                    messages: initialMessagesWithAddedMessages,
+                    messages: unredactedMessages,
                     archived: false,
                   })
                 ).pipe(
@@ -515,10 +518,7 @@ export class ObservabilityAIAssistantClient {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
-        shareReplay(),
-        finalize(() => {
-          this.dependencies.anonymizationService.unredactMessages(messages);
-        })
+        shareReplay()
       ) as TStream extends true
         ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
         : never;
