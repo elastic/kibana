@@ -6,9 +6,9 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { AIConnector } from '@kbn/elastic-assistant';
-import type { DataViewBase } from '@kbn/es-query';
 
 import { convertToBuildEsQuery } from '../../../../../common/lib/kuery';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
@@ -19,14 +19,14 @@ export const convertFormDataInBaseSchedule = (
   scheduleData: AttackDiscoveryScheduleSchema,
   alertsIndexPattern: string,
   connector: AIConnector,
-  indexPattern: DataViewBase,
+  dataViewSpec: DataViewSpec,
   uiSettings: IUiSettingsClient
 ) => {
   const alertsSelectionSettings = scheduleData.alertsSelectionSettings;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern,
+    dataViewSpec,
     queries: [alertsSelectionSettings.query],
     filters: alertsSelectionSettings.filters,
   });
