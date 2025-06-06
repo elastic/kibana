@@ -18,7 +18,7 @@ export const MAX_HTTP_LINE_CHUNK_SIZE = MAX_HTTP_LINE_LENGTH * 0.75; // 4096 *0.
  */
 export const bytePartition = (list: string[], chunkSize = MAX_HTTP_LINE_CHUNK_SIZE): string[][] => {
   if (list.length === 0) {
-    return [[]];
+    return [];
   }
 
   const chunks: string[][] = [];

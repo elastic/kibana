@@ -48,7 +48,7 @@ describe('bytePartition', () => {
       const input: string[] = [];
       const result = bytePartition(input);
 
-      expect(result).toEqual([[]]);
+      expect(result).toEqual([]);
     });
 
     it('should handle single item input', () => {
