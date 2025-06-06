@@ -59,8 +59,8 @@ export const FullScreenWaterfall = ({
           serviceName: transaction?.[SERVICE_NAME_FIELD],
           entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
           scrollElement,
-          onNodeClick: (item: { id: string }) => {
-            setSpanId(item.id);
+          onNodeClick: (nodeSpanId: string) => {
+            setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
           },
         },

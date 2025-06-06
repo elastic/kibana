@@ -46,7 +46,7 @@ export function TraceWaterfallEmbeddable({
           showCriticalPath={false}
           waterfall={waterfallFetchResult.waterfall}
           displayLimit={displayLimit}
-          onNodeClick={onNodeClick}
+          onNodeClick={(node) => onNodeClick?.(node.id)}
           isEmbeddable
           scrollElement={scrollElement}
         />

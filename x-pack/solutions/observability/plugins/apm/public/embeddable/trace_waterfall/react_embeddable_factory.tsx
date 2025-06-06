@@ -20,7 +20,6 @@ import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
 import { FocusedTraceWaterfallEmbeddable } from './focused_trace_waterfall_embeddable';
-import type { IWaterfallSpanOrTransaction } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface BaseProps {
   traceId: string;
@@ -37,7 +36,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   entryTransactionId: string;
   displayLimit?: number;
   scrollElement?: Element;
-  onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  onNodeClick?: (nodeSpanId: string) => void;
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
