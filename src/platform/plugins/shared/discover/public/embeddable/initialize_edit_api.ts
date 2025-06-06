@@ -38,9 +38,10 @@ export async function getAppTarget(
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
 
   const urlWithoutLocationState = await discoverServices.locator.getUrl({});
+
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
-    : urlWithoutLocationState;
+    : await discoverServices.locator.getUrl(locatorParams);
 
   const editPath = discoverServices.core.http.basePath.remove(editUrl);
   const editApp = useRedirect ? 'r' : 'discover';
