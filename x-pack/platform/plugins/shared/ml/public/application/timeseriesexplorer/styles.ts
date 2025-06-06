@@ -114,7 +114,6 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.anomaly-marker': {
             strokeWidth: 1,
-            // stroke: euiTheme.colors.mediumShade,
 
             '&.critical': {
               fill: euiTheme.colors.severity.danger,
