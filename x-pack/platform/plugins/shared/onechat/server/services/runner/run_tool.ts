@@ -10,6 +10,7 @@ import type {
   ScopedRunnerRunToolsParams,
   RunToolReturn,
 } from '@kbn/onechat-server';
+import { internalProviderToPublic } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
 import type { RunnerManager } from './runner';
@@ -46,12 +47,17 @@ export const createToolHandlerContext = <TParams = Record<string, unknown>>({
   manager: RunnerManager;
 }): ToolHandlerContext => {
   const { onEvent } = toolExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory } = manager.deps;
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService } =
+    manager.deps;
   return {
     request,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
+    toolProvider: internalProviderToPublic({
+      provider: toolsService.registry,
+      getRunner: manager.getRunner,
+    }),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

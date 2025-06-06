@@ -7,17 +7,25 @@
 
 import { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
 
-const getSystemPrompt = () => {
-  return `You are a helpful chat assistant from the Elasticsearch company.
+export const defaultSystemPrompt =
+  'You are a helpful chat assistant from the Elasticsearch company.';
 
-  You have tools at your disposal that you can use to answer the user's question.
+const getFullSystemPrompt = (systemPrompt: string) => {
+  return `${systemPrompt}
 
   ### Additional info
+  - You have tools at your disposal that you can use
   - The current date is: ${new Date().toISOString()}
   - You can use markdown format to structure your response
   `;
 };
 
-export const withSystemPrompt = ({ messages }: { messages: BaseMessage[] }): BaseMessageLike[] => {
-  return [['system', getSystemPrompt()], ...messages];
+export const withSystemPrompt = ({
+  systemPrompt,
+  messages,
+}: {
+  systemPrompt: string;
+  messages: BaseMessage[];
+}): BaseMessageLike[] => {
+  return [['system', getFullSystemPrompt(systemPrompt)], ...messages];
 };
