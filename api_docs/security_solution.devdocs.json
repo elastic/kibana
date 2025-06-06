@@ -1527,7 +1527,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false
           },
           {
