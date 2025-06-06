@@ -10,14 +10,7 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  Streams,
-  getAdvancedParameters,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isRoot,
-  namespacePrefixes,
-} from '@kbn/streams-schema';
+import { Streams, getAdvancedParameters, isRoot, namespacePrefixes } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -65,7 +58,6 @@ export function generateLayer(
   return {
     name: getComponentTemplateName(name),
     template: {
-      lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
         dynamic: false,
@@ -85,53 +77,7 @@ export function generateLayer(
   };
 }
 
-function getTemplateLifecycle(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  const lifecycle = definition.ingest.lifecycle;
-  if (isServerless) {
-    // dlm cannot be disabled in serverless
-    return {
-      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-    };
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return { enabled: false };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      enabled: true,
-      data_retention: lifecycle.dsl.data_retention,
-    };
-  }
-
-  return undefined;
-}
-
 function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const baseSettings = isRoot(definition.name) ? logsSettings : {};
-  const lifecycle = definition.ingest.lifecycle;
-
-  if (isServerless) {
-    return baseSettings;
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': true,
-      'index.lifecycle.name': lifecycle.ilm.policy,
-    };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': false,
-      'index.lifecycle.name': undefined,
-    };
-  }
-
-  // don't specify any lifecycle property when lifecyle is disabled or inherited
   return baseSettings;
 }
