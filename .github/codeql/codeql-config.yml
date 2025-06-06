@@ -125,5 +125,6 @@ paths-ignore:
   - x-pack/performance
   - x-pack/scripts
   - x-pack/solutions/observability/packages/kbn-genai-cli
+  - x-pack/solutions/*/test
   - x-pack/test
   - x-pack/test_serverless

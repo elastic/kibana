@@ -185,11 +185,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    sourcererDataView,
-  } = useSourcererDataView(sourcererScope);
+  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();
 
@@ -219,11 +215,11 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && indexPatterns != null) {
+    if (browserFields != null && sourcererDataView) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        dataViewSpec: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -231,7 +227,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableType,

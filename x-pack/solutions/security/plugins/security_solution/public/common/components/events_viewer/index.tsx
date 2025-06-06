@@ -145,9 +145,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const {
     browserFields,
     dataViewId,
-    indexPattern,
-    sourcererDataView,
     selectedPatterns,
+    sourcererDataView,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
@@ -234,12 +233,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern,
+        dataViewSpec: sourcererDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, indexPattern, query, end]
+    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
   );
 
   const canQueryTimeline = useMemo(
@@ -281,7 +280,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
