@@ -81,6 +81,7 @@ export function PackageCard({
   minCardHeight,
   showDescription = true,
   showReleaseBadge = true,
+  hasDataStreams,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
@@ -219,7 +220,11 @@ export function PackageCard({
             [class*='euiCard__description'] {
               flex-grow: 1;
               ${descriptionLineClamp
-                ? shouldShowInstallationStatus({ installStatus, showInstallationStatus })
+                ? shouldShowInstallationStatus({
+                    installStatus,
+                    showInstallationStatus,
+                    isActive: hasDataStreams,
+                  })
                   ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                   : getLineClampStyles(descriptionLineClamp)
                 : ''}
@@ -263,6 +268,7 @@ export function PackageCard({
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
               compressed={showCompressedInstallationStatus}
+              hasDataStreams={hasDataStreams}
             />
           </EuiFlexGroup>
         </Card>

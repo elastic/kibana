@@ -25,17 +25,17 @@ describe('ManageIntegrationsCallout', () => {
     jest.clearAllMocks();
   });
 
-  test('renders nothing when installedIntegrationsCount is 0', () => {
-    const { queryByTestId } = render(<ManageIntegrationsCallout installedIntegrationsCount={0} />, {
+  test('renders nothing when activeIntegrationsCount is 0', () => {
+    const { queryByTestId } = render(<ManageIntegrationsCallout activeIntegrationsCount={0} />, {
       wrapper: TestProviders,
     });
 
     expect(queryByTestId('integrationsCompleteText')).not.toBeInTheDocument();
   });
 
-  test('renders callout with correct message and link when there are installed integrations', () => {
+  test('renders callout with correct message and link when there are active integrations', () => {
     const { getByText, getByTestId } = render(
-      <ManageIntegrationsCallout installedIntegrationsCount={5} />,
+      <ManageIntegrationsCallout activeIntegrationsCount={5} />,
       {
         wrapper: TestProviders,
       }

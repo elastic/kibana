@@ -37,6 +37,24 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
   },
 ];
 
+export const defaultExternalDetectionsBodyConfig: OnboardingGroupConfig[] = [
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.externalDetections.dataGroup.title', {
+      defaultMessage: 'Ingest your data',
+    }),
+    cards: [integrationsExternalDetectionsCardConfig, knowledgeSourceCardConfig],
+  },
+  {
+    title: i18n.translate(
+      'xpack.securitySolution.onboarding.externalDetections.customizeLLMGroup.title',
+      {
+        defaultMessage: 'Customize your LLM',
+      }
+    ),
+    cards: [assistantCardConfig],
+  },
+];
+
 export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
   {
     title: i18n.translate('xpack.securitySolution.onboarding.configure.title', {
