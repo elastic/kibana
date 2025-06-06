@@ -110,6 +110,7 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    buildFlavor: 'traditional',
     eventLogger: clients.eventLogger,
     eventLogIndex: '.kibana-event-log-*',
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),

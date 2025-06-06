@@ -10,14 +10,12 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod';
-import type { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
+import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 
-// select only some properties of AssistantToolParams
-export type ESQLToolParams = AssistantToolParams & {
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-};
+type ESQLToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'assistantContext' | 'createLlmInstance'>>;
 
 const TOOL_NAME = 'NaturalLanguageESQLTool';
 
@@ -47,7 +45,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
       !assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;

@@ -9,6 +9,7 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { BuildFlavor } from '@kbn/config';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ElasticAssistantApiRequestHandlerContext,
@@ -33,16 +34,19 @@ interface ConstructorOptions {
   core: ElasticAssistantPluginCoreSetupDependencies;
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
+  buildFlavor: BuildFlavor;
   assistantService: AIAssistantService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
+  private readonly buildFlavor: BuildFlavor;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
+    this.buildFlavor = options.buildFlavor;
   }
 
   public async create(
@@ -87,6 +91,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     return {
       core: coreContext,
+      buildFlavor: this.buildFlavor,
 
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),

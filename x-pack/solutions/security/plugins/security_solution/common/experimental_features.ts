@@ -109,6 +109,11 @@ export const allowedExperimentalValues = Object.freeze({
   advancedEsqlGeneration: false,
 
   /**
+   * Enables Kibana client tools
+   */
+  kibanaClientToolEnabled: true,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,

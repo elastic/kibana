@@ -373,6 +373,7 @@ export const postEvaluateRoute = (
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
                 createLlmInstance,
+                llmType,
               };
 
               const tools: StructuredTool[] = (
@@ -399,6 +400,7 @@ export const postEvaluateRoute = (
                       llm: createLlmInstance(),
                       isOssModel,
                       description,
+                      llmType,
                     });
                   })
                 )

@@ -4016,7 +4016,8 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "@std-uritemplate/std-uritemplate"
       ],
       "reviewers": [
         "team:security-generative-ai"

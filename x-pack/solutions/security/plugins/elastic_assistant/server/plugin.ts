@@ -12,6 +12,7 @@ import {
   AssistantFeatures,
 } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { BuildFlavor } from '@kbn/config';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -46,12 +47,14 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private readonly buildFlavor: BuildFlavor;
   private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
     this.config = initializerContext.config.get<ConfigSchema>();
   }
 
@@ -88,6 +91,7 @@ export class ElasticAssistantPlugin
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
+      buildFlavor: this.buildFlavor,
       assistantService: this.assistantService,
     });
 

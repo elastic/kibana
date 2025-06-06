@@ -32,6 +32,10 @@ describe('SecurityLabsTool', () => {
 
   describe('DynamicStructuredTool', () => {
     it('includes citations', async () => {
+      const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
+
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
           id: '123',
@@ -51,8 +55,6 @@ category:
 In previous publications,`,
         }),
       ]);
-
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
 
       (contentReferencesStore.add as jest.Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
@@ -80,7 +82,7 @@ In previous publications,`,
           pageContent: `hello world`,
         }),
       ]);
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
 
       (contentReferencesStore.add as jest.Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {

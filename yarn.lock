@@ -10562,6 +10562,11 @@
     "@statoscope/types" "5.28.1"
     "@types/md5" "^2.3.2"
 
+"@std-uritemplate/std-uritemplate@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@std-uritemplate/std-uritemplate/-/std-uritemplate-2.0.3.tgz#cb84f412f7855d324da17af05990a8d0da9867e7"
+  integrity sha512-oN5BHB81TMdasLZLkcdmVDFajo3CxrdeYWFKbeVw1MVZcd4jWZX6cbxm0Iq91wt/o2zsJjmefUaYrLInvZ3/DQ==
+
 "@storybook/addon-a11y@^8.6.3":
   version "8.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/addon-a11y/-/addon-a11y-8.6.3.tgz#f017e9183138be2dddc88172b43e4b275a39f282"

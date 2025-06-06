@@ -624,6 +624,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       advancedEsqlGeneration: config.experimentalFeatures.advancedEsqlGeneration,
+      kibanaClientToolEnabled: config.experimentalFeatures.kibanaClientToolEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

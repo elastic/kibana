@@ -63,6 +63,7 @@
     "@kbn/rule-data-utils",
     "@kbn/alerting-types",
     "@kbn/zod-helpers",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

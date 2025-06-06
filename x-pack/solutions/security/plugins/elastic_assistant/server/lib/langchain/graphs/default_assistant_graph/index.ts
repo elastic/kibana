@@ -133,6 +133,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     telemetry,
     createLlmInstance,
     isOssModel,
+    llmType,
   };
 
   const tools: StructuredTool[] = (

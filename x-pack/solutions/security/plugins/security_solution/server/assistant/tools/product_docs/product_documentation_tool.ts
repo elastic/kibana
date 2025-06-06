@@ -15,7 +15,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
+
+type ProductDocumentationToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'llmTasks' | 'connectorId'>>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -26,17 +30,18 @@ const toolDetails = {
   id: 'product-documentation-tool',
   name: 'ProductDocumentationTool',
 };
+
 export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+  isSupported: (params: AssistantToolParams): params is ProductDocumentationToolParams => {
     return params.llmTasks != null && params.connectorId != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, llmTasks, request, contentReferencesStore } =
-      params as AssistantToolParams;
+      params as ProductDocumentationToolParams;
 
     // This check is here in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;

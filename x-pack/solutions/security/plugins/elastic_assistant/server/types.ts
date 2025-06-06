@@ -51,6 +51,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { BuildFlavor } from '@kbn/config';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
@@ -143,6 +144,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  buildFlavor: BuildFlavor;
   eventLogger: IEventLogger;
   eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;
@@ -184,6 +186,8 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
 >;
 
 export type GetElser = () => Promise<string> | never;
+
+export type LlmType = 'openai' | 'bedrock' | 'gemini' | 'inference';
 
 export interface AssistantResourceNames {
   componentTemplate: {
@@ -250,7 +254,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
+  getTool: (params: AssistantToolParams) => Promise<StructuredToolInterface | null>;
 }
 
 export type AssistantToolLlm =
@@ -288,4 +292,17 @@ export interface AssistantToolParams {
     | ActionsClientChatBedrockConverse
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
+  llmType: LlmType | undefined;
 }
+
+/**
+ * Helper type for working with AssistantToolParams when some properties are required.
+ *
+ *
+ * ```ts
+ * export type MyNewTypeWithAssistantContext = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>
+ * ```
+ */
+export type RequiredDefined<T> = {
+  [K in keyof T]-?: Exclude<T[K], undefined>;
+};
