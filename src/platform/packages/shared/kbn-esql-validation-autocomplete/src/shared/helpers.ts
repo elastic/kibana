@@ -113,30 +113,6 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 export const within = (position: number, location: ESQLLocation | undefined) =>
   Boolean(location && location.min <= position && location.max >= position);
 
-function isMathFunction(query: string) {
-  const queryTrimmed = query.trimEnd();
-  // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
-  // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
-  const [opString] = queryTrimmed.split(' ').reverse();
-  // compare last char for all math functions
-  // limit only to 2 chars operators
-  const fns = operatorsDefinitions.filter(({ name }) => name.length < 3).map(({ name }) => name);
-  const tokenMatch = fns.some((op) => opString === op);
-  // there's a match, that's good
-  if (tokenMatch) {
-    return true;
-  }
-  // either there's no match or it is the case where field/function and op are not spaced out
-  // e.g "field+" or "fn()+"
-  // so try to extract the last char and compare it with the single char math functions
-  const singleCharFns = fns.filter((name) => name.length === 1);
-  return singleCharFns.some((c) => c === opString[opString.length - 1]);
-}
-
-export function isComma(char: string) {
-  return char === ',';
-}
-
 export function isSourceCommand({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
 }
@@ -788,18 +764,13 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
   let query = _query;
   // check if all brackets are closed, otherwise close them
   const bracketsToAppend = getBracketsToClose(query);
-  const unclosedRoundBracketCount = bracketsToAppend.filter((bracket) => bracket === ')').length;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBracketCount === 0) ||
-    isMathFunction(query) ||
-    /,\s+$/.test(query)
-  ) {
-    query += EDITOR_MARKER;
+
+  const endsWithBinaryOperatorRegex =
+    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+  const endsWithCommaRegex = /,\s+$/;
+
+  if (endsWithBinaryOperatorRegex.test(query) || endsWithCommaRegex.test(query)) {
+    query += `${EDITOR_MARKER}`;
   }
 
   query += bracketsToAppend.join('');
