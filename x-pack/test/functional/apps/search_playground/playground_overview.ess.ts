@@ -19,12 +19,7 @@ const esArchiveIndex =
 
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects([
-    'common',
-    'searchPlayground',
-    'solutionNavigation',
-    'searchStart',
-  ]);
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'searchStart']);
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -39,6 +34,7 @@ export default function (ftrContext: FtrProviderContext) {
   const retry = getService('retry');
 
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+  const deleteIndex = async () => await esArchiver.unload(esArchiveIndex);
 
   let proxy: LlmProxy;
   let removeOpenAIConnector: () => Promise<void>;
@@ -66,7 +62,7 @@ export default function (ftrContext: FtrProviderContext) {
       } catch {
         // we can ignore  if this fails
       }
-      await esArchiver.unload(esArchiveIndex);
+      await deleteIndex();
       proxy.close();
     });
 
@@ -125,14 +121,14 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('load start page after selecting index', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         after(async () => {
           await removeOpenAIConnector?.();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
         });
       });
@@ -162,7 +158,7 @@ export default function (ftrContext: FtrProviderContext) {
             await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
           });
           after(async () => {
-            await esArchiver.unload(esArchiveIndex);
+            await deleteIndex();
             await removeOpenAIConnector?.();
             await browser.refresh();
           });
@@ -182,12 +178,13 @@ export default function (ftrContext: FtrProviderContext) {
             await pageObjects.searchStart.clickCreateIndexButton();
             await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
 
-            // add data
-            await es.index({
+            // add mapping
+            await es.indices.putMapping({
               index: indexName,
-              refresh: true,
-              body: {
-                my_field: [1, 0, 1],
+              properties: {
+                text: {
+                  type: 'text',
+                },
               },
             });
             await pageObjects.common.navigateToApp('searchPlayground');
@@ -324,7 +321,7 @@ export default function (ftrContext: FtrProviderContext) {
         });
         after(async () => {
           await removeOpenAIConnector?.();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
         });
       });

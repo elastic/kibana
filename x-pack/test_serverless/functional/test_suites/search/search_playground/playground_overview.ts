@@ -36,6 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+  const deleteIndex = async () => await esArchiver.unload(esArchiveIndex);
+
   let roleAuthc: RoleCredentials;
 
   describe('Serverless Playground Overview', function () {
@@ -73,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       } catch {
         // we can ignore  if this fails
       }
-      await esArchiver.unload(esArchiveIndex);
+      await deleteIndex();
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
@@ -141,14 +143,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('load start page after selecting index', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         after(async () => {
           await removeOpenAIConnector?.();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
         });
       });
@@ -178,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
           });
           after(async () => {
-            await esArchiver.unload(esArchiveIndex);
+            await deleteIndex();
             await removeOpenAIConnector?.();
             await browser.refresh();
           });
@@ -198,14 +200,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
             await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
 
-            // add data
-            await es.index({
+            // add mapping
+            await es.indices.putMapping({
               index: indexName,
-              refresh: true,
-              body: {
-                my_field: [1, 0, 1],
+              properties: {
+                text: {
+                  type: 'text',
+                },
               },
             });
+
             await svlSearchNavigation.navigateToSearchPlayground();
           });
 
@@ -345,7 +349,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await removeOpenAIConnector?.();
-        await esArchiver.unload(esArchiveIndex);
+        await deleteIndex();
         await browser.refresh();
       });
     });
