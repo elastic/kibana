@@ -15,14 +15,12 @@ export const registerUrlServiceRoutes = ({
   router,
   core,
   urlExpirationDuration,
-  pitKeepAlive,
   maxPageSize,
   logger,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  pitKeepAlive: Duration;
   maxPageSize: number;
   logger: Logger;
 }) => {
@@ -30,7 +28,6 @@ export const registerUrlServiceRoutes = ({
     router,
     core,
     urlExpirationDuration,
-    pitKeepAlive,
     maxPageSize,
     logger,
   });

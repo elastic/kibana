@@ -15,14 +15,12 @@ export const registerDeleteUnusedUrlsRoute = ({
   router,
   core,
   urlExpirationDuration,
-  pitKeepAlive,
   maxPageSize,
   logger,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  pitKeepAlive: Duration;
   maxPageSize: number;
   logger: Logger;
 }) => {
@@ -44,7 +42,6 @@ export const registerDeleteUnusedUrlsRoute = ({
       await runDeleteUnusedUrlsTask({
         core,
         urlExpirationDuration,
-        pitKeepAlive,
         maxPageSize,
         logger,
       });

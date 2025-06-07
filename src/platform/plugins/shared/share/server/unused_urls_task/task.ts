@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { CoreSetup, ISavedObjectsRepository, SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
-import { groupBy } from 'lodash';
 import { Duration } from 'moment';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
@@ -56,74 +54,38 @@ export const deleteUnusedUrls = async ({
   }
 };
 
-type SavedObjectsBulkDeleteObjectWithNamespace = SavedObjectsBulkDeleteObject & {
-  namespace: string;
-};
-
-export const fetchAllUnusedUrls = async ({
+export const fetchUnusedUrls = async ({
   savedObjectsRepository,
   filter,
-  pitKeepAlive,
   maxPageSize,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   filter: string;
-  pitKeepAlive: string;
   maxPageSize: number;
 }) => {
-  const results: SavedObjectsBulkDeleteObjectWithNamespace[] = [];
-
-  const { id: pitId } = await savedObjectsRepository.openPointInTimeForType(SAVED_OBJECT_TYPE, {
-    keepAlive: pitKeepAlive,
+  const { saved_objects: savedObjects } = await savedObjectsRepository.find({
+    type: SAVED_OBJECT_TYPE,
+    filter,
+    perPage: maxPageSize,
+    namespaces: ['*'],
+    fields: ['type'],
   });
 
-  try {
-    let searchAfter: SortResults | undefined;
-    let hasMore = true;
-
-    while (hasMore) {
-      const { saved_objects: savedObjects } = await savedObjectsRepository.find({
-        type: SAVED_OBJECT_TYPE,
-        filter,
-        pit: { id: pitId, keepAlive: pitKeepAlive },
-        searchAfter,
-        perPage: maxPageSize,
-        namespaces: ['*'],
-        fields: ['type'],
-      });
-
-      results.push(
-        ...savedObjects.map(({ id, type, namespaces }) => ({
-          id,
-          type,
-          namespace: namespaces ? namespaces[0] : 'default',
-        }))
-      );
-      hasMore = savedObjects.length === maxPageSize;
-
-      if (hasMore) {
-        searchAfter = savedObjects[savedObjects.length - 1].sort;
-      }
-    }
-  } catch (e) {
-    throw new Error(`Failed to fetch unused URLs: ${e.message}`);
-  } finally {
-    await savedObjectsRepository.closePointInTime(pitId);
-  }
-
-  return groupBy(results, 'namespace');
+  return {
+    unusedUrls: savedObjects,
+    hasMore: savedObjects.length === maxPageSize,
+    namespace: savedObjects[0]?.namespaces?.[0] || 'default',
+  };
 };
 
 export const runDeleteUnusedUrlsTask = async ({
   core,
   urlExpirationDuration,
-  pitKeepAlive,
   maxPageSize,
   logger,
 }: {
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  pitKeepAlive: Duration;
   maxPageSize: number;
   logger: Logger;
 }) => {
@@ -135,31 +97,35 @@ export const runDeleteUnusedUrlsTask = async ({
 
   const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
 
-  const unusedUrlsGroupedByNamespace = await fetchAllUnusedUrls({
+  let { unusedUrls, hasMore, namespace } = await fetchUnusedUrls({
     savedObjectsRepository,
     filter,
-    pitKeepAlive: durationToSeconds(pitKeepAlive),
     maxPageSize,
   });
 
-  if (Object.keys(unusedUrlsGroupedByNamespace).length) {
-    const deletionPromises = Object.entries(unusedUrlsGroupedByNamespace).map(
-      async ([namespace, unusedUrls]) => {
-        logger.debug(`Found ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
+  while (unusedUrls.length > 0) {
+    await deleteUnusedUrls({
+      savedObjectsRepository,
+      unusedUrls,
+      namespace,
+      logger,
+    });
 
-        await deleteUnusedUrls({
-          savedObjectsRepository,
-          unusedUrls,
-          logger,
-          namespace,
-        });
-      }
-    );
-
-    await Promise.allSettled(deletionPromises);
-  } else {
-    logger.debug('No unused URLs found');
+    if (hasMore) {
+      const nextPageData = await fetchUnusedUrls({
+        savedObjectsRepository,
+        filter,
+        maxPageSize,
+      });
+      unusedUrls = nextPageData.unusedUrls;
+      hasMore = nextPageData.hasMore;
+      namespace = nextPageData.namespace;
+    } else {
+      unusedUrls = [];
+    }
   }
+
+  logger.debug('Unused URLs cleanup finished');
 };
 
 export const scheduleUnusedUrlsCleanupTask = async ({

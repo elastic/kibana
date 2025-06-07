@@ -97,7 +97,6 @@ export class SharePlugin
         router: core.http.createRouter(),
         core,
         urlExpirationDuration: this.config.url_expiration.duration,
-        pitKeepAlive: this.config.url_expiration.pit_keep_alive,
         maxPageSize: this.config.url_expiration.max_page_size,
         logger: this.logger,
       });
@@ -137,7 +136,6 @@ export class SharePlugin
               await runDeleteUnusedUrlsTask({
                 core,
                 urlExpirationDuration: this.config.url_expiration.duration,
-                pitKeepAlive: this.config.url_expiration.pit_keep_alive,
                 logger: this.logger,
                 maxPageSize: this.config.url_expiration.max_page_size,
               });
