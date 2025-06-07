@@ -37,7 +37,7 @@ export function createInferenceRestClient({
         );
 
         if (!matchingConnector) {
-          throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
+          throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 404);
         }
         return matchingConnector;
       });

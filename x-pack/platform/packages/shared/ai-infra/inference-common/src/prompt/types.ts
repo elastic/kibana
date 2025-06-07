@@ -41,7 +41,6 @@ export type PromptVersion<TToolOptions extends ToolOptions = ToolOptions> = {
   system?: string | MustachePromptTemplate;
   template: MustachePromptTemplate | ChatPromptTemplate | StaticPromptTemplate;
   temperature?: number;
-  invokeParameters?: Record<string, any>;
 } & TToolOptions;
 
 export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = PromptVersion[]> {

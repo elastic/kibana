@@ -49,14 +49,14 @@ type ChatCompleteApiWithCallbackInitOptions = Pick<
   CreateChatCompleteApiOptionsKey
 >;
 
-type ChatCompleteApiWithCallbackCallback = (
+export type ChatCompleteApiWithCallbackCallback = (
   connector: InferenceExecutor
 ) => Omit<ChatCompleteOptions<ToolOptions, boolean>, CreateChatCompleteApiOptionsKey>;
 
-type ChatCompleteApiWithCallback = (
+export type ChatCompleteApiWithCallback = (
   options: ChatCompleteApiWithCallbackInitOptions,
   callback: ChatCompleteApiWithCallbackCallback
-) => ChatCompleteCompositeResponse;
+) => ChatCompleteCompositeResponse<ToolOptions, boolean>;
 
 export function createChatCompleteCallbackApi(
   options: CreateChatCompleteApiOptions

@@ -509,7 +509,9 @@ export class ObservabilityAIAssistantClient {
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
-            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+            this.dependencies.logger.trace(
+              () => `Received chunk: ${JSON.stringify(event.message)}`
+            );
           }
         }),
         shareReplay()

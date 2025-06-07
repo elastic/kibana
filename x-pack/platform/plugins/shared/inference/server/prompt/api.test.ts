@@ -18,15 +18,19 @@ import {
   getConnectorModel,
   createPrompt,
   Message,
+  ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 
-import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
+import {
+  ChatCompleteApiWithCallback,
+  ChatCompleteApiWithCallbackCallback,
+  createChatCompleteCallbackApi,
+} from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 import { createPromptApi } from './api';
 import { createInferenceExecutorMock, createInferenceConnectorMock } from '../test_utils';
 
-// Mock dependencies
 jest.mock('../chat_complete/callback_api');
 jest.mock('../../common/prompt/prompt_to_message_options', () => {
   const actual = jest.requireActual<typeof import('../../common/prompt/prompt_to_message_options')>(
@@ -38,19 +42,9 @@ jest.mock('../../common/prompt/prompt_to_message_options', () => {
     promptToMessageOptions: jest.fn(actual.promptToMessageOptions),
   };
 });
-jest.mock('@kbn/inference-common', () => {
-  const originalModule = jest.requireActual('@kbn/inference-common');
-  return {
-    ...originalModule,
-    // We will use the actual implementations of these, so no need to mock them here
-    // getConnectorFamily: jest.fn(),
-    // getConnectorProvider: jest.fn(),
-    // getConnectorModel: jest.fn(),
-  };
-});
 
 const mockCreateChatCompleteCallbackApi = jest.mocked(createChatCompleteCallbackApi);
-const mockPromptToMessageOptions = jest.mocked(promptToMessageOptions); // Still need to assert it's called
+const mockPromptToMessageOptions = jest.mocked(promptToMessageOptions);
 
 const mockPrompt = createPrompt({
   name: 'test-prompt',
@@ -67,7 +61,7 @@ describe('createPromptApi', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let promptApi: PromptAPI;
-  let mockCallbackApi: jest.Mock;
+  let mockCallbackApi: jest.MockedFn<ChatCompleteApiWithCallback>;
 
   const mockInput = { query: 'world' };
 
@@ -76,10 +70,9 @@ describe('createPromptApi', () => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
 
-    mockCallbackApi = jest.fn().mockReturnValue(Promise.resolve({ content: 'response' }));
-    mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi as any);
+    mockCallbackApi = jest.fn();
+    mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
-    // No longer mocking getConnectorFamily, getConnectorProvider, getConnectorModel directly
     promptApi = createPromptApi({ request, actions, logger });
   });
 
@@ -119,7 +112,10 @@ describe('createPromptApi', () => {
     const mockExecutor = createInferenceExecutorMock({ connector: mockConnector });
 
     // Let the actual callback function execute with our mockExecutor
-    mockCallbackApi.mockImplementationOnce((_opts, callback) => callback(mockExecutor));
+    mockCallbackApi.mockImplementationOnce((_opts, cb) => {
+      cb(mockExecutor);
+      return Promise.resolve({ content: '', toolCalls: [] });
+    });
 
     const promptOptions: PromptOptions = {
       prompt: mockPrompt,
@@ -143,7 +139,7 @@ describe('createPromptApi', () => {
     let callbackFn: any;
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
       callbackFn = callback;
-      return Promise.resolve({ content: 'response' });
+      return Promise.resolve({ content: 'response', toolCalls: [] });
     });
 
     const prevMessages: Message[] = [{ role: MessageRole.Assistant, content: 'Previous message' }];
@@ -165,10 +161,11 @@ describe('createPromptApi', () => {
 
   it('generates correct metadata', async () => {
     const mockExecutor = createInferenceExecutorMock({});
-    let callbackFn: any;
+    let callbackFn: ChatCompleteApiWithCallbackCallback | undefined;
+
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
       callbackFn = callback;
-      return Promise.resolve({ content: 'response' });
+      return Promise.resolve({ content: 'response', toolCalls: [] });
     });
 
     const promptOptions: PromptOptions = {
@@ -179,7 +176,7 @@ describe('createPromptApi', () => {
     };
 
     await promptApi(promptOptions);
-    const resultOptions = callbackFn(mockExecutor);
+    const resultOptions = callbackFn!(mockExecutor);
 
     expect(resultOptions.metadata).toEqual({
       attributes: {
@@ -199,13 +196,28 @@ describe('createPromptApi', () => {
       stream: false,
     };
 
+    mockCallbackApi.mockResolvedValueOnce({ content: 'response', toolCalls: [] });
+
     const response = promptApi(promptOptions);
     expect(response).toBeInstanceOf(Promise);
-    await expect(response).resolves.toEqual({ content: 'response' });
+    await expect(response).resolves.toEqual({ content: 'response', toolCalls: [] });
   });
 
   it('handles streaming (Observable) response', async () => {
-    mockCallbackApi.mockReturnValue(of({ content: 'chunk1' }, { content: 'chunk2' }));
+    mockCallbackApi.mockReturnValue(
+      of(
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk as const,
+          content: 'chunk1',
+          tool_calls: [],
+        },
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk as const,
+          content: 'chunk2',
+          tool_calls: [],
+        }
+      )
+    );
 
     const promptOptions = {
       prompt: mockPrompt,
@@ -218,7 +230,10 @@ describe('createPromptApi', () => {
     expect(isObservable(response$)).toBe(true);
 
     const events = await firstValueFrom(response$.pipe(toArray()));
-    expect(events).toEqual([{ content: 'chunk1' }, { content: 'chunk2' }]);
+    expect(events).toEqual([
+      { type: ChatCompletionEventType.ChatCompletionChunk, content: 'chunk1', tool_calls: [] },
+      { type: ChatCompletionEventType.ChatCompletionChunk, content: 'chunk2', tool_calls: [] },
+    ]);
   });
 
   it('passes through other options like temperature', async () => {
@@ -226,7 +241,7 @@ describe('createPromptApi', () => {
     let callbackFn: any;
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
       callbackFn = callback;
-      return Promise.resolve({ content: 'response' });
+      return Promise.resolve({ content: 'response', toolCalls: [] });
     });
 
     const promptOptions: PromptOptions = {

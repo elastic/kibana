@@ -78,7 +78,6 @@ export const chatCompleteBaseSchema = schema.object({
   functionCalling: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
   ),
-  invokeParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 const messageSchema = schema.oneOf([
@@ -173,7 +172,6 @@ const promptSchema = schema.object({
             }),
           ]),
           temperature: schema.maybe(schema.number()),
-          invokeParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       ])
     ),
