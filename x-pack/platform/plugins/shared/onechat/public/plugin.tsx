@@ -14,6 +14,13 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import {
+  AgentService,
+  ChatService,
+  ConversationsService,
+  ToolsService,
+  OnechatInternalService,
+} from './services';
 
 export class OnechatPlugin
   implements
@@ -25,6 +32,8 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
+  // @ts-expect-error unused for now
+  private internalServices?: OnechatInternalService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -36,7 +45,19 @@ export class OnechatPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+    const agentService = new AgentService({ http });
+    const chatService = new ChatService({ http });
+    const conversationsService = new ConversationsService({ http });
+    const toolsService = new ToolsService({ http });
+
+    this.internalServices = {
+      agentService,
+      chatService,
+      conversationsService,
+      toolsService,
+    };
+
     return {};
   }
 }

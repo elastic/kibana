@@ -58,5 +58,7 @@
     "@kbn/lock-manager",
     "@kbn/inference-tracing"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
