@@ -86,12 +86,15 @@ const SingleMonitorView = () => {
   const monitor = monitorsSortedByStatus.length === 1 ? monitorsSortedByStatus[0] : undefined;
 
   useEffect(() => {
-    if (monitor && !trendData[monitor.configId + monitor.locationId]) {
+    if (
+      monitor &&
+      !(trendData[monitor.configId + monitor.locations[0].id] || trendData[monitor.configId])
+    ) {
       dispatch(
         trendStatsBatch.get([
           {
             configId: monitor.configId,
-            locationId: monitor.locationId,
+            locationIds: monitor.locations.map((location) => location.id),
             schedule: monitor.schedule,
           },
         ])

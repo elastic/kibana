@@ -10,15 +10,13 @@ import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
+import { MonitorStatusCol } from '../components/monitor_status_col';
+import { MonitorLocations } from '../../../../management/monitor_list_table/monitor_locations';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
-import {
-  MonitorTypeEnum,
-  OverviewStatusMetaData,
-} from '../../../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import {
@@ -60,7 +58,10 @@ export const useMonitorsTableColumns = ({
 
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
-      const { configId, locationLabel, locationId, spaceId } = monitor;
+      const { configId, spaceId } = monitor;
+
+      const locationId = monitor.locations[0].id;
+      const locationLabel = monitor.locations[0].label;
       dispatch(
         setFlyoutConfigCallback({
           configId,
@@ -77,14 +78,10 @@ export const useMonitorsTableColumns = ({
   const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(
     () => [
       {
-        field: 'status',
         name: STATUS,
-        render: (status: OverviewStatusMetaData['status'], monitor) => (
-          <BadgeStatus
-            status={status}
-            isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-            onClickBadge={() => openFlyout(monitor)}
-          />
+        width: '150px',
+        render: (monitor: OverviewStatusMetaData) => (
+          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
       },
       {
@@ -131,16 +128,12 @@ export const useMonitorsTableColumns = ({
           ),
       },
       {
-        field: 'locationLabel',
         name: LOCATIONS,
-        render: (locationLabel: OverviewStatusMetaData['locationLabel']) => (
-          <EuiLink
-            data-test-subj="syntheticsCompactViewLocation"
-            onClick={() => onClickMonitorFilter('locations', locationLabel)}
-          >
-            {locationLabel}
-          </EuiLink>
-        ),
+        render: (monitor: OverviewStatusMetaData) => {
+          return (
+            <MonitorLocations configId={monitor.configId} locationsWithStatus={monitor.locations} />
+          );
+        },
       },
       {
         field: 'tags',
@@ -165,10 +158,11 @@ export const useMonitorsTableColumns = ({
         },
         width: '220px',
         render: (configId: string, monitor: OverviewStatusMetaData) => {
-          const uniqId = `${configId}-${monitor.locationId}`;
+          const locationId = monitor.locations[0].id;
+          const uniqId = `${configId}-${locationId}`;
           return (
             <MonitorBarSeries
-              histogramSeries={histogramsById?.[uniqId]?.points}
+              histogramSeries={histogramsById?.[uniqId]?.points ?? histogramsById[configId]?.points}
               minInterval={minInterval!}
             />
           );

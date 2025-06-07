@@ -13,6 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useMetricSubtitle } from '../../../../../hooks/use_metric_subtitle';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
@@ -42,7 +43,6 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
   const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   // make sure these are synced with slo card colors while making changes
-
   switch (status) {
     case 'down':
       return isAmsterdam
@@ -53,6 +53,8 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
         ? euiTheme.colors.vis.euiColorVisBehindText0
         : euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
+      return euiTheme.colors.backgroundBasePlain;
+    case 'pending':
       return euiTheme.colors.backgroundBasePlain;
     default:
       return isAmsterdam
@@ -70,14 +72,17 @@ export const MetricItem = ({
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const status = monitor.overallStatus;
+  const locationId = monitor.locations[0].id;
   const { euiTheme } = useEuiTheme();
-  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
+  const metricSubtitle = useMetricSubtitle(monitor);
   const locationName = useLocationName(monitor);
-  const { status, timestamp, configIdByLocation } = useStatusByLocationOverview({
+  const { timestamp, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
-    locationId: monitor.locationId,
+    locationId,
   });
 
   const { charts } = useKibana<ClientPluginsStart>().services;
@@ -88,7 +93,7 @@ export const MetricItem = ({
 
   return (
     <div
-      data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      data-test-subj={`${monitor.name}-${locationId}-metric-item`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -131,10 +136,10 @@ export const MetricItem = ({
               }
               if (!testInProgress && locationName) {
                 onClick({
+                  locationId,
                   configId: monitor.configId,
                   id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.locationId,
                   spaceId: monitor.spaceId,
                 });
               }
@@ -143,12 +148,12 @@ export const MetricItem = ({
             locale={i18n.getLocale()}
           />
           <Metric
-            id={`${monitor.configId}-${monitor.locationId}`}
+            id={configIdByLocation}
             data={[
               [
                 {
                   title: monitor.name,
-                  subtitle: locationName,
+                  subtitle: metricSubtitle,
                   value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
@@ -184,7 +189,7 @@ export const MetricItem = ({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
-            locationId={monitor.locationId}
+            locationId={locationId}
           />
         </div>
         {configIdByLocation && (

@@ -20,9 +20,11 @@ export const useCanUsePublicLocById = (configId: string) => {
 
   const listIds = allLocations?.filter((loc) => loc.isServiceManaged).map((loc) => loc.id) ?? [];
 
-  const hasManagedLocation = allConfigs?.filter(
-    (mon) => mon.configId === configId && listIds.includes(mon.locationId)
-  );
+  const hasManagedLocation = allConfigs?.filter((mon) => {
+    const sameId = mon.configId === configId;
+    const hasLocation = mon.locations.some((loc) => listIds.includes(loc.id));
+    return sameId && hasLocation;
+  });
 
   const canUsePublicLocations =
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;

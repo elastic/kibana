@@ -34,7 +34,7 @@ const initialState: OverviewStatusStateReducer = {
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(fetchOverviewStatusAction.get, (state) => {
+    .addCase(fetchOverviewStatusAction.get, (state, action) => {
       state.status = null;
       state.loading = true;
     })
@@ -43,11 +43,12 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
+
       state.allConfigs = Object.values({
-        ...action.payload.upConfigs,
-        ...action.payload.downConfigs,
-        ...action.payload.pendingConfigs,
-        ...action.payload.disabledConfigs,
+        ...state.status.upConfigs,
+        ...state.status.downConfigs,
+        ...state.status.pendingConfigs,
+        ...state.status.disabledConfigs,
       });
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
