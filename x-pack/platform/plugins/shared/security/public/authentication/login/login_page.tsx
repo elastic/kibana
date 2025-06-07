@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,9 +13,11 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  type EuiThemeComputed,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -30,6 +30,7 @@ import type {
   HttpStart,
   NotificationsStart,
 } from '@kbn/core/public';
+import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -93,6 +94,18 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
   },
 };
 
+const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const theme = useEuiTheme();
+  return (
+    <div
+      css={fullScreenGraphicsMixinStyles(Number(theme.euiTheme.levels.toast), theme)}
+      data-test-subj="loginForm"
+    >
+      {children}
+    </div>
+  );
+};
+
 export class LoginPage extends Component<Props, State> {
   state = { loginState: null, customBranding: {} } as State;
   private customBrandingSubscription?: Subscription;
@@ -137,13 +150,24 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+      css`
+        position: relative;
+        margin: auto;
+        max-width: 460px;
+        padding-left: ${euiTheme.size.xl};
+        padding-right: ${euiTheme.size.xl};
+        z-index: 10;
+        text-align: center;
+      `;
 
-    const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
+      loginWelcomeStyle(euiTheme),
+      !loginIsSupported &&
+        css`
+          max-width: 700px;
+        `,
+    ];
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
@@ -154,13 +178,26 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form">
-        <header className="loginWelcome__header">
-          <div className={contentHeaderClasses}>
-            <span className="loginWelcome__logo" style={logoStyle}>
+      <Container>
+        <header
+          css={({ euiTheme }) => css`
+            margin-top: calc(${euiTheme.size.xxl} * 3);
+            position: relative;
+            padding: ${euiTheme.size.base};
+            z-index: 10;
+          `}
+        >
+          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
+            <span
+              css={({ euiTheme }) => css`
+                margin-bottom: ${euiTheme.size.xl};
+                display: inline-block;
+              `}
+              style={logoStyle}
+            >
               {logo}
             </span>
-            <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
+            <EuiTitle size="m" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
@@ -170,7 +207,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiTitle>
           </div>
         </header>
-        <div className={contentBodyClasses}>
+        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               {this.getLoginForm({
@@ -181,7 +218,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-      </div>
+      </Container>
     );
   }
 
