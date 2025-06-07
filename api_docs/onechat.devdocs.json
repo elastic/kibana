@@ -518,6 +518,20 @@
           "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-server.OnechatPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [],
+          "signature": [
+            "AgentsStart"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
