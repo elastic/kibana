@@ -279,6 +279,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "delete": [MockFunction],
         "externalUrl": Object {
+          "isInternalUrl": [MockFunction],
           "validateUrl": [MockFunction],
         },
         "fetch": [MockFunction],
