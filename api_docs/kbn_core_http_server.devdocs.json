@@ -3093,6 +3093,10 @@
                 "path": "src/core/packages/apps/server-internal/src/core_app.ts"
               },
               {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-internal/src/routes/pricing.ts"
+              },
+              {
                 "plugin": "usageCollection",
                 "path": "src/platform/plugins/shared/usage_collection/server/routes/stats/stats.ts"
               },
@@ -3825,10 +3829,6 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
-              },
-              {
                 "plugin": "guidedOnboarding",
                 "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
               },
@@ -4339,6 +4339,10 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
               },
               {
                 "plugin": "esql",
@@ -5279,6 +5283,14 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-internal/src/pricing_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-internal/src/pricing_service.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -6347,6 +6359,26 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
                 "plugin": "productDocBase",
@@ -14421,6 +14453,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/monitoring_entity_source.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/search_indices.ts"
               },
               {
@@ -16044,6 +16080,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/init.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/monitoring_entity_source.ts"
               },
               {
                 "plugin": "securitySolution",
