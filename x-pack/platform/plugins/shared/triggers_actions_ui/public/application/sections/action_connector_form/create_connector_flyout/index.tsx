@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { getInferenceApiParams } from '@kbn/inference-endpoint-ui-common';
 import { CreateConnectorFilter } from './create_connector_filter';
 import {
   ActionConnector,
@@ -32,6 +33,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
+import { useConnectorContext } from '../../../context/use_connector_context';
 import { ConnectorForm, ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
@@ -44,6 +46,7 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -56,6 +59,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const {
     application: { capabilities },
   } = useKibana().services;
+  const { isServerless } = useConnectorContext();
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
   const isMounted = useRef(false);
@@ -156,8 +160,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
-      const { actionTypeId, name, config, secrets } = data;
+      const connectorData = getInferenceApiParams(data, !!isServerless);
+      const { actionTypeId, name, config, secrets } = connectorData;
       const validConnector = {
         actionTypeId,
         name: name ?? '',
@@ -170,7 +174,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     } else {
       setShowFormErrors(true);
     }
-  }, [submit, preSubmitValidator, createConnector]);
+  }, [submit, preSubmitValidator, createConnector, isServerless]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 

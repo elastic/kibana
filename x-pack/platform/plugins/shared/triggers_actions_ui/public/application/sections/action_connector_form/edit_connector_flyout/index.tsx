@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { getInferenceApiParams } from '@kbn/inference-endpoint-ui-common';
 import { Option, none, some } from 'fp-ts/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
@@ -30,6 +31,7 @@ import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useConnectorContext } from '../../../context/use_connector_context';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
@@ -43,6 +45,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -64,6 +67,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
+  const { isServerless } = useConnectorContext();
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -177,8 +181,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
-      const { name, config, secrets } = data;
+      const connectorData = getInferenceApiParams(data, !!isServerless);
+      const { name, config, secrets } = connectorData;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
@@ -208,6 +212,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       setShowFormErrors(true);
     }
   }, [
+    isServerless,
     onConnectorUpdated,
     submit,
     preSubmitValidator,

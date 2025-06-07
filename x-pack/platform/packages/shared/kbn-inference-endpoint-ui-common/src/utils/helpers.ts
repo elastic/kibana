@@ -8,9 +8,9 @@
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty, cloneDeep } from 'lodash/fp';
 import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration, InferenceEndpoint } from '../types/types';
+import type { FieldsConfiguration } from '../types/types';
 import * as LABELS from '../translations';
-import { MIN_ALLOCATIONS, ServiceProviderKeys } from '../constants';
+import { DEFAULT_NUM_THREADS, MIN_ALLOCATIONS, ServiceProviderKeys } from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -119,18 +119,22 @@ export const mapProviderFields = (
     );
 };
 
-export const getInferenceApiParams = (data: InferenceEndpoint, isServerless: boolean) => {
+export const getInferenceApiParams = (data: any, isServerless: boolean) => {
   if (
     isServerless &&
     data?.config?.provider === ServiceProviderKeys.elasticsearch &&
     data?.config?.providerConfig
   ) {
     const dataToSend = cloneDeep(data);
+    const maxAllocations = data.config.providerConfig.max_number_of_allocations;
+
     dataToSend.config.providerConfig!.adaptive_allocations = {
       enabled: true,
       min_number_of_allocations: MIN_ALLOCATIONS,
-      max_number_of_allocations: data.config.providerConfig.max_number_of_allocations,
+      ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
     };
+    // num_threads: Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+    dataToSend.config.providerConfig!.num_threads = DEFAULT_NUM_THREADS;
     delete dataToSend?.config?.providerConfig?.max_number_of_allocations;
 
     return dataToSend;

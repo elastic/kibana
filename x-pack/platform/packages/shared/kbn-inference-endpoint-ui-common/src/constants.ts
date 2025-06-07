@@ -31,6 +31,7 @@ export enum ServiceProviderKeys {
 
 export const DEFAULT_TASK_TYPE = 'completion';
 export const MIN_ALLOCATIONS = 0;
+export const DEFAULT_NUM_THREADS = 1;
 
 type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
 type InternalOverrideFieldsType = {
@@ -47,10 +48,10 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
     additional: [
       {
         max_number_of_allocations: {
-          default_value: 32,
+          default_value: null,
           description: 'Maximum number of allocations for the inference endpoint.',
           label: 'Max Allocations',
-          required: true,
+          required: false,
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,
@@ -59,8 +60,4 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
       },
     ],
   },
-};
-
-export const DEFAULT_VALUES = {
-  [ServiceProviderKeys.elasticsearch]: { num_allocations: 1, num_threads: 16 },
 };

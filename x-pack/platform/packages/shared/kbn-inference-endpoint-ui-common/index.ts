@@ -12,6 +12,7 @@ export { InferenceFlyoutWrapper as default } from './src/components/inference_fl
 export { useProviders } from './src/hooks/use_providers';
 export { isInferenceEndpointExists } from './src/hooks/inference_endpoint_exists';
 export { SERVICE_PROVIDERS } from './src/components/providers/render_service_provider/service_provider';
+export { getInferenceApiParams } from './src/utils/helpers';
 
 export * from './src/types/types';
 export * from './src/constants';

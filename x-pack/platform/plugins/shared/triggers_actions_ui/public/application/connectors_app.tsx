@@ -59,17 +59,24 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
+  isServerless: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<App deps={deps} />, element);
+  render(<App deps={deps} isServerless={deps.isServerless} />, element);
   return () => {
     unmountComponentAtNode(element);
   };
 };
 
-export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
+export const App = ({
+  deps,
+  isServerless,
+}: {
+  deps: TriggersAndActionsUiServices;
+  isServerless: boolean;
+}) => {
   const { dataViews } = deps;
   const sections: Section[] = ['connectors', 'logs'];
   const sectionsRegex = sections.join('|');
@@ -80,7 +87,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
       <KibanaContextProvider services={{ ...deps }}>
         <Router history={deps.history}>
           <QueryClientProvider client={queryClient}>
-            <AppWithoutRouter sectionsRegex={sectionsRegex} />
+            <AppWithoutRouter sectionsRegex={sectionsRegex} isServerless={isServerless} />
           </QueryClientProvider>
         </Router>
       </KibanaContextProvider>
@@ -88,13 +95,19 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   );
 };
 
-export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
+export const AppWithoutRouter = ({
+  sectionsRegex,
+  isServerless,
+}: {
+  sectionsRegex: string;
+  isServerless: boolean;
+}) => {
   const {
     actions: { validateEmailAddresses },
   } = useKibana().services;
 
   return (
-    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+    <ConnectorProvider value={{ services: { validateEmailAddresses }, isServerless }}>
       <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}

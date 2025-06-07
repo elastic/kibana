@@ -15,7 +15,6 @@ export * from './dynamic_config/types';
 
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
-  range?: { min: number; max: number };
   validationErrors: string[];
   value: string | number | boolean | null;
 }
