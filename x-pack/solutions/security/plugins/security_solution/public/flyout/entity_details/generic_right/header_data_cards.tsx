@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -47,6 +47,15 @@ export const HeaderDataCards = ({
 
   const criticality = getAssetCriticality.data?.criticality_level;
 
+  const [localCriticality, setLocalCriticality] =
+    useState<CriticalityLevelWithUnassigned>(criticality);
+
+  useEffect(() => {
+    if (getAssetCriticality.data?.criticality_level) {
+      setLocalCriticality(getAssetCriticality.data.criticality_level);
+    }
+  }, [getAssetCriticality.data?.criticality_level]);
+
   // const assignCriticality = useCallback(
   //   (value: CriticalityLevelWithUnassigned) => {
   //     assignAssetCriticality.mutate({
@@ -59,6 +68,8 @@ export const HeaderDataCards = ({
   // );
   const assignCriticality = useCallback(
     (value: CriticalityLevelWithUnassigned) => {
+      const previousValue = localCriticality;
+      setLocalCriticality(value);
       assignAssetCriticality.mutate(
         {
           criticalityLevel: value,
@@ -67,6 +78,7 @@ export const HeaderDataCards = ({
         },
         {
           onError: (error) => {
+            setLocalCriticality(previousValue);
             toasts.addDanger({
               title: 'Failed to assign criticality',
               text: (error as Error).message,
@@ -75,7 +87,7 @@ export const HeaderDataCards = ({
         }
       );
     },
-    [assignAssetCriticality, id, toasts]
+    [assignAssetCriticality, id, localCriticality, toasts]
   );
 
   const cards = useMemo(
