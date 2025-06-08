@@ -34,7 +34,6 @@ export {
   ColorPicker,
   LegendToggleLazy,
   LegendToggle,
-  MULTILAYER_TIME_AXIS_STYLE,
 } from './static';
 export { lightenColor } from './services/palettes/lighten_color';
 export { decreaseOpacity } from './services/palettes/decrease_opacity';
