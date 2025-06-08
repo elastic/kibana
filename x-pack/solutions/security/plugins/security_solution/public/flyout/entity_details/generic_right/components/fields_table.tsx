@@ -80,6 +80,7 @@ export const usePinnedFields = (storageKey: string, defaultPinnedFields?: string
       queryClient.setQueryData(['pinnedFields', storageKey], defaultPinnedFields);
       queryClient.invalidateQueries(['pinnedFields', storageKey]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: pinnedFields = [] } = useQuery<string[]>({
