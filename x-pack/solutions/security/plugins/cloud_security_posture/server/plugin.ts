@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import {
@@ -29,6 +30,7 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+
 import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
@@ -237,7 +239,7 @@ export class CspPlugin
     // 2. A customer with a new Kibana stack who installs an integration version earlier than 2.00 for the first time (e.g., in a serverless environment).
     if (isIDeprecatedLatestIndexExists && !isAliasExists) {
       try {
-        const res = await esClient.indices.updateAliases({
+        await esClient.indices.updateAliases({
           actions: [
             {
               add: {
