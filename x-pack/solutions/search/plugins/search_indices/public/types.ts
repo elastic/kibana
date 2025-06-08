@@ -80,6 +80,7 @@ export interface CodeSnippetParameters {
   indexName?: string;
   apiKey?: string;
   elasticsearchURL: string;
+  isServerless?: boolean;
 }
 
 export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
