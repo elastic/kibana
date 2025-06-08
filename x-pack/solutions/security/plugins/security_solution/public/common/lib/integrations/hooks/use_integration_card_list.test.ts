@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { mockReportLinkClick } from './__mocks__/mocks';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
+import type { IntegrationTabId, Tab } from '../types';
 
 jest.mock('./integration_context');
 
@@ -20,12 +21,13 @@ jest.mock('../../kibana', () => ({
   }),
 }));
 
-const mockUseSelectedTab = jest.fn().mockReturnValue({
-  selectedTab: { id: 'test', featuredCardIds: [] },
-});
-jest.mock('./use_selected_tab', () => ({
-  useSelectedTab: () => mockUseSelectedTab(),
-}));
+const selectedTab: Tab = {
+  id: 'test' as IntegrationTabId,
+  label: 'Test Tab',
+  category: 'test',
+  sortByFeaturedIntegrations: false,
+  featuredCardIds: [],
+};
 
 describe('useIntegrationCardList', () => {
   const mockIntegrationsList = [
@@ -95,6 +97,7 @@ describe('useIntegrationCardList', () => {
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
+        selectedTab,
       })
     );
 
@@ -102,14 +105,11 @@ describe('useIntegrationCardList', () => {
   });
 
   it('returns featured cards when featuredCardIds are provided', () => {
-    mockUseSelectedTab.mockReturnValue({
-      selectedTab: { id: 'test', featuredCardIds: ['epr:endpoint'] },
-    });
-
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
+        selectedTab: { ...selectedTab, featuredCardIds: ['epr:endpoint'] },
       })
     );
 
@@ -121,6 +121,7 @@ describe('useIntegrationCardList', () => {
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
+        selectedTab,
       })
     );
 
