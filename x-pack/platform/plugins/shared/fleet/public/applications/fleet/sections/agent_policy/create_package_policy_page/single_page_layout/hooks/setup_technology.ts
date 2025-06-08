@@ -43,6 +43,8 @@ export const useAgentless = () => {
 
   const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
   const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
+  const isAgentlessCustomIntegrationsEnabled =
+    isAgentlessEnabled && config.agentless?.customIntegrations?.enabled === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -51,6 +53,16 @@ export const useAgentless = () => {
 
   // When an integration has at least a policy template enabled for agentless
   const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+    const installSource =
+      packageInfo &&
+      'installationInfo' in packageInfo &&
+      packageInfo.installationInfo?.install_source;
+    const isCustomIntegration = installSource === 'custom' || installSource === 'upload';
+
+    if (isCustomIntegration && !isAgentlessCustomIntegrationsEnabled) {
+      return false;
+    }
+
     if (isAgentlessEnabled && isAgentlessIntegrationFn(packageInfo)) {
       return true;
     }
@@ -166,7 +178,6 @@ export function useSetupTechnology({
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
-
   if (
     isEditPage &&
     agentPolicies &&

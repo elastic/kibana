@@ -20,6 +20,10 @@ import {
   setTabs,
   updateTabs,
   disconnectTab,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 } from './actions';
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
@@ -43,6 +47,10 @@ export const internalStateActions = {
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSession,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 };
 
 export {
@@ -56,7 +64,7 @@ export {
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectTab } from './selectors';
+export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,

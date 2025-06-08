@@ -15,8 +15,7 @@ describe('query_string_utils', () => {
         FROM users // This is a comment
         | WHERE age > 18
       `;
-      const expected = `FROM users 
-        | WHERE age > 18`;
+      const expected = `FROM users         | WHERE age > 18`;
       expect(removeComments(text)).toBe(expected);
     });
 
@@ -39,8 +38,7 @@ describe('query_string_utils', () => {
         product */
         | KEEP name, price
       `;
-      const expected = `FROM items 
-        
+      const expected = `FROM items         
         | KEEP name, price`;
       expect(removeComments(text)).toBe(expected);
     });

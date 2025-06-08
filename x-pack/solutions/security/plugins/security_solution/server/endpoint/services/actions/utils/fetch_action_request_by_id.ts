@@ -53,11 +53,11 @@ export const fetchActionRequestById = async <
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   } else if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
-      const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine access to it for active space [${spaceId}]:\n${stringify(
-        actionRequest
-      )}`;
+      const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
 
       logger.warn(message);
+      logger.debug(`Action missing policy info:\n${stringify(actionRequest)}`);
+
       throw new CustomHttpRequestError(message);
     } else {
       // Validate that action is visible in active space. In order for a user to be able to access

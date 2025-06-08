@@ -14,6 +14,7 @@ import {
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
+import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
 import React, { useMemo } from 'react';
@@ -29,7 +30,10 @@ import { selectPreviewDocuments } from './state_management/simulation_state_mach
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
+import { isGrokProcessor } from './utils';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -147,6 +151,14 @@ const OutcomePreviewTable = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
+  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+    selectDraftProcessor(snapshot.context)
+  );
+
+  const grokCollection = useStreamsEnrichmentSelector(
+    (machineState) => machineState.context.grokCollection
+  );
+
   const previewColumns = useMemo(
     () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
     [detectedFields, previewDocsFilter, processors]
@@ -180,5 +192,37 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
+  return draftProcessor?.processor &&
+    isGrokProcessor(draftProcessor.processor) &&
+    !isEmpty(draftProcessor.processor.grok.field) &&
+    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
+      const fieldName = draftProcessor.processor?.grok.field;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    }) ? (
+    <PreviewTable
+      documents={previewDocuments}
+      displayColumns={[draftProcessor.processor.grok.field]}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      renderCellValue={(document, columnId) => {
+        const value = document[columnId];
+        if (typeof value === 'string') {
+          return (
+            <Sample
+              grokCollection={grokCollection}
+              draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+              sample={value}
+            />
+          );
+        } else {
+          return undefined;
+        }
+      }}
+    />
+  ) : (
+    <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />
+  );
 };

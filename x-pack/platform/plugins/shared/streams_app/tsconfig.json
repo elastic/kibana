@@ -9,17 +9,12 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "ui_tests/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
-    "@kbn/streams-schema",
-    "@kbn/utility-types",
-    "@kbn/share-plugin",
     "@kbn/core",
-    "@kbn/react-kibana-context-render",
-    "@kbn/shared-ux-link-redirect-app",
-    "@kbn/typed-react-router-config",
     "@kbn/data-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/discover-shared-plugin",
@@ -31,6 +26,12 @@
     "@kbn/licensing-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/unified-search-plugin",
+    "@kbn/streams-schema",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/typed-react-router-config",
+    "@kbn/react-kibana-context-render",
     "@kbn/i18n",
     "@kbn/code-editor",
     "@kbn/i18n-react",
@@ -39,7 +40,7 @@
     "@kbn/react-field",
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
-    "@kbn/actions-plugin",
+    "@kbn/grok-ui",
     "@kbn/streams-plugin",
     "@kbn/object-utils",
     "@kbn/xstate-utils",
@@ -66,5 +67,6 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/discover-plugin",
     "@kbn/config-schema",
+    "@kbn/scout",
   ]
 }

@@ -11,10 +11,10 @@ import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from '@k
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 
 import { SpacesService } from './spaces_service';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
 import { SpacesClientService } from '../spaces_client';
 const createService = (serverBasePath: string = '') => {

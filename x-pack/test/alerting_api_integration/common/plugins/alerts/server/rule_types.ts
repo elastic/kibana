@@ -306,7 +306,7 @@ function getExceedsAlertLimitRuleType() {
         limit = services.alertFactory.alertLimit.getValue();
       }
 
-      const alertsToCreate = limit ? limit : 25;
+      const alertsToCreate = limit ? limit : 115;
 
       range(alertsToCreate)
         .map(() => uuidv4())
@@ -808,11 +808,34 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     isExportable: true,
     ruleTaskTimeout: '3s',
     cancelAlertsOnRuleTimeout,
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.patternfiring',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          patternIndex: {
+            required: false,
+            type: 'long',
+          },
+          instancePattern: {
+            required: false,
+            type: 'boolean',
+            array: true,
+          },
+        },
+      },
+    },
     async executor(ruleExecutorOptions) {
       const { services, params } = ruleExecutorOptions;
       const pattern = params.pattern;
       if (!Array.isArray(pattern)) {
         throw new Error(`pattern is not an array`);
+      }
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) {
+        throw new Error(`Expected alertsClient to be defined but it is not`);
       }
 
       // get the pattern index, return if past it
@@ -821,7 +844,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return { state: {} };
       }
 
-      services.alertFactory.create('alert').scheduleActions('default', {});
+      alertsClient.report({ id: `alert_${globalPatternIndex}`, actionGroup: 'default' });
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {
@@ -1254,6 +1277,40 @@ export function defineRuleTypes(
       params: schema.any(),
     },
   };
+  const artifactsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifacts',
+    name: 'Test: Artifacts',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
+  const artifactsAndActionsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifactsAndActions',
+    name: 'Test: Artifacts and Actions',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
   const goldNoopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
@@ -1453,6 +1510,8 @@ export function defineRuleTypes(
   alerting.registerType(getValidationRuleType());
   alerting.registerType(getAuthorizationRuleType(core));
   alerting.registerType(noopRuleType);
+  alerting.registerType(artifactsRuleType);
+  alerting.registerType(artifactsAndActionsRuleType);
   alerting.registerType(onlyContextVariablesRuleType);
   alerting.registerType(onlyStateVariablesRuleType);
   alerting.registerType(getPatternFiringRuleType());

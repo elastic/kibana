@@ -100,7 +100,7 @@ export async function changeDataView({
     appState.update(nextAppState);
 
     if (internalState.getState().expandedDoc) {
-      internalState.dispatch(internalStateActions.setExpandedDoc(undefined));
+      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
     }
   }
 

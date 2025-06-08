@@ -12,28 +12,16 @@ import { Logger } from '@kbn/logging';
 export async function createKnowledgeBaseIndex({
   esClient,
   logger,
-  inferenceId,
   indexName,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  inferenceId: string;
   indexName: string;
 }) {
   logger.debug(`Creating knowledge base write index "${indexName}"`);
 
   try {
-    await esClient.asInternalUser.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          semantic_text: {
-            type: 'semantic_text',
-            inference_id: inferenceId,
-          },
-        },
-      },
-    });
+    await esClient.asInternalUser.indices.create({ index: indexName });
   } catch (error) {
     if (
       error instanceof errors.ResponseError &&
@@ -43,6 +31,7 @@ export async function createKnowledgeBaseIndex({
         `Write index "${indexName}" already exists. Please delete it before creating a new index.`
       );
     }
+    logger.error(`Failed to create write index "${indexName}": ${error.message}`);
     throw error;
   }
 }

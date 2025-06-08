@@ -6,6 +6,7 @@
  */
 
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
 import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet
@@ -15,11 +16,9 @@ import { UsageAPIProvider } from './usage_api';
 
 import { AiopsProvider } from './aiops';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
-import { MachineLearningProvider } from './ml';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
 import { IngestPipelinesProvider } from './ingest_pipelines';
-import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
@@ -40,7 +39,6 @@ export const services = {
   ingestManager: IngestManagerProvider,
   transform: TransformProvider,
   ingestPipelines: IngestPipelinesProvider,
-  indexManagement: IndexManagementProvider,
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
   fleetAndAgents: FleetAndAgents,

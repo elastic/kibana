@@ -64,7 +64,7 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, 'firehose_onboarding'),
+      createShipperApiKey(client.asCurrentUser, 'firehose'),
       packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
     ]);
 

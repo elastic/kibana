@@ -23,8 +23,8 @@ import {
   EuiText,
   EuiButton,
   Query,
+  IconType,
 } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
@@ -1079,5 +1079,20 @@ describe('SavedObjectsFinder', () => {
     assertTooltip(doc.attributes.title, false);
     assertTooltip(doc2.attributes.title, false);
     assertTooltip(doc3.attributes.title, true);
+  });
+  it('should focus the search input on render', async () => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({ hits: [doc] });
+
+    render(
+      <SavedObjectFinder
+        {...baseProps}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
+        savedObjectMetaData={searchMetaData}
+      />
+    );
+
+    // 2. Grab the input directly and assert focus in one step
+    const input = await screen.findByTestId('savedObjectFinderSearchInput');
+    expect(input).toHaveFocus();
   });
 });
