@@ -27,7 +27,7 @@
         "label": "createAgentNotFoundError",
         "description": [],
         "signature": [
-          "({ agentId, customMessage, meta, }: { agentId: `${string}:${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+          "({ agentId, customMessage, meta, }: { agentId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
           "OnechatAgentNotFoundError"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
@@ -53,7 +53,7 @@
                 "label": "agentId",
                 "description": [],
                 "signature": [
-                  "`${string}:${string}`"
+                  "`${string}::${string}`"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
@@ -362,7 +362,7 @@
         "label": "createToolNotFoundError",
         "description": [],
         "signature": [
-          "({ toolId, customMessage, meta, }: { toolId: `${string}||builtIn||${string}` | `${string}||unknown||${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+          "({ toolId, customMessage, meta, }: { toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -389,12 +389,12 @@
               {
                 "parentPluginId": "@kbn/onechat-common",
                 "id": "def-common.createToolNotFoundError.$1.toolId",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "toolId",
                 "description": [],
                 "signature": [
-                  "`${string}||builtIn||${string}` | `${string}||unknown||${string}`"
+                  "`${string}::${string}`"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
@@ -988,7 +988,7 @@
             "section": "def-common.AgentIdentifier",
             "text": "AgentIdentifier"
           },
-          ") => identifier is `${string}:${string}`"
+          ") => identifier is `${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
         "deprecated": false,
@@ -1037,7 +1037,7 @@
             "section": "def-common.ToolIdentifier",
             "text": "ToolIdentifier"
           },
-          ") => identifier is `${string}||builtIn||${string}` | `${string}||unknown||${string}`"
+          ") => identifier is `${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
         "deprecated": false,
@@ -1458,7 +1458,7 @@
             "section": "def-common.AgentIdentifier",
             "text": "AgentIdentifier"
           },
-          ") => `${string}:${string}`"
+          ") => `${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
         "deprecated": false,
@@ -1507,7 +1507,7 @@
             "section": "def-common.ToolIdentifier",
             "text": "ToolIdentifier"
           },
-          ") => `${string}||builtIn||${string}` | `${string}||unknown||${string}`"
+          ") => `${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
         "deprecated": false,
@@ -1780,7 +1780,7 @@
             "label": "agentId",
             "description": [],
             "signature": [
-              "`${string}:${string}`"
+              "`${string}::${string}`"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -2291,34 +2291,12 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredToolIdentifier.sourceType",
-            "type": "Enum",
-            "tags": [],
-            "label": "sourceType",
-            "description": [
-              "The type of source the tool is being provided from, e.g. builtIn or MCP"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolSourceType",
-                "text": "ToolSourceType"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredToolIdentifier.sourceId",
+            "id": "def-common.StructuredToolIdentifier.providerId",
             "type": "string",
             "tags": [],
-            "label": "sourceId",
+            "label": "providerId",
             "description": [
-              "Id of the source, e.g. for MCP server it will be the server/connector ID"
+              "The type of source the tool is being provided from, e.g. builtIn or MCP"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
             "deprecated": false,
@@ -2494,19 +2472,6 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptor.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [
-              "\nName of the tool, which will be exposed to the LLM."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ToolDescriptor.description",
             "type": "string",
             "tags": [],
@@ -2558,34 +2523,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptorMeta.sourceType",
-            "type": "Enum",
-            "tags": [],
-            "label": "sourceType",
-            "description": [
-              "\nThe type of the source this tool is provided by."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolSourceType",
-                "text": "ToolSourceType"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptorMeta.sourceId",
+            "id": "def-common.ToolDescriptorMeta.providerId",
             "type": "string",
             "tags": [],
-            "label": "sourceId",
+            "label": "providerId",
             "description": [
-              "\nThe id of the source this tool is provided by.\nE.g. for MCP source, this will be the ID of the MCP connector."
+              "\nID of the provider this tool is exposed from."
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
             "deprecated": false,
@@ -2741,20 +2684,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ToolSourceType",
-        "type": "Enum",
-        "tags": [],
-        "label": "ToolSourceType",
-        "description": [
-          "\nRepresents the source type for a tool."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -2794,10 +2723,10 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.builtinSourceId",
+        "id": "def-common.builtinToolProviderId",
         "type": "string",
         "tags": [],
-        "label": "builtinSourceId",
+        "label": "builtinToolProviderId",
         "description": [
           "\nThe singleton sourceId used for all builtIn tools."
         ],
@@ -3338,7 +3267,7 @@
           "\nString representation of {@link StructuredAgentIdentifier}\nFollow a `{providerId}:{agentId}` format."
         ],
         "signature": [
-          "`${string}:${string}`"
+          "`${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
         "deprecated": false,
@@ -3355,7 +3284,7 @@
           "\nString representation of {@link StructuredToolIdentifier}\nFollow a `{toolId}||{sourceType}||{sourceId}` format."
         ],
         "signature": [
-          "`${string}||builtIn||${string}` | `${string}||unknown||${string}`"
+          "`${string}::${string}`"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
         "deprecated": false,
@@ -3456,6 +3385,21 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ToolProviderId",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolProviderId",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ToolResultEvent",
         "type": "Type",
         "tags": [],
@@ -3488,6 +3432,23 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.unknownToolProviderId",
+        "type": "string",
+        "tags": [],
+        "label": "unknownToolProviderId",
+        "description": [
+          "\nUnknown sourceId used from converting plain Ids to structured or serialized ids."
+        ],
+        "signature": [
+          "\"unknown\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3751,7 +3712,7 @@
             "label": "createToolNotFoundError",
             "description": [],
             "signature": [
-              "({ toolId, customMessage, meta, }: { toolId: `${string}||builtIn||${string}` | `${string}||unknown||${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+              "({ toolId, customMessage, meta, }: { toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
               {
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
@@ -3773,7 +3734,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ toolId: `${string}||builtIn||${string}` | `${string}||unknown||${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
+                  "{ toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
@@ -3789,7 +3750,7 @@
             "label": "createAgentNotFoundError",
             "description": [],
             "signature": [
-              "({ agentId, customMessage, meta, }: { agentId: `${string}:${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+              "({ agentId, customMessage, meta, }: { agentId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
               "OnechatAgentNotFoundError"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
@@ -3805,7 +3766,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ agentId: `${string}:${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
+                  "{ agentId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
