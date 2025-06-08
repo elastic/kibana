@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { createRule } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
@@ -100,7 +100,7 @@ const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'u
     method: 'POST',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}/_doc`,
+    )}/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}/_doc`,
     body:
       findingType === 'host.name'
         ? mockFindingHostName(isNameMatches)
@@ -113,7 +113,7 @@ const deleteDataStream = () => {
     method: 'DELETE',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/_data_stream/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}`,
+    )}/_data_stream/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}`,
   });
 };
 
