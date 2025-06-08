@@ -10,13 +10,11 @@
 import React from 'react';
 
 import { css } from '@emotion/react';
-import { EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText, EuiToolTip, UseEuiTheme } from '@elastic/eui';
 
 import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentCount: number }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <>
       <EuiToolTip
@@ -27,11 +25,8 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
           size="xs"
           aria-hidden={true}
           className="eui-textNumber"
-          color={euiTheme.colors.textSubdued}
           data-test-subj="optionsList-document-count-badge"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium} !important;
-          `}
+          css={styles.documentCountBadge}
         >
           {`${documentCount.toLocaleString()}`}
         </EuiText>
@@ -44,4 +39,11 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
       </EuiScreenReaderOnly>
     </>
   );
+};
+
+const styles = {
+  documentCountBadge: ({ euiTheme }: UseEuiTheme) => css`
+    font-weight: ${euiTheme.font.weight.medium} !important;
+    color: ${euiTheme.colors.textSubdued} !important;
+  `,
 };

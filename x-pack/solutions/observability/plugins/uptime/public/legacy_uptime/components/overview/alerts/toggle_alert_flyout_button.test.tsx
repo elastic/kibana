@@ -23,7 +23,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
-      await userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts'));
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
       ).toBeEnabled();
@@ -34,7 +34,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
-      await userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts'));
       await waitForEuiPopoverOpen();
       await userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
@@ -50,7 +50,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
-      await userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts'));
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
       ).toBeDisabled();
@@ -61,7 +61,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
-      await userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts'));
       await waitForEuiPopoverOpen();
 
       await userEvent.hover(
