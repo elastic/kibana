@@ -63,7 +63,12 @@ export const fetchUnusedUrls = async ({
   filter: string;
   maxPageSize: number;
 }) => {
-  const { saved_objects: savedObjects } = await savedObjectsRepository.find({
+  const {
+    saved_objects: savedObjects,
+    total,
+    per_page: perPage,
+    page,
+  } = await savedObjectsRepository.find({
     type: SAVED_OBJECT_TYPE,
     filter,
     perPage: maxPageSize,
@@ -73,7 +78,7 @@ export const fetchUnusedUrls = async ({
 
   return {
     unusedUrls: savedObjects,
-    hasMore: savedObjects.length === maxPageSize,
+    hasMore: page * perPage < total,
     namespace: savedObjects[0]?.namespaces?.[0] || 'default',
   };
 };
