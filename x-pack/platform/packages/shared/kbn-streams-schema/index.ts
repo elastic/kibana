@@ -140,12 +140,7 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
 } from './src/api/significant_events';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
-
-export type {
-  SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsResponse,
-} from './src/api/significant_events/api';

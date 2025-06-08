@@ -63,13 +63,16 @@ export function formatChangePoint(item: SignificantEventItem): FormattedChangePo
 
   const point = item.change_points.type[type];
 
+  const pValue = point?.p_value;
+  const changePoint = point?.change_point;
+
   const change =
-    isChange && point
+    isChange && point && pValue !== undefined && changePoint !== undefined
       ? {
           type,
-          impact: pValueToLabel(point.p_value),
-          time: item.occurrences[point.change_point].x,
-          p_value: point.p_value,
+          impact: pValueToLabel(pValue),
+          time: item.occurrences[changePoint].x,
+          p_value: pValue,
         }
       : undefined;
 
