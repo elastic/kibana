@@ -14,7 +14,7 @@ ts-node "$(dirname "${0}")/ci_stats_start.ts"
 # We resolve the latest manifest URL at the beginning of the build to ensure that all steps in the build will use the same manifest
 # Otherwise, the manifest could change if a step is running around the time that a new one is promoted
 if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
-  # no-op-2 BUCKET=$(curl -s "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(cat package.json | jq -r .version)/manifest-latest-verified.json" | jq -r .bucket)
+  # no-op-3 BUCKET=$(curl -s "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(cat package.json | jq -r .version)/manifest-latest-verified.json" | jq -r .bucket)
   ES_SNAPSHOT_MANIFEST_DEFAULT="https://storage.googleapis.com/kibana-ci-es-snapshots-permanent/8.15.6/manifest.json"
   buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT "$ES_SNAPSHOT_MANIFEST_DEFAULT"
 fi
