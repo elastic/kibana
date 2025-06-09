@@ -68,7 +68,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
-  const ELASTIC_DOCS = 'https://www.elastic.co/docs/';
+
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
