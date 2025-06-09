@@ -5,10 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiTitle,
+  EuiImage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import { EndpointsHeaderAction } from './endpoints_header_action';
+import SearchHomePageImage from '../assets/search_homepage.png';
 
 export interface SearchHomepageHeaderProps {
   showEndpointsAPIKeys: boolean;
@@ -16,12 +24,54 @@ export interface SearchHomepageHeaderProps {
 
 export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHeaderProps) => (
   <EuiPageTemplate.Header
-    pageTitle={
-      <EuiTitle data-test-subj="search-homepage-header-title" size="l">
-        <FormattedMessage id="xpack.searchHomepage.pageTitle" defaultMessage="Welcome to Search" />
-      </EuiTitle>
-    }
     data-test-subj="search-homepage-header"
-    rightSideItems={[...(showEndpointsAPIKeys ? [<EndpointsHeaderAction />] : [])]}
+    pageTitle={i18n.translate('xpack.searchHomepage.pageTitle', {
+      defaultMessage: 'Your vector database just got faster',
+    })}
+    description={
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart" direction="column">
+        <EuiFlexItem>
+          {i18n.translate('xpack.searchHomepage.description', {
+            defaultMessage:
+              'Elasticsearch and Lucene now offer “Better binary quantization”, delivering ~95% memory reduction while maintaining high ranking quality.',
+          })}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+                <EuiIcon type="checkInCircleFilled" color="primary" />
+                <small>
+                  {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
+                    defaultMessage: 'Feature update',
+                  })}
+                </small>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+                <EuiIcon type="checkInCircleFilled" color="primary" />
+                <small>
+                  {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
+                    defaultMessage: 'Feature update',
+                  })}
+                </small>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+                <EuiIcon type="checkInCircleFilled" color="primary" />
+                <small>
+                  {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
+                    defaultMessage: 'Feature update',
+                  })}
+                </small>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    }
+    rightSideItems={[<EuiImage size="fullWidth" url={SearchHomePageImage} alt="" />]}
   />
 );
