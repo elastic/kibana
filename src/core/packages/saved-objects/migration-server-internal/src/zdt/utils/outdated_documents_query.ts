@@ -24,17 +24,19 @@ export const getOutdatedDocumentsQuery = ({
   const virtualVersions = getVirtualVersionMap({ types, useModelVersionsOnly: false });
   return {
     bool: {
-      should: types.map((type) => {
-        const virtualVersion = virtualVersions[type.name];
-        return {
-          bool: {
-            must: [
-              { term: { type: type.name } },
-              { range: { typeMigrationVersion: { lt: virtualVersion } } },
-            ],
-          },
-        };
-      }),
+      should: types
+        .filter((type) => virtualVersions[type.name] !== '0.0.0') // types with no migrations or modelVersions cannot be outdated
+        .map((type) => {
+          const virtualVersion = virtualVersions[type.name];
+          return {
+            bool: {
+              must: [
+                { term: { type: type.name } },
+                { range: { typeMigrationVersion: { lt: virtualVersion } } },
+              ],
+            },
+          };
+        }),
     },
   };
 };

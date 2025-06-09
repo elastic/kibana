@@ -62,6 +62,7 @@ describe('ModelVersion map utilities', () => {
         getLatestModelVersion(
           buildType({
             modelVersions: {
+              // @ts-expect-error
               foo: dummyModelVersion(),
             },
           })
@@ -215,9 +216,6 @@ describe('ModelVersion map utilities', () => {
             }),
             buildType({
               name: 'dolly',
-              modelVersions: {
-                0: dummyModelVersion(),
-              },
             }),
           ],
           useModelVersionsOnly: false,
@@ -225,7 +223,7 @@ describe('ModelVersion map utilities', () => {
       ).toEqual({
         foo: '10.1.0',
         bar: '8.6.0',
-        dolly: '10.0.0',
+        dolly: '0.0.0',
       });
     });
 
@@ -252,9 +250,6 @@ describe('ModelVersion map utilities', () => {
             }),
             buildType({
               name: 'dolly',
-              modelVersions: {
-                0: dummyModelVersion(),
-              },
             }),
           ],
           useModelVersionsOnly: true,
@@ -278,6 +273,7 @@ describe('ModelVersion map utilities', () => {
         getLatestMappingsVersionNumber(
           buildType({
             modelVersions: {
+              // @ts-expect-error
               foo: dummyModelVersionWithMappingsChanges(),
             },
           })
@@ -388,7 +384,6 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
-            modelVersions: { 0: dummyModelVersion() },
           }),
         ])
       ).toEqual({
