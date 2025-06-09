@@ -986,6 +986,8 @@
       "@kbn/field-utils/*": ["src/platform/packages/shared/kbn-field-utils/*"],
       "@kbn/fields-metadata-plugin": ["x-pack/platform/plugins/shared/fields_metadata"],
       "@kbn/fields-metadata-plugin/*": ["x-pack/platform/plugins/shared/fields_metadata/*"],
+      "@kbn/file-upload": ["x-pack/platform/packages/shared/file-upload"],
+      "@kbn/file-upload/*": ["x-pack/platform/packages/shared/file-upload/*"],
       "@kbn/file-upload-common": ["x-pack/platform/packages/shared/file-upload-common"],
       "@kbn/file-upload-common/*": ["x-pack/platform/packages/shared/file-upload-common/*"],
       "@kbn/file-upload-plugin": ["x-pack/platform/plugins/private/file_upload"],
