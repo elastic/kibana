@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiTitle,
   EuiText,
@@ -15,6 +15,8 @@ import {
   EuiCopy,
   EuiButtonIcon,
   EuiButton,
+  EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -81,13 +83,19 @@ export const ConnectToElasticsearch = () => {
                   })}
                 </span>
               </EuiTitle>
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="s" alignItems="baseline">
                 <EuiFlexItem grow={false}>
                   <EuiButton iconType="key">
                     {i18n.translate('xpack.searchHomepage.connectToElasticsearch.createApiKey', {
                       defaultMessage: 'Create API Key',
                     })}
                   </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty iconType="gear">Manage API keys</EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiBadge>0 active</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
