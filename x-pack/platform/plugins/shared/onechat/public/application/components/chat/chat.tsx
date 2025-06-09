@@ -20,7 +20,6 @@ import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
 interface ChatProps {
   agentId: string;
   conversationId: string | undefined;
-  connectorId: string | undefined;
   onConversationUpdate: (changes: ConversationEventChanges) => void;
 }
 
@@ -40,37 +39,21 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
   ${scrollBarStyles}
 `;
 
-export const Chat: React.FC<ChatProps> = ({
-  agentId,
-  conversationId,
-  onConversationUpdate,
-  connectorId,
-}) => {
+export const Chat: React.FC<ChatProps> = ({ agentId, conversationId, onConversationUpdate }) => {
   const { conversation } = useConversation({ conversationId });
   const { initialMessage, clearInitialMessage } = useInitialMessage();
-  const {
-    sendMessage,
-    conversationEvents,
-    setConversationEvents,
-    progressionEvents,
-    status: chatStatus,
-  } = useChat({
+  const { sendMessage } = useChat({
     conversationId,
-    connectorId,
     agentId,
     onConversationUpdate,
   });
 
   useEffect(() => {
-    setConversationEvents(conversation?.events ?? []);
-  }, [conversation, setConversationEvents]);
-
-  useEffect(() => {
-    if (initialMessage && agentId && connectorId) {
+    if (initialMessage && agentId) {
       sendMessage(initialMessage);
       clearInitialMessage();
     }
-  }, [initialMessage, agentId, connectorId, sendMessage, clearInitialMessage]);
+  }, [initialMessage, agentId, sendMessage, clearInitialMessage]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -94,7 +77,7 @@ export const Chat: React.FC<ChatProps> = ({
     [sendMessage, setStickToBottom]
   );
 
-  if (!conversationId && conversationEvents.length === 0) {
+  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
     return <ChatNewConversationPrompt onSubmit={onSubmit} />;
   }
 
@@ -103,16 +86,12 @@ export const Chat: React.FC<ChatProps> = ({
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ChatConversation
-              conversationEvents={conversationEvents}
-              progressionEvents={progressionEvents}
-              chatStatus={chatStatus}
-            />
+            <ChatConversation conversationRounds={conversation?.rounds ?? []} />
           </EuiPanel>
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ChatInputForm disabled={!agentId || !connectorId} loading={false} onSubmit={onSubmit} />
+        <ChatInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
       </EuiFlexItem>
     </>
   );

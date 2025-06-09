@@ -20,10 +20,5 @@ export const OnechatChatPage: React.FC = () => {
     return conversationIdParam === newConversationId ? undefined : conversationIdParam;
   }, [conversationIdParam]);
 
-  return (
-    <div>
-      <h1>Onechat Chat</h1>
-      <OnechatChatView conversationId={conversationId} />
-    </div>
-  );
+  return <OnechatChatView conversationId={conversationId} />;
 };

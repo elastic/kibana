@@ -16,21 +16,14 @@ import {
   useEuiTheme,
   useEuiFontSize,
 } from '@elastic/eui';
-import { useConversation } from '../../../hooks/use_conversation';
-import { chatCommonLabels } from '../i18n';
-import { ChatHeaderSettingsPanel } from './chat_header_settings_panel';
+import { useConversation } from '../../hooks/use_conversation';
+import { chatCommonLabels } from './i18n';
 
 interface ChatHeaderProps {
   conversationId: string | undefined;
-  connectorId: string | undefined;
-  onConnectorChange: (connectorId: string) => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  conversationId,
-  connectorId,
-  onConnectorChange,
-}) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationId }) => {
   const { conversation, isLoading: isConvLoading } = useConversation({ conversationId });
 
   const { euiTheme } = useEuiTheme();
@@ -63,12 +56,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                 </h3>
               </EuiSkeletonTitle>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ChatHeaderSettingsPanel
-              connectorId={connectorId}
-              onConnectorChange={onConnectorChange}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

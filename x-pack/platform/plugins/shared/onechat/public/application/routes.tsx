@@ -12,7 +12,6 @@ import { OnechatChatPage } from './pages/chat';
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <div>
-      <h1>Routes!</h1>
       <Routes>
         <Route path="/chat">
           <OnechatChatPage />

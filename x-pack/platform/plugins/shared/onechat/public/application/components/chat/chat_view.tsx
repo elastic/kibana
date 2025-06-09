@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useNavigation } from '../../hooks/use_navigation';
-// import { ConversationPanel } from './conversations_panel/conversation_panel';
 import { appPaths } from '../../utils/app_paths';
-import { ChatHeader } from './header_bar/chat_header';
+import { ChatHeader } from './chat_header';
 import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
 
@@ -33,20 +32,14 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  // const currentUser = useCurrentUser();
-  // const { conversations, refresh: refreshConversations } = useConversationList({ agentId });
-
   const onConversationUpdate = useCallback(
     (changes: ConversationEventChanges) => {
       if (!conversationId) {
         navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: changes.id }));
       }
-      // refreshConversations();
     },
     [navigateToOnechatUrl, conversationId]
   );
-
-  const [connectorId, setConnectorId] = useState<string>();
 
   return (
     <KibanaPageTemplate
@@ -56,22 +49,6 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
       grow={false}
       panelled={false}
     >
-      {/* <KibanaPageTemplate.Sidebar paddingSize="none" minWidth={280}>
-        <ConversationPanel
-          agentId={}
-          conversations={conversations}
-          activeConversationId={conversationId}
-          onConversationSelect={(newConvId) => {
-            navigateToOnechatUrl(
-              appPaths.chat.conversation({ agentId, conversationId: newConvId })
-            );
-          }}
-          onNewConversationSelect={() => {
-            navigateToOnechatUrl(appPaths.chat.new({ agentId }));
-          }}
-        />
-      </KibanaPageTemplate.Sidebar> */}
-
       <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
         <EuiFlexGroup
           className={pageSectionContentClassName}
@@ -80,15 +57,10 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader
-            connectorId={connectorId}
-            conversationId={conversationId}
-            onConnectorChange={setConnectorId}
-          />
+          <ChatHeader conversationId={conversationId} />
           <Chat
             agentId={OneChatDefaultAgentId}
             conversationId={conversationId}
-            connectorId={connectorId}
             onConversationUpdate={onConversationUpdate}
           />
         </EuiFlexGroup>

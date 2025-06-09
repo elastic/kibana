@@ -39,7 +39,6 @@ export const renderApp = async ({
             <OneChatServicesContext.Provider value={services}>
               <InitialMessageProvider>
                 <RedirectAppLinks coreStart={core}>
-                  <h1>Render!</h1>
                   <Router history={history}>
                     <OnechatRoutes />
                   </Router>

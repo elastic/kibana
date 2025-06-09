@@ -7,6 +7,7 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ChatAgentEventType, ChatEventType } from '@kbn/onechat-common';
 import type { ConversationCreatedEvent, ProgressionEvent } from '../../../common/chat_events';
 import type { ChatError } from '../../../common/errors';
 import {
@@ -76,38 +77,43 @@ export const useChat = ({
       events$.subscribe({
         next: (event) => {
           // chunk received, we append it to the chunk buffer
-          if (event.type === 'message_chunk') {
-            concatenatedChunks += event.content_chunk;
+          if (event.type === ChatAgentEventType.messageChunk) {
+            concatenatedChunks += event.data.textChunk;
             setPendingMessages(getAllStreamMessages());
             setProgressionEvents([]);
           }
 
           // full message received - we purge the chunk buffer
           // and insert the received message into the temporary list
-          if (event.type === 'message') {
-            concatenatedChunks = '';
-            streamMessages.push(event.message);
-            setPendingMessages(getAllStreamMessages());
-          }
-
-          if (event.type === 'tool_result') {
+          if (event.type === ChatAgentEventType.messageComplete) {
             concatenatedChunks = '';
             streamMessages.push(
-              createToolResult({
-                toolCallId: event.toolResult.callId,
-                toolResult: event.toolResult.result,
+              createAssistantMessage({
+                content: event.data.messageContent,
+                id: event.data.messageId,
               })
             );
             setPendingMessages(getAllStreamMessages());
           }
 
-          if (event.type === 'conversation_created') {
-            onConversationUpdate(event.conversation);
+          if (event.type === ChatAgentEventType.toolResult) {
+            concatenatedChunks = '';
+            const { toolCallId, result } = event.data;
+            streamMessages.push(createToolResult({ toolCallId, toolResult: result }));
+            setPendingMessages(getAllStreamMessages());
           }
 
-          if (event.type === 'progression') {
-            setProgressionEvents((previous) => [...previous, event]);
+          if (event.type === ChatEventType.conversationCreated) {
+            const { conversationId: id, title } = event.data;
+            onConversationUpdate({ id, title });
           }
+
+          // TODO: handle progression events
+          // Do we have a concept of progression events in OneChat yet?
+
+          // if (event.type === 'progression') {
+          //   setProgressionEvents((previous) => [...previous, event]);
+          // }
         },
         complete: () => {
           setPendingMessages([]);

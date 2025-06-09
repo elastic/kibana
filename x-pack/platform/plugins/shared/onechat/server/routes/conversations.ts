@@ -49,7 +49,7 @@ export function registerConversationRoutes({
     {
       path: '/internal/onechat/conversations/{conversationId}',
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.useOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: {
         params: schema.object({

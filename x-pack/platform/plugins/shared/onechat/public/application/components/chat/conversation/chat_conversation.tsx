@@ -5,37 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { ConversationEvent } from '../../../../../common/conversation_events';
-import type { ProgressionEvent } from '../../../../../common/chat_events';
-import { getConversationRounds } from '../../../utils/conversation_rounds';
-// import { WithFadeIn } from '../../utilities/fade_in';
-import type { ChatStatus } from '../../../hooks/use_chat';
+import React from 'react';
+import { ConversationRound } from '@kbn/onechat-common';
 import { ChatConversationRound } from './conversation_round';
 
 interface ChatConversationProps {
-  conversationEvents: ConversationEvent[];
-  progressionEvents: ProgressionEvent[];
-  chatStatus: ChatStatus;
+  conversationRounds: ConversationRound[];
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({
-  conversationEvents,
-  progressionEvents,
-  chatStatus,
-}) => {
-  const rounds = useMemo(() => {
-    return getConversationRounds({ conversationEvents, progressionEvents, chatStatus });
-  }, [conversationEvents, progressionEvents, chatStatus]);
-
+export const ChatConversation: React.FC<ChatConversationProps> = ({ conversationRounds }) => {
   return (
     <>
-      {rounds.map((round) => {
-        return (
-          // <WithFadeIn key={round.userMessage.id}>
-          <ChatConversationRound round={round} />
-          // </WithFadeIn>
-        );
+      {conversationRounds.map((round) => {
+        return <ChatConversationRound round={round} />;
       })}
     </>
   );

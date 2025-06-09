@@ -25,7 +25,6 @@ import {
 
 interface Props {
   content: string;
-  loading: boolean;
 }
 
 const cursorCss = css`
@@ -113,7 +112,7 @@ const esqlLanguagePlugin = () => {
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ loading, content }: Props) {
+export function ChatMessageText({ content }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -184,7 +183,7 @@ export function ChatMessageText({ loading, content }: Props) {
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >
-        {`${content}${loading ? CURSOR : ''}`}
+        {content}
       </EuiMarkdownFormat>
     </EuiText>
   );
