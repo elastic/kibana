@@ -9,7 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import type { DomainDeprecationDetails, DeprecationsDetails } from '@kbn/core-deprecations-common';
+import {
+  type DomainDeprecationDetails,
+  type DeprecationsDetails,
+  DeprecationSeverityOrError,
+} from '@kbn/core-deprecations-common';
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { DeprecationsRegistry } from './deprecations_registry';
 
@@ -101,7 +105,7 @@ export class DeprecationsFactory {
                 defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
                 values: { domainId },
               }),
-              level: 'fetch_error',
+              level: DeprecationSeverityOrError.FETCH_ERROR,
               correctiveActions: {
                 manualSteps: [
                   i18n.translate(

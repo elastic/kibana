@@ -9,6 +9,7 @@
 
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { DocLinks } from '@kbn/doc-links';
+import type { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 /**
  * Config deprecation hook used when invoking a {@link ConfigDeprecation}
@@ -34,7 +35,7 @@ export interface DeprecatedConfigDetails {
    * - warning: will not break deployment upon upgrade
    * - critical: needs to be addressed before upgrade.
    */
-  level: 'warning' | 'critical';
+  level: DeprecationSeverity;
   /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
   /** (optional) link to the documentation for more details on the deprecation. */

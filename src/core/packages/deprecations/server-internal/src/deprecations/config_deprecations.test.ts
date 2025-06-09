@@ -11,6 +11,7 @@ import { registerConfigDeprecationsInfo } from './config_deprecations';
 import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('#registerConfigDeprecationsInfo', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
@@ -34,7 +35,7 @@ describe('#registerConfigDeprecationsInfo', () => {
         [
           {
             configPath: 'test',
-            level: 'critical',
+            level: DeprecationSeverity.CRITICAL,
             message: 'testMessage',
             documentationUrl: 'testDocUrl',
             correctiveActions: {
@@ -91,7 +92,7 @@ describe('#registerConfigDeprecationsInfo', () => {
           {
             configPath: 'test',
             message: 'testMessage',
-            level: 'warning',
+            level: DeprecationSeverity.WARNING,
             correctiveActions: {
               manualSteps: ['step a'],
             },

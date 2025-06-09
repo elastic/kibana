@@ -11,6 +11,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
 import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('applyDeprecations', () => {
   const context: ConfigDeprecationContext = {
@@ -112,8 +113,10 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
-      wrapHandler(deprecations.rename('renamed', 'newname', { level: 'critical' })),
+      wrapHandler(deprecations.unused('deprecated', { level: DeprecationSeverity.CRITICAL })),
+      wrapHandler(
+        deprecations.rename('renamed', 'newname', { level: DeprecationSeverity.CRITICAL })
+      ),
     ]);
 
     expect(migrated).toEqual({ foo: 'bar', newname: 'renamed' });
@@ -134,9 +137,13 @@ describe('applyDeprecations', () => {
     };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated.nested', { level: 'critical' })),
       wrapHandler(
-        deprecations.rename('nested.from.rename', 'nested.to.renamed', { level: 'critical' })
+        deprecations.unused('deprecated.nested', { level: DeprecationSeverity.CRITICAL })
+      ),
+      wrapHandler(
+        deprecations.rename('nested.from.rename', 'nested.to.renamed', {
+          level: DeprecationSeverity.CRITICAL,
+        })
       ),
     ]);
 
@@ -155,7 +162,7 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
+      wrapHandler(deprecations.unused('deprecated', { level: DeprecationSeverity.CRITICAL })),
     ]);
 
     expect(initialConfig).toEqual({ foo: 'bar', deprecated: 'deprecated' });

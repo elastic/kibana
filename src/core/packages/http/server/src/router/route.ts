@@ -9,6 +9,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DeepPartial } from '@kbn/utility-types';
+import type { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -140,7 +141,7 @@ export interface RouteDeprecationInfo {
    * - warning: will not break deployment upon upgrade.
    * - critical: needs to be addressed before upgrade.
    */
-  severity: 'warning' | 'critical';
+  severity: DeprecationSeverity;
   /**
    * API deprecation reason:
    * - bump: New version of the API is available.

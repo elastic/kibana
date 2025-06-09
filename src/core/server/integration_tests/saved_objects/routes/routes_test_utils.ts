@@ -8,6 +8,7 @@
  */
 
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 export function setupConfig(allowAccess: boolean = false) {
   const config = {
@@ -18,7 +19,7 @@ export function setupConfig(allowAccess: boolean = false) {
 
 export const deprecationMock = {
   documentationUrl: 'http://elastic.co',
-  severity: 'warning' as const,
+  severity: DeprecationSeverity.WARNING as const,
   reason: {
     type: 'deprecate' as const,
   },
@@ -26,7 +27,7 @@ export const deprecationMock = {
 
 export const legacyDeprecationMock = {
   documentationUrl: 'http://elastic.co',
-  severity: 'warning' as const,
+  severity: DeprecationSeverity.WARNING as const,
   reason: {
     type: 'remove' as const,
   },

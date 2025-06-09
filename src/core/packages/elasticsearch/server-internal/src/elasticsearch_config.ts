@@ -13,6 +13,7 @@ import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {
   IElasticsearchConfig,
@@ -214,7 +215,7 @@ const deprecations: ConfigDeprecationProvider = () => [
             'Kibana is configured to authenticate to Elasticsearch with the "{username}" user. Use a service account token instead.',
           values: { username },
         }),
-        level: 'warning',
+        level: DeprecationSeverity.WARNING,
         documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${branch}/service-accounts.html`,
         correctiveActions: {
           manualSteps: [
@@ -246,7 +247,7 @@ const deprecations: ConfigDeprecationProvider = () => [
             'Use both "{existingSetting}" and "{missingSetting}" to enable Kibana to use Mutual TLS authentication with Elasticsearch.',
           values: { existingSetting, missingSetting },
         }),
-        level: 'warning',
+        level: DeprecationSeverity.WARNING,
         documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/elasticsearch-mutual-tls.html`,
         correctiveActions: {
           manualSteps: [
@@ -273,7 +274,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (es.logQueries === true) {
       addDeprecation({
         configPath: `${fromPath}.logQueries`,
-        level: 'warning',
+        level: DeprecationSeverity.WARNING,
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [

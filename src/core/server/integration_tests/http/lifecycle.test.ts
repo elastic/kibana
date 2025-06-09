@@ -19,6 +19,7 @@ import { createHttpService } from '@kbn/core-http-server-mocks';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 let server: HttpService;
 
@@ -1684,7 +1685,7 @@ describe('runs with default preResponse deprecation handlers', () => {
           deprecated: {
             documentationUrl: 'https://fake-url.com',
             reason: { type: 'deprecate' },
-            severity: 'warning',
+            severity: DeprecationSeverity.WARNING,
             message: deprecationMessage,
           },
         },
@@ -1733,7 +1734,7 @@ describe('runs with default preResponse deprecation handlers', () => {
           deprecated: {
             documentationUrl: 'https://fake-url.com',
             reason: { type: 'deprecate' },
-            severity: 'warning',
+            severity: DeprecationSeverity.WARNING,
             message: deprecationMessage,
           },
         },
@@ -1766,7 +1767,7 @@ describe('runs with default preResponse deprecation handlers', () => {
             deprecated: {
               documentationUrl: 'https://fake-url.com',
               reason: { type: 'deprecate' },
-              severity: 'warning',
+              severity: DeprecationSeverity.WARNING,
               message: deprecationMessage,
             },
           },
@@ -1825,7 +1826,7 @@ describe('runs with default preResponse deprecation handlers', () => {
             deprecated: {
               documentationUrl: 'https://fake-url.com',
               reason: { type: 'deprecate' },
-              severity: 'warning',
+              severity: DeprecationSeverity.WARNING,
               message: deprecationMessage,
             },
           },

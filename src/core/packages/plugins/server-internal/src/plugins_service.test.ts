@@ -29,6 +29,7 @@ import { config, PluginsConfigType } from './plugins_config';
 import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -1143,7 +1144,7 @@ describe('PluginsService', () => {
           }),
           deprecations: ({ renameFromRoot }) => [
             renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
-              level: 'critical',
+              level: DeprecationSeverity.CRITICAL,
             }),
           ],
         },

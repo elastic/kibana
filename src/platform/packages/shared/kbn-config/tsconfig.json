@@ -19,7 +19,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/doc-links",
-    "@kbn/repo-packages"
+    "@kbn/repo-packages",
+    "@kbn/core-deprecations-common",
   ],
   "exclude": [
     "target/**/*",

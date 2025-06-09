@@ -16,6 +16,7 @@ import type {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { RouteDeprecationInfo } from '@kbn/core-http-server';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -61,7 +62,7 @@ export function registerRoutes({
   const internalOnServerless = isServerless ? 'internal' : 'public';
   const deprecationInfo: RouteDeprecationInfo = {
     documentationUrl: `${docLinks.links.management.savedObjectsApiList}`,
-    severity: 'warning' as const, // will not break deployment upon upgrade
+    severity: DeprecationSeverity.WARNING as const, // will not break deployment upon upgrade
     reason: {
       type: 'deprecate' as const,
     },

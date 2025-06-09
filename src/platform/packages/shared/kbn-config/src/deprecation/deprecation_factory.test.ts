@@ -10,6 +10,7 @@
 import { DeprecatedConfigDetails } from './types';
 import { createMockedContext } from '../internal_mocks';
 import { configDeprecationFactory } from './deprecation_factory';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('DeprecationFactory', () => {
   const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =
@@ -33,12 +34,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = deprecate('deprecated', '8.0.0', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = deprecate('deprecated', '8.0.0', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -71,12 +69,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = deprecate('section.deprecated', '8.0.0', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = deprecate('section.deprecated', '8.0.0', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -106,12 +101,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = deprecate('deprecated', '8.0.0', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = deprecate('deprecated', '8.0.0', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
@@ -128,12 +120,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0', { level: 'critical' })(
-        rawConfig,
-        'does-not-matter',
-        addDeprecation,
-        context
-      );
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -163,12 +152,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0', { level: 'critical' })(
-        rawConfig,
-        'does-not-matter',
-        addDeprecation,
-        context
-      );
+      const commands = deprecateFromRoot('myplugin.deprecated', '8.0.0', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
@@ -185,12 +171,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = rename('deprecated', 'renamed', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = rename('deprecated', 'renamed', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toEqual({
         set: [
           {
@@ -228,7 +211,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = rename('deprecated', 'new', { level: 'critical' })(
+      const commands = rename('deprecated', 'new', { level: DeprecationSeverity.CRITICAL })(
         rawConfig,
         'myplugin',
         addDeprecation,
@@ -249,12 +232,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = rename('oldsection.deprecated', 'newsection.renamed', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = rename('oldsection.deprecated', 'newsection.renamed', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toEqual({
         set: [
           {
@@ -289,12 +269,9 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const commands = rename('deprecated', 'renamed', { level: 'critical' })(
-        rawConfig,
-        'myplugin',
-        addDeprecation,
-        context
-      );
+      const commands = rename('deprecated', 'renamed', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'myplugin', addDeprecation, context);
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
       });
@@ -331,7 +308,7 @@ describe('DeprecationFactory', () => {
         },
       };
       const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed', {
-        level: 'critical',
+        level: DeprecationSeverity.CRITICAL,
       })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toEqual({
         set: [
@@ -372,7 +349,7 @@ describe('DeprecationFactory', () => {
         },
       };
       const commands = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed', {
-        level: 'critical',
+        level: DeprecationSeverity.CRITICAL,
       })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toEqual({
         set: [
@@ -412,12 +389,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = renameFromRoot('myplugin.deprecated', 'myplugin.new', { level: 'critical' })(
-        rawConfig,
-        'does-not-matter',
-        addDeprecation,
-        context
-      );
+      const commands = renameFromRoot('myplugin.deprecated', 'myplugin.new', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
@@ -430,7 +404,7 @@ describe('DeprecationFactory', () => {
         },
       };
       const commands = renameFromRoot('myplugin.deprecated', 'myplugin.renamed', {
-        level: 'critical',
+        level: DeprecationSeverity.CRITICAL,
       })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
@@ -468,7 +442,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('deprecated', { level: 'critical' })(
+      const commands = unused('deprecated', { level: DeprecationSeverity.CRITICAL })(
         rawConfig,
         'myplugin',
         addDeprecation,
@@ -508,7 +482,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('section.deprecated', { level: 'critical' })(
+      const commands = unused('section.deprecated', { level: DeprecationSeverity.CRITICAL })(
         rawConfig,
         'myplugin',
         addDeprecation,
@@ -545,7 +519,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unused('deprecated', { level: 'critical' })(
+      const commands = unused('deprecated', { level: DeprecationSeverity.CRITICAL })(
         rawConfig,
         'myplugin',
         addDeprecation,
@@ -567,12 +541,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unusedFromRoot('myplugin.deprecated', { level: 'critical' })(
-        rawConfig,
-        'does-not-matter',
-        addDeprecation,
-        context
-      );
+      const commands = unusedFromRoot('myplugin.deprecated', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toEqual({
         unset: [{ path: 'myplugin.deprecated' }],
       });
@@ -604,12 +575,9 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const commands = unusedFromRoot('myplugin.deprecated', { level: 'critical' })(
-        rawConfig,
-        'does-not-matter',
-        addDeprecation,
-        context
-      );
+      const commands = unusedFromRoot('myplugin.deprecated', {
+        level: DeprecationSeverity.CRITICAL,
+      })(rawConfig, 'does-not-matter', addDeprecation, context);
       expect(commands).toBeUndefined();
       expect(addDeprecation).toBeCalledTimes(0);
     });
