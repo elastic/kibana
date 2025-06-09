@@ -15,14 +15,14 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void } = {}) {
+export function usePurgeRollupData({ name, onConfirm }: { name: string; onConfirm?: () => void }) {
   const {
     notifications: { toasts },
   } = useKibana().services;
   const { sloClient } = usePluginContext();
 
   return useMutation<BulkPurgeRollupResponse, ServerError, BulkPurgeRollupInput>(
-    ['bulkPurgeRollupData'],
+    ['purgeRollupData'],
     ({ purgePolicy, force, list }) => {
       return sloClient.fetch('POST /api/observability/slos/_bulk_purge_rollup 2023-10-31', {
         params: {
@@ -35,19 +35,28 @@ export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void }
       });
     },
     {
-      onError: (error, { list }) => {
-        toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.bulkPurge.errorNotification', {
-            defaultMessage: 'Failed to schedule bulk purge of rollup data for {count} SLOs',
-            values: { count: list.length },
+      onError: (error) => {
+        let errorMessage = error.body?.message ?? error.message;
+        if (errorMessage.includes('At least one SLO')) {
+          errorMessage = i18n.translate('xpack.slo.purge.requestErrorNotification', {
+            defaultMessage:
+              'The provided purge policy is invalid. {name} has a time window that is longer than the provided purge policy.',
+            values: { name },
+          });
+        }
+
+        toasts.addError(new Error(errorMessage), {
+          title: i18n.translate('xpack.slo.purge.errorNotification', {
+            defaultMessage: 'Failed to schedule purge of rollup data for {name}',
+            values: { name },
           }),
         });
       },
-      onSuccess: (_, { list }) => {
+      onSuccess: () => {
         toasts.addSuccess(
-          i18n.translate('xpack.slo.bulkPurge.successNotification', {
-            defaultMessage: 'Bulk purge of rollup data scheduled for {count} SLOs',
-            values: { count: list.length },
+          i18n.translate('xpack.slo.purge.successNotification', {
+            defaultMessage: 'Purge of rollup data scheduled for {name}',
+            values: { name },
           })
         );
         onConfirm?.();
