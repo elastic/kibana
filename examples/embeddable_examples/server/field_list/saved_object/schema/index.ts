@@ -8,4 +8,4 @@
  */
 
 export type { SavedFieldListAttributes } from './types';
-export { savedFieldListAttributesSchema } from './v1';
+export { savedFieldListAttributesSchema } from './schema';

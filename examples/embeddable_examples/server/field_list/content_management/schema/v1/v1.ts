@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedFieldListAttributesSchema } from '../../../saved_object/schema/v1';
+import { savedFieldListAttributesSchema } from '../../../saved_object/schema';
 
 export const fieldListAttributesSchema = savedFieldListAttributesSchema;
