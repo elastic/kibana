@@ -31,11 +31,15 @@ const selector = (s: ReactFlowState) => ({
   maxZoomReached: s.transform[2] >= s.maxZoom,
 });
 
+const DEFAULT_ZOOM_DURATION = 200; // milliseconds
+
 export interface ControlsProps extends CommonProps {
   showZoom?: boolean;
   showFitView?: boolean;
   showCenter?: boolean;
   fitViewOptions?: FitViewOptions;
+  /** Duration of zoom in and zoom out animations in milliseconds */
+  zoomDuration?: number;
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
   /** Callback when zoom out button is clicked */
@@ -66,6 +70,7 @@ export const Controls = ({
   showFitView = true,
   showCenter = true,
   fitViewOptions,
+  zoomDuration = DEFAULT_ZOOM_DURATION,
   onZoomIn,
   onZoomOut,
   onCenter,
@@ -77,17 +82,20 @@ export const Controls = ({
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
   const onZoomInHandler = () => {
-    zoomIn();
+    zoomIn({ duration: zoomDuration });
     onZoomIn?.();
   };
 
   const onZoomOutHandler = () => {
-    zoomOut();
+    zoomOut({ duration: zoomDuration });
     onZoomOut?.();
   };
 
   const onFitViewHandler = () => {
-    fitView(fitViewOptions);
+    const options = fitViewOptions
+      ? { ...fitViewOptions, duration: fitViewOptions.duration ?? DEFAULT_ZOOM_DURATION }
+      : { duration: DEFAULT_ZOOM_DURATION };
+    fitView(options);
     onFitView?.();
   };
 
