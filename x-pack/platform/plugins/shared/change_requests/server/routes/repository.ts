@@ -12,3 +12,5 @@ export const repository = {
   ...crudRoutes,
   ...manageRoutes,
 };
+
+export type ChangeRequestsRouteRepository = typeof repository;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangeRequestsRepositoryClient } from '@kbn/change-requests-plugin/public';
 import type { SecurityLicense } from '@kbn/security-plugin-types-common';
 
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
@@ -27,6 +28,8 @@ export interface SecurityPluginSetup {
    * Exposes information about the available security features under the current license.
    */
   license: SecurityLicense;
+  // Gives the changeRequest plugin a way to share its client while avoiding circular dependencies
+  registerChangeRequestsRepositoryClient: (client: ChangeRequestsRepositoryClient) => void;
 }
 
 export interface SecurityPluginStart {

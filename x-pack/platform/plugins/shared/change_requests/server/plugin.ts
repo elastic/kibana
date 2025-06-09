@@ -11,6 +11,7 @@ import {
   type Logger,
   type CoreSetup,
   DEFAULT_APP_CATEGORIES,
+  CoreStart,
 } from '@kbn/core/server';
 import { type SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -30,6 +31,7 @@ import {
   CHANGE_REQUESTS_UI_PRIVILEGES,
   changeRequestsStorageSettings,
 } from './constants';
+import { submitChangeRequest } from './lib/submit_change_request';
 
 export type ChangeRequestsPluginSetup = ReturnType<ChangeRequestsPlugin['setup']>;
 export type ChangeRequestsPluginStart = ReturnType<ChangeRequestsPlugin['start']>;
@@ -73,6 +75,7 @@ export class ChangeRequestsPlugin
       app: [CHANGE_REQUESTS_FEATURE_ID],
       privileges: {
         all: {
+          excludeFromBasePrivileges: true, // Admins should grant this explicitly
           app: [CHANGE_REQUESTS_FEATURE_ID],
           api: [CHANGE_REQUESTS_API_PRIVILEGES.manage, CHANGE_REQUESTS_API_PRIVILEGES.create], // Can view pending requests and approve/decline
           ui: [CHANGE_REQUESTS_UI_PRIVILEGES.manage, CHANGE_REQUESTS_UI_PRIVILEGES.create], // Can view pending requests and approve/decline
@@ -83,6 +86,7 @@ export class ChangeRequestsPlugin
         },
         // It's a bit odd because the UI shows read but this is all about creation.
         read: {
+          excludeFromBasePrivileges: true, // Admins should grant this explicitly
           app: [CHANGE_REQUESTS_FEATURE_ID],
           api: [CHANGE_REQUESTS_API_PRIVILEGES.create], // Can submit a new request for review
           ui: [CHANGE_REQUESTS_UI_PRIVILEGES.create], // Can view options to "submit for approval" and view their list of requests
@@ -125,10 +129,32 @@ export class ChangeRequestsPlugin
       },
       runDevModeChecks: false,
     });
-
-    // TODO: Need to return a server side service here
-    // I guess it should only have access to submit CRs
   }
 
-  public start() {}
+  public start(coreStart: CoreStart) {
+    const scopedClusterClient = coreStart.elasticsearch.client;
+
+    const storageAdapter = new StorageIndexAdapter<
+      ChangeRequestsStorageSettings,
+      { request: ChangeRequestDoc } & { _id: string }
+    >(scopedClusterClient.asInternalUser, this.logger, changeRequestsStorageSettings);
+
+    const storageClient = storageAdapter.getClient();
+
+    return {
+      submitChangeRequest: async (
+        changeRequest: Omit<
+          ChangeRequestDoc,
+          'reviewedBy' | 'reviewComment' | 'user' | 'lastUpdatedAt' | 'submittedAt' | 'status'
+        >
+      ) =>
+        submitChangeRequest(storageClient, {
+          ...changeRequest,
+          status: 'pending',
+          user: 'Kibana system',
+          lastUpdatedAt: new Date().toISOString(),
+          submittedAt: new Date().toISOString(),
+        }),
+    };
+  }
 }

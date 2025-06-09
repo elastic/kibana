@@ -17,6 +17,8 @@ const apiRequestRt = z.object({
   method: z.union([z.literal('post'), z.literal('put'), z.literal('patch'), z.literal('delete')]),
   endpoint: z.string(),
   version: z.string().optional(),
+  // Should I require the consuming app to already put the path and query params into the endpoint instead?
+  // If they use the route repository, it'll be more familiar for them to use format_request?
   query: z.record(z.string(), z.any()).optional(),
   path: z.record(z.string(), z.any()).optional(),
   body: z.record(z.string(), z.any()).optional(),
@@ -43,7 +45,7 @@ const actionRt = z.object({
 });
 
 export const submitRequestBodyRt = z.object({
-  actions: z.array(actionRt),
+  actions: z.array(actionRt), // This should probably be a list of lists to express what can be done in parallel vs sequence
   urgency: z.union([z.literal('low'), z.literal('medium'), z.literal('high')]),
   title: z.string(), // User explanation of why this change is needed etc.
   description: z.string(),

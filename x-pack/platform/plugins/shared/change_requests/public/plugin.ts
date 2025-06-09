@@ -4,26 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin-types-public';
+import type { RouteRepositoryClient } from '@kbn/server-route-repository';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import type { ChangeRequestsRouteRepository } from '../server';
 
 export type ChangeRequestsPluginSetup = ReturnType<ChangeRequestsPlugin['setup']>;
 export type ChangeRequestsPluginStart = ReturnType<ChangeRequestsPlugin['start']>;
 
+export type ChangeRequestsRepositoryClient = RouteRepositoryClient<
+  ChangeRequestsRouteRepository,
+  {}
+>;
+
+interface PluginSetupDependencies {
+  security: SecurityPluginSetup;
+}
+
 export class ChangeRequestsPlugin
   implements Plugin<ChangeRequestsPluginSetup, ChangeRequestsPluginStart>
 {
-  public setup() {
-    // TODO: Create UI widget and expose it here
-    // I guess the widget should show two sections, one for your own requests and another one for things you could approve (if you have the right privilege)
-    // How can I make sure that the request the UI makes to submit this request still matches the API type of the target
-    // endpoint if I'm using the route repository?
-    // Once I've read the request from the index, how do I put the path params into the endpoint string?
-    // Attaching query params and the body should be easy since this part won't be type safe (that burden is on the one submitting the request)
-    // What about rollbacks?
+  private repositoryClient!: ChangeRequestsRepositoryClient;
+
+  public setup(core: CoreSetup, { security }: PluginSetupDependencies) {
+    this.repositoryClient = createRepositoryClient(core);
+    security.registerChangeRequestsRepositoryClient(this.repositoryClient);
+    return {};
+
+    // TODO: I think it would be nice to have a widget in the top chrome and the home page to notify you about changes to change requests
   }
 
   public start() {
-    // I guess I should expose an API client here based on the repository?
-    // In case another plugin wants to submit a CR
+    return {
+      changeRequestsRepositoryClient: this.repositoryClient,
+    };
   }
 }

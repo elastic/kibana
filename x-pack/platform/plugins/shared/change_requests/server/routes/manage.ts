@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { badRequest, notFound } from '@hapi/boom';
 import { createChangeRequestsServerRoute } from './route_factory';
@@ -23,8 +23,9 @@ const listRequestsRoute = createChangeRequestsServerRoute({
   },
   handler: async ({ response, getClients, getStartServices, request }) => {
     const { storageClient } = await getClients();
-    const { security, spaces } = await getStartServices();
+    const { security, spaces, core } = await getStartServices();
     const space = spaces.spacesService.getSpaceId(request);
+    const user = await getCurrentUser(core, request);
 
     const result = await storageClient.search({
       size: 10000,
@@ -40,9 +41,9 @@ const listRequestsRoute = createChangeRequestsServerRoute({
       });
     }
 
-    const changeRequests = sortBy(
+    const changeRequests = orderBy(
       result.hits.hits
-        .filter((hit) => hit._source.request.space === space)
+        .filter((hit) => hit._source.request.space === space && hit._source.request.user !== user) // You cannot approve your own request so we don't show it in the list
         .map((hit) => {
           const { space: _space, ...requestWithoutSpace } = hit._source.request;
           return {
@@ -50,7 +51,8 @@ const listRequestsRoute = createChangeRequestsServerRoute({
             ...requestWithoutSpace,
           };
         }),
-      'submittedAt'
+      'submittedAt',
+      'desc'
     );
 
     // This process might be fairly expensive if it is done for many requests and requested frequently (add APM)
@@ -82,6 +84,8 @@ const listRequestsRoute = createChangeRequestsServerRoute({
           ...changeRequest,
           actions: changeRequest.actions.map((action) => {
             const { requiredPrivileges, ...actionWithoutRequiredPrivileges } = action;
+            // Perhaps the reviewing admin actually wants to know which privileges are needed? Even if they have them.
+            // My thought was that the action summary provided by plugins should already make it clear what kind of resources are effected.
             return actionWithoutRequiredPrivileges;
           }),
         };
@@ -162,7 +166,7 @@ const updateRequestRoute = createChangeRequestsServerRoute({
       };
 
       // Do I need to log this event for audit tracing?
-      storageClient.index({
+      await storageClient.index({
         id: params.path.id,
         document: {
           request: updatedChangeRequest,

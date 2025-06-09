@@ -5,6 +5,9 @@
  * 2.0.
  */
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { ChangeRequestsRouteRepository } from './routes/repository';
+import { ChangeRequestDoc } from './types';
+import type { ChangeRequestsPluginStart } from './plugin';
 
 const plugin = async (initContext: PluginInitializerContext) => {
   const { ChangeRequestsPlugin } = await import('./plugin');
@@ -12,3 +15,7 @@ const plugin = async (initContext: PluginInitializerContext) => {
 };
 
 export { plugin };
+
+export type { ChangeRequestsRouteRepository };
+export type { ChangeRequestDoc };
+export type { ChangeRequestsPluginStart };

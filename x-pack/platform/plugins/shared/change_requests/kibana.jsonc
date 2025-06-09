@@ -7,7 +7,7 @@
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "change_requests",
+    "id": "changeRequests",
     "server": true,
     "browser": true,
     "configPath": [

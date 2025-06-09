@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ChangeRequestsRepositoryClient } from '@kbn/change-requests-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -87,6 +88,7 @@ export class SecurityPlugin
   private authz!: AuthorizationServiceSetup;
   private securityApiClients!: SecurityApiClients;
   private buildFlavor: BuildFlavor;
+  private changeRequestsRepositoryClient?: ChangeRequestsRepositoryClient;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
@@ -157,6 +159,7 @@ export class SecurityPlugin
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
+        getChangeRequestsRepositoryClient: () => this.changeRequestsRepositoryClient,
       });
     }
 
@@ -185,6 +188,9 @@ export class SecurityPlugin
       authc: this.authc,
       authz: this.authz,
       license,
+      registerChangeRequestsRepositoryClient: (client) => {
+        this.changeRequestsRepositoryClient = client;
+      },
     };
   }
 

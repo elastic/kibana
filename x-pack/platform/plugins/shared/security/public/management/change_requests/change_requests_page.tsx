@@ -8,14 +8,24 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
+import type { ChangeRequestsRepositoryClient } from '@kbn/change-requests-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MyRequestsTable } from './my_requests_table';
 import { ReviewTable } from './review_table';
 
-export const ChangeRequestsPage = () => {
-  const canManage = true;
+interface ChangeRequestsPageProps {
+  changeRequestsRepositoryClient: ChangeRequestsRepositoryClient;
+  coreStart: CoreStart;
+  canManage: boolean;
+}
 
+export const ChangeRequestsPage = ({
+  changeRequestsRepositoryClient: client,
+  coreStart,
+  canManage,
+}: ChangeRequestsPageProps) => {
   return (
     <>
       <EuiPageHeader
@@ -32,20 +42,20 @@ export const ChangeRequestsPage = () => {
 
       <EuiFlexGroup gutterSize="l" direction="column">
         {canManage && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={0}>
             <EuiTitle size="s">
               <h2>To review</h2>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <ReviewTable />
+            <ReviewTable changeRequestsRepositoryClient={client} coreStart={coreStart} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem>
+        <EuiFlexItem grow={0}>
           <EuiTitle size="s">
             <h2>My requests</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <MyRequestsTable />
+          <MyRequestsTable changeRequestsRepositoryClient={client} coreStart={coreStart} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

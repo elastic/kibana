@@ -7,6 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 
+import type { ChangeRequestsRepositoryClient } from '@kbn/change-requests-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
@@ -38,6 +39,7 @@ interface SetupParams {
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
   buildFlavor: BuildFlavor;
+  getChangeRequestsRepositoryClient: () => ChangeRequestsRepositoryClient | undefined;
 }
 
 interface StartParams {
@@ -58,7 +60,15 @@ export class ManagementService {
     this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
   }
 
-  setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
+  setup({
+    getStartServices,
+    management,
+    authc,
+    license,
+    fatalErrors,
+    buildFlavor,
+    getChangeRequestsRepositoryClient,
+  }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
@@ -78,7 +88,9 @@ export class ManagementService {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     }
 
-    this.securitySection.registerApp(changeRequestsManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(
+      changeRequestsManagementApp.create({ getStartServices, getChangeRequestsRepositoryClient })
+    );
   }
 
   start({ capabilities }: StartParams) {

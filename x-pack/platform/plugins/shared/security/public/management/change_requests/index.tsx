@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { ChangeRequestsRepositoryClient } from '@kbn/change-requests-plugin/public';
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -27,11 +28,12 @@ import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  getChangeRequestsRepositoryClient: () => ChangeRequestsRepositoryClient | undefined;
 }
 
 export const changeRequestsManagementApp = Object.freeze({
   id: 'change_requests',
-  create({ getStartServices }: CreateParams) {
+  create({ getStartServices, getChangeRequestsRepositoryClient }: CreateParams) {
     const title = i18n.translate('xpack.security.management.changeRequestsTitle', {
       defaultMessage: 'Change requests',
     });
@@ -41,6 +43,14 @@ export const changeRequestsManagementApp = Object.freeze({
       title,
       async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await getStartServices();
+        const client = getChangeRequestsRepositoryClient();
+
+        if (!client) {
+          return null;
+        }
+
+        // Should probably hide this whole page and nav link if the user doesn't have the create capability either
+
         render(
           coreStart.rendering.addContext(
             <Providers
@@ -56,7 +66,13 @@ export const changeRequestsManagementApp = Object.freeze({
               >
                 <Routes>
                   <Route path={['/', '']} exact>
-                    <ChangeRequestsPage />
+                    <ChangeRequestsPage
+                      changeRequestsRepositoryClient={client}
+                      coreStart={coreStart}
+                      canManage={
+                        coreStart.application.capabilities.change_requests.manage as boolean
+                      }
+                    />
                   </Route>
                 </Routes>
               </Breadcrumb>

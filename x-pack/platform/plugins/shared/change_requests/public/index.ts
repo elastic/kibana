@@ -8,6 +8,7 @@
 import type { PluginInitializer } from '@kbn/core/public';
 import {
   ChangeRequestsPlugin,
+  type ChangeRequestsRepositoryClient,
   type ChangeRequestsPluginSetup,
   type ChangeRequestsPluginStart,
 } from './plugin';
@@ -16,3 +17,4 @@ const plugin: PluginInitializer<ChangeRequestsPluginSetup, ChangeRequestsPluginS
   new ChangeRequestsPlugin();
 
 export { plugin };
+export type { ChangeRequestsRepositoryClient };

@@ -6,11 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
+import { orderBy } from 'lodash';
 import { badRequest } from '@hapi/boom';
 import { RequiredPrivileges, submitRequestBodyRt } from '../types';
 import { createChangeRequestsServerRoute } from './route_factory';
 import { CHANGE_REQUESTS_API_PRIVILEGES } from '../constants';
 import { getCurrentUser } from '../lib/get_current_user';
+import { submitChangeRequest } from '../lib/submit_change_request';
 
 const submitRequestRoute = createChangeRequestsServerRoute({
   endpoint: 'POST /internal/change_requests/change_requests',
@@ -24,7 +26,7 @@ const submitRequestRoute = createChangeRequestsServerRoute({
   }),
   handler: async ({ params, response, getClients, getStartServices, request }) => {
     if (params.body.actions.length === 0) {
-      throw badRequest('An change request should contain a least one action');
+      throw badRequest('A change request should contain a least one action');
     }
 
     if (
@@ -43,17 +45,14 @@ const submitRequestRoute = createChangeRequestsServerRoute({
 
     // Do I need to log this for audit tracing?
     // https://docs.elastic.dev/kibana-dev-docs/key-concepts/audit-logging
-    const indexResponse = await storageClient.index({
-      document: {
-        request: {
-          ...params.body,
-          user,
-          space,
-          status: 'pending',
-          submittedAt: new Date().toISOString(),
-          lastUpdatedAt: new Date().toISOString(),
-        },
-      },
+
+    const indexResponse = await submitChangeRequest(storageClient, {
+      ...params.body,
+      user,
+      space,
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      lastUpdatedAt: new Date().toISOString(),
     });
 
     // Could send a notification email if available, requires notifications plugin
@@ -95,15 +94,19 @@ const listRequestsRoute = createChangeRequestsServerRoute({
       });
     }
 
-    const changeRequests = result.hits.hits
-      .filter((hit) => hit._source.request.user === user && hit._source.request.space === space)
-      .map((hit) => {
-        const { user: _user, space: _space, ...requestWithoutUser } = hit._source.request;
-        return {
-          id: hit._id,
-          ...requestWithoutUser,
-        };
-      });
+    const changeRequests = orderBy(
+      result.hits.hits
+        .filter((hit) => hit._source.request.user === user && hit._source.request.space === space)
+        .map((hit) => {
+          const { user: _user, space: _space, ...requestWithoutUser } = hit._source.request;
+          return {
+            id: hit._id,
+            ...requestWithoutUser,
+          };
+        }),
+      'submittedAt',
+      'desc'
+    );
 
     return response.ok({
       body: {
