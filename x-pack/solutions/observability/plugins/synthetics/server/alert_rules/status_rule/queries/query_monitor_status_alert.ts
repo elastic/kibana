@@ -21,7 +21,7 @@ import {
 } from '../../../../common/runtime_types';
 import { SyntheticsEsClient } from '../../../lib';
 import { getSearchPingsParams } from './get_search_ping_params';
-import { ConfigStats, getConfigStats, getIsValidPing, getPendingConfigs } from './helpers';
+import { ConfigStats, calculateIsValidPing, getConfigStats, getPendingConfigs } from './helpers';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -112,9 +112,10 @@ export async function queryMonitorStatusAlert({
             const configId = latestPing.config_id;
             const monitorQueryId = latestPing.monitor.id;
 
-            const isValidPing = getIsValidPing({
+            const isValidPing = calculateIsValidPing({
               scheduleInMs: monitorsData[monitorQueryId].scheduleInMs,
-              timestamp: latestPing['@timestamp'],
+              previousRunEndTimeISO: latestPing['@timestamp'],
+              previousRunDurationUs: latestPing.monitor.duration?.us,
             });
 
             const meta: AlertStatusMetaData = {

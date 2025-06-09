@@ -166,17 +166,22 @@ export const getConfigStats = ({
   return Object.fromEntries(configsByMonitor.entries());
 };
 
-export const getIsValidPing = ({
+export const calculateIsValidPing = ({
+  previousRunEndTimeISO,
   scheduleInMs,
-  timestamp: latestPingTimestamp,
+  previousRunDurationUs = 0,
+  minimumTotalBufferMs = 60 * 1000, // 60 seconds
 }: {
+  previousRunEndTimeISO: string;
   scheduleInMs: number;
-  timestamp: string;
+  previousRunDurationUs?: number;
+  minimumTotalBufferMs?: number;
 }) => {
-  const msSinceLastPing = new Date().getTime() - new Date(latestPingTimestamp).getTime();
-  const msBeforeIsPending = scheduleInMs + moment.duration(60, 'seconds').asMilliseconds();
+  const msSincePreviousRunEnd = new Date().getTime() - new Date(previousRunEndTimeISO).getTime();
+  const stalenessThresholdMs =
+    scheduleInMs + Math.max(minimumTotalBufferMs, previousRunDurationUs / 1000);
 
   // Example: if a monitor has a schedule of 5m the last valid ping can be at (5+1)m
   // If it's greater than that it means the monitor is pending
-  return msBeforeIsPending - msSinceLastPing > 0;
+  return msSincePreviousRunEnd < stalenessThresholdMs;
 };
