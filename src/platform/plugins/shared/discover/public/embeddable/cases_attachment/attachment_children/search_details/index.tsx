@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange, Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiCodeBlock } from '@elastic/eui';
-import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterBadge } from '../filter_badge/filter_badge';
+// import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { ReadOnlyTimeRange } from './read_only_time_range';
 
 interface SearchDetailsProps {
@@ -84,7 +83,7 @@ export const SearchDetails: React.FC<SearchDetailsProps> = ({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {canViewFilters &&
+      {/* {canViewFilters &&
         filters.map((filter, i) => (
           <EuiFlexItem grow={false} key={i}>
             <FilterBadge
@@ -96,7 +95,7 @@ export const SearchDetails: React.FC<SearchDetailsProps> = ({
               readOnly={true}
             />
           </EuiFlexItem>
-        ))}
+        ))} */}
     </EuiFlexGroup>
   );
 };
