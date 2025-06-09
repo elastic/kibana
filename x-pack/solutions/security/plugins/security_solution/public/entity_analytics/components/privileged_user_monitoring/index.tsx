@@ -8,6 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { KeyInsightsPanel } from './components/key_insights_panel';
+
+const timerange = {
+  from: 'now-24h',
+  to: 'now',
+};
 
 export const PrivilegedUserMonitoring = () => {
   return (
@@ -18,9 +24,7 @@ export const PrivilegedUserMonitoring = () => {
             <RiskLevelsPrivilegedUsersPanel />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder={true}>
-              <span>{'TODO: Top risky privileged users'}</span>
-            </EuiPanel>
+            <KeyInsightsPanel timerange={timerange} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
