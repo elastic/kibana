@@ -16,6 +16,7 @@ import type {
   ActionTypeParams,
   RenderParameterTemplates,
   Services,
+  SSLSettings,
   ValidatorType as ValidationSchema,
 } from '../types';
 import type { SubFeature } from '../../common';
@@ -41,6 +42,7 @@ export type SubActionRequestParams<R> = {
   url: string;
   responseSchema: Type<R>;
   method?: Method;
+  sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
 
 export type IService<Config, Secrets> = new (

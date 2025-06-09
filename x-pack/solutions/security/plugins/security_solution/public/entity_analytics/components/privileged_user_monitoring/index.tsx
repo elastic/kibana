@@ -7,15 +7,18 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 
 export const PrivilegedUserMonitoring = () => {
+  const spaceId = useSpaceId();
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiFlexGroup responsive direction="row">
           <EuiFlexItem>
-            <RiskLevelsPrivilegedUsersPanel />
+            {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder={true}>
@@ -30,9 +33,7 @@ export const PrivilegedUserMonitoring = () => {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          {'TODO: Privileged user activity'}
-        </EuiPanel>
+        <UserActivityPrivilegedUsersPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>
