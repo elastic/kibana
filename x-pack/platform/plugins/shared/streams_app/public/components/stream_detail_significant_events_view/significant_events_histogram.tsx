@@ -17,7 +17,7 @@ interface Props {
   id: string;
   occurrences: Array<{ x: number; y: number }>;
   change?: FormattedChangePoint;
-  xFormatter?: TickFormatter;
+  xFormatter: TickFormatter;
 }
 
 export function SignificantEventsHistogramChart({ id, occurrences, change, xFormatter }: Props) {
@@ -32,14 +32,15 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
         query: { id },
         change,
         theme,
+        xFormatter,
       }),
     ];
-  }, [change, id, theme]);
+  }, [change, id, theme, xFormatter]);
 
   return (
     <SparkPlot
       id={id}
-      name={i18n.translate('xpack.apm.significantEventsTable.histogramSeriesTitle', {
+      name={i18n.translate('xpack.streams.significantEventsTable.histogramSeriesTitle', {
         defaultMessage: 'Count',
       })}
       timeseries={occurrences}

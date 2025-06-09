@@ -21,6 +21,7 @@ export interface UncontrolledStreamsAppSearchBarProps {
   dataViews?: DataView[];
   showSubmitButton?: boolean;
   showQueryInput?: boolean;
+  submitOnBlur?: boolean;
 }
 
 export function UncontrolledStreamsAppSearchBar({
@@ -34,6 +35,7 @@ export function UncontrolledStreamsAppSearchBar({
   dataViews,
   showSubmitButton = true,
   showQueryInput,
+  submitOnBlur = false,
 }: UncontrolledStreamsAppSearchBarProps) {
   const {
     dependencies: {
@@ -72,6 +74,7 @@ export function UncontrolledStreamsAppSearchBar({
       disableQueryLanguageSwitcher
       placeholder={placeholder}
       indexPatterns={dataViews}
+      submitOnBlur={submitOnBlur}
     />
   );
 }

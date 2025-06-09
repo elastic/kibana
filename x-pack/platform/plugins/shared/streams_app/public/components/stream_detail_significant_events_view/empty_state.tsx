@@ -15,13 +15,13 @@ export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick?: (
       <AssetImage type="significantEventsEmptyState" size="s" />
       <EuiTitle size="s">
         <h2>
-          {i18n.translate('xpack.significantEvents.emptyState.title', {
+          {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
             defaultMessage: 'No significant event definitions',
           })}
         </h2>
       </EuiTitle>
       <EuiText size="s" textAlign="center">
-        {i18n.translate('xpack.significantEvents.emptyState.description', {
+        {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
           defaultMessage: 'There are no significant events defined for this stream yet.',
         })}
       </EuiText>

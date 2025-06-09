@@ -21,12 +21,10 @@ export const useFetchSignificantEvents = ({
   name,
   start,
   end,
-  kql,
 }: {
-  name?: string;
+  name: string;
   start: number;
   end: number;
-  kql?: string;
 }) => {
   const {
     dependencies: {
@@ -39,10 +37,6 @@ export const useFetchSignificantEvents = ({
 
   const result = useStreamsAppFetch(
     async ({ signal }): Promise<undefined | SignificantEventItem[]> => {
-      if (!name) {
-        return Promise.resolve(undefined);
-      }
-
       const isoFrom = new Date(start).toISOString();
       const isoTo = new Date(end).toISOString();
 

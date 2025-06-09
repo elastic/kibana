@@ -20,31 +20,10 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-
-function AnnotationTooltip({
-  timestamp,
-  label,
-  xFormatter,
-}: {
-  timestamp: number;
-  label: React.ReactNode;
-  xFormatter: TickFormatter;
-}) {
-  const formattedTime = xFormatter(timestamp);
-
-  return (
-    <EuiPanel paddingSize="s">
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText size="xs">{formattedTime}</EuiText>
-        <EuiText size="xs">{label}</EuiText>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-}
+import { StreamsChartTooltip } from '../streams_chart_tooltip';
 
 export interface SparkPlotAnnotation {
   id: string;
@@ -162,7 +141,7 @@ export function SparkPlot({
           <LineAnnotation
             key={annotation.id}
             id={annotation.id}
-            dataValues={[{ dataValue: annotation.x, header: '' }]}
+            dataValues={[{ dataValue: annotation.x }]}
             domainType={AnnotationDomainType.XDomain}
             marker={annotation.icon}
             markerPosition={Position.Bottom}
@@ -172,14 +151,8 @@ export function SparkPlot({
                 stroke: annotation.color,
               },
             }}
-            customTooltip={({ datum }) => {
-              return (
-                <AnnotationTooltip
-                  timestamp={(datum as { dataValue: number }).dataValue}
-                  label={annotation.label}
-                  xFormatter={xFormatter}
-                />
-              );
+            customTooltip={() => {
+              return <StreamsChartTooltip label={annotation.label} color={annotation.color} />;
             }}
           />
         );

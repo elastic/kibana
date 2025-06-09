@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import { SignificantEventFlyout } from './significant_event_flyout';
+import { SignificantEventFlyout } from '.';
 
 const stories: Meta<{}> = {
   title: 'Streams/SignificantEventFlyout',

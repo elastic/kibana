@@ -45,19 +45,22 @@ export const WithEvents: StoryFn<{}> = () => {
     {
       id: 'some_event',
       time: new Date(`2025-03-24T12:30:00.000Z`).getTime(),
-      label: `Some event`,
+      header: 'Some event',
+      label: `Trend change`,
       color: theme.euiTheme.colors.danger,
     },
     {
       id: 'some_other_event',
       time: new Date(`2025-03-24T12:10:00.000Z`).getTime(),
-      label: `Some other event`,
+      header: 'Some other event',
+      label: `Dip`,
       color: theme.euiTheme.colors.danger,
     },
     {
       id: 'another_event',
       time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-      label: `Another event`,
+      header: `Another event`,
+      label: `Spike`,
       color: theme.euiTheme.colors.danger,
     },
   ];

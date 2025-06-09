@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { niceTimeFormatter } from '@elastic/charts';
 import {
   EuiButton,
   EuiFieldText,
@@ -17,53 +18,20 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
-import { StreamQueryKql, streamQuerySchema } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { StreamQueryKql, streamQuerySchema } from '@kbn/streams-schema';
+import React, { useMemo, useState } from 'react';
 import { v4 } from 'uuid';
-import { fromKueryExpression } from '@kbn/es-query';
-import moment from 'moment';
-import { calculateAuto } from '@kbn/calculate-auto';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { SparkPlot } from '../spark_plot';
-import { formatChangePoint } from './change_point';
-import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { UncontrolledStreamsAppSearchBar } from '../streams_app_search_bar/uncontrolled_streams_app_bar';
-
-function getTitle(query?: StreamQueryKql) {
-  if (!query) {
-    return i18n.translate('xpack.significantEventFlyout.addNewQueryFlyoutTitle', {
-      defaultMessage: 'Add significant event',
-    });
-  }
-
-  return i18n.translate('xpack.significantEventFlyout.editQueryFlyoutTitle', {
-    defaultMessage: 'Edit {title}',
-    values: {
-      title: query.title,
-    },
-  });
-}
-
-function getSubmitTitle(query?: StreamQueryKql) {
-  if (!query) {
-    return i18n.translate('xpack.significantEventFlyout.addButtonLabel', {
-      defaultMessage: 'Add',
-    });
-  }
-
-  return i18n.translate('xpack.significantEventFlyout.editButtonLabel', {
-    defaultMessage: 'Save changes',
-    values: {
-      title: query.title,
-    },
-  });
-}
+import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { SparkPlot } from '../../spark_plot';
+import { UncontrolledStreamsAppSearchBar } from '../../streams_app_search_bar/uncontrolled_streams_app_bar';
+import { getSigEventFlyoutTitle, getSigEventSubmitTitle } from './i18n';
+import { useSignificantEventPreviewFetch } from './use_significant_event_preview_fetch';
+import { useSignificantEventValidation } from './use_significant_event_validation';
+import { useSparkplotDataFromSigEvents } from './use_spark_plot_data_from_sig_events';
 
 interface SignificantEventFlyoutProps {
   name: string;
@@ -89,16 +57,14 @@ export function SignificantEventFlyoutContents({
 
   const [loading, setLoading] = useState(false);
 
-  const theme = useEuiTheme().euiTheme;
-
   const {
     dependencies: {
-      start: { data, streams },
+      start: { data },
     },
   } = useKibana();
 
   const {
-    timeState: { timeRange: initialTimeRange },
+    timeState: { timeRange: initialTimeRange, start, end },
   } = useTimefilter();
 
   const [timeRange, setTimeRange] = useState(initialTimeRange);
@@ -113,42 +79,7 @@ export function SignificantEventFlyoutContents({
       });
   }, [data.dataViews, name]);
 
-  const validation = useMemo(() => {
-    const { title = '', kql: { query: kqlQuery } = { query: '' } } = queryValues;
-    const titleEmptyError = title.length === 0;
-    const kqlEmptyError = kqlQuery.length === 0;
-
-    const titleErrorMessage = titleEmptyError
-      ? i18n.translate('xpack.significantEventFlyout.formFieldTitleRequiredError', {
-          defaultMessage: 'Required',
-        })
-      : undefined;
-
-    let kqlSyntaxError = false;
-
-    if (!kqlEmptyError) {
-      try {
-        fromKueryExpression(kqlQuery);
-      } catch (error) {
-        kqlSyntaxError = true;
-      }
-    }
-
-    const kqlErrorMessage = kqlSyntaxError
-      ? i18n.translate('xpack.significantEventFlyout.formFieldQuerySyntaxError', {
-          defaultMessage: 'Invalid syntax',
-        })
-      : kqlEmptyError
-      ? i18n.translate('xpack.significantEventFlyout.formFieldQueryRequiredError', {
-          defaultMessage: 'Required',
-        })
-      : undefined;
-
-    return {
-      title: titleErrorMessage,
-      kql: kqlErrorMessage,
-    };
-  }, [queryValues]);
+  const validation = useSignificantEventValidation({ queryValues });
 
   const validationMessages = useMemo(() => {
     return {
@@ -169,83 +100,21 @@ export function SignificantEventFlyoutContents({
     };
   }, [validation, touched]);
 
-  const previewFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      const { id, kql } = queryValues;
+  const previewFetch = useSignificantEventPreviewFetch({
+    name,
+    queryValues,
+    timeRange,
+  });
 
-      const { from, to } = getAbsoluteTimeRange(timeRange);
+  const xFormatter = useMemo(() => {
+    return niceTimeFormatter([start, end]);
+  }, [start, end]);
 
-      const bucketSize = calculateAuto
-        .near(50, moment.duration(moment(to).diff(from)))
-        ?.asSeconds()!;
-
-      return streams.streamsRepositoryClient.fetch(
-        `POST /api/streams/{name}/significant_events/_preview`,
-        {
-          signal,
-          params: {
-            path: {
-              name,
-            },
-            query: {
-              bucketSize: `${bucketSize}s`,
-              from,
-              to,
-            },
-            body: {
-              query: {
-                kql: kql ?? { query: '' },
-              },
-            },
-          },
-        }
-      );
-    },
-    [timeRange, name, queryValues, streams.streamsRepositoryClient]
-  );
-
-  const sparkPlotData = useMemo(() => {
-    const changePoints = previewFetch.value?.change_points;
-    const occurrences = previewFetch.value?.occurrences;
-
-    const timeseries =
-      occurrences?.map(({ date, count }) => {
-        return {
-          x: new Date(date).getTime(),
-          y: count,
-        };
-      }) ?? [];
-
-    const { id, kql, title } = queryValues;
-
-    const change =
-      changePoints && occurrences && id && kql && title
-        ? formatChangePoint({
-            change_points: changePoints,
-            occurrences: timeseries,
-            query: {
-              id,
-              kql,
-              title,
-            },
-          })
-        : undefined;
-
-    return {
-      timeseries,
-      annotations: change
-        ? [
-            getAnnotationFromFormattedChangePoint({
-              query: {
-                id,
-              },
-              change,
-              theme,
-            }),
-          ]
-        : [],
-    };
-  }, [previewFetch.value, queryValues, theme]);
+  const sparkPlotData = useSparkplotDataFromSigEvents({
+    previewFetch,
+    queryValues,
+    xFormatter,
+  });
 
   const parsedQuery = useMemo(() => {
     return streamQuerySchema.safeParse(queryValues);
@@ -255,7 +124,7 @@ export function SignificantEventFlyoutContents({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>{getTitle(query)}</h2>
+          <h2>{getSigEventFlyoutTitle(query)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -264,7 +133,7 @@ export function SignificantEventFlyoutContents({
             {...validationMessages.title}
             label={
               <EuiFormLabel>
-                {i18n.translate('xpack.significantEventFlyout.formFieldTitleLabel', {
+                {i18n.translate('xpack.streams.significantEventFlyout.formFieldTitleLabel', {
                   defaultMessage: 'Title',
                 })}
               </EuiFormLabel>
@@ -282,7 +151,7 @@ export function SignificantEventFlyoutContents({
           <EuiFormRow
             label={
               <EuiFormLabel>
-                {i18n.translate('xpack.significantEventFlyout.formFieldQueryLabel', {
+                {i18n.translate('xpack.streams.significantEventFlyout.formFieldQueryLabel', {
                   defaultMessage: 'Query',
                 })}
               </EuiFormLabel>
@@ -304,22 +173,24 @@ export function SignificantEventFlyoutContents({
               }}
               dateRangeFrom={timeRange.from}
               dateRangeTo={timeRange.to}
-              placeholder={i18n.translate('xpack.significantEventFlyout.queryPlaceholder', {
+              placeholder={i18n.translate('xpack.streams.significantEventFlyout.queryPlaceholder', {
                 defaultMessage: 'Filter events',
               })}
               dataViews={dataViewsFetch.value}
+              submitOnBlur
             />
           </EuiFormRow>
         </EuiForm>
         <EuiSpacer size="s" />
         <SparkPlot
           id={`query_preview_${query?.id}`}
-          name={i18n.translate('xpack.significantEventFlyout.previewChartSeriesName', {
+          name={i18n.translate('xpack.streams.significantEventFlyout.previewChartSeriesName', {
             defaultMessage: `Count`,
           })}
           timeseries={sparkPlotData.timeseries}
           type="bar"
           annotations={sparkPlotData.annotations}
+          xFormatter={xFormatter}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -330,7 +201,7 @@ export function SignificantEventFlyoutContents({
               onClose?.();
             }}
           >
-            {i18n.translate('xpack.significantEventFlyout.cancelButtonLabel', {
+            {i18n.translate('xpack.streams.significantEventFlyout.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButton>
@@ -358,7 +229,7 @@ export function SignificantEventFlyoutContents({
               }
             }}
           >
-            {getSubmitTitle(query)}
+            {getSigEventSubmitTitle(query)}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

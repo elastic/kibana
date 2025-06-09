@@ -16,7 +16,7 @@ import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { getRuleIdFromQueryLink } from '../../../lib/streams/assets/query/helpers/query';
 
-export async function readSignificantEvents(
+export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string },
   dependencies: {
     assetClient: AssetClient;

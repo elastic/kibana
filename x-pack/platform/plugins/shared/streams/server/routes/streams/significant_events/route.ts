@@ -5,79 +5,23 @@
  * 2.0.
  */
 
-import {
-  AggregationsDateHistogramAggregate,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
-import { badRequest, notFound } from '@hapi/boom';
-import { ChangePointType } from '@kbn/es-types/src';
+import { badRequest } from '@hapi/boom';
 import {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
-  StreamQueryKql,
 } from '@kbn/streams-schema';
-import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
-import { isEmpty } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
+import { previewSignificantEvents } from './preview_significant_events';
+import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
 
-const dateFromString = z.string().pipe(z.coerce.date());
-
-function createSearchRequest({
-  from,
-  to,
-  query,
-  bucketSize,
-}: {
-  from: Date;
-  to: Date;
-  query: Pick<StreamQueryKql, 'kql'>;
-  bucketSize: string;
-}) {
-  return {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from.toISOString(),
-                lte: to.toISOString(),
-              },
-            },
-          },
-          {
-            kql: {
-              query: query.kql.query,
-            },
-          } as QueryDslQueryContainer,
-        ],
-      },
-    },
-    aggs: {
-      occurrences: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: bucketSize,
-          extended_bounds: {
-            min: from.toISOString(),
-            max: to.toISOString(),
-          },
-        },
-      },
-      change_points: {
-        change_point: {
-          buckets_path: 'occurrences>_count',
-        },
-      } as {},
-    },
-  };
-}
+// Make sure strings are expected for input, but still converted to a
+// Date, without breaking the OpenAPI generator
+const dateFromString = z.string().transform((input) => new Date(input));
 
 const previewSignificantEventsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/significant_events/_preview',
+  endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
@@ -89,20 +33,17 @@ const previewSignificantEventsRoute = createServerRoute({
       }),
     }),
   }),
-
   options: {
-    access: 'internal',
-    summary: 'Read the significant events',
-    description: 'Read the significant events',
+    access: 'public',
+    summary: 'Preview significant events',
+    description: 'Preview significant event results based on a given query',
     availability: {
       stability: 'experimental',
     },
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({
@@ -120,50 +61,24 @@ const previewSignificantEventsRoute = createServerRoute({
       throw badRequest('Streams is not enabled');
     }
 
-    const tracedEsClient = createTracedEsClient({
-      client: scopedClusterClient.asCurrentUser,
-      logger,
-      plugin: 'streams',
-    });
+    const {
+      body: { query },
+      path: { name },
+      query: { bucketSize, from, to },
+    } = params;
 
-    const { name } = params.path;
-    const { from, to, bucketSize } = params.query;
-    const { query } = params.body;
-
-    const searchRequest = createSearchRequest({
-      bucketSize,
-      from,
-      query,
-      to,
-    });
-
-    const response = await tracedEsClient.search('get_significant_event_timeseries', {
-      index: name,
-      track_total_hits: false,
-      ...searchRequest,
-    });
-
-    if (!response.aggregations) {
-      throw notFound();
-    }
-
-    const aggregations = response.aggregations as typeof response.aggregations & {
-      change_points: {
-        type: Record<ChangePointType, { p_value: number; change_point: number }>;
-      };
-    };
-
-    return {
-      ...query,
-      change_points: aggregations.change_points,
-      occurrences:
-        aggregations.occurrences.buckets.map((bucket) => {
-          return {
-            date: bucket.key_as_string,
-            count: bucket.doc_count,
-          };
-        }) ?? [],
-    };
+    return await previewSignificantEvents(
+      {
+        name,
+        bucketSize,
+        from,
+        to,
+        query,
+      },
+      {
+        scopedClusterClient,
+      }
+    );
   },
 });
 
@@ -204,56 +119,15 @@ const readSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
 
-    const assetQueries = await assetClient.getAssetLinks(name, ['query']);
-    if (isEmpty(assetQueries)) {
-      return [];
-    }
-
-    const searchRequests = assetQueries.flatMap((asset) => {
-      return [
-        { index: name },
-        createSearchRequest({
-          from,
-          to,
-          bucketSize,
-          query: asset.query,
-        }),
-      ];
-    });
-
-    const response = await scopedClusterClient.asCurrentUser.msearch<
-      unknown,
-      { occurrences: AggregationsDateHistogramAggregate; change_points: unknown }
-    >({ searches: searchRequests });
-
-    const significantEvents = response.responses.map((queryResponse, queryIndex) => {
-      const query = assetQueries[queryIndex];
-      if ('error' in queryResponse) {
-        return {
-          id: query.query.id,
-          title: query.query.title,
-          kql: query.query.kql,
-          occurrences: [],
-          change_points: {},
-        };
-      }
-
-      return {
-        id: query.query.id,
-        title: query.query.title,
-        kql: query.query.kql,
-        occurrences:
-          // @ts-ignore map unrecognized on buckets
-          queryResponse?.aggregations?.occurrences?.buckets.map((bucket) => ({
-            date: bucket.key_as_string,
-            count: bucket.doc_count,
-          })),
-        change_points: queryResponse?.aggregations?.change_points,
-      };
-    });
-
-    // @ts-ignore
-    return significantEvents;
+    return await readSignificantEventsFromAlertsIndices(
+      {
+        name,
+        from,
+        to,
+        bucketSize,
+      },
+      { assetClient, scopedClusterClient }
+    );
   },
 });
 

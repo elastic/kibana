@@ -12,7 +12,6 @@ import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -33,10 +32,6 @@ export function StreamDetailSignificantEventsView({
   } = useKibana();
 
   const {
-    query: { kql },
-  } = useStreamsAppParams('/{key}/*');
-
-  const {
     timeState: { start, end },
   } = useTimefilter();
 
@@ -50,7 +45,6 @@ export function StreamDetailSignificantEventsView({
     name: definition.stream.name,
     start,
     end,
-    kql,
   });
 
   const { addQuery, removeQuery } = useSignificantEventsApi({ name: definition.stream.name }) || {};
@@ -74,6 +68,7 @@ export function StreamDetailSignificantEventsView({
             label: <ChangePointSummary change={change} xFormatter={xFormatter} />,
             color: theme.colors[change.color],
             time: change.time,
+            header: item.query.title,
           },
         ];
       }) ?? []
@@ -169,12 +164,7 @@ export function StreamDetailSignificantEventsView({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow>
-              <StreamsAppSearchBar
-                query={kql}
-                showQueryInput
-                onQuerySubmit={() => {}}
-                onQueryChange={() => {}}
-              />
+              <StreamsAppSearchBar showQueryInput={false} showDatePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

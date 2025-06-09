@@ -14,12 +14,6 @@ import {
   Settings,
   TickFormatter,
   Tooltip,
-  TooltipContainer,
-  TooltipTable,
-  TooltipTableBody,
-  TooltipTableCell,
-  TooltipTableColorCell,
-  TooltipTableRow,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -29,12 +23,14 @@ import { range } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamsChartTooltip } from '../streams_chart_tooltip';
 
 export interface TimelineEvent {
   id: string;
   time: number;
   label: React.ReactNode;
   color: string;
+  header: React.ReactNode;
 }
 
 interface TimelineProps {
@@ -75,23 +71,25 @@ export function Timeline({ events, start, end, xFormatter }: TimelineProps) {
     },
   };
 
-  const dummyValues = useMemo(() => {
-    if (events.length) {
-      return events.map((event) => {
-        return {
-          x: event.time,
-        };
-      });
-    }
+  // make sure there's nice ticks
+  const valuesWithNiceTicks = useMemo(() => {
     const delta = calculateAuto.atLeast(20, moment.duration(end - start))?.asMilliseconds()!;
 
     const buckets = Math.floor((end - start) / delta);
 
-    return range(0, buckets).map((index) => {
-      return {
-        x: start + index * delta,
-      };
-    });
+    const roundedStart = Math.round(start / delta) * delta;
+
+    return range(0, buckets)
+      .map((index) => {
+        return {
+          x: roundedStart + index * delta,
+        };
+      })
+      .concat(
+        events.map((event) => {
+          return { x: event.time };
+        })
+      );
   }, [start, end, events]);
 
   return (
@@ -132,7 +130,7 @@ export function Timeline({ events, start, end, xFormatter }: TimelineProps) {
           />
           <LineSeries
             id="dummy"
-            data={dummyValues}
+            data={valuesWithNiceTicks}
             xAccessor={'x'}
             yAccessors={['x']}
             color={'rgba(0,0,0,0)'}
@@ -160,21 +158,11 @@ export function Timeline({ events, start, end, xFormatter }: TimelineProps) {
             customTooltip={({ datum }) => {
               const { event } = datum as { dataValue: number; event: TimelineEvent };
               return (
-                <TooltipContainer>
-                  <TooltipTable
-                    gridTemplateColumns="none"
-                    className={css`
-                      padding: ${theme.size.xs};
-                    `}
-                  >
-                    <TooltipTableBody>
-                      <TooltipTableRow>
-                        <TooltipTableColorCell color={event.color} />
-                        <TooltipTableCell>{event.label}</TooltipTableCell>
-                      </TooltipTableRow>
-                    </TooltipTableBody>
-                  </TooltipTable>
-                </TooltipContainer>
+                <StreamsChartTooltip
+                  header={event.header}
+                  color={event.color}
+                  label={event.label}
+                />
               );
             }}
           />
