@@ -17,6 +17,7 @@ import { getEventLog } from '../../../../../common/lib/get_event_log';
 export default function updateGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('update gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -499,6 +500,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         .send([{ rule_id: ruleId, ranges: [{ start: gapStart, end: gapEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
+      log.info(`schedule response ${JSON.stringify(scheduleResponse.body)}`);
 
       await retry.try(async () => {
         const firstGapResponse = await supertest
