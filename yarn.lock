@@ -5624,6 +5624,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/file-upload@link:x-pack/platform/packages/shared/file-upload":
+  version "0.0.0"
+  uid ""
+
 "@kbn/files-example-plugin@link:examples/files_example":
   version "0.0.0"
   uid ""
