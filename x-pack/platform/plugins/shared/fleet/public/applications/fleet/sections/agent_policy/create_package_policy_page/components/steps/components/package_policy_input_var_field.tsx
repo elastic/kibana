@@ -354,7 +354,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             position="top"
             content={
               <FormattedMessage
