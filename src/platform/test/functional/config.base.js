@@ -52,7 +52,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:useLegacyTimeAxis': true,
       },
     },
 
