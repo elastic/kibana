@@ -39,20 +39,23 @@ export class RelatedDashboardsClient {
     this.alert = alert;
   }
 
+  private checkAlert(): AlertData {
+    if (!this.alert)
+      throw new Error(
+        `Alert with id ${this.alertId} not found. Could not fetch related dashboards.`
+      );
+    return this.alert;
+  }
+
   async fetchRelatedDashboards(): Promise<{
     suggestedDashboards: RelatedDashboard[];
     linkedDashboards: RelatedDashboard[];
   }> {
-    const [alert] = await Promise.all([
+    const [alertDocument] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
       this.fetchFirst500Dashboards(),
     ]);
-    this.setAlert(alert);
-    if (!this.alert) {
-      throw new Error(
-        `Alert with id ${this.alertId} not found. Could not fetch related dashboards.`
-      );
-    }
+    this.setAlert(alertDocument);
     const [suggestedDashboards, linkedDashboards] = await Promise.all([
       this.fetchSuggestedDashboards(),
       this.getLinkedDashboards(),
@@ -70,10 +73,8 @@ export class RelatedDashboardsClient {
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
     const index = await this.getRuleQueryIndex();
-    if (!this.alert) {
-      throw new Error('Alert not found. Could not fetch suggested dashboards.');
-    }
-    const allRelevantFields = this.alert.getAllRelevantFields();
+    const alert = this.checkAlert();
+    const allRelevantFields = alert.getAllRelevantFields();
 
     if (index) {
       const { dashboards } = this.getDashboardsByIndex(index);
@@ -274,10 +275,8 @@ export class RelatedDashboardsClient {
   }
 
   getRuleQueryIndex(): string | null {
-    if (!this.alert) {
-      throw new Error('Alert not found. Could not get rule query index.');
-    }
-    const index = this.alert.getRuleQueryIndex();
+    const alert = this.checkAlert();
+    const index = alert.getRuleQueryIndex();
     return index;
   }
 
@@ -309,10 +308,8 @@ export class RelatedDashboardsClient {
   }
 
   async getLinkedDashboards(): Promise<RelatedDashboard[]> {
-    if (!this.alert) {
-      throw new Error('Alert not found. Could not get linked dashboards.');
-    }
-    const ruleId = this.alert.getRuleId();
+    const alert = this.checkAlert();
+    const ruleId = alert.getRuleId();
     if (!ruleId) {
       this.logger.warn(`Rule id not found. No linked dashboards available.`);
       return [];
@@ -354,12 +351,8 @@ export class RelatedDashboardsClient {
   }
 
   getScore(dashboard: RelatedDashboard): number {
-    if (!this.alert) {
-      throw new Error(
-        `Alert with id ${this.alertId} not found. Could not compute the relevance score for suggested dashboard.`
-      );
-    }
-    const allRelevantFields = this.alert.getAllRelevantFields();
+    const alert = this.checkAlert();
+    const allRelevantFields = alert.getAllRelevantFields();
     const index = this.getRuleQueryIndex();
     const setA = new Set<string>([...allRelevantFields, ...(index ? [index] : [])]);
     const setB = new Set<string>(this.getMatchingFields(dashboard));
