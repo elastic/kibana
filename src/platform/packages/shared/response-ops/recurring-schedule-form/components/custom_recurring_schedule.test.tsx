@@ -8,7 +8,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { fireEvent, render, waitFor, within, screen } from '@testing-library/react';
+import { fireEvent, render, within, screen } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
 import type { RecurringSchedule } from '../types';
@@ -70,7 +70,7 @@ describe('CustomRecurringSchedule', () => {
         target: { value: Frequency.WEEKLY },
       }
     );
-    await waitFor(() => expect(screen.getByTestId('byweekday-field')).toBeInTheDocument());
+    expect(await screen.findByTestId('byweekday-field')).toBeInTheDocument();
   });
 
   it('renders byweekday field if frequency = daily', async () => {
@@ -105,7 +105,7 @@ describe('CustomRecurringSchedule', () => {
         target: { value: Frequency.MONTHLY },
       }
     );
-    await waitFor(() => expect(screen.getByTestId('bymonth-field')).toBeInTheDocument());
+    expect(await screen.findByTestId('bymonth-field')).toBeInTheDocument();
   });
 
   it('should initialize the form when no initialValue provided', () => {
