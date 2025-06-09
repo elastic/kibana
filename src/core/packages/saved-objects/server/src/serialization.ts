@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 import type { SavedObjectReference } from '..';
 
 /**
