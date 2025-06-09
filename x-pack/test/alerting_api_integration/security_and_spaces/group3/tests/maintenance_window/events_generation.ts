@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, TaskManagerDoc } from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { ObjectRemover } from '../../../../common/lib';
 
 export default function eventsGenerationTaskTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
