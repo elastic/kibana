@@ -34,6 +34,6 @@ export function deepFreeze<T extends Freezable>(object: T) {
   return Object.freeze(object) as RecursiveReadonly<T>;
 }
 
-function isMomentLocale(obj: any): obj is moment.Locale {
-  return obj && typeof obj === 'object' && '_longDateFormat' in obj;
+function isMomentLocale(obj: unknown): obj is moment.Locale {
+  return obj !== null && typeof obj === 'object' && '_longDateFormat' in obj;
 }
