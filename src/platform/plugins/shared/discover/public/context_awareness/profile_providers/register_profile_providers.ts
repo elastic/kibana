@@ -31,7 +31,8 @@ import { createDeprecationLogsDataSourceProfileProvider } from './common/depreca
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 import { createObservabilityTracesSpanDocumentProfileProvider } from './observability/traces_document_profile/span_document_profile';
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './observability/traces_document_profile/transaction_document_profile';
-import { createObservabilityDocumentProfileProvider } from './observability/observability_document_profile';
+import { createBaseObservabilityDocumentProfileProvider } from './observability/observability_document_profile';
+import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_provides';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -150,8 +151,9 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
-  createObservabilityLogDocumentProfileProvider(providerServices),
-  createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-  createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
-  // createObservabilityDocumentProfileProvider(providerServices),
+  ...createObservabilityDocumentProfileProviders(providerServices),
+  // createObservabilityLogDocumentProfileProvider(providerServices),
+  // createObservabilityTracesSpanDocumentProfileProvider(providerServices),
+  // createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
+  // createBaseObservabilityDocumentProfileProvider(providerServices),
 ];
