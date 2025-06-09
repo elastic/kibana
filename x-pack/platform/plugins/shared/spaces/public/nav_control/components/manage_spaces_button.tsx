@@ -35,23 +35,12 @@ export const ManageSpacesButton: React.FC<Props> = ({
     if (onClick) {
       onClick();
     }
-
-    return (
-      <EuiButton
-        size={this.props.size || 's'}
-        className={this.props.className}
-        isDisabled={this.props.isDisabled}
-        onClick={this.navigateToManageSpaces}
-        style={this.props.style}
-        data-test-subj="manageSpaces"
-      >
-        <FormattedMessage
-          id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
-          defaultMessage="Manage spaces"
-        />
-      </EuiButton>
-    );
+    navigateToApp('management', { path: 'kibana/spaces' });
   };
+
+  if (!capabilities.spaces.manage) {
+    return null;
+  }
 
   return (
     <EuiButton

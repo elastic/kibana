@@ -28,6 +28,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -244,7 +245,11 @@ const renderFormBasedDataPanel = async (propsOverrides?: Partial<FormBasedDataPa
   const { rerender, ...rest } = render(
     <FormBasedDataPanel {...defaultProps} {...propsOverrides} />,
     {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      wrapper: ({ children }) => (
+        <EuiThemeProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </EuiThemeProvider>
+      ),
     }
   );
   await waitToLoad();
