@@ -14,8 +14,8 @@ import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-
-import { getSimpleRule, getThresholdRuleForAlertTesting } from '../../../utils';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { getThresholdRuleForAlertTesting, getCustomQueryRuleParams } from '../../../utils';
 import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -42,29 +42,30 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    describe('add_alert_suppression action', () => {
-      it('should add suppression fields to a rule', async () => {
+    describe('set_alert_suppression action', () => {
+      it('should overwrite suppression in a rule', async () => {
         const ruleId = 'ruleId';
         const existingSuppression = {
           group_by: ['field1'],
           duration: { value: 5, unit: 'm' as const },
-          missing_fields_strategy: 'suppress' as const,
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         };
-        const suppressionToAdd = {
+        const suppressionToSet = {
           group_by: ['field2'],
           duration: { value: 10, unit: 'm' },
-          missing_fields_strategy: 'suppress',
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         };
         const resultingSuppression = {
-          group_by: ['field1', 'field2'],
+          group_by: ['field2'],
           duration: { value: 10, unit: 'm' },
-          missing_fields_strategy: 'suppress',
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         };
 
-        await createRule(supertest, log, {
-          ...getSimpleRule(ruleId),
-          alert_suppression: existingSuppression,
-        });
+        await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ rule_id: ruleId, alert_suppression: existingSuppression })
+        );
 
         const { body: bulkEditResponse } = await postBulkAction()
           .send({
@@ -72,8 +73,8 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.add_alert_suppression,
-                value: suppressionToAdd,
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: suppressionToSet,
               },
             ],
           })
@@ -97,17 +98,19 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
 
-      it('should add suppression fields to a rule without configured suppression', async () => {
-        const ruleId = 'ruleId';
-        const suppressionToAdd = {
+      it('should set suppression to rules without configured suppression', async () => {
+        const suppressionToSet = {
           group_by: ['field2'],
         };
         const resultingSuppression = {
           group_by: ['field2'],
-          missing_fields_strategy: 'suppress',
+          missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         };
 
-        await createRule(supertest, log, getSimpleRule(ruleId));
+        await Promise.all([
+          createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'id_1' })),
+          createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'id_2' })),
+        ]);
 
         const { body: bulkEditResponse } = await postBulkAction()
           .send({
@@ -115,8 +118,8 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.add_alert_suppression,
-                value: suppressionToAdd,
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: suppressionToSet,
               },
             ],
           })
@@ -125,8 +128,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bulkEditResponse.attributes.summary).toEqual({
           failed: 0,
           skipped: 0,
-          succeeded: 1,
-          total: 1,
+          succeeded: 2,
+          total: 2,
         });
 
         // Check that the updated rule is returned with the response
@@ -135,26 +138,20 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await fetchRule('id_1').expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
 
-      it('should not add more than 3 suppression fields to a rule', async () => {
+      it('should return error when trying to set suppression to threshold rule', async () => {
         const ruleId = 'ruleId';
-        const existingSuppression = {
-          group_by: ['field1', 'field2'],
-          duration: { value: 5, unit: 'm' as const },
-          missing_fields_strategy: 'suppress' as const,
-        };
-        const suppressionToAdd = {
-          group_by: ['new1', 'new2', 'new3'],
-          duration: { value: 10, unit: 'm' },
-          missing_fields_strategy: 'suppress',
+        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
+        const suppressionToSet = {
+          group_by: ['field2'],
         };
 
         await createRule(supertest, log, {
-          ...getSimpleRule(ruleId),
+          ...getThresholdRuleForAlertTesting(['*'], ruleId),
           alert_suppression: existingSuppression,
         });
 
@@ -164,8 +161,8 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.add_alert_suppression,
-                value: suppressionToAdd,
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: suppressionToSet,
               },
             ],
           })
@@ -178,73 +175,25 @@ export default ({ getService }: FtrProviderContext): void => {
           total: 1,
         });
 
-        expect(bulkEditResponse.attributes.errors[0].message).toEqual(
-          'alert_suppression.group_by: Array must contain at most 3 element(s)'
+        expect(bulkEditResponse.attributes.errors).toHaveLength(1);
+        expect(bulkEditResponse.attributes.errors[0].message).toBe(
+          "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
         );
-
-        // Check that the updates have not been applied to the rule
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-
-        expect(updatedRule.alert_suppression).toEqual(existingSuppression);
-      });
-
-      it('should skip threshold rule if duration is not set in action', async () => {
-        const ruleId = 'ruleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
-        const suppressionToAdd = {
-          group_by: ['field2'],
-        };
-
-        await createRule(supertest, log, {
-          ...getThresholdRuleForAlertTesting(['*'], ruleId),
-          alert_suppression: existingSuppression,
-        });
-
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.add_alert_suppression,
-                value: suppressionToAdd,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(bulkEditResponse.attributes.summary).toEqual({
-          failed: 0,
-          skipped: 1,
-          succeeded: 0,
-          total: 1,
-        });
-
-        expect(bulkEditResponse.attributes.results.updated).toHaveLength(0);
-        expect(bulkEditResponse.attributes.results.skipped).toHaveLength(1);
-
         // Check that the updates did not apply to the rule
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(existingSuppression);
       });
 
-      it('should update threshold rule if duration is set in action', async () => {
-        const ruleId = 'ruleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
-        const suppressionToAdd = {
+      it('should set suppression to rules without configured suppression and throw error on threshold one', async () => {
+        const suppressionToSet = {
           group_by: ['field2'],
-          duration: { value: 1, unit: 'h' as const },
-          missing_fields_strategy: 'suppress' as const,
-        };
-        const resultingSuppression = {
-          duration: { value: 1, unit: 'h' },
         };
 
-        await createRule(supertest, log, {
-          ...getThresholdRuleForAlertTesting(['*'], ruleId),
-          alert_suppression: existingSuppression,
-        });
+        await Promise.all([
+          createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'id_1' })),
+          createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], 'id_2')),
+        ]);
 
         const { body: bulkEditResponse } = await postBulkAction()
           .send({
@@ -252,53 +201,89 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.add_alert_suppression,
-                value: suppressionToAdd,
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: suppressionToSet,
               },
             ],
           })
-          .expect(200);
+          .expect(500);
 
         expect(bulkEditResponse.attributes.summary).toEqual({
-          failed: 0,
+          failed: 1,
           skipped: 0,
           succeeded: 1,
-          total: 1,
+          total: 2,
         });
-
-        // Check that the updated rule is returned with the response
-        expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(
-          resultingSuppression
-        );
-
-        // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-
-        expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
     });
 
     describe('delete_alert_suppression action', () => {
-      it('should delete suppression fields from a rule', async () => {
+      it('should delete suppression from rules', async () => {
+        await Promise.all([
+          createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'id_1',
+              alert_suppression: {
+                group_by: ['field2'],
+                duration: { value: 10, unit: 'm' },
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+              },
+            })
+          ),
+          createRule(supertest, log, {
+            ...getThresholdRuleForAlertTesting(['*'], 'id_2'),
+            alert_suppression: {
+              duration: { value: 10, unit: 'm' },
+            },
+          }),
+        ]);
+
+        const { body: bulkEditResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.delete_alert_suppression,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(bulkEditResponse.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 2,
+          total: 2,
+        });
+
+        // Check that the updated rule is returned with the response
+        expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(undefined);
+
+        // Check that the updates have been persisted
+        const updatedRules = await Promise.all([fetchRule('id_1'), await fetchRule('id_2')]);
+        expect(updatedRules[0].body.alert_suppression).toEqual(undefined);
+        expect(updatedRules[1].body.alert_suppression).toEqual(undefined);
+      });
+    });
+
+    describe('set_alert_suppression_for_threshold action', () => {
+      it('should overwrite suppression in a rule', async () => {
         const ruleId = 'ruleId';
         const existingSuppression = {
-          group_by: ['field1', 'field2'],
           duration: { value: 5, unit: 'm' as const },
-          missing_fields_strategy: 'suppress' as const,
         };
-        const suppressionToDelete = {
-          group_by: ['field2'],
-          duration: { value: 5, unit: 'm' },
-          missing_fields_strategy: 'suppress',
+        const suppressionToSet = {
+          duration: { value: 10, unit: 'm' },
         };
         const resultingSuppression = {
-          group_by: ['field1'],
-          duration: { value: 5, unit: 'm' },
-          missing_fields_strategy: 'suppress',
+          duration: { value: 10, unit: 'm' },
         };
 
         await createRule(supertest, log, {
-          ...getSimpleRule(ruleId),
+          ...getThresholdRuleForAlertTesting(['*'], ruleId),
           alert_suppression: existingSuppression,
         });
 
@@ -308,8 +293,8 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.delete_alert_suppression,
-                value: suppressionToDelete,
+                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                value: suppressionToSet,
               },
             ],
           })
@@ -333,15 +318,16 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
 
-      it('should remove suppression from threshold rule if duration is set to null in action', async () => {
-        const ruleId = 'thresholdRuleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
-        const suppressionToSet = { group_by: ['field2'], duration: null };
+      it('should set suppression to rule without configured suppression', async () => {
+        const ruleId = 'ruleId';
+        const suppressionToSet = {
+          duration: { value: 10, unit: 'm' },
+        };
+        const resultingSuppression = {
+          duration: { value: 10, unit: 'm' },
+        };
 
-        await createRule(supertest, log, {
-          ...getThresholdRuleForAlertTesting(['*'], ruleId),
-          alert_suppression: existingSuppression,
-        });
+        await createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], ruleId));
 
         const { body: bulkEditResponse } = await postBulkAction()
           .send({
@@ -349,7 +335,7 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkActionTypeEnum.edit,
             [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditTypeEnum.delete_alert_suppression,
+                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
                 value: suppressionToSet,
               },
             ],
@@ -363,136 +349,50 @@ export default ({ getService }: FtrProviderContext): void => {
           total: 1,
         });
 
-        expect(bulkEditResponse.attributes.results.updated).toHaveLength(1);
+        // Check that the updated rule is returned with the response
+        expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(
+          resultingSuppression
+        );
 
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
+      });
+
+      it('should return error when trying to set suppression not to threshold rule', async () => {
+        const ruleId = 'ruleId';
+
+        await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: ruleId }));
+
+        const { body: bulkEditResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                value: { duration: { value: 10, unit: 'm' } },
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(bulkEditResponse.attributes.summary).toEqual({
+          failed: 1,
+          skipped: 0,
+          succeeded: 0,
+          total: 1,
+        });
+
+        expect(bulkEditResponse.attributes.errors).toHaveLength(1);
+        expect(bulkEditResponse.attributes.errors[0].message).toBe(
+          "query rule type doesn't support this action. Use 'set_alert_suppression' action instead."
+        );
         // Check that the updates did not apply to the rule
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(undefined);
-      });
-    });
-
-    describe('set_alert_suppression action', () => {
-      it('should overwrite suppression fields in a rule', async () => {
-        const ruleId = 'ruleId';
-        const existingSuppression = {
-          group_by: ['field1'],
-          duration: { value: 5, unit: 'm' as const },
-          missing_fields_strategy: 'suppress' as const,
-        };
-        const suppressionToSet = {
-          group_by: ['field2'],
-          duration: { value: 10, unit: 'm' },
-          missing_fields_strategy: 'doNotSuppress',
-        };
-        const resultingSuppression = {
-          group_by: ['field2'],
-          duration: { value: 10, unit: 'm' },
-          missing_fields_strategy: 'doNotSuppress',
-        };
-
-        await createRule(supertest, log, {
-          ...getSimpleRule(ruleId),
-          alert_suppression: existingSuppression,
-        });
-
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(bulkEditResponse.attributes.summary).toEqual({
-          failed: 0,
-          skipped: 0,
-          succeeded: 1,
-          total: 1,
-        });
-
-        // Check that the updated rule is returned with the response
-        expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(
-          resultingSuppression
-        );
-
-        // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-
-        expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
-      });
-
-      it('should skip threshold rule if duration is not set in action', async () => {
-        const ruleId = 'thresholdRuleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
-        const suppressionToSet = { group_by: ['field2'] };
-
-        await createRule(supertest, log, {
-          ...getThresholdRuleForAlertTesting(['*'], ruleId),
-          alert_suppression: existingSuppression,
-        });
-
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(bulkEditResponse.attributes.summary).toEqual({
-          failed: 0,
-          skipped: 1,
-          succeeded: 0,
-          total: 1,
-        });
-
-        expect(bulkEditResponse.attributes.results.updated).toHaveLength(0);
-        expect(bulkEditResponse.attributes.results.skipped).toHaveLength(1);
-
-        // Check that the updates did not apply to the rule
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
-
-        expect(updatedRule.alert_suppression).toEqual(existingSuppression);
-      });
-
-      it('should skip a rule if setting empty suppression fields to a rule without suppression', async () => {
-        const ruleId = 'ruleId';
-        const suppressionToSet = {
-          group_by: [],
-        };
-
-        await createRule(supertest, log, getSimpleRule(ruleId));
-
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(bulkEditResponse.attributes.summary).toEqual({
-          failed: 0,
-          skipped: 1,
-          succeeded: 0,
-          total: 1,
-        });
       });
     });
   });
