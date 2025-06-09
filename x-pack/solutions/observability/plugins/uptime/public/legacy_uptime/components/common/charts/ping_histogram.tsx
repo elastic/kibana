@@ -168,24 +168,24 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             })}
           />
 
-            <BarSeries
-              color={[danger, gray]}
-              data={barData}
-              id={STATUS_DOWN_LABEL}
-              name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
-                defaultMessage: 'Monitor Pings',
-              })}
-              stackAccessors={['x']}
-              splitSeriesAccessors={['type']}
-              timeZone={timeZone}
-              xAccessor="x"
-              // Defaults to multi layer time axis as of Elastic Charts v70
-              xScaleType={ScaleType.Time}
-              yAccessors={['y']}
-              yScaleType={ScaleType.Linear}
-            />
-          </Chart>
-        </ChartWrapper>
+          <BarSeries
+            color={[danger, gray]}
+            data={barData}
+            id={STATUS_DOWN_LABEL}
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
+              defaultMessage: 'Monitor Pings',
+            })}
+            stackAccessors={['x']}
+            splitSeriesAccessors={['type']}
+            timeZone={timeZone}
+            xAccessor="x"
+            // Defaults to multi layer time axis as of Elastic Charts v70
+            xScaleType={ScaleType.Time}
+            yAccessors={['y']}
+            yScaleType={ScaleType.Linear}
+          />
+        </Chart>
+      </ChartWrapper>
     );
   }
 
