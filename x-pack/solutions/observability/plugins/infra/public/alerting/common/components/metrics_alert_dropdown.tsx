@@ -210,16 +210,13 @@ export const MetricsAlertDropdown = () => {
         anchorPosition="downLeft"
         button={
           <EuiHeaderLink
-            color="text"
+            color="primary"
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={togglePopover}
             data-test-subj="infrastructure-alerts-and-rules"
           >
-            <FormattedMessage
-              id="xpack.infra.alerting.alertsButton"
-              defaultMessage="Alerts and rules"
-            />
+            <FormattedMessage id="xpack.infra.alerting.alertsButton" defaultMessage="Alerts" />
           </EuiHeaderLink>
         }
         isOpen={popoverOpen}
