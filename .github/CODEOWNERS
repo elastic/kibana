@@ -2631,6 +2631,9 @@ x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/secu
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/navigation/src/navigation_tree/entity_analytics_navigation_tree.ts @elastic/security-entity-analytics
+x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/security-entity-analytics
+x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/security-entity-analytics
+x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/security-entity-analytics
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
