@@ -100,6 +100,7 @@ export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
+  // TODO add box-shadow. EUI has no token for it though
 `;
 
 export const NodeShapeSvg = styled.svg`
