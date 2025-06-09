@@ -101,11 +101,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
-              const panels = JSON.parse(
-                dashboard.attributes.panelsJSON as string
-              ) as unknown as Array<{ type: string; [key: string]: unknown }>;
-
-              collectPanelsByType(panels, dashboardData, embeddable);
+              if ('panelsJSON' in dashboard.attributes)
+                collectPanelsByType(dashboard.attributes.panelsJSON, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

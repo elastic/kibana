@@ -43,7 +43,7 @@ interface DashboardAttributesTo720 extends KibanaAttributes {
   optionsJSON?: string;
 }
 
-export type DashboardDoc730ToLatest = Doc<DashboardSavedObjectAttributes>;
+export type DashboardDoc730ToLatest = Doc<DashboardSavedObjectAttributes & KibanaAttributes>;
 
 export type DashboardDoc700To720 = Doc<DashboardAttributesTo720>;
 

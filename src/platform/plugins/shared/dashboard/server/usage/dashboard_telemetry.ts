@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty } from 'lodash';
-
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import {
   initializeControlGroupTelemetry,
@@ -17,6 +15,9 @@ import {
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
+import { isDashboardSection } from '../../common';
+import { transformPanelsOut } from '../content_management/v3/transforms';
+import { isControlGroupSavedObject } from '../content_management/v3/transforms/out/control_group_out_transforms';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
@@ -60,13 +61,16 @@ export const getEmptyPanelTypeData = () => ({
 });
 
 export const collectPanelsByType = (
-  panels: Array<{ type: string; [key: string]: unknown }>,
+  panelsJSON: unknown,
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
-  collectorData.panels.total += panels.length;
+  const panels = transformPanelsOut(panelsJSON, {});
 
   for (const panel of panels) {
+    if (isDashboardSection(panel)) continue;
+    collectorData.panels.total++;
+
     const type = panel.type;
     if (!collectorData.panels.by_type[type]) {
       collectorData.panels.by_type[type] = getEmptyPanelTypeData();
@@ -84,7 +88,7 @@ export const collectPanelsByType = (
     // telemetry for the **final** embeddable of that type
     collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
-        ...panel.embeddableConfig,
+        ...panel.panelConfig,
         type: panel.type,
       },
       collectorData.panels.by_type[type].details
@@ -95,7 +99,10 @@ export const collectPanelsByType = (
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
   (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
-    if (!isEmpty(attributes.controlGroupInput)) {
+    if (
+      'controlGroupInput' in attributes &&
+      isControlGroupSavedObject(attributes.controlGroupInput)
+    ) {
       collectorData.controls = embeddableService.telemetry(
         {
           ...attributes.controlGroupInput,

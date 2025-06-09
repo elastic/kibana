@@ -20,7 +20,7 @@ import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './utils';
-import type { SavedDashboardPanel } from '../schema/v2';
+import type { SavedDashboardPanel } from '../../../common/content_management/v1/types'; // TODO: This will be moved in https://github.com/elastic/kibana/issues/221295
 
 interface ValueOrReferenceInput {
   attributes?: Serializable;

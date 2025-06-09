@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedDashboardPanel } from '../schema/v2';
+import type { SavedDashboardPanel } from '../../../common/content_management/v1/types'; // TODO: This will be moved in https://github.com/elastic/kibana/issues/221295
 import type { DashboardPanelState } from '../../../common';
 
 import {

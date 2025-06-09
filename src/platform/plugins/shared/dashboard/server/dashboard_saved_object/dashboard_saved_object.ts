@@ -87,7 +87,7 @@ export const createDashboardSavedObjectType = ({
       },
     },
     4: {
-      // remove **all** non-indexed fields from the mapping so that we can treat the dashboard SO as a black box
+      // deprecate **all** non-indexed fields from the mapping so that we can treat the dashboard SO as a black box
       changes: [
         {
           type: 'mappings_deprecation',
@@ -114,13 +114,17 @@ export const createDashboardSavedObjectType = ({
   mappings: {
     dynamic: false,
     properties: {
+      /**
+       * !!IMPORTANT!! Do not add more mappings here unless they are indexed / searchable!
+       */
       description: { type: 'text' },
       title: { type: 'text' },
       version: { type: 'integer' },
 
       /**
-       * As of v4, we shouldn't need these mappings - however, saved object schemas do not **currently**
-       * allow the removal of these fields.
+       * As of v4, we shouldn't need the following mappings - however, saved object schemas do not **currently**
+       * allow the removal of these fields, so we need to keep them around for legacy purposes.
+       * See https://github.com/elastic/kibana/blob/main/docs/extend/saved-objects-service.md#mappings_deprecation-_mappings_deprecation
        */
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {

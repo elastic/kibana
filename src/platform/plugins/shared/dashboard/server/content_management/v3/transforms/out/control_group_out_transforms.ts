@@ -35,7 +35,7 @@ const controlGroupSavedObjectSchema = schema.object({
 });
 type ControlGroupSavedObject = TypeOf<typeof controlGroupSavedObjectSchema>;
 
-const isControlGroupSavedObject = (
+export const isControlGroupSavedObject = (
   controlGroupInput: unknown
 ): controlGroupInput is ControlGroupSavedObject => {
   try {
