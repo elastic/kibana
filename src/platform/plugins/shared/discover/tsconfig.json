@@ -108,7 +108,6 @@
     "@kbn/cases-plugin",
     "@kbn/saved-search-component",
     "@kbn/alerts-ui-shared",
-    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }
