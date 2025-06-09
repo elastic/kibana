@@ -680,6 +680,25 @@ describe('#rawToSavedObject', () => {
       `"Expected document id to be a string but given [String] with [foo:bar] value."`
     );
   });
+
+  describe('accessControl property', () => {
+    test('it copies the accessControl property to _source.accessControl', () => {
+      const actual = singleNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          accessControl: {
+            owner: 'my_user_id',
+            accessMode: 'read_only',
+          },
+        },
+      });
+      expect(actual).toHaveProperty('accessControl', {
+        owner: 'my_user_id',
+        accessMode: 'read_only',
+      });
+    });
+  });
 });
 
 describe('#savedObjectToRaw', () => {
@@ -958,6 +977,22 @@ describe('#savedObjectToRaw', () => {
       } as any);
 
       expect(actual._source).toHaveProperty('namespaces', ['bar']);
+    });
+  });
+
+  test('it copies accessControl to _source.accessControl', () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: 'foo',
+      accessControl: {
+        owner: 'my_user_id',
+        accessMode: 'read_only',
+      },
+      attributes: {},
+    } as any);
+
+    expect(actual._source).toHaveProperty('accessControl', {
+      owner: 'my_user_id',
+      accessMode: 'read_only',
     });
   });
 });
