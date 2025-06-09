@@ -183,6 +183,7 @@ export function ControlledEsqlChart<T extends string>({
             key={serie.id}
             color="#61A2FF"
             id={serie.id}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
