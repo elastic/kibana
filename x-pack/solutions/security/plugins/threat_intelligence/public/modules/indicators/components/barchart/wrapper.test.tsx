@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChartWrapper } from './wrapper';
 import {
@@ -20,19 +19,6 @@ import moment from 'moment';
 import { DROPDOWN_TEST_ID } from './test_ids';
 
 jest.mock('../../../query_bar/hooks/use_filters');
-
-const mockIndexPattern: DataView = {
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
-    } as DataViewField,
-    {
-      name: 'threat.feed.name',
-      type: 'string',
-    } as DataViewField,
-  ],
-} as DataView;
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
 const mockField = { label: 'host.name', value: 'string' };
@@ -47,7 +33,6 @@ describe('<IndicatorsBarChartWrapper />', () => {
             series={[]}
             field={mockField}
             onFieldChange={jest.fn()}
-            indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
             isFetching={false}
             isLoading={false}
@@ -70,7 +55,6 @@ describe('<IndicatorsBarChartWrapper />', () => {
             series={[]}
             field={mockField}
             onFieldChange={jest.fn()}
-            indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
             isFetching={false}
             isLoading={true}
@@ -92,7 +76,6 @@ describe('<IndicatorsBarChartWrapper />', () => {
             series={[]}
             field={mockField}
             onFieldChange={jest.fn()}
-            indexPattern={mockIndexPattern}
             timeRange={mockTimeRange}
             isFetching={true}
             isLoading={false}

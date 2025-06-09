@@ -37,7 +37,7 @@ describe('useGetScopedSourcererDataView', () => {
   it('should return undefined when no spec is provided', () => {
     mockGetSourcererDataView.mockReturnValueOnce({
       ...mockSourcererScope,
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
     const { result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
     expect(result.current).toBeUndefined();
@@ -45,7 +45,7 @@ describe('useGetScopedSourcererDataView', () => {
   it('should return undefined when no spec is provided and should update the return when spec is updated to correct value', () => {
     mockGetSourcererDataView.mockReturnValueOnce({
       ...mockSourcererScope,
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
     const { rerender, result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
     expect(result.current).toBeUndefined();

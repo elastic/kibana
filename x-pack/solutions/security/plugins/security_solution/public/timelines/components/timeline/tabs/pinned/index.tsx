@@ -148,7 +148,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,
