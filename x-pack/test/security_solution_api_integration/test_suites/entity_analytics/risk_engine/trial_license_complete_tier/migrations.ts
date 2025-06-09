@@ -22,6 +22,7 @@ import {
   setAssetCriticalityIndexVersion,
   getAssetCriticalityMappingAndSettings,
   getAssetCriticalityEsDocument,
+  getRiskScoreIndexTemplate,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -260,10 +261,17 @@ export default ({ getService }: FtrProviderContext) => {
           `entity_analytics_create_eventIngest_from_timestamp-pipeline-default`
         );
 
+        const indexTemplate = await getRiskScoreIndexTemplate(es, 'default');
+
+        expect(indexTemplate?.settings?.index?.default_pipeline).to.be(
+          `entity_analytics_create_eventIngest_from_timestamp-pipeline-default`
+        );
+
         const { settings: latestIndexSettings } = await getRiskScoreLatestIndexMappingAndSettings(
           es,
           'default'
         );
+
         expect(latestIndexSettings?.index?.default_pipeline).to.be(undefined);
       });
 
@@ -277,6 +285,12 @@ export default ({ getService }: FtrProviderContext) => {
         await entityAnalyticsRoutes.runMigrations();
 
         for (const space of SPACE_TEST_SPACES) {
+          const indexTemplate = await getRiskScoreIndexTemplate(es, space);
+
+          expect(indexTemplate?.settings?.index?.default_pipeline).to.be(
+            `entity_analytics_create_eventIngest_from_timestamp-pipeline-${space}`
+          );
+
           const { settings: writeIndexSettings } = await getRiskScoreWriteIndexMappingAndSettings(
             es,
             space

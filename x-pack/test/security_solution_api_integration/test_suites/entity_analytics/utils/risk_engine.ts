@@ -23,7 +23,11 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesIndexSettings,
+  IndicesIndexTemplateSummary,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
@@ -877,4 +881,16 @@ export const getRiskScoreLatestIndexMappingAndSettings = async (
     mappings: indexInfo[riskScoreLatestIndex]?.mappings,
     settings: indexInfo[riskScoreLatestIndex]?.settings,
   };
+};
+
+export const getRiskScoreIndexTemplate = async (
+  es: Client,
+  space = 'default'
+): Promise<IndicesIndexTemplateSummary | undefined> => {
+  const indexTemplateName = `.risk-score.risk-score-${space}-index-template`;
+  const { index_templates: indexTemplates } = await es.indices.getIndexTemplate({
+    name: indexTemplateName,
+  });
+
+  return indexTemplates[0]?.index_template?.template;
 };
