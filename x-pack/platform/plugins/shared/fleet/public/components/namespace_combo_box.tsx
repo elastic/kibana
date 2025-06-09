@@ -40,8 +40,6 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   onNamespaceChange,
   'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',
   fullWidth = false,
-  labelId = 'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel',
-  helpTextId = 'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel',
 }) => {
   const getHelpText = () => {
     if (isEditPage && packageType === 'input') {
@@ -72,11 +70,10 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
 
     return (
       <FormattedMessage
-        id={helpTextId}
+        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
         defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMore}."
         values={{
           learnMore: learnMoreLink,
-          learnMoreLink,
         }}
       />
     );
@@ -87,7 +84,12 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
       fullWidth={fullWidth}
       isInvalid={!!validationError}
       error={validationError}
-      label={<FormattedMessage id={labelId} defaultMessage="Namespace" />}
+      label={
+        <FormattedMessage
+          id={'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel'}
+          defaultMessage="Namespace"
+        />
+      }
       helpText={getHelpText()}
     >
       <EuiComboBox
