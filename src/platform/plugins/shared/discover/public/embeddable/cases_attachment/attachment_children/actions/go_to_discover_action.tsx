@@ -79,6 +79,6 @@ GoToDiscoverButtonComponent.displayName = 'GoToDiscoverButtonComponent';
 
 export const GoToDiscoverButton = React.memo(GoToDiscoverButtonComponent);
 
-const GO_TO_DISCOVER = i18n.translate('casesAttachment.goToDiscoverButtonLabel', {
+const GO_TO_DISCOVER = i18n.translate('discover.cases.attachment.goToDiscoverButtonLabel', {
   defaultMessage: 'Go To Discover',
 });
