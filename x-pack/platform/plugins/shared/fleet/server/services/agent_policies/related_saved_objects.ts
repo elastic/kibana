@@ -22,6 +22,15 @@ export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy
 ) {
+  const logger = appContextService.getLogger().get('fetchRelatedSavedObjects');
+
+  logger.debug(
+    () =>
+      `getting related saved objects for policy [${
+        agentPolicy.id
+      }] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
     outputService.getDefaultDataOutputId(soClient),
     outputService.getDefaultMonitoringOutputId(soClient),
@@ -46,13 +55,15 @@ export async function fetchRelatedSavedObjects(
     }, []),
   ]);
 
+  logger.debug(
+    `Fetching outputs, download source and fleet server hosts for agent policy [${agentPolicy.id}]`
+  );
+
   const [outputs, downloadSource, fleetServerHosts] = await Promise.all([
     outputService.bulkGet(outputIds, { ignoreNotFound: true }),
     getDownloadSourceForAgentPolicy(soClient, agentPolicy),
     getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
-      appContextService
-        .getLogger()
-        ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+      logger.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
       return undefined;
     }),
@@ -76,6 +87,7 @@ export async function fetchRelatedSavedObjects(
       .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])
   );
 
+  logger.debug(`fetching list of fleet-server proxies`);
   const proxies = proxyIds.length ? await bulkGetFleetProxies(soClient, proxyIds) : [];
 
   let downloadSourceProxyUri: string | null = null;
@@ -86,6 +98,8 @@ export async function fetchRelatedSavedObjects(
       downloadSourceProxyUri = downloadSourceProxy.url;
     }
   }
+
+  logger.debug(`Returning related saved objects for policy [${agentPolicy.id}]`);
 
   return {
     outputs,
