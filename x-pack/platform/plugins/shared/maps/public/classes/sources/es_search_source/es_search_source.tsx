@@ -400,7 +400,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     entityBuckets.forEach((entityBucket: any) => {
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
-      allHits.push(...hits.reverse());
+      allHits.push([...hits].reverse());
       if (isTotalHitsGreaterThan(entityBucket.entityHits.hits.total, hits.length)) {
         areTopHitsTrimmed = true;
       }
