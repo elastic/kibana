@@ -32,8 +32,8 @@ export class InvestigateAlertsClient {
     }
   }
 
-  async getRuleById(ruleId: string) {
-    return await this.rulesClient.get({ id: ruleId });
+  getRuleById(ruleId: string) {
+    return this.rulesClient.get({ id: ruleId });
   }
 
   async getAlertsIndices() {
