@@ -14,7 +14,6 @@ import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
 
 type AlertsFlyoutProps = {
   alert?: Alert;
@@ -34,11 +33,8 @@ export function AlertsFlyout({
     () => alert ?? alerts?.find((a) => a[ALERT_UUID] === selectedAlertId),
     [alert, alerts, selectedAlertId]
   );
-  const { rule } = useFetchRule({
-    ruleId: selectedAlert?.['kibana.alert.rule.uuid']?.[0]?.toString(),
-  });
 
-  if (!selectedAlert || !rule) {
+  if (!selectedAlert) {
     return null;
   }
 
@@ -48,7 +44,6 @@ export function AlertsFlyout({
         <AlertsFlyoutHeader alert={selectedAlert} />
       </EuiFlyoutHeader>
       <AlertsFlyoutBody
-        rule={rule}
         alert={selectedAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
