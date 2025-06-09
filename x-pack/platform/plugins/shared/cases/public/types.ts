@@ -18,6 +18,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -91,6 +92,7 @@ export interface CasesPublicStartDependencies {
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
   storage: Storage;
+  share: SharePluginStart;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;

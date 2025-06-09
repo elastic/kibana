@@ -76,7 +76,7 @@ export const SearchDetails: React.FC<SearchDetailsProps> = ({
               {hasNonESQLQuery && (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="success">
-                    {query?.query}
+                    {typeof query?.query === 'string' ? query?.query : JSON.stringify(query?.query)}
                   </EuiText>
                 </EuiFlexItem>
               )}
@@ -89,7 +89,7 @@ export const SearchDetails: React.FC<SearchDetailsProps> = ({
           <EuiFlexItem grow={false} key={i}>
             <FilterBadge
               filter={filter}
-              dataViews={[dataView]} // Assuming index is the data view title
+              dataViews={[dataView]}
               hideAlias={true}
               valueLabel={getDisplayValueFromFilter(filter, [dataView])}
               filterLabelStatus={''}

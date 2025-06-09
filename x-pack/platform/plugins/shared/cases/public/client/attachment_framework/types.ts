@@ -57,9 +57,10 @@ export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentVi
   externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
 }
 
-export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
+export interface PersistableStateAttachmentViewProps<AttachmentState = unknown>
+  extends CommonAttachmentViewProps {
   persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
+  persistableStateAttachmentState: AttachmentState;
 }
 
 export interface AttachmentType<Props> {

@@ -24,7 +24,10 @@ import {
   apiPublishesTimeRange,
 } from '@kbn/presentation-publishing';
 
-type SearchEmbeddableApiWithAtLeastOneDataView = Omit<SearchEmbeddableApi, 'dataViews$'> & {
+type SearchEmbeddableApiWithAtLeastOneDataView = Omit<
+  SearchEmbeddableApi,
+  'dataViews$' | 'timeRange$'
+> & {
   dataViews$: PublishingSubject<DataView[]>;
   timeRange$: PublishingSubject<TimeRange>;
 };
