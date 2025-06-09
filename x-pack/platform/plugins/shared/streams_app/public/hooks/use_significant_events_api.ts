@@ -27,11 +27,7 @@ interface SignificantEventsApi {
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
 }
 
-export function useSignificantEventsApi({
-  name,
-}: {
-  name?: string;
-}): SignificantEventsApi | undefined {
+export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -43,57 +39,52 @@ export function useSignificantEventsApi({
   const { signal } = useAbortController();
 
   return useMemo(() => {
-    return !name
-      ? undefined
-      : {
-          addQuery: async ({ kql, title, id }) => {
-            await streamsRepositoryClient.fetch(
-              'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
-              {
-                signal,
-                params: {
-                  path: {
-                    name,
-                    queryId: id,
-                  },
-                  body: {
-                    kql,
-                    title,
-                  },
-                },
-              }
-            );
+    return {
+      addQuery: async ({ kql, title, id }) => {
+        await streamsRepositoryClient.fetch(
+          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
+          {
+            signal,
+            params: {
+              path: {
+                name,
+                queryId: id,
+              },
+              body: {
+                kql,
+                title,
+              },
+            },
+          }
+        );
+      },
+      removeQuery: async (id) => {
+        await streamsRepositoryClient.fetch(
+          'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
+          {
+            signal,
+            params: {
+              path: {
+                name,
+                queryId: id,
+              },
+            },
+          }
+        );
+      },
+      bulk: async (operations) => {
+        await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          signal,
+          params: {
+            path: {
+              name,
+            },
+            body: {
+              operations,
+            },
           },
-          removeQuery: async (id) => {
-            await streamsRepositoryClient.fetch(
-              'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
-              {
-                signal,
-                params: {
-                  path: {
-                    name,
-                    queryId: id,
-                  },
-                },
-              }
-            );
-          },
-          bulk: async (operations) => {
-            await streamsRepositoryClient.fetch(
-              'POST /api/streams/{name}/queries/_bulk 2023-10-31',
-              {
-                signal,
-                params: {
-                  path: {
-                    name,
-                  },
-                  body: {
-                    operations,
-                  },
-                },
-              }
-            );
-          },
-        };
+        });
+      },
+    };
   }, [name, signal, streamsRepositoryClient]);
 }

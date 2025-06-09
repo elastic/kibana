@@ -25,12 +25,14 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  * NOTE: anything exposed here will be visible in the UI dev tools,
  * and therefore MUST NOT be anything that is sensitive information!
  */
-export const exposeToBrowserConfig = {} as const;
+export const exposeToBrowserConfig = {
+  experimental: {
+    significantEventsEnabled: true,
+  },
+} as const;
 
-type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
-    ? K
-    : never]: true;
-};
-
-export type StreamsPublicConfig = Pick<StreamsConfig, ValidKeys>;
+export interface StreamsPublicConfig {
+  experimental?: {
+    significantEventsEnabled?: boolean;
+  };
+}

@@ -15,7 +15,6 @@ import {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   StreamQueryKql,
-  streamQueryKqlSchema,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
@@ -33,7 +32,7 @@ function createSearchRequest({
 }: {
   from: Date;
   to: Date;
-  query: StreamQueryKql;
+  query: Pick<StreamQueryKql, 'kql'>;
   bucketSize: string;
 }) {
   return {
@@ -83,7 +82,11 @@ const previewSignificantEventsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
-      query: streamQueryKqlSchema,
+      query: z.object({
+        kql: z.object({
+          query: z.string(),
+        }),
+      }),
     }),
   }),
 

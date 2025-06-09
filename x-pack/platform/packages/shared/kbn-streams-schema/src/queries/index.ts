@@ -33,7 +33,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     kql: z.object({
-      query: NonEmptyString,
+      query: z.string(),
     }),
   })
 );
@@ -47,7 +47,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   kql: z.object({
-    query: NonEmptyString,
+    query: z.string(),
   }),
 });
 

@@ -33,7 +33,7 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
   if (impact === 'high') {
     return {
       color: 'danger',
-      label: i18n.translate('xpack.significantEventsTable.changePoint.dotImpactHigh', {
+      label: i18n.translate('xpack.streams.significantEventsTable.changePoint.dotImpactHigh', {
         defaultMessage: 'High',
       }),
     };
@@ -42,7 +42,7 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
   if (impact === 'medium') {
     return {
       color: 'warning',
-      label: i18n.translate('xpack.significantEventsTable.changePoint.dotImpactMedium', {
+      label: i18n.translate('xpack.streams.significantEventsTable.changePoint.dotImpactMedium', {
         defaultMessage: 'Medium',
       }),
     };
@@ -50,7 +50,7 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
 
   return {
     color: 'darkShade',
-    label: i18n.translate('xpack.significantEventsTable.changePoint.dotImpactLow', {
+    label: i18n.translate('xpack.streams.significantEventsTable.changePoint.dotImpactLow', {
       defaultMessage: 'Low',
     }),
   };

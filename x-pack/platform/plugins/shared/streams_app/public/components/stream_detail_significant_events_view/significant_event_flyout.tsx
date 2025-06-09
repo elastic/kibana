@@ -171,10 +171,7 @@ export function SignificantEventFlyoutContents({
 
   const previewFetch = useStreamsAppFetch(
     ({ signal }) => {
-      const { id, kql, title } = queryValues;
-      if (!id || !kql?.query || !title) {
-        return;
-      }
+      const { id, kql } = queryValues;
 
       const { from, to } = getAbsoluteTimeRange(timeRange);
 
@@ -197,9 +194,7 @@ export function SignificantEventFlyoutContents({
             },
             body: {
               query: {
-                id,
-                kql,
-                title,
+                kql: kql ?? { query: '' },
               },
             },
           },

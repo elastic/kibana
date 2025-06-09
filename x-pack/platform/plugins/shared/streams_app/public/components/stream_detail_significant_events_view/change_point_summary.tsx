@@ -29,7 +29,7 @@ export function ChangePointSummary({
           white-space: nowrap;
         `}
       >
-        {i18n.translate('xpack.significantEventsTable.changePointBadge.noChangesDetected', {
+        {i18n.translate('xpack.streams.significantEventsTable.changePointBadge.noChangesDetected', {
           defaultMessage: 'No changes detected',
         })}
       </EuiText>

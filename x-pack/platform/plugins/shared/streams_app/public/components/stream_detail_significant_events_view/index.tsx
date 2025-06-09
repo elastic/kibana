@@ -26,7 +26,7 @@ import { SignificantEventsTable } from './significant_events_table';
 export function StreamDetailSignificantEventsView({
   definition,
 }: {
-  definition?: Streams.all.GetResponse;
+  definition: Streams.all.GetResponse;
 }) {
   const {
     core: { notifications },
@@ -47,14 +47,13 @@ export function StreamDetailSignificantEventsView({
   }, [start, end]);
 
   const significantEventsFetchState = useFetchSignificantEvents({
-    name: definition?.stream.name,
+    name: definition.stream.name,
     start,
     end,
     kql,
   });
 
-  const { addQuery, removeQuery } =
-    useSignificantEventsApi({ name: definition?.stream.name }) || {};
+  const { addQuery, removeQuery } = useSignificantEventsApi({ name: definition.stream.name }) || {};
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
 
