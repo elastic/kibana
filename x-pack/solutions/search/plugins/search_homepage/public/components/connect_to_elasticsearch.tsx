@@ -129,7 +129,14 @@ export const ConnectToElasticsearch = () => {
                     defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
                   />
                 }
-                footer={<EuiButton />}
+                footer={
+                  <EuiButtonEmpty flush="right" iconType="importAction">
+                    <FormattedMessage
+                      id="xpack.searchHomepage.connectToElasticsearch.uploadFileButton"
+                      defaultMessage="Upload a file"
+                    />
+                  </EuiButtonEmpty>
+                }
               />
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
@@ -138,8 +145,8 @@ export const ConnectToElasticsearch = () => {
                 titleSize="xs"
                 title={
                   <FormattedMessage
-                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileTitle"
-                    defaultMessage="Upload a file"
+                    id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
+                    defaultMessage="Sample dataset"
                   />
                 }
                 description={
@@ -148,27 +155,33 @@ export const ConnectToElasticsearch = () => {
                     defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
                   />
                 }
-                footer={<EuiButton />}
+                footer={
+                  <EuiButtonEmpty flush="right" iconType="importAction">
+                    <FormattedMessage
+                      id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton"
+                      defaultMessage="Sample dataset"
+                    />
+                  </EuiButtonEmpty>
+                }
               />
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              <EuiCard
-                textAlign="left"
-                titleSize="xs"
-                title={
-                  <FormattedMessage
-                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileTitle"
-                    defaultMessage="Upload a file"
-                  />
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
-                  />
-                }
-                footer={<EuiButton />}
-              />
+              <EuiTitle size="xxs">
+                <span>
+                  {i18n.translate('xpack.searchHomepage.connectToElasticsearch.needAdviceTitle', {
+                    defaultMessage: 'Need advice? Engage a Customer Engineer.',
+                  })}
+                </span>
+              </EuiTitle>
+              <EuiText>
+                {i18n.translate(
+                  'xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription',
+                  {
+                    defaultMessage:
+                      'Get expert advice on best practices, performance, upgrade paths and efficiency. ',
+                  }
+                )}
+              </EuiText>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
