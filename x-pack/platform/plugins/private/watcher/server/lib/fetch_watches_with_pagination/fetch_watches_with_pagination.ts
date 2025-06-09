@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { WatcherQueryWatch } from '@elastic/elasticsearch/lib/api/types';
+import { QUERY_WATCHES_PAGINATION } from "@kbn/watcher-plugin/common/constants";
 
 /**
  * Fetches all watches using the Query Watches API.
@@ -22,7 +23,7 @@ export const fetchWatchesWithPagination = async (
 
   let total = Infinity;
 
-  while (allWatches.length < total) {
+  while (allWatches.length < total && from + pageSize <= QUERY_WATCHES_PAGINATION.MAX_RESULT_WINDOW) {
     const response = await dataClient.asCurrentUser.watcher.queryWatches({
       from,
       size: pageSize,

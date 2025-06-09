@@ -8,6 +8,7 @@
 import { fetchWatchesWithPagination } from './fetch_watches_with_pagination';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { WatcherQueryWatch } from '@elastic/elasticsearch/lib/api/types';
+import { QUERY_WATCHES_PAGINATION } from '../../../common/constants';
 
 describe('fetchWatchesWithPagination (iterative version with pageSize)', () => {
   const mockQueryWatches = jest.fn();
@@ -74,6 +75,45 @@ describe('fetchWatchesWithPagination (iterative version with pageSize)', () => {
         from: pageSize,
         size: pageSize,
       });
+    });
+  });
+
+  it('should not exceed the Elasticsearch max result window (from + size <= 10000)', async () => {
+    const mockQueryWatches = jest.fn();
+    const mockScopedClusterClient: IScopedClusterClient = {
+      asCurrentUser: {
+        watcher: {
+          queryWatches: mockQueryWatches,
+        },
+      },
+      asInternalUser: {} as any,
+    } as IScopedClusterClient;
+
+    const pageSize = 1000;
+    const totalWatches = 11000; // simulate more than allowed
+
+    // Mock 10 pages of 1000 watches
+    for (let i = 0; i < 10; i++) {
+      mockQueryWatches.mockResolvedValueOnce({
+        count: totalWatches,
+        watches: Array.from({ length: pageSize }, (_, index) => ({ _id: i * pageSize + index })),
+      });
+    }
+
+    // 11th call should not be made, so no result for it
+    mockQueryWatches.mockResolvedValue({
+      count: totalWatches,
+      watches: [], // if it gets called by mistake
+    });
+
+    const result = await fetchWatchesWithPagination(mockScopedClusterClient, pageSize);
+
+    expect(result).toHaveLength(10000); // max allowed
+    expect(mockQueryWatches).toHaveBeenCalledTimes(10);
+    mockQueryWatches.mock.calls.forEach(([params]) => {
+      expect(params.from + params.size).toBeLessThanOrEqual(
+        QUERY_WATCHES_PAGINATION.MAX_RESULT_WINDOW
+      );
     });
   });
 });
