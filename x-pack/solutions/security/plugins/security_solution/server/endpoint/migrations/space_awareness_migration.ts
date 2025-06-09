@@ -5,18 +5,30 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { BulkRequest, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  SearchRequest,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { CROWDSTRIKE_HOST_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/crowdstrike';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/sentinel_one';
+import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/microsoft_defender';
 import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../common/endpoint/service/response_actions/constants';
 import { EndpointError } from '../../../common/endpoint/errors';
-import type { LogsEndpointAction } from '../../../common/endpoint/types';
+import type {
+  LogsEndpointAction,
+  MicrosoftDefenderEndpointLogEsDoc,
+} from '../../../common/endpoint/types';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { stringify } from '../utils/stringify';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
@@ -166,6 +178,9 @@ const migrateArtifactsToSpaceAware = async (
       return acc;
     }, {} as Record<string, { success: number; failed: number; errors: string[] }>),
   };
+
+  migrationState.metadata.data = migrationStats;
+
   const updateProcessor = new QueueProcessor<UpdateExceptionListItemOptions & { listId: string }>({
     batchSize: 50,
     batchHandler: async ({ data: artifactUpdates }) => {
@@ -193,6 +208,8 @@ const migrateArtifactsToSpaceAware = async (
         },
         { stopOnError: false, concurrency: 10 }
       );
+
+      updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
     },
   });
 
@@ -242,7 +259,6 @@ const migrateArtifactsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  migrationState.metadata.data = migrationStats;
   await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
@@ -276,10 +292,6 @@ const migrateResponseActionsToSpaceAware = async (
 
   logger.info(`starting migration of endpoint response actions in support of spaces`);
 
-  migrationState.metadata.status = 'pending';
-  migrationState.metadata.started = new Date().toISOString();
-  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
-
   const migrationStats = {
     totalItems: 0,
     itemsNeedingUpdates: 0,
@@ -288,6 +300,12 @@ const migrateResponseActionsToSpaceAware = async (
     warnings: [] as string[],
     errors: [] as string[],
   };
+
+  migrationState.metadata.status = 'pending';
+  migrationState.metadata.started = new Date().toISOString();
+  migrationState.metadata.data = migrationStats;
+  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
   const policyInfoBuilder = new AgentPolicyInfoBuilder(endpointService, logger);
   const esClient = endpointService.getInternalEsClient();
   const updateProcessor = new QueueProcessor<{
@@ -347,7 +365,8 @@ const migrateResponseActionsToSpaceAware = async (
         );
       }
 
-      // TODO:PT should we write the stats on every successful batch update? so we can keep track?
+      // Write stats so we can see intermediate stats if required
+      await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
     },
   });
 
@@ -402,7 +421,6 @@ const migrateResponseActionsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  migrationState.metadata.data = migrationStats;
   await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
@@ -430,11 +448,18 @@ interface PolicyIdInfo {
   policyId: string;
 }
 
+interface AgentIdInfo {
+  found: boolean;
+  warning: string;
+  agentId: string;
+}
+
 class AgentPolicyInfoBuilder {
   // Cache of previously processed Agent IDs
   private agentIdCache = new Map<string, Promise<AgentPolicyInfo>>();
   private agentIdToAgentPolicyIdCache = new Map<string, Promise<PolicyIdInfo>>();
   private agentPolicyIdToIntegrationPolicyId = new Map<string, Promise<PolicyIdInfo>>();
+  private externalEdrAgentIdToElasticAgentIdMapCache = new Map<string, Promise<AgentIdInfo>>();
 
   constructor(
     private readonly endpointService: EndpointAppContextService,
@@ -493,10 +518,31 @@ class AgentPolicyInfoBuilder {
   }
 
   private async fetchAgentPolicyInfo(
-    agentId: string,
+    _agentId: string,
     actionRequest: LogsEndpointAction
   ): Promise<AgentPolicyInfo> {
-    // FIXME:PT need to handle retrieval of 3rd party agents - determine what the ES agent is first before calling fetchAgentPolicyIdForAgent()
+    let agentId = _agentId;
+
+    if (actionRequest.EndpointActions.input_type !== 'endpoint') {
+      const externalEdrAgentId = await this.fetchElasticAgentIdFor3rdPartyEdr(
+        _agentId,
+        actionRequest
+      );
+
+      if (!externalEdrAgentId.found) {
+        return {
+          warnings: [externalEdrAgentId.warning],
+          agentInfo: {
+            agentId,
+            elasticAgentId: NOT_FOUND_VALUE,
+            agentPolicyId: NOT_FOUND_VALUE,
+            integrationPolicyId: NOT_FOUND_VALUE,
+          },
+        };
+      }
+
+      agentId = externalEdrAgentId.agentId;
+    }
 
     const agentPolicyId = await this.fetchAgentPolicyIdForAgent(agentId);
 
@@ -612,5 +658,105 @@ class AgentPolicyInfoBuilder {
     }
 
     return integrationPolicyIdPromise;
+  }
+
+  async fetchElasticAgentIdFor3rdPartyEdr(
+    externalEdrAgentId: string,
+    actionRequest: LogsEndpointAction
+  ): Promise<AgentIdInfo> {
+    const agentType = actionRequest.EndpointActions.input_type;
+    const elasticAgentIdPromise =
+      this.externalEdrAgentIdToElasticAgentIdMapCache.get(externalEdrAgentId);
+
+    if (elasticAgentIdPromise) {
+      this.logger.debug(`Returning cached result [${agentType}] agent id [${externalEdrAgentId}]`);
+      return elasticAgentIdPromise;
+    }
+
+    this.externalEdrAgentIdToElasticAgentIdMapCache.set(
+      externalEdrAgentId,
+      new Promise(async (resolve, reject) => {
+        try {
+          const esClient = this.endpointService.getInternalEsClient();
+
+          this.logger.debug(
+            `Retrieving Elastic agent id for [${agentType}] agent [${externalEdrAgentId}]`
+          );
+
+          const esSearchRequest: SearchRequest = {
+            index: '', // value by switch statement below
+            // query: {} set by switch statement below
+            _source: ['agent'],
+            sort: [{ 'event.created': 'desc' }],
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            size: 1,
+          };
+
+          switch (agentType) {
+            case 'microsoft_defender_endpoint':
+              esSearchRequest.index = MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN;
+              esSearchRequest.query = {
+                bool: { filter: [{ term: { 'cloud.instance.id': externalEdrAgentId } }] },
+              };
+              break;
+
+            case 'sentinel_one':
+              esSearchRequest.index = SENTINEL_ONE_AGENT_INDEX_PATTERN;
+              esSearchRequest.query = {
+                bool: { filter: [{ term: { 'sentinel_one.agent.agent.id': externalEdrAgentId } }] },
+              };
+              break;
+
+            case 'crowdstrike':
+              esSearchRequest.index = CROWDSTRIKE_HOST_INDEX_PATTERN;
+              esSearchRequest.query = {
+                bool: { filter: [{ term: { 'device.id': externalEdrAgentId } }] },
+              };
+              break;
+
+            default:
+              resolve({
+                found: false,
+                warning: `Response action [${actionRequest.EndpointActions.action_id}] has an unsupported agent type [${agentType}].]`,
+                agentId: '',
+              });
+              return;
+          }
+
+          this.logger.debug(
+            () =>
+              `Searching [${agentType}] data to identify elastic agent used to ingest data for [${externalEdrAgentId}]:${stringify(
+                esSearchRequest
+              )}`
+          );
+
+          const esSearchResult = await esClient
+            .search<MicrosoftDefenderEndpointLogEsDoc>(esSearchRequest)
+            .catch(catchAndWrapError);
+          const hitSource = esSearchResult.hits.hits[0]?._source;
+
+          if (hitSource && hitSource.agent.id) {
+            resolve({
+              found: true,
+              warning: '',
+              agentId: hitSource.agent.id,
+            });
+            return;
+          }
+
+          resolve({
+            found: false,
+            warning: `Unable to determine elastic agent id used to ingest data for [${agentType}] external agent id [${externalEdrAgentId}]`,
+            agentId: '',
+          });
+        } catch (error) {
+          reject(error);
+        }
+      })
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.externalEdrAgentIdToElasticAgentIdMapCache.get(externalEdrAgentId)!;
   }
 }
