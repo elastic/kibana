@@ -533,7 +533,7 @@ class AgentPolicyInfoBuilder {
         return {
           warnings: [externalEdrAgentId.warning],
           agentInfo: {
-            agentId,
+            agentId: _agentId,
             elasticAgentId: NOT_FOUND_VALUE,
             agentPolicyId: NOT_FOUND_VALUE,
             integrationPolicyId: NOT_FOUND_VALUE,
@@ -552,7 +552,7 @@ class AgentPolicyInfoBuilder {
       return {
         warnings: [agentPolicyId.warning],
         agentInfo: {
-          agentId,
+          agentId: _agentId,
           elasticAgentId: agentId,
           agentPolicyId: NOT_FOUND_VALUE,
           integrationPolicyId: NOT_FOUND_VALUE,
@@ -568,7 +568,7 @@ class AgentPolicyInfoBuilder {
     return {
       warnings: integrationPolicyId.found ? [] : [integrationPolicyId.warning],
       agentInfo: {
-        agentId,
+        agentId: _agentId,
         elasticAgentId: agentId,
         agentPolicyId: agentPolicyId.policyId,
         integrationPolicyId: integrationPolicyId.policyId,
@@ -726,7 +726,7 @@ class AgentPolicyInfoBuilder {
 
           this.logger.debug(
             () =>
-              `Searching [${agentType}] data to identify elastic agent used to ingest data for [${externalEdrAgentId}]:${stringify(
+              `Searching [${agentType}] data to identify elastic agent used to ingest data for external agent id [${externalEdrAgentId}]:${stringify(
                 esSearchRequest
               )}`
           );
