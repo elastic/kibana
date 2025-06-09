@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { ToolSourceType } from '@kbn/onechat-common';
+import { esqlToolProviderId } from '@kbn/onechat-common';
 
 export function registerESQLToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -103,7 +103,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
             { defaultValue: [] }
           ),
           meta: schema.object({
-            sourceType: schema.literal(ToolSourceType.esql),
+            providerId: schema.literal(esqlToolProviderId),
             sourceId: schema.string(),
             tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
           }),

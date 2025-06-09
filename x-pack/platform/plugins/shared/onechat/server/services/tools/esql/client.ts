@@ -71,6 +71,7 @@ export const createClient = ({
                         description: param.value.description,
                     }
                 })),
+                meta: tool.meta,
                 created_at: now.toISOString(),
                 updated_at: now.toISOString(),
             };

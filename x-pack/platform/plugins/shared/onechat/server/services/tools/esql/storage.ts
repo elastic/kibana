@@ -6,6 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { ToolDescriptorMeta } from '@kbn/onechat-common';
 import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
 export const esqlToolIndexName = '.kibana_onechat_esql_tools';
@@ -47,6 +48,7 @@ export interface EsqlToolProperties {
       description: string;
     }
   }[];
+  meta: ToolDescriptorMeta;
 }
 
 export type EsqlToolStorageSettings = typeof storageSettings;
