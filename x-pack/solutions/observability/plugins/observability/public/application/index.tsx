@@ -32,15 +32,14 @@ function App() {
   const { pricing } = useKibana().services;
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
   const allRoutes = {
-    ...routes,
-    ...(isCompleteOverviewEnabled ? completeRoutes : {}),
+    ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
   };
   return (
     <>
       <Routes enableExecutionContextTracking={true}>
         {Object.keys(allRoutes).map((key) => {
-          const path = key as keyof typeof routes;
-          const { handler, exact } = routes[path];
+          const path = key as keyof typeof allRoutes;
+          const { handler, exact } = allRoutes[path];
           const Wrapper = () => {
             return handler();
           };
