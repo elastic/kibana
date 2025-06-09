@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover } from '../../../../common/lib';
+import { ObjectRemover, TaskManagerDoc } from '../../../../common/lib';
 
 export default function eventsGenerationTaskTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -18,11 +18,10 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Events Generation', () => {
-    let maintenanceWindowsIds: string[] = [];
     let differenceInDays: number;
 
     before(async () => {
-      maintenanceWindowsIds = await createAndUpdateTestMaintenanceWindows();
+      await createAndUpdateTestMaintenanceWindows();
     });
     afterEach(() => objectRemover.removeAll());
 
@@ -32,7 +31,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
 
       // verify task ran today
       await retry.try(async () => {
-        const taskResult = await getTaskStatus();
+        const taskResult: TaskManagerDoc[] = await getTaskStatus();
         expect(taskResult.length).to.eql(1);
 
         const now = moment().utc();
@@ -73,7 +72,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       });
 
       // should be updated as expiration date is within 1 week
-      updateMaintenanceWindowSO({
+      await updateMaintenanceWindowSO({
         id: recurring1,
         expirationDate: moment().utc().add(6, 'days').toISOString(),
       });
@@ -98,7 +97,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       });
 
       // should be updated as expiration date is within 1 week
-      updateMaintenanceWindowSO({
+      await updateMaintenanceWindowSO({
         id: recurring2,
         expirationDate: moment().utc().add(2, 'days').toISOString(),
       });
@@ -116,7 +115,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       });
 
       // should not be updated as non recurring
-      updateMaintenanceWindowSO({
+      await updateMaintenanceWindowSO({
         id: nonRecurring,
         expirationDate: moment().utc().add(5, 'days').toISOString(),
       });
@@ -143,7 +142,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       );
 
       // should not be updated as archived
-      updateMaintenanceWindowSO({
+      await updateMaintenanceWindowSO({
         id: archived,
         expirationDate: moment().utc().subtract(5, 'days').toISOString(),
       });
@@ -167,7 +166,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       });
 
       // should be updated as expiration date is more than 1 week away
-      updateMaintenanceWindowSO({
+      await updateMaintenanceWindowSO({
         id: running,
         expirationDate: moment().utc().add(10, 'days').toISOString(),
       });
@@ -203,7 +202,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       expirationDate: string;
       //  events: { gte: string; lte: string }[];
     }) {
-      const res = await es.update({
+      await es.update({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
         id: `maintenance-window:${id}`,
         doc: {
@@ -241,7 +240,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       return result.hits.hits.map((hit) => hit._source);
     }
 
-    async function getTaskStatus() {
+    async function getTaskStatus(): Promise<TaskManagerDoc[]> {
       const result = await es.search({
         index: '.kibana_task_manager',
         query: {
@@ -251,7 +250,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
         },
       });
 
-      return result.hits.hits.map((hit) => hit._source);
+      return result.hits.hits.map((hit) => hit._source) as TaskManagerDoc[];
     }
   });
 }
