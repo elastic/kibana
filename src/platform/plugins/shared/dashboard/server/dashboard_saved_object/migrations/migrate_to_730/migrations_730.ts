@@ -14,22 +14,24 @@ import { moveFiltersToQuery } from './move_filters_to_query';
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 
-function isDoc(
-  doc: { [key: string]: unknown } | SavedObjectUnsanitizedDoc
-): doc is SavedObjectUnsanitizedDoc {
+function isDoc(doc: unknown): doc is SavedObjectUnsanitizedDoc {
   return (
+    doc !== null &&
+    typeof doc === 'object' &&
+    'id' in doc &&
     typeof doc.id === 'string' &&
+    'type' in doc &&
     typeof doc.type === 'string' &&
+    'attributes' in doc &&
     doc.attributes !== null &&
     typeof doc.attributes === 'object' &&
+    'references' in doc &&
     doc.references !== null &&
     typeof doc.references === 'object'
   );
 }
 
-export function isDashboardDoc(
-  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
-): doc is DashboardDoc730ToLatest {
+export function isDashboardDoc(doc: unknown): doc is DashboardDoc730ToLatest {
   if (!isDoc(doc)) {
     return false;
   }
