@@ -28,13 +28,16 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should register all profile providers', async () => {
-    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
+    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
       providers: [rootProfileProviderMock],
       enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
     });
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({ context });
@@ -48,13 +51,14 @@ describe('registerEnabledProfileProviders', () => {
 
   it('should not register experimental profile providers by default', async () => {
     jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock } = createContextAwarenessMocks({
+    const { rootProfileServiceMock, profileProviderServices } = createContextAwarenessMocks({
       shouldRegisterProviders: false,
     });
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
       providers: [exampleRootProfileProvider],
       enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
     });
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({ context });
@@ -66,13 +70,15 @@ describe('registerEnabledProfileProviders', () => {
 
   it('should register experimental profile providers when enabled by config', async () => {
     jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
+    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
       providers: [exampleRootProfileProvider],
       enabledExperimentalProfileIds: [exampleRootProfileProvider.profileId],
+      services: profileProviderServices,
     });
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({ context });
