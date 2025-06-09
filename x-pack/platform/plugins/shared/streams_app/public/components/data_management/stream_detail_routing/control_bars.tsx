@@ -37,7 +37,6 @@ export const AddRoutingRuleControls = () => {
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap responsive={false}>
       <CancelButton isDisabled={isForking} onClick={cancelChanges} />
       <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-        {/* If you don't have the privileges to forkStream, this should be submitForApproval instead */}
         <SaveButton isLoading={isForking} isDisabled={!canForkRouting} onClick={forkStream} />
       </PrivilegesTooltip>
     </EuiFlexGroup>

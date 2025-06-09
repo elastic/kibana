@@ -150,9 +150,6 @@ export class Home extends Component<HomeProps, State> {
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
-        {/* Use widget here */}
-        <div>3 changes pending review</div>
-
         <AddData
           addBasePath={addBasePath}
           application={application}

@@ -164,8 +164,6 @@ export function Header({
                     navigateToUrl={application.navigateToUrl}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
-                  // Put a widget here
-                  <div>Test</div>,
                 ],
               },
             ]}
