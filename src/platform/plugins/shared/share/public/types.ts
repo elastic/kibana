@@ -12,7 +12,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { Capabilities, ToastsSetup } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -302,7 +302,6 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  toasts: ToastsSetup;
 }
 
 /**
