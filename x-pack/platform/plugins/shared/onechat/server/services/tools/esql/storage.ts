@@ -20,20 +20,13 @@ const storageSettings = {
         description: types.text({}),
         query: types.text({}),
         params: types.object({
-            properties: {
-              key: types.keyword({}),
-              value: types.object({
-                properties: {
-                  type: types.keyword({}),
-                  description: types.text({})
-                }
-              })
-            }
-        }),
+          dynamic: true,
+          properties: {}
+      }),
         meta: types.object({
           properties: {
             providerId: types.keyword({}),
-            tags: types.keyword({}) // Array of strings stored as keywords
+            tags: types.keyword({})
           }
       }),
         created_at: types.date({}),
@@ -42,20 +35,17 @@ const storageSettings = {
     }
   } satisfies IndexStorageSettings;
 
-export interface EsqlToolProperties {
-  id: string;
-  name: string;
-  description: string;
-  query: string;
-  params: {
-    key: string;
-    value: {
+  export interface EsqlToolProperties {
+    id: string;
+    name: string;
+    description: string;
+    query: string;
+    params: Record<string, {
       type: string;
       description: string;
-    }
-  }[];
-  meta: ToolDescriptorMeta;
-}
+    }>;
+    meta: ToolDescriptorMeta;
+  }
 
 export type EsqlToolStorageSettings = typeof storageSettings;
 

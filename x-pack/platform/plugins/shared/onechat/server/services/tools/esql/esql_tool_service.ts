@@ -49,7 +49,7 @@ import type {
 
             const client = createClient({ 
                 storage, 
-                esClient: currentUser 
+                esClient: currentUser,
             });
 
             return client;

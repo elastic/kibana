@@ -154,11 +154,6 @@ export interface ToolDescriptor {
   meta: ToolDescriptorMeta;
 }
 
-/**
- * Serializable representation of an ESQL tool.
- * 
- * This provides the structure for executing SQL queries with parameterized inputs.
- */
 export interface EsqlTool extends ToolDescriptor {
   /**
    * The name of the tool.
@@ -173,28 +168,19 @@ export interface EsqlTool extends ToolDescriptor {
    * Parameters that can be used in the query.
    * Each parameter has a key identifier and metadata about its type and usage.
    */
-  params: {
+  params: Record<string, {
     /**
-     * The parameter identifier used in the query.
+     * The data type of the parameter.
      */
-    key: string;
+    type: string;
     
     /**
-     * Metadata about the parameter.
+     * Description of the parameter's purpose or expected values.
      */
-    value: {
-      /**
-       * The data type of the parameter.
-       */
-      type: string;
-      
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  }[];
+    description: string;
+  }>;
 }
+
 
 /**
  * Metadata associated with a tool.

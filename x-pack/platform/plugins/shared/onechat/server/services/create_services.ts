@@ -18,6 +18,7 @@ import { RunnerFactoryImpl } from './runner';
 import { EsqlToolServiceImpl } from './tools/esql/esql_tool_service';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
+import { EsqlToolProviderImpl } from './tools/esql/esql_provider';
 
 interface ServiceInstances {
   tools: ToolsService;

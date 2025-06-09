@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { builtinToolProviderId } from '@kbn/onechat-common';
+import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
 import type { Runner, RegisteredTool } from '@kbn/onechat-server';
 import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';

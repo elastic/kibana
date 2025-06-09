@@ -13,11 +13,13 @@ import {
 import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 import { logger } from 'elastic-apm-node';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { esqlToolIndexName } from './storage';
 
 export interface EsqlToolClient {
     get(esqlToolId: string): Promise<EsqlTool>;
+    list(): Promise<EsqlTool[]>;
     create(esqlTool: EsqlToolCreateRequest): Promise<EsqlTool>;
-    execute(esqlToolId: string): Promise<any>;
+    execute(name: string, params: Record<string, any>): Promise<any>;
   }
 
 export const createClient = ({
@@ -25,7 +27,7 @@ export const createClient = ({
     esClient,
   }: {
     storage: EsqlToolStorage;
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient;
   }): EsqlToolClient => {
     return new EsqlToolClientImpl({ storage, esClient });
   };
@@ -34,13 +36,12 @@ export const createClient = ({
     private readonly storage: EsqlToolStorage;
     private readonly esClient: ElasticsearchClient;
 
-    constructor({ storage, esClient }: { storage: EsqlToolStorage; esClient: ElasticsearchClient }) {
+    constructor({ storage, esClient }: { storage: EsqlToolStorage; esClient: ElasticsearchClient; }) {
         this.storage = storage;
         this.esClient = esClient;
     }
 
     async get(esqlToolId: string): Promise<EsqlTool> {
-
         try {
             const document = await this.storage.getClient().get({ id: esqlToolId });
             return document._source as EsqlTool;
@@ -54,6 +55,24 @@ export const createClient = ({
         
       }
 
+    async list(): Promise<EsqlTool[]> {
+        try {
+            const document = await this.storage.getClient().search({
+                index: esqlToolIndexName,
+                query: {
+                    match_all: {}
+                },
+                size: 1000, 
+                track_total_hits: true
+            });
+
+            return document.hits.hits.map(hit => hit._source as EsqlTool);
+        } catch (error) {
+            logger.error(`Error fetching all ESQL tools: ${error}`);
+            return [];
+        }
+    }
+
     async create(tool: EsqlToolCreateRequest): Promise<EsqlTool> {
         try {
             const now = new Date();
@@ -64,14 +83,11 @@ export const createClient = ({
                 name: tool.name,
                 description: tool.description,
                 query: tool.query,
-                params: tool.params.map(param => ({
-                    key: param.key,
-                    value: {
-                        type: param.value.type,
-                        description: param.value.description,
-                    }
-                })),
-                meta: tool.meta,
+                params: tool.params,
+                meta: {
+                    providerId: tool.meta.providerId,
+                    tags: tool.meta?.tags || [],
+                },
                 created_at: now.toISOString(),
                 updated_at: now.toISOString(),
             };
@@ -80,7 +96,7 @@ export const createClient = ({
                 id,
                 document: attributes,
             });
-        
+
             return this.get(id);
         
         } catch (error: any) {
@@ -89,31 +105,48 @@ export const createClient = ({
         }
     }
 
-    async execute(esqlToolId: string): Promise<any> {
+    async execute(name: string, params: Record<string, any>): Promise<any> {
         try {
-            const document = await this.storage.getClient().get({ id: esqlToolId });
-            const tool = document._source
+            const document = await this.storage.getClient().search({
+                index: esqlToolIndexName,
+                query: {
+                    term: {
+                        name: name
+                    }
+                },
+                size: 1,
+                track_total_hits: true  
+            });
+            const tool = document.hits.hits[0]._source  
 
             if (!tool) {
-                throw new Error(`ESQL tool not found: ${esqlToolId}`);
+                throw new Error(`ESQL tool not found: ${name}`);
             }
 
-            logger.info("Tool found: " + JSON.stringify(tool));
+            const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
+                if (!(key in tool.params)) { 
+                    throw new Error(`Parameter ${key} not found in tool params`);
+                }
+                
+                const value = params[key];
+                if (value === undefined || value === null) {
+                    throw new Error(`Parameter ${key} is required but was not provided`);
+                }
+                
+                return typeof value === 'string' ? `"${value}"` : value;
+            });
 
             const esqlResponse = await this.esClient.transport.request({
                 method: 'POST',
                 path: '/_query',
                 body: {
-                  query: tool.query
+                  query: filledQuery
                 }
               });
-          
-            logger.info("ESQL Response: " + JSON.stringify(esqlResponse));
+    
             return esqlResponse;
         } catch (error) {
-            if (error.statusCode === 404) {
-                throw new Error(`Tool with ID ${esqlToolId} not found`);
-            }
+            logger.error(`Error executing ESQL tool with name ${name}: ${error}`);
             throw error;
         }
         
