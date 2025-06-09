@@ -46,7 +46,7 @@ export const ElasticLlmConversationCallout = () => {
       onDismiss={onDismiss}
       iconType="iInCircle"
       title={i18n.translate('xpack.aiAssistant.elasticLlmCallout.title', {
-        defaultMessage: `You're using the Elastic-managed LLM connector`,
+        defaultMessage: `You're using the Elastic Managed LLM connector`,
       })}
       size="s"
       className={elasticLlmCalloutClassName}
@@ -54,7 +54,7 @@ export const ElasticLlmConversationCallout = () => {
       <p>
         <FormattedMessage
           id="xpack.aiAssistant.tour.elasticLlmDescription"
-          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic-managed LLM connector is used by default (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can configure a <connectorLink>custom connector</connectorLink> if you prefer."
+          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can configure a <connectorLink>custom connector</connectorLink> if you prefer."
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink

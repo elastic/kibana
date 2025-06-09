@@ -128,7 +128,7 @@ export function SettingsTab() {
             <p>
               <FormattedMessage
                 id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
-                defaultMessage={`Elastic AI Assistant and other AI features are powered by an LLM. The Elastic-managed LLM connector is used by default ({link}) when no custom connectors are available. Select "Manage connectors" to configure and use a custom connector.`}
+                defaultMessage={`Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default ({link}) when no custom connectors are available. Select "Manage connectors" to configure and use a custom connector.`}
                 values={{
                   link: (
                     <EuiLink

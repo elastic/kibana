@@ -28,7 +28,7 @@ export const ElasticLlmTourCallout = ({
   return (
     <TourCallout
       title={i18n.translate('xpack.observabilityAiAssistant.tour.elasticLlmTitle', {
-        defaultMessage: 'Elastic-managed LLM connector now available',
+        defaultMessage: 'Elastic Managed LLM connector now available',
       })}
       subtitle={i18n.translate('xpack.observabilityAiAssistant.tour.subtitle', {
         defaultMessage: 'New AI feature!',
