@@ -66,7 +66,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       <p>
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.connectors.tour.elasticLlmDescription"
-          defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. By default, Elastic uses its Elastic-managed LLM connector ({costLink}) when no custom connectors are available. You can always configure and use your own {connectorLink} and change the default in {settingsLink}."
+          defaultMessage="Elastic requires a large language model (LLM) to power the AI Assistant and AI features. By default, it uses the Elastic Managed LLM connector ({costLink}). You can change it by configuring your own {connectorLink} in {settingsLink}."
           values={{
             costLink: (
               <EuiLink
