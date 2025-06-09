@@ -28268,8 +28268,10 @@ router@^2.0.0:
     parseurl "^1.3.3"
     path-to-regexp "^8.0.0"
 
-rrule-es@../rrule-es:
+rrule-es@1.0.0:
   version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rrule-es/-/rrule-es-1.0.0.tgz#17dfe76565f8fb927f9fe911de9c412518a8320e"
+  integrity sha512-uvv0PbcVGK1UJgSBZFnK2SPOyj907+cQ4lKUp5o/Zj53rq4dKhhuG1tNUszHACKKeLX3KBKmBeP3Aop9iy1eSQ==
   dependencies:
     "@date-fns/tz" "^1.2.0"
     date-fns "^4.1.0"
