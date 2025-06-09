@@ -31,80 +31,80 @@ export type SyntheticsMonitorStatusAlertState = t.TypeOf<
   typeof SyntheticsMonitorStatusAlertStateCodec
 >;
 
-export const AlertStatusMetaDataCodec = t.interface({
-  monitorQueryId: t.string,
-  configId: t.string,
-  status: t.string,
-  locationId: t.string,
-  timestamp: t.string,
-  ping: OverviewPingCodec,
-  checks: t.type({
-    downWithinXChecks: t.number,
-    down: t.number,
-  }),
-});
+export interface AlertStatusMetaData {
+  monitorQueryId: string;
+  configId: string;
+  status: string;
+  locationId: string;
+  timestamp: string;
+  ping: t.TypeOf<typeof OverviewPingCodec>;
+  checks: {
+    downWithinXChecks: number;
+    down: number;
+  };
+}
 
-const StaleMetaDataCodec = t.partial({
-  isDeleted: t.boolean,
-  isLocationRemoved: t.boolean,
-});
+// Interface for StaleMetaData
+export interface StaleAlertMetadata {
+  isDeleted?: boolean;
+  isLocationRemoved?: boolean;
+}
 
-export const StaleAlertStatusMetaDataCodec = t.intersection([
-  AlertStatusMetaDataCodec,
-  StaleMetaDataCodec,
-]);
+// Interface for MissingPingMonitorInfo
+export interface MissingPingMonitorInfo {
+  // Required fields
+  monitor: {
+    name: string;
+    id: string;
+    type: string;
+  };
+  observer: {
+    geo: {
+      name: string;
+    };
+  };
+  tags: string[];
 
-const MissingPingMonitorInfoCodec = t.intersection([
-  t.type({
-    monitor: t.type({ name: t.string, id: t.string, type: t.string }),
-    observer: t.type({ geo: t.type({ name: t.string }) }),
-    tags: t.array(t.string),
-  }),
-  t.partial({
-    labels: t.record(t.string, t.string),
-    url: t.partial({
-      full: t.string,
-    }),
-    error: t.type({ message: t.string, stack_trace: t.string }),
-    service: t.type({ name: t.string }),
-    agent: t.type({ name: t.string }),
-    state: t.type({ id: t.string }),
-  }),
-]);
+  // Optional fields
+  labels?: Record<string, string>;
+  url?: {
+    full?: string;
+  };
+  error?: {
+    message: string;
+    stack_trace: string;
+  };
+  service?: {
+    name: string;
+  };
+  agent?: {
+    name: string;
+  };
+  state?: {
+    id: string;
+  };
+}
 
-export const AlertPendingStatusMetaDataCodec = t.intersection([
-  t.interface({
-    monitorQueryId: t.string,
-    configId: t.string,
-    status: t.string,
-    locationId: t.string,
-    monitorInfo: MissingPingMonitorInfoCodec,
-  }),
-  t.partial({
-    timestamp: t.string,
-    ping: OverviewPingCodec,
-  }),
-]);
+export interface AlertPendingStatusMetaData {
+  monitorQueryId: string;
+  configId: string;
+  status: string;
+  locationId: string;
+  monitorInfo: MissingPingMonitorInfo;
+  timestamp?: string;
+  ping?: t.TypeOf<typeof OverviewPingCodec>;
+}
 
-const StaleAlertPendingStatusMetaDataCodec = t.intersection([
-  AlertPendingStatusMetaDataCodec,
-  StaleMetaDataCodec,
-]);
-
-export const AlertStatusCodec = t.interface({
-  upConfigs: t.record(t.string, AlertStatusMetaDataCodec),
-  downConfigs: t.record(t.string, AlertStatusMetaDataCodec),
-  pendingConfigs: t.record(t.string, AlertPendingStatusMetaDataCodec),
-  enabledMonitorQueryIds: t.array(t.string),
-  staleDownConfigs: t.record(t.string, StaleAlertStatusMetaDataCodec),
-  stalePendingConfigs: t.record(t.string, StaleAlertPendingStatusMetaDataCodec),
-  maxPeriod: t.number,
-});
-
-export type StaleDownConfig = t.TypeOf<typeof StaleAlertStatusMetaDataCodec>;
-export type AlertStatusMetaData = t.TypeOf<typeof AlertStatusMetaDataCodec>;
-export type AlertPendingStatusMetaData = t.TypeOf<typeof AlertPendingStatusMetaDataCodec>;
-export type AlertOverviewStatus = t.TypeOf<typeof AlertStatusCodec>;
+export interface AlertOverviewStatus {
+  upConfigs: Record<string, AlertStatusMetaData>;
+  downConfigs: Record<string, AlertStatusMetaData>;
+  pendingConfigs: Record<string, AlertPendingStatusMetaData>;
+  enabledMonitorQueryIds: string[];
+  staleDownConfigs: Record<string, AlertStatusMetaData & StaleAlertMetadata>;
+  stalePendingConfigs: Record<string, AlertPendingStatusMetaData & StaleAlertMetadata>;
+  maxPeriod: number;
+}
+export type StaleDownConfig = AlertStatusMetaData & StaleAlertMetadata;
 export type StatusRuleInspect = AlertOverviewStatus & {
   monitors: Array<{
     id: string;
@@ -115,5 +115,3 @@ export type StatusRuleInspect = AlertOverviewStatus & {
 export type TLSRuleInspect = StatusRuleInspect;
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;
 export type AlertPendingStatusConfigs = Record<string, AlertPendingStatusMetaData>;
-export type StaleAlertMetadata = t.TypeOf<typeof StaleMetaDataCodec>;
-export type MissingPingMonitorInfo = t.TypeOf<typeof MissingPingMonitorInfoCodec>;
