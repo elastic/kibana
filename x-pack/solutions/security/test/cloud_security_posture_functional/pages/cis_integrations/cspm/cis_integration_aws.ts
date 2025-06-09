@@ -362,7 +362,7 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await cisIntegration.clickOptionButton(ADVANCED_OPTION_ACCORDION);
-        await cisIntegration.fillInTextField(NAMESPACE_INPUT, namespace);
+        await cisIntegration.fillInComboBox(NAMESPACE_INPUT, namespace);
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();

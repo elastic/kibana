@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -24,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -1032,49 +1031,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               }
               paddingSize="m"
             >
-              <EuiFormRow
+              <NamespaceComboBox
                 fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.namespaceLabel"
-                    defaultMessage="Namespace"
-                  />
-                }
-                isInvalid={!isEditPage && !!validationResults?.namespace}
-                error={!isEditPage ? validationResults?.namespace : null}
-                helpText={
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
-                    defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
-                    values={{
-                      learnMoreLink: (
-                        <a
-                          href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Learn more{' '}
-                          <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
-                        </a>
-                      ),
-                    }}
-                  />
-                }
-              >
-                <EuiFieldText
-                  fullWidth
-                  placeholder="default"
-                  data-test-subj="namespaceInput"
-                  isInvalid={!isEditPage && !!validationResults?.namespace}
-                  value={newPolicy.namespace}
-                  onChange={(event) => {
-                    if (!isEditPage) {
-                      updatePolicy({ ...newPolicy, namespace: event.target.value });
-                    }
-                  }}
-                  disabled={isEditPage}
-                />
-              </EuiFormRow>
+                namespace={newPolicy.namespace}
+                placeholder="default"
+                isEditPage={isEditPage}
+                validationError={validationResults?.namespace}
+                onNamespaceChange={(namespace: string) => {
+                  updatePolicy({ ...newPolicy, namespace });
+                }}
+                data-test-subj="namespaceInput"
+                labelId="xpack.csp.fleetIntegration.namespaceLabel"
+                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              />
             </EuiAccordion>
           </>
         )}
