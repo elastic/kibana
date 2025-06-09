@@ -54,17 +54,12 @@ export async function extractPanelsState(
     return {};
   }
 
-  // < 8.17 panels state stored panelConfig as embeddableConfig
   const standardizedPanels = await Promise.all(
     panels.map(async (panel) => {
-      if (typeof panel === 'object' && panel?.embeddableConfig) {
-        const { embeddableConfig, ...rest } = panel;
-        return {
-          ...rest,
-          panelConfig: embeddableConfig,
-        };
-      } else if (typeof panel === 'object' && panel?.panelConfig) {
-        const { panelConfig, type, ...rest } = panel;
+      if (typeof panel === 'object') {
+        // < 8.17 panels state stored panelConfig as embeddableConfig
+        const panelConfig = panel.panelConfig ?? panel.embeddableConfig;
+        const { type, ...rest } = panel;
 
         const embeddableCmDefintions =
           await embeddableService.getEmbeddableContentManagementDefinition(type);
