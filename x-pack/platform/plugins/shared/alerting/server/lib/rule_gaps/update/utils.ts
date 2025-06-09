@@ -7,7 +7,7 @@
 
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import { parseDuration } from '../../../../common';
-import { clipDateIntervals } from '../gap/interval_utils';
+import { clipDateInterval } from '../gap/interval_utils';
 import type { Gap } from '../gap';
 
 export interface ScheduledItem {
@@ -62,7 +62,7 @@ const findEarliestOverlapping = (
 };
 
 const clipScheduled = (startMs: number, endMs: number, scheduledItem: ScheduledItem) => {
-  const clipped = clipDateIntervals(
+  const clipped = clipDateInterval(
     scheduledItem.from,
     scheduledItem.to,
     new Date(startMs),

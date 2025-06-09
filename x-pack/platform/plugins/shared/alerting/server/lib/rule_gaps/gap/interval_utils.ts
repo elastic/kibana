@@ -205,11 +205,10 @@ export const denormalizeInterval = (interval: Interval): StringInterval => {
 };
 
 /**
- * Clips an interval to ensure it falls within the given boundary range.
- * If there's no overlap, returns null.
+ * Conveninence function that clips an `Interval` given an `Interval` boundary
  */
 export const clipInterval = (interval: Interval, boundary: Interval): Interval | null => {
-  const clipped = clipDateIntervals(interval.gte, interval.lte, boundary.gte, boundary.lte);
+  const clipped = clipDateInterval(interval.gte, interval.lte, boundary.gte, boundary.lte);
 
   if (clipped === null) {
     return null;
@@ -218,7 +217,11 @@ export const clipInterval = (interval: Interval, boundary: Interval): Interval |
   return { gte: clipped.start, lte: clipped.end };
 };
 
-export const clipDateIntervals = (
+/**
+ * Clips an date interval to ensure it falls within the given boundary range.
+ * If there's no overlap, returns null.
+ */
+export const clipDateInterval = (
   start: Date,
   end: Date,
   boundaryStart: Date,
