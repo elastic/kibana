@@ -14,13 +14,14 @@ import {
   EuiFieldText,
   EuiCopy,
   EuiButtonIcon,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const ConnectToElasticsearch = () => {
-  const localhost = 'http://localhost:9200/';
+const LOCALHOST_URL = 'http://localhost:9200/';
 
+export const ConnectToElasticsearch = () => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -42,7 +43,7 @@ export const ConnectToElasticsearch = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
                 <span>
@@ -56,7 +57,7 @@ export const ConnectToElasticsearch = () => {
               </EuiTitle>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={localhost}>
+                  <EuiCopy textToCopy={LOCALHOST_URL}>
                     {(copy) => (
                       <EuiButtonIcon
                         onClick={copy}
@@ -68,7 +69,25 @@ export const ConnectToElasticsearch = () => {
                   </EuiCopy>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFieldText value={localhost} readOnly />
+                  <EuiFieldText value={LOCALHOST_URL} readOnly />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <span>
+                  {i18n.translate('xpack.searchHomepage.connectToElasticsearch.apiKeysLabel', {
+                    defaultMessage: 'API Keys',
+                  })}
+                </span>
+              </EuiTitle>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="key">
+                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.createApiKey', {
+                      defaultMessage: 'Create API Key',
+                    })}
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
