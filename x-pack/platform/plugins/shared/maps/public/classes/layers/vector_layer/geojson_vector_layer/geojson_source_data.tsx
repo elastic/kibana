@@ -76,7 +76,7 @@ export async function syncGeojsonSourceData({
       },
       syncContext.inspectorAdapters
     );
-    const layerFeatureCollection = assignFeatureIds(structuredClone(sourceFeatureCollection));
+    const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
     const supportedShapes = await source.getSupportedShapeTypes();
     if (
       supportedShapes.includes(VECTOR_SHAPE_TYPE.LINE) ||
