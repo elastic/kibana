@@ -49,6 +49,21 @@ export const buildActionDetailsQuery = ({
     } else {
       extendedFilter = [...baseFilter, getPolicyIdsSubsetScriptFilter(policyIds)];
     }
+  } else {
+    // When no osquery package policies exist in the current space,
+    // return no results to prevent cross-space data leakage.
+    // This is a railsafe check as user dont have access to actions
+    // if there are no osquery package policies in the current space
+    extendedFilter = [
+      ...baseFilter,
+      {
+        bool: {
+          must_not: {
+            match_all: {},
+          },
+        },
+      },
+    ];
   }
 
   const dslQuery = {

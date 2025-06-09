@@ -26,13 +26,14 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
-import { fetchOsqueryPackagePolicyIds, getActionResponses } from './utils';
+import { getActionResponses } from './utils';
 import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { fetchOsqueryPackagePolicyIds } from '../utils';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,

@@ -18,7 +18,8 @@ import type {
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
-import { fetchOsqueryPackagePolicyIds, getActionResponses } from './utils';
+import { getActionResponses } from './utils';
+import { fetchOsqueryPackagePolicyIds } from '../utils';
 
 import type {
   ActionDetailsRequestOptions,
