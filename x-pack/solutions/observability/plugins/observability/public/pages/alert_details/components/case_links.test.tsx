@@ -55,8 +55,8 @@ describe('CaseLinks', () => {
   });
 
   it('renders nothing if cases is empty', () => {
-    useFetchBulkCases.mockReset();
-    useFetchBulkCases.mockReturnValue({
+    (useFetchBulkCases as jest.Mock).mockReset();
+    (useFetchBulkCases as jest.Mock).mockReturnValue({
       cases: [],
       isLoading: false,
     });
@@ -74,8 +74,8 @@ describe('CaseLinks', () => {
   });
 
   it('renders nothing if cases is undefined', () => {
-    useFetchBulkCases.mockReset();
-    useFetchBulkCases.mockReturnValue({
+    (useFetchBulkCases as jest.Mock).mockReset();
+    (useFetchBulkCases as jest.Mock).mockReturnValue({
       cases: undefined,
       isLoading: false,
     });
