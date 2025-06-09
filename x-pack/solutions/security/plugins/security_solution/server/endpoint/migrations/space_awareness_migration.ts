@@ -209,7 +209,7 @@ const migrateArtifactsToSpaceAware = async (
         { stopOnError: false, concurrency: 10 }
       );
 
-      updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+      await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
     },
   });
 
