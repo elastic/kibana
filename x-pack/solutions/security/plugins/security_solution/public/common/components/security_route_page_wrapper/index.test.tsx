@@ -184,4 +184,18 @@ describe('SecurityRoutePageWrapper', () => {
       expect(SpyRoute).not.toHaveBeenCalled();
     });
   });
+  it('should not render SpyRoute when omitSpyRoute is set to true', () => {
+    (useLinkInfo as jest.Mock).mockReturnValue(defaultLinkInfo);
+    (useUpsellingPage as jest.Mock).mockReturnValue(undefined);
+
+    render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} omitSpyRoute>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    // SpyRoute was mocked, so if omitSpyRoute worked, it should not have been called
+    expect(SpyRoute).not.toHaveBeenCalled();
+  });
 });
