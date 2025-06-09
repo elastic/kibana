@@ -13,16 +13,20 @@ import { PLUGIN_PATH } from '../../common';
 import { useKibana } from './use_kibana';
 
 export const usePlaygroundBreadcrumbs = (playgroundName?: string) => {
-  const { http, searchNavigation } = useKibana().services;
+  const { cloud, http, searchNavigation } = useKibana().services;
+  const isServerless = cloud?.isServerlessEnabled ?? false;
 
   useEffect(() => {
     searchNavigation?.breadcrumbs.setSearchBreadCrumbs([
-      // TODO: confirm how this behaves with classic navigation
-      // {
-      //   text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
-      //     defaultMessage: 'Build',
-      //   }),
-      // },
+      ...(isServerless
+        ? [] // Serverless is setting Build breadcrumb automatically
+        : [
+            {
+              text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
+                defaultMessage: 'Build',
+              }),
+            },
+          ]),
       {
         text: i18n.translate('xpack.searchPlayground.breadcrumbs.playground', {
           defaultMessage: 'Playground',
@@ -42,5 +46,5 @@ export const usePlaygroundBreadcrumbs = (playgroundName?: string) => {
       // Clear breadcrumbs on unmount;
       searchNavigation?.breadcrumbs.clearBreadcrumbs();
     };
-  }, [http, searchNavigation, playgroundName]);
+  }, [http, searchNavigation, isServerless, playgroundName]);
 };
