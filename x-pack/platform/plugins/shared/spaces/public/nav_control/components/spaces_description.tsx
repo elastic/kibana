@@ -44,7 +44,7 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
       <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
         <ManageSpacesButton
           size="s"
-          style={{ width: `100%` }}
+          fullWidth
           onClick={props.onClickManageSpaceBtn}
           capabilities={props.capabilities}
           navigateToApp={props.navigateToApp}
