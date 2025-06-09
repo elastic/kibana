@@ -1,0 +1,316 @@
+---
+# This file is used to generate "Map settings" page in the product docs
+
+product: Kibana
+collection: Map settings in Kibana
+id: map-settings-kb
+page_description: |
+  Use these settings when you [build maps](docs-content://explore-analyze/visualize/maps.md) based off of your geographical data.
+
+groups:
+  - group: General settings
+    id: general-map-settings
+    # description: |
+    # example: |
+    settings:
+
+      - setting: map.regionmap
+        # id:
+        description: |
+          Specifies additional vector layers for use in [Region Map](docs-content://explore-analyze/visualize/maps/maps-getting-started.md) visualizations. Each layer object points to an external vector file that contains a geojson FeatureCollection. The file must use the [WGS84 coordinate reference system](https://en.wikipedia.org/wiki/World_Geodetic_System) and only include polygons. If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        example: |
+          The following example shows a valid regionmap configuration.
+
+          ```yaml
+          map.regionmap:
+            includeElasticMapsService: false
+            layers:
+              - name: "Departments of France"
+                url: "http://my.cors.enabled.server.org/france_departements.geojson"
+                attribution:   "INRAP"
+                fields:
+                  - name: "department"
+                    description: "Full department name"
+                  - name: "INSEE"
+                    description: "INSEE numeric identifier"
+          ```
+
+      - setting: map.regionmap.includeElasticMapsService
+        # id:
+        description: |
+          Turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list. Supported on Elastic Cloud Enterprise. By turning this off, only the layers that are configured here will be included.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].attribution
+        # id:
+        description: |
+          Optional. References the originating source of the geojson file.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].fields[]
+        # id:
+        description: |
+          Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The previous example shows how to define multiple properties.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].fields[].description
+        # id:
+        description: |
+          Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].fields[].name
+        # id:
+        description: |
+          Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. For example, if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].name
+        # id:
+        description: |
+          Mandatory. A description of the map being provided.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: map.regionmap.layers[].url
+        # id:
+        description: |
+          Mandatory. The location of the geojson file as provided by a webserver.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: tilemap.options.attribution
+        # id:
+        description: |
+          Adds the map attribution string.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: tilemap.options.maxZoom
+        # id:
+        description: |
+          Sets the maximum zoom level.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: tilemap.options.minZoom
+        # id:
+        description: |
+          Sets the minimum zoom level.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: tilemap.options.subdomains
+        # id:
+        description: |
+          Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: tilemap.url
+        # id:
+        description: |
+          Lists the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
