@@ -9,11 +9,43 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiIcon, EuiLoadingSpinner, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
+import {
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useIndexContext } from './context';
+
+type RecommendedActionType =
+  | 'unfreeze'
+  | 'isLargeIndex'
+  | 'isFollowerIndex'
+  | 'isReadonly'
+  | 'readonly'
+  | 'reindex';
+
+const recommendedReadOnlyText = i18n.translate(
+  'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyText',
+  {
+    defaultMessage: 'Recommended to set to read-only',
+  }
+);
+const recommendedReindexText = i18n.translate(
+  'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexText',
+  {
+    defaultMessage: 'Recommended to reindex',
+  }
+);
 
 const i18nTexts = {
   reindexLoadingStatusText: i18n.translate(
@@ -58,11 +90,120 @@ const i18nTexts = {
       defaultMessage: 'Update complete',
     }
   ),
+  recommendedActionTexts: {
+    isLargeIndex: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonIsLargeIndex',
+        {
+          defaultMessage:
+            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
+        }
+      ),
+    },
+    isFollowerIndex: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonIsFollowerIndex',
+        {
+          defaultMessage:
+            'This index is a cross-cluster replication follower index, which should not be reindexed. You can mark it as read-only or terminate the replication and convert it to a standard index.',
+        }
+      ),
+    },
+    readonly: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonReadonly',
+        {
+          defaultMessage:
+            'Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
+        }
+      ),
+    },
+    isReadonly: {
+      text: recommendedReindexText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexReasonReadonly',
+        {
+          defaultMessage: 'This index is already read-only. You can still reindex it.',
+        }
+      ),
+    },
+    reindex: {
+      text: recommendedReindexText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexTooltipText',
+        {
+          defaultMessage:
+            'The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed.',
+        }
+      ),
+    },
+    unfreeze: {
+      text: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedOptionUnfreezeText',
+        {
+          defaultMessage: 'Recommended to unfreeze',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedOptionReadonlyReasonFreeze',
+        {
+          defaultMessage:
+            'To ensure compatibility with the next major version, unfreeze is recommended. It will also be set as read-only.',
+        }
+      ),
+    },
+  },
 };
 
-export const ReindexResolutionCell: React.FunctionComponent = () => {
+export const ReindexResolutionCell: React.FunctionComponent<{
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ deprecation }) => {
   const { reindexState, updateIndexState } = useIndexContext();
+  const { correctiveAction } = deprecation;
+
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
+
+  const getRecommendedActionForUnfreezeAction = (): RecommendedActionType => {
+    // Unfreeze is always the Recommended action for frozen index
+    return 'unfreeze';
+  };
+
+  const getRecommendedActionForReindexingAction = (): RecommendedActionType => {
+    const { meta } = reindexState;
+    const { isReadonly, isFollowerIndex } = meta;
+    const { excludedActions = [], indexSizeInBytes = 0 } =
+      (deprecation.correctiveAction as ReindexAction) || {};
+
+    // Determine if the index is larger than 1GB
+    const isLargeIndex = indexSizeInBytes > 1073741824;
+    const readOnlyExcluded = excludedActions.includes('readOnly');
+    const reindexExcluded = excludedActions.includes('reindex');
+
+    if (isFollowerIndex && !readOnlyExcluded) {
+      // If the index is a follower index, recommend setting it to read-only
+      return 'isFollowerIndex';
+    } else if (isLargeIndex && !readOnlyExcluded) {
+      // If the index is larger than 1GB, recommend setting it to read-only
+      return 'isLargeIndex';
+    } else if (isReadonly) {
+      // If the index is already read-only, recommend reindexing
+      return 'isReadonly';
+    } else if (reindexExcluded) {
+      // If reindexing is excluded, recommend setting it to read-only
+      return 'readonly';
+    } else {
+      // Reindex is the default recommended action unless other conditions apply
+      return 'reindex';
+    }
+  };
+
+  const recommendedAction =
+    correctiveAction?.type === 'unfreeze'
+      ? getRecommendedActionForUnfreezeAction()
+      : getRecommendedActionForReindexingAction();
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -71,7 +212,9 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.reindexLoadingStatusText}</EuiText>
+          <EuiText size="s" color="subdued">
+            <em>{i18nTexts.reindexLoadingStatusText}</em>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -85,13 +228,15 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18nTexts.reindexInProgressText}{' '}
-              {getReindexProgressLabel(
-                reindexState.reindexTaskPercComplete,
-                reindexState.lastCompletedStep,
-                hasExistingAliases
-              )}
+            <EuiText size="s" color="subdued">
+              <em>
+                {i18nTexts.reindexInProgressText}{' '}
+                {getReindexProgressLabel(
+                  reindexState.reindexTaskPercComplete,
+                  reindexState.lastCompletedStep,
+                  hasExistingAliases
+                )}
+              </em>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -159,5 +304,23 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       );
   }
 
+  if (recommendedAction) {
+    return (
+      <EuiText size="s" color="subdued">
+        <em>
+          {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
+          <EuiToolTip
+            position="top"
+            content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+          >
+            <EuiIcon
+              type="iInCircle"
+              aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+            />
+          </EuiToolTip>
+        </em>
+      </EuiText>
+    );
+  }
   return <></>;
 };
