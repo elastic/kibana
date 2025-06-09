@@ -109,9 +109,10 @@ import type { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapt
 import type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import type { GetAlertIndicesAlias } from './lib';
-import { createGetAlertIndicesAliasFn } from './lib';
+import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
+import { AlertDeletionClient } from './alert_deletion';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -125,6 +126,7 @@ export const EVENT_LOG_ACTIONS = {
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
+  deleteAlerts: 'delete-alerts',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -229,6 +231,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private alertDeletionClient?: AlertDeletionClient;
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
@@ -347,7 +350,7 @@ export class AlertingPlugin {
       }
     }
 
-    const ruleTypeRegistry = new RuleTypeRegistry({
+    const ruleTypeRegistry: RuleTypeRegistry = new RuleTypeRegistry({
       config: this.config,
       logger: this.logger,
       taskManager: plugins.taskManager,
@@ -359,6 +362,21 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    this.alertDeletionClient = new AlertDeletionClient({
+      auditService: plugins.security?.audit,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      eventLogger: this.eventLogger,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      logger: this.logger,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      securityService: core.getStartServices().then(([{ security }]) => security),
+      spacesService: core.getStartServices().then(([_, { spaces }]) => spaces?.spacesService),
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -426,6 +444,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       docLinks: core.docLinks,
       alertingConfig: this.config,
+      core,
     });
 
     return {
@@ -572,12 +591,6 @@ export class AlertingPlugin {
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
     });
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginStart: plugins.security,
@@ -601,7 +614,7 @@ export class AlertingPlugin {
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
@@ -686,7 +699,7 @@ export class AlertingPlugin {
       }),
       savedObjects: core.savedObjects,
       share: plugins.share,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
@@ -730,6 +743,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const {
+      alertDeletionClient,
       ruleTypeRegistry,
       rulesClientFactory,
       rulesSettingsClientFactory,
@@ -738,6 +752,9 @@ export class AlertingPlugin {
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
+        getAlertDeletionClient: () => {
+          return alertDeletionClient!;
+        },
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
