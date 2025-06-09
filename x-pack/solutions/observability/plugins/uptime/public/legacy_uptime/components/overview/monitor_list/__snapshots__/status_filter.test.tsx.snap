@@ -5,11 +5,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
 >
   <div
-    class="euiFilterButton__wrapper css-nbqv3o-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1mc0x02-wrapper-hasToggle"
   >
     <button
       aria-pressed="true"
-      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-withNext-hasActiveFilters-toggle"
       data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
       type="button"
     >
@@ -27,11 +27,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-nbqv3o-wrapper-withNext-hasToggle"
+    class="euiFilterButton__wrapper css-1mc0x02-wrapper-hasToggle"
   >
     <button
       aria-pressed="false"
-      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      class="euiButtonGroupButton euiFilterButton emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-withNext-toggle"
       data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
       type="button"
     >
@@ -49,11 +49,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </button>
   </div>
   <div
-    class="euiFilterButton__wrapper css-10m1aro-wrapper-hasToggle"
+    class="euiFilterButton__wrapper css-1mc0x02-wrapper-hasToggle"
   >
     <button
       aria-pressed="false"
-      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      class="euiButtonGroupButton euiFilterButton emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
       data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
       type="button"
     >
