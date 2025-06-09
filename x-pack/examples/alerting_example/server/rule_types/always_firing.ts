@@ -75,6 +75,7 @@ export const ruleType: RuleType<
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
     state,
   }) {
+    console.log('starting rule execution');
     const { alertsClient } = services;
     if (!alertsClient) {
       throw new AlertsClientError();
@@ -90,6 +91,9 @@ export const ruleType: RuleType<
           state: { triggerdOnCycle: count },
         });
       });
+
+    await new Promise((resolve) => setTimeout(resolve, 65000));
+    console.log('finishing rule execution');
 
     return {
       state: {

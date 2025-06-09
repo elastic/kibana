@@ -412,6 +412,7 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
+      console.log(err);
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
       this.logger.error(`Task ${this} failed: ${err}`, {
         tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
@@ -689,13 +690,7 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (this.isExpired) {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
-    } else if (
+    if (
       fieldUpdates.status === TaskStatus.Failed ||
       fieldUpdates.status === TaskStatus.ShouldDelete
     ) {
@@ -704,16 +699,41 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
-
-      const partialTask = {
-        ...fieldUpdates,
-        // reset fields that track the lifecycle of the concluded `task run`
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
+      let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
+
+      if (this.isExpired) {
+        this.usageCounter?.incrementCounter({
+          counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+          counterType: 'taskManagerTaskRunner',
+          incrementBy: 1,
+        });
+
+        partialTask = {
+          status: TaskStatus.Idle,
+          runAt: fieldUpdates.runAt,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+          id: this.instance.task.id,
+          version: this.instance.task.version,
+        };
+
+        console.log(`task update when expired ${JSON.stringify(partialTask)}`);
+      } else {
+        partialTask = {
+          ...fieldUpdates,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+          id: this.instance.task.id,
+          version: this.instance.task.version,
+        };
+      }
 
       this.instance = asRan(
         await this.bufferedTaskStore.partialUpdate(partialTask, {
