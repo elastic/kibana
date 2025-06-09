@@ -18,6 +18,7 @@ interface UseConversationsUpdater {
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   onConversationDeleted: (cId: string) => void;
+  onConversationsBulkDeleted: (cIds: string[]) => void;
   resetConversationsSettings: () => void;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
@@ -54,6 +55,37 @@ export const useConversationsUpdater = (
 
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
   }, [assistantStreamingEnabled, conversations]);
+
+  const onConversationsBulkDeleted = useCallback(
+    (cIds: string[]) => {
+      let updatedConversationSettings: Record<string, Conversation> = {};
+      const deletedConversations = new Set(conversationsSettingsBulkActions.delete?.ids ?? []);
+      Object.values(conversations).forEach((current) => {
+        const isConversationExist = cIds.includes(current.id);
+        if (isConversationExist) {
+          if (!deletedConversations.has(current.id)) {
+            deletedConversations.add(current.id);
+          } else {
+            updatedConversationSettings = { ...updatedConversationSettings, current };
+          }
+        }
+      });
+
+      setConversationSettings(updatedConversationSettings);
+      setConversationsSettingsBulkActions({
+        ...conversationsSettingsBulkActions,
+        delete: {
+          ids: Array.from(deletedConversations),
+        },
+      });
+    },
+    [
+      conversations,
+      conversationsSettingsBulkActions,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+    ]
+  );
 
   const onConversationDeleted = useCallback(
     (cId: string) => {
@@ -129,6 +161,7 @@ export const useConversationsUpdater = (
     conversationSettings,
     conversationsSettingsBulkActions,
     onConversationDeleted,
+    onConversationsBulkDeleted,
     resetConversationsSettings,
     saveConversationsSettings,
     setUpdatedAssistantStreamingEnabled,

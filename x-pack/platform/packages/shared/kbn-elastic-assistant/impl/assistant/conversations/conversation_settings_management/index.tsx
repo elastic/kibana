@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiText,
   EuiLoadingSpinner,
+  EuiTableSelectionType,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { snakeCase } from 'lodash';
@@ -38,11 +39,16 @@ import {
   useSessionPagination,
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
+import { Toolbar } from './tool_bar_component';
+
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
 }
+
+const DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
+
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
@@ -97,6 +103,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const {
     assistantStreamingEnabled,
     conversationsSettingsBulkActions,
+    onConversationsBulkDeleted,
     onConversationDeleted,
     resetConversationsSettings,
     saveConversationsSettings,
@@ -150,7 +157,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     openFlyout: openEditFlyout,
     closeFlyout: closeEditFlyout,
   } = useFlyoutModalVisibility();
-  const [deletedConversation, setDeletedConversation] = useState<ConversationTableItem | null>();
+  const [deletedConversations, setDeletedConversations] = useState<ConversationTableItem[]>(
+    DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY
+  );
 
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -168,7 +177,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onDeleteActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
-      setDeletedConversation(rowItem);
+      setDeletedConversations([rowItem]);
       onConversationDeleted(rowItem.id);
 
       closeEditFlyout();
@@ -176,6 +185,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     },
     [closeEditFlyout, onConversationDeleted, openConfirmModal]
   );
+
+  const onBulkDeleteActionClicked = useCallback(() => {
+    onConversationsBulkDeleted(deletedConversations.map((item) => item.id));
+
+    closeEditFlyout();
+    openConfirmModal();
+  }, [closeEditFlyout, deletedConversations, onConversationsBulkDeleted, openConfirmModal]);
 
   const onDeleteConfirmed = useCallback(() => {
     if (Object.keys(conversationsSettingsBulkActions).length === 0) {
@@ -193,7 +209,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   ]);
 
   const onDeleteCancelled = useCallback(() => {
-    setDeletedConversation(null);
+    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
     closeConfirmModal();
     onCancelClick();
   }, [closeConfirmModal, onCancelClick]);
@@ -207,6 +223,25 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
   });
+
+  const onSelectionChange = (selectedItems: ConversationTableItem[]) => {
+    setDeletedConversations(selectedItems);
+  };
+
+  const selection: EuiTableSelectionType<ConversationTableItem> = {
+    selectable: (conversation: ConversationTableItem) => !!conversation.id,
+    onSelectionChange,
+    initialSelected: [],
+    selected: deletedConversations,
+  };
+
+  const onSelectAll = useCallback(() => {
+    setDeletedConversations(conversationOptions);
+  }, [conversationOptions]);
+
+  const handleUnselectAll = useCallback(() => {
+    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+  }, []);
 
   const onSaveCancelled = useCallback(() => {
     closeEditFlyout();
@@ -230,13 +265,16 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [getColumns, onDeleteActionClicked, onEditActionClicked]
   );
 
-  const confirmationTitle = useMemo(
-    () =>
-      deletedConversation?.title
-        ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversation?.title)
-        : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE,
-    [deletedConversation?.title]
-  );
+  const confirmationTitle = useMemo(() => {
+    if (!deletedConversations) {
+      return;
+    }
+    return deletedConversations.length === 1
+      ? deletedConversations[0]?.title
+        ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversations[0]?.title)
+        : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE
+      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(deletedConversations.length);
+  }, [deletedConversations]);
 
   if (!conversationsLoaded) {
     return null;
@@ -260,12 +298,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiSpacer size="xs" />
         <EuiText size="m">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
+        <Toolbar
+          onConversationsBulkDeleted={onBulkDeleteActionClicked}
+          onSelectAll={onSelectAll}
+          handleUnselectAll={handleUnselectAll}
+          selected={deletedConversations}
+          totalConversations={conversationOptions.length}
+        />
         <EuiBasicTable
           items={conversationOptions}
           columns={columns}
           pagination={pagination}
           sorting={sorting}
           onChange={onTableChange}
+          selection={selection}
+          itemId="id"
         />
       </EuiPanel>
       {editFlyoutVisible && (
@@ -301,11 +348,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           )}
         </Flyout>
       )}
-      {deleteConfirmModalVisibility && deletedConversation?.title && (
+      {deleteConfirmModalVisibility && deletedConversations?.length > 0 && (
         <EuiConfirmModal
           aria-labelledby={confirmationTitle}
           title={confirmationTitle}
-          titleProps={{ id: deletedConversation?.id ?? undefined }}
+          titleProps={{ id: deletedConversations.map(({ id }) => id) ?? undefined }}
           onCancel={onDeleteCancelled}
           onConfirm={onDeleteConfirmed}
           cancelButtonText={CANCEL}
