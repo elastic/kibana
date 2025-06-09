@@ -8,14 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DataStreamMigrationStatus,
   DataStreamResolutionType,
@@ -25,61 +18,7 @@ import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useDataStreamMigrationContext } from './context';
 
-const getI18nTexts = (
-  resolutionType?: DataStreamResolutionType,
-  excludedActions: Array<'readOnly' | 'reindex'> = []
-) => {
-  const resolutionAction = excludedActions.includes('readOnly')
-    ? 'reindex'
-    : excludedActions.includes('reindex')
-    ? 'readOnly'
-    : 'readOnlyOrReindex';
-
-  const resolutionTexts = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyOrReindexLabel',
-      {
-        defaultMessage: 'Mark as read-only, or reindex',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReadOnlyLabel',
-      {
-        defaultMessage: 'Mark as read-only',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionReindexLabel',
-      {
-        defaultMessage: 'Reindex',
-      }
-    ),
-  };
-
-  const resolutionTooltipLabels = {
-    readOnlyOrReindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyOrReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream or marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    readOnly: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReadOnlyLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by marking its indices as read-only. This issue can be resolved automatically.',
-      }
-    ),
-    reindex: i18n.translate(
-      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipReindexLabel',
-      {
-        defaultMessage:
-          'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
-      }
-    ),
-  };
-
+const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
   return {
     loadingStatusText: i18n.translate(
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLoadingStatusText',
@@ -127,19 +66,14 @@ const getI18nTexts = (
         values: { resolutionType },
       }
     ),
-    resolutionText: resolutionTexts[resolutionAction],
-    resolutionTooltipLabel: resolutionTooltipLabels[resolutionAction],
   };
 };
 
 export const DataStreamReindexResolutionCell: React.FunctionComponent<{
   correctiveAction: DataStreamsAction;
-}> = ({ correctiveAction }) => {
+}> = () => {
   const { migrationState } = useDataStreamMigrationContext();
-  const i18nTexts = getI18nTexts(
-    migrationState.resolutionType,
-    correctiveAction.metadata.excludedActions
-  );
+  const i18nTexts = getI18nTexts(migrationState.resolutionType);
 
   if (migrationState.loadingState === LoadingState.Loading) {
     return (
@@ -206,17 +140,6 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
         </EuiFlexGroup>
       );
     default:
-      return (
-        <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      );
+      return <></>;
   }
 };

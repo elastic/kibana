@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
@@ -17,6 +17,7 @@ interface Props {
   resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
+  actionsTableCell?: React.ReactNode;
 }
 
 const i18nTexts = {
@@ -38,6 +39,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   resolutionTableCell,
   fieldName,
   deprecation,
+  actionsTableCell,
 }) => {
   // "Status column"
   if (fieldName === 'level') {
@@ -46,11 +48,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
 
   // "Issue" column
   if (fieldName === 'message') {
-    return (
-      <EuiLink data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}>
-        {deprecation.message}
-      </EuiLink>
-    );
+    return <>{deprecation.message}</>;
   }
 
   // "Type" column
@@ -71,6 +69,14 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
         </EuiText>
       </EuiToolTip>
     );
+  }
+
+  // "Actions column"
+  if (fieldName === 'actions') {
+    if (actionsTableCell) {
+      return <>{actionsTableCell}</>;
+    }
+    return <></>;
   }
 
   // Default behavior: render value or empty string if undefined
