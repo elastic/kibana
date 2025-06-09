@@ -1327,6 +1327,21 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.REPORTING_REDIRECT_APP",
         "type": "string",
         "tags": [],
