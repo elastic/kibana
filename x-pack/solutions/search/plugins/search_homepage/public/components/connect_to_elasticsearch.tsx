@@ -132,15 +132,43 @@ export const ConnectToElasticsearch = () => {
                 footer={<EuiButton />}
               />
             </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner color="subdued">
-              <EuiText>
-                <p>Middle panel</p>
-              </EuiText>
+            <EuiSplitPanel.Inner>
+              <EuiCard
+                textAlign="left"
+                titleSize="xs"
+                title={
+                  <FormattedMessage
+                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileTitle"
+                    defaultMessage="Upload a file"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
+                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+                  />
+                }
+                footer={<EuiButton />}
+              />
             </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner color="danger">
-              <EuiText>
-                <p>Danger panel</p>
-              </EuiText>
+            <EuiSplitPanel.Inner>
+              <EuiCard
+                textAlign="left"
+                titleSize="xs"
+                title={
+                  <FormattedMessage
+                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileTitle"
+                    defaultMessage="Upload a file"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
+                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+                  />
+                }
+                footer={<EuiButton />}
+              />
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
