@@ -107,7 +107,6 @@
     "@kbn/unified-histogram",
     "@kbn/cases-plugin",
     "@kbn/alerts-ui-shared",
-    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }
