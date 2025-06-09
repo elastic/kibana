@@ -85,6 +85,7 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
     disabledRuleTypes: true,
+    enabledRuleTypes: true,
     rulesSettings: { enabled: true },
     maintenanceWindow: { enabled: true },
   },

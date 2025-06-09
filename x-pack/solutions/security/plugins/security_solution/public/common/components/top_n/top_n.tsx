@@ -9,7 +9,8 @@ import { EuiButtonIcon, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
@@ -51,7 +52,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  indexPattern: DataViewBase;
+  dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -69,7 +70,7 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
-  indexPattern,
+  dataViewSpec,
   options,
   paddingSize,
   query,
@@ -122,7 +123,7 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
-            indexPattern={indexPattern}
+            dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}

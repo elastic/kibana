@@ -73,6 +73,7 @@ describe('AdditionalToolbarControls', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
+      sourcererDataView: {},
     });
   });
 

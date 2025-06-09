@@ -35,6 +35,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
     ],
     complete: [
       ProductFeatureKey.detections,
@@ -42,6 +43,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.attackDiscovery,
