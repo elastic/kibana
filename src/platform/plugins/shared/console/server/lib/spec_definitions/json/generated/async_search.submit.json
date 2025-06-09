@@ -10,11 +10,7 @@
         "-1",
         "0"
       ],
-      "keep_alive": [
-        "5d",
-        "-1",
-        "0"
-      ],
+      "keep_alive": [],
       "keep_on_completion": "__flag__",
       "allow_no_indices": "__flag__",
       "allow_partial_search_results": "__flag__",
