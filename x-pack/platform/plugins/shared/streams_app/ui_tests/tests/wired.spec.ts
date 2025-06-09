@@ -74,7 +74,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
       .getByRole('row', { name: 'attributes.custom_field' })
       .getByTestId('streamsAppActionsButton');
 
-    // await actionsButtons.focus();
+    await actionsButtons.focus();
     await actionsButtons.click();
 
     await expect(
