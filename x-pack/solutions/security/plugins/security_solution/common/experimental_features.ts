@@ -268,6 +268,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Automatically installs the security AI prompts package
    */
   securityAIPromptsEnabled: false,
+
+  /**
+   * Enables advanced mode for Trusted Apps creation and update
+   */
+  trustedAppsAdvancedMode: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
