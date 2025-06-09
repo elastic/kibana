@@ -982,9 +982,7 @@
             "signature": [
               "((callbacks?: Deps | undefined) => ",
               "languages",
-              ".HoverProvider<",
-              "languages",
-              ".Hover>) | undefined"
+              ".HoverProvider) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/types.ts",
             "deprecated": false,
@@ -2406,9 +2404,7 @@
               },
               " | undefined) => ",
               "languages",
-              ".HoverProvider<",
-              "languages",
-              ".Hover>"
+              ".HoverProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
             "deprecated": false,
