@@ -1,0 +1,992 @@
+---
+# This file is used to generate the "General settings in Kibana" page in the product docs
+
+product: Kibana
+collection: General settings in Kibana
+id: general-settings-kb
+page_description: |
+  Use these settings to configure general features available in Kibana.
+note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
+
+groups:
+  - group: General settings
+    id: general-kibana-settings
+    # description: |
+    # example: |
+    settings:
+
+      - setting: console.ui.enabled
+        # id:
+        description: |
+          Toggling this causes the server to regenerate assets on the next startup, which may cause a delay before pages start being served. Set to `false` to disable Console.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: console.ui.enabled
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `script-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: console.ui.enabled
+        # id:
+        description: |
+          Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive.
+
+          When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library. Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates, please set this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
+        state: deprecated
+        deprecation_details: "Deprecated in 8.7.0. Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. This config option will have no effect in a future version."
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.worker_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `worker-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.style_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `style-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.connect_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.default_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `default-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.font_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `font-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.frame_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `frame-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.img_src
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.frame_ancestors
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `frame-ancestors` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        note: "The `frame-ancestors` directive can also be configured by using [`server.securityResponseHeaders.disableEmbedding`](#server-securityResponseHeaders-disableEmbedding). In that case, that takes precedence and any values in `csp.frame_ancestors` are ignored."
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.report_only.form_action
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.report_uri
+        # id:
+        description: |
+          Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.strict
+        id: csp-strict
+        description: |
+          Blocks {{kib}} access to any browser that does not enforce even rudimentary CSP rules. In practice, this disables support for older, less safe browsers like Internet Explorer.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: csp.warnLegacyBrowsers
+        # id:
+        description: |
+          Shows a warning message after loading {{kib}} to any browser that does not enforce even rudimentary CSP rules, though {{kib}} is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: data.autocomplete.valueSuggestions.terminateAfter
+        # id:
+        description: |
+          Specifies the max number of documents loaded by each shard to generate autocomplete suggestions. Allowed values are between 1 and 10000000.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 100000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: data.autocomplete.valueSuggestions.timeout
+        # id:
+        description: |
+          Specifies the time in milliseconds to wait for autocomplete suggestions from Elasticsearch. Allowed values are between 1 and 1200000.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 1000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: elasticsearch.maxSockets
+        id: elasticsearch-maxSockets
+        description: |
+          The maximum number of sockets that can be used for communications with {{es}}. This setting is available in {{ecloud}} 8.2.0 and later versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: Infinity
+        # options: 
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: elasticsearch.maxResponseSize
+        id: elasticsearch-maxResponseSize
+        description: |
+          Either `false` or a `byteSize` value. When set, responses from {{es}} with a size higher than the defined limit will be rejected. This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {{es}}.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.maxIdleSockets
+        id: elasticsearch-maxIdleSockets
+        description: |
+          The maximum number of idle sockets to keep open between {{kib}} and {{es}}. If more sockets become idle, they will be closed.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 256
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.idleSocketTimeout
+        id: elasticsearch-idleSocketTimeout
+        description: |
+          The timeout for idle sockets kept open between {{kib}} and {{es}}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {{kib}} and {{es}} be sure to set this value lower than or equal to the proxy's timeout.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 60s
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.customHeaders
+        # id:
+        description: |
+          Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: '{}'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.hosts
+        id: elasticsearch-hosts
+        description: |
+          The URLs of the {{es}} instances to use for all your queries. All nodes listed here must be on the same cluster.
+
+          To enable SSL/TLS for outbound connections to {{es}}, use the `https` protocol in this setting.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: '[ "http://localhost:9200" ]'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.publicBaseUrl
+        id: elasticsearch-publicBaseUrl
+        description: |
+          The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.pingTimeout
+        id: elasticsearch-pingTimeout
+        description: |
+          Time in milliseconds to wait for {{es}} to respond to pings.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: The value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.requestHeadersWhitelist
+        id: elasticsearch-requestHeadersWhitelist
+        description: |
+          List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#basic-authentication) in {{kib}}.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: "[ 'authorization', 'es-client-authentication' ]"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.requestTimeout
+        id: elasticsearch-requestTimeout
+        description: |
+          Time in milliseconds to wait for responses from the back end or {{es}}. This value must be a positive integer.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 30000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.shardTimeout
+        # id:
+        description: |
+          Time in milliseconds for {{es}} to wait for responses from shards. Set to 0 to disable.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 30000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.compression
+        # id:
+        description: |
+          Specifies whether {{kib}} should use compression for communications with {{es}}. This setting is available in {{ecloud}} 8.3.0 and later versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: elasticsearch.sniffInterval
+        # id:
+        description: |
+          Time in milliseconds between requests to check {{es}} for an updated list of nodes.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.sniffOnStart
+        # id:
+        description: |
+          Attempt to find other {{es}} nodes on startup.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.sniffOnConnectionFault
+        # id:
+        description: |
+          Update the list of {{es}} nodes immediately following a connection fault.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.alwaysPresentCertificate
+        id: elasticsearch-ssl-alwaysPresentCertificate
+        description: |
+          Controls {{kib}} behavior in regard to presenting a client certificate when requested by {{es}}. This setting applies to all outbound SSL/TLS connections to {{es}}, including requests that are proxied for end users.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "When {{es}} uses certificates to authenticate end users with a PKI realm and [`elasticsearch.ssl.alwaysPresentCertificate`](#elasticsearch-ssl-alwaysPresentCertificate) is `true`, proxied requests may be executed as the identity that is tied to the {{kib}} server."
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.certificate
+        id: elasticsearch-ssl-certificate
+        description: |
+          Use with [`elasticsearch.ssl.key`](#elasticsearch-ssl-cert-key). Paths to a PEM-encoded X.509 client certificate and its corresponding private key. These are used by {{kib}} to authenticate itself when making outbound SSL/TLS connections to {{es}}. For these settings to take effect, the `xpack.security.http.ssl.client_authentication` setting in {{es}} must be also be set to `"required"` or `"optional"` to request a client certificate from {{kib}}.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        note: "These settings cannot be used in conjunction with [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path)."
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.key
+        id: elasticsearch-ssl-cert-key
+        description: |
+          Use with [`elasticsearch.ssl.certificate`](#elasticsearch-ssl-certificate). Paths to a PEM-encoded X.509 client certificate and its corresponding private key. These are used by {{kib}} to authenticate itself when making outbound SSL/TLS connections to {{es}}. For these settings to take effect, the `xpack.security.http.ssl.client_authentication` setting in {{es}} must be also be set to `"required"` or `"optional"` to request a client certificate from {{kib}}.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        note: "These settings cannot be used in conjunction with [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path)."
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.certificateAuthorities
+        id: elasticsearch-ssl-certificateAuthorities
+        description: |
+          Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates, which make up a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}.
+
+          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.keyPassphrase
+        # id:
+        description: |
+          The password that decrypts the private key that is specified via [`elasticsearch.ssl.key`](#elasticsearch-ssl-cert-key). This value is optional, as the key may not be encrypted.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.keystore.path
+        id: elasticsearch-ssl-keystore-path
+        description: |
+          Path to a PKCS#12 keystore that contains an X.509 client certificate and it’s corresponding private key. These are used by {{kib}} to authenticate itself when making outbound SSL/TLS connections to {{es}}. For this setting, you must also set the `xpack.security.http.ssl.client_authentication` setting in {{es}} to `"required"` or `"optional"` to request a client certificate from {{kib}}.
+
+          If the keystore contains any additional certificates, they are used as a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}. In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        note: "This setting cannot be used in conjunction with [`elasticsearch.ssl.certificate`](#elasticsearch-ssl-cert-key) or [`elasticsearch.ssl.key`](#elasticsearch-ssl-cert-key)."
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.keystore.password
+        # id:
+        description: |
+          The password that decrypts the keystore specified via [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path). If the keystore has no password, leave this as blank. If the keystore has an empty password, set this to `""`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.truststore.path
+        id: elasticsearch-ssl-truststore-path
+        description: |
+          Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates, which make up a trusted certificate chain for {{es}}. This chain is used by {{kib}} to establish trust when making outbound SSL/TLS connections to {{es}}.
+
+          In addition to this setting, trusted certificates may be specified via [`elasticsearch.ssl.certificateAuthorities`](#elasticsearch-ssl-certificateAuthorities) and/or [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.truststore.password
+        # id:
+        description: |
+          The password that decrypts the trust store specified via [`elasticsearch.ssl.truststore.path`](#elasticsearch-ssl-truststore-path). If the trust store has no password, leave this as blank. If the trust store has an empty password, set this to `""`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.ssl.verificationMode
+        id: elasticsearch-ssl-verificationMode
+        description: |
+          Controls the verification of the server certificate that {{kib}} receives when making an outbound SSL/TLS connection to {{es}}. Valid values are `"full"`, `"certificate"`, and `"none"`. Using `"full"` performs hostname verification, using `"certificate"` skips hostname verification, and using `"none"` skips verification entirely.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: full
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.password
+        id: elasticsearch-user-passwd
+        description: |
+          Use with [`elasticsearch.username`](#elasticsearch-user-username). If your {{es}} is protected with basic authentication, these settings provide the username and password that the {{kib}} server uses to perform maintenance on the {{kib}} index at startup. {{kib}} users still need to authenticate with {{es}}, which is proxied through the {{kib}} server.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: full
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.username
+        id: elasticsearch-user-username
+        description: |
+          Use with [`elasticsearch.password`](#elasticsearch-user-passwd). If your {{es}} is protected with basic authentication, these settings provide the username and password that the {{kib}} server uses to perform maintenance on the {{kib}} index at startup. {{kib}} users still need to authenticate with {{es}}, which is proxied through the {{kib}} server.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: full
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: elasticsearch.serviceAccountToken
+        id: elasticsearch-service-account-token$
+        description: |
+          If your {{es}} is protected with basic authentication, this token provides the credentials that the {{kib}} server uses to perform maintenance on the {{kib}} index at startup. This setting is an alternative to `elasticsearch.username` and `elasticsearch.password`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
