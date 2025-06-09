@@ -1079,7 +1079,7 @@
       "managed": {
         "type": "boolean"
       },
-        "matchers": {
+      "matchers": {
         "dynamic": false,
         "type": "object"
       },
@@ -3216,6 +3216,23 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:reference-data": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "type": "object"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
