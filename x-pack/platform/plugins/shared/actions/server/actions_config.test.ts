@@ -571,3 +571,45 @@ describe('getMaxQueued()', () => {
     expect(max).toEqual(1000000);
   });
 });
+
+describe('getWebhookSettings', () => {
+  test('returns the webhook settings from config', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: true,
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: true,
+      },
+    });
+  });
+
+  test('returns the webhook settings from config when pfx is false', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: false,
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: false,
+      },
+    });
+  });
+
+  test('returns undefined when no webhook settings are defined', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({ ssl: { pfx: true } });
+  });
+});

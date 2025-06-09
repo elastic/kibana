@@ -26,6 +26,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
+import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
   ActionParamsType,
@@ -123,6 +124,17 @@ function validateConnectorTypeConfig(
           'error configuring webhook action: authType must be null or undefined if hasAuth is false',
       })
     );
+  }
+
+  if (configObject.certType === SSLCertType.PFX) {
+    const webhookSettings = configurationUtilities.getWebhookSettings();
+    if (!webhookSettings.ssl.pfx) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
+          defaultMessage: `error configuring webhook action: certType ${SSLCertType.PFX} is disabled`,
+        })
+      );
+    }
   }
 }
 

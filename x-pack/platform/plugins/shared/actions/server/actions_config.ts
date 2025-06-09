@@ -55,6 +55,11 @@ export interface ActionsConfigurationUtilities {
   ): string | undefined;
   enableFooterInEmail: () => boolean;
   getMaxQueued: () => number;
+  getWebhookSettings(): {
+    ssl: {
+      pfx: boolean;
+    };
+  };
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -225,5 +230,12 @@ export function getActionsConfigurationUtilities(
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
+    getWebhookSettings: () => {
+      return {
+        ssl: {
+          pfx: config.webhook?.ssl.pfx ?? true,
+        },
+      };
+    },
   };
 }

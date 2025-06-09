@@ -298,6 +298,24 @@ describe('config validation', () => {
       `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
     );
   });
+
+  test('config validation fails when using disabled pfx certType', () => {
+    const config: Record<string, string | boolean> = {
+      url: 'https://mylisteningserver:9200/endpoint',
+      method: WebhookMethods.POST,
+      authType: AuthType.SSL,
+      certType: SSLCertType.PFX,
+      hasAuth: true,
+    };
+    configurationUtilities.getWebhookSettings = jest.fn(() => ({
+      ssl: { pfx: false },
+    }));
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error configuring webhook action: certType ssl-pfx is disabled"`
+    );
+  });
 });
 
 describe('params validation', () => {
