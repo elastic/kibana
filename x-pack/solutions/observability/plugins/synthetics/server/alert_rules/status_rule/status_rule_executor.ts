@@ -305,11 +305,6 @@ export class StatusRuleExecutor {
         statusConfig,
       });
 
-      if (!monitorSummary) {
-        this.logger.error(`Monitor summary is not available for pending monitor alert`);
-        return;
-      }
-
       this.scheduleAlert({
         idWithLocation,
         alertId,
@@ -333,10 +328,6 @@ export class StatusRuleExecutor {
       const monitorSummary = this.getUngroupedPendingSummary({
         statusConfigs: configs,
       });
-      if (!monitorSummary) {
-        this.logger.error(`Monitor summary is not available for pending monitor alert`);
-        return;
-      }
       this.scheduleAlert({
         idWithLocation: configId,
         alertId,
