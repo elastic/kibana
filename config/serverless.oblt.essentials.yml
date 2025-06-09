@@ -4,10 +4,9 @@
 xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.apm.enabled: false
-uiSettings.overrides.defaultRoute: /app/observability/overview
+uiSettings.overrides.defaultRoute: /app/discover
 
 xpack.legacy_uptime.enabled: false
-# xpack.uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
 

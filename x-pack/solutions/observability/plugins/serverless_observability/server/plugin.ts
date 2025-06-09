@@ -26,8 +26,19 @@ export class ServerlessObservabilityPlugin
 {
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
+  public setup(
+    _coreSetup: CoreSetup<StartDependencies, ServerlessObservabilityPluginStart>,
+    pluginsSetup: SetupDependencies
+  ) {
     pluginsSetup.serverless.setupProjectSettings(OBSERVABILITY_PROJECT_SETTINGS);
+    _coreSetup.pricing.registerProductFeatures([
+      {
+        id: 'observability:complete_overview',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description:
+          'Observability Overview Complete - Enables overview of the Observability solution.',
+      },
+    ]);
     return {};
   }
 
