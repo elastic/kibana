@@ -246,7 +246,7 @@ export const IndexPatternTable = ({
               <>
                 &nbsp;
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   color="text"
                   aria-label={dataView.title}
                   content={dataView.title}

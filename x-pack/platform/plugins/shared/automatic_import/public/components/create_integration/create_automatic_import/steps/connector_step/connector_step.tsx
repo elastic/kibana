@@ -122,7 +122,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
         <EuiText size="s" color="subdued">
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
             <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
-              <EuiIcon type="iInCircle" />
+              <EuiIcon type="info" />
             </EuiFlexItem>
             <EuiFlexItem>{i18n.SUPPORTED_MODELS_INFO}</EuiFlexItem>
           </EuiFlexGroup>

@@ -50,7 +50,7 @@ const FollowerIndexCallout = () => (
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj="followerIndexCallout"
     >
       <p>

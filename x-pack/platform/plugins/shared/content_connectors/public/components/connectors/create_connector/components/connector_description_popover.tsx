@@ -108,7 +108,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             defaultMessage: 'More information',
           })}
           data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
-          iconType="iInCircle"
+          iconType="info"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }

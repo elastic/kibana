@@ -16,7 +16,7 @@ export const DeprecatedPrompt = () => {
       <EuiEmptyPrompt
         color="primary"
         data-test-subj="jobListDeprecatedPrompt"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <h1>
             <FormattedMessage

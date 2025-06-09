@@ -402,7 +402,7 @@ export const getDatasetQualityTableColumns = ({
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
                     <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                      <EuiIcon tabIndex={0} type="info" size="s" />
                     </EuiToolTip>
                   </EuiFlexGroup>
                 ) : (

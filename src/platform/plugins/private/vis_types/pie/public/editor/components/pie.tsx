@@ -204,7 +204,7 @@ const PieOptions = (props: PieOptionsProps) => {
                   <EuiIconTip
                     content="Use with multi-layer chart or multiple charts."
                     position="top"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </EuiFlexItem>

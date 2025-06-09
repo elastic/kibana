@@ -30,7 +30,7 @@ export const ContentEditorActivityRow: FC<{
             defaultMessage="Activity"
           />{' '}
           <EuiIconTip
-            type={'iInCircle'}
+            type={'info'}
             iconProps={{ style: { verticalAlign: 'bottom' } }}
             content={
               <FormattedMessage

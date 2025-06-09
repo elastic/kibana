@@ -146,7 +146,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
-              iconType="iInCircle"
+              iconType="info"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"

@@ -190,7 +190,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiCallOut
               size="s"
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"

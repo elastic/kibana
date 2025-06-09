@@ -299,7 +299,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       isInvalid={sampleFileError != null}
     >
       <>
-        <EuiCallOut iconType="iInCircle" color="warning">
+        <EuiCallOut iconType="info" color="warning">
           {i18n.LOGS_SAMPLE_WARNING}
         </EuiCallOut>
         <EuiSpacer size="s" />

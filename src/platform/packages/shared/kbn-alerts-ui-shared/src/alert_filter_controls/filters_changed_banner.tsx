@@ -33,7 +33,7 @@ export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
         <EuiCallOut
           data-test-subj={TEST_IDS.FILTERS_CHANGED_BANNER}
           title={FILTER_GROUP_BANNER_TITLE}
-          iconType="iInCircle"
+          iconType="info"
         >
           <p>{FILTER_GROUP_BANNER_MESSAGE}</p>
           <EuiButton
