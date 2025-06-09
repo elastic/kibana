@@ -19,7 +19,6 @@
     "@kbn/actions-plugin",
     "@kbn/config-schema",
     "@kbn/inference-plugin",
-    "@kbn/utility-types",
     "@kbn/onechat-server",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",

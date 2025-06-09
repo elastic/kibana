@@ -82,6 +82,7 @@ export class OnechatPlugin
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
+        registerProvider: serviceSetups.tools.registerProvider.bind(serviceSetups.tools),
       },
     };
   }
