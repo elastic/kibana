@@ -31,6 +31,7 @@ import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
@@ -72,7 +73,6 @@ import { SetupTechnologySelector } from './setup_technology_selector/setup_techn
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -688,7 +688,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const isParentSecurityPosture = !integrationParam;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const { cloud } = useKibana().services;
+    const { cloud, uiSettings } = useKibana().services;
+    const cloudConnectorsEnabled =
+      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
@@ -753,14 +756,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       [onChange, isValid]
     );
 
-    const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
-
     const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
       input,
       cloud,
       packageInfo,
     });
-
     const showCloudConnectors =
       cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
@@ -773,15 +773,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          inputType === CLOUDBEAT_AWS && isAgentlessAvailable
-            ? SetupTechnology.AGENTLESS
-            : SetupTechnology.AGENT_BASED,
+          setupTechnology,
           showCloudConnectors
         );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [packageInfo, newPolicy, updatePolicy, isAgentlessAvailable, showCloudConnectors]
+      [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object

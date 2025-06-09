@@ -84,6 +84,7 @@ export const openImageEditor = async ({
         paddingSize: 'm',
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',
+        'aria-labelledby': 'image-editor-flyout-title',
       }
     );
 

@@ -34,6 +34,7 @@ export interface SyncIntegrationsData {
     name: string;
     hosts: string[];
     sync_integrations: boolean;
+    sync_uninstalled_integrations?: boolean;
   }>;
   integrations: IntegrationsData[];
   custom_assets: {

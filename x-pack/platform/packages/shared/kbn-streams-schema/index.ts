@@ -36,6 +36,8 @@ export {
   type DissectProcessorDefinition,
   type GrokProcessorConfig,
   type GrokProcessorDefinition,
+  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
+  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
   getProcessorConfig,
   getProcessorType,
   processorWithIdDefinitionSchema,
@@ -47,8 +49,16 @@ export { type RoutingDefinition, routingDefinitionListSchema } from './src/model
 export { type ContentPack, contentPackSchema } from './src/content';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export {
+  keepFields,
+  namespacePrefixes,
+  isNamespacedEcsField,
+  getRegularEcsField,
+} from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+
+export * from './src/ingest_pipeline_processors';
 
 export {
   type SampleDocument,
@@ -73,6 +83,7 @@ export {
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
+  type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
@@ -119,5 +130,10 @@ export {
   conditionSchema,
   isCondition,
 } from './src/conditions';
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+} from './src/api/significant_events';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
