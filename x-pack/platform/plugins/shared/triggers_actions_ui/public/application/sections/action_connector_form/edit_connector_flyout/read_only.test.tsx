@@ -11,16 +11,13 @@ import { render } from '@testing-library/react';
 import { ReadOnlyConnectorMessage } from './read_only';
 import { ActionTypeModel } from '../../../..';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { useKibana } from '../../../..';
 
 jest.mock('../../../..', () => {
   const original = jest.requireActual('../../../..');
   return {
     ...original,
-    useKibana: jest.fn(() => ({
-      services: {
-        docLinks: docLinksServiceMock.createStartContract(),
-      },
-    })),
+    useKibana: jest.fn(),
   };
 });
 
@@ -28,6 +25,13 @@ const ExtraComponent = jest.fn(() => (
   <div>Extra Component</div>
 )) as unknown as ActionTypeModel['actionReadOnlyExtraComponent'];
 describe('ReadOnlyConnectorMessage', () => {
+  beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        docLinks: docLinksServiceMock.createStartContract(),
+      },
+    });
+  });
   it('should render a readonly message with a link to the provided href', () => {
     const { getByTestId, getByText, queryByText } = render(
       <ReadOnlyConnectorMessage
