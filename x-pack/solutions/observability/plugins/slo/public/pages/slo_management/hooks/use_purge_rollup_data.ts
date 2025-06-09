@@ -22,7 +22,7 @@ export function usePurgeRollupData({ name, onConfirm }: { name: string; onConfir
   const { sloClient } = usePluginContext();
 
   return useMutation<BulkPurgeRollupResponse, ServerError, BulkPurgeRollupInput>(
-    ['bulkPurgeRollupData'],
+    ['purgeRollupData'],
     ({ purgePolicy, force, list }) => {
       return sloClient.fetch('POST /api/observability/slos/_bulk_purge_rollup 2023-10-31', {
         params: {
@@ -38,7 +38,7 @@ export function usePurgeRollupData({ name, onConfirm }: { name: string; onConfir
       onError: (error) => {
         let errorMessage = error.body?.message ?? error.message;
         if (errorMessage.includes('At least one SLO')) {
-          errorMessage = i18n.translate('xpack.slo.purge.successNotification', {
+          errorMessage = i18n.translate('xpack.slo.purge.requestErrorNotification', {
             defaultMessage:
               'The provided purge policy is invalid. {name} has a time window that is longer than the provided purge policy.',
             values: { name },

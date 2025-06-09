@@ -148,7 +148,7 @@ export function SloManagementTable() {
       description: i18n.translate('xpack.slo.item.actions.purge', {
         defaultMessage: 'Purge',
       }),
-      'data-test-subj': 'sloActionsDelete',
+      'data-test-subj': 'sloActionsPurge',
       enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
     },
