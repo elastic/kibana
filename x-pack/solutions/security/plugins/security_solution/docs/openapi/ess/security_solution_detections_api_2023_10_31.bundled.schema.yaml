@@ -4478,35 +4478,11 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
         - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
-    BulkActionEditPayloadAddSetAlertSuppression:
-      type: object
-      properties:
-        type:
-          enum:
-            - add_alert_suppression
-            - set_alert_suppression
-          type: string
-        value:
-          type: object
-          properties:
-            duration:
-              $ref: '#/components/schemas/AlertSuppressionDuration'
-              nullable: true
-            group_by:
-              items:
-                type: string
-              maxItems: 3
-              type: array
-            missing_fields_strategy:
-              $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
-      required:
-        - type
-        - value
     BulkActionEditPayloadAlertSuppression:
       anyOf:
-        - $ref: '#/components/schemas/BulkActionEditPayloadAddSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold
         - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
     BulkActionEditPayloadDeleteAlertSuppression:
       type: object
@@ -4515,23 +4491,8 @@ components:
           enum:
             - delete_alert_suppression
           type: string
-        value:
-          type: object
-          properties:
-            duration:
-              $ref: '#/components/schemas/AlertSuppressionDuration'
-              nullable: true
-            group_by:
-              items:
-                type: string
-              type: array
-            missing_fields_strategy:
-              $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
       required:
         - type
-        - value
     BulkActionEditPayloadIndexPatterns:
       description: >
         Edits index patterns of rulesClient.
@@ -4670,6 +4631,30 @@ components:
       required:
         - type
         - value
+    BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression
+          type: string
+        value:
+          $ref: '#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+    BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression_for_threshold
+          type: string
+        value:
+          $ref: '#/components/schemas/ThresholdAlertSuppression'
+      required:
+        - type
+        - value
     BulkActionEditPayloadTags:
       description: >
         Edits tags of rules.
@@ -4731,6 +4716,8 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION
       type: string
     BulkActionSkipResult:
       type: object
