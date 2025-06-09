@@ -36,6 +36,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               {
                 link: 'discover',
               },
+              { link: 'onechat' },
               {
                 link: 'dashboards',
                 getIsActive: ({ pathNameSerialized, prepend }) => {
