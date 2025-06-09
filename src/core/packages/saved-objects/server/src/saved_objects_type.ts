@@ -258,7 +258,7 @@ export interface SavedObjectsType<Attributes = any> {
    * - `accessMode`: Optional access mode setting, currently supporting 'read_only'
    *
    * This property works in conjunction with the SavedObjectAccessControl interface defined
-   * in server_types.ts and is respected by the serializer when processing saved objects.
+   * in server_types.ts.
    */
   supportsAccessControl?: boolean;
 }
