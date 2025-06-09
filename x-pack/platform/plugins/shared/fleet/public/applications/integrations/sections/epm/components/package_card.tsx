@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -76,6 +77,7 @@ export function PackageCard({
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
   titleLineClamp,
+  titleBadge,
   descriptionLineClamp,
   maxCardHeight,
   minCardHeight,
@@ -231,6 +233,7 @@ export function PackageCard({
             }
 
             [class*='euiCard__titleButton'] {
+              width: 100%;
               ${getLineClampStyles(titleLineClamp)}
             }
 
@@ -240,7 +243,7 @@ export function PackageCard({
           isquickstart={isQuickstart}
           betaBadgeProps={quickstartBadge(isQuickstart)}
           layout="horizontal"
-          title={title || ''}
+          title={<CardTitle title={title} titleBadge={titleBadge} />}
           titleSize="xs"
           description={showDescription ? description : ''}
           hasBorder
@@ -276,6 +279,30 @@ export function PackageCard({
     </WithGuidedOnboardingTour>
   );
 }
+
+const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
+  ({ title, titleBadge }) => {
+    if (!titleBadge) {
+      return title;
+    }
+    return (
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
   return isQuickstart

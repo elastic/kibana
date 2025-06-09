@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { mockReportLinkClick } from './__mocks__/mocks';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
+import type { IntegrationTabId, Tab } from '../types';
 
 jest.mock('./integration_context');
 
@@ -19,6 +20,14 @@ jest.mock('../../kibana', () => ({
     getAppUrl: jest.fn().mockReturnValue(''),
   }),
 }));
+
+const selectedTab: Tab = {
+  id: 'test' as IntegrationTabId,
+  label: 'Test Tab',
+  category: 'test',
+  sortByFeaturedIntegrations: false,
+  featuredCardIds: [],
+};
 
 describe('useIntegrationCardList', () => {
   const mockIntegrationsList = [
@@ -36,7 +45,7 @@ describe('useIntegrationCardList', () => {
       descriptionLineClamp: 3,
       showInstallationStatus: true,
       title: 'Security Integration',
-      url: '/app/integrations/security',
+      url: '/app/integrations/security?returnAppId=securitySolutionUI&returnPath=%2Fget_started',
       version: '1.0.0',
     },
     {
@@ -53,7 +62,7 @@ describe('useIntegrationCardList', () => {
       descriptionLineClamp: 3,
       showInstallationStatus: true,
       title: 'Security Integration',
-      url: '/app/integrations/security',
+      url: '/app/integrations/security?returnAppId=securitySolutionUI&returnPath=%2Fget_started',
       version: '1.0.0',
     },
   ];
@@ -88,6 +97,7 @@ describe('useIntegrationCardList', () => {
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
+        selectedTab,
       })
     );
 
@@ -95,13 +105,11 @@ describe('useIntegrationCardList', () => {
   });
 
   it('returns featured cards when featuredCardIds are provided', () => {
-    const featuredCardIds = ['epr:endpoint'];
-
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
-        featuredCardIds,
+        selectedTab: { ...selectedTab, featuredCardIds: ['epr:endpoint'] },
       })
     );
 
@@ -113,6 +121,7 @@ describe('useIntegrationCardList', () => {
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         activeIntegrations: mockActiveIntegrations,
+        selectedTab,
       })
     );
 
