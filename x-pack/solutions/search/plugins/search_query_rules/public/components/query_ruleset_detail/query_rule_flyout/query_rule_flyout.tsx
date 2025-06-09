@@ -23,6 +23,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -33,12 +34,14 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
 import { DocumentSelector } from './document_selector/document_selector';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface QueryRuleFlyoutProps {
   rules: SearchQueryRulesQueryRule[];
@@ -57,6 +60,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   rulesetId,
   setIsFormDirty,
 }) => {
+  const {
+    services: { application },
+  } = useKibana();
   const [isFlyoutDirty, setIsFlyoutDirty] = useState<boolean>(false);
   const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
   const { fields, remove, replace, update, append } = useFieldArray({
@@ -286,7 +292,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiHorizontalRule margin="m" />
-
               <EuiText size="s">
                 <b>
                   <FormattedMessage
@@ -301,6 +306,31 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   />
                 </b>
               </EuiText>
+              <EuiSpacer size="s" />
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
+                  defaultMessage="Find your documents IDs into "
+                />
+                <EuiLink
+                  data-test-subj="searchQueryRulesQueryRuleFlyoutLink"
+                  external
+                  href="#" // Removing href hides the external link icon
+                  onClick={(e) => {
+                    e.preventDefault();
+                    application.navigateToApp(DISCOVER_APP_ID, {
+                      openInNewTab: true,
+                    });
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.DiscoverDocumentsLink"
+                    defaultMessage="Discover"
+                  />
+                </EuiLink>
+              </EuiText>
+
+              <EuiSpacer size="m" />
               <EuiFlexItem
                 css={css`
                   background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
