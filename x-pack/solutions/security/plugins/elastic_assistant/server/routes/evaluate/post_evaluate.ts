@@ -163,12 +163,13 @@ export const postEvaluateRoute = (
           // Setup graph params
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
 
           // Create output index for writing results and write current eval as RUNNING
-          await setupEvaluationIndex({ esClient, logger });
+          await setupEvaluationIndex({ esClientInternalUser, logger });
           await createOrUpdateEvaluationResults({
             evaluationResults: [{ id: evaluationId, status: EvaluationStatus.RUNNING }],
-            esClient,
+            esClientInternalUser,
             logger,
           });
 
@@ -236,6 +237,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -280,6 +282,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -514,7 +517,7 @@ export const postEvaluateRoute = (
               .then((output) => {
                 void createOrUpdateEvaluationResults({
                   evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
-                  esClient,
+                  esClientInternalUser,
                   logger,
                 });
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);

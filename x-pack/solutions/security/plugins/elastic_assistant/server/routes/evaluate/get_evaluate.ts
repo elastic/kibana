@@ -46,7 +46,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
       async (context, request, response): Promise<IKibanaResponse<GetEvaluateResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
-        const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
         const logger = assistantContext.logger.get('evaluate');
 
         // Perform license, authenticated user and evaluation FF checks
@@ -65,7 +65,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           logger,
         });
 
-        const results = await getEvaluationResults({ esClient, logger });
+        const results = await getEvaluationResults({ esClientInternalUser, logger });
 
         try {
           return response.ok({

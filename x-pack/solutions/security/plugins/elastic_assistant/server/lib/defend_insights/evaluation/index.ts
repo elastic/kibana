@@ -36,6 +36,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
@@ -51,6 +52,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
@@ -127,7 +129,7 @@ export const evaluateDefendInsights = async ({
 
   await createOrUpdateEvaluationResults({
     evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
-    esClient,
+    esClientInternalUser,
     logger,
   });
 };

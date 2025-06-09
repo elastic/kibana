@@ -68,7 +68,7 @@ export const fetchLangSmithDatasets = async ({
   }
 };
 
-export const EVALUATION_RESULTS_INDEX = '.kibana-elastic-ai-assistant-evaluations-default';
+export const EVALUATION_RESULTS_INDEX = '.kibana_elastic-ai-assistant-evaluations-default';
 export const EVALUATION_RESULTS_ILM_POLICY = 'security-assistant-evaluation-data-policy';
 export const EvaluationStatus = {
   RUNNING: 'running',
@@ -81,20 +81,23 @@ export type EvaluationStatus = (typeof EvaluationStatus)[keyof typeof Evaluation
  * Asynchronously retrieves evaluation results from the Elasticsearch index.
  *
  * @param {Object} params - The function parameters.
- * @param {ElasticsearchClient} params.esClient - The Elasticsearch client used to perform the search query.
+ * @param {ElasticsearchClient} params.esClientInternalUser - The Elasticsearch client used to perform the search query.
  * @param {Logger} params.logger - The logger instance used to log errors if the operation fails.
  * @returns {Promise<Array<{ id: string; status: EvaluationStatus }>>} A promise that resolves to an array of evaluation results,
  *   each containing an `id` and `status`. If an error occurs, an empty array is returned.
  */
 export const getEvaluationResults = async ({
-  esClient,
+  esClientInternalUser,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   logger: Logger;
 }): Promise<Array<{ id: string; status: EvaluationStatus }>> => {
   try {
-    const resp = await esClient.search<{ evaluation_id: string; status: EvaluationStatus }>({
+    const resp = await esClientInternalUser.search<{
+      evaluation_id: string;
+      status: EvaluationStatus;
+    }>({
       index: EVALUATION_RESULTS_INDEX,
       size: 100,
       _source: ['evaluation_id', 'status'],
@@ -119,24 +122,24 @@ export const getEvaluationResults = async ({
  * and index are created if they do not already exist.
  *
  * @param {Object} params - An object containing the necessary dependencies.
- * @param {ElasticsearchClient} params.esClient - The Elasticsearch client used to interact with the Elasticsearch cluster.
+ * @param {ElasticsearchClient} params.esClientInternalUser - The Elasticsearch client used to interact with the Elasticsearch cluster.
  * @param {Logger} params.logger - The logger instance used for logging actions and errors.
  * @returns {Promise<void>} A promise that resolves when the setup process is complete.
  */
 export const setupEvaluationIndex = async ({
-  esClient,
+  esClientInternalUser,
   logger,
 }: {
-  esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   logger: Logger;
 }): Promise<void> => {
   try {
     // Check if ILM policy exists
-    const ilmExists = await esClient.ilm
+    const ilmExists = await esClientInternalUser.ilm
       .getLifecycle({ name: EVALUATION_RESULTS_ILM_POLICY })
       .catch(() => null);
     if (!ilmExists || !ilmExists[EVALUATION_RESULTS_ILM_POLICY]) {
-      await esClient.ilm.putLifecycle({
+      await esClientInternalUser.ilm.putLifecycle({
         name: EVALUATION_RESULTS_ILM_POLICY,
         policy: {
           phases: {
@@ -150,9 +153,11 @@ export const setupEvaluationIndex = async ({
     }
 
     // Check if the index exists
-    const indexExists = await esClient.indices.exists({ index: EVALUATION_RESULTS_INDEX });
+    const indexExists = await esClientInternalUser.indices.exists({
+      index: EVALUATION_RESULTS_INDEX,
+    });
     if (!indexExists) {
-      await esClient.indices.create({
+      await esClientInternalUser.indices.create({
         index: EVALUATION_RESULTS_INDEX,
         settings: {
           'index.lifecycle.name': EVALUATION_RESULTS_ILM_POLICY,
@@ -162,8 +167,8 @@ export const setupEvaluationIndex = async ({
     } else {
       logger.info('Evaluation results index already exists');
     }
-  } catch {
-    logger.error('Error setting up evaluation results index/ILM');
+  } catch (e) {
+    logger.error(`Error setting up evaluation results index/ILM: ${e.message}`);
   }
 };
 
@@ -174,22 +179,22 @@ export const setupEvaluationIndex = async ({
  *
  * @param {Object} params - The function parameters.
  * @param {Array<{ id: string; status: EvaluationStatus }>} params.evaluationResults - Array of evaluation results to index or update.
- * @param {ElasticsearchClient} params.esClient - Elasticsearch client instance for performing index operations.
+ * @param {ElasticsearchClient} params.esClientInternalUser - Elasticsearch client instance for performing index operations.
  * @param {Logger} params.logger - Logger instance for error reporting.
  * @returns {Promise<void>} A promise that resolves when all results have been processed.
  */
 export const createOrUpdateEvaluationResults = async ({
   evaluationResults,
-  esClient,
+  esClientInternalUser,
   logger,
 }: {
   evaluationResults: Array<{ id: string; status: EvaluationStatus }>;
-  esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   logger: Logger;
 }): Promise<void> => {
   for (const result of evaluationResults) {
     try {
-      await esClient.index({
+      await esClientInternalUser.index({
         index: EVALUATION_RESULTS_INDEX,
         id: result.id,
         document: {
