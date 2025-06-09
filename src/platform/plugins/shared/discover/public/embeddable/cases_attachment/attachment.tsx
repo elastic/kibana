@@ -67,7 +67,7 @@ export const generateAttachmentType = (): PersistableStateAttachmentType => ({
     return {
       event: (
         <FormattedMessage
-          id="xpack.discover.cases.eventDescription"
+          id="discover.cases.eventDescription"
           defaultMessage="added a Discover Session"
         />
       ),
