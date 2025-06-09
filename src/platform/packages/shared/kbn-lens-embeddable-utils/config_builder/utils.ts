@@ -378,33 +378,3 @@ export const buildQuery = (
 
   return undefined;
 }
-
-/**
- * Builds a breakdown configuration from the accessor and layer.
- * @param accessor - The accessor string to identify the column.
- * @param layer - The layer containing the columns.
- * @returns The breakdown configuration if available, otherwise undefined.
- */
-export const buildBreakdownConfig = (
-  accessor: string | undefined,
-  layer: FormBasedLayer,
-): LensBreakdownConfig | undefined => {
-  if (!accessor) {
-    return undefined;
-  }
-
-  const column = layer.columns[accessor];
-  if (!column) {
-    return undefined;
-  }
-
-  if ('sourceField' in column && column.sourceField) {
-    return {
-      type: 'topValues',
-      field: column.sourceField,
-      size: column.size || 10, // Default size if not specified
-    };
-  }
-
-  return undefined;
-}

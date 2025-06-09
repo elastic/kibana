@@ -28,6 +28,7 @@ import {
   mapToFormula,
 } from '../utils';
 import {
+  fromBreakdownColumn,
   getBreakdownColumn,
   getFormulaColumn,
   getHistogramColumn,
@@ -114,7 +115,7 @@ function reverseBuildVisualizationState(
   } as LensMetricConfig['dataset'];
 
   const query = buildQuery(visualization.metricAccessor, layer);
-  const breakdown = buildBreakdownConfig(visualization.breakdownByAccessor, layer);
+  const breakdown = visualization.breakdownByAccessor ? fromBreakdownColumn(layer.columns[visualization.breakdownByAccessor]) : undefined ;
   const querySecondaryMetric = buildQuery(visualization.secondaryMetricAccessor, layer);
   const queryMaxValue = buildQuery(visualization.maxAccessor, layer);
   
