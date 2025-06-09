@@ -33,7 +33,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
@@ -150,7 +149,7 @@ interface ExplorerUIProps {
   // TODO Remove
   timeBuckets: TimeBuckets;
   selectedCells: AppStateSelectedCells | undefined | null;
-  swimLaneSeverity?: number;
+  swimLaneSeverity?: SeverityThreshold[];
   noInfluencersConfigured?: boolean;
 }
 
@@ -175,9 +174,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
   timefilter,
   timeBuckets,
   selectedCells,
-  swimLaneSeverity,
   explorerState,
   overallSwimlaneData,
+  swimLaneSeverity,
   noInfluencersConfigured,
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -441,7 +440,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     (hasResults && overallSwimlaneData!.points.some((v) => v.value > 0)) ||
     (tableData && tableData.anomalies?.length > 0);
 
-  const hasActiveFilter = isDefined(swimLaneSeverity);
+  const hasActiveFilter = swimLaneSeverity?.length ?? false;
 
   useEffect(() => {
     if (!noJobsSelected) {
