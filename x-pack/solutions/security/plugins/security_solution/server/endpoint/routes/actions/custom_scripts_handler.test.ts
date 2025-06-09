@@ -67,7 +67,6 @@ describe('custom_scripts_handler', () => {
       'crowdstrike',
       expect.objectContaining({
         esClient: expect.anything(),
-        spaceId: expect.anything(),
         endpointService: expect.anything(),
         username: expect.any(String),
         connectorActions: expect.anything(),
