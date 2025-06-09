@@ -42,6 +42,8 @@ export class EmailNotificationService implements NotificationService {
     let extension = 'pdf';
     if (jobType.toLowerCase().includes('png')) {
       extension = 'png';
+    } else if (jobType.toLowerCase().includes('csv')) {
+      extension = 'csv';
     }
 
     return [

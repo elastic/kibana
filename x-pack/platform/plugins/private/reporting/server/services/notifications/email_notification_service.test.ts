@@ -71,6 +71,15 @@ describe('EmailNotificationService', () => {
           filename: 'report.pdf',
         },
       ],
+      context: {
+        relatedObjects: [
+          {
+            id: 'report-so-id',
+            namespace: 'space1',
+            type: 'scheduled-report',
+          },
+        ],
+      },
       message: "Here's your report!",
       spaceId: 'space1',
       subject: 'Scheduled report for 04/18/2025',
