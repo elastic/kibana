@@ -383,6 +383,7 @@ paths:
                     - $ref: '#/components/schemas/jira_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
+                    - $ref: '#/components/schemas/genai_openai_other_config'
                     - $ref: '#/components/schemas/opsgenie_config'
                     - $ref: '#/components/schemas/pagerduty_config'
                     - $ref: '#/components/schemas/sentinelone_config'
@@ -73990,12 +73991,30 @@ components:
             The URL of the incoming webhook. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
     genai_secrets:
       title: Connector secrets properties for an OpenAI connector
-      description: Defines secrets for connectors when type is `.gen-ai`.
+      description: |
+        Defines secrets for connectors when type is `.gen-ai`. Supports both API key authentication (OpenAI, Azure OpenAI, and `Other`) and PKI authentication (`Other` provider only). PKI fields must be base64-encoded PEM content.
       type: object
       properties:
         apiKey:
           type: string
-          description: The OpenAI API key.
+          description: |
+            The API key for authentication. For OpenAI and Azure OpenAI providers, it is required. For the `Other` provider, it is required if you do not use PKI authentication. With PKI, you can also optionally include an API key if the OpenAI-compatible service supports or requires one.
+        certificateData:
+          type: string
+          description: |
+            Base64-encoded PEM certificate content for PKI authentication (Other provider only). Required for PKI.
+          minLength: 1
+        privateKeyData:
+          type: string
+          description: |
+            Base64-encoded PEM private key content for PKI authentication (Other provider only). Required for PKI.
+          minLength: 1
+        caData:
+          type: string
+          description: |
+            Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
+          minLength: 1
+      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:
@@ -74165,6 +74184,52 @@ components:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
           type: string
+    genai_openai_other_config:
+      title: Connector request properties for an OpenAI connector with Other provider
+      description: |
+        Defines properties for connectors when type is `.gen-ai` and the API provider is `Other` (OpenAI-compatible service), including optional PKI authentication.
+      type: object
+      required:
+        - apiProvider
+        - apiUrl
+        - defaultModel
+      properties:
+        apiProvider:
+          type: string
+          description: The OpenAI API provider.
+          enum:
+            - Other
+        apiUrl:
+          type: string
+          description: The OpenAI-compatible API endpoint.
+        defaultModel:
+          type: string
+          description: The default model to use for requests.
+        certificateData:
+          type: string
+          description: PEM-encoded certificate content.
+          minLength: 1
+        privateKeyData:
+          type: string
+          description: PEM-encoded private key content.
+          minLength: 1
+        caData:
+          type: string
+          description: PEM-encoded CA certificate content.
+          minLength: 1
+        verificationMode:
+          type: string
+          description: SSL verification mode for PKI authentication.
+          enum:
+            - full
+            - certificate
+            - none
+          default: full
+        headers:
+          type: object
+          description: Custom headers to include in requests.
+          additionalProperties:
+            type: string
     defender_secrets:
       title: Connector secrets properties for a Microsoft Defender for Endpoint connector
       required:
