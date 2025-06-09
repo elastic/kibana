@@ -85,6 +85,7 @@
     "@kbn/discover-contextual-components",
     "@kbn/discover-utils",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
