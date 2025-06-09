@@ -84,6 +84,7 @@
     "@kbn/code-editor",
     "@kbn/discover-contextual-components",
     "@kbn/discover-utils",
+    "@kbn/core-test-helpers-model-versions",
   ],
   "exclude": [
     "target/**/*",
