@@ -20,6 +20,7 @@ import type {
   AlertSuppressionCamel,
   AlertSuppressionDuration,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -289,7 +290,8 @@ const applyBulkActionEditToRuleParams = (
 
       ruleParams.alertSuppression = {
         groupBy: action.value.group_by,
-        missingFieldsStrategy: action.value.missing_fields_strategy,
+        missingFieldsStrategy:
+          action.value.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
         duration: action.value.duration,
       };
 
