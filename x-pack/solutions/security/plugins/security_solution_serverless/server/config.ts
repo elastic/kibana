@@ -9,9 +9,9 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
 
-import type { ExperimentalFeatures } from '../common/experimental_features';
-
+import { USAGE_SERVICE_USAGE_URL } from './constants';
 import { commonConfigSchema, exposeToBrowser } from '../common/config';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export const serverConfigSchema = schema.object({
@@ -26,6 +26,11 @@ export const serverConfigSchema = schema.object({
    * Usage Reporting: the interval between runs of the cloud security task
    */
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
+
+  /**
+   * Usage Reporting: the URL to send usage data to
+   */
+  usageReportingApiUrl: schema.string({ defaultValue: USAGE_SERVICE_USAGE_URL }),
 
   /**
    * Usage Reporting: timeout value for how long the task should run.
