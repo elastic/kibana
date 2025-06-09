@@ -55,9 +55,8 @@ export const AnomalyDetectionFlyout = ({
   return (
     <>
       <EuiHeaderLink
-        color="text"
-        iconSide={'left'}
-        iconType={'inspect'}
+        color="primary"
+        iconType="machineLearningApp"
         onClick={openFlyout}
         data-test-subj="openAnomalyFlyoutButton"
       >
