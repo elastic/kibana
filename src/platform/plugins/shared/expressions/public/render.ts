@@ -8,7 +8,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { Observable } from 'rxjs';
+import { createElement, memo } from 'react';
+import { Observable, BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { filter } from 'rxjs';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
@@ -29,6 +31,7 @@ export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
 export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
+  onRenderComponent?: (Component: React.ComponentType) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncCursor?: boolean;
@@ -54,6 +57,7 @@ export class ExpressionRenderHandler {
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
+  private onRenderComponent?: (Component: React.ComponentType) => void;
 
   constructor(
     element: HTMLElement,
@@ -67,9 +71,11 @@ export class ExpressionRenderHandler {
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
       executionContext,
+      onRenderComponent,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
+    this.onRenderComponent = onRenderComponent;
 
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
@@ -122,6 +128,8 @@ export class ExpressionRenderHandler {
     };
   }
 
+  private wrapperComponents = new WeakMap<object, BehaviorSubject<unknown>>();
+
   render = async (value: SerializableRecord, uiState?: unknown) => {
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
@@ -143,12 +151,38 @@ export class ExpressionRenderHandler {
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      await getRenderersRegistry()
-        .get(value.as as string)!
-        .render(this.element, value.value, {
+      const renderer = getRenderersRegistry().get(value.as as string)!;
+
+      if (renderer.loadComponent && this.onRenderComponent) {
+        const Component = await renderer.loadComponent();
+        if (!this.wrapperComponents.has(renderer.loadComponent)) {
+          const state$ = new BehaviorSubject({
+            config: value.value,
+            handlers: { ...this.handlers, uiState },
+          });
+
+          const initial = state$.getValue();
+          const WrapperComponent = memo(() => {
+            const state = useObservable(state$, initial);
+            return createElement(Component, state);
+          });
+
+          this.wrapperComponents.set(renderer.loadComponent, state$);
+
+          this.onRenderComponent(WrapperComponent);
+        } else {
+          const componentState$ = this.wrapperComponents.get(renderer.loadComponent)!;
+          componentState$.next({
+            config: value.value,
+            handlers: { ...this.handlers, uiState },
+          });
+        }
+      } else {
+        await renderer.render(this.element, value.value, {
           ...this.handlers,
           uiState,
         });
+      }
     } catch (e) {
       return this.handleRenderError(e as ExpressionRenderError);
     }

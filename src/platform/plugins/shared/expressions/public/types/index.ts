@@ -10,6 +10,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { ExecutionContextSearch } from '@kbn/es-query';
+import type { ComponentType } from 'react';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
@@ -47,6 +48,7 @@ export interface IExpressionLoaderParams {
   inspectorAdapters?: Adapters;
   interactive?: boolean;
   onRenderError?: RenderErrorHandlerFnType;
+  onRenderComponent?: (Component: ComponentType) => void;
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;
