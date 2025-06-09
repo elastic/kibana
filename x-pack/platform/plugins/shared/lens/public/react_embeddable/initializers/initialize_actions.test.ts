@@ -58,7 +58,6 @@ function setupActionsApi(
     () => runtimeState,
     createUnifiedSearchApi(),
     pick(apiMock, ['timeRange$']),
-    apiMock.title$,
     internalApi,
     {
       ...services,

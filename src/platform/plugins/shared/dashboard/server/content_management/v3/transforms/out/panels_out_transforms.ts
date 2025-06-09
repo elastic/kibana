@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectReference } from '@kbn/core/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
-  sections: SavedDashboardSection[] = []
+  sections: SavedDashboardSection[] = [],
+  references?: SavedObjectReference[],
 ): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON);
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
@@ -23,11 +26,13 @@ export function transformPanelsOut(
     {}
   );
   panels.forEach((panel: SavedDashboardPanel) => {
+    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
+    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel));
+      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel, panelReferences));
     } else {
-      sectionsMap[panel.panelIndex] = transformPanelProperties(panel);
+      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
     }
   });
   return Object.values(sectionsMap);
@@ -42,16 +47,24 @@ function transformPanelProperties({
   title,
   type,
   version,
-}: SavedDashboardPanel) {
+}: SavedDashboardPanel,
+references?: SavedObjectReference[]) {
   const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  
+  const matchingReference = panelRefName && references
+    ? references.find(
+      (reference) => reference.name === panelRefName
+    )
+    : undefined;
+
   return {
     gridData: rest,
-    id,
+    id: id === undefined && matchingReference ? matchingReference.id : id,
     panelConfig: embeddableConfig,
     panelIndex,
     panelRefName,
     title,
-    type,
+    type: type == undefined && matchingReference ? matchingReference.type : type,
     version,
   };
 }

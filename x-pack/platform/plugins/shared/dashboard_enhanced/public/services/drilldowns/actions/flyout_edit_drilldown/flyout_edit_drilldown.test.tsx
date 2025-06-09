@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {

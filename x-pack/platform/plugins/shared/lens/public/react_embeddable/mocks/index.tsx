@@ -21,7 +21,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -193,7 +193,7 @@ export function makeEmbeddableServices(
     },
     embeddableEnhanced: {
       initializeEmbeddableDynamicActions: jest.fn(
-        () =>
+        async () =>
           ({
             api: {
               enhancements: { dynamicActions: {} },

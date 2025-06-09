@@ -77,10 +77,10 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      state
+      initialState
     );
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 

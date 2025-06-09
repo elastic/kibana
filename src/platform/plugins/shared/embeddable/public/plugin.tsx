@@ -16,17 +16,9 @@ import {
   PublicAppInfo,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import { registerTriggers } from './ui_actions/register_triggers';
 import { EmbeddableStateTransfer } from './state_transfer';
-import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-  getTelemetryFunction,
-} from '../common/lib';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { CommonEmbeddableStartContract } from '../common/types';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
@@ -71,13 +63,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
-    const getAllMigrationsFn = () =>
-      getAllMigrations(
-        [],
-        this.enhancementsRegistry.getEnhancements(),
-        getMigrateFunction(commonContract)
-      );
-
     const embeddableStart: EmbeddableStart = {
       getStateTransfer: (storage?: Storage) =>
         storage
@@ -88,13 +73,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      telemetry: getTelemetryFunction(commonContract),
-      extract: getExtractFunction(commonContract),
-      inject: getInjectFunction(commonContract),
-      getAllMigrations: getAllMigrationsFn,
-      migrateToLatest: (state) => {
-        return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
-      },
+      getEnhancement: commonContract.getEnhancement,
     };
 
     setKibanaServices(core, embeddableStart, deps);
