@@ -38,7 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupStatsAggregations,
@@ -261,9 +261,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
+  const sourcererDataViewSpec: DataViewSpec = sourcererDataView.sourcererDataView as DataViewSpec;
+  const isLoadingIndexPattern = sourcererDataView.loading;
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
@@ -632,7 +632,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            sourcererDataView={sourcererDataView}
+            sourcererDataView={sourcererDataViewSpec}
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -802,6 +802,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <GroupedAlertsTable
                         accordionButtonContent={defaultGroupTitleRenderers}
                         accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                        dataViewSpec={sourcererDataViewSpec}
                         defaultFilters={alertMergedFilters}
                         defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
@@ -810,8 +811,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         groupTakeActionItems={groupTakeActionItems}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
-                        signalIndexName={signalIndexName}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         to={to}
                       />

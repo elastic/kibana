@@ -18,29 +18,24 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('Alert by rule chart', () => {
-  const defaultProps = {
-    data: [],
-    isLoading: false,
-  };
-
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders table correctly without data', () => {
+  test('should render the table correctly without data', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsByRule {...defaultProps} />
+        <AlertsByRule data={[]} isLoading={false} showCellActions={true} />
       </TestProviders>
     );
     expect(getByTestId('alerts-by-rule-table')).toBeInTheDocument();
     expect(getByTestId('alerts-by-rule-table')).toHaveTextContent('No items found');
   });
 
-  test('renders table correctly with data', () => {
+  test('should render the table correctly with data', () => {
     const { queryAllByRole } = render(
       <TestProviders>
-        <AlertsByRule data={parsedAlerts} isLoading={false} />
+        <AlertsByRule data={parsedAlerts} isLoading={false} showCellActions={true} />
       </TestProviders>
     );
 
@@ -48,6 +43,18 @@ describe('Alert by rule chart', () => {
       expect(queryAllByRole('row')[i + 1].textContent).toContain(parsedAlerts[i].rule);
       expect(queryAllByRole('row')[i + 1].textContent).toContain(parsedAlerts[i].value.toString());
       expect(queryAllByRole('row')[i + 1].children).toHaveLength(3);
+    });
+  });
+
+  test('should render the table without the third columns (for cell actions)', () => {
+    const { queryAllByRole } = render(
+      <TestProviders>
+        <AlertsByRule data={parsedAlerts} isLoading={false} showCellActions={false} />
+      </TestProviders>
+    );
+
+    parsedAlerts.forEach((_, i) => {
+      expect(queryAllByRole('row')[i + 1].children).toHaveLength(2);
     });
   });
 });

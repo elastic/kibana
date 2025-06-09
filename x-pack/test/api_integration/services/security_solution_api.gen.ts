@@ -1151,6 +1151,16 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+     */
+    getRuleMigrationIntegrationsStats(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations/stats', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves all available prebuilt rules (installed and installable)
      */
     getRuleMigrationPrebuiltRules(

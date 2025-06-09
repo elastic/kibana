@@ -64,7 +64,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       id: scheduleId,
     });
 
-  const { indexPattern } = useSourcererDataView();
+  const { sourcererDataView } = useSourcererDataView();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -83,7 +83,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          indexPattern,
+          sourcererDataView,
           uiSettings
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
@@ -95,7 +95,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     [
       aiConnectors,
       uiSettings,
-      indexPattern,
+      sourcererDataView,
       scheduleId,
       alertsIndexPattern,
       updateAttackDiscoverySchedule,

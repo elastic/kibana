@@ -54,7 +54,7 @@ export const getShareAppMenuItem = ({
           isEsqlMode
         );
 
-        const { locator, notifications } = services;
+        const { locator } = services;
         const appState = stateContainer.appState.getState();
         const { timefilter } = services.data.query.timefilter;
         const timeRange = timefilter.getTime();
@@ -138,7 +138,6 @@ export const getShareAppMenuItem = ({
           onClose: () => {
             anchorElement?.focus();
           },
-          toasts: notifications.toasts,
         });
       },
     },

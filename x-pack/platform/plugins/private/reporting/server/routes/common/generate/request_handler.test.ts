@@ -131,6 +131,7 @@ describe('Handle request to generate', () => {
           "output": null,
           "process_expiration": undefined,
           "queue_time_ms": undefined,
+          "space_id": "default",
           "started_at": undefined,
           "status": "pending",
           "timeout": undefined,

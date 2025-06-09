@@ -78,7 +78,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
         data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteCompleteText}</EuiText>
@@ -95,7 +95,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
         data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteFailedText}</EuiText>

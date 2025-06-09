@@ -34,6 +34,7 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -157,11 +158,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const {
-    sourcererDataView,
-    loading: isLoadingIndexPattern,
-    indexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
+  const sourcererDataViewSpec: DataViewSpec = sourcererDataView.sourcererDataView as DataViewSpec;
+  const isLoadingIndexPattern = sourcererDataView.loading;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -391,7 +390,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={sourcererDataView}
+              sourcererDataView={sourcererDataViewSpec}
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
@@ -427,7 +426,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 query={query}
                 timeRange={pageFiltersTimerange}
                 onInit={setDetectionPageFilterHandler}
-                indexPattern={indexPattern}
+                dataViewSpec={sourcererDataViewSpec}
               />
               <EuiSpacer size="l" />
               <ChartPanels
@@ -435,7 +434,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
-                runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
+                runtimeMappings={sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
@@ -444,6 +443,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+              dataViewSpec={sourcererDataViewSpec}
               defaultFilters={alertsTableDefaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
@@ -452,8 +452,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               groupTakeActionItems={groupTakeActionItems}
               loading={isAlertTableLoading}
               renderChildComponent={renderAlertTable}
-              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
-              signalIndexName={signalIndexName}
               tableId={TableId.alertsOnAlertsPage}
               to={to}
             />

@@ -73,10 +73,10 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern,
+    dataViewSpec: sourcererDataView,
     queries: [query],
     filters,
   });

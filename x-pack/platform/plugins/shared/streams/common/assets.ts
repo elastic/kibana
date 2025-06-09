@@ -32,6 +32,10 @@ export type QueryLink = AssetLinkBase<'query'> & {
 
 export type AssetLink = DashboardLink | SloLink | RuleLink | QueryLink;
 
+export function isQueryLink(item: AssetLink): item is QueryLink {
+  return item['asset.type'] === 'query';
+}
+
 type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
 
 export type AssetLinkRequest = OmitFrom<AssetLink, 'asset.uuid'>;

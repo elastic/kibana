@@ -75,7 +75,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -92,7 +92,7 @@ export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlActionResolutionCell">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
