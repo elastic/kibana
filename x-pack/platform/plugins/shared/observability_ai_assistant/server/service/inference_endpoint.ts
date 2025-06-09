@@ -76,6 +76,36 @@ async function getInferenceEndpoint({
   return response.endpoints[0];
 }
 
+export async function deleteInferenceEndpoint({
+  esClient,
+  logger,
+  inferenceId,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  inferenceId: string;
+}) {
+  try {
+    logger.info(`Attempting to delete inference endpoint with ID: ${inferenceId}`);
+    await esClient.asInternalUser.inference.delete({
+      inference_id: inferenceId,
+    });
+    logger.info(`Successfully deleted inference endpoint with ID: ${inferenceId}`);
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      error.body?.error?.type === 'resource_not_found_exception'
+    ) {
+      logger.debug(`Inference endpoint "${inferenceId}" was already deleted. Skipping deletion.`);
+      return;
+    }
+
+    logger.error(
+      `Failed to delete inference endpoint with ID: ${inferenceId}. Error: ${error.message}`
+    );
+  }
+}
+
 export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   return (
     error instanceof errors.ResponseError &&
