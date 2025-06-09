@@ -33,6 +33,8 @@ export class ChangeRequestsPlugin
     return {};
 
     // TODO: I think it would be nice to have a widget in the top chrome and the home page to notify you about changes to change requests
+    // I might also need some kind of "shopping cart" kind of experience where users can walk through Kibana's various app and configure
+    // the actions they want to take before coming back to their "cart" to order/parallelize them before submitting with the meta info
   }
 
   public start() {

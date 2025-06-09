@@ -153,6 +153,7 @@ function ChangeRequestDetailsFlyout({ changeRequest }: { changeRequest: ChangeRe
             <EuiFlexGroup gutterSize="s">
               <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart">
                 <EuiFlexItem>
+                  {/* If the request is failed/rejected, the user should be able to tweak the change request */}
                   <EuiText>Status:</EuiText>
                   <EuiBadge
                     color={statusColorMap[changeRequest.status]}

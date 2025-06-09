@@ -99,6 +99,11 @@ export const ReviewTable = ({
       ),
     },
     {
+      field: 'user',
+      name: 'Submitted by',
+      sortable: true,
+    },
+    {
       field: 'submittedAt',
       name: 'Submitted',
       dataType: 'date' as EuiTableDataType,
@@ -180,6 +185,7 @@ function ChangeRequestDetailsFlyout({
 
       try {
         // Try to run all actions
+        // This is the biggest challenge so post PoC this is where we need to spend most time
         await Promise.all(
           changeRequest.actions.map((action) =>
             http.fetch(action.request.endpoint, {
