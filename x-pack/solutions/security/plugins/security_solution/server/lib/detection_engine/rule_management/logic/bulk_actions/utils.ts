@@ -34,13 +34,13 @@ export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
 
 /**
  * helper utility that defines whether bulk edit action is related to alert suppression, i.e. one of:
- * 'add_alert_suppression', 'delete_alert_suppression', 'set_alert_suppression'
+ * 'set_alert_suppression_for_threshold', 'delete_alert_suppression', 'set_alert_suppression'
  * @param editAction {@link BulkActionEditType}
  * @returns {boolean}
  */
 export const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType) => {
   const indexPatternsActions: BulkActionEditType[] = [
-    BulkActionEditTypeEnum.add_alert_suppression,
+    BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
     BulkActionEditTypeEnum.delete_alert_suppression,
     BulkActionEditTypeEnum.set_alert_suppression,
   ];
@@ -49,7 +49,7 @@ export const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType)
 
 /**
  * Checks if any of the actions is related to alert suppression, i.e. one of:
- * 'add_alert_suppression', 'delete_alert_suppression', 'set_alert_suppression'
+ * 'set_alert_suppression_for_threshold', 'delete_alert_suppression', 'set_alert_suppression'
  * @param actions {@link BulkActionEditPayload[][]}
  * @returns {boolean}
  */
