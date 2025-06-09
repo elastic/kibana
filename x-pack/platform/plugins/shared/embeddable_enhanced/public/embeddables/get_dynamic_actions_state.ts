@@ -7,13 +7,13 @@
 
 import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 
-export function getDynamicActionsState(enhancements?: {
+export function getDynamicActionsState(enhancementState?: {
   dynamicActions?: Partial<DynamicActionsState>;
 }) {
   return {
     dynamicActions: {
       events: [],
-      ...(enhancements?.dynamicActions ?? {}),
+      ...(enhancementState?.dynamicActions ?? {}),
     },
   };
 }

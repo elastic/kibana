@@ -18,7 +18,6 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerTriggers } from './ui_actions/register_triggers';
 import { EmbeddableStateTransfer } from './state_transfer';
-import { CommonEmbeddableStartContract } from '../common/types';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
@@ -59,10 +58,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
 
-    const commonContract: CommonEmbeddableStartContract = {
-      getEnhancement: this.enhancementsRegistry.getEnhancement,
-    };
-
     const embeddableStart: EmbeddableStart = {
       getStateTransfer: (storage?: Storage) =>
         storage
@@ -73,7 +68,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      getEnhancement: commonContract.getEnhancement,
+      getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
     setKibanaServices(core, embeddableStart, deps);
