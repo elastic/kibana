@@ -176,7 +176,11 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed={isCompressed(api)} className={classNames('optionsList__filterGroup', controlPanelClassName)}>
+    <EuiFilterGroup
+      fullWidth
+      compressed={isCompressed(api)}
+      className={classNames('optionsList__filterGroup', controlPanelClassName)}
+    >
       <EuiInputPopover
         id={popoverId}
         ownFocus

@@ -51,7 +51,7 @@ export const ManageSpacesButton: React.FC<Props> = ({
         />
       </EuiButton>
     );
-  }
+  };
 
   return (
     <EuiButton
