@@ -131,7 +131,10 @@ function validateConnectorTypeConfig(
     if (!webhookSettings.ssl.pfx) {
       throw new Error(
         i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
-          defaultMessage: `error configuring webhook action: certType ${SSLCertType.PFX} is disabled`,
+          defaultMessage: 'error configuring webhook action: certType "{certType}" is disabled',
+          values: {
+            certType: SSLCertType.PFX,
+          },
         })
       );
     }

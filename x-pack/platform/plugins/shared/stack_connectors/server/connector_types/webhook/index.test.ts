@@ -313,7 +313,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: certType ssl-pfx is disabled"`
+      `"error validating action type config: error configuring webhook action: certType \\"ssl-pfx\\" is disabled"`
     );
   });
 });
