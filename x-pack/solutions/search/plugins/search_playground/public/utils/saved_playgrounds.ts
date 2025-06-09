@@ -49,7 +49,8 @@ export function parseSavedPlayground(
     [SavedPlaygroundFormFields.elasticsearchQuery]: JSON.parse(
       playground.data.elasticsearchQueryJSON
     ) as { retriever: any }, // TODO: replace with function
-    [SavedPlaygroundFormFields.userElasticsearchQuery]: playground.data.userElasticsearchQueryJSON,
+    [SavedPlaygroundFormFields.userElasticsearchQuery]:
+      playground.data.userElasticsearchQueryJSON ?? null,
     [SavedPlaygroundFormFields.prompt]: playground.data.prompt ?? DEFAULT_LLM_PROMPT,
     [SavedPlaygroundFormFields.citations]: playground.data.citations ?? false,
     [SavedPlaygroundFormFields.sourceFields]:
