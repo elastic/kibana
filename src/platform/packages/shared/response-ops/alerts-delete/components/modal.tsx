@@ -175,24 +175,6 @@ export const AlertDeleteModal = ({
   const isValidThreshold =
     validations.isActiveThresholdValid && validations.isInactiveThresholdValid;
 
-  const {
-    data: { affectedAlertCount: previewAffectedAlertsCount } = { affectedAlertCount: undefined },
-  } = useAlertDeletePreview({
-    services: {
-      http,
-    },
-    isEnabled: isValidThreshold,
-    queryParams: {
-      activeAlertDeleteThreshold: activeState.checked
-        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
-        : undefined,
-      inactiveAlertDeleteThreshold: inactiveState.checked
-        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
-        : undefined,
-      categoryIds,
-    },
-  });
-
   const { mutate: createAlertDeleteSchedule } = useAlertDeleteSchedule({
     services: { http },
     onSuccess: () => {
@@ -213,6 +195,25 @@ export const AlertDeleteModal = ({
       isEnabled: true,
       isOpen: isVisible,
     });
+
+  const {
+    data: { affectedAlertCount: previewAffectedAlertsCount } = { affectedAlertCount: undefined },
+  } = useAlertDeletePreview({
+    services: {
+      http,
+    },
+    isEnabled: isValidThreshold,
+    queryParams: {
+      activeAlertDeleteThreshold: activeState.checked
+        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
+        : undefined,
+      inactiveAlertDeleteThreshold: inactiveState.checked
+        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
+        : undefined,
+      categoryIds,
+    },
+    lastRun,
+  });
 
   const currentSettingsWouldDeleteAlerts =
     (activeState.checked || inactiveState.checked) &&
@@ -405,6 +406,7 @@ export const AlertDeleteModal = ({
               disabled={isDisabled || !currentSettingsWouldDeleteAlerts}
               onChange={onChangeDeleteConfirmation}
               data-test-subj="alert-delete-delete-confirmation"
+              autoComplete="off"
             />
           </EuiFormRow>
         </EuiModalBody>

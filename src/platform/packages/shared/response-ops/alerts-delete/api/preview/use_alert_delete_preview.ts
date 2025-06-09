@@ -18,11 +18,13 @@ export interface UseAlertDeletePreviewParams {
   isEnabled: boolean;
   services: { http: HttpStart };
   queryParams: AlertDeleteParams;
+  lastRun?: string;
 }
 export const useAlertDeletePreview = ({
   isEnabled,
   services: { http },
   queryParams: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
+  lastRun,
 }: UseAlertDeletePreviewParams) => {
   const [params, setParams] = useState({
     activeAlertDeleteThreshold,
@@ -42,7 +44,7 @@ export const useAlertDeletePreview = ({
     [activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds]
   );
 
-  const key = ['alertDeletePreview', params];
+  const key = ['alertDeletePreview', params, lastRun];
 
   return useQuery({
     queryKey: key,
