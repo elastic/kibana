@@ -105,6 +105,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
 
   return (
     <EuiTourStep
+      id="elasticLLMTourStep"
       css={css`
         display: flex;
       `}
@@ -145,7 +146,6 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
     >
       {wrapper ? (
         <div
-          id={`elasticLLMTourStepContent`}
           css={css`
             padding-left: ${euiTheme.size.m};
           `}

@@ -64,7 +64,7 @@ const HeaderComponent: React.FC<Props> = ({
   const spaceId = useSpaceId();
 
   const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
-    !attackDiscoveryAlertsEnabled ||
+    attackDiscoveryAlertsEnabled ||
       !connectorsAreConfigured ||
       !spaceId ||
       !inferenceEnabled ||
@@ -73,7 +73,7 @@ const HeaderComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (
-      !attackDiscoveryAlertsEnabled ||
+      attackDiscoveryAlertsEnabled ||
       !connectorsAreConfigured ||
       !spaceId ||
       !inferenceEnabled ||
@@ -83,10 +83,20 @@ const HeaderComponent: React.FC<Props> = ({
     } else {
       setIsEISCostTourDisabled(false);
     }
+    console.log(
+      'isEISCostTourDisabled--------',
+      isEISCostTourDisabled,
+      attackDiscoveryAlertsEnabled,
+      connectorsAreConfigured,
+      inferenceEnabled,
+      showFlyout,
+      spaceId
+    );
   }, [
     attackDiscoveryAlertsEnabled,
     connectorsAreConfigured,
     inferenceEnabled,
+    isEISCostTourDisabled,
     showFlyout,
     spaceId,
   ]);
@@ -158,7 +168,7 @@ const HeaderComponent: React.FC<Props> = ({
                       <ElasticLLMCostAwarenessTour
                         isDisabled={isEISCostTourDisabled}
                         selectedConnectorId={connectorId}
-                        zIndex={1} // Should lower than the flyout
+                        zIndex={999} // Should lower than the flyout
                         storageKey={
                           NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
                         }
