@@ -12,6 +12,7 @@ import { useCreateSecurityPrompts } from '../../hooks/create_security_prompts/cr
 import { useAppToasts } from '../../hooks/toast/use_app_toasts';
 import { useInferenceEnabled } from '../../hooks/inference_enabled/inference_enabled';
 import { getComments } from '../../components/get_comments';
+import { PROMPT_CONTEXTS } from '../../assets/prompt_contexts';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
     defaultMessage: 'Elastic AI Assistant',
@@ -54,12 +55,12 @@ export function AssistantProvider({
         <ElasticAssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             alertsIndexPattern={alertsIndexPattern}
-            augmentMessageCodeBlocks={() => []} // augmentMessageCodeBlocks
+            augmentMessageCodeBlocks={() => []} 
             assistantAvailability={assistantAvailability}
             assistantTelemetry={assistantTelemetry}
             docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
             basePath={basePath}
-            basePromptContexts={[]} //Object.values(PROMPT_CONTEXTS)
+            basePromptContexts={Object.values(PROMPT_CONTEXTS)} 
             getComments={getComments}
             http={http}
             inferenceEnabled={inferenceEnabled}
