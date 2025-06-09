@@ -15,11 +15,28 @@ interface CaseLinks {
   casesOverviewLink: string | null;
 }
 
+/**
+ * Given a list of cases, returns the link to the first case's detail page,
+ * and the link to the overview page if there is > 1 case.
+ * @param cases the cases to get links for
+ * @returns the first case link and the cases overview link
+ */
 export function useCaseLinks(cases?: Cases): CaseLinks {
+  const [activeSpace, setActiveSpace] = useState<string | null>(null);
   const [firstCaseLink, setFirstCaseLink] = useState<string | null>(null);
   const [casesOverviewLink, setCasesOverviewLink] = useState<string | null>(null);
-  const { share } = useKibana().services;
+  const {
+    share,
+    http: { basePath: httpBasePath },
+    spaces,
+  } = useKibana().services;
 
+  const basePath = httpBasePath.serverBasePath;
+  useEffect(() => {
+    return spaces?.getActiveSpace$().subscribe((space) => {
+      setActiveSpace(space.id);
+    })?.unsubscribe;
+  }, [spaces]);
   const { casesOverviewLocator, caseDetailLocator } = useMemo(
     () => ({
       casesOverviewLocator: share.url.locators.get(casesOverviewLocatorID),
@@ -29,19 +46,22 @@ export function useCaseLinks(cases?: Cases): CaseLinks {
   );
 
   useEffect(() => {
-    casesOverviewLocator?.getLocation({}).then((location) => {
-      setCasesOverviewLink(location?.path || null);
+    const spaceId = activeSpace !== 'default' && activeSpace !== null ? activeSpace : undefined;
+    casesOverviewLocator?.getLocation({ basePath, spaceId }).then((location) => {
+      setCasesOverviewLink(location.path);
     });
     if (cases && cases.length > 0) {
       caseDetailLocator
         ?.getLocation({
           caseId: cases[0].id,
+          basePath,
+          spaceId,
         })
         .then((location) => {
-          setFirstCaseLink(location?.path || null);
+          setFirstCaseLink(location.path);
         });
     }
-  }, [caseDetailLocator, cases, casesOverviewLocator]);
+  }, [activeSpace, basePath, caseDetailLocator, cases, casesOverviewLocator]);
 
   return { firstCaseLink, casesOverviewLink };
 }
