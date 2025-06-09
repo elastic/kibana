@@ -327,8 +327,6 @@ export const getAssetCriticalityEsDocument = async ({
       id: `${idField}:${idValue}`,
     });
 
-    console.log(`Retrieved asset criticality document: ${JSON.stringify(doc)}`);
-
     return doc._source as AssetCriticalityRecord;
   } catch (e) {
     return undefined;
