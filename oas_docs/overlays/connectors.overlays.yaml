@@ -164,6 +164,8 @@ actions:
                     - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
                     # OpenAI (.gen-ai)
                     - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    # Other OpenAI (.gen-ai)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_other_config.yaml'
                     # Opsgenie (.opsgenie)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
                     # PagerDuty (.pagerduty)

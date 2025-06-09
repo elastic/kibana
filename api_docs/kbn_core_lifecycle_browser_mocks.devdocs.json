@@ -112,6 +112,8 @@
               "UserProfileService",
               ">; rendering: jest.Mocked<",
               "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               "HttpSetupMock",
               "; notifications: ",
@@ -237,6 +239,8 @@
               "UserProfileService",
               ">; rendering: jest.Mocked<",
               "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
             "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
