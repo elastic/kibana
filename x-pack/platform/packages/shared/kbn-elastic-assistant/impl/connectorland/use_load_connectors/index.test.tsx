@@ -92,7 +92,6 @@ describe('useLoadConnectors', () => {
     await waitFor(() => {
       expect(result.current.data).toStrictEqual(
         mockConnectors
-          .filter((c) => c.actionTypeId !== '.inference')
           // @ts-ignore ts does not like config, but we define it in the mock data
           .map((c) => ({ ...c, referencedByCount: 0, apiProvider: c?.config?.apiProvider }))
       );
