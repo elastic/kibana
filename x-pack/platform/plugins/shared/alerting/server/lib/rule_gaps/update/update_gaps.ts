@@ -128,7 +128,7 @@ const updateGapBatch = async (
           return undefined;
         }
       })
-      .filter((scheduledItem) => scheduledItem !== undefined);
+      .filter((scheduledItem): scheduledItem is ScheduledItem => scheduledItem !== undefined);
     await withSpan({ name: 'updateGaps.prepareGapsForUpdate', type: 'rule' }, async () => {
       for (const { gap, scheduled } of findOverlappingIntervals(gaps, scheduledItems)) {
         // we do async request only if there errors in backfill or no backfill schedule
