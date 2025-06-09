@@ -11,11 +11,13 @@ import { flow } from 'lodash';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 import { DashboardAttributes } from '../../types';
 
-export function transformOptionsOut(
-  optionsJSON: unknown
-): DashboardAttributes['options'] | undefined {
-  if (typeof optionsJSON !== 'string') return undefined;
-  return flow(JSON.parse, transformOptionsSetDefaults, transformOptionsProperties)(optionsJSON);
+export function transformOptionsOut(optionsJSON: unknown): {
+  options?: DashboardAttributes['options'];
+} {
+  if (typeof optionsJSON !== 'string') return {};
+  return {
+    options: flow(JSON.parse, transformOptionsSetDefaults, transformOptionsProperties)(optionsJSON),
+  };
 }
 
 // TODO We may want to remove setting defaults in the future

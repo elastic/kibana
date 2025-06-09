@@ -51,7 +51,7 @@ const isSectionsSavedObject = (sections: unknown): sections is SectionsSavedObje
 export function transformPanelsOut(
   panelsJSON: unknown,
   sections: unknown
-): DashboardAttributes['panels'] {
+): { panels: DashboardAttributes['panels'] } {
   const panels = typeof panelsJSON === 'string' ? JSON.parse(panelsJSON) : [];
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = isSectionsSavedObject(
     sections
@@ -69,7 +69,7 @@ export function transformPanelsOut(
       sectionsMap[panel.panelIndex] = transformPanelProperties(panel);
     }
   });
-  return Object.values(sectionsMap);
+  return { panels: Object.values(sectionsMap) };
 }
 
 function transformPanelProperties({

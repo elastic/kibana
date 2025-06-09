@@ -9,7 +9,6 @@
 
 import { pick } from 'lodash';
 
-import { schema } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
   ControlGroupAttributes as ControlGroupAttributesV2,
@@ -25,6 +24,8 @@ import {
   transformSearchSourceIn,
   transformSearchSourceOut,
 } from './transforms';
+import { transformRefreshInterval } from './transforms/out/refresh_interval_out_transforms';
+import { transformTimeProperties } from './transforms/out/time_properties_out_transforms';
 import type {
   DashboardAttributes,
   DashboardGetOut,
@@ -50,73 +51,22 @@ export function dashboardAttributesOut(
   }
 
   // try to maintain a consistent (alphabetical) order of keys
-  let baseDashboard = {
+  return {
+    ...('controlGroupInput' in attributes &&
+      transformControlGroupOut(attributes.controlGroupInput)),
     ...(description && { description }),
+    ...('kibanaSavedObjectMeta' in attributes &&
+      transformSearchSourceOut(attributes.kibanaSavedObjectMeta)),
+    ...('optionsJSON' in attributes && transformOptionsOut(attributes.optionsJSON)),
+    ...(('panelsJSON' in attributes || 'sections' in attributes) &&
+      transformPanelsOut(attributes.panelsJSON, attributes.sections)),
+    ...('refreshInterval' in attributes && transformRefreshInterval(attributes.refreshInterval)),
     ...(tags && tags.length && { tags }),
+    ...transformTimeProperties(attributes),
     title,
     ...(version && { version }),
   };
-  if ('controlGroupInput' in attributes) {
-    const controlGroupInput = transformControlGroupOut(attributes.controlGroupInput);
-    baseDashboard = { ...baseDashboard, ...(controlGroupInput && { controlGroupInput }) };
-  }
-  if ('kibanaSavedObjectMeta' in attributes) {
-    const kibanaSavedObjectMeta = transformSearchSourceOut(attributes.kibanaSavedObjectMeta);
-    baseDashboard = { ...baseDashboard, ...(kibanaSavedObjectMeta && { kibanaSavedObjectMeta }) };
-  }
-  if ('optionsJSON' in attributes) {
-    const options = transformOptionsOut(attributes.optionsJSON);
-    baseDashboard = { ...baseDashboard, ...(options && { options }) };
-  }
-  if ('panelsJSON' in attributes || 'sections' in attributes) {
-    const panels = transformPanelsOut(attributes.panelsJSON, attributes.sections);
-    baseDashboard = { ...baseDashboard, ...(panels && { panels }) };
-  }
-  if ('refreshInterval' in attributes) {
-    const refreshInterval = isRefreshIntervalSavedObject(attributes.refreshInterval)
-      ? {
-          refreshInterval: {
-            pause: attributes.refreshInterval.pause,
-            value: attributes.refreshInterval.value,
-          },
-        }
-      : undefined;
-    baseDashboard = { ...baseDashboard, ...(refreshInterval && { refreshInterval }) };
-  }
-  if ('timeFrom' in attributes) {
-    const timeFrom = typeof attributes.timeFrom === 'string' ? attributes.timeFrom : undefined;
-    baseDashboard = { ...baseDashboard, ...(timeFrom && { timeFrom }) };
-  }
-  if ('timeRestore' in attributes) {
-    const timeRestore =
-      typeof attributes.timeRestore === 'boolean' ? attributes.timeRestore : false;
-    baseDashboard = { ...baseDashboard, ...(timeRestore && { timeRestore }) };
-  }
-  if ('timeTo' in attributes) {
-    const timeTo = typeof attributes.timeTo === 'string' ? attributes.timeTo : undefined;
-    baseDashboard = { ...baseDashboard, ...(timeTo && { timeTo }) };
-  }
-  return baseDashboard;
 }
-
-const isRefreshIntervalSavedObject = (
-  refreshInterval: unknown
-): refreshInterval is { pause: boolean; value: number } => {
-  try {
-    return Boolean(
-      schema
-        .object({
-          pause: schema.boolean(),
-          value: schema.number(),
-          display: schema.maybe(schema.string()),
-          section: schema.maybe(schema.number()),
-        })
-        .validate(refreshInterval)
-    );
-  } catch {
-    return false;
-  }
-};
 
 export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;

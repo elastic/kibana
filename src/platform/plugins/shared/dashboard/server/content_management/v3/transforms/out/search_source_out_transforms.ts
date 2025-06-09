@@ -30,10 +30,10 @@ const isKibanaSavedObjectMeta = (
   }
 };
 
-export function transformSearchSourceOut(
-  kibanaSavedObjectMeta: unknown
-): DashboardAttributes['kibanaSavedObjectMeta'] | undefined {
-  if (!isKibanaSavedObjectMeta(kibanaSavedObjectMeta)) return undefined;
+export function transformSearchSourceOut(kibanaSavedObjectMeta: unknown): {
+  kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta'];
+} {
+  if (!isKibanaSavedObjectMeta(kibanaSavedObjectMeta)) return {};
 
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
@@ -41,9 +41,11 @@ export function transformSearchSourceOut(
   }
   // Dashboards do not yet support ES|QL (AggregateQuery) in the search source
   return {
-    searchSource: parseSearchSourceJSON(searchSourceJSON) as Omit<
-      SerializedSearchSourceFields,
-      'query'
-    > & { query?: Query },
+    kibanaSavedObjectMeta: {
+      searchSource: parseSearchSourceJSON(searchSourceJSON) as Omit<
+        SerializedSearchSourceFields,
+        'query'
+      > & { query?: Query },
+    },
   };
 }

@@ -65,7 +65,7 @@ export const collectPanelsByType = (
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
-  const panels = transformPanelsOut(panelsJSON, {});
+  const { panels } = transformPanelsOut(panelsJSON, {});
 
   for (const panel of panels) {
     if (isDashboardSection(panel)) continue;

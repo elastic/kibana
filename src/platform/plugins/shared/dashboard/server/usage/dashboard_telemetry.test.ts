@@ -18,6 +18,8 @@ const visualizationType1ByValue = {
       type: 'type1',
     },
   },
+  gridData: {},
+  panelIndex: '1',
   type: 'visualization',
 } as unknown as SavedDashboardPanel;
 
@@ -27,12 +29,15 @@ const visualizationType2ByValue = {
       type: 'type2',
     },
   },
+  gridData: {},
+  panelIndex: '2',
   type: 'visualization',
 } as unknown as SavedDashboardPanel;
 
 const visualizationType2ByReference = {
   ...visualizationType2ByValue,
   id: '11111',
+  panelIndex: '3',
 };
 
 const lensTypeAByValue = {
@@ -42,11 +47,14 @@ const lensTypeAByValue = {
       visualizationType: 'a',
     },
   },
+  gridData: {},
+  panelIndex: '4',
 } as unknown as SavedDashboardPanel;
 
 const lensTypeAByReference = {
   ...lensTypeAByValue,
   id: '22222',
+  panelIndex: '5',
 };
 
 const lensXYSeriesA = {
@@ -61,6 +69,8 @@ const lensXYSeriesA = {
       },
     },
   },
+  gridData: {},
+  panelIndex: '6',
 } as unknown as SavedDashboardPanel;
 
 const lensXYSeriesB = {
@@ -91,6 +101,8 @@ const lensXYSeriesB = {
       },
     },
   },
+  gridData: {},
+  panelIndex: '7',
 } as unknown as SavedDashboardPanel;
 
 const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
@@ -121,7 +133,7 @@ describe('dashboard telemetry', () => {
       visualizationType2ByReference,
     ];
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(JSON.stringify(panels), collectorData, embeddablePersistableStateService);
 
     expect(collectorData.panels.total).toBe(panels.length);
     expect(collectorData.panels.by_value).toBe(2);
@@ -131,13 +143,13 @@ describe('dashboard telemetry', () => {
   it('collects information about visualizations', () => {
     const panels = [
       visualizationType1ByValue,
-      visualizationType1ByValue,
+      { ...visualizationType1ByValue, panelIndex: '8' },
       visualizationType2ByValue,
       visualizationType2ByReference,
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(JSON.stringify(panels), collectorData, embeddablePersistableStateService);
 
     expect(collectorData.panels.by_type.visualization.total).toBe(panels.length);
     expect(collectorData.panels.by_type.visualization.by_value).toBe(3);
@@ -147,16 +159,16 @@ describe('dashboard telemetry', () => {
   it('collects information about lens', () => {
     const panels = [
       lensTypeAByValue,
-      lensTypeAByValue,
-      lensTypeAByValue,
+      { ...lensTypeAByValue, panelIndex: '8' },
+      { ...lensTypeAByValue, panelIndex: '9' },
       lensTypeAByReference,
       lensXYSeriesA,
-      lensXYSeriesA,
+      { ...lensXYSeriesA, panelIndex: '10' },
       lensXYSeriesB,
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(JSON.stringify(panels), collectorData, embeddablePersistableStateService);
 
     expect(collectorData.panels.by_type.lens.total).toBe(panels.length);
     expect(collectorData.panels.by_type.lens.by_value).toBe(6);
@@ -166,17 +178,17 @@ describe('dashboard telemetry', () => {
   it('collects information about a mix of panel types', () => {
     const panels = [
       visualizationType1ByValue,
-      visualizationType1ByValue,
+      { ...visualizationType1ByValue, panelIndex: '8' },
       visualizationType2ByReference,
       lensTypeAByValue,
-      lensTypeAByValue,
-      lensTypeAByValue,
+      { ...lensTypeAByValue, panelIndex: '9' },
+      { ...lensTypeAByValue, panelIndex: '10' },
       lensTypeAByReference,
       lensXYSeriesA,
     ];
 
     const collectorData = getEmptyDashboardData();
-    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
+    collectPanelsByType(JSON.stringify(panels), collectorData, embeddablePersistableStateService);
 
     expect(collectorData.panels.total).toBe(panels.length);
     expect(collectorData.panels.by_type.lens.total).toBe(5);

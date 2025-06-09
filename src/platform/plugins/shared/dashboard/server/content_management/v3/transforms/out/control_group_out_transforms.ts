@@ -45,11 +45,16 @@ export const isControlGroupSavedObject = (
   }
 };
 
-export const transformControlGroupOut: (
-  controlGroupInput: unknown
-) => ControlGroupAttributes | undefined = (controlGroupInput: unknown) => {
-  if (!isControlGroupSavedObject(controlGroupInput)) return undefined;
-  return flow(transformControlGroupSetDefaults, transformControlGroupProperties)(controlGroupInput);
+export const transformControlGroupOut: (controlGroupInput: unknown) => {
+  controlGroupInput?: ControlGroupAttributes;
+} = (controlGroupInput: unknown) => {
+  if (!isControlGroupSavedObject(controlGroupInput)) return {};
+  return {
+    controlGroupInput: flow(
+      transformControlGroupSetDefaults,
+      transformControlGroupProperties
+    )(controlGroupInput),
+  };
 };
 
 // TODO We may want to remove setting defaults in the future
