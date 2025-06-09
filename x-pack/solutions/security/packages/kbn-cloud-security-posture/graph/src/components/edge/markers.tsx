@@ -48,27 +48,9 @@ const ArrowMarker = ({
   );
 };
 
-const DotMarker = ({ id, color }: { id: string; color: string }) => {
-  return (
-    <marker id={id} markerWidth="6" markerHeight="6" refX="0.1" refY="3" orient="auto">
-      <circle cx="3" cy="3" r="3" fill={color} />
-    </marker>
-  );
-};
-
-const MarkerStartType = {
-  primary: 'url(#dotPrimary)',
-  danger: 'url(#dotDanger)',
-};
-
 const MarkerEndType = {
   primary: 'url(#arrowPrimary)',
   danger: 'url(#arrowDanger)',
-};
-
-export const getMarkerStart = (color: string) => {
-  const colorKey = color as keyof typeof MarkerStartType;
-  return MarkerStartType[colorKey] ?? MarkerStartType.primary;
 };
 
 export const getMarkerEnd = (color: string) => {
@@ -84,8 +66,6 @@ export const SvgDefsMarker = () => {
       <defs>
         <ArrowMarker id="arrowPrimary" color={euiTheme.colors.primary} width={6} height={4.8} />
         <ArrowMarker id="arrowDanger" color={euiTheme.colors.danger} width={6} height={4.8} />
-        <DotMarker id="dotPrimary" color={euiTheme.colors.primary} />
-        <DotMarker id="dotDanger" color={euiTheme.colors.danger} />
       </defs>
     </svg>
   );

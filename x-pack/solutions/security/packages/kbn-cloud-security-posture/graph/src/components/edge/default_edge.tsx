@@ -10,7 +10,7 @@ import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
-import { getMarkerStart, getMarkerEnd } from './markers';
+import { getMarkerEnd } from './markers';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -36,10 +36,6 @@ export const DefaultEdge = memo(
     const color: EdgeColor = data?.color || 'primary';
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
-    const markerStart =
-      !data?.sourceShape || !NODES_WITHOUT_MARKER.includes(data?.sourceShape)
-        ? getMarkerStart(color)
-        : undefined;
     const markerEnd =
       !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
         ? getMarkerEnd(color)
@@ -73,7 +69,6 @@ export const DefaultEdge = memo(
             // Defaults to dashed when type is not available
             ...(!data?.type || data?.type === 'dashed' ? dashedStyle : {}),
           }}
-          markerStart={markerStart}
           markerEnd={markerEnd}
         />
       </>
