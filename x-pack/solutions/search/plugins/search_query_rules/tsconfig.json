@@ -28,6 +28,7 @@
     "@kbn/try-in-console",
     "@kbn/share-plugin",
     "@kbn/search-index-documents",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": [
     "target/**/*",
