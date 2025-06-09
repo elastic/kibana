@@ -381,6 +381,26 @@ components:
         - failed
         - not_fully_translated
 
+    RuleMigrationAllIntegrationsStats:
+      type: array
+      description: The integrations stats objects of all the rule of all the migrations.
+      items:
+        description: The migration rules integration stats object.
+        $ref: '#/components/schemas/RuleMigrationIntegrationStats'
+    RuleMigrationIntegrationStats:
+      type: object
+      description: The migration rules integration stats object.
+      required:
+        - id
+        - total_rules
+      properties:
+        id:
+          description: The integration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        total_rules:
+          type: integer
+          description: The number of rules that are associated with the integration.
+
     ## Rule migration resources
 
     RuleMigrationResourceType:
