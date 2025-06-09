@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
+  FormBasedLayer,
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -29,12 +30,14 @@ import {
   LensBaseConfig,
   LensBaseLayer,
   LensBaseXYLayer,
+  LensBreakdownConfig,
   LensConfig,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
 import { AnyColumnWithSourceField } from '@kbn/visualizations-plugin/common';
+import { access } from 'fs';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -344,3 +347,64 @@ export const addLayerFormulaColumns = (
   };
   layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
 };
+
+// utils for building LensConfig out of LensAttributes (reverse building)
+
+/** * Builds a formuka string from the accessor and layer.
+ * * @param accessor - The accessor string to identify the column.
+ * * @param layer - The layer containing the columns.
+ * * @returns The formula string if available, otherwise undefined.
+ */
+export const buildQuery = (
+  accessor: string | undefined,
+  layer: FormBasedLayer,
+): string | undefined => {
+  if (!accessor) {
+    return undefined;
+  }
+
+  const column = layer.columns[accessor];
+  if (!column) {
+    return undefined;
+  }
+
+  if ('sourceField' in column && column.sourceField) {
+    return column.sourceField;
+  } else if ('formula' in column && column.formula) {
+    return column.formula as string;
+  } else if ('operationType' in column && column.operationType === 'static_value') {
+    return (column as AnyColumnWithSourceField).value;
+  }
+
+  return undefined;
+}
+
+/**
+ * Builds a breakdown configuration from the accessor and layer.
+ * @param accessor - The accessor string to identify the column.
+ * @param layer - The layer containing the columns.
+ * @returns The breakdown configuration if available, otherwise undefined.
+ */
+export const buildBreakdownConfig = (
+  accessor: string | undefined,
+  layer: FormBasedLayer,
+): LensBreakdownConfig | undefined => {
+  if (!accessor) {
+    return undefined;
+  }
+
+  const column = layer.columns[accessor];
+  if (!column) {
+    return undefined;
+  }
+
+  if ('sourceField' in column && column.sourceField) {
+    return {
+      type: 'topValues',
+      field: column.sourceField,
+      size: column.size || 10, // Default size if not specified
+    };
+  }
+
+  return undefined;
+}

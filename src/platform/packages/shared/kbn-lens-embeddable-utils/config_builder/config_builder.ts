@@ -85,8 +85,7 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  async reverseBuild(
-    attributes: LensAttributes): Promise<{ config: LensConfig; options: LensConfigOptions }> {
+  async reverseBuild(attributes: LensAttributes): Promise<{ config: LensConfig; options: LensConfigOptions }> {
     const chartType = attributes.visualizationType;
     const chartBuilder = this.reverseCharts[chartType as 'metric'];
 
