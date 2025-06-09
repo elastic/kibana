@@ -10,12 +10,13 @@
 import moment from 'moment';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import {
-  CoreStart,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindResult,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { coreMock, loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 import {
   durationToSeconds,
@@ -25,16 +26,25 @@ import {
   runDeleteUnusedUrlsTask,
   scheduleUnusedUrlsCleanupTask,
 } from './task';
-import { coreMock, loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 describe('unused_urls_task', () => {
   const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const mockLogger = loggingSystemMock.create().get();
   const mockCoreSetup = coreMock.createSetup();
+  const mockCoreStart = coreMock.createStart();
   const mockTaskManager = taskManagerMock.createStart();
   const checkInterval = moment.duration(1, 'hour');
   const urlExpirationDuration = moment.duration(30, 'days');
+  mockCoreSetup.getStartServices.mockResolvedValue([
+    {
+      ...mockCoreStart,
+      savedObjects: {
+        createInternalRepository: jest.fn(() => mockSavedObjectsRepository),
+      } as unknown as SavedObjectsServiceStart,
+    },
+    {},
+    {},
+  ]);
 
   describe('durationToSeconds', () => {
     it('should convert moment duration to seconds string', () => {
@@ -202,16 +212,8 @@ describe('unused_urls_task', () => {
 
   describe('runDeleteUnusedUrlsTask', () => {
     beforeEach(() => {
-      const savedObjectsStart = {
-        createInternalRepository: jest.fn(() => mockSavedObjectsRepository),
-      } as unknown as SavedObjectsServiceStart;
-
-      const coreStartMock = {
-        savedObjects: savedObjectsStart,
-      } as unknown as CoreStart;
-
-      mockCoreSetup.getStartServices.mockResolvedValue([coreStartMock] as any);
-      jest.clearAllMocks();
+      mockSavedObjectsRepository.find.mockReset();
+      mockSavedObjectsRepository.bulkDelete.mockReset();
     });
 
     it('should not call delete if there are no saved objects', async () => {
