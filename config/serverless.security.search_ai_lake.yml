@@ -4,6 +4,7 @@
 xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
+uiSettings.overrides.defaultRoute: /app/ai_for_soc/get_started
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false

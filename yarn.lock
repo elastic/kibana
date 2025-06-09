@@ -7178,6 +7178,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-ai-for-soc@link:x-pack/solutions/security/plugins/ai_for_soc":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-connectors@link:x-pack/solutions/security/packages/connectors":
   version "0.0.0"
   uid ""

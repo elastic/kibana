@@ -862,6 +862,7 @@
     "@kbn/security-plugin-types-public": "link:x-pack/platform/packages/shared/security/plugin_types_public",
     "@kbn/security-plugin-types-server": "link:x-pack/platform/packages/shared/security/plugin_types_server",
     "@kbn/security-role-management-model": "link:x-pack/platform/packages/private/security/role_management_model",
+    "@kbn/security-solution-ai-for-soc": "link:x-pack/solutions/security/plugins/ai_for_soc",
     "@kbn/security-solution-connectors": "link:x-pack/solutions/security/packages/connectors",
     "@kbn/security-solution-distribution-bar": "link:x-pack/solutions/security/packages/distribution-bar",
     "@kbn/security-solution-ess": "link:x-pack/solutions/security/plugins/security_solution_ess",

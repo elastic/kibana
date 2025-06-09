@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition, AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import { AI_FOR_SOC_APP_ID, SecurityPageNameAiSoc } from '@kbn/deeplinks-security';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { AiNavigationIcon } from './icon';
@@ -20,6 +20,10 @@ const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
   { defaultMessage: 'AI for SOC' }
 );
+
+export const aiSocLink = (pageName: SecurityPageNameAiSoc): AppDeepLinkId => {
+  return `${AI_FOR_SOC_APP_ID}:${pageName}`;
+};
 
 export const createAiNavigationTree = (): NavigationTreeDefinition => ({
   body: [
@@ -37,14 +41,27 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
           link: securityLink(SecurityPageName.alertSummary),
         },
         {
-          id: SecurityPageName.attackDiscovery,
-          link: securityLink(SecurityPageName.attackDiscovery),
+          id: SecurityPageNameAiSoc.attackDiscovery,
+          link: aiSocLink(SecurityPageNameAiSoc.attackDiscovery),
         },
         {
           breadcrumbStatus: 'hidden',
           children: [
-            defaultNavigationTree.cases(),
             {
+              id: SecurityPageNameAiSoc.case,
+              link: aiSocLink(SecurityPageNameAiSoc.case),
+              children: [
+                {
+                  id: SecurityPageNameAiSoc.caseConfigure,
+                  link: aiSocLink(SecurityPageNameAiSoc.caseConfigure),
+                },
+                {
+                  id: SecurityPageNameAiSoc.caseCreate,
+                  link: aiSocLink(SecurityPageNameAiSoc.caseCreate),
+                },
+              ],
+            },
+            /* {
               id: SecurityPageName.configurations,
               link: securityLink(SecurityPageName.configurations),
               renderAs: 'item',
@@ -62,7 +79,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
                   link: securityLink(SecurityPageName.configurationsAiSettings),
                 },
               ],
-            },
+            }, */
           ],
         },
         {
@@ -95,8 +112,8 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       type: 'navGroup',
       children: [
         {
-          id: SecurityPageName.landing,
-          link: securityLink(SecurityPageName.landing),
+          id: SecurityPageNameAiSoc.landing,
+          link: securityLink(SecurityPageNameAiSoc.landing),
           icon: 'launch',
         },
         {

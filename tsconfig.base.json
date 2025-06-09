@@ -1706,6 +1706,8 @@
       "@kbn/security-plugin-types-server/*": ["x-pack/platform/packages/shared/security/plugin_types_server/*"],
       "@kbn/security-role-management-model": ["x-pack/platform/packages/private/security/role_management_model"],
       "@kbn/security-role-management-model/*": ["x-pack/platform/packages/private/security/role_management_model/*"],
+      "@kbn/security-solution-ai-for-soc": ["x-pack/solutions/security/plugins/ai_for_soc"],
+      "@kbn/security-solution-ai-for-soc/*": ["x-pack/solutions/security/plugins/ai_for_soc/*"],
       "@kbn/security-solution-connectors": ["x-pack/solutions/security/packages/connectors"],
       "@kbn/security-solution-connectors/*": ["x-pack/solutions/security/packages/connectors/*"],
       "@kbn/security-solution-distribution-bar": ["x-pack/solutions/security/packages/distribution-bar"],
@@ -2220,7 +2222,9 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      "@kbn/security-solution-ai-for-soc": ["x-pack/solutions/security/plugins/ai_for_soc"],
+      "@kbn/security-solution-ai-for-soc/*": ["x-pack/solutions/security/plugins/ai_for_soc/*"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

@@ -94,6 +94,7 @@ const overviewIDs = [
   ...overviewIDsToHide,
   'observability-overview',
   'securitySolutionUI:get_started',
+  'aiForSocUI:get_started',
   'management',
   'enterpriseSearch',
 ];

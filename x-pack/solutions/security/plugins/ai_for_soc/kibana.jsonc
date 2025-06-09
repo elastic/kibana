@@ -1,0 +1,36 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-ai-for-soc",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "AI capabilities for Security Operations Center (SOC).",
+  "plugin": {
+    "id": "securitySolutionAiForSoc",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "securitySolutionAiForSoc"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "management",
+      "security",
+      "cases"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "securitySolution"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+} 
