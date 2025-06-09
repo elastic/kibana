@@ -66,6 +66,11 @@ export function getComponentTemplate(inferenceId: string) {
         'ml.tokens': {
           type: 'rank_features',
         },
+        confidence: keyword, // deprecated but kept for backwards compatibility
+        is_correction: {
+          // deprecated but kept for backwards compatibility
+          type: 'boolean',
+        },
         public: {
           type: 'boolean',
         },
