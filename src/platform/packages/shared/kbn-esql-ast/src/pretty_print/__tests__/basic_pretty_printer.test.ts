@@ -141,6 +141,16 @@ describe('single line query', () => {
       });
     });
 
+    describe('ENRICH', () => {
+      test('policy name with colon', () => {
+        const { text } = reprint(
+          'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
+        );
+
+        expect(text).toBe('FROM a | ENRICH _coordinator:woof ON category WITH col0 = category');
+      });
+    });
+
     describe('CHANGE_POINT', () => {
       test('value only', () => {
         const { text } = reprint(`FROM a | CHANGE_POINT value`);
@@ -274,6 +284,31 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
+
+    describe('COMPLETION', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(
+          `FROM kibana_sample_data_ecommerce
+                 | COMPLETION "prompt" WITH \`openai-completion\` AS result
+                 | LIMIT 2
+          `
+        );
+
+        expect(text).toBe(
+          'FROM kibana_sample_data_ecommerce | COMPLETION "prompt" WITH `openai-completion` AS result | LIMIT 2'
         );
       });
     });

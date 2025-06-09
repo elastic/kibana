@@ -7,6 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import {
+  ElasticsearchProcessorType,
+  elasticsearchProcessorTypes,
+} from '../../../ingest_pipeline_processors';
 import { Condition, conditionSchema } from '../../../conditions';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
@@ -24,6 +28,33 @@ const processorBaseSchema = z.object({
   if: z.optional(conditionSchema),
   ignore_failure: z.optional(z.boolean()),
 });
+
+/* Manual ingest pipeline processor */
+
+// Not 100% accurate, but close enough for our use case to provide minimal safety
+// without having to check all details
+export type ElasticsearchProcessor = Partial<Record<ElasticsearchProcessorType, unknown>>;
+
+export interface ManualIngestPipelineProcessorConfig extends ProcessorBase {
+  processors: ElasticsearchProcessor[];
+  ignore_failure?: boolean;
+  tag?: string;
+  on_failure?: Array<Record<string, unknown>>;
+}
+export interface ManualIngestPipelineProcessorDefinition {
+  manual_ingest_pipeline: ManualIngestPipelineProcessorConfig;
+}
+
+export const manualIngestPipelineProcessorDefinitionSchema = z.strictObject({
+  manual_ingest_pipeline: z.intersection(
+    processorBaseSchema,
+    z.object({
+      processors: z.array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown())),
+      tag: z.optional(z.string()),
+      on_failure: z.optional(z.array(z.record(z.unknown()))),
+    })
+  ),
+}) satisfies z.Schema<ManualIngestPipelineProcessorDefinition>;
 
 /**
  * Grok processor
@@ -294,6 +325,7 @@ export type ProcessorDefinition =
   | GeoIpProcessorDefinition
   | RenameProcessorDefinition
   | SetProcessorDefinition
+  | ManualIngestPipelineProcessorDefinition
   | UrlDecodeProcessorDefinition
   | UserAgentProcessorDefinition;
 
@@ -313,6 +345,7 @@ export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union
   dateProcessorDefinitionSchema,
   dissectProcessorDefinitionSchema,
   grokProcessorDefinitionSchema,
+  manualIngestPipelineProcessorDefinitionSchema,
   kvProcessorDefinitionSchema,
   geoIpProcessorDefinitionSchema,
   renameProcessorDefinitionSchema,
@@ -325,6 +358,7 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   dateProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   dissectProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   grokProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  manualIngestPipelineProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   kvProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   geoIpProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   renameProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
