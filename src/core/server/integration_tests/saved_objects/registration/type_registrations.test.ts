@@ -56,6 +56,7 @@ const previouslyRegisteredTypes = [
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
   'entity-definition',
   'entity-discovery-api-key',
   'epm-packages',
