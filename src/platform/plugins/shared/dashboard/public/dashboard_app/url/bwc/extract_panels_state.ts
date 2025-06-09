@@ -8,12 +8,12 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedObject } from '@kbn/core/server';
 import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObject } from '@kbn/core/server';
 
 type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
