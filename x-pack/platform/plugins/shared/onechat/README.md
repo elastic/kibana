@@ -232,7 +232,8 @@ The MCP server provides a standardized interface for external MCP clients to acc
 To enable the MCP server, add the following to your Kibana config:
 
 ```yaml
-xpack.onechat.mcpServer.enabled: true
+uiSettings.overrides:
+  onechat:mcpServer:enabled: true
 ```
 
 Configure Claude Desktop by adding this to its configuration:
@@ -244,7 +245,7 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/onechat/mcp",
+        "http://localhost:5601/api/mcp",
         "--header",
         "Authorization: ApiKey ${API_KEY}"
       ],

@@ -28,11 +28,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .post({
       path: MCP_SERVER_PATH,
       security: {
-        authz: {
-          enabled: false,
-          reason: 'todo',
-        },
-        // authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
       summary: 'MCP server',

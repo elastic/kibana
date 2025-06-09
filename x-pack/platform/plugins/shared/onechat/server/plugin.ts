@@ -58,9 +58,10 @@ export class OnechatPlugin
         name: i18n.translate('onechat.uiSettings.mcpServer.name', {
           defaultMessage: 'MCP Server',
         }),
-        requiresPageReload: true,
         schema: schema.boolean(),
         value: false,
+        readonly: true,
+        readonlyMode: 'ui',
       },
     });
 
