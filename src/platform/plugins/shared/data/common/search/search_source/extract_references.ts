@@ -10,6 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { Filter } from '@kbn/es-query';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { SerializedSearchSourceFields } from './types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../..';
 
@@ -21,7 +22,7 @@ export const extractReferences = (
   if (searchSourceFields.index) {
     if (typeof searchSourceFields.index === 'string') {
       const indexId = searchSourceFields.index;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      const refName = `data-view-${uuidv4()}`;
       references.push({
         name: refName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -43,11 +44,11 @@ export const extractReferences = (
   if (searchSourceFields.filter) {
     searchSourceFields = {
       ...searchSourceFields,
-      filter: (searchSourceFields.filter as Filter[]).map((filterRow, i) => {
+      filter: (searchSourceFields.filter as Filter[]).map((filterRow) => {
         if (!filterRow.meta || !filterRow.meta.index) {
           return filterRow;
         }
-        const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+        const refName = `filter-data-view-${uuidv4()}`;
         references.push({
           name: refName,
           type: DATA_VIEW_SAVED_OBJECT_TYPE,

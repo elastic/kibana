@@ -1145,8 +1145,7 @@ export class SearchSource {
    * Use this method to get a representation of the search source which can be stored in a saved object.
    *
    * The references returned by this function can be mixed with other references in the same object,
-   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
-   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+   * however make sure there are no name-collisions (see `extractReferences`).
    *
    * Using `createSearchSource`, the instance can be re-created.
    * @public */
