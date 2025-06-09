@@ -7,6 +7,7 @@
 import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { lazyMitreConfiguration } from '../../../../detections/mitre/lazy_mitre_configuration';
 import type { BuildThreatDescription } from './types';
 import type {
   MitreSubTechnique,
@@ -14,17 +15,6 @@ import type {
   MitreTechnique,
 } from '../../../../detections/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
-  );
-};
 
 const ThreatEuiFlexGroupStyles = styled(EuiFlexGroup)`
   .euiFlexItem {

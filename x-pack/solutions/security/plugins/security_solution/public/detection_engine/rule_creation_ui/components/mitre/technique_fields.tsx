@@ -18,23 +18,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import { lazyMitreConfiguration } from '../../../../detections/mitre/lazy_mitre_configuration';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
 import type { MitreSubTechnique, MitreTechnique } from '../../../../detections/mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
-  );
-};
 
 const hasSubtechniqueOptions = (
   subtechniquesOptions: MitreSubTechnique[],

@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import { lazyMitreConfiguration } from '../../../../detections/mitre/lazy_mitre_configuration';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
@@ -19,17 +20,6 @@ import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
 import type { MitreTactic } from '../../../../detections/mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
-  );
-};
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
