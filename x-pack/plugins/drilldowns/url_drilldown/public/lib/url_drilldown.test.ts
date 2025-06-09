@@ -66,6 +66,10 @@ class TextExternalUrl implements IExternalUrl {
   public validateUrl(url: string): URL | null {
     return this.isCorrect ? new URL(url) : null;
   }
+
+  public isInternalUrl(_url: string): boolean {
+    return false;
+  }
 }
 
 const createDrilldown = (isExternalUrlValid: boolean = true) => {

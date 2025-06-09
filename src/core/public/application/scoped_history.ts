@@ -86,7 +86,6 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * The number of entries in the history stack, including all entries forwards and backwards from the current location.
    */
   public get length() {
-    this.verifyActive();
     return this.locationKeys.length;
   }
 
@@ -94,7 +93,6 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * The current location of the history stack.
    */
   public get location() {
-    this.verifyActive();
     return this.stripBasePath(this.parentHistory.location);
   }
 
@@ -102,7 +100,6 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * The last action dispatched on the history stack.
    */
   public get action() {
-    this.verifyActive();
     return this.parentHistory.action;
   }
 

@@ -45,6 +45,9 @@ export const createShortUrlRedirectApp = (
     }
 
     const url = core.http.basePath.prepend(redirectUrl);
+    if (!core.http.externalUrl.isInternalUrl(url)) {
+      throw new Error(`Can not redirect to external URL: ${url}`);
+    }
 
     location.href = url;
 

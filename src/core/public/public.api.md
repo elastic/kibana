@@ -950,6 +950,7 @@ export interface IBasePath {
 
 // @public
 export interface IExternalUrl {
+    isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 

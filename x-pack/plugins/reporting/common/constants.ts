@@ -115,6 +115,13 @@ export const ILM_POLICY_NAME = 'kibana-reporting';
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
+// Allowed locator types for reporting: the "reportable" analytical apps we expect to redirect to during screenshotting
+export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
+  'DASHBOARD_APP_LOCATOR',
+  'LENS_APP_LOCATOR',
+  'VISUALIZE_APP_LOCATOR',
+];
+
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 /**

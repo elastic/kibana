@@ -328,8 +328,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await PageObjects.common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
+
+      await PageObjects.common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
@@ -351,8 +355,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await PageObjects.common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.ARROW_UP : browser.keys.ARROW_DOWN);
       }
+
+      await PageObjects.common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
