@@ -22,9 +22,9 @@ export async function unenrollForAgentPolicyId(
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
       kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      showInactive: false,
       page: page++,
       perPage: 1000,
-      showInactive: false,
     });
 
     if (agents.length === 0) {

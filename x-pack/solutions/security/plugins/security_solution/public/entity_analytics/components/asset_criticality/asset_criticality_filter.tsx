@@ -28,7 +28,7 @@ export const AssetCriticalityFilter: React.FC<AssetCriticalityFilterProps> = ({
   onChange,
 }) => {
   const renderItem = useCallback((level: CriticalityLevels) => {
-    return <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />;
+    return <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />;
   }, []);
 
   return (
