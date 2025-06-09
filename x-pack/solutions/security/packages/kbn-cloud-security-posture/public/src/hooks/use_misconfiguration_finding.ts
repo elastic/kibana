@@ -18,22 +18,12 @@ import type {
 } from '../types';
 import { buildFindingsQueryWithFilters } from '../utils/findings_query_builders';
 
-const GET_MISCONFIGURATIONS_SOURCE_FIELDS = [
-  'result.*',
-  'rule.*',
-  'resource.*',
-  '@timestamp',
-  'observer',
-  'data_stream.*',
-];
-
 export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions) => {
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: 1,
     ignore_unavailable: true,
     query: buildFindingsQueryWithFilters(query),
-    _source: GET_MISCONFIGURATIONS_SOURCE_FIELDS,
   };
 };
 
