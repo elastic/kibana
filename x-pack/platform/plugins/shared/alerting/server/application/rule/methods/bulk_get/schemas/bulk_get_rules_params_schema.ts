@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const getRulesParamsSchema = schema.object({
-  ids: schema.arrayOf(schema.string()),
+export const bulkGetRulesParamsSchema = schema.object({
+  ids: schema.arrayOf(schema.string(), { minSize: 1 }),
   includeLegacyId: schema.maybe(schema.boolean()),
   includeSnoozeData: schema.maybe(schema.boolean()),
   excludeFromPublicApi: schema.maybe(schema.boolean()),

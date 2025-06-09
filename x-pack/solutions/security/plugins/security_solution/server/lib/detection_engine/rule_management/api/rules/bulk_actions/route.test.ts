@@ -37,7 +37,7 @@ describe('Perform bulk action route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGet as jest.Mock;
+    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({

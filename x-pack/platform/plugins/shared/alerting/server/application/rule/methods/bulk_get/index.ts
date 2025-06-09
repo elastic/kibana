@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { getRulesParamsSchema } from '../schemas';
-
-export type GetRulesParams = TypeOf<typeof getRulesParamsSchema>;
+export type { BulkGetRulesParams } from './types';
+export { bulkGetRules } from './bulk_get_rules';

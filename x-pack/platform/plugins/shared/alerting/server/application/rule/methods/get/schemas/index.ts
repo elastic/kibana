@@ -6,4 +6,3 @@
  */
 
 export * from './get_rule_params_schema';
-export * from './get_rules_params_schema';

@@ -26,7 +26,7 @@ export const fetchRulesByQueryOrIds = async ({
   gapRange?: { start: string; end: string };
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
-    const { rules, errors } = await rulesClient.bulkGet({ ids });
+    const { rules, errors } = await rulesClient.bulkGetRules({ ids });
     return {
       results: rules.map((rule) => ({
         item: rule.id,

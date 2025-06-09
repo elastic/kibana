@@ -12,24 +12,24 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authori
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { GetRulesParams } from './types';
-import { getRulesParamsSchema } from './schemas';
+import type { BulkGetRulesParams } from './types';
+import { bulkGetRulesParamsSchema } from './schemas';
 import type { RuleParams } from '../../types';
 import { bulkGetRulesSo } from '../../../../data/rule';
-import { transformToSanitizedRule } from './utils';
-import type { GetRulesResponse } from './types/get_rules_response';
+import { transformRuleSoToSanitizedRule } from '../../transforms';
+import type { BulkGetRulesResponse } from './types/bulk_get_rules_response';
 
-export async function getRules<Params extends RuleParams = never>(
+export async function bulkGetRules<Params extends RuleParams = never>(
   context: RulesClientContext,
-  params: GetRulesParams
-): Promise<GetRulesResponse<Params>> {
+  params: BulkGetRulesParams
+): Promise<BulkGetRulesResponse<Params>> {
   try {
-    getRulesParamsSchema.validate(params);
+    bulkGetRulesParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating get rules params - ${error.message}`);
   }
 
-  const result: GetRulesResponse<Params> = {
+  const result: BulkGetRulesResponse<Params> = {
     rules: [],
     errors: [],
   };
@@ -109,7 +109,7 @@ export async function getRules<Params extends RuleParams = never>(
   const paramsForTransform = omit(params, ['ids']);
   const transformedRules = await pMap(
     authorizedRuleSos,
-    (rule) => transformToSanitizedRule<Params>(context, rule, paramsForTransform),
+    (rule) => transformRuleSoToSanitizedRule<Params>(context, rule, paramsForTransform),
     { concurrency: 10 }
   );
   result.rules.push(...transformedRules);

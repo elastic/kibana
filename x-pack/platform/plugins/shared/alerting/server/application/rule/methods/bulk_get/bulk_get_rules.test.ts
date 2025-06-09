@@ -6,18 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import { transformToSanitizedRule } from './utils';
+import { transformRuleSoToSanitizedRule } from '../../transforms';
 import { bulkGetRulesSo } from '../../../../data/rule';
-import { getRules } from './get_rules';
+import { bulkGetRules } from './bulk_get_rules';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
-import type { GetRulesResponse } from './types/get_rules_response';
+import type { BulkGetRulesResponse } from './types/bulk_get_rules_response';
 import type { RuleParams } from '../../types';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import type { GetRulesParams } from './types';
+import type { BulkGetRulesParams } from './types';
 
-jest.mock('./utils', () => {
+jest.mock('../../transforms', () => {
   return {
-    transformToSanitizedRule: jest.fn(),
+    transformRuleSoToSanitizedRule: jest.fn(),
   };
 });
 
@@ -28,7 +28,7 @@ jest.mock('../../../../data/rule', () => {
 });
 
 const rulesClientContext = rulesClientContextMock.create();
-const transformToSanitizedRuleMock = transformToSanitizedRule as jest.Mock;
+const transformRuleSoToSanitizedRuleMock = transformRuleSoToSanitizedRule as jest.Mock;
 const bulkGetRulesSoMock = bulkGetRulesSo as jest.Mock;
 const ensureAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as jest.Mock;
 const auditLoggerMock = rulesClientContext.auditLogger?.log as jest.Mock;
@@ -58,15 +58,15 @@ const getTestRules = () => {
   };
 };
 
-describe('getRules', () => {
+describe('bulkGetRules', () => {
   let ruleIds: string[] = [];
-  let results: GetRulesResponse<RuleParams>;
+  let results: BulkGetRulesResponse<RuleParams>;
   let testRules: ReturnType<typeof getTestRules>;
   beforeEach(async () => {
     jest.resetAllMocks();
     testRules = getTestRules();
     ruleIds = testRules.all.map(({ id }) => id);
-    transformToSanitizedRuleMock.mockImplementation((_, rule) => {
+    transformRuleSoToSanitizedRuleMock.mockImplementation((_, rule) => {
       return {
         ...rule,
         sanitized: true,
@@ -87,12 +87,12 @@ describe('getRules', () => {
       }
     });
 
-    results = await getRules(rulesClientContext, { ids: ruleIds });
+    results = await bulkGetRules(rulesClientContext, { ids: ruleIds });
   });
 
   it('should throw if called with invalid params', async () => {
     await expect(
-      getRules(rulesClientContext, {} as unknown as GetRulesParams)
+      bulkGetRules(rulesClientContext, {} as unknown as BulkGetRulesParams)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Error validating get rules params - [ids]: expected value of type [array] but got [undefined]"'
     );
@@ -141,9 +141,9 @@ describe('getRules', () => {
   });
 
   it('should attempt to sanitize the rules', () => {
-    expect(transformToSanitizedRuleMock).toHaveBeenCalledTimes(testRules.successful.length);
+    expect(transformRuleSoToSanitizedRuleMock).toHaveBeenCalledTimes(testRules.successful.length);
     testRules.successful.forEach((rule) => {
-      expect(transformToSanitizedRuleMock).toHaveBeenCalledWith(rulesClientContext, rule, {});
+      expect(transformRuleSoToSanitizedRuleMock).toHaveBeenCalledWith(rulesClientContext, rule, {});
     });
   });
 
