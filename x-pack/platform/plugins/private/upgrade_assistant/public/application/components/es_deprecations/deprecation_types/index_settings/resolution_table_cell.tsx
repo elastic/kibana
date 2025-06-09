@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Status } from '../../../types';
 
@@ -111,20 +104,5 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
     );
   }
 
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        data-test-subj="indexSettingsResolutionStatusCell"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  return <></>;
 };
