@@ -43,8 +43,8 @@ describe('Form Resolvers', () => {
     [PlaygroundFormFields.citations]: false,
     [PlaygroundFormFields.docSize]: 3,
     [PlaygroundFormFields.summarizationModel]: { ...mockLLM },
-    [PlaygroundFormFields.question]: '',
-    [PlaygroundFormFields.searchQuery]: '',
+    [PlaygroundFormFields.question]: 'Some question',
+    [PlaygroundFormFields.searchQuery]: 'search',
   };
 
   describe('playgroundFormResolver', () => {
@@ -74,6 +74,78 @@ describe('Form Resolvers', () => {
           [PlaygroundFormFields.userElasticsearchQuery]: {
             type: 'value',
             message: expect.any(String),
+          },
+        },
+      });
+    });
+    it('validates summarizationModel', async () => {
+      const values = {
+        ...validPlaygroundForm,
+        [PlaygroundFormFields.summarizationModel]: undefined,
+      };
+      expect(
+        playgroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.summarizationModel]: {
+            type: 'required',
+          },
+        },
+      });
+    });
+    it('validates prompt', async () => {
+      const values = {
+        ...validPlaygroundForm,
+        [PlaygroundFormFields.prompt]: '',
+      };
+      expect(
+        playgroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.prompt]: {
+            type: 'required',
+          },
+        },
+      });
+
+      values[PlaygroundFormFields.prompt] = '     ';
+      expect(
+        playgroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.prompt]: {
+            type: 'required',
+          },
+        },
+      });
+    });
+    it('validates question', async () => {
+      const values = {
+        ...validPlaygroundForm,
+        [PlaygroundFormFields.question]: '',
+      };
+      expect(
+        playgroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.question]: {
+            type: 'required',
+          },
+        },
+      });
+
+      values[PlaygroundFormFields.question] = '     ';
+      expect(
+        playgroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.question]: {
+            type: 'required',
           },
         },
       });
@@ -111,6 +183,79 @@ describe('Form Resolvers', () => {
           [PlaygroundFormFields.userElasticsearchQuery]: {
             type: 'value',
             message: expect.any(String),
+          },
+        },
+      });
+    });
+
+    it('validates summarizationModel', async () => {
+      const values = {
+        ...validSavedPlaygroundForm,
+        [PlaygroundFormFields.summarizationModel]: undefined,
+      };
+      expect(
+        savedPlaygroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.summarizationModel]: {
+            type: 'required',
+          },
+        },
+      });
+    });
+    it('validates prompt', async () => {
+      const values = {
+        ...validSavedPlaygroundForm,
+        [PlaygroundFormFields.prompt]: '',
+      };
+      expect(
+        savedPlaygroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.prompt]: {
+            type: 'required',
+          },
+        },
+      });
+
+      values[PlaygroundFormFields.prompt] = '     ';
+      expect(
+        savedPlaygroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.prompt]: {
+            type: 'required',
+          },
+        },
+      });
+    });
+    it('validates question', async () => {
+      const values = {
+        ...validSavedPlaygroundForm,
+        [PlaygroundFormFields.question]: '',
+      };
+      expect(
+        savedPlaygroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.question]: {
+            type: 'required',
+          },
+        },
+      });
+
+      values[PlaygroundFormFields.question] = '     ';
+      expect(
+        savedPlaygroundFormResolver(values, resolverContext, resolverOptions)
+      ).resolves.toStrictEqual({
+        values: {},
+        errors: {
+          [PlaygroundFormFields.question]: {
+            type: 'required',
           },
         },
       });

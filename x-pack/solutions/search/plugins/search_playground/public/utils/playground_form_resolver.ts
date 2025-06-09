@@ -5,23 +5,38 @@
  * 2.0.
  */
 
-import type { FieldErrors, Resolver } from 'react-hook-form';
+import type { FieldErrors, Resolver, ResolverOptions } from 'react-hook-form';
 import { type PlaygroundForm, type SavedPlaygroundForm, PlaygroundFormFields } from '../types';
 import { validateUserElasticsearchQuery } from './user_query';
 
+const REQUIRED_ERROR = { type: 'required' };
+
+const hasErrors = (errors: FieldErrors<PlaygroundForm>): boolean => Object.keys(errors).length > 0;
+
 export const playgroundFormResolver: Resolver<PlaygroundForm> = async (values) => {
   const errors: FieldErrors<PlaygroundForm> = {};
-  let hasErrors = false;
 
+  if (!values[PlaygroundFormFields.summarizationModel]) {
+    errors[PlaygroundFormFields.summarizationModel] = REQUIRED_ERROR;
+  }
+  if (!values[PlaygroundFormFields.prompt]) {
+    errors[PlaygroundFormFields.prompt] = REQUIRED_ERROR;
+  } else if (!values[PlaygroundFormFields.prompt].trim()) {
+    errors[PlaygroundFormFields.prompt] = REQUIRED_ERROR;
+  }
+  if (!values[PlaygroundFormFields.question]) {
+    errors[PlaygroundFormFields.question] = REQUIRED_ERROR;
+  } else if (!values[PlaygroundFormFields.question].trim()) {
+    errors[PlaygroundFormFields.question] = REQUIRED_ERROR;
+  }
   const userQueryError = validateUserElasticsearchQuery(
     values[PlaygroundFormFields.userElasticsearchQuery]
   );
   if (userQueryError) {
     errors[PlaygroundFormFields.userElasticsearchQuery] = userQueryError;
-    hasErrors = true;
   }
 
-  if (hasErrors) {
+  if (hasErrors(errors)) {
     return {
       values: {},
       errors,
@@ -34,27 +49,16 @@ export const playgroundFormResolver: Resolver<PlaygroundForm> = async (values) =
   };
 };
 
-export const savedPlaygroundFormResolver: Resolver<SavedPlaygroundForm> = async (values) => {
-  const errors: FieldErrors<SavedPlaygroundForm> = {};
-  let hasErrors = false;
-
-  const userQueryError = validateUserElasticsearchQuery(
-    values[PlaygroundFormFields.userElasticsearchQuery]
-  );
-  if (userQueryError) {
-    errors[PlaygroundFormFields.userElasticsearchQuery] = userQueryError;
-    hasErrors = true;
-  }
-
-  if (hasErrors) {
-    return {
-      values: {},
-      errors,
-    };
-  }
-
-  return {
+export const savedPlaygroundFormResolver: Resolver<SavedPlaygroundForm> = async (
+  values,
+  context,
+  options
+) => {
+  const baseResult = await playgroundFormResolver(
     values,
-    errors: {},
-  };
+    context,
+    options as unknown as ResolverOptions<PlaygroundForm>
+  );
+
+  return baseResult;
 };

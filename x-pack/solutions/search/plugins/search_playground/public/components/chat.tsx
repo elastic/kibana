@@ -196,10 +196,6 @@ export const Chat = () => {
                   name={PlaygroundFormFields.question}
                   control={control}
                   defaultValue=""
-                  rules={{
-                    required: true,
-                    validate: (rule) => !!rule?.trim(),
-                  }}
                   render={({ field }) => (
                     <QuestionInput
                       value={field.value}
