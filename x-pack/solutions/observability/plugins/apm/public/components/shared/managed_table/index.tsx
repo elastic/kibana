@@ -12,14 +12,14 @@ import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -113,7 +113,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
     uiSettings?.get<ProgressiveLoadingQuality>(apmProgressiveLoading) ??
     ProgressiveLoadingQuality.off;
 
-
   const {
     items,
     columns,
@@ -193,7 +192,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
     (newTableOptions: Partial<TableOptions<T>>) => {
       setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
-      if (saveTableOptionsToUrl && (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading)) {
+      if (
+        saveTableOptionsToUrl &&
+        (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading)
+      ) {
         history.push({
           ...history.location,
           search: fromQuery({
