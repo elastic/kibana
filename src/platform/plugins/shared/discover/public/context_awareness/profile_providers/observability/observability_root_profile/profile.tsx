@@ -21,7 +21,6 @@ export const createObservabilityRootProfileProvider = (
   profile: {
     getAppMenu: createGetAppMenu(services),
     getDefaultAdHocDataViews,
-    getDocViewer: createGetDocViewer(services),
   },
   resolve: (params) => {
     if (params.solutionNavId !== SolutionType.Observability) {
