@@ -269,7 +269,53 @@ export const getEnrichedDeprecations = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const esDeprecations = (await esClient.migration.deprecations()) as EsDeprecations;
+  let esDeprecations = (await esClient.migration.deprecations()) as EsDeprecations;
+  esDeprecations = {
+    ...esDeprecations,
+    cluster_settings: [
+      {
+        level: 'warning',
+        message:
+          'Template patterns are no longer using `template` field, but `index_patterns` instead',
+        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_indices_changes.html#_index_templates_use_literal_index_patterns_literal_instead_of_literal_template_literal',
+        details:
+          'templates using `template` field: security_audit_log,watches,.monitoring-alerts,triggered_watches,.ml-anomalies-,.ml-notifications,.ml-meta,.monitoring-kibana,.monitoring-es,.monitoring-logstash,.watch-history-6,.ml-state,security-index-template',
+        resolve_during_rolling_upgrade: false,
+      },
+      {
+        level: 'warning',
+        message: 'one or more templates use deprecated mapping settings',
+        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_indices_changes.html',
+        details:
+          '{.monitoring-logstash=[Coercion of boolean fields], .monitoring-es=[Coercion of boolean fields], .ml-anomalies-=[Coercion of boolean fields], .watch-history-6=[Coercion of boolean fields], .monitoring-kibana=[Coercion of boolean fields], security-index-template=[Coercion of boolean fields]}',
+        resolve_during_rolling_upgrade: false,
+      },
+    ],
+    ilm_policies: {
+      myfreezepolicy: [
+        {
+          level: 'warning',
+          message:
+            "ILM policy [myfreezepolicy] contains the action 'freeze' that is deprecated and will be removed in a future version.",
+          url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html',
+          details:
+            'This action is already a noop so it can be safely removed, because frozen indices no longer offer any advantages. Consider cold or frozen tiers in place of frozen indices.',
+          resolve_during_rolling_upgrade: false,
+        },
+      ],
+    },
+    templates: {
+      mytemplate: [
+        {
+          level: 'critical',
+          message:
+            'Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.',
+          url: 'https://github.com/elastic/elasticsearch/pull/117172',
+          resolve_during_rolling_upgrade: false,
+        },
+      ],
+    },
+  };
   const deprecations = normalizeEsResponse(esDeprecations);
 
   // Throwing here to avoid allowing upgrades while we have unhandled deprecation types from ES

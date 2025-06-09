@@ -35,13 +35,13 @@ type RecommendedActionType =
   | 'reindex';
 
 const recommendedReadOnlyText = i18n.translate(
-  'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyText',
+  'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyText',
   {
     defaultMessage: 'Recommended to set to read-only',
   }
 );
 const recommendedReindexText = i18n.translate(
-  'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexText',
+  'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexText',
   {
     defaultMessage: 'Recommended to reindex',
   }
@@ -94,7 +94,7 @@ const i18nTexts = {
     isLargeIndex: {
       text: recommendedReadOnlyText,
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonIsLargeIndex',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsLargeIndex',
         {
           defaultMessage:
             'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
@@ -104,7 +104,7 @@ const i18nTexts = {
     isFollowerIndex: {
       text: recommendedReadOnlyText,
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonIsFollowerIndex',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsFollowerIndex',
         {
           defaultMessage:
             'This index is a cross-cluster replication follower index, which should not be reindexed. You can mark it as read-only or terminate the replication and convert it to a standard index.',
@@ -114,7 +114,7 @@ const i18nTexts = {
     readonly: {
       text: recommendedReadOnlyText,
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyReasonReadonly',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonReadonly',
         {
           defaultMessage:
             'Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
@@ -124,7 +124,7 @@ const i18nTexts = {
     isReadonly: {
       text: recommendedReindexText,
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexReasonReadonly',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexReasonReadonly',
         {
           defaultMessage: 'This index is already read-only. You can still reindex it.',
         }
@@ -133,7 +133,7 @@ const i18nTexts = {
     reindex: {
       text: recommendedReindexText,
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexTooltipText',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexTooltipText',
         {
           defaultMessage:
             'The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed.',
@@ -142,13 +142,13 @@ const i18nTexts = {
     },
     unfreeze: {
       text: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedOptionUnfreezeText',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionUnfreezeText',
         {
           defaultMessage: 'Recommended to unfreeze',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedOptionReadonlyReasonFreeze',
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionReadonlyReasonFreeze',
         {
           defaultMessage:
             'To ensure compatibility with the next major version, unfreeze is recommended. It will also be set as read-only.',
