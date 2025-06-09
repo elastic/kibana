@@ -24,7 +24,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const samlAuth = getService('samlAuth');
     const roleScopedSupertest = getService('roleScopedSupertest');
     let supertestEditorWithApiKey: SupertestWithRoleScopeType;
-    let supertestViewerWithApiKey: SupertestWithRoleScopeType;
 
     let testFleetPolicyID: string;
     let editorUser: RoleCredentials;
@@ -39,9 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
         withInternalHeaders: true,
       });
-      supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-        withInternalHeaders: true,
-      });
+
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
@@ -49,7 +46,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await supertestEditorWithApiKey.destroy();
-      await supertestViewerWithApiKey.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
       await kibanaServer.savedObjects.cleanStandardList();
     });

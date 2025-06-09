@@ -51,7 +51,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient, spaceId } = routeContext;
+    const { response, request, savedObjectsClient, server } = routeContext;
     const { locationId } = request.params;
     const newLocationLabel = request.body.label;
 
@@ -71,17 +71,20 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
       const monitorsSpaces = monitorsInLocation.map(({ attributes: { namespace } }) => namespace);
 
-      // TODO: this should just check if the user has the right auth to modify the monitors of all the different monitorsSpaces spaces
-      if (
-        monitorsSpaces.length &&
-        ((monitorsSpaces.length === 1 && monitorsSpaces[0] !== spaceId) ||
-          monitorsSpaces.length > 1)
-      ) {
-        return response.conflict({
+      const checkSavedObjectsPrivileges =
+        server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+
+      const { hasAllRequested } = await checkSavedObjectsPrivileges(
+        'saved_object:synthetics-monitor/bulk_update',
+        monitorsSpaces
+      );
+
+      if (!hasAllRequested) {
+        return response.forbidden({
           body: {
-            message: i18n.translate('xpack.synthetics.editPrivateLocation.monitorsInOtherSpaces', {
+            message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
               defaultMessage:
-                'There are monitors deployed to the same private location in other spaces and they cannot be updated',
+                'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
             }),
           },
         });
