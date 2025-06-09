@@ -12,23 +12,26 @@ import { fireEvent, render, waitFor, within, screen } from '@testing-library/rea
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
 import type { RecurringSchedule } from '../types';
-import { getFormSchema } from '../schemas/form_schema';
+import { getRecurringScheduleFormSchema } from '../schemas/recurring_schedule_form_schema';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { RecurrenceEnd } from '../constants';
 
-const initialValue: RecurringSchedule = {
-  frequency: 'CUSTOM',
-  ends: RecurrenceEnd.NEVER,
+interface FormValue {
+  recurringSchedule: RecurringSchedule;
+}
+
+const initialValue: FormValue = {
+  recurringSchedule: {
+    frequency: 'CUSTOM',
+    ends: RecurrenceEnd.NEVER,
+  },
 };
 
-const TestComponent = ({
-  children,
-  iv = initialValue,
-}: PropsWithChildren<{ iv?: RecurringSchedule }>) => {
-  const { form } = useForm<RecurringSchedule>({
+const TestWrapper = ({ children, iv = initialValue }: PropsWithChildren<{ iv?: FormValue }>) => {
+  const { form } = useForm<FormValue>({
     defaultValue: iv,
     options: { stripEmptyFields: false },
-    schema: getFormSchema(),
+    schema: { recurringSchedule: getRecurringScheduleFormSchema() },
   });
 
   return <Form form={form}>{children}</Form>;
@@ -41,9 +44,9 @@ describe('CustomRecurringSchedule', () => {
 
   it('renders all form fields', async () => {
     render(
-      <TestComponent>
+      <TestWrapper>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     expect(screen.getByTestId('interval-field')).toBeInTheDocument();
@@ -54,9 +57,9 @@ describe('CustomRecurringSchedule', () => {
 
   it('renders byweekday field if custom frequency = weekly', async () => {
     render(
-      <TestComponent>
+      <TestWrapper>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     fireEvent.change(
@@ -71,15 +74,17 @@ describe('CustomRecurringSchedule', () => {
   });
 
   it('renders byweekday field if frequency = daily', async () => {
-    const iv: RecurringSchedule = {
-      ...initialValue,
-      frequency: Frequency.DAILY,
-      ends: RecurrenceEnd.NEVER,
+    const iv: FormValue = {
+      recurringSchedule: {
+        ...initialValue,
+        frequency: Frequency.DAILY,
+        ends: RecurrenceEnd.NEVER,
+      },
     };
     render(
-      <TestComponent iv={iv}>
+      <TestWrapper iv={iv}>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     expect(screen.getByTestId('byweekday-field')).toBeInTheDocument();
@@ -87,9 +92,9 @@ describe('CustomRecurringSchedule', () => {
 
   it('renders bymonth field if custom frequency = monthly', async () => {
     render(
-      <TestComponent>
+      <TestWrapper>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     fireEvent.change(
@@ -105,9 +110,9 @@ describe('CustomRecurringSchedule', () => {
 
   it('should initialize the form when no initialValue provided', () => {
     render(
-      <TestComponent>
+      <TestWrapper>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     const frequencyInput = within(screen.getByTestId('custom-frequency-field')).getByTestId(
@@ -122,18 +127,20 @@ describe('CustomRecurringSchedule', () => {
   });
 
   it('should prefill the form when provided with initialValue', () => {
-    const iv: RecurringSchedule = {
-      ...initialValue,
-      frequency: 'CUSTOM',
-      ends: RecurrenceEnd.NEVER,
-      customFrequency: Frequency.WEEKLY,
-      interval: 3,
-      byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
+    const iv: FormValue = {
+      recurringSchedule: {
+        ...initialValue,
+        frequency: 'CUSTOM',
+        ends: RecurrenceEnd.NEVER,
+        customFrequency: Frequency.WEEKLY,
+        interval: 3,
+        byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
+      },
     };
     render(
-      <TestComponent iv={iv}>
+      <TestWrapper iv={iv}>
         <CustomRecurringSchedule />
-      </TestComponent>
+      </TestWrapper>
     );
 
     const frequencyInput = within(screen.getByTestId('custom-frequency-field')).getByTestId(

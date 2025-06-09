@@ -47,8 +47,12 @@ export interface CustomRecurringScheduleProps {
 
 export const CustomRecurringSchedule: React.FC = React.memo(
   ({ startDate }: CustomRecurringScheduleProps) => {
-    const [recurringSchedule] = useFormData<RecurringSchedule>({
-      watch: ['frequency', 'interval', 'customFrequency'],
+    const [{ recurringSchedule }] = useFormData<{ recurringSchedule: RecurringSchedule }>({
+      watch: [
+        'recurringSchedule.frequency',
+        'recurringSchedule.interval',
+        'recurringSchedule.customFrequency',
+      ],
     });
 
     const parsedSchedule = useMemo(() => {
@@ -87,7 +91,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
             <EuiFlexGroup gutterSize="s" alignItems="flexStart">
               <EuiFlexItem>
                 <UseField
-                  path="interval"
+                  path="recurringSchedule.interval"
                   css={styles.flexField}
                   componentProps={{
                     'data-test-subj': 'interval-field',
@@ -106,7 +110,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
               </EuiFlexItem>
               <EuiFlexItem>
                 <UseField
-                  path="customFrequency"
+                  path="recurringSchedule.customFrequency"
                   componentProps={{
                     'data-test-subj': 'custom-frequency-field',
                     euiFieldProps: {
@@ -123,7 +127,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
         {Number(parsedSchedule?.customFrequency) === Frequency.WEEKLY ||
         parsedSchedule?.frequency === Frequency.DAILY ? (
           <UseField
-            path="byweekday"
+            path="recurringSchedule.byweekday"
             config={{
               type: FIELD_TYPES.MULTI_BUTTON_GROUP,
               label: '',
@@ -155,7 +159,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(
 
         {Number(parsedSchedule?.customFrequency) === Frequency.MONTHLY ? (
           <UseField
-            path="bymonth"
+            path="recurringSchedule.bymonth"
             componentProps={{
               'data-test-subj': 'bymonth-field',
               euiFieldProps: {
