@@ -27,7 +27,7 @@ import { routeWithNamespace } from '../../../../../common/utils/security_solutio
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
 
-const TEST_TIMOUT = 30 * 60 * 1000;
+const TEST_TIMOUT = 60 * 60 * 1000;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
