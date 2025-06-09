@@ -186,7 +186,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             />
           </Chart>
         </ChartWrapper>
-      </div>
     );
   }
 
