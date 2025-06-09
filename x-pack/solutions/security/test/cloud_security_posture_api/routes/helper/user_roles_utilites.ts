@@ -45,7 +45,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS],
     privileges: ['read'],
   },
   {
