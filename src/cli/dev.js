@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+if (process.features.require_module) {
+  console.warn(
+    "Node.js's experimental support for native ES modules is enabled.  This will not be enabled in production while the feature is experimental.  It is recommended to add `--no-experimental-require-module` to NODE_OPTIONS."
+  );
+}
+
 require('../setup_node_env');
 require('../setup_node_env/root');
 require('./apm')(process.env.ELASTIC_APM_SERVICE_NAME || 'kibana-proxy');
