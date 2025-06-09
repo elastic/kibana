@@ -106,7 +106,6 @@
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
     "@kbn/cases-plugin",
-    "@kbn/saved-search-component",
     "@kbn/alerts-ui-shared",
     "@kbn/ui-theme"
   ],
