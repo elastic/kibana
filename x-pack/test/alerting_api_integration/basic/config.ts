@@ -14,4 +14,5 @@ export default createTestConfig('basic', {
   ssl: true,
   enableActionsProxy: false,
   useDedicatedTaskRunner: true,
+  enabledRuleTypes: ['test.gold.noop', 'test.noop'],
 });
