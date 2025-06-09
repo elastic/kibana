@@ -9,7 +9,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import type { FC } from 'react';
-import React, { Fragment, useMemo, useCallback } from 'react';
+import React, { Fragment, useMemo, useCallback, useEffect } from 'react';
 
 import type { EuiSelectableOption, EuiSuperSelectProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
@@ -55,7 +55,31 @@ const useTableSeverityDefault = () => {
  */
 export const useTableSeverity = () => {
   const defaultSeverity = useTableSeverityDefault();
-  return usePageUrlState<TableSeverityPageUrlState>('mlSelectSeverity', defaultSeverity);
+  const severityOptions = useSeverityOptions();
+
+  const [urlState, setUrlState, urlStateService] = usePageUrlState<TableSeverityPageUrlState>(
+    'mlSelectSeverity',
+    defaultSeverity
+  );
+
+  useEffect(() => {
+    const state = urlState.val;
+
+    // Check if this is the old format (single number instead of array)
+    if (typeof state === 'number') {
+      // Convert old single number format to new array format
+      // Find all severities with val >= the old value
+      const compatibleSeverities = severityOptions
+        .filter((option) => option.val >= state)
+        .map((option) => option.threshold);
+
+      setUrlState({
+        val: compatibleSeverities,
+      });
+    }
+  }, [urlState, severityOptions, setUrlState]);
+
+  return [urlState, setUrlState, urlStateService] as const;
 };
 
 /**
