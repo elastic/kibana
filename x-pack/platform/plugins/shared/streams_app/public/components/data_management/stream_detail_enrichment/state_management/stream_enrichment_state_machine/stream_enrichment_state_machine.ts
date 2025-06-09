@@ -19,13 +19,14 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { GrokCollection } from '@kbn/grok-ui';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { processorConverter } from '../../utils';
+import { isGrokProcessor, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -39,6 +40,7 @@ import {
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
 import { getConfiguredProcessors, getStagedProcessors, getUpsertWiredFields } from './utils';
+import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 
 const createId = htmlIdGenerator();
 
@@ -52,6 +54,7 @@ export const streamEnrichmentMachine = setup({
   },
   actors: {
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     processorMachine: getPlaceholderFor(() => processorMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
@@ -73,6 +76,7 @@ export const streamEnrichmentMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
+
     stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
     setupProcessors: assign(
       ({ self, spawn }, params: { definition: Streams.ingest.all.GetResponse }) => {
@@ -131,6 +135,17 @@ export const streamEnrichmentMachine = setup({
       })
     ),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+    updateGrokCollectionCustomPatterns: assign(({ context }, params: { id: string }) => {
+      const processorRefContext = context.processorsRefs
+        .find((p) => p.id === params.id)
+        ?.getSnapshot().context;
+      if (processorRefContext && isGrokProcessor(processorRefContext.processor)) {
+        context.grokCollection.setCustomPatterns(
+          processorRefContext?.processor.grok.pattern_definitions ?? {}
+        );
+      }
+      return { grokCollection: context.grokCollection };
+    }),
   },
   guards: {
     hasMultipleProcessors: ({ context }) => context.processorsRefs.length > 1,
@@ -160,6 +175,12 @@ export const streamEnrichmentMachine = setup({
       if (!processorRef) return false;
       return processorRef.getSnapshot().context.isNew;
     },
+    isDraftProcessor: ({ context }, params: { id: string }) => {
+      const processorRef = context.processorsRefs.find((p) => p.id === params.id);
+
+      if (!processorRef) return false;
+      return processorRef.getSnapshot().matches('draft');
+    },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
@@ -168,6 +189,7 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
+    grokCollection: new GrokCollection(),
     initialProcessorsRefs: [],
     processorsRefs: [],
   }),
@@ -179,9 +201,25 @@ export const streamEnrichmentMachine = setup({
           target: 'resolvedRootStream',
           guard: 'isRootStream',
         },
-        { target: 'ready' },
+        { target: 'setupGrokCollection' },
       ],
     },
+    setupGrokCollection: {
+      invoke: {
+        id: 'setupGrokCollection',
+        src: 'setupGrokCollection',
+        input: ({ context }) => ({
+          grokCollection: context.grokCollection,
+        }),
+        onDone: {
+          target: 'ready',
+        },
+        onError: {
+          target: 'grokCollectionFailure',
+        },
+      },
+    },
+    grokCollectionFailure: {},
     ready: {
       id: 'ready',
       type: 'parallel',
@@ -264,6 +302,15 @@ export const streamEnrichmentMachine = setup({
                 'processor.update': {
                   actions: [{ type: 'reassignProcessors' }],
                 },
+                'processor.change': {
+                  guard: { type: 'isDraftProcessor', params: ({ event }) => event },
+                  actions: [
+                    {
+                      type: 'updateGrokCollectionCustomPatterns',
+                      params: ({ event }) => event,
+                    },
+                  ],
+                },
               },
             },
             displayingSimulation: {
@@ -326,6 +373,7 @@ export const createStreamEnrichmentMachineImplementations = ({
 > => ({
   actors: {
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    setupGrokCollection: setupGrokCollectionActor(),
     processorMachine,
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({

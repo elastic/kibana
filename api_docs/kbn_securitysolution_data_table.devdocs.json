@@ -655,22 +655,6 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.DataTableModel.graphEventId",
-            "type": "string",
-            "tags": [],
-            "label": "graphEventId",
-            "description": [
-              "When non-empty, display a graph view for this event"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
             "id": "def-public.DataTableModel.id",
             "type": "string",
             "tags": [],
@@ -798,21 +782,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.DataTableModel.sessionViewConfig",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "SessionViewConfig",
-              " | null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
@@ -1095,18 +1064,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-public.TimelineTabs",
-        "type": "Enum",
-        "tags": [],
-        "label": "TimelineTabs",
-        "description": [],
-        "path": "x-pack/solutions/security/packages/data-table/common/types/detail_panel.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -1260,7 +1217,7 @@
           },
           " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
           "AlertPageFilterType",
-          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1268,9 +1225,7 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[]>; readonly sessionViewConfig: ",
-          "SessionViewConfig",
-          " | null; }"
+          "[]>; }"
         ],
         "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
@@ -1530,31 +1485,6 @@
             "description": [],
             "signature": [
               "false"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.tableDefaults.graphEventId",
-            "type": "string",
-            "tags": [],
-            "label": "graphEventId",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.tableDefaults.sessionViewConfig",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "sessionViewConfig",
-            "description": [],
-            "signature": [
-              "null"
             ],
             "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,

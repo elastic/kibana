@@ -12,6 +12,9 @@ properties:
               type: array
               items:
                 type: number
+              description: >
+                The threshold value that is used with the `comparator`.
+                If the `comparator` is `between`, you must specify the boundary values.
             comparator:
               type: string
               enum:
@@ -21,14 +24,30 @@ properties:
                 - ">="
                 - "between"
                 - "outside"
+              description: >
+                The comparison function for the threshold.
+                For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "outside".
             timeUnit:
               type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+              description: >
+                The type of units for the time window: seconds, minutes, hours, or days.
             timeSize:
               type: number
+              description: >
+                 The size of the time window (in `timeUnit` units), which determines how far back to search for documents.
+                 Generally it should be a value higher than the rule check interval to avoid gaps in detection.
             warningThreshold:
               type: array
               items:
                 type: number
+              description: >
+                The threshold value that is used with the `warningComparator`.
+                If the `warningComparator` is `between`, you must specify the boundary values.
             warningComparator:
               type: string
               enum:
@@ -53,7 +72,6 @@ properties:
                 - "p95"
                 - "p99"
                 - "custom"
-
         - title: count criterion
           type: object
           properties:
@@ -72,8 +90,18 @@ properties:
                 - "outside"
             timeUnit:
               type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+              description: >
+                The type of units for the time window: seconds, minutes, hours, or days.
             timeSize:
               type: number
+              description: >
+                 The size of the time window (in `timeUnit` units), which determines how far back to search for documents.
+                 Generally it should be a value higher than the rule check interval to avoid gaps in detection.
             warningThreshold:
               type: array
               items:
@@ -110,8 +138,18 @@ properties:
                 - "outside"
             timeUnit:
               type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+              description: >
+                The type of units for the time window: seconds, minutes, hours, or days.
             timeSize:
               type: number
+              description: >
+                 The size of the time window (in `timeUnit` units), which determines how far back to search for documents.
+                 Generally it should be a value higher than the rule check interval to avoid gaps in detection.
             warningThreshold:
               type: array
               items:
@@ -145,6 +183,10 @@ properties:
                           - "max"
                           - "min"
                           - "cardinality"
+                        description: >
+                          An aggregation to gather data for the rule.
+                          For example, find the average, highest or lowest value of a numeric field.
+                          Or use a cardinality aggregation to find the approximate number of unique values in a field. 
                       field:
                         type: string
                   - type: object
@@ -167,11 +209,24 @@ properties:
       - type: array
         items:
           type: string
+    description: >
+      Create an alert for every unique value of the specified fields.
+      For example, you can create a rule per host or every mount point of each host.
+
+      IMPORTANT: If you include the same field in both the `filterQuery` and `groupBy`, you might receive fewer results than you expect.
+      For example, if you filter by `cloud.region: us-east`, grouping by `cloud.region` will have no effect because the filter query can match only one region.
   filterQuery:
     type: string
+    description: >
+      A query that limits the scope of the rule.
+      The rule evaluates only metric data that matches the query.
   sourceId:
     type: string
   alertOnNoData:
     type: boolean
+    description: If true, an alert occurs if the metrics do not report any data over the expected period or if the query fails.
   alertOnGroupDisappear:
     type: boolean
+    description: >
+      If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period.
+      This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.

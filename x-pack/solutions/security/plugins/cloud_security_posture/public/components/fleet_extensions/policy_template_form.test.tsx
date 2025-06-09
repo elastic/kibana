@@ -57,8 +57,8 @@ import {
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { ExperimentalFeaturesService as CSPMExperimentalFeaturesService } from '../../common/experimental_features_service';
 import * as KibanaHook from '../../common/hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -72,10 +72,8 @@ jest.mock('../../common/api/use_package_policy_list');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
-jest.mock('../../common/experimental_features_service');
 
 const onChange = jest.fn();
-const mockedCSPMExperimentalFeaturesService = jest.mocked(CSPMExperimentalFeaturesService);
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
@@ -91,9 +89,6 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
-    mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-      cloudConnectorsEnabled: false,
-    } as any);
 
     (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
       createReactQueryResponseWithRefetch({
@@ -695,11 +690,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('K8S', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
     it('K8S or KSPM Vanilla should not render any Setup Access option', () => {
       const policy = getMockPolicyK8s();
 
@@ -713,11 +703,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('EKS Credentials input fields', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
     it(`documentation Hyperlink should have correct URL to redirect users to AWS page`, () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
@@ -925,12 +910,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('AWS Credentials input fields', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
-
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Organization is enabled for supported versions`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
@@ -1232,11 +1211,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Vuln Mgmt', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
     it('Update Agent Policy CloudFormation template from vars', () => {
       const policy = getMockPolicyVulnMgmtAWS();
 
@@ -1275,11 +1249,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('GCP Credentials input fields', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
     it(`renders ${CLOUDBEAT_GCP} Not supported when version is not at least version 1.5.2`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
@@ -1464,11 +1433,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Azure Credentials input fields', () => {
-    beforeEach(() => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-    });
     it(`renders ${CLOUDBEAT_AZURE} Not supported when version is not at least version 1.6.0`, () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
@@ -1553,10 +1517,6 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
 
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-
       const { rerender, getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
@@ -1619,10 +1579,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-      } as any);
-
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -1669,9 +1625,6 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
-        cloudConnectorsEnabled: true,
-      } as any);
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
@@ -1680,6 +1633,9 @@ describe('<CspPolicyTemplateForm />', () => {
             deploymentId: 'mock-deployment-id',
             serverless: { projectId: '' },
             isCloudEnabled: true,
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
           },
         },
       } as any);

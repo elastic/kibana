@@ -12,6 +12,10 @@
 .dshDashboardViewport {
   width: 100%;
 
+  &.dshDashboardViewport--empty {
+    height: 100%;
+  }
+
   &--panelExpanded {
     flex: 1;
   }
@@ -20,8 +24,4 @@
 .dshDashboardViewport-controls {
   margin: 0 $euiSizeS 0 $euiSizeS;
   padding-top: $euiSizeS;
-}
-
-.dashboardViewport--screenshotMode  .controlsWrapper--empty {
-  display:none
 }

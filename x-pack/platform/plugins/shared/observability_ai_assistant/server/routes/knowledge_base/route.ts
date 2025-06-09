@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
@@ -34,7 +33,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   ): Promise<{
     errorMessage?: string;
     enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
     currentInferenceId?: string | undefined;
@@ -294,32 +293,18 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw new Error('Knowledge base is not ready');
     }
 
-    const limiter = pLimit(5);
-    const promises = resources.params.body.entries.map(async (entry) => {
-      return limiter(async () => {
-        return pRetry(
-          () => {
-            return client.addKnowledgeBaseEntry({
-              entry: {
-                confidence: 'high',
-                is_correction: false,
-                public: true,
-                labels: {},
-                role: KnowledgeBaseEntryRole.UserEntry,
-                ...entry,
-              },
-            });
-          },
-          { retries: 10 }
-        );
-      });
-    });
+    const entries = resources.params.body.entries.map((entry) => ({
+      confidence: 'high' as const,
+      is_correction: false,
+      public: true,
+      labels: {},
+      role: KnowledgeBaseEntryRole.UserEntry,
+      ...entry,
+    }));
 
-    await Promise.all(promises);
+    await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
 
-    resources.logger.info(
-      `Imported ${resources.params.body.entries.length} knowledge base entries`
-    );
+    resources.logger.info(`Imported ${entries.length} knowledge base entries`);
   },
 });
 

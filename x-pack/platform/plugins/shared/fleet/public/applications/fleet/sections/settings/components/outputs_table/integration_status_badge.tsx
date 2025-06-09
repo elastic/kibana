@@ -45,6 +45,19 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
         />
       </EuiBadge>
     ),
+    WARNING: (
+      <EuiBadge
+        color="warning"
+        data-test-subj="integrationSyncWarningBadge"
+        iconType="warning"
+        {...onClickProps}
+      >
+        <FormattedMessage
+          id="xpack.fleet.integrationSyncStatus.warningText"
+          defaultMessage="Warning"
+        />
+      </EuiBadge>
+    ),
     COMPLETED: (
       <EuiBadge
         color="success"
