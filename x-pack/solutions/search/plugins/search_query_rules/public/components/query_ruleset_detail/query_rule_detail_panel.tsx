@@ -19,6 +19,7 @@ import { SearchQueryRulesQueryRule } from '../../types';
 interface QueryRuleDetailPanelProps {
   rules: SearchQueryRulesQueryRule[];
   setNewRules: (newRules: SearchQueryRulesQueryRule[]) => void;
+  setIsFormDirty?: (isDirty: boolean) => void;
   updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
   addNewRule: (newRuleId: string) => void;
   deleteRule?: (ruleId: string) => void;
@@ -33,6 +34,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rulesetId,
   tourInfo,
   rules,
+  setIsFormDirty,
   setNewRules,
   updateRule,
   addNewRule,
@@ -56,6 +58,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           onClose={() => {
             setRuleIdToEdit(null);
           }}
+          setIsFormDirty={setIsFormDirty}
         />
       )}
 
@@ -102,7 +105,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           <QueryRuleDraggableList
             rules={rules}
             rulesetId={rulesetId}
-            onReorder={(newRules) => setNewRules(newRules)}
+            onReorder={(newRules) => {
+              setNewRules(newRules);
+              if (setIsFormDirty) {
+                setIsFormDirty(true);
+              }
+            }}
             onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
             tourInfo={tourInfo}
             deleteRule={deleteRule}

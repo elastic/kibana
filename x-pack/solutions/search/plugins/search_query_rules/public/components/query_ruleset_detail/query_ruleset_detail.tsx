@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
 import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
@@ -41,8 +42,9 @@ import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
 export const QueryRulesetDetail: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, http },
+    services: { application, http, history },
   } = useKibana();
+  const { overlays } = useKibana().services;
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
   }>();
@@ -161,12 +163,35 @@ export const QueryRulesetDetail: React.FC = () => {
   };
 
   const handleSave = () => {
+    setIsFormDirty(false);
     createRuleset({
       rulesetId,
       forceWrite: true,
       rules,
     });
   };
+
+  const [isFormDirty, setIsFormDirty] = useState(false);
+
+  useUnsavedChangesPrompt({
+    cancelButtonText: i18n.translate('xpack.queryRules.queryRulesetDetail.unsavedPrompt.cancel', {
+      defaultMessage: 'Continue setup',
+    }),
+    confirmButtonText: i18n.translate('xpack.queryRules.queryRulesetDetail.unsavedPrompt.confirm', {
+      defaultMessage: 'Leave the page',
+    }),
+    hasUnsavedChanges: isFormDirty,
+    history,
+    http,
+    messageText: i18n.translate('xpack.queryRules.queryRulesetDetail.unsavedPrompt.body', {
+      defaultMessage: 'Make sure to save your changes before leaving this page.',
+    }),
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
+    titleText: i18n.translate('xpack.queryRules.queryRulesetDetail.unsavedPrompt.title', {
+      defaultMessage: 'Your ruleset has some unsaved changes',
+    }),
+  });
 
   return (
     <QueryRulesPageTemplate>
@@ -272,6 +297,7 @@ export const QueryRulesetDetail: React.FC = () => {
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
                     onClick={handleSave}
+                    disabled={!isFormDirty || isInitialLoading}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.queryRulesetDetail.saveButton"
@@ -315,6 +341,7 @@ export const QueryRulesetDetail: React.FC = () => {
             updateRule={updateRule}
             rules={rules}
             tourInfo={tourStepsInfo[1]}
+            setIsFormDirty={setIsFormDirty}
           />
 
           {tourStepsInfo[1]?.tourTargetRef?.current !== null && (

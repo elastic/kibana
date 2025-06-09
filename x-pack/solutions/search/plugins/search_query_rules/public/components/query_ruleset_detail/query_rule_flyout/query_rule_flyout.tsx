@@ -46,6 +46,7 @@ export interface QueryRuleFlyoutProps {
   onSave: (rule: SearchQueryRulesQueryRule) => void;
   ruleId: string;
   rulesetId: string;
+  setIsFormDirty?: (isDirty: boolean) => void;
 }
 
 export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
@@ -54,7 +55,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   onSave,
   ruleId,
   rulesetId,
+  setIsFormDirty,
 }) => {
+  const [isFlyoutDirty, setIsFlyoutDirty] = useState<boolean>(false);
   const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
   const { fields, remove, replace, update, append } = useFieldArray({
     control,
@@ -106,6 +109,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
   const handleAddCriteria = () => {
+    setIsFlyoutDirty(true);
     append({
       type: 'exact',
       metadata: '',
@@ -114,6 +118,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   };
 
   const appendNewAction = () => {
+    setIsFlyoutDirty(true);
     if (isIdRule) {
       setValue('actions.ids', [...(getValues('actions.ids') || []), '']);
     } else {
@@ -125,6 +130,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   };
 
   const handleSave = () => {
+    setIsFormDirty?.(true);
     const index = rules.findIndex((rule) => rule.rule_id === ruleId);
     if (index !== -1) {
       if (isAlways) {
@@ -250,7 +256,10 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                             ),
                           },
                         ]}
-                        onChange={onChange}
+                        onChange={(id) => {
+                          setIsFlyoutDirty(true);
+                          onChange(id);
+                        }}
                         buttonSize="compressed"
                         type="single"
                         idSelected={value}
@@ -300,6 +309,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 <EuiDragDropContext
                   onDragEnd={({ source, destination }) => {
                     if (source && destination && ruleFromRuleset) {
+                      setIsFlyoutDirty(true);
                       if (isDocRule) {
                         const newActions = euiDragDropReorder(
                           actionFields,
@@ -335,6 +345,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                 hasIndexSelector={false}
                                 onDeleteDocument={() => {
                                   if (ruleFromRuleset) {
+                                    setIsFlyoutDirty(true);
                                     const updatedActions = actionIdsFields.filter(
                                       (_, i) => i !== index
                                     );
@@ -343,6 +354,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                 }}
                                 onIdSelectorChange={(id) => {
                                   if (ruleFromRuleset) {
+                                    setIsFlyoutDirty(true);
                                     const updatedActions = actionIdsFields.map((value, i) =>
                                       i === index ? id : value
                                     );
@@ -367,10 +379,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                 initialDocId={doc._id}
                                 index={doc._index}
                                 onDeleteDocument={() => {
+                                  setIsFlyoutDirty(true);
                                   removeAction(index);
                                 }}
                                 onIndexSelectorChange={(indexName) => {
                                   if (ruleFromRuleset) {
+                                    setIsFlyoutDirty(true);
                                     const updatedActions = actionFields.map((action, i) =>
                                       i === index ? { ...action, _index: indexName } : action
                                     );
@@ -379,6 +393,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                 }}
                                 onIdSelectorChange={(id) => {
                                   if (ruleFromRuleset) {
+                                    setIsFlyoutDirty(true);
                                     const updatedActions = actionFields.map((action, i) =>
                                       i === index ? { ...action, _id: id } : action
                                     );
@@ -470,6 +485,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       },
                     ]}
                     onChange={(id) => {
+                      setIsFlyoutDirty(true);
                       setIsAlways(id === 'always');
                     }}
                     buttonSize="compressed"
@@ -497,9 +513,11 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       criteria={field}
                       key={field.id}
                       onChange={(newCriteria) => {
+                        setIsFlyoutDirty(true);
                         update(index, newCriteria);
                       }}
                       onRemove={() => {
+                        setIsFlyoutDirty(true);
                         remove(index);
                       }}
                     />
@@ -544,10 +562,11 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               data-test-subj="searchQueryRulesQueryRuleFlyoutUpdateButton"
               fill
               onClick={handleSave}
+              disabled={!isFlyoutDirty}
             >
               <FormattedMessage
                 id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"
-                defaultMessage="Update"
+                defaultMessage="Update rule"
               />
             </EuiButton>
           </EuiFlexItem>
