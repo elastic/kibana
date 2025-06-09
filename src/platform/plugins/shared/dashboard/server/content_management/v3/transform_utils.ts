@@ -50,37 +50,53 @@ export function dashboardAttributesOut(
   }
 
   // try to maintain a consistent (alphabetical) order of keys
-  return {
-    ...('controlGroupInput' in attributes && {
-      controlGroupInput: transformControlGroupOut(attributes.controlGroupInput),
-    }),
+  let baseDashboard = {
     ...(description && { description }),
-    ...('kibanaSavedObjectMeta' in attributes && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(attributes.kibanaSavedObjectMeta),
-    }),
-    ...('optionsJSON' in attributes && { options: transformOptionsOut(attributes.optionsJSON) }),
-    ...(('panelsJSON' in attributes || 'sections' in attributes) && {
-      panels: transformPanelsOut(attributes.panelsJSON, attributes.sections),
-    }),
-    ...('refreshInterval' in attributes &&
-      isRefreshIntervalSavedObject(attributes.refreshInterval) && {
-        refreshInterval: {
-          pause: attributes.refreshInterval.pause,
-          value: attributes.refreshInterval.value,
-        },
-      }),
     ...(tags && tags.length && { tags }),
-    ...('timeFrom' in attributes &&
-      typeof attributes.timeFrom === 'string' && { timeFrom: attributes.timeFrom }),
-    timeRestore:
-      'timeRestore' in attributes && typeof attributes.timeRestore === 'boolean'
-        ? attributes.timeRestore
-        : false,
-    ...('timeTo' in attributes &&
-      typeof attributes.timeTo === 'string' && { timeTo: attributes.timeTo }),
     title,
     ...(version && { version }),
   };
+  if ('controlGroupInput' in attributes) {
+    const controlGroupInput = transformControlGroupOut(attributes.controlGroupInput);
+    baseDashboard = { ...baseDashboard, ...(controlGroupInput && { controlGroupInput }) };
+  }
+  if ('kibanaSavedObjectMeta' in attributes) {
+    const kibanaSavedObjectMeta = transformSearchSourceOut(attributes.kibanaSavedObjectMeta);
+    baseDashboard = { ...baseDashboard, ...(kibanaSavedObjectMeta && { kibanaSavedObjectMeta }) };
+  }
+  if ('optionsJSON' in attributes) {
+    const options = transformOptionsOut(attributes.optionsJSON);
+    baseDashboard = { ...baseDashboard, ...(options && { options }) };
+  }
+  if ('panelsJSON' in attributes || 'sections' in attributes) {
+    const panels = transformPanelsOut(attributes.panelsJSON, attributes.sections);
+    baseDashboard = { ...baseDashboard, ...(panels && { panels }) };
+  }
+  if ('refreshInterval' in attributes) {
+    const refreshInterval = isRefreshIntervalSavedObject(attributes.refreshInterval)
+      ? {
+          refreshInterval: {
+            pause: attributes.refreshInterval.pause,
+            value: attributes.refreshInterval.value,
+          },
+        }
+      : undefined;
+    baseDashboard = { ...baseDashboard, ...(refreshInterval && { refreshInterval }) };
+  }
+  if ('timeFrom' in attributes) {
+    const timeFrom = typeof attributes.timeFrom === 'string' ? attributes.timeFrom : undefined;
+    baseDashboard = { ...baseDashboard, ...(timeFrom && { timeFrom }) };
+  }
+  if ('timeRestore' in attributes) {
+    const timeRestore =
+      typeof attributes.timeRestore === 'boolean' ? attributes.timeRestore : false;
+    baseDashboard = { ...baseDashboard, ...(timeRestore && { timeRestore }) };
+  }
+  if ('timeTo' in attributes) {
+    const timeTo = typeof attributes.timeTo === 'string' ? attributes.timeTo : undefined;
+    baseDashboard = { ...baseDashboard, ...(timeTo && { timeTo }) };
+  }
+  return baseDashboard;
 }
 
 const isRefreshIntervalSavedObject = (
