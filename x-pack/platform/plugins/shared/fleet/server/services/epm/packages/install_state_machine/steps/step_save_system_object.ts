@@ -7,13 +7,12 @@
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../../../constants';
 import type { Installation } from '../../../../../types';
 
-import { packagePolicyService } from '../../../..';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../../../../package_policy';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
@@ -65,11 +64,12 @@ export async function stepSaveSystemObject(context: InstallContext) {
   // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
   // associated package policies after installation
   if (updatedPackage.attributes.keep_policies_up_to_date) {
+    const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
     await withPackageSpan('Upgrade package policies', async () => {
       const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
         page: 1,
         perPage: SO_SEARCH_LIMIT,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+        kuery: `${packagePolicySavedObjectType}.package.name:${pkgName}`,
       });
       logger.debug(
         `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`

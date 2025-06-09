@@ -15,13 +15,13 @@ import type {
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../../common/types';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
 
 import type { Installation, PackagePolicy } from '../../types';
 
 import { appContextService } from '../app_context';
 import { getInstallation, getInstallations } from '../epm/packages';
-import { packagePolicyService } from '../package_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../package_policy';
 import { runWithCache } from '../epm/packages/cache';
 
 export interface UpgradeManagedPackagePoliciesResult {
@@ -168,9 +168,10 @@ async function getPackagePoliciesNotMatchingVersion(
   pkgName: string,
   pkgVersion: string
 ) {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   return packagePolicyService.fetchAllItems(soClient, {
     perPage: 50,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName} AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version:${pkgVersion}`,
+    kuery: `${packagePolicySavedObjectType}.package.name:${pkgName} AND NOT ${packagePolicySavedObjectType}.package.version:${pkgVersion}`,
   });
 }
 

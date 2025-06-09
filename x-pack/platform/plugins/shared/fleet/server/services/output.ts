@@ -38,8 +38,6 @@ import type {
   PolicySecretReference,
 } from '../types';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -69,8 +67,8 @@ import {
 
 import type { OutputType } from '../types';
 
-import { agentPolicyService } from './agent_policy';
-import { packagePolicyService } from './package_policy';
+import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
@@ -143,19 +141,21 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
 }
 
 async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {
+  const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  const packagePoliciesKuery: string = `${packagePolicySavedObjectType}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${agentPolicySavedObjectType}.data_output_id:"${outputId}" or not ${agentPolicySavedObjectType}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${agentPolicySavedObjectType}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${agentPolicySavedObjectType}.data_output_id:*`;
     } else {
       return;
     }
@@ -204,7 +204,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
       {
         fields: ['policy_ids', 'package.name'],
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
-          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .map((packageName) => `${packagePolicySavedObjectType}.package.name:${packageName}`)
           .join(' or '),
       }
     );
@@ -237,6 +237,7 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
 }
 
 async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefault?: boolean) {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
@@ -250,7 +251,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
         fields: ['policy_ids', 'package.name'],
         spaceId: '*',
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
-          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .map((packageName) => `${packagePolicySavedObjectType}.package.name:${packageName}`)
           .join(' or '),
       }
     );
