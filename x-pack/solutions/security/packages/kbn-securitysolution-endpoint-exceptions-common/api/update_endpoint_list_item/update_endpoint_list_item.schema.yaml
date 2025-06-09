@@ -9,7 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: UpdateEndpointListItem
       summary: Update an endpoint exception list item
-      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      description: Update an Elastic Endpoint exception list item by using the `id` or `item_id` field.
       requestBody:
         description: Exception list item's properties
         required: true

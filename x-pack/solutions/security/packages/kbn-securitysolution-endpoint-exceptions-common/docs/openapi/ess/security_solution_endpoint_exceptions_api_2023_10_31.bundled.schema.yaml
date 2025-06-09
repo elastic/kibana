@@ -57,7 +57,7 @@ paths:
   /api/endpoint_list/items:
     delete:
       description: >-
-        Delete an endpoint exception list item using the `id` or `item_id`
+        Delete an Elastic Endpoint exception list item by using the `id` or `item_id`
         field.
       operationId: DeleteEndpointListItem
       parameters:
@@ -117,8 +117,7 @@ paths:
         - Security Endpoint Exceptions API
     get:
       description: >-
-        Get the details of an endpoint exception list item using the `id` or
-        `item_id` field.
+        Get the details of an Elastic Endpoint exception list item by using the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -179,8 +178,7 @@ paths:
         - Security Endpoint Exceptions API
     post:
       description: >-
-        Create an endpoint exception list item, and associate it with the
-        endpoint exception list.
+        Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -260,8 +258,7 @@ paths:
         - Security Endpoint Exceptions API
     put:
       description: >-
-        Update an endpoint exception list item using the `id` or `item_id`
-        field.
+        Update an Elastic Endpoint exception list item by using the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -346,7 +343,7 @@ paths:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items. 
       operationId: FindEndpointListItems
       parameters:
         - description: >

@@ -9,7 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: DeleteEndpointListItem
       summary: Delete an endpoint exception list item
-      description: Delete an endpoint exception list item using the `id` or `item_id` field.
+      description: Delete an Elastic Endpoint exception list item by using the `id` or `item_id` field.
       parameters:
         - name: id
           in: query
