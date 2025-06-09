@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-          await waitForEvaluationComplete({ evaluationId, supertest, log });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
         }).timeout(TEST_TIMOUT);
 
         // Uses attack discovery alerts from episodes 1-8
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-          await waitForEvaluationComplete({ evaluationId, supertest, log });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
         }).timeout(TEST_TIMOUT);
 
         it('should successfully run the "Assistant Eval: Custom Knowledge" dataset', async () => {
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-          await waitForEvaluationComplete({ evaluationId, supertest, log });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
         }).timeout(TEST_TIMOUT);
       });
 
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-          await waitForEvaluationComplete({ evaluationId, supertest, log });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
         }).timeout(TEST_TIMOUT);
       });
     });

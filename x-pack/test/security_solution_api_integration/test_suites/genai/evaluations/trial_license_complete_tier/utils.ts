@@ -19,10 +19,12 @@ export const waitForEvaluationComplete = async ({
   evaluationId,
   supertest,
   log,
+  timeout = 1_200_000, // 20min default
 }: {
   evaluationId: string;
   supertest: SuperTest.Agent;
   log: ToolingLog;
+  timeout?: number;
 }) => {
   await waitFor(
     async () => {
@@ -41,7 +43,7 @@ export const waitForEvaluationComplete = async ({
     },
     'waitForEvaluationComplete',
     log,
-    20 * 60 * 1000, // wait for up to 20m -- evals can take a long time!
+    timeout,
     1000 // poll every 1s
   );
 };
