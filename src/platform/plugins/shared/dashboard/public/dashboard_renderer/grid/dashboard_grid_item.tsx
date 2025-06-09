@@ -216,23 +216,26 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
 
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>
-    css([{
-      height: '100%',
-      '&.dshDashboardGrid__item--highlighted .embPanel': {
-        borderRadius: context.euiTheme.border.radius.small,
-        animationName: highlightOutline(context.euiTheme),
-        animationDuration: '4s',
-        animationTimingFunction: 'ease-out',
-        zIndex: context.euiTheme.levels.mask,
+    css([
+      {
+        height: '100%',
+        '&.dshDashboardGrid__item--highlighted .embPanel': {
+          borderRadius: context.euiTheme.border.radius.small,
+          animationName: highlightOutline(context.euiTheme),
+          animationDuration: '4s',
+          animationTimingFunction: 'ease-out',
+          zIndex: context.euiTheme.levels.mask,
+        },
+        // Remove padding in fullscreen mode
+        '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
+        '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
+          padding: 0,
+        },
       },
-      // Remove padding in fullscreen mode
-      '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
-        padding: 0,
-      },
-      '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
-        padding: 0,
-      },
-    }, printViewportVisStyles(context)]),
+      printViewportVisStyles(context),
+    ]),
   focusPanelBlur: css({
     pointerEvents: 'none',
     opacity: '0.25',
