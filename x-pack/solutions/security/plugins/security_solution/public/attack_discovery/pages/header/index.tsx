@@ -83,15 +83,6 @@ const HeaderComponent: React.FC<Props> = ({
     } else {
       setIsEISCostTourDisabled(false);
     }
-    console.log(
-      'isEISCostTourDisabled--------',
-      isEISCostTourDisabled,
-      attackDiscoveryAlertsEnabled,
-      connectorsAreConfigured,
-      inferenceEnabled,
-      showFlyout,
-      spaceId
-    );
   }, [
     attackDiscoveryAlertsEnabled,
     connectorsAreConfigured,
