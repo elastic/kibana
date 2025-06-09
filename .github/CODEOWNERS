@@ -22,7 +22,7 @@ x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
+x-pack/test/alerting_api_integration/common/plugins/alerting @elastic/response-ops
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
@@ -774,6 +774,7 @@ src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
