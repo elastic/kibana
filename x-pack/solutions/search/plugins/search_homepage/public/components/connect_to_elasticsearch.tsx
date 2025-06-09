@@ -12,16 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
+  EuiCopy,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 export const ConnectToElasticsearch = () => {
-  const [value, setValue] = useState('');
-
-  const onChange = (e) => {
-    setValue(e.target.value);
-  };
+  const localhost = 'http://localhost:9200/';
 
   return (
     <>
@@ -56,11 +54,23 @@ export const ConnectToElasticsearch = () => {
                   )}
                 </span>
               </EuiTitle>
-              <EuiFieldText
-                placeholder="http://localhost:9200/"
-                value={value}
-                onChange={(e) => onChange(e)}
-              />
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={localhost}>
+                    {(copy) => (
+                      <EuiButtonIcon
+                        onClick={copy}
+                        iconType="copyClipboard"
+                        display="base"
+                        size="m"
+                      />
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFieldText value={localhost} readOnly />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
