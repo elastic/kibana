@@ -48,6 +48,21 @@ export const buildActionsQuery = ({
       // For other spaces, only include docs where all policy_ids are in policyIds
       extendedFilter = [...filter, getPolicyIdsSubsetScriptFilter(policyIds)];
     }
+  } else {
+    // When no osquery package policies exist in the current space,
+    // return no results to prevent cross-space data leakage.
+    // This is a railsafe check as user dont have access to actions
+    // if there are no osquery package policies in the current space
+    extendedFilter = [
+      ...filter,
+      {
+        bool: {
+          must_not: {
+            match_all: {},
+          },
+        },
+      },
+    ];
   }
 
   return {

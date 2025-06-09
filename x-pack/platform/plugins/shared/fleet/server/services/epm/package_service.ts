@@ -70,7 +70,10 @@ export interface PackageService {
 }
 
 export interface PackageClient {
-  getInstallation(pkgName: string): Promise<Installation | undefined>;
+  getInstallation(
+    pkgName: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<Installation | undefined>;
 
   ensureInstalledPackage(options: {
     pkgName: string;
@@ -198,11 +201,14 @@ class PackageClientImpl implements PackageClient {
     }
   }
 
-  public async getInstallation(pkgName: string) {
+  public async getInstallation(
+    pkgName: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
-      savedObjectsClient: this.internalSoClient,
+      savedObjectsClient,
     });
   }
 

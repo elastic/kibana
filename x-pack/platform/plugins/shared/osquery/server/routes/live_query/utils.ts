@@ -10,16 +10,13 @@ import { of } from 'rxjs';
 import { mergeMap } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
 } from '../../../common/search_strategy';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getActionResponses = (
   search: IScopedSearchClient,
@@ -90,34 +87,3 @@ export const getActionResponses = (
         });
       })
     );
-
-/**
- * Fetches all package policy IDs for osquery_manager integration in the current space.
- * @param packagePolicyService - Fleet's package policy service
- * @param soClient - Saved objects client
- * @returns Array of package policy IDs
- */
-export const fetchOsqueryPackagePolicyIds = async (
-  soClient: SavedObjectsClientContract,
-  osqueryContext: OsqueryAppContext
-): Promise<string[]> => {
-  const logger = osqueryContext.logFactory.get('fetchOsqueryPackagePolicyIds');
-  const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-
-  if (!packagePolicyService) {
-    throw new Error('Package policy service is not available');
-  }
-
-  logger.debug('Fetching osquery package policy IDs');
-
-  const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`;
-  const idIterable = await packagePolicyService.fetchAllItemIds(soClient, { kuery });
-  const ids: string[] = [];
-  for await (const batch of idIterable) {
-    ids.push(...batch);
-  }
-
-  logger.debug(`Fetched ${ids.length} osquery package policy IDs`);
-
-  return ids;
-};

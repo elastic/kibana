@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { fetchOsqueryPackagePolicyIds } from './utils';
+import { fetchOsqueryPackagePolicyIds } from '../utils';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
