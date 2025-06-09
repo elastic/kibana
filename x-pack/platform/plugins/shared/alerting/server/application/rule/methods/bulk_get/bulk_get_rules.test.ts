@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { transformRuleSoToSanitizedRule } from '../../transforms';
 import { bulkGetRulesSo } from '../../../../data/rule';
 import { bulkGetRules } from './bulk_get_rules';
@@ -14,6 +13,10 @@ import type { BulkGetRulesResponse } from './types/bulk_get_rules_response';
 import type { RuleParams } from '../../types';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { BulkGetRulesParams } from './types';
+import {
+  getAuthorizationFilter,
+  checkAuthorizationAndGetTotal,
+} from '../../../../rules_client/lib';
 
 jest.mock('../../transforms', () => {
   return {
@@ -27,11 +30,19 @@ jest.mock('../../../../data/rule', () => {
   };
 });
 
+jest.mock('../../../../rules_client/lib', () => {
+  return {
+    getAuthorizationFilter: jest.fn(),
+    checkAuthorizationAndGetTotal: jest.fn(),
+  };
+});
+
 const rulesClientContext = rulesClientContextMock.create();
 const transformRuleSoToSanitizedRuleMock = transformRuleSoToSanitizedRule as jest.Mock;
 const bulkGetRulesSoMock = bulkGetRulesSo as jest.Mock;
-const ensureAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as jest.Mock;
 const auditLoggerMock = rulesClientContext.auditLogger?.log as jest.Mock;
+const getAuthorizationFilterMock = getAuthorizationFilter as jest.Mock;
+const checkAuthorizationAndGetTotalMock = checkAuthorizationAndGetTotal as jest.Mock;
 
 const getRule = (id: string, alertTypeId: string, consumer: string) => ({
   id,
@@ -48,13 +59,10 @@ const getTestRules = () => {
 
   const erroredFetchingSo = [getRuleErroredFetchingSo('5')];
 
-  const erroredAccess = [getRule('6', 'some-forbidden-alert-type', 'some-consumer-1')];
-
   return {
     successful,
     erroredFetchingSo,
-    erroredAccess,
-    all: [...successful, ...erroredFetchingSo, ...erroredAccess],
+    all: [...successful, ...erroredFetchingSo],
   };
 };
 
@@ -77,15 +85,9 @@ describe('bulkGetRules', () => {
       saved_objects: testRules.all,
     });
 
-    ensureAuthorizedMock.mockImplementation(async ({ ruleTypeId, consumer }) => {
-      const errorRule = testRules.erroredAccess.find(
-        (rule) =>
-          rule.attributes.alertTypeId === ruleTypeId && rule.attributes.consumer === consumer
-      );
-      if (errorRule) {
-        throw Boom.forbidden('Unauthorized');
-      }
-    });
+    getAuthorizationFilterMock.mockResolvedValue([]);
+
+    checkAuthorizationAndGetTotalMock.mockResolvedValueOnce({ total: 0 });
 
     results = await bulkGetRules(rulesClientContext, { ids: ruleIds });
   });
@@ -98,6 +100,14 @@ describe('bulkGetRules', () => {
     );
   });
 
+  it('should throw an error if it fails to verify the user access to the rules', async () => {
+    const authError = new Error('Some auth error');
+    checkAuthorizationAndGetTotalMock.mockRejectedValueOnce(authError);
+    await expect(
+      bulkGetRules(rulesClientContext, { ids: ruleIds } as unknown as BulkGetRulesParams)
+    ).rejects.toThrowError(authError);
+  });
+
   it('should attempt to resolve rules', () => {
     expect(bulkGetRulesSoMock).toHaveBeenCalledTimes(1);
     expect(bulkGetRulesSoMock).toHaveBeenCalledWith({
@@ -107,7 +117,7 @@ describe('bulkGetRules', () => {
   });
 
   it('should audit log', () => {
-    expect(auditLoggerMock).toHaveBeenCalledTimes(6);
+    expect(auditLoggerMock).toHaveBeenCalledTimes(5);
     const assertAuditLogCall = (id: string, name?: string, errorMsg?: string) => {
       const errorObj = errorMsg ? expect.objectContaining({ message: errorMsg }) : undefined;
       const ruleObj: { id: string; name?: string } = { id };
@@ -134,10 +144,6 @@ describe('bulkGetRules', () => {
     testRules.erroredFetchingSo.forEach(({ id, error }) => {
       assertAuditLogCall(id, undefined, error.message);
     });
-
-    testRules.erroredAccess.forEach(({ id }) => {
-      assertAuditLogCall(id, undefined, 'Unauthorized');
-    });
   });
 
   it('should attempt to sanitize the rules', () => {
@@ -153,9 +159,6 @@ describe('bulkGetRules', () => {
   });
 
   it('should return any errors that occurred', () => {
-    expect(results.errors).toEqual([
-      ...testRules.erroredFetchingSo,
-      ...testRules.erroredAccess.map(({ id }) => ({ id, error: new Error('Unauthorized') })),
-    ]);
+    expect(results.errors).toEqual(testRules.erroredFetchingSo);
   });
 });

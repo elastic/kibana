@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
-import { chunk, groupBy, mapValues, omit } from 'lodash';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { chunk, omit } from 'lodash';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -18,6 +19,11 @@ import type { RuleParams } from '../../types';
 import { bulkGetRulesSo } from '../../../../data/rule';
 import { transformRuleSoToSanitizedRule } from '../../transforms';
 import type { BulkGetRulesResponse } from './types/bulk_get_rules_response';
+import { convertRuleIdsToKueryNode } from '../../../../lib';
+import {
+  getAuthorizationFilter,
+  checkAuthorizationAndGetTotal,
+} from '../../../../rules_client/lib';
 
 export async function bulkGetRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -28,6 +34,19 @@ export async function bulkGetRules<Params extends RuleParams = never>(
   } catch (error) {
     throw Boom.badRequest(`Error validating get rules params - ${error.message}`);
   }
+
+  const kueryNodeFilter = convertRuleIdsToKueryNode(params.ids);
+  const authorizationFilter = await getAuthorizationFilter(context, { action: 'GET' });
+
+  const kueryNodeFilterWithAuth =
+    authorizationFilter && kueryNodeFilter
+      ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+      : kueryNodeFilter;
+
+  await checkAuthorizationAndGetTotal(context, {
+    filter: kueryNodeFilterWithAuth,
+    action: 'GET',
+  });
 
   const result: BulkGetRulesResponse<Params> = {
     rules: [],
@@ -57,37 +76,7 @@ export async function bulkGetRules<Params extends RuleParams = never>(
     }
   );
 
-  const alertTypes = mapValues(
-    groupBy(savedObjects, (rule) => `${rule.attributes.alertTypeId}<>${rule.attributes.consumer}`),
-    (groupedRules) => ({
-      alertTypeId: groupedRules[0].attributes.alertTypeId,
-      consumer: groupedRules[0].attributes.consumer,
-      rules: groupedRules,
-    })
-  );
-
-  const authorizedRuleSos: (typeof alertTypes)[0]['rules'] = [];
-  for (const { alertTypeId, consumer, rules } of Object.values(alertTypes)) {
-    try {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: alertTypeId,
-        consumer,
-        operation: ReadOperations.Get,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-
-      authorizedRuleSos.push(...rules);
-    } catch (error) {
-      rules.forEach((rule) => {
-        result.errors.push({
-          id: rule.id,
-          error,
-        });
-      });
-    }
-  }
-
-  authorizedRuleSos.forEach((rule) => {
+  savedObjects.forEach((rule) => {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET,
@@ -108,7 +97,7 @@ export async function bulkGetRules<Params extends RuleParams = never>(
 
   const paramsForTransform = omit(params, ['ids']);
   const transformedRules = await pMap(
-    authorizedRuleSos,
+    savedObjects,
     (rule) => transformRuleSoToSanitizedRule<Params>(context, rule, paramsForTransform),
     { concurrency: 10 }
   );
