@@ -84,7 +84,7 @@ export const createClient = ({
             return this.get(id);
         
         } catch (error: any) {
-            logger.info('Error creating ESQL tool:' + error);
+            logger.info(error);
             throw error; 
         }
     }

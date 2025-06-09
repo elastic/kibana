@@ -104,7 +104,6 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
           ),
           meta: schema.object({
             providerId: schema.literal(esqlToolProviderId),
-            sourceId: schema.string(),
             tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
           }),
         }),

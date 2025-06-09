@@ -30,6 +30,12 @@ const storageSettings = {
               })
             }
         }),
+        meta: types.object({
+          properties: {
+            providerId: types.keyword({}),
+            tags: types.keyword({}) // Array of strings stored as keywords
+          }
+      }),
         created_at: types.date({}),
         updated_at: types.date({})
       }
