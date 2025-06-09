@@ -250,6 +250,16 @@ export interface SavedObjectsType<Attributes = any> {
    */
   getTitle?: (savedObject: Attributes) => string;
 
+  /**
+   * If defined and set to `true`, this saved object type will support access control functionality.
+   *
+   * When enabled, objects of this type can have an `accessControl` property containing:
+   * - `owner`: The ID of the user who owns this object
+   * - `accessMode`: Optional access mode setting, currently supporting 'read_only'
+   *
+   * This property works in conjunction with the SavedObjectAccessControl interface defined
+   * in server_types.ts and is respected by the serializer when processing saved objects.
+   */
   supportsAccessControl?: boolean;
 }
 
