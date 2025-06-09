@@ -15,4 +15,7 @@ export enum MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION {
   ISOLATE_HOST = 'isolateHost',
   RELEASE_HOST = 'releaseHost',
   GET_ACTIONS = 'getActions',
+  GET_LIBRARY_FILES = 'getLibraryFiles',
+  RUN_SCRIPT = 'runScript',
+  GET_ACTION_RESULTS = 'getActionResults',
 }

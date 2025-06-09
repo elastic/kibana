@@ -9918,6 +9918,258 @@ Object {
     "error": [Function],
     "presence": "optional",
   },
+  "keys": Object {},
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 8`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "comment": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "parameters": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "args": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-min-length": 1,
+            },
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "scriptName": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "metas": Array [
+            Object {
+              "x-oas-min-length": 1,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 9`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+            ],
+            "type": "array",
+          },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "alternatives",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 10`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
   "keys": Object {
     "apiUrl": Object {
       "flags": Object {
@@ -10049,7 +10301,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 8`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 11`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10089,7 +10341,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 9`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 12`] = `
 Object {
   "flags": Object {
     "default": Object {
