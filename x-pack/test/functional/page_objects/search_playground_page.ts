@@ -220,12 +220,26 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectChatWindowLoaded() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
-        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
-
-        expect(await testSubjects.isEnabled('regenerateActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('sendQuestionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.equal(
+          true,
+          'dataSourceActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.equal(
+          true,
+          'viewCodeActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('regenerateActionButton')).to.equal(
+          false,
+          'regenerateActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.equal(
+          false,
+          'clearChatActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('sendQuestionButton')).to.equal(
+          false,
+          'sendQuestionButton isEnabled should be false'
+        );
 
         await testSubjects.existOrFail('questionInput');
         const model = await testSubjects.find('summarizationModelSelect');
