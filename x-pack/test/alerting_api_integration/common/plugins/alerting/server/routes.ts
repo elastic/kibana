@@ -27,6 +27,7 @@ import type {
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   RULE_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -41,6 +42,7 @@ export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
   taskManagerStart: Promise<TaskManagerStartContract>,
   notificationsStart: Promise<NotificationsPluginStart>,
+  alertingStart: Promise<AlertingServerStart>,
   { logger, eventLogger }: { logger: Logger; eventLogger: IEventLogger }
 ) {
   const router = core.http.createRouter();
