@@ -1332,6 +1332,44 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
   );
 
 /**
+ * Bulk fill gaps for rules
+ */
+
+export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
+  {
+    defaultMessage: 'Gaps filling for rules scheduled',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling gaps filling for rules',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled gaps filling for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        'Failed to schedule gaps filling for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+    }
+  );
+
+/**
  * Bulk Edit
  */
 
