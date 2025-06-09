@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { FileManager } from './file_manager';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/file-upload'],
+};
