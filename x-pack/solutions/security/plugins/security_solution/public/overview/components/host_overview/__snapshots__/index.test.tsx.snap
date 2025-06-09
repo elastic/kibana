@@ -1,6 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Host Summary Component it renders the default Host Summary 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -32,14 +40,6 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div
@@ -684,6 +684,14 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
 `;
 
 exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -715,14 +723,6 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div
