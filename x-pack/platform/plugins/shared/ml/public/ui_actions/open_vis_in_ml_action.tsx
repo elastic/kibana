@@ -10,6 +10,7 @@ import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/present
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ActionApi } from './types';
 import type { MlCoreSetup } from '../plugin';
 
@@ -61,16 +62,7 @@ export function createVisToADJobAction(
       )
         return false;
 
-      const [
-        { getChartInfoFromVisualization, isCompatibleVisualizationType },
-        [coreStart, { lens }],
-      ] = await Promise.all([
-        import('../application/jobs/new_job/job_from_lens'),
-        getStartServices(),
-      ]);
-      const { isCompatibleMapVisualization } = await import(
-        '../application/jobs/new_job/job_from_map'
-      );
+      const [coreStart, { lens }] = await getStartServices();
 
       if (
         !coreStart.application.capabilities.ml?.canCreateJob ||
@@ -82,12 +74,21 @@ export function createVisToADJobAction(
       try {
         if (isLensApi(embeddable) && lens) {
           const vis = embeddable.getSavedVis();
-          if (!vis) {
+          if (!vis || isOfAggregateQueryType(vis.state.query)) {
             return false;
           }
+
+          const { getChartInfoFromVisualization, isCompatibleVisualizationType } = await import(
+            '../application/jobs/new_job/job_from_lens'
+          );
+
           const chartInfo = await getChartInfoFromVisualization(lens, vis);
           return isCompatibleVisualizationType(chartInfo);
         } else if (isMapApi(embeddable)) {
+          const { isCompatibleMapVisualization } = await import(
+            '../application/jobs/new_job/job_from_map'
+          );
+
           return isCompatibleMapVisualization(embeddable);
         }
         return false;
