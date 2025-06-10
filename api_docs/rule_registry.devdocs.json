@@ -1772,54 +1772,6 @@
     "functions": [
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.alertAuditEvent",
-        "type": "Function",
-        "tags": [],
-        "label": "alertAuditEvent",
-        "description": [],
-        "signature": [
-          "({ action, id, outcome, error }: ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "server",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.AlertAuditEventParams",
-            "text": "AlertAuditEventParams"
-          },
-          ") => ",
-          "AuditEvent"
-        ],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.alertAuditEvent.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ action, id, outcome, error }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditEventParams",
-                "text": "AlertAuditEventParams"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.createPersistenceRuleTypeWrapper",
         "type": "Function",
         "tags": [],
@@ -1997,82 +1949,6 @@
     "interfaces": [
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.AlertAuditEventParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "AlertAuditEventParams",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.action",
-            "type": "Enum",
-            "tags": [],
-            "label": "action",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.outcome",
-            "type": "string",
-            "tags": [],
-            "label": "outcome",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.ComponentTemplateOptions",
         "type": "Interface",
         "tags": [],
@@ -2166,7 +2042,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
+              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"streams\" | \"AlertingExample\""
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
@@ -2590,7 +2466,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>>>>(request: TSearchRequest) => Promise<",
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.grouping\": { readonly type: \"object\"; readonly dynamic: true; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>>>>(request: TSearchRequest) => Promise<",
               {
                 "pluginId": "@kbn/es-types",
                 "scope": "common",
@@ -3562,18 +3438,6 @@
     "enums": [
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.AlertAuditAction",
-        "type": "Enum",
-        "tags": [],
-        "label": "AlertAuditAction",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.Dataset",
         "type": "Enum",
         "tags": [],
@@ -4101,82 +3965,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.operationAlertAuditActionMap",
-        "type": "Object",
-        "tags": [],
-        "label": "operationAlertAuditActionMap",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.WriteOperations.Update",
-            "type": "Enum",
-            "tags": [],
-            "label": "[WriteOperations.Update]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Find",
-            "type": "Enum",
-            "tags": [],
-            "label": "[ReadOperations.Find]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Get",
-            "type": "Enum",
-            "tags": [],
-            "label": "[ReadOperations.Get]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "ruleRegistry",
       "id": "def-server.RuleRegistryPluginSetupContract",

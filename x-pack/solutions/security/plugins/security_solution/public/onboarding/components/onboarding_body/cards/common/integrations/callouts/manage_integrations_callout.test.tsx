@@ -16,29 +16,23 @@ jest.mock('../../../../../../../common/hooks/use_add_integrations_url', () => ({
   }),
 }));
 
-jest.mock('../../card_callout', () => ({
-  CardCallOut: ({ text }: { text: React.ReactNode }) => <div>{text}</div>,
-}));
-
 describe('ManageIntegrationsCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders nothing when installedIntegrationsCount is 0', () => {
-    const { queryByTestId } = render(<ManageIntegrationsCallout installedIntegrationsCount={0} />, {
+  test('renders nothing when activeIntegrationsCount is 0', () => {
+    const { queryByTestId } = render(<ManageIntegrationsCallout activeIntegrationsCount={0} />, {
       wrapper: TestProviders,
     });
 
     expect(queryByTestId('integrationsCompleteText')).not.toBeInTheDocument();
   });
 
-  test('renders callout with correct message and link when there are installed integrations', () => {
+  test('renders callout with correct message and link when there are active integrations', () => {
     const { getByText, getByTestId } = render(
-      <ManageIntegrationsCallout installedIntegrationsCount={5} />,
-      {
-        wrapper: TestProviders,
-      }
+      <ManageIntegrationsCallout activeIntegrationsCount={5} />,
+      { wrapper: TestProviders }
     );
 
     expect(getByText('5 integrations have been added')).toBeInTheDocument();

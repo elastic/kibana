@@ -2,21 +2,22 @@
 navigation_title: "{{bedrock}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
+applies_to:
+  stack: all
+  serverless: all
 ---
-
 # {{bedrock}} connector and action [bedrock-action-type]
 
-
 The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
-
 
 ## Create connectors in {{kib}} [define-bedrock-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-% TO DO: Use `:class: screenshot`
-![{{bedrock}} connector](../images/bedrock-connector.png)
-
+:::{image} ../images/bedrock-connector.png
+:alt: {{bedrock}} connector
+:screenshot:
+:::
 
 ### Connector configuration [bedrock-connector-configuration]
 
@@ -37,13 +38,14 @@ Access Key
 Secret
 :   The secret for authentication.
 
-
 ## Test connectors [bedrock-action-configuration]
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-% TO DO: Use `:class: screenshot`
-![{{bedrock}} params test](../images/bedrock-params.png)
+:::{image} ../images/bedrock-params.png
+:alt: {{bedrock}} params test
+:screenshot:
+:::
 
 The {{bedrock}} actions have the following configuration properties.
 
@@ -60,12 +62,9 @@ Body
     }
     ```
 
-
 Model
 :   An optional string that will overwrite the connector’s default model. For
-
 
 ## Connector networking configuration [bedrock-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-

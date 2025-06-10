@@ -58,10 +58,10 @@ processingCommand
     | mvExpandCommand
     | joinCommand
     | changePointCommand
+    | completionCommand
     // in development
     | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
-    | {this.isDevVersion()}? completionCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? forkCommand
     | {this.isDevVersion()}? rerankCommand
@@ -87,6 +87,14 @@ fields
 
 field
     : (qualifiedName ASSIGN)? booleanExpression
+    ;
+
+rerankFields
+    : rerankField (COMMA rerankField)*
+    ;
+
+rerankField
+    : qualifiedName (ASSIGN booleanExpression)?
     ;
 
 fromCommand
@@ -181,7 +189,7 @@ identifierOrParameter
     ;
 
 limitCommand
-    : LIMIT INTEGER_LITERAL
+    : LIMIT constant
     ;
 
 sortCommand
@@ -298,11 +306,11 @@ rrfCommand
    ;
 
 rerankCommand
-    : DEV_RERANK queryText=constant ON fields WITH inferenceId=identifierOrParameter
+    : DEV_RERANK queryText=constant ON rerankFields (WITH inferenceId=identifierOrParameter)?
     ;
 
 completionCommand
-    : DEV_COMPLETION prompt=primaryExpression WITH inferenceId=identifierOrParameter (AS targetField=qualifiedName)?
+    : COMPLETION prompt=primaryExpression WITH inferenceId=identifierOrParameter (AS targetField=qualifiedName)?
     ;
 
 sampleCommand

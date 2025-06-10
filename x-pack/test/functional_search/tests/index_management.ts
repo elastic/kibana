@@ -8,7 +8,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'searchIndexDetailsPage',
-    'searchApiKeys',
     'header',
     'common',
     'indexManagement',
@@ -104,7 +103,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'classic-nav-index-management-listpage-ftr',
           solution: 'classic',
         }));
-        await pageObjects.searchApiKeys.deleteAPIKeys();
         await es.indices.create({ index: indexName });
       });
 

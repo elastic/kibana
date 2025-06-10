@@ -205,7 +205,8 @@ Response:
         "total_filled_duration_ms": 0,
         "total_in_progress_duration_ms": 0,
         "total_unfilled_duration_ms": 0,
-      }
+      },
+      "frozen_indices_queried_max_count": 0
     },
     "history_over_interval": {
       "buckets": [
@@ -277,7 +278,8 @@ Response:
                 "95.0": 0,
                 "99.0": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         },
         {
@@ -348,7 +350,8 @@ Response:
                 "95.0": 0,
                 "99.0": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         }
       ]
@@ -569,7 +572,8 @@ Response:
           "count": 2129,
           "message": "This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching was found This warning will continue to appear until matching index is created or this rule is disabled"
         }
-      ]
+      ],
+      "frozen_indices_queried_max_count": 0
     },
     "history_over_interval": {
       "buckets": [
@@ -641,7 +645,8 @@ Response:
                 "95.0": 0,
                 "99.0": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         },
         {
@@ -712,7 +717,8 @@ Response:
                 "95.0": 0,
                 "99.0": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         }
       ]
@@ -893,7 +899,8 @@ Response:
           "count": 240,
           "message": "This rule is attempting to query data from Elasticsearch indices listed in the Index pattern section of the rule definition however no index matching filebeat logs-aws was found This warning will continue to appear until matching index is created or this rule is disabled"
         }
-      ]
+      ],
+      "frozen_indices_queried_max_count": 0
     },
     "history_over_interval": {
       "buckets": [
@@ -953,7 +960,8 @@ Response:
                 "99.0": 0,
                 "99.9": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         },
         {
@@ -1012,7 +1020,8 @@ Response:
                 "99.0": 0,
                 "99.9": 0
               }
-            }
+            },
+            "frozen_indices_queried_max_count": 0
           }
         }
       ]

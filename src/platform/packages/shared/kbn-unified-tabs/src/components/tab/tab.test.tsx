@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
@@ -96,7 +96,9 @@ describe('Tab', () => {
     );
 
     const tabMenuButton = screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabItem.id}`);
-    tabMenuButton.click();
+    act(() => {
+      tabMenuButton.click();
+    });
 
     expect(getTabMenuItems).toHaveBeenCalledWith(tabItem);
 

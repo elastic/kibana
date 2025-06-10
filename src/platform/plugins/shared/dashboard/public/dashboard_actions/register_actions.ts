@@ -8,8 +8,10 @@
  */
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 import {
+  ACTION_ADD_SECTION,
   ACTION_ADD_TO_LIBRARY,
   ACTION_CLONE_PANEL,
   ACTION_COPY_TO_DASHBOARD,
@@ -19,13 +21,7 @@ import {
   BADGE_FILTERS_NOTIFICATION,
 } from './constants';
 
-export const registerActions = async ({
-  plugins,
-  allowByValueEmbeddables,
-}: {
-  allowByValueEmbeddables?: boolean;
-  plugins: DashboardStartDependencies;
-}) => {
+export const registerActions = async (plugins: DashboardStartDependencies) => {
   const { uiActions, share } = plugins;
 
   uiActions.registerActionAsync(ACTION_CLONE_PANEL, async () => {
@@ -46,6 +42,12 @@ export const registerActions = async ({
   });
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
 
+  uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
+    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddSectionAction();
+  });
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
+
   if (share) {
     uiActions.registerActionAsync(ACTION_EXPORT_CSV, async () => {
       const { ExportCSVAction } = await import('../dashboard_renderer/dashboard_module');
@@ -54,23 +56,21 @@ export const registerActions = async ({
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPORT_CSV);
   }
 
-  if (allowByValueEmbeddables) {
-    uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
-      const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new AddToLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
+  uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
+    const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddToLibraryAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
-      const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new UnlinkFromLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
+  uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
+    const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new UnlinkFromLibraryAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
-      const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
-      return new CopyToDashboardAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
-  }
+  uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
+    const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
+    return new CopyToDashboardAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
 };

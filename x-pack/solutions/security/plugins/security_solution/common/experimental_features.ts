@@ -237,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to edit highlighted fields in the alertflyout
    */
-  editHighlightedFieldsEnabled: false,
+  editHighlightedFields: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -258,6 +258,16 @@ export const allowedExperimentalValues = Object.freeze({
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: false,
+
+  /**
+   * Automatically installs the security AI prompts package
+   */
+  securityAIPromptsEnabled: false,
+
+  /**
+   * Enables advanced mode for Trusted Apps creation and update
+   */
+  trustedAppsAdvancedMode: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

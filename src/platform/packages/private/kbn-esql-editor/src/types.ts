@@ -18,7 +18,12 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  IndicesAutocompleteResult,
+  RecommendedQuery,
+} from '@kbn/esql-types';
+import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -84,16 +89,8 @@ export interface ESQLEditorProps {
   controlsContext?: ControlsContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
-}
-
-export interface JoinIndicesAutocompleteResult {
-  indices: JoinIndexAutocompleteItem[];
-}
-
-export interface JoinIndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | string;
-  aliases: string[];
+  /** Resize the editor to fit the initially passed query on mount */
+  expandToFitQueryOnMount?: boolean;
 }
 
 interface ESQLVariableService {
@@ -106,9 +103,15 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getEditorExtensionsAutocomplete: (
+    queryString: string,
+    activeSolutionId: string
+  ) => Promise<RecommendedQuery[]>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
+  getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
 }
 
 export interface ESQLEditorDeps {

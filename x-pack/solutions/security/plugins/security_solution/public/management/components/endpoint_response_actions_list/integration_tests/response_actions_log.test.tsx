@@ -941,19 +941,19 @@ describe('Response actions history', () => {
         });
       });
 
-      it('should display pending output if action is not complete yet', () => {
+      it('should display pending output if action is not complete yet', async () => {
         action.isCompleted = false;
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-details-tray-output`)).toHaveTextContent(
           OUTPUT_MESSAGES.isPending('upload')
         );
       });
 
-      it('should display output for single agent', () => {
+      it('should display output for single agent', async () => {
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +
@@ -962,7 +962,7 @@ describe('Response actions history', () => {
         );
       });
 
-      it('should display output for multiple agents', () => {
+      it('should display output for multiple agents', async () => {
         action.agents.push('agent-b');
         action.hosts['agent-b'] = {
           name: 'host b',
@@ -983,7 +983,8 @@ describe('Response actions history', () => {
         };
 
         const { getByTestId } = render();
-        getByTestId(`${testPrefix}-expand-button`).click();
+
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +

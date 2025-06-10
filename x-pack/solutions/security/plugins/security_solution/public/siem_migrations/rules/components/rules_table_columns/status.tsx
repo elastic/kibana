@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { StatusBadge } from '../status_badge';
@@ -56,7 +56,12 @@ export const createStatusColumn = (): TableColumn => {
         }
       />
     ),
-    render: (_, rule: RuleMigration) => <StatusBadge migrationRule={rule} />,
+    render: (_, rule: RuleMigrationRule) => (
+      <StatusBadge
+        data-test-subj={`translationStatus-${rule.translation_result ?? rule.status}`}
+        migrationRule={rule}
+      />
+    ),
     sortable: true,
     truncateText: true,
     width: '15%',

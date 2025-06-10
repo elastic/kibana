@@ -4248,6 +4248,24 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getLegacyTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getLegacyTypes",
+            "description": [
+              "Return legacy types, this types can't be registered"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectTypeRegistry.getType",
             "type": "Function",
             "tags": [],
@@ -8910,6 +8928,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts"
               },
               {
@@ -9133,6 +9155,10 @@
                 "path": "x-pack/solutions/observability/plugins/apm/server/saved_objects/apm_service_groups.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
+              },
+              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
@@ -9299,6 +9325,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -9904,6 +9934,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
+              },
+              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/server/saved_objects/visualization.ts"
               },
@@ -10044,6 +10078,22 @@
               " | ",
               "SavedObjectsModelVersionMapProvider",
               " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.switchToModelVersionAt",
+            "type": "string",
+            "tags": [],
+            "label": "switchToModelVersionAt",
+            "description": [
+              "\nAllows to opt-in to the model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,

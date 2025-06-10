@@ -29,6 +29,7 @@ import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
+import { KeyboardShortcuts } from './keyboard_shortcuts';
 import type { ESQLEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -237,6 +238,7 @@ export const EditorFooter = memo(function EditorFooter({
                       isHistoryOpen={isHistoryOpen}
                     />
                   )}
+                  <KeyboardShortcuts />
                 </>
               )}
               {!hideRunQueryText && (
@@ -305,6 +307,7 @@ export const EditorFooter = memo(function EditorFooter({
                       })}
                     />
                   </EuiFlexItem>
+                  <KeyboardShortcuts />
                 </EuiFlexGroup>
               </EuiFlexItem>
             </>
