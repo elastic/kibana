@@ -34,7 +34,8 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization because reporting uses its own authorization model.',
           },
         },
         validate: {

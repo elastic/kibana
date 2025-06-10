@@ -660,6 +660,29 @@ describe('Handle request to schedule', () => {
       `);
     });
 
+    test('disallows scheduling when user is "false"', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: false,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: mockRequest,
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "body": "User must be authenticated to schedule a report",
+        }
+      `);
+    });
+
     test('disallows scheduling when reportingHealth.hasPermanentEncryptionKey = false', async () => {
       jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
         isSufficientlySecure: true,

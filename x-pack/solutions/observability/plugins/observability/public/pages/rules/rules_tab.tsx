@@ -14,6 +14,7 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../
 import { observabilityAlertFeatureIds } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { relativePaths, RULES_PATH } from '../../../common/locators/paths';
 
 interface RulesTabProps {
   setRefresh: React.Dispatch<React.SetStateAction<Date>>;
@@ -22,6 +23,7 @@ interface RulesTabProps {
 
 export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   const {
+    application: { navigateToApp },
     triggersActionsUi: { getRulesList: RuleList },
   } = useKibana().services;
   const history = useHistory();
@@ -74,6 +76,16 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
     urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
   };
 
+  const navigateToEditRuleForm = (ruleId: string) => {
+    navigateToApp('observability', {
+      path: relativePaths.observability.editRule(ruleId),
+      state: {
+        returnApp: 'observability',
+        returnPath: RULES_PATH,
+      },
+    });
+  };
+
   return (
     <RuleList
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
@@ -88,6 +100,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
       statusFilter={stateStatus}
       searchFilter={stateSearch}
       typeFilter={stateType}
+      navigateToEditRuleForm={navigateToEditRuleForm}
       visibleColumns={[
         'ruleName',
         'ruleExecutionStatusLastDate',

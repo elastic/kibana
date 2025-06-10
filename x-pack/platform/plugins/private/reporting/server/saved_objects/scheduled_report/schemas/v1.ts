@@ -41,7 +41,7 @@ export const rawNotificationSchema = schema.object({
 
 export const rawScheduledReportSchema = schema.object({
   createdAt: schema.string(),
-  createdBy: schema.oneOf([schema.string(), schema.boolean()]),
+  createdBy: schema.string(),
   enabled: schema.boolean(),
   jobType: schema.string(),
   meta: schema.object({

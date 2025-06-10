@@ -139,7 +139,9 @@ export class ScheduleRequestHandler extends RequestHandler<
 
     const attributes = {
       createdAt: moment.utc().toISOString(),
-      createdBy: user ? user.username : false,
+      // we've already checked that user exists in handleRequest
+      // this fallback is just to satisfy the type
+      createdBy: user ? user.username : 'unknown',
       enabled: true,
       jobType,
       meta: {
@@ -197,6 +199,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     if (!reportingHealth.isSufficientlySecure) {
       return res.forbidden({
         body: `Security and API keys must be enabled for scheduled reporting`,
+      });
+    }
+    // check that username exists
+    if (!this.opts.user || !this.opts.user.username) {
+      return res.forbidden({
+        body: `User must be authenticated to schedule a report`,
       });
     }
 
