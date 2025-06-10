@@ -1575,6 +1575,8 @@ module.exports = {
         'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/solutions/**/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
