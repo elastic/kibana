@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-// privileged_user_monitoring/components/key_insights_panel/active_privileged_users_tile/active_privileged_users_tile.tsx
-
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { getActivePrivilegedUsersEsqlCount } from './esql_query';
+import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 
@@ -22,136 +21,13 @@ interface Props {
   };
 }
 
-export const activePrivilegedUsersLensAttributes: LensAttributes = {
-  title: 'Active privileged users',
-  description: '',
-  visualizationType: 'lnsMetric',
-  state: {
-    visualization: {
-      layerId: 'layer1',
-      layerType: 'data',
-      metricAccessor: 'metric_count',
-      trendlineLayerId: 'layer2',
-      trendlineLayerType: 'metricTrendline',
-      trendlineTimeAccessor: 'timestamp',
-      trendlineMetricAccessor: 'metric_count_trend',
-      palette: undefined, // Add palette if needed
-      subtitle: undefined, // Add subtitle if needed
-    },
-    query: {
-      query: 'event_type : "active_privileged_user"',
-      language: 'kuery',
-    },
-    filters: [],
-    datasourceStates: {
-      formBased: {
-        layers: {
-          layer1: {
-            columns: {
-              metric_count: {
-                label: 'Active Privileged Users',
-                dataType: 'number',
-                operationType: 'max',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: 'count',
-                reducedTimeRange: '',
-                params: {
-                  format: {
-                    id: 'number',
-                    params: {
-                      decimals: 0,
-                      compact: false,
-                    },
-                  },
-                },
-                customLabel: true,
-              },
-            },
-            columnOrder: ['metric_count'],
-            incompleteColumns: {},
-          },
-          layer2: {
-            linkToLayers: ['layer1'],
-            columns: {
-              timestamp: {
-                label: 'timestamp',
-                dataType: 'date',
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                isBucketed: true,
-                scale: 'interval',
-                params: {},
-              },
-              metric_count_trend: {
-                label: 'Active Privileged Users',
-                dataType: 'number',
-                operationType: 'max',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: 'count',
-                filter: {
-                  query: '',
-                  language: 'kuery',
-                },
-                timeShift: '',
-                reducedTimeRange: '',
-                params: {
-                  format: {
-                    id: 'number',
-                    params: {
-                      decimals: 0,
-                      compact: false,
-                    },
-                  },
-                },
-                customLabel: true,
-              },
-            },
-            columnOrder: ['timestamp', 'metric_count_trend'],
-            sampling: 1,
-            ignoreGlobalFilters: false,
-            incompleteColumns: {},
-          },
-        },
-      },
-      textBased: {
-        layers: {},
-      },
-    },
-    internalReferences: [
-      {
-        type: 'index-pattern',
-        id: 'privmon-indexpattern-id',
-        name: 'indexpattern-datasource-layer-layer1',
-      },
-      {
-        type: 'index-pattern',
-        id: 'privmon-indexpattern-id',
-        name: 'indexpattern-datasource-layer-layer2',
-      },
-    ],
-    adHocDataViews: {
-      'privmon-indexpattern-id': {
-        id: 'privmon-indexpattern-id',
-        title: 'privmon-metrics-test-data',
-        timeFieldName: 'timestamp',
-        sourceFilters: [],
-        fieldFormats: {},
-        runtimeFieldMap: {},
-        fieldAttrs: {},
-        allowNoIndex: false,
-        name: 'privmon-metrics-test-data',
-      },
-    },
-  },
-  references: [],
-};
-
-const LENS_VISUALIZATION_HEIGHT = 126;
-const LENS_VISUALIZATION_MIN_WIDTH = 160;
-
 export const ActivePrivilegedUsersTile: React.FC<Props> = ({ timerange }) => {
+  const lensAttributes = createKeyInsightsPanelLensAttributes({
+    title: 'Active Privileged Users',
+    label: 'Active Privileged Users',
+    esqlQuery: getActivePrivilegedUsersEsqlCount('default'),
+  });
+
   return (
     <EuiFlexItem grow={false}>
       <div
@@ -163,9 +39,9 @@ export const ActivePrivilegedUsersTile: React.FC<Props> = ({ timerange }) => {
         `}
       >
         <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={false}
-          applyPageAndTabsFilters={false}
-          lensAttributes={activePrivilegedUsersLensAttributes} // TODO: Replace with actual attributes
+          applyGlobalQueriesAndFilters={true}
+          applyPageAndTabsFilters={true}
+          lensAttributes={lensAttributes}
           id="privileged-user-monitoring-active-users"
           timerange={timerange}
           width="auto"
@@ -182,3 +58,6 @@ export const ActivePrivilegedUsersTile: React.FC<Props> = ({ timerange }) => {
     </EuiFlexItem>
   );
 };
+
+const LENS_VISUALIZATION_HEIGHT = 126;
+const LENS_VISUALIZATION_MIN_WIDTH = 160;

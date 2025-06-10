@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-
+import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
+import { getAnomaliesDetectedEsqlQuery } from './esql_query';
 
 interface Props {
   timerange: {
@@ -20,126 +20,11 @@ interface Props {
   };
 }
 
-export const anomaliesDetectedLensAttributes: LensAttributes = {
-  title: 'Anomalies detected',
-  description: '',
-  visualizationType: 'lnsMetric',
-  state: {
-    visualization: {
-      layerId: 'layer1',
-      layerType: 'data',
-      metricAccessor: 'metric_count',
-      trendlineLayerId: 'layer2',
-      trendlineLayerType: 'metricTrendline',
-      trendlineTimeAccessor: 'timestamp',
-      trendlineMetricAccessor: 'metric_count_trend',
-    },
-    query: {
-      query: 'event_type : "anomaly_detected"',
-      language: 'kuery',
-    },
-    filters: [],
-    datasourceStates: {
-      formBased: {
-        layers: {
-          layer1: {
-            columns: {
-              metric_count: {
-                label: 'Anomalies Detected',
-                dataType: 'number',
-                operationType: 'max',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: 'count',
-                reducedTimeRange: '',
-                params: {
-                  format: {
-                    id: 'number',
-                    params: {
-                      decimals: 0,
-                      compact: false,
-                    },
-                  },
-                },
-                customLabel: true,
-              },
-            },
-            columnOrder: ['metric_count'],
-            incompleteColumns: {},
-          },
-          layer2: {
-            linkToLayers: ['layer1'],
-            columns: {
-              timestamp: {
-                label: 'timestamp',
-                dataType: 'date',
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-                isBucketed: true,
-                scale: 'interval',
-                params: {},
-              },
-              metric_count_trend: {
-                label: 'Anomalies Detected',
-                dataType: 'number',
-                operationType: 'max',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: 'count',
-                filter: {
-                  query: '',
-                  language: 'kuery',
-                },
-                timeShift: '',
-                reducedTimeRange: '',
-                params: {
-                  format: {
-                    id: 'number',
-                    params: {
-                      decimals: 0,
-                      compact: false,
-                    },
-                  },
-                },
-                customLabel: true,
-              },
-            },
-            columnOrder: ['timestamp', 'metric_count_trend'],
-            sampling: 1,
-            ignoreGlobalFilters: false,
-            incompleteColumns: {},
-          },
-        },
-      },
-    },
-    internalReferences: [
-      {
-        type: 'index-pattern',
-        id: 'privmon-indexpattern-id',
-        name: 'indexpattern-datasource-layer-layer1',
-      },
-      {
-        type: 'index-pattern',
-        id: 'privmon-indexpattern-id',
-        name: 'indexpattern-datasource-layer-layer2',
-      },
-    ],
-    adHocDataViews: {
-      'privmon-indexpattern-id': {
-        id: 'privmon-indexpattern-id',
-        title: 'privmon-metrics-test-data',
-        timeFieldName: 'timestamp',
-        sourceFilters: [],
-        fieldFormats: {},
-        runtimeFieldMap: {},
-        fieldAttrs: {},
-        allowNoIndex: false,
-        name: 'privmon-metrics-test-data',
-      },
-    },
-  },
-  references: [],
-};
+const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
+  title: 'Anomalies Detected',
+  label: 'Anomalies Detected',
+  esqlQuery: getAnomaliesDetectedEsqlQuery('default'),
+});
 
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
@@ -160,8 +45,8 @@ export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
         `}
       >
         <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={false}
-          applyPageAndTabsFilters={false}
+          applyGlobalQueriesAndFilters={true}
+          applyPageAndTabsFilters={true}
           lensAttributes={anomaliesDetectedLensAttributes}
           id="privileged-user-monitoring-anomalies-detected"
           timerange={timerange}
