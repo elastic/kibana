@@ -2446,6 +2446,8 @@
           "ThemeServiceSetup",
           " | undefined; plugins?: ",
           "PluginsServiceStart",
+          " | undefined; pricing?: ",
+          "PricingServiceStart",
           " | undefined; security?: ",
           "SecurityServiceStart",
           " | undefined; userProfile?: ",
