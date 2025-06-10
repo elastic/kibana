@@ -39,7 +39,6 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-elasticsearch-server",
-    "@kbn/watcher-plugin",
   ],
   "exclude": [
     "target/**/*",
