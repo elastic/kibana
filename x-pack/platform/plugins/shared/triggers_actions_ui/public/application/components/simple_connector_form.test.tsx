@@ -15,8 +15,6 @@ import {
 } from './simple_connector_form';
 import userEvent from '@testing-library/user-event';
 
-import { validateURL } from '@kbn/stack-connectors-plugin/public/connector_types/openai/validators';
-
 const fillForm = async ({ getByTestId }: RenderResult) => {
   await userEvent.type(getByTestId('config.url-input'), 'https://example.com', {
     delay: 10,
@@ -175,62 +173,6 @@ describe('SimpleConnectorForm', () => {
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-    });
-  });
-
-  describe('URL Validation', () => {
-    const configFormSchemaWithCustomUrlValidation: ConfigFieldSchema[] = [
-      {
-        id: 'url',
-        label: 'URL',
-        isUrlField: true,
-        customUrlFieldValidator: validateURL,
-      },
-    ];
-
-    const urlTests: Array<[string, boolean]> = [
-      ['http://example.com', true],
-      ['http://localhost:9200', true],
-      ['http://example:1234/path', true],
-      ['invalid-url', false],
-      ['http://exam ple.com', false],
-      ['http://example.com.', false],
-      ['http://example.com/path.', false],
-    ];
-
-    it.each(urlTests)('validates "%s" as %s', async (urlInput, validUrl) => {
-      render(
-        <FormTestProvider onSubmit={onSubmit}>
-          <SimpleConnectorForm
-            isEdit={true}
-            readOnly={false}
-            configFormSchema={configFormSchemaWithCustomUrlValidation}
-            secretsFormSchema={[]}
-          />
-        </FormTestProvider>
-      );
-      const input = screen.getByTestId('config.url-input');
-
-      await userEvent.clear(input);
-      await userEvent.type(input, urlInput);
-
-      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-
-      if (validUrl) {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {
-            config: {
-              url: urlInput,
-            },
-          },
-          isValid: true,
-        });
-      } else {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {},
-          isValid: false,
-        });
-      }
     });
   });
 });

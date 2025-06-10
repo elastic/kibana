@@ -88,8 +88,7 @@
     "@kbn/response-ops-alerts-delete",
     "@kbn/content-management-plugin",
     "@kbn/esql-types",
-    "@kbn/presentation-containers",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/presentation-containers"
   ],
   "exclude": ["target/**/*"]
 }
