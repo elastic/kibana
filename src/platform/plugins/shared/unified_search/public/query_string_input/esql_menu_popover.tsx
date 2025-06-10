@@ -60,10 +60,24 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       const timeFieldName =
         adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name;
 
+      const textFields = adHocDataview.fields?.getByType('string') ?? [];
+      let patternAnalysisField;
+      if (textFields.length) {
+        const labels = new Set(textFields.map((field) => field.name));
+        patternAnalysisField = labels.has('message')
+          ? 'message'
+          : labels.has('error.message')
+          ? 'error.message'
+          : labels.has('event.original')
+          ? 'event.original'
+          : undefined;
+      }
+
       recommendedQueries.push(
         ...getRecommendedQueries({
           fromCommand: queryString,
           timeField: timeFieldName,
+          patternAnalysisField,
         })
       );
     }

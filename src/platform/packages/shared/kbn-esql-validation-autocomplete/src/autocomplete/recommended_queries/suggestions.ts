@@ -14,17 +14,29 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<SuggestionRawDefinition[]> => {
-  const fieldSuggestions = await getFieldsByType('date', [], {
+  const fieldSuggestions = await getFieldsByType(['date', 'text'], [], {
     openSuggestions: true,
   });
   let timeField = '';
+  let patternAnalysisField: string | undefined = '';
+
   if (fieldSuggestions.length) {
-    timeField =
-      fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
-      fieldSuggestions[0].label;
+    const labels = new Set(fieldSuggestions.map((field) => field.label));
+    timeField = labels.has('@timestamp') ? '@timestamp' : fieldSuggestions[0].label;
+    patternAnalysisField = labels.has('message')
+      ? 'message'
+      : labels.has('error.message')
+      ? 'error.message'
+      : labels.has('event.original')
+      ? 'event.original'
+      : undefined;
   }
 
-  const recommendedQueries = getRecommendedQueries({ fromCommand, timeField });
+  const recommendedQueries = getRecommendedQueries({
+    fromCommand,
+    timeField,
+    patternAnalysisField,
+  });
 
   const suggestions: SuggestionRawDefinition[] = recommendedQueries.map((query) => {
     return {

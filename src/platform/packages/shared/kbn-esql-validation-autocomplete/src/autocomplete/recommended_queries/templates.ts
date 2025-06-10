@@ -14,9 +14,11 @@ import { i18n } from '@kbn/i18n';
 export const getRecommendedQueries = ({
   fromCommand,
   timeField,
+  patternAnalysisField,
 }: {
   fromCommand: string;
   timeField?: string;
+  patternAnalysisField?: string;
 }) => {
   const queries = [
     {
@@ -167,6 +169,25 @@ export const getRecommendedQueries = ({
     | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
     | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
     | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+          },
+        ]
+      : []),
+    ...(patternAnalysisField
+      ? [
+          {
+            label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.label',
+              {
+                defaultMessage: 'Identify patterns in my logs',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.description',
+              {
+                defaultMessage: 'Identify patterns in my logs',
+              }
+            ),
+            queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${patternAnalysisField})\n  | SORT Count DESC`,
           },
         ]
       : []),
