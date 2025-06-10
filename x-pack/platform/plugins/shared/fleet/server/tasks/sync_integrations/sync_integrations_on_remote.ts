@@ -26,6 +26,8 @@ import { getInstallation, removeInstallation } from '../../services/epm/packages
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
 
+import { createOrUpdateFailedInstallStatus } from '../../services/epm/packages/install_errors_helpers';
+
 import { installCustomAsset } from './custom_assets';
 import type { CustomAssetsData, SyncIntegrationsData } from './model';
 
@@ -93,6 +95,7 @@ async function getSyncIntegrationsEnabled(
 }
 
 async function installPackageIfNotInstalled(
+  savedObjectsClient: SavedObjectsClientContract,
   pkg: { package_name: string; package_version: string },
   packageClient: PackageClient,
   logger: Logger,
@@ -165,6 +168,16 @@ async function installPackageIfNotInstalled(
     logger.error(
       `Failed to install package ${pkg.package_name} with version ${pkg.package_version}, error: ${error}`
     );
+    if (error instanceof PackageNotFoundError && error.message.includes('not found in registry')) {
+      await createOrUpdateFailedInstallStatus({
+        logger,
+        savedObjectsClient,
+        pkgName: pkg.package_name,
+        pkgVersion: pkg.package_version,
+        error,
+        installSource: 'registry',
+      });
+    }
   }
 }
 
@@ -231,7 +244,7 @@ export const syncIntegrationsOnRemote = async (
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
     }
-    await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+    await installPackageIfNotInstalled(soClient, pkg, packageClient, logger, abortController);
   }
 
   const uninstalledIntegrations =

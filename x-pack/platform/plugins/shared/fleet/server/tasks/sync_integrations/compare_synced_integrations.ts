@@ -180,6 +180,7 @@ const compareIntegrations = (
           updated_at: ccrIntegration?.updated_at,
         };
       }
+
       if (!localIntegrationSO) {
         return {
           ...baseIntegrationData,
@@ -216,11 +217,28 @@ const compareIntegrations = (
           latestFailedAttemptTime = `at ${new Date(
             latestInstallFailedAttempts.created_at
           ).toUTCString()}`;
-          latestFailedAttempt = latestInstallFailedAttempts.error?.message
-            ? `error: ${latestInstallFailedAttempts.error?.message}`
-            : '';
-        }
 
+          // handling special case for those integrations that cannot be found in registry
+          if (latestInstallFailedAttempts.error?.name === 'PackageNotFoundError') {
+            return {
+              ...baseIntegrationData,
+              install_status: {
+                main: ccrIntegration.install_status,
+                remote: 'not_installed',
+              },
+              updated_at: ccrIntegration.updated_at,
+              sync_status: SyncStatus.WARNING,
+              warning: {
+                title: `${ccrIntegration.package_name} can't be automatically synced`,
+                message: `This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.`,
+              },
+            };
+          } else {
+            latestFailedAttempt = latestInstallFailedAttempts.error?.message
+              ? `error: ${latestInstallFailedAttempts.error?.message}`
+              : '';
+          }
+        }
         return {
           ...baseIntegrationData,
           install_status: {
@@ -259,7 +277,12 @@ const compareIntegrations = (
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.WARNING,
           ...(localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
-            ? { warning: `${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}` }
+            ? {
+                warning: {
+                  message: `${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}`,
+                  title: 'Integration was uninstalled, but removal from remote cluster failed.',
+                },
+              }
             : {}),
         };
       }
