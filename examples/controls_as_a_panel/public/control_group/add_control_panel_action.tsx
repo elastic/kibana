@@ -35,11 +35,9 @@ export class AddControlPanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    embeddable.addNewPanel(
-      {
-        panelType: CONTROL_PANEL_ID,
-      },
-      true
-    );
+    embeddable.addNewPanel({
+      panelType: CONTROL_PANEL_ID,
+      serializedState: { rawState: { controlCount: 10 } },
+    });
   }
 }

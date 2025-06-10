@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CONTROL_PANEL_ID = 'controlsGroupV2';
+export const CONTROL_PANEL_ID = 'controlPanel';
 export const ADD_CONTROL_PANEL_ACTION_ID = 'create_control_panel_action';

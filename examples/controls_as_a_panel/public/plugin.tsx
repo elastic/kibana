@@ -27,10 +27,10 @@ export class ControlsAsAPanelExamplePlugin
 {
   public setup(core: CoreSetup<ControlsExampleStartDeps>, { embeddable }: SetupDeps) {
     embeddable.registerReactEmbeddableFactory(CONTROL_PANEL_ID, async () => {
-      const { markdownEmbeddableFactory } = await import(
+      const { controlPanelEmbeddableFactory } = await import(
         './control_group/control_group_embeddable'
       );
-      return markdownEmbeddableFactory;
+      return controlPanelEmbeddableFactory;
     });
   }
 
