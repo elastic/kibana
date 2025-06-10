@@ -30,7 +30,7 @@ describe('Initializing', () => {
     jest.resetAllMocks();
   });
 
-  it('should render and have the correct add integration button href and enabled state', () => {
+  it('should render and have the correct add integration link href and enabled state', () => {
     (useAddIntegrationPath as jest.Mock).mockReturnValue(
       mockUseAddIntegrationPath({ addIntegrationPath: '/test-integration-path', isLoading: false })
     );
@@ -39,10 +39,10 @@ describe('Initializing', () => {
 
     expect(screen.getByRole('heading', { name: /discovering your assets/i })).toBeInTheDocument();
 
-    const addButton = screen.getByRole('button', { name: /add integration/i });
-    expect(addButton).toBeInTheDocument();
-    expect(addButton).toHaveAttribute('href', '/test-integration-path');
-    expect(addButton).not.toBeDisabled();
+    const addLink = screen.getByRole('link', { name: /add integration/i });
+    expect(addLink).toBeInTheDocument();
+    expect(addLink).toHaveAttribute('href', '/test-integration-path');
+    expect(addLink).not.toBeDisabled();
   });
 
   it('should disable the add integration button when loading', () => {
