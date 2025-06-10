@@ -18,7 +18,7 @@ describe('transformPanelsOut', () => {
     jest.clearAllMocks();
   });
 
-  it('should transform panels JSON and inject saved object id for by-ref panels', () => {
+  it('should transform panels JSON and inject saved object id for by-ref panels', async () => {
     const panelsJSON = JSON.stringify([
       {
         gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
@@ -35,7 +35,11 @@ describe('transformPanelsOut', () => {
     const references: SavedObjectReference[] = [{ name: '1:panel_1', type: 'foo', id: '123' }];
 
     const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
-    const result = transformPanelsOut(panelsJSON, embeddableStartMock, references);
+    const result = await transformPanelsOut({
+      panelsJSON,
+      embeddable: embeddableStartMock,
+      references,
+    });
     expect(injectSpy).toHaveBeenCalledTimes(1);
     expect(injectSpy).toHaveBeenCalledWith({ type: 'foo', foo: 'bar', savedObjectId: '123' }, [
       { name: 'panel_1', type: 'foo', id: '123' },
@@ -53,7 +57,7 @@ describe('transformPanelsOut', () => {
     ]);
   });
 
-  it('should throw an error if a reference is missing', () => {
+  it('should throw an error if a reference is missing', async () => {
     const panelsJSON = JSON.stringify([
       {
         gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
@@ -69,12 +73,13 @@ describe('transformPanelsOut', () => {
 
     const references: SavedObjectReference[] = [];
 
-    expect(() => transformPanelsOut(panelsJSON, embeddableStartMock, references)).toThrow(
-      'Could not find reference "panel_1"'
-    );
+    expect(
+      async () =>
+        await transformPanelsOut({ panelsJSON, embeddable: embeddableStartMock, references })
+    ).toThrow('Could not find reference "panel_1"');
   });
 
-  it('should call embeddable inject method', () => {
+  it('should call embeddable inject method', async () => {
     const panelsJSON = JSON.stringify([
       {
         gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
@@ -94,7 +99,11 @@ describe('transformPanelsOut', () => {
       injected: true,
     }));
 
-    const result = transformPanelsOut(panelsJSON, embeddableStartMock, references);
+    const result = await transformPanelsOut({
+      panelsJSON,
+      embeddable: embeddableStartMock,
+      references,
+    });
 
     expect(result).toEqual([
       {

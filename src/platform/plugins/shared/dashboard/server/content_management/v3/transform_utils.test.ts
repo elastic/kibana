@@ -68,7 +68,7 @@ describe('dashboardAttributesOut', () => {
     },
   ];
 
-  it('should set default values if not provided', () => {
+  it('should set default values if not provided', async () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -82,7 +82,7 @@ describe('dashboardAttributesOut', () => {
       description: 'my description',
     };
     expect(
-      dashboardAttributesOut(input, embeddableStartMock, referencesSo)
+      await dashboardAttributesOut(input, embeddableStartMock, referencesSo)
     ).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROL_CHAINING,
@@ -122,7 +122,7 @@ describe('dashboardAttributesOut', () => {
     });
   });
 
-  it('should transform full attributes correctly', () => {
+  it('should transform full attributes correctly', async () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({
@@ -156,7 +156,7 @@ describe('dashboardAttributesOut', () => {
       title: 'title',
     };
     expect(
-      dashboardAttributesOut(input, embeddableStartMock, referencesSo)
+      await dashboardAttributesOut(input, embeddableStartMock, referencesSo)
     ).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: 'NONE',
@@ -223,7 +223,7 @@ describe('dashboardAttributesOut', () => {
     });
   });
 
-  it('should call embeddable.inject for panels', () => {
+  it('should call embeddable.inject for panels', async () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify(controlGroupInputControlsSo),
@@ -266,7 +266,7 @@ describe('dashboardAttributesOut', () => {
       type: 'type2',
     };
     const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
-    dashboardAttributesOut(input, embeddableStartMock, [...referencesSo, referencePanel]);
+    await dashboardAttributesOut(input, embeddableStartMock, [...referencesSo, referencePanel]);
     expect(injectSpy).toHaveBeenCalledTimes(1);
     expect(injectSpy).toHaveBeenCalledWith(
       {
@@ -285,7 +285,7 @@ describe('dashboardAttributesOut', () => {
 });
 
 describe('itemToSavedObject', () => {
-  it('should transform item attributes to saved object attributes correctly', () => {
+  it('should transform item attributes to saved object attributes correctly', async () => {
     const input: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
@@ -345,7 +345,7 @@ describe('itemToSavedObject', () => {
       },
     ];
 
-    const output = itemToSavedObject({
+    const output = await itemToSavedObject({
       attributes: input,
       embeddable: embeddableStartMock,
       references,
@@ -387,7 +387,7 @@ describe('itemToSavedObject', () => {
     `);
   });
 
-  it('should handle missing optional attributes', () => {
+  it('should handle missing optional attributes', async () => {
     const input: DashboardAttributes = {
       title: 'title',
       description: 'my description',
@@ -397,7 +397,7 @@ describe('itemToSavedObject', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = itemToSavedObject({ attributes: input, embeddable: embeddableStartMock });
+    const output = await itemToSavedObject({ attributes: input, embeddable: embeddableStartMock });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -431,7 +431,7 @@ describe('savedObjectToItem', () => {
     jest.clearAllMocks();
   });
 
-  it('should convert saved object to item with all attributes', () => {
+  it('should convert saved object to item with all attributes', async () => {
     const input = {
       ...commonSavedObject,
       references: [
@@ -469,7 +469,7 @@ describe('savedObjectToItem', () => {
         },
       },
     };
-    const { item, error } = savedObjectToItem(input, embeddableStartMock, false);
+    const { item, error } = await savedObjectToItem(input, embeddableStartMock, false);
     expect(error).toBeNull();
     expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
@@ -509,7 +509,7 @@ describe('savedObjectToItem', () => {
     });
   });
 
-  it('should pass references to getTagNamesFromReferences', () => {
+  it('should pass references to getTagNamesFromReferences', async () => {
     getTagNamesFromReferences.mockReturnValue(['tag1', 'tag2']);
     const input = {
       ...commonSavedObject,
@@ -538,7 +538,7 @@ describe('savedObjectToItem', () => {
         },
       ],
     };
-    const { item, error } = savedObjectToItem(input, embeddableStartMock, false, {
+    const { item, error } = await savedObjectToItem(input, embeddableStartMock, false, {
       getTagNamesFromReferences,
     });
     expect(getTagNamesFromReferences).toHaveBeenCalledWith(input.references);
@@ -557,7 +557,7 @@ describe('savedObjectToItem', () => {
     });
   });
 
-  it('should handle missing optional attributes', () => {
+  it('should handle missing optional attributes', async () => {
     const input = {
       ...commonSavedObject,
       attributes: {
@@ -570,7 +570,7 @@ describe('savedObjectToItem', () => {
       },
     };
 
-    const { item, error } = savedObjectToItem(input, embeddableStartMock, false);
+    const { item, error } = await savedObjectToItem(input, embeddableStartMock, false);
     expect(error).toBeNull();
     expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
@@ -585,7 +585,7 @@ describe('savedObjectToItem', () => {
     });
   });
 
-  it('should handle partial saved object', () => {
+  it('should handle partial saved object', async () => {
     const input = {
       ...commonSavedObject,
       references: undefined,
@@ -596,7 +596,7 @@ describe('savedObjectToItem', () => {
       },
     };
 
-    const { item, error } = savedObjectToItem(input, embeddableStartMock, true, {
+    const { item, error } = await savedObjectToItem(input, embeddableStartMock, true, {
       allowedAttributes: ['title', 'description'],
     });
     expect(error).toBeNull();
@@ -610,7 +610,7 @@ describe('savedObjectToItem', () => {
     });
   });
 
-  it('should return an error if attributes can not be parsed', () => {
+  it('should return an error if attributes can not be parsed', async () => {
     const input = {
       ...commonSavedObject,
       references: undefined,
@@ -619,12 +619,12 @@ describe('savedObjectToItem', () => {
         panelsJSON: 'not stringified json',
       },
     };
-    const { item, error } = savedObjectToItem(input, embeddableStartMock, true);
+    const { item, error } = await savedObjectToItem(input, embeddableStartMock, true);
     expect(item).toBeNull();
     expect(error).not.toBe(null);
   });
 
-  it('should include only requested references', () => {
+  it('should include only requested references', async () => {
     const input = {
       ...commonSavedObject,
       references: [
@@ -647,14 +647,14 @@ describe('savedObjectToItem', () => {
     };
 
     {
-      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
+      const { item } = await savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
       });
       expect(item?.references).toEqual(input.references);
     }
 
     {
-      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
+      const { item } = await savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
         allowedReferences: ['tag'],
       });
@@ -662,7 +662,7 @@ describe('savedObjectToItem', () => {
     }
 
     {
-      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
+      const { item } = await savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
         allowedReferences: [],
       });
@@ -670,7 +670,7 @@ describe('savedObjectToItem', () => {
     }
 
     {
-      const { item } = savedObjectToItem(
+      const { item } = await savedObjectToItem(
         { ...input, references: undefined },
         embeddableStartMock,
         true,
@@ -698,7 +698,7 @@ describe('getResultV3ToV2', () => {
     jest.clearAllMocks();
   });
 
-  it('should transform a v3 result to a v2 result with all attributes', () => {
+  it('should transform a v3 result to a v2 result with all attributes', async () => {
     const v3Result = {
       meta: { outcome: 'exactMatch' as const },
       item: {
@@ -756,7 +756,7 @@ describe('getResultV3ToV2', () => {
     };
 
     const extractSpy = jest.spyOn(embeddableStartMock, 'extract');
-    const output = getResultV3ToV2(v3Result, embeddableStartMock);
+    const output = await getResultV3ToV2(v3Result, embeddableStartMock);
 
     expect(extractSpy).toHaveBeenCalledTimes(1);
     expect(extractSpy).toHaveBeenCalledWith({

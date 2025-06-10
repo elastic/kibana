@@ -7,29 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
   describe('>= 8.18 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
-        panels: [
-          {
-            panelConfig: {
-              timeRange: {
-                from: 'now-7d/d',
-                to: 'now',
+    test('should convert embeddableConfig to panelConfig', async () => {
+      const dashboardState = await extractPanelsState(
+        {
+          panels: [
+            {
+              panelConfig: {
+                timeRange: {
+                  from: 'now-7d/d',
+                  to: 'now',
+                },
               },
+              gridData: {},
+              id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+              panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+              title: 'Custom title',
+              type: 'map',
             },
-            gridData: {},
-            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-            title: 'Custom title',
-            type: 'map',
-          },
-        ],
-      });
+          ],
+        },
+        embeddableService
+      );
       expect(dashboardState.panels).toEqual({
         ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
           explicitInput: {
@@ -50,24 +53,27 @@ describe('extractPanelsState', () => {
   });
 
   describe('< 8.17 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
-        panels: [
-          {
-            embeddableConfig: {
-              timeRange: {
-                from: 'now-7d/d',
-                to: 'now',
+    test('should convert embeddableConfig to panelConfig', async () => {
+      const dashboardState = await extractPanelsState(
+        {
+          panels: [
+            {
+              embeddableConfig: {
+                timeRange: {
+                  from: 'now-7d/d',
+                  to: 'now',
+                },
               },
+              gridData: {},
+              id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+              panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+              title: 'Custom title',
+              type: 'map',
             },
-            gridData: {},
-            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-            title: 'Custom title',
-            type: 'map',
-          },
-        ],
-      });
+          ],
+        },
+        embeddableService
+      );
       expect(dashboardState.panels).toEqual({
         ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
           explicitInput: {
@@ -88,29 +94,32 @@ describe('extractPanelsState', () => {
   });
 
   describe('< 7.3 panels state', () => {
-    test('should ignore state and notify user', () => {
-      const dashboardState = extractPanelsState({
-        panels: [
-          {
-            col: 1,
-            id: 'Visualization-MetricChart',
-            panelIndex: 1,
-            row: 1,
-            size_x: 6,
-            size_y: 3,
-            type: 'visualization',
-          },
-          {
-            col: 7,
-            id: 'Visualization-PieChart',
-            panelIndex: 2,
-            row: 1,
-            size_x: 6,
-            size_y: 3,
-            type: 'visualization',
-          },
-        ],
-      });
+    test('should ignore state and notify user', async () => {
+      const dashboardState = await extractPanelsState(
+        {
+          panels: [
+            {
+              col: 1,
+              id: 'Visualization-MetricChart',
+              panelIndex: 1,
+              row: 1,
+              size_x: 6,
+              size_y: 3,
+              type: 'visualization',
+            },
+            {
+              col: 7,
+              id: 'Visualization-PieChart',
+              panelIndex: 2,
+              row: 1,
+              size_x: 6,
+              size_y: 3,
+              type: 'visualization',
+            },
+          ],
+        },
+        embeddableService
+      );
       expect(dashboardState).toEqual({});
       expect(coreServices.notifications.toasts.addWarning).toHaveBeenCalled();
     });
