@@ -42,6 +42,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
   const [searchValue, setSearchValue] = useState<string>('');
+  const [isLoading, setLoading] = useState(false);
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -132,6 +133,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
+      setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
         .fetchDashboards({ limit: 100, text: `${searchValue}*` })
         .catch(() => {});
@@ -139,6 +141,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
         getDashboardItem(dashboard)
       );
       setDashboardList(dashboardOptions);
+      setLoading(false);
     }
   }, [contentManagement, searchValue]);
 
@@ -157,6 +160,8 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
             labelAppend={OptionalFieldLabel}
           >
             <EuiComboBox
+              async
+              isLoading={isLoading}
               fullWidth
               options={dashboardList}
               selectedOptions={selectedDashboards}
