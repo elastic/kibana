@@ -144,9 +144,9 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   };
 
   /**
-  * Public method to set a session for a specific role.
-  * This is primarily intended for testing purposes.
-  */
+   * Public method to set a session for a specific role.
+   * This is primarily intended for testing purposes.
+   */
   public setSessionForRole(role: string, sessionInfo: SessionInfo) {
     this.sessionCache.set(role, sessionInfo);
   }
