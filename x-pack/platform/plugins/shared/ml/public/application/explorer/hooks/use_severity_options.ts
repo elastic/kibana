@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
 import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { getSeverityRangeDisplay } from '../../components/controls/select_severity/select_severity';
@@ -48,8 +48,7 @@ export const useSeverityOptions = (): SeverityOption[] => {
         val: ML_ANOMALY_THRESHOLD.LOW,
         display: lowLabel,
         rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.LOW),
-        // TODO: SKY20
-        color: '#CFEEF7',
+        color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
         threshold: {
           min: ML_ANOMALY_THRESHOLD.LOW,
           max: ML_ANOMALY_THRESHOLD.WARNING,
@@ -59,8 +58,7 @@ export const useSeverityOptions = (): SeverityOption[] => {
         val: ML_ANOMALY_THRESHOLD.WARNING,
         display: warningLabel,
         rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.WARNING),
-        // TODO: SKY40
-        color: '#94D8EB',
+        color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
         threshold: {
           min: ML_ANOMALY_THRESHOLD.WARNING,
           max: ML_ANOMALY_THRESHOLD.MINOR,
@@ -70,7 +68,7 @@ export const useSeverityOptions = (): SeverityOption[] => {
         val: ML_ANOMALY_THRESHOLD.MINOR,
         display: minorLabel,
         rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.MINOR),
-        color: euiTheme.colors.severity.warning,
+        color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
         threshold: {
           min: ML_ANOMALY_THRESHOLD.MINOR,
           max: ML_ANOMALY_THRESHOLD.MAJOR,
@@ -80,7 +78,7 @@ export const useSeverityOptions = (): SeverityOption[] => {
         val: ML_ANOMALY_THRESHOLD.MAJOR,
         display: majorLabel,
         rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.MAJOR),
-        color: euiTheme.colors.severity.risk,
+        color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
         threshold: {
           min: ML_ANOMALY_THRESHOLD.MAJOR,
           max: ML_ANOMALY_THRESHOLD.CRITICAL,
@@ -90,16 +88,12 @@ export const useSeverityOptions = (): SeverityOption[] => {
         val: ML_ANOMALY_THRESHOLD.CRITICAL,
         display: criticalLabel,
         rangeDisplay: getSeverityRangeDisplay(ML_ANOMALY_THRESHOLD.CRITICAL),
-        color: euiTheme.colors.severity.danger,
+        color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
         threshold: {
           min: ML_ANOMALY_THRESHOLD.CRITICAL,
         },
       },
     ],
-    [
-      euiTheme.colors.severity.danger,
-      euiTheme.colors.severity.risk,
-      euiTheme.colors.severity.warning,
-    ]
+    [euiTheme]
   );
 };
