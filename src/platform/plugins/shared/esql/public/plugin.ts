@@ -141,6 +141,14 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       return result;
     };
 
+    // Create a cached version of getEditorExtensionsAutocomplete
+    const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
+      getEditorExtensionsAutocomplete,
+      (queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
     const getInferenceEndpointsAutocomplete = cacheParametrizedAsyncFunction(
       async (taskType: InferenceTaskType) => {
         return await core.http.get<InferenceEndpointsAutocompleteResult>(
@@ -148,14 +156,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
         );
       },
       (taskType: InferenceTaskType) => taskType,
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
-
-    // Create a cached version of getEditorExtensionsAutocomplete
-    const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
-      getEditorExtensionsAutocomplete,
-      (queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
       1000 * 60 * 5, // Keep the value in cache for 5 minutes
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
