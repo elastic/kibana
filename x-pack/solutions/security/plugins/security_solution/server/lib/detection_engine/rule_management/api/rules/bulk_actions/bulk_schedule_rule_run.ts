@@ -66,6 +66,14 @@ export const bulkScheduleBackfill = async ({
   }));
 
   // Perform actual schedule using the rulesClient
-  const results = await rulesClient.scheduleBackfill(params);
-  return handleScheduleBackfillResults({ results, rules: validatedRules });
+  const backfillResults = await rulesClient.scheduleBackfill(params);
+  const processedResults = handleScheduleBackfillResults({
+    results: backfillResults,
+    rules: validatedRules,
+  });
+
+  return {
+    backfilled: processedResults.backfilled,
+    errors: [...errors, ...processedResults.errors],
+  };
 };
