@@ -19,8 +19,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./discover/embeddables'));
     loadTestFile(require.resolve('./onboarding'));
     loadTestFile(require.resolve('./rules/rules_list'));
-    loadTestFile(require.resolve('./rules/custom_threshold_consumer'));
-    loadTestFile(require.resolve('./rules/es_query_consumer'));
+    // moved to feature flags config until custom roles in serverless are supported
+    // loadTestFile(require.resolve('./rules/custom_threshold_consumer'));
+    // loadTestFile(require.resolve('./rules/es_query_consumer'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./ml'));
