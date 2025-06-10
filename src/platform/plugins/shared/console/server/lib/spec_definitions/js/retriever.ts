@@ -117,10 +117,12 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       // Only one of 'ids' or 'docs' should be used at a time
       ids: {
-        __description: "Specify an array of document IDs to pin. Only one of 'ids' or 'docs' can be used.",
+        __description:
+          "Specify an array of document IDs to pin. Only one of 'ids' or 'docs' can be used.",
       },
       docs: {
-        __description: "Specify an array of full documents to pin. Only one of 'ids' or 'docs' can be used.",
+        __description:
+          "Specify an array of full documents to pin. Only one of 'ids' or 'docs' can be used.",
       },
       match_criteria: {},
       rank_window_size: 10,
