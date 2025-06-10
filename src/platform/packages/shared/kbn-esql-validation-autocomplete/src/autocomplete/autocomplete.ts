@@ -137,8 +137,6 @@ export async function suggest(
           fromCommand = 'FROM logs*';
         } else if (visibleSources.length) {
           fromCommand = `FROM ${visibleSources[0].name}`;
-        } else {
-          fromCommand = `FROM`;
         }
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
