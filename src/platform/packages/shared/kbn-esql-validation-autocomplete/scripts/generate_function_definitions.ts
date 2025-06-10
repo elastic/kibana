@@ -22,7 +22,6 @@ import { mathValidators } from './validators';
 import {
   aliasTable,
   aliases,
-  bucketParameterTypes,
   defaultScalarFunctionLocations,
   defaultAggFunctionLocations,
   MATH_OPERATORS,
@@ -116,31 +115,29 @@ const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
   return groupingFunctionDefinitions.map((op) => {
-    if (op.name === 'bucket') {
-      const signatures = [
-        ...bucketParameterTypes.map((signature) => {
-          const [fieldType, bucketType, fromType, toType, resultType] = signature;
-          return {
-            params: [
-              { name: 'field', type: fieldType },
-              { name: 'buckets', type: bucketType, constantOnly: true },
-              ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
-              ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
-            ],
-            returnType: resultType,
-          };
-        }),
-      ];
-      return {
-        ...op,
-        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
-        signatures,
-      };
-    }
-    return {
+    const newOp = {
       ...op,
       locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
     };
+    if (newOp.name === 'bucket') {
+      const updatedSignatures = newOp.signatures.map((signature) => {
+        const newSignature = { ...signature };
+        if (newSignature.params && newSignature.params.length > 1) {
+          const indicesToMakeConstantOnly = [1, 2, 3];
+
+          newSignature.params = newSignature.params.map((param, index) => {
+            const newParam = { ...param };
+            if (indicesToMakeConstantOnly.includes(index)) {
+              newParam.constantOnly = true;
+            }
+            return newParam;
+          });
+        }
+        return newSignature;
+      });
+      newOp.signatures = updatedSignatures;
+    }
+    return newOp;
   });
 };
 

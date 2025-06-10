@@ -1935,7 +1935,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'time_literal',
+          type: 'date_period',
           optional: false,
         },
         {
