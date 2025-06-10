@@ -28,8 +28,13 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { withInferenceSpan, type InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
+import { withInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ChatCompleteResponse,
+  FunctionCallingMode,
+  InferenceClient,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
@@ -505,7 +510,9 @@ export class ObservabilityAIAssistantClient {
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
-            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+            this.dependencies.logger.trace(
+              () => `Received chunk: ${JSON.stringify(event.message)}`
+            );
           }
         }),
         shareReplay()
