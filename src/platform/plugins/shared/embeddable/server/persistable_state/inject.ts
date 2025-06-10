@@ -9,13 +9,17 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { EmbeddableStateWithType } from '../types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
-export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {
+export const getInjectFunction = (
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEnhancement: (enhancementId: string) => PersistableState
+) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory?.(state.type);
+    const factory = getEmbeddableFactory(state.type);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
 
@@ -26,9 +30,10 @@ export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) =>
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      updatedInput.enhancements![key] = embeddables
-        .getEnhancement(key)
-        .inject(enhancements[key] as SerializableRecord, references);
+      updatedInput.enhancements![key] = getEnhancement(key).inject(
+        enhancements[key] as SerializableRecord,
+        references
+      );
     });
 
     return updatedInput;

@@ -8,15 +8,19 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract } from '../types';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { baseEmbeddableMigrations } from './migrate_base_input';
+import { EmbeddableStateWithType } from '../types';
 
 export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
-export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) => {
+export const getMigrateFunction = (
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEnhancement: (enhancementId: string) => PersistableState
+) => {
   const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
     const enhancements = (state.enhancements as SerializableRecord) || {};
-    const factory = embeddables.getEmbeddableFactory?.(state.type as string);
+    const factory = getEmbeddableFactory?.(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
       ? baseEmbeddableMigrations[version](state)
@@ -28,8 +32,8 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
       updatedInput = factoryMigrations[version](updatedInput);
     }
 
-    if (factory?.isContainerType) {
-      updatedInput.panels = ((state.panels as SerializableRecord[]) || []).map((panel) => {
+    if ('panels' in state && Array.isArray(state.panels)) {
+      updatedInput.panels = (state.panels as SerializableRecord[]).map((panel) => {
         return migrateFn(panel, version);
       });
     }
@@ -37,7 +41,7 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      const enhancementDefinition = embeddables.getEnhancement(key);
+      const enhancementDefinition = getEnhancement(key);
       const enchantmentMigrations =
         typeof enhancementDefinition?.migrations === 'function'
           ? enhancementDefinition?.migrations()

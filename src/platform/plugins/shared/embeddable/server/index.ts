@@ -11,9 +11,11 @@ import { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export type { EmbeddableSetup, EmbeddableStart };
 
-export type { EnhancementRegistryDefinition } from './types';
-
-export type { EmbeddableRegistryDefinition } from '../common';
+export type {
+  EmbeddableRegistryDefinition,
+  EmbeddableStateWithType,
+  EnhancementRegistryDefinition,
+} from './types';
 
 export const plugin = async () => {
   const { EmbeddableServerPlugin } = await import('./plugin');

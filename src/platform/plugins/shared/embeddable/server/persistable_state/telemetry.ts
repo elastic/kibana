@@ -8,16 +8,20 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { EmbeddableStateWithType } from '../types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
-export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract) => {
+export const getTelemetryFunction = (
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEnhancement: (enhancementId: string) => PersistableState
+) => {
   return (
     state: EmbeddableStateWithType,
     telemetryData: Record<string, string | number | boolean> = {}
   ) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory?.(state.type);
+    const factory = getEmbeddableFactory(state.type);
 
     let outputTelemetryData = telemetryBaseEmbeddableInput(state, telemetryData);
     if (factory) {
@@ -25,9 +29,10 @@ export const getTelemetryFunction = (embeddables: CommonEmbeddableStartContract)
     }
     Object.keys(enhancements).map((key) => {
       if (!enhancements[key]) return;
-      outputTelemetryData = embeddables
-        .getEnhancement(key)
-        .telemetry(enhancements[key] as Record<string, SerializableRecord>, outputTelemetryData);
+      outputTelemetryData = getEnhancement(key).telemetry(
+        enhancements[key] as Record<string, SerializableRecord>,
+        outputTelemetryData
+      );
     });
 
     return outputTelemetryData;

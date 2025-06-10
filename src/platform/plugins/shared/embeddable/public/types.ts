@@ -14,10 +14,10 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { CommonEmbeddableStartContract } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
 
 export interface EmbeddableSetupDependencies {
@@ -75,5 +75,5 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getEnhancement: CommonEmbeddableStartContract['getEnhancement'];
+  getEnhancement: (enhancementId: string) => PersistableState;
 }

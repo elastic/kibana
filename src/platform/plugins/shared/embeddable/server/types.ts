@@ -8,8 +8,11 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from '../common/types';
+import {
+  PersistableState,
+  PersistableStateDefinition,
+  PersistableStateService,
+} from '@kbn/kibana-utils-plugin/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
@@ -28,3 +31,16 @@ export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = Embe
   extends PersistableState<P> {
   id: string;
 }
+
+export type EmbeddableStateWithType = {
+  enhancements?: SerializableRecord;
+  type: string;
+};
+
+export interface EmbeddableRegistryDefinition<
+  P extends EmbeddableStateWithType = EmbeddableStateWithType
+> extends PersistableStateDefinition<P> {
+  id: string;
+}
+
+export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;

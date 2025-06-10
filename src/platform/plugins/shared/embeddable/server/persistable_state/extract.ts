@@ -8,13 +8,17 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
-export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
+export const getExtractFunction = (
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEnhancement: (enhancementId: string) => PersistableState
+) => {
   return (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};
-    const factory = embeddables.getEmbeddableFactory?.(state.type);
+    const factory = getEmbeddableFactory(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;
@@ -29,9 +33,9 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
     updatedInput.enhancements = {};
     Object.keys(enhancements).forEach((key) => {
       if (!enhancements[key]) return;
-      const enhancementResult = embeddables
-        .getEnhancement(key)
-        .extract(enhancements[key] as SerializableRecord);
+      const enhancementResult = getEnhancement(key).extract(
+        enhancements[key] as SerializableRecord
+      );
       refs.push(...enhancementResult.references);
       updatedInput.enhancements![key] = enhancementResult.state;
     });
