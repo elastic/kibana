@@ -6,11 +6,10 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { INVOKE_LLM_CLIENT_TIMEOUT, PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
 import { HttpFetchQuery } from '@kbn/core-http-browser';
 import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
-import { FETCH_MESSAGE_TIMEOUT_ERROR } from '../../use_send_message/translations';
 
 interface SendMessageProps {
   message: string;
@@ -39,11 +38,6 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
     async ({ message, promptIds, replacements, query }: SendMessageProps) => {
       setIsLoading(true);
 
-      const timeoutId = setTimeout(() => {
-        abortController.current.abort(FETCH_MESSAGE_TIMEOUT_ERROR);
-        abortController.current = new AbortController();
-      }, INVOKE_LLM_CLIENT_TIMEOUT);
-
       try {
         return await postChatComplete({
           actionTypeId,
@@ -58,7 +52,6 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
           traceOptions,
         });
       } finally {
-        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     },

@@ -14,7 +14,7 @@ import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
 jest.mock('../context');
 jest.mock('./attack_discovery_widget', () => ({
-  AttackDiscoveryWidget: jest.fn(),
+  AttackDiscoveryWidget: () => <></>,
 }));
 
 describe('AttackDiscoverySection', () => {

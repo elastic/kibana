@@ -86,22 +86,21 @@ describe('useChatComplete', () => {
   it('should set isLoading to true while sending a message and false after completion', async () => {
     (postChatComplete as jest.Mock).mockResolvedValue({});
 
-    const { result } = renderHook(() => useChatComplete({ connectorId: 'mock-connector-id' }));
+    const { result } = renderHook(() => useChatComplete({ connectorId: 'mock-connector-id' }), {
+      // TODO: fails with concurrent mode
+      legacyRoot: true,
+    });
 
     expect(result.current.isLoading).toBe(false);
 
     let sendMessagePromise: Promise<ChatCompleteResponse>;
 
-    await act(async () => {
-      sendMessagePromise = result.current.sendMessage({
-        message: 'test message',
-        replacements: {},
-      });
+    act(() => {
+      result.current.sendMessage({ message: 'test message', replacements: {} });
+    });
 
-      // Wait until isLoading becomes true
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(true);
-      });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(true);
     });
 
     await act(async () => {
