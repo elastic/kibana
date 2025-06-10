@@ -85,7 +85,7 @@ describe(`POST ${URL}`, () => {
       .fn()
       .mockImplementation(() => importer as jest.Mocked<SavedObjectsImporter>);
 
-    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>(
+    const router = httpSetup.router.create<InternalSavedObjectsRequestHandlerContext>(
       '/internal/saved_objects/'
     );
     coreUsageStatsClient = coreUsageStatsClientMock.create();

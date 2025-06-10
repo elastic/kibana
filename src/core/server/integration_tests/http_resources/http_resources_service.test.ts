@@ -41,7 +41,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('renders core application', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         resources.register(
           {
@@ -61,7 +61,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('applies default CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         resources.register(
           {
@@ -81,7 +81,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('can attach headers, except the CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         resources.register(
           {
@@ -110,7 +110,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('renders html', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         const htmlBody = `
           <!DOCTYPE html>
@@ -139,7 +139,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('renders javascript', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         const jsBody = 'window.alert("from js body");';
         resources.register(
@@ -161,7 +161,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('attaches CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         const htmlBody = `
           <!DOCTYPE html>
@@ -189,7 +189,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('can attach headers, except the CSP & "content-type" headers', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         resources.register(
           {
@@ -218,7 +218,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
       it('can adjust route config', async () => {
         const { http, httpResources } = await root.setup();
 
-        const router = http.createRouter('');
+        const router = http.router.create('');
         const resources = httpResources.createRegistrar(router);
         const validate = {
           params: schema.object({
@@ -245,7 +245,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
     it('responses do not contain the elastic-api-version header', async () => {
       const { http, httpResources } = await root.setup();
 
-      const router = http.createRouter('');
+      const router = http.router.create('');
       const resources = httpResources.createRegistrar(router);
       const htmlBody = `<p>HtMlr00lz</p>`;
       resources.register(

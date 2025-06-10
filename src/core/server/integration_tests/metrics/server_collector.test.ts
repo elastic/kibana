@@ -37,7 +37,7 @@ describe('ServerMetricsCollector', () => {
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
     hapiServer = httpSetup.server;
-    router = httpSetup.createRouter('/');
+    router = httpSetup.router.create('/');
     collector = new ServerMetricsCollector(hapiServer);
   });
 

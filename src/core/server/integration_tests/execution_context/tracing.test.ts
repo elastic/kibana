@@ -71,9 +71,8 @@ describe('trace', () => {
   describe('x-opaque-id', () => {
     it('passed to Elasticsearch unscoped client calls', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -101,9 +100,8 @@ describe('trace', () => {
 
     it('passed to Elasticsearch scoped client calls', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -131,9 +129,8 @@ describe('trace', () => {
 
     it('generated and attached to Elasticsearch unscoped client calls if not specifed', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -157,9 +154,8 @@ describe('trace', () => {
 
     it('generated and attached to Elasticsearch scoped client calls if not specifed', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -183,9 +179,8 @@ describe('trace', () => {
 
     it('can be overridden during Elasticsearch client call', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -238,9 +233,8 @@ describe('trace', () => {
       });
       it('passed to Elasticsearch scoped client calls even if ExecutionContext Service is disabled', async () => {
         const { http } = await rootExecutionContextDisabled.setup();
-        const { createRouter } = http;
 
-        const router = createRouter<RequestHandlerContext>('');
+        const router = http.router.create<RequestHandlerContext>('');
         router.get(
           {
             path: '/execution-context',
@@ -268,9 +262,8 @@ describe('trace', () => {
 
       it('does not pass context if ExecutionContext Service is disabled', async () => {
         const { http, executionContext } = await rootExecutionContextDisabled.setup();
-        const { createRouter } = http;
 
-        const router = createRouter<RequestHandlerContext>('');
+        const router = http.router.create<RequestHandlerContext>('');
         router.get(
           {
             path: '/execution-context',
@@ -308,9 +301,8 @@ describe('trace', () => {
   describe('execution context', () => {
     it('sets execution context for a sync request handler', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -330,9 +322,8 @@ describe('trace', () => {
 
     it('sets execution context for an async request handler', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -353,9 +344,8 @@ describe('trace', () => {
 
     it('execution context is uniq for sequential requests', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       let id = 42;
       router.get(
         {
@@ -380,9 +370,8 @@ describe('trace', () => {
 
     it('execution context is uniq for concurrent requests', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       let id = 2;
       router.get(
         {
@@ -415,9 +404,8 @@ describe('trace', () => {
 
     it('execution context is uniq for concurrent requests when "x-opaque-id" provided', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       let id = 2;
       router.get(
         {
@@ -457,9 +445,8 @@ describe('trace', () => {
 
     it('parses the parent context if present', async () => {
       const { executionContext, http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -480,9 +467,8 @@ describe('trace', () => {
 
     it('supports UTF-8 characters', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -515,7 +501,6 @@ describe('trace', () => {
     it('execution context is the same for all the lifecycle events', async () => {
       const { executionContext, http } = await root.setup();
       const {
-        createRouter,
         registerOnPreRouting,
         registerOnPreAuth,
         registerAuth,
@@ -523,7 +508,7 @@ describe('trace', () => {
         registerOnPreResponse,
       } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -582,9 +567,8 @@ describe('trace', () => {
 
     it('propagates context to Elasticsearch scoped client', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -611,9 +595,8 @@ describe('trace', () => {
 
     it('propagates context to Elasticsearch unscoped client', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -640,9 +623,8 @@ describe('trace', () => {
 
     it('passes "x-opaque-id" if no execution context is registered', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -670,9 +652,8 @@ describe('trace', () => {
 
     it('does not affect "x-opaque-id" set by user', async () => {
       const { http, executionContext } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       router.get(
         {
           path: '/execution-context',
@@ -701,9 +682,8 @@ describe('trace', () => {
 
     it('does not break on non-ASCII characters within execution context', async () => {
       const { http, executionContext } = await root.setup();
-      const { createRouter } = http;
 
-      const router = createRouter<RequestHandlerContext>('');
+      const router = http.router.create<RequestHandlerContext>('');
       const ctx = {
         type: 'test-type',
         name: 'test-name',
@@ -735,9 +715,8 @@ describe('trace', () => {
     describe('withContext', () => {
       it('sets execution context for a nested function', async () => {
         const { executionContext, http } = await root.setup();
-        const { createRouter } = http;
 
-        const router = createRouter<RequestHandlerContext>('');
+        const router = http.router.create<RequestHandlerContext>('');
         router.get(
           {
             path: '/execution-context',
@@ -758,9 +737,8 @@ describe('trace', () => {
 
       it('set execution context becomes child if parent context is presented', async () => {
         const { executionContext, http } = await root.setup();
-        const { createRouter } = http;
 
-        const router = createRouter<RequestHandlerContext>('');
+        const router = http.router.create<RequestHandlerContext>('');
         const nestedContext = {
           type: 'nested-type',
           name: 'nested-name',
@@ -791,9 +769,8 @@ describe('trace', () => {
 
       it('extends the execution context passed from the client-side', async () => {
         const { http, executionContext } = await root.setup();
-        const { createRouter } = http;
 
-        const router = createRouter<RequestHandlerContext>('');
+        const router = http.router.create<RequestHandlerContext>('');
         const newContext = {
           type: 'new-type',
           name: 'new-name',

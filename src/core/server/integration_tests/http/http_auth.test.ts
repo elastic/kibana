@@ -48,7 +48,11 @@ describe('http auth', () => {
     describe('when authRequired is `true`', () => {
       it('allows authenticated access when auth returns `authenticated`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
@@ -61,7 +65,11 @@ describe('http auth', () => {
 
       it('blocks access when auth returns `notHandled`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
 
@@ -74,7 +82,11 @@ describe('http auth', () => {
 
       it('blocks access when auth returns `unauthorized`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => res.unauthorized());
 
@@ -88,7 +100,11 @@ describe('http auth', () => {
     describe('when authRequired is `false`', () => {
       it('allows anonymous access when auth returns `authenticated`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
@@ -101,7 +117,11 @@ describe('http auth', () => {
 
       it('allows anonymous access when auth returns `notHandled`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
 
@@ -114,7 +134,11 @@ describe('http auth', () => {
 
       it('allows anonymous access when auth returns `unauthorized`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => res.unauthorized());
 
@@ -128,7 +152,11 @@ describe('http auth', () => {
     describe('when authRequired is `optional`', () => {
       it('allows authenticated access when auth returns `authenticated`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
@@ -141,7 +169,11 @@ describe('http auth', () => {
 
       it('allows anonymous access when auth returns `notHandled`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
 
@@ -154,7 +186,11 @@ describe('http auth', () => {
 
       it('allows anonymous access when auth returns `unauthorized`', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => res.unauthorized());
 
@@ -170,7 +206,10 @@ describe('http auth', () => {
   describe('when auth is not registered', () => {
     it('allow anonymous access to resources when `authRequired` is `true`', async () => {
       const { http } = await root.setup();
-      const { createRouter, auth } = http;
+      const {
+        router: { create: createRouter },
+        auth,
+      } = http;
 
       const router = createRouter('');
       registerRoute(router, auth, true);
@@ -181,7 +220,10 @@ describe('http auth', () => {
 
     it('allow anonymous access to resources when `authRequired` is `false`', async () => {
       const { http } = await root.setup();
-      const { createRouter, auth } = http;
+      const {
+        router: { create: createRouter },
+        auth,
+      } = http;
 
       const router = createRouter('');
       registerRoute(router, auth, false);
@@ -192,7 +234,10 @@ describe('http auth', () => {
 
     it('allow anonymous access to resources when `authRequired` is `optional`', async () => {
       const { http } = await root.setup();
-      const { createRouter, auth } = http;
+      const {
+        router: { create: createRouter },
+        auth,
+      } = http;
 
       const router = createRouter('');
       registerRoute(router, auth, 'optional');

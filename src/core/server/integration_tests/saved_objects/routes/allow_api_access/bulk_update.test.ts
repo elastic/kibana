@@ -44,7 +44,7 @@ describe('PUT /api/saved_objects/_bulk_update with allowApiAccess true', () => {
     });
 
     const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+      httpSetup.router.create<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);

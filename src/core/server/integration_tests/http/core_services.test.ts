@@ -49,7 +49,11 @@ describe('http service', () => {
     describe('#isAuthenticated()', () => {
       it('returns true if has been authenticated', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
@@ -69,7 +73,11 @@ describe('http service', () => {
 
       it('returns false if has not been authenticated', async () => {
         const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
+        const {
+          registerAuth,
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
@@ -90,7 +98,10 @@ describe('http service', () => {
 
       it('returns false if no authentication mechanism has been registered', async () => {
         const { http } = await root.setup();
-        const { createRouter, auth } = http;
+        const {
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         const router = createRouter('');
         router.get(
@@ -109,7 +120,11 @@ describe('http service', () => {
 
       it('returns true if authenticated on a route with "optional" auth', async () => {
         const { http } = await root.setup();
-        const { createRouter, auth, registerAuth } = http;
+        const {
+          router: { create: createRouter },
+          auth,
+          registerAuth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         const router = createRouter('');
@@ -129,7 +144,11 @@ describe('http service', () => {
 
       it('returns false if not authenticated on a route with "optional" auth', async () => {
         const { http } = await root.setup();
-        const { createRouter, auth, registerAuth } = http;
+        const {
+          router: { create: createRouter },
+          auth,
+          registerAuth,
+        } = http;
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
 
@@ -153,7 +172,12 @@ describe('http service', () => {
         const user = { id: '42' };
 
         const { http } = await root.setup();
-        const { createCookieSessionStorageFactory, createRouter, registerAuth, auth } = http;
+        const {
+          createCookieSessionStorageFactory,
+          router: { create: createRouter },
+          registerAuth,
+          auth,
+        } = http;
         const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
         registerAuth((req, res, toolkit) => {
           sessionStorageFactory.asScoped(req).set({ value: user });
@@ -177,7 +201,10 @@ describe('http service', () => {
 
       it('returns correct authentication unknown status', async () => {
         const { http } = await root.setup();
-        const { createRouter, auth } = http;
+        const {
+          router: { create: createRouter },
+          auth,
+        } = http;
 
         const router = createRouter('');
         router.get(
@@ -197,7 +224,11 @@ describe('http service', () => {
         const authenticate = jest.fn();
 
         const { http } = await root.setup();
-        const { createRouter, registerAuth, auth } = http;
+        const {
+          router: { create: createRouter },
+          registerAuth,
+          auth,
+        } = http;
         registerAuth(authenticate);
         const router = createRouter('');
         router.get(
@@ -238,7 +269,6 @@ describe('http service', () => {
 
     it('forwards unauthorized errors from elasticsearch', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
       // eslint-disable-next-line prefer-const
       let elasticsearch: InternalElasticsearchServiceStart;
 
@@ -260,7 +290,7 @@ describe('http service', () => {
         )
       );
 
-      const router = createRouter('/new-platform');
+      const router = http.router.create('/new-platform');
       router.get(
         { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
         async (context, req, res) => {
@@ -279,7 +309,6 @@ describe('http service', () => {
 
     it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
       // eslint-disable-next-line prefer-const
       let elasticsearch: InternalElasticsearchServiceStart;
 
@@ -299,7 +328,7 @@ describe('http service', () => {
         )
       );
 
-      const router = createRouter('/new-platform');
+      const router = http.router.create('/new-platform');
       router.get(
         { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
         async (context, req, res) => {
@@ -318,7 +347,6 @@ describe('http service', () => {
 
     it('provides error reason for Elasticsearch Response Errors', async () => {
       const { http } = await root.setup();
-      const { createRouter } = http;
       // eslint-disable-next-line prefer-const
       let elasticsearch: InternalElasticsearchServiceStart;
 
@@ -339,7 +367,7 @@ describe('http service', () => {
         )
       );
 
-      const router = createRouter('/new-platform');
+      const router = http.router.create('/new-platform');
       router.get(
         { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
         async (context, req, res) => {

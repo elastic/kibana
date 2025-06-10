@@ -44,7 +44,7 @@ describe('POST /api/saved_objects/_export', () => {
     exporter = handlerContext.savedObjects.getExporter();
 
     const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+      httpSetup.router.create<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     handlerContext.savedObjects.getExporter = jest
       .fn()
       .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);

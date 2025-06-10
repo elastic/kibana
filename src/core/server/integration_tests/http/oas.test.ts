@@ -49,9 +49,9 @@ async function startService(
     configService: createConfigService(args.config),
   });
   await httpService.preboot(prebootDeps);
-  const { server: innerServer, createRouter } = await httpService.setup(setupDeps);
+  const { server: innerServer, router } = await httpService.setup(setupDeps);
   if (args.createRoutes) {
-    args.createRoutes((pluginId) => createRouter('/', pluginId));
+    args.createRoutes((pluginId) => router.create('/', pluginId));
   }
   await httpService.start();
   return {

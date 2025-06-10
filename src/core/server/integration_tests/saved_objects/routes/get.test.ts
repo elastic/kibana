@@ -72,7 +72,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     );
 
     const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+      httpSetup.router.create<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsGet.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail

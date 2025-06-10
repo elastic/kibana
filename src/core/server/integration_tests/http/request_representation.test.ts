@@ -46,7 +46,10 @@ const replacePorts = (input: string): string => input.replace(/[:][0-9]+[/]/g, '
 describe('request logging', () => {
   describe('KibanaRequest', () => {
     it('has expected string representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -68,7 +71,10 @@ describe('request logging', () => {
     });
 
     it('has expected JSON representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -105,7 +111,10 @@ describe('request logging', () => {
     });
 
     it('has expected inspect representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -154,7 +163,10 @@ describe('request logging', () => {
 
   describe('HAPI request', () => {
     it('has expected string representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -177,7 +189,10 @@ describe('request logging', () => {
     });
 
     it('has expected JSON representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -201,7 +216,10 @@ describe('request logging', () => {
     });
 
     it('has expected inspect representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -226,7 +244,10 @@ describe('request logging', () => {
 
   describe('http.IncomingMessage', () => {
     it('has expected string representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -249,7 +270,10 @@ describe('request logging', () => {
     });
 
     it('has expected JSON representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {
@@ -275,7 +299,10 @@ describe('request logging', () => {
     });
 
     it('has expected inspect representation', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         {

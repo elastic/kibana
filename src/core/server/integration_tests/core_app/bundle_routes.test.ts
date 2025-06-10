@@ -54,12 +54,12 @@ describe('bundle routes', () => {
   };
 
   it('serves images inside from the bundle path', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const { server: innerServer, router } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(router.create(''));
     await server.start();
 
     const response = await supertest(innerServer.listener)
@@ -72,12 +72,12 @@ describe('bundle routes', () => {
   });
 
   it('serves uncompressed js files', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const { server: innerServer, router } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(router.create(''));
     await server.start();
 
     const response = await supertest(innerServer.listener)
@@ -90,12 +90,12 @@ describe('bundle routes', () => {
   });
 
   it('returns 404 for files outside of the bundlePath', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const { server: innerServer, router } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(router.create(''));
     await server.start();
 
     await supertest(innerServer.listener)
@@ -104,12 +104,12 @@ describe('bundle routes', () => {
   });
 
   it('returns 404 for non-existing files', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const { server: innerServer, router } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(router.create(''));
     await server.start();
 
     await supertest(innerServer.listener)
@@ -118,12 +118,12 @@ describe('bundle routes', () => {
   });
 
   it('returns gzip version if present', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const { server: innerServer, router } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(router.create(''));
     await server.start();
 
     const response = await supertest(innerServer.listener)
@@ -143,12 +143,12 @@ describe('bundle routes', () => {
 
   describe('in production mode', () => {
     it('uses max-age cache-control', async () => {
-      const { server: innerServer, createRouter } = await server.setup({
+      const { server: innerServer, router } = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
-      registerFooPluginRoute(createRouter(''), { isDist: true });
+      registerFooPluginRoute(router.create(''), { isDist: true });
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -162,12 +162,12 @@ describe('bundle routes', () => {
 
   describe('in development mode', () => {
     it('uses etag cache-control', async () => {
-      const { server: innerServer, createRouter } = await server.setup({
+      const { server: innerServer, router } = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
-      registerFooPluginRoute(createRouter(''), { isDist: false });
+      registerFooPluginRoute(router.create(''), { isDist: false });
       await server.start();
 
       const response = await supertest(innerServer.listener)
