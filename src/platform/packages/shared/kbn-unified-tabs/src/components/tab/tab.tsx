@@ -30,6 +30,7 @@ import {
   keys,
   useGeneratedHtmlId,
   EuiProgress,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -205,7 +206,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
               <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                {item.label}
+                <EuiTextTruncate text={item.label} truncation="middle" />
               </EuiText>
             </div>
           )}
