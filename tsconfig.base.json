@@ -1548,6 +1548,8 @@
       "@kbn/response-ops-alerts-filters-form/*": ["src/platform/packages/shared/response-ops/alerts-filters-form/*"],
       "@kbn/response-ops-alerts-table": ["src/platform/packages/shared/response-ops/alerts-table"],
       "@kbn/response-ops-alerts-table/*": ["src/platform/packages/shared/response-ops/alerts-table/*"],
+      "@kbn/response-ops-recurring-schedule-form": ["src/platform/packages/shared/response-ops/recurring-schedule-form"],
+      "@kbn/response-ops-recurring-schedule-form/*": ["src/platform/packages/shared/response-ops/recurring-schedule-form/*"],
       "@kbn/response-ops-rule-form": ["src/platform/packages/shared/response-ops/rule_form"],
       "@kbn/response-ops-rule-form/*": ["src/platform/packages/shared/response-ops/rule_form/*"],
       "@kbn/response-ops-rule-params": ["src/platform/packages/shared/response-ops/rule_params"],

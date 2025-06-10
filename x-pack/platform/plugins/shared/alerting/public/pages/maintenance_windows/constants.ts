@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { invert, mapValues } from 'lodash';
-import { Frequency } from '@kbn/rrule';
-import moment from 'moment';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import * as i18n from './translations';
-import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
+import { MaintenanceWindowStatus } from '../../../common';
 
 export const VALID_CATEGORIES = [
   DEFAULT_APP_CATEGORIES.observability.id,
