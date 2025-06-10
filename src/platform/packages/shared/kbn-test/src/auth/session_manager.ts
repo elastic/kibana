@@ -54,6 +54,7 @@ export interface SessionInfo {
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
+  private static readonly SESSION_LIFE_SPAN: number = 20 * 60 * 1000; // 20 minutes in milliseconds
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
@@ -63,7 +64,6 @@ export class SamlSessionManager {
   private readonly supportedRoles?: SupportedRoles;
   private readonly cloudHostName?: string;
   private readonly cloudUsersFilePath: string;
-  private static readonly SESSION_LIFE_SPAN: number = 20 * 60 * 1000; // 20 minutes in milliseconds
 
   constructor(options: SamlSessionManagerOptions) {
     this.log = options.log;
@@ -142,6 +142,26 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       throw new Error(`User with '${role}' role is not defined`);
     }
   };
+
+  /**
+  * Public method to set a session for a specific role.
+  * This is primarily intended for testing purposes.
+  */
+  public setSessionForRole(role: string, sessionInfo: SessionInfo) {
+    this.sessionCache.set(role, sessionInfo);
+  }
+
+  /**
+   * Public method to get a session for a specific role.
+   * Returns undefined if no session exists for the role.
+   */
+  public getSessionForRole(role: string): SessionInfo {
+    const sessionInfo = this.sessionCache.get(role);
+    if (!sessionInfo) {
+      throw new Error(`No session found for role: ${role}`);
+    }
+    return sessionInfo;
+  }
 
   private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
     const { role, forceNewSession, spaceId } = options;

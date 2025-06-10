@@ -479,7 +479,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       const role = 'viewer';
       const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
       const now = Date.now();
-      samlSessionManager.sessionCache.set(role, {
+      samlSessionManager.setSessionForRole(role, {
         session: new Session(cookieInstance, testEmail),
         createdAt: now - sessionLifetime + 1000, // Just within the valid lifetime
       });
@@ -497,7 +497,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       const role = 'viewer';
       const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
       const now = Date.now();
-      samlSessionManager.sessionCache.set(role, {
+      samlSessionManager.setSessionForRole(role, {
         session: new Session(cookieInstance, testEmail),
         createdAt: now - sessionLifetime - 1000, // Just beyond the valid lifetime
       });
@@ -545,8 +545,8 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       const sessionInfo: SessionInfo = { session, createdAt };
 
       // Act
-      samlSessionManager.sessionCache.set(role, sessionInfo);
-      const cachedSessionInfo = samlSessionManager.sessionCache.get(role);
+      samlSessionManager.setSessionForRole(role, sessionInfo);
+      const cachedSessionInfo = samlSessionManager.getSessionForRole(role);
 
       // Assert
       expect(cachedSessionInfo).toBeDefined();
