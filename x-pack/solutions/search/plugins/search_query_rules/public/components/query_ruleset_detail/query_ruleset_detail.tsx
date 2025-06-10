@@ -38,6 +38,7 @@ import { DeleteRulesetModal } from '../query_rules_sets/delete_ruleset_modal';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
+import { docLinks } from '../../../common/doc_links';
 
 export const QueryRulesetDetail: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -221,6 +222,25 @@ export const QueryRulesetDetail: React.FC = () => {
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
               <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="queryRulesetDetailApiReferenceButton"
+                  iconType="documentation"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.queryRules.queryRulesetDetail.apiReferenceButton',
+                    {
+                      defaultMessage: 'API reference',
+                    }
+                  )}
+                  href={docLinks.queryRulesApi}
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
+                    defaultMessage: 'API reference',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiTourStep
                   content={<p>{tourStepsInfo[0].content}</p>}
                   isStepOpen={tourState.isTourActive && tourState.currentTourStep === 1}
@@ -281,7 +301,8 @@ export const QueryRulesetDetail: React.FC = () => {
                 >
                   <UseRunQueryRuleset
                     rulesetId={rulesetId}
-                    type="contextMenuItem"
+                    type="emptyButton"
+                    color="text"
                     content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
                       defaultMessage: 'Test in Console',
                     })}
@@ -311,7 +332,6 @@ export const QueryRulesetDetail: React.FC = () => {
                     button={
                       <EuiButtonIcon
                         data-test-subj="searchQueryRulesQueryRulesetDetailButton"
-                        display="fill"
                         size="m"
                         iconType="boxesVertical"
                         aria-label="More"

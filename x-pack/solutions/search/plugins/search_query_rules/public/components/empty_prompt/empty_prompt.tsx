@@ -248,7 +248,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
               >
                 <FormattedMessage
                   id="xpack.queryRules.emptyPrompt.footerLink"
-                  defaultMessage="Query Rules API documentation"
+                  defaultMessage="API reference"
                 />
               </EuiLink>
             </EuiFlexItem>

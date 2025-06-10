@@ -28,6 +28,16 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
+  color?:
+    | 'primary'
+    | 'text'
+    | 'danger'
+    | 'success'
+    | 'accent'
+    | 'warning'
+    | 'accentSecondary'
+    | 'neutral'
+    | 'risk';
   showIcon?: boolean;
   iconType?: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
@@ -41,6 +51,7 @@ export const TryInConsoleButton = ({
   consolePlugin,
   sharePlugin,
   content = RUN_IN_CONSOLE,
+  color,
   showIcon = true,
   iconType = 'console',
   type = 'emptyButton',
@@ -127,7 +138,7 @@ export const TryInConsoleButton = ({
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={btnIconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={btnIconType} color={color} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );
