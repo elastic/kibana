@@ -38,7 +38,7 @@ export const generateMaintenanceWindowEvents = ({
 
   try {
     const recurrenceRule = new RRule(rRuleOptions);
-    const occurrenceDates = recurrenceRule.between(startDate, endDate, true);
+    const occurrenceDates = recurrenceRule.between(startDate, endDate, { inclusive: true });
 
     return occurrenceDates.map((date) => {
       return {
