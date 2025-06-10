@@ -526,6 +526,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         }
         return [];
       },
+      getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
     };
     return callbacks;
   }, [
