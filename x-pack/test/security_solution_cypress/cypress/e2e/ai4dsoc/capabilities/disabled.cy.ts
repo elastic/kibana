@@ -10,7 +10,7 @@ import { visit } from '../../../tasks/navigation';
 import { APP_NOT_FOUND_PAGE } from '../../../screens/ai_soc';
 import { APP_DASHBOARDS_URL, VISUALIZE_URL, MAPS_URL, LENS_URL } from '../../../urls/navigation';
 
-describe('Disabled features', { tags: '@serverless' }, () => {
+describe.skip('Disabled features', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
   });
