@@ -7,9 +7,9 @@
 
 export const appPaths = {
   chat: {
-    new: '/chat/new',
+    new: '/chat/conversations/new',
     conversation: ({ conversationId }: { conversationId: string }) => {
-      return `/chat/${conversationId}`;
+      return `/chat/conversations/${conversationId}`;
     },
   },
 };

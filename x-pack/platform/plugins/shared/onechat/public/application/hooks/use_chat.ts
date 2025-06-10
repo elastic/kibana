@@ -107,13 +107,6 @@ export const useChat = ({
             const { conversationId: id, title } = event.data;
             onConversationUpdate({ id, title });
           }
-
-          // TODO: handle progression events
-          // Do we have a concept of progression events in OneChat yet?
-
-          // if (event.type === 'progression') {
-          //   setProgressionEvents((previous) => [...previous, event]);
-          // }
         },
         complete: () => {
           setPendingMessages([]);

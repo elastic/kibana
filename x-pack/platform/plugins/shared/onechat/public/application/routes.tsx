@@ -13,10 +13,10 @@ export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <div>
       <Routes>
-        <Route path="/chat">
+        <Route path="/chat/conversations/:conversationId">
           <OnechatChatPage />
         </Route>
-        <Route path="/chat/conversations/:conversationId">
+        <Route path="/chat">
           <OnechatChatPage />
         </Route>
       </Routes>
