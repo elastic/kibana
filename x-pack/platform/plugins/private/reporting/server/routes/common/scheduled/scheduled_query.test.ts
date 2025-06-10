@@ -597,7 +597,22 @@ describe('scheduledQueryFactory', () => {
         'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
       ]);
 
-      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        errors: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: `Not found.`,
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "elastic" attempted to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4" created by "not-elastic" without sufficient privileges.`
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
         event: {
           action: 'scheduled_report_disable',
@@ -615,21 +630,26 @@ describe('scheduledQueryFactory', () => {
         message:
           'User is disabling scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
       });
-
-      expect(result).toEqual({
-        scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        errors: [
-          {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        error: {
+          code: 'Error',
+          message: 'Not found.',
+        },
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            message: `Not found.`,
-            status: 404,
+            type: 'scheduled_report',
           },
-        ],
-        total: 2,
+        },
+        message:
+          'Failed attempt to disable scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4]',
       });
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        `User "elastic" attempted to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4" created by "not-elastic" without sufficient privileges.`
-      );
     });
 
     it('should handle errors in bulk get', async () => {

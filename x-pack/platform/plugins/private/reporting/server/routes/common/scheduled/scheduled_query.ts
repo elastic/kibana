@@ -231,6 +231,16 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
               logger.warn(
                 `User "${username}" attempted to disable scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
               );
+              auditLogger.log(
+                scheduledReportAuditEvent({
+                  action: ScheduledReportAuditAction.DISABLE,
+                  savedObject: {
+                    type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+                    id: so.id,
+                  },
+                  error: new Error(`Not found.`),
+                })
+              );
             } else if (so.attributes.enabled === false) {
               logger.debug(`Scheduled report ${so.id} is already disabled`);
               disabledScheduledReportIds.add(so.id);
