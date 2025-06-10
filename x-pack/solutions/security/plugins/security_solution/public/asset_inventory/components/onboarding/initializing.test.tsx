@@ -14,7 +14,6 @@ import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
 jest.mock('./hooks/use_add_integration_path');
 
-// Optionally, if Initializing still uses navigateToApp somewhere, you can keep this mock
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
