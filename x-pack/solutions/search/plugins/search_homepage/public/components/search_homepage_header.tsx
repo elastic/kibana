@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import SearchHomePageImage from '../assets/search_homepage.png';
+import SearchHomePageImage from '../assets/search_homepage.svg';
 
 export interface SearchHomepageHeaderProps {
   showEndpointsAPIKeys: boolean;
@@ -71,6 +71,6 @@ export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHea
         </EuiFlexItem>
       </EuiFlexGroup>
     }
-    rightSideItems={[<EuiImage size="fullWidth" url={SearchHomePageImage} alt="" />]}
+    rightSideItems={[<EuiImage size="xl" url={SearchHomePageImage} alt="" />]}
   />
 );
