@@ -26,6 +26,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
+import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 
 import {
   addToSearchAfterReturn,
@@ -120,6 +121,7 @@ export const esqlExecutor = async ({
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         });
 
+        logClusterShardFailuresEsql({ response, result });
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 
