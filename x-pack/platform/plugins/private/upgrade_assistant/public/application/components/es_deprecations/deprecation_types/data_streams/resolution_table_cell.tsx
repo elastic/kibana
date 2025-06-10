@@ -93,7 +93,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
         text: i18n.translate(
           'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReindexText',
           {
-            defaultMessage: 'Recommended to reindex',
+            defaultMessage: 'Recommended: reindex',
           }
         ),
         tooltipText: i18n.translate(
