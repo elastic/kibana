@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { useMemoizedStyles } from '@kbn/core/public';
 
-const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
+export const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
 // Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
 const expandedFieldValuesSet = new Set<string>();
