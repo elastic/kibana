@@ -98,6 +98,7 @@
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/test/",
+        "^x-pack/test_serverless/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
