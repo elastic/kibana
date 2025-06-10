@@ -8,7 +8,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  OpenPointInTimeResponse,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -23,9 +27,11 @@ interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
    * end of the index name)
    */
   index: string;
-  response: SearchResponse<TDocument>;
+  response:
+    | SearchResponse<TDocument>
+    | ((searchRequest: SearchRequest) => SearchResponse<TDocument>);
   /**
-   * Mock is to be used only when search is using ES's Point-in-Time
+   * Mock is to be used only when search is using ES's Point-in-Time.
    */
   pitUsage?: boolean;
 }
@@ -99,10 +105,17 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
     const searchReqIndexes = Array.isArray(params.index) ? params.index : [params.index!];
     const pit = 'pit' in params ? params.pit : undefined;
 
-    if (params.index && !pitUsage && indexListHasMatchForIndex(searchReqIndexes, index)) {
-      return response;
-    } else if (pit && pitUsage && openedPitIds.has(pit.id)) {
-      return response;
+    if (
+      (params.index && !pitUsage && indexListHasMatchForIndex(searchReqIndexes, index)) ||
+      (pit && pitUsage && openedPitIds.has(pit.id))
+    ) {
+      const searchResponse = typeof response === 'function' ? response(params) : response;
+
+      if (pitUsage && !searchResponse.pit_id) {
+        searchResponse.pit_id = pit?.id;
+      }
+
+      return searchResponse;
     }
 
     if (priorSearchMockImplementation) {
@@ -131,7 +144,7 @@ export const getPackagePolicyInfoFromFleetKuery = async (
     agentPolicyIds: [],
   };
 
-  // Why is a dynamic import being used here?
+  // Why is a dynamic import being used below for `kueryAst`?
   // There is a module (`grammar`) used by this ES Query utility that does not load correctly
   // when cypress is ran (unclear why). The error seen when this occurs is below. The work-around
   // seems to be to use dynamic import.

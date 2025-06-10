@@ -9,6 +9,8 @@ import { createMockEndpointAppContextService } from '../mocks';
 import type { MigrationStateReferenceData } from './space_awareness_migration';
 import {
   ARTIFACTS_MIGRATION_REF_DATA_ID,
+  NOT_FOUND_VALUE,
+  RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
   migrateEndpointDataToSupportSpaces,
 } from './space_awareness_migration';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
@@ -17,36 +19,62 @@ import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import { buildSpaceOwnerIdTag } from '../../../common/endpoint/service/artifacts/utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
+import { applyEsClientSearchMock } from '../mocks/utils.mock';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
+import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
+import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/types';
+import type { Agent } from '@kbn/fleet-plugin/common';
 
 describe('Space awareness migration', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
-  let migrationState: MigrationStateReferenceData;
+  let migrationsState: {
+    'SPACE-AWARENESS-ARTIFACT-MIGRATION': MigrationStateReferenceData;
+    'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION': MigrationStateReferenceData;
+  };
 
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
     // @ts-expect-error
     endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-    migrationState = {
-      id: 'some id',
-      type: 'MIGRATION',
-      owner: 'EDR',
-      metadata: {
-        started: '',
-        finished: '',
-        status: 'not-started',
+    migrationsState = {
+      [ARTIFACTS_MIGRATION_REF_DATA_ID]: {
+        id: ARTIFACTS_MIGRATION_REF_DATA_ID,
+        type: 'MIGRATION',
+        owner: 'EDR',
+        metadata: {
+          started: '',
+          finished: '',
+          status: 'not-started',
+        },
+      },
+      [RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID]: {
+        id: RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+        type: 'MIGRATION',
+        owner: 'EDR',
+        metadata: {
+          started: '',
+          finished: '',
+          status: 'not-started',
+        },
       },
     };
 
     const soClientMock =
       endpointServiceMock.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
 
-    soClientMock.get.mockImplementation(async (type) => {
+    // @ts-expect-error
+    soClientMock.get.mockImplementation(async (type, id) => {
       if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
-        return { attributes: migrationState };
+        return { attributes: migrationsState[id as keyof typeof migrationsState] };
       }
 
       return { attributes: {} };
     });
+    // @ts-expect-error
     soClientMock.update.mockImplementation(async (type, _id, update) => {
       if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
         return { attributes: update };
@@ -66,11 +94,13 @@ describe('Space awareness migration', () => {
   });
 
   describe('for Artifacts', () => {
-    let exceptionsGenerator: ExceptionsListItemGenerator;
+    let artifactMigrationState: MigrationStateReferenceData;
 
     beforeEach(() => {
-      migrationState.id = ARTIFACTS_MIGRATION_REF_DATA_ID;
-      exceptionsGenerator = new ExceptionsListItemGenerator('seed');
+      artifactMigrationState = migrationsState[ARTIFACTS_MIGRATION_REF_DATA_ID];
+      migrationsState[RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID].metadata.status = 'complete';
+
+      const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
 
       const exceptionsClient = endpointServiceMock.getExceptionListsClient();
       (endpointServiceMock.getExceptionListsClient as jest.Mock).mockClear();
@@ -94,7 +124,8 @@ describe('Space awareness migration', () => {
     it.each(['complete', 'pending'])(
       'should do nothing if migration state is `%s`',
       async (migrationStatus) => {
-        migrationState.metadata.status = migrationStatus as typeof migrationState.metadata.status;
+        artifactMigrationState.metadata.status =
+          migrationStatus as typeof artifactMigrationState.metadata.status;
 
         await expect(
           migrateEndpointDataToSupportSpaces(endpointServiceMock)
@@ -161,20 +192,178 @@ describe('Space awareness migration', () => {
   });
 
   describe('for Response Actions', () => {
-    it.todo('should do nothing if migration state is either `complete` or `pending`');
+    let actionsMigrationState: MigrationStateReferenceData;
+    let data: {
+      action: LogsEndpointAction;
+      agent: Agent;
+      packagePolicy: PolicyData;
+    };
 
-    it.todo('should query response actions looking for records that do NOT have a `originSpaceId`');
+    beforeEach(() => {
+      actionsMigrationState = migrationsState[RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID];
+      migrationsState[ARTIFACTS_MIGRATION_REF_DATA_ID].metadata.status = 'complete';
+      data = {
+        action: new EndpointActionGenerator('seed').generate(),
+        agent: new FleetAgentGenerator('seed').generate(),
+        packagePolicy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy(),
+      };
 
-    it.todo('should update response action with expected new fields');
+      const esClientMock = endpointServiceMock.getInternalEsClient() as ElasticsearchClientMock;
+      let responseHasBeenProvided = false;
 
-    it.todo('should handle case where agent is no longer enrolled');
+      applyEsClientSearchMock({
+        esClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        pitUsage: true,
+        response: () => {
+          if (!responseHasBeenProvided) {
+            responseHasBeenProvided = true;
+            return EndpointActionGenerator.toEsSearchResponse([
+              EndpointActionGenerator.toEsSearchHit(data.action),
+            ]);
+          }
 
-    it.todo(`should handle 3rd party response actions`);
+          return EndpointActionGenerator.toEsSearchResponse([]);
+        },
+      });
 
-    it.todo('should handle case where agent policy might not exist');
+      esClientMock.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
 
-    it.todo('should handle case where integration policy might not exist');
+      const fleetServices = endpointServiceMock.getInternalFleetServices();
+      const agentClientMock = fleetServices.agent as jest.Mocked<AgentClient>;
 
-    it.todo('should update migration state after completion');
+      agentClientMock.getAgent.mockResolvedValue(data.agent);
+
+      (fleetServices.packagePolicy.list as jest.Mock).mockResolvedValue({
+        items: [data.packagePolicy],
+      });
+    });
+
+    it.each(['complete', 'pending'])(
+      'should do nothing if migration state is `%s`',
+      async (migrationStatus) => {
+        actionsMigrationState.metadata.status =
+          migrationStatus as typeof actionsMigrationState.metadata.status;
+
+        await expect(
+          migrateEndpointDataToSupportSpaces(endpointServiceMock)
+        ).resolves.toBeUndefined();
+        expect(endpointServiceMock.getExceptionListsClient).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should query response actions looking for records that do NOT have a `originSpaceId`', async () => {
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+
+      expect(endpointServiceMock.getInternalEsClient().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.any(Object),
+          sort: '@timestamp',
+          size: 50,
+          query: { bool: { must_not: { exists: { field: 'originSpaceId' } } } },
+        })
+      );
+    });
+
+    it('should update response action with expected new fields', async () => {
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(endpointServiceMock.getInternalEsClient().bulk).toHaveBeenCalledWith({
+        operations: [
+          { update: { _id: expect.any(String), _index: expect.any(String) } },
+          {
+            doc: {
+              agent: {
+                policy: [
+                  {
+                    agentId: (data.action.agent.id as string[])[0],
+                    elasticAgentId: (data.action.agent.id as string[])[0],
+                    agentPolicyId: data.agent.policy_id,
+                    integrationPolicyId: data.packagePolicy.id,
+                  },
+                ],
+              },
+              originSpaceId: 'default',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should handle case where agent is no longer enrolled', async () => {
+      (endpointServiceMock.getInternalFleetServices().agent.getAgent as jest.Mock).mockReturnValue(
+        Promise.reject(new Error('not found'))
+      );
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(endpointServiceMock.getInternalEsClient().bulk).toHaveBeenCalledWith({
+        operations: [
+          { update: { _id: expect.any(String), _index: expect.any(String) } },
+          {
+            doc: {
+              agent: {
+                policy: [
+                  {
+                    agentId: (data.action.agent.id as string[])[0],
+                    elasticAgentId: (data.action.agent.id as string[])[0],
+                    agentPolicyId: NOT_FOUND_VALUE,
+                    integrationPolicyId: NOT_FOUND_VALUE,
+                  },
+                ],
+              },
+              originSpaceId: 'default',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should handle case where integration policy might not exist', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().packagePolicy.list as jest.Mock
+      ).mockResolvedValue({ items: [] });
+
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(endpointServiceMock.getInternalEsClient().bulk).toHaveBeenCalledWith({
+        operations: [
+          { update: { _id: expect.any(String), _index: expect.any(String) } },
+          {
+            doc: {
+              agent: {
+                policy: [
+                  {
+                    agentId: (data.action.agent.id as string[])[0],
+                    elasticAgentId: (data.action.agent.id as string[])[0],
+                    agentPolicyId: data.agent.policy_id,
+                    integrationPolicyId: NOT_FOUND_VALUE,
+                  },
+                ],
+              },
+              originSpaceId: 'default',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should update migration state after completion', async () => {
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(
+        endpointServiceMock.savedObjects.createInternalScopedSoClient().update
+      ).toHaveBeenCalledWith(
+        REFERENCE_DATA_SAVED_OBJECT_TYPE,
+        RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) }),
+        expect.anything()
+      );
+    });
   });
 });

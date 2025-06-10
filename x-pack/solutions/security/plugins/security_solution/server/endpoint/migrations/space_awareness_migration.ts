@@ -46,7 +46,7 @@ const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
 export const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
 export const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
   'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
-const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
+export const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 
 export type MigrationStateReferenceData = ReferenceDataSavedObject<{
   started: string;
