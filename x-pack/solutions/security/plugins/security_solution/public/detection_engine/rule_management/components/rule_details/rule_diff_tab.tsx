@@ -121,9 +121,10 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
+  newRuleLabel?: string;
 }
 
-export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
+export const RuleDiffTab = ({ oldRule, newRule, newRuleLabel }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
     const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
     const visibleOldRuleProperties = omit(
@@ -162,7 +163,7 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
               size="m"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
+              <h6>{newRuleLabel ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>

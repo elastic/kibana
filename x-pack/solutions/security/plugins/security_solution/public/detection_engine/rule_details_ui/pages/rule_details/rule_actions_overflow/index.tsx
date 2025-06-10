@@ -55,6 +55,8 @@ interface RuleActionsOverflowComponentProps {
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
+  openRuleDiffFlyout: (isReverting: boolean) => void;
+  isRevertBaseVersionDisabled: boolean;
 }
 
 /**
@@ -67,6 +69,8 @@ const RuleActionsOverflowComponent = ({
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
+  openRuleDiffFlyout,
+  isRevertBaseVersionDisabled,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const {
@@ -177,6 +181,32 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.MANUAL_RULE_RUN}
             </EuiContextMenuItem>,
+            ...(rule.rule_source.type === 'external' && rule.rule_source.is_customized === true // Don't display action if rule isn't a customized prebuilt rule
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.REVERT_RULE}
+                    toolTipContent={
+                      isRevertBaseVersionDisabled
+                        ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT
+                        : undefined
+                    }
+                    toolTipProps={{
+                      title: isRevertBaseVersionDisabled
+                        ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
+                        : undefined,
+                    }}
+                    icon="timeRefresh"
+                    disabled={!userHasPermissions || isRevertBaseVersionDisabled}
+                    data-test-subj="rules-details-revert-rule"
+                    onClick={() => {
+                      closePopover();
+                      openRuleDiffFlyout(true);
+                    }}
+                  >
+                    {i18nActions.REVERT_RULE}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
@@ -207,6 +237,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
+      isRevertBaseVersionDisabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,
@@ -217,6 +248,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
+      openRuleDiffFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]
