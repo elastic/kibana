@@ -67,7 +67,7 @@ function transformPanelProperties(
     panelIndex,
     panelRefName,
     title,
-    type: type == undefined && matchingReference ? matchingReference.type : type,
+    type: type === undefined && matchingReference ? matchingReference.type : type,
     version,
   };
 }
