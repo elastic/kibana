@@ -36,6 +36,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           withNext
           grow={false}
           onClick={() => handleFilterChange('all')}
+          isToggle
+          isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
           numFilters={userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0}
           isLoading={isLoading}
@@ -48,6 +50,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         <EuiFilterButton
           withNext
           grow={false}
+          isToggle
+          isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
           numFilters={
             userActionsStats && userActionsStats.totalComments > 0
@@ -62,6 +66,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           {i18n.COMMENTS}
         </EuiFilterButton>
         <EuiFilterButton
+          isToggle
+          isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
           numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0
