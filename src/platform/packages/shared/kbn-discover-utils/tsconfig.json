@@ -26,10 +26,7 @@
     "@kbn/navigation-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/data-plugin",
-    "@kbn/saved-search-plugin",
-    "@kbn/embeddable-plugin",
-    "@kbn/inspector-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/embeddable-enhanced-plugin"
+    "@kbn/discover-plugin"
   ]
 }
