@@ -362,7 +362,7 @@ describe('KibanaMcpHttpTransport', () => {
       expect(errorData).toMatchObject({
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: -32600,
           message: 'Method not allowed.',
         },
       });

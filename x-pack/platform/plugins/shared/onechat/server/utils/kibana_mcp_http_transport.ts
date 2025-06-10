@@ -358,7 +358,7 @@ export class KibanaMcpHttpTransport implements Transport {
       body: JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: ErrorCode.MethodNotFound,
+          code: ErrorCode.InvalidRequest,
           message: 'Method not allowed.',
         },
         id: null,
