@@ -62,12 +62,12 @@ function transformPanelProperties(
 
   return {
     gridData: rest,
-    id: id === undefined && matchingReference ? matchingReference.id : id,
+    id: matchingReference ? matchingReference.id : id,
     panelConfig: embeddableConfig,
     panelIndex,
     panelRefName,
     title,
-    type: type === undefined && matchingReference ? matchingReference.type : type,
+    type: matchingReference ? matchingReference.type : type,
     version,
   };
 }
