@@ -23,7 +23,7 @@ import {
   getConnectorsManagementHref,
   getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
+import { useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';

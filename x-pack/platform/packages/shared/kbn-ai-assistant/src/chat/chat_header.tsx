@@ -222,14 +222,14 @@ export function ChatHeader({
                     onCopyConversationClick={onCopyConversation}
                   />
                 </ElasticLlmTourCallout>
-                ) : (
+              ) : (
                 <ChatActionsMenu
                   connectors={connectors}
                   conversationId={conversationId}
                   disabled={licenseInvalid}
                   onCopyConversationClick={onCopyConversation}
                 />
-                )}
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
