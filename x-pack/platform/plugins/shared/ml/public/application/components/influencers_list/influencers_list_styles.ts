@@ -9,7 +9,11 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import { type MlSeverityType } from '@kbn/ml-anomaly-utils';
+import {
+  getThemeResolvedSeverityColor,
+  ML_ANOMALY_THRESHOLD,
+  type MlSeverityType,
+} from '@kbn/ml-anomaly-utils';
 
 export const useInfluencersListStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -34,17 +38,15 @@ export const useInfluencersListStyles = () => {
     }),
     progressColor: (severity: MlSeverityType) =>
       severity.id === 'critical'
-        ? euiTheme.colors.severity.danger
+        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme)
         : severity.id === 'major'
-        ? euiTheme.colors.severity.risk
+        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme)
         : severity.id === 'minor'
-        ? euiTheme.colors.severity.warning
+        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme)
         : severity.id === 'warning'
-        ? // TODO: SKY40
-          '#94D8EB'
+        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme)
         : severity.id === 'low'
-        ? // TODO: SKY20
-          '#CFEEF7'
+        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme)
         : euiTheme.colors.severity.unknown,
     influencerBadgeBackgroundColor: (severity: MlSeverityType) =>
       severity.id === 'critical'
@@ -55,8 +57,7 @@ export const useInfluencersListStyles = () => {
         ? euiTheme.colors.backgroundLightWarning
         : severity.id === 'warning' || severity.id === 'low'
         ? euiTheme.colors.backgroundLightNeutral
-        : // TODO: Figure out unknown background color
-          euiTheme.colors.severity.unknown,
+        : euiTheme.colors.backgroundLightPrimary,
     influencerBadgeTextColor: (severity: MlSeverityType) =>
       css({
         color:
@@ -68,8 +69,7 @@ export const useInfluencersListStyles = () => {
             ? euiTheme.colors.textWarning
             : severity.id === 'warning' || severity.id === 'low'
             ? euiTheme.colors.textNeutral
-            : // TODO: Figure out unknown text color
-              euiTheme.colors.textSubdued,
+            : euiTheme.colors.textSubdued,
       }),
   };
 };
