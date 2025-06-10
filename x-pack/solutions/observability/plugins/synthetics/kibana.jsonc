@@ -65,7 +65,7 @@
       "kibanaUtils",
       "observability",
       "spaces",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
     ]
   }
 }
