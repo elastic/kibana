@@ -7,11 +7,7 @@
 
 import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
-  const {
-    inference_id: inferenceId,
-    service_settings: serviceSettings,
-    task_type: taskType,
-  } = provider;
+  const { service_settings: serviceSettings, task_type: taskType } = provider;
   const modelId = serviceSettings?.model_id;
 
   // If there's no model ID in service settings, it's not a tech preview
@@ -26,7 +22,7 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
     modelId === 'rainbow-sprinkles' ||
-    inferenceId === '.elser-2-elasticsearch'
+    modelId === '.elser-v2'
   ) {
     return true;
   }
