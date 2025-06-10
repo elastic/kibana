@@ -63,15 +63,15 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
       Component: () => {
         const count = initialState.rawState.controlCount;
         return (
-          <>
+          <div css={styles}>
             {new Array(count).fill('').map((_, i) => {
               return (
-                <div css={styles} key={`control-${i}`}>
+                <div key={`control-${i}`} className={'singleControl'}>
                   Here
                 </div>
               );
             })}
-          </>
+          </div>
         );
       },
     };
@@ -79,5 +79,10 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
 };
 
 const styles = css({
-  backgroundColor: 'red',
+  width: '100%',
+  height: '100%',
+  '.singleControl': {
+    width: '100%',
+    backgroundColor: 'pink',
+  },
 });
