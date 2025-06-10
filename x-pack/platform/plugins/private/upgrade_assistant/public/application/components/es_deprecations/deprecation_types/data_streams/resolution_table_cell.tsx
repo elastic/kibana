@@ -78,7 +78,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
         text: i18n.translate(
           'xpack.upgradeAssistant.esDeprecations.dataStream.recommendedActionReadonlyText',
           {
-            defaultMessage: 'Recommended to set to read-only',
+            defaultMessage: 'Recommended: set to read-only',
           }
         ),
         tooltipText: i18n.translate(
