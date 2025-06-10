@@ -17,12 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  enum INDEX_MODE {
-    STANDARD = 'Standard',
-    LOGSDB = 'LogsDB',
-    TIME_SERIES = 'Time series',
-  }
-
   const TEST_DS_NAME_1 = 'test-ds-1';
   const TEST_DS_NAME_2 = 'test-ds-2';
   const TEST_DATA_STREAM_NAMES = [TEST_DS_NAME_1, TEST_DS_NAME_2];
