@@ -8,10 +8,10 @@
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
-import {
+import type {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
-} from '@kbn/embeddable-plugin/common';
+} from '@kbn/embeddable-plugin/server';
 import type { LensRuntimeState } from '../../public';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
