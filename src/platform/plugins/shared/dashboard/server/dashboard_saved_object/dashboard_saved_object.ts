@@ -22,10 +22,8 @@ export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 export const createDashboardSavedObjectType = ({
   migrationDeps,
-  accessControlEnabled,
 }: {
   migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
-  accessControlEnabled?: boolean;
 }): SavedObjectsType => ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
@@ -33,7 +31,6 @@ export const createDashboardSavedObjectType = ({
   // supportsAccessControl: true, TODO: Revisit this when access control is implemented
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
-  ...(accessControlEnabled ? { supportsAccessControl: true } : {}),
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',
