@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
@@ -24,10 +25,9 @@ describe('SettingsTab', () => {
       },
     });
 
-    const { getAllByTestId } = render(<SettingsTab />);
-    const [firstSpacesButton] = getAllByTestId('settingsTabGoToSpacesButton');
+    fireEvent.click(getByTestId('settingsTabGoToSpacesButton'));
 
-    expect(firstSpacesButton).toHaveAttribute('href', expectedSpacesUrl);
+    expect(navigateToAppMock).toBeCalledWith('management', { path: '/kibana/spaces' });
   });
 
   it('should offer a way to configure Gen AI connectors', () => {
@@ -38,9 +38,10 @@ describe('SettingsTab', () => {
       },
     });
 
-    const { getByTestId } = render(<SettingsTab />);
-    const connectorsButton = getByTestId('settingsTabGoToConnectorsButton');
+    fireEvent.click(getByTestId('settingsTabGoToConnectorsButton'));
 
-    expect(connectorsButton).toHaveAttribute('href', expectedConnectorsUrl);
+    expect(navigateToAppMock).toBeCalledWith('management', {
+      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+    });
   });
 });
