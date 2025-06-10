@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { hasAnyFieldWithPrefixes } from '../../utils/has_any_field_with_prefixes';
 
-const attributesPrefixes = ['attributes.', 'scope.attributes.', 'resource.atributes.'];
+const attributesPrefixes = ['attributes.', 'scope.attributes.', 'resource.attributes.'];
 const hasAnyAttributesField = hasAnyFieldWithPrefixes(attributesPrefixes);
 
 export const withAttributesDocViewerTab = <
