@@ -61,6 +61,7 @@ export const esqlFunctionNames = [
   'HASH',
   'HYPOT',
   'IP_PREFIX',
+  'KNN',
   'KQL',
   'LEAST',
   'LEFT',
