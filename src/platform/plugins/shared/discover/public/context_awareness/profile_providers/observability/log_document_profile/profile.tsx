@@ -16,7 +16,6 @@ import { createGetDocViewer } from './accessors';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
-import { extendProfileProvider } from '../../extend_profile_provider';
 
 export type LogDocumentProfileProvider = DocumentProfileProvider<{
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;

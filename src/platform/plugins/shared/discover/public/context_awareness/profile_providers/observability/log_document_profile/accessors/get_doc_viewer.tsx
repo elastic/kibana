@@ -21,7 +21,6 @@ export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
   (prev, { context }) =>
   (params) => {
-    console.log('getDocViewer called for logs overview', params);
     const prevDocViewer = prev(params);
 
     const logsAIAssistantFeature = services.discoverShared.features.registry.getById(
