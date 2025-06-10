@@ -111,7 +111,7 @@ export const loadDashboardState = async ({
   }
 
   const { references, attributes, managed } = rawDashboardContent;
-  
+
   /**
    * Create search source and pull filters and query from it.
    */

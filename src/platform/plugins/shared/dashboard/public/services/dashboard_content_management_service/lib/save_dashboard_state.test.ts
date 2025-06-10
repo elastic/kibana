@@ -8,11 +8,7 @@
  */
 
 import { getSampleDashboardState } from '../../../mocks';
-import {
-  contentManagementService,
-  coreServices,
-  dataService,
-} from '../../kibana_services';
+import { contentManagementService, coreServices, dataService } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
 import { DashboardPanelMap } from '../../../../common/dashboard_container/types';
 

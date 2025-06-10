@@ -99,7 +99,8 @@ export const serializeState = ({
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-  const { rawState: dynamicActionsState, references: dynamicActionsReferences } = serializeDynamicActions?.() ?? {};
+  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+    serializeDynamicActions?.() ?? {};
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
@@ -140,9 +141,6 @@ export const serializeState = ({
       ...dynamicActionsState,
       ...(state as unknown as SavedSearchAttributes),
     },
-    references: [
-      ...references,
-      ...(dynamicActionsReferences ?? []),
-    ],
+    references: [...references, ...(dynamicActionsReferences ?? [])],
   };
 };

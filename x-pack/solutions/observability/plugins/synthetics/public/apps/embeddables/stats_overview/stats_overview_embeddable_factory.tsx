@@ -23,7 +23,10 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { DynamicActionsSerializedState, HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import {
+  DynamicActionsSerializedState,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
@@ -80,14 +83,15 @@ export const getStatsOverviewEmbeddableFactory = (
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {};
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
             filters: filters$.getValue(),
             ...dynamicActionsState,
           },
-          references: dynamicActionsReferences ?? []
+          references: dynamicActionsReferences ?? [],
         };
       }
 

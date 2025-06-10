@@ -56,7 +56,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    getEnhancement: jest.fn()
+    getEnhancement: jest.fn(),
   };
   return startContract;
 };

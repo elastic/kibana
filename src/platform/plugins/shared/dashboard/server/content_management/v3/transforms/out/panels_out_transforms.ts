@@ -15,7 +15,7 @@ import { getReferencesForPanelId } from '../../../../../common/dashboard_contain
 export function transformPanelsOut(
   panelsJSON: string = '{}',
   sections: SavedDashboardSection[] = [],
-  references?: SavedObjectReference[],
+  references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON);
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
@@ -30,7 +30,9 @@ export function transformPanelsOut(
     const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel, panelReferences));
+      (sectionsMap[sectionId] as DashboardSection).panels.push(
+        transformPanelProperties(panel, panelReferences)
+      );
     } else {
       sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
     }
@@ -38,24 +40,25 @@ export function transformPanelsOut(
   return Object.values(sectionsMap);
 }
 
-function transformPanelProperties({
-  embeddableConfig,
-  gridData,
-  id,
-  panelIndex,
-  panelRefName,
-  title,
-  type,
-  version,
-}: SavedDashboardPanel,
-references?: SavedObjectReference[]) {
+function transformPanelProperties(
+  {
+    embeddableConfig,
+    gridData,
+    id,
+    panelIndex,
+    panelRefName,
+    title,
+    type,
+    version,
+  }: SavedDashboardPanel,
+  references?: SavedObjectReference[]
+) {
   const { sectionId, ...rest } = gridData; // drop section ID, if it exists
-  
-  const matchingReference = panelRefName && references
-    ? references.find(
-      (reference) => reference.name === panelRefName
-    )
-    : undefined;
+
+  const matchingReference =
+    panelRefName && references
+      ? references.find((reference) => reference.name === panelRefName)
+      : undefined;
 
   return {
     gridData: rest,

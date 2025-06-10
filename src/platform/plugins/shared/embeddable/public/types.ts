@@ -75,5 +75,5 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getEnhancement: CommonEmbeddableStartContract['getEnhancement'], 
+  getEnhancement: CommonEmbeddableStartContract['getEnhancement'];
 }

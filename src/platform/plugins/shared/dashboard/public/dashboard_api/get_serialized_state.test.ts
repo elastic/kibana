@@ -9,10 +9,7 @@
 
 import type { DashboardPanelState } from '../../common';
 
-import {
-  dataService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
 

@@ -82,14 +82,15 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {};
+      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+        dynamicActionsManager?.serializeState() ?? {};
       return {
         rawState: {
           ...titleManager.getLatestState(),
           ...sloStateManager.getLatestState(),
           ...dynamicActionsState,
         },
-        references: dynamicActionsReferences ?? []
+        references: dynamicActionsReferences ?? [],
       };
     }
 

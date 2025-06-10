@@ -11,6 +11,7 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { Reference } from '../../common/content_management';
 import {
   getAnalytics,
@@ -36,7 +37,6 @@ import {
   VisualizeSavedVisInputState,
   ExtraSavedObjectProperties,
 } from './types';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
@@ -193,7 +193,8 @@ export const serializeState: (props: {
 }) => {
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
 
-  const { rawState: dynamicActionsState, references: dynamicActionsReferences } = serializeDynamicActions?.() ?? {};
+  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+    serializeDynamicActions?.() ?? {};
 
   // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
   // latest revision of the saved object
@@ -206,10 +207,7 @@ export const serializeState: (props: {
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
         ...(timeRange ? { timeRange } : {}),
       } as VisualizeSavedObjectInputState,
-      references: [
-        ...references,
-        ...(dynamicActionsReferences ?? [])
-      ],
+      references: [...references, ...(dynamicActionsReferences ?? [])],
     };
   }
 
@@ -237,9 +235,6 @@ export const serializeState: (props: {
         },
       },
     } as VisualizeSavedVisInputState,
-    references: [
-      ...references,
-      ...(dynamicActionsReferences ?? [])
-    ],
+    references: [...references, ...(dynamicActionsReferences ?? [])],
   };
 };

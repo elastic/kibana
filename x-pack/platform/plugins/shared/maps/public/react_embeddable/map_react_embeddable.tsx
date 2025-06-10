@@ -116,10 +116,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     }
 
     function serializeState() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {};
+      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+        dynamicActionsManager?.serializeState() ?? {};
       const rawState = {
         ...getLatestState(),
-        ...dynamicActionsState
+        ...dynamicActionsState,
       };
 
       // by-reference embeddable
@@ -147,10 +148,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
 
       return {
         rawState: getByValueState(rawState, attributes),
-        references: [
-          ...references,
-          ...(dynamicActionsReferences ?? []),
-        ],
+        references: [...references, ...(dynamicActionsReferences ?? [])],
       };
     }
 

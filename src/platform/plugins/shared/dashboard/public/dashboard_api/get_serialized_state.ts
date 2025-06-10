@@ -24,10 +24,7 @@ import {
   convertDashboardVersionToNumber,
   convertNumberToDashboardVersion,
 } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
-import {
-  dataService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);

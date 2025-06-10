@@ -50,7 +50,8 @@ export const getImageEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {}
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),

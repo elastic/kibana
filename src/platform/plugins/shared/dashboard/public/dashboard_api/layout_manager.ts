@@ -106,7 +106,8 @@ export function initializeLayoutManager(
       };
 
       // TODO move savedObjectRef extraction into embeddable implemenations
-      const savedObjectId = (panels[panelId].explicitInput as { savedObjectId?: string }).savedObjectId;
+      const savedObjectId = (panels[panelId].explicitInput as { savedObjectId?: string })
+        .savedObjectId;
       if (savedObjectId) {
         panels[panelId].panelRefName = `panel_${panelId}`;
 
