@@ -50,29 +50,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
 
     async function getEvents(params: {
       screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
     }) {
-      const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
-        await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
-        });
-
-      const response = await supertestEditorWithCookieCredentials
-        .post('/internal/observability_ai_assistant/chat/complete')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          messages,
-          connectorId,
-          persist: true,
-          screenContexts: params.screenContexts || [],
-          scopes: ['all'],
-        });
+      const response = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+        params: {
+          body: {
+            messages,
+            connectorId,
+            persist: true,
+            screenContexts: params.screenContexts || [],
+            scopes: ['all'],
+          },
+        },
+      });
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 

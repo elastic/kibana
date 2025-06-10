@@ -13,18 +13,24 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
 export async function clearKnowledgeBase(es: Client) {
-  return es.deleteByQuery({
-    index: resourceNames.indexPatterns.kb,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-    refresh: true,
-  });
+  return pRetry(
+    () => {
+      return es.deleteByQuery({
+        index: resourceNames.indexPatterns.kb,
+        conflicts: 'proceed',
+        query: { match_all: {} },
+        refresh: true,
+      });
+    },
+    { retries: 5 }
+  );
 }
 
 export async function waitForKnowledgeBaseIndex(
@@ -40,6 +46,14 @@ export async function waitForKnowledgeBaseIndex(
   });
 }
 
+export async function getKnowledgeBaseStatus(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  return observabilityAIAssistantAPIClient.editor({
+    endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+  });
+}
+
 export async function waitForKnowledgeBaseReady(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
@@ -49,26 +63,51 @@ export async function waitForKnowledgeBaseReady(
 
   await retry.tryForTime(5 * 60 * 1000, async () => {
     log.debug(`Waiting for knowledge base to be ready...`);
-    const res = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-    });
-    expect(res.status).to.be(200);
-    expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
-    expect(res.body.isReIndexing).to.be(false);
+    const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
+
+    const { kbState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
+    if (status !== 200) {
+      log.warning(`Knowledge base is not ready yet:
+        Status code: ${status}
+        State: ${kbState}
+        isReIndexing: ${isReIndexing}
+        concreteWriteIndex: ${concreteWriteIndex}
+        currentInferenceId: ${currentInferenceId}`);
+    }
+
+    expect(status).to.be(200);
+    expect(kbState).to.be(KnowledgeBaseState.READY);
+    expect(isReIndexing).to.be(false);
     log.debug(`Knowledge base is in ready state.`);
   });
 }
 
 export async function setupKnowledgeBase(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
   inferenceId: string
 ) {
-  return observabilityAIAssistantAPIClient.admin({
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const log = getService('log');
+
+  const statusResult = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
+
+  log.debug(
+    `Setting up knowledge base with inferenceId = "${inferenceId}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
+  );
+  const { body, status } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
-      query: { inference_id: inferenceId },
+      query: { inference_id: inferenceId, wait_until_complete: true },
     },
   });
+
+  if (status !== 200) {
+    log.warning(`Failed to setup knowledge base:
+      Status code: ${status}
+      Body: ${JSON.stringify(body, null, 2)}`);
+  }
+
+  return { body, status };
 }
 
 export async function addSampleDocsToInternalKb(
@@ -77,6 +116,8 @@ export async function addSampleDocsToInternalKb(
 ) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
+  const log = getService('log');
+  const retry = getService('retry');
 
   await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
@@ -87,8 +128,20 @@ export async function addSampleDocsToInternalKb(
     },
   });
 
-  // refresh the index to make sure the documents are searchable
-  await es.indices.refresh({ index: resourceNames.indexPatterns.kb });
+  await refreshKbIndex(es);
+
+  await retry.try(async () => {
+    const itemsInKb = await getKnowledgeBaseEntriesFromEs(es);
+    log.debug(
+      `Waiting for at least ${sampleDocs.length} docs to be available for search in KB. Currently ${itemsInKb.length} docs available.`
+    );
+    expect(itemsInKb.length >= sampleDocs.length).to.be(true);
+  });
+}
+
+// refresh the index to make sure the documents are searchable
+export function refreshKbIndex(es: Client) {
+  return es.indices.refresh({ index: resourceNames.indexPatterns.kb });
 }
 
 export async function addSampleDocsToCustomIndex(
@@ -162,12 +215,6 @@ export async function getConcreteWriteIndexFromAlias(es: Client) {
   return writeIndex;
 }
 
-export async function hasIndexWriteBlock(es: Client, index: string) {
-  const response = await es.indices.getSettings({ index });
-  const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
-  return writeBlockSetting === 'true' || writeBlockSetting === true;
-}
-
 export async function getKbIndexCreatedVersion(es: Client) {
   const indexSettings = await es.indices.getSettings({
     index: resourceNames.writeIndexAlias.kb,
@@ -187,11 +234,6 @@ export async function reIndexKnowledgeBase(
 ) {
   return observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
-    params: {
-      query: {
-        inference_id: TINY_ELSER_INFERENCE_ID,
-      },
-    },
   });
 }
 

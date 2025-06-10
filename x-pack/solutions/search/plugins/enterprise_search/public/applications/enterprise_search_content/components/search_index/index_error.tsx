@@ -16,6 +16,7 @@ import {
   MappingProperty,
   MappingPropertyBase,
   MappingTypeMapping,
+  MappingSemanticTextProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
@@ -28,11 +29,6 @@ import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 
 export interface IndexErrorProps {
   indexName: string;
-}
-
-interface SemanticTextProperty extends MappingPropertyBase {
-  inference_id: string;
-  type: 'semantic_text';
 }
 
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
@@ -48,13 +44,13 @@ const parseMapping = (mappings: MappingTypeMapping) => {
 const getSemanticTextFields = (
   fields: Record<string, MappingProperty>,
   path: string
-): Array<{ path: string; source: SemanticTextProperty }> => {
+): Array<{ path: string; source: MappingSemanticTextProperty }> => {
   return Object.entries(fields).flatMap(([key, value]) => {
     const currentPath: string = path ? `${path}.${key}` : key;
-    const currentField: Array<{ path: string; source: SemanticTextProperty }> =
+    const currentField: Array<{ path: string; source: MappingSemanticTextProperty }> =
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
     if (hasProperties(value)) {
-      const childSemanticTextFields: Array<{ path: string; source: SemanticTextProperty }> =
+      const childSemanticTextFields: Array<{ path: string; source: MappingSemanticTextProperty }> =
         value.properties ? getSemanticTextFields(value.properties, currentPath) : [];
       return [...currentField, ...childSemanticTextFields];
     }
@@ -75,7 +71,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
   const { data } = useValues(mappingsWithPropsApiLogic(indexName));
   const { ml } = useValues(KibanaLogic);
   const [errors, setErrors] = useState<
-    Array<{ error: string; field: { path: string; source: SemanticTextProperty } }>
+    Array<{ error: string; field: { path: string; source: MappingSemanticTextProperty } }>
   >([]);
 
   const [showErrors, setShowErrors] = useState(false);

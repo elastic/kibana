@@ -12,6 +12,7 @@ import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
@@ -33,10 +34,7 @@ import {
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
-import {
-  buildQueryUntilPreviousCommand,
-  getPolicyHelper,
-} from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
@@ -121,6 +119,7 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
+    const source = node as ESQLSource;
     const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
@@ -144,18 +143,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.cluster) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.cluster!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;
@@ -168,10 +171,7 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(root.commands, query),
-    root.commands
-  );
+  const queryForFields = getQueryForFields(query, root);
   const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);

@@ -34,7 +34,7 @@ export function useInspector({
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    dispatch(internalStateActions.setExpandedDoc(undefined));
+    dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
 
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 

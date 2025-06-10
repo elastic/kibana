@@ -3,32 +3,32 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: alert-action-settings-kb
 page_description: |
   Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
-  
+
   1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
   2. [Set up TLS encryption between {{kib}} and {{es}}](docs-content://deploy-manage/security/set-up-basic-security-plus-https.  md#encrypt-kibana-http).
   3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
-  
+
 note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
         # id:
         description: |
           A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
-          
+
           Kibana offers a [CLI tool](/kibana/docs/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
-          
+
           If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
-          
+
           Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -36,7 +36,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
@@ -50,15 +50,14 @@ groups:
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts
         # id:
         description: |
           A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
-          
+
           Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -82,9 +81,9 @@ groups:
         # id:
         description: |
           A list of custom host settings to override existing global settings.
-          
+
           Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
-          
+
           The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -104,7 +103,7 @@ groups:
             ess: all
         example: |
           In the following example, two custom host settings are defined.  The first provides a custom host setting for mail server `mail.example.com` using port 465 that supplies server certificate authentication data from both a file and inline, and requires TLS for the connection.  The second provides a custom host setting for https server `webhook.example.com` which turns off server certificate authentication, that will allow Kibana to connect to the server if it's using a self-signed certificate.  The individual properties that can be used in the settings are documented below.
-          
+
           ```yaml
           xpack.actions.customHostSettings:
             - url: smtp://mail.example.com:465
@@ -128,9 +127,9 @@ groups:
         # id:
         description: |
           A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
-          
+
           Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
-          
+
           No other URL values should be part of this URL, including paths, query strings, and authentication information.  When an http or smtp request is made as part of running an action, only the protocol, hostname, and port of the URL for that request are used to look up these configuration values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -420,7 +419,7 @@ groups:
             ess: all
         example: |
           To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the proxy in tunneling mode, and display some of the interaction between the client and the proxy.
-          
+
           ```sh
           curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
           ```
@@ -449,11 +448,11 @@ groups:
             ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
           ```
-          
+
           If applicable, include the subdomain in the hostname
 
 
@@ -481,7 +480,7 @@ groups:
             ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
           ```
@@ -691,14 +690,14 @@ groups:
       These settings vary depending on which type of preconfigured connector you're adding.
     example: |
       For example:
-      
+
       ```yaml
       xpack.actions.preconfigured:
         my-server-log:
           name: preconfigured-server-log-connector-type
           actionTypeId: .server-log
       ```
-      
+
       For more examples, go to [Preconfigured connectors](/kibana/docs/reference/connectors-kibana/pre-configured-connectors.md).
 
     settings:
@@ -1071,7 +1070,10 @@ groups:
         description: |
           The default model to use for requests, which varies by connector:
 
-          * For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+          * For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
+            * In {{serverless-full}}, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+            * In {{stack}} 9.0, the default is `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+            * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: planned 9.1`
           * For a [{{gemini}} connector](/kibana/docs/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
           * For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
         # state: deprecated/hidden/tech-preview
@@ -2286,7 +2288,7 @@ groups:
          # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
-        # id: 
+        # id:
         description: |
           Specifies the maximum number of rules to run per minute.
         # state: deprecated/hidden/tech-preview
@@ -2438,7 +2440,7 @@ groups:
             ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.alerting.rules.run:
               timeout: '5m'
@@ -2469,7 +2471,7 @@ groups:
             ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.alerting.rules.run:
               actions:

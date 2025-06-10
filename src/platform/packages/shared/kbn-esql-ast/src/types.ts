@@ -9,7 +9,13 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstTimeseriesCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstTimeseriesCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -28,14 +34,13 @@ export type ESQLSingleAstItem =
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
-  | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
   | ESQLUnknownItem
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -106,6 +111,20 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
   };
 }
 
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+}
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  inferenceId: ESQLIdentifierOrParam;
+}
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
+
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
@@ -117,10 +136,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
  */
 export interface ESQLAstRenameExpression extends ESQLCommandOption {
   name: 'as';
-}
-
-export interface ESQLCommandMode extends ESQLAstBaseItem {
-  type: 'mode';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {

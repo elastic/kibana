@@ -1,0 +1,16 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "search-empty-index",
+    "mappings": {
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

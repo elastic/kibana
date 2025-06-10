@@ -30,11 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         useCookieHeader: true,
       });
 
-      const createFlowResponse = await adminClient
-        .post('/internal/observability_onboarding/flow')
-        .send({
-          name: 'test-onboarding',
-        });
+      const createFlowResponse = await adminClient.post('/internal/observability_onboarding/flow');
 
       onboardingId = createFlowResponse.body.onboardingFlow.id;
     });

@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useEuiTheme } from '@elastic/eui';
-
-import { DashboardPanelState } from '../../../common';
+import classNames from 'classnames';
+import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equal';
+import { GridData } from '../../../common/content_management/v2/types';
+import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
+import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
+  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
@@ -35,84 +34,123 @@ export const DashboardGrid = ({
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
 }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
+  const layoutRef = useRef<HTMLDivElement | null>(null);
+
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
-  const firstRowId = useRef(uuidv4());
 
-  const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
+  const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
+  const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
+    dashboardInternalApi.layout$,
     dashboardApi.settings.useMargins$,
     dashboardApi.viewMode$
   );
 
+  useEffect(() => {
+    setTopOffset(
+      dashboardContainerRef?.current?.getBoundingClientRect().top ??
+        DEFAULT_DASHBOARD_DRAG_TOP_OFFSET
+    );
+  }, [dashboardContainerRef]);
+
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[string] = {
-      id: firstRowId.current,
-      order: 0,
-      title: '', // we only support a single section currently, and it does not have a title
-      isCollapsed: false,
-      panels: {},
-    };
-
-    Object.keys(panels).forEach((panelId) => {
-      const gridData = panels[panelId].gridData;
-      singleRow.panels[panelId] = {
+    const newLayout: GridLayoutData = {};
+    Object.keys(layout.sections).forEach((sectionId) => {
+      const section = layout.sections[sectionId];
+      newLayout[sectionId] = {
+        id: sectionId,
+        type: 'section',
+        row: section.gridData.y,
+        isCollapsed: Boolean(section.collapsed),
+        title: section.title,
+        panels: {},
+      };
+    });
+    Object.keys(layout.panels).forEach((panelId) => {
+      const gridData = layout.panels[panelId].gridData;
+      const basePanel = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,
         width: gridData.w,
         height: gridData.h,
-      };
+      } as GridPanelData;
+      if (gridData.sectionId) {
+        (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
+      } else {
+        newLayout[panelId] = {
+          ...basePanel,
+          type: 'panel',
+        };
+      }
       // update `data-grid-row` attribute for all panels because it is used for some styling
       const panelRef = panelRefs.current[panelId];
       if (typeof panelRef !== 'function' && panelRef?.current) {
         panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
       }
     });
-
-    return { [firstRowId.current]: singleRow };
-  }, [panels]);
+    return newLayout;
+  }, [layout]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
-      const currentPanels = dashboardApi.panels$.getValue();
-      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[firstRowId.current].panels
-      ).reduce((updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.id] = {
-          ...currentPanels[panelLayout.id],
-          gridData: {
-            i: panelLayout.id,
-            y: panelLayout.row,
-            x: panelLayout.column,
-            w: panelLayout.width,
-            h: panelLayout.height,
-          },
-        };
-        return updatedPanelsAcc;
-      }, {} as { [key: string]: DashboardPanelState });
-      if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
-        dashboardApi.setPanels(updatedPanels);
+      const currLayout = dashboardInternalApi.layout$.getValue();
+      const updatedLayout: DashboardLayout = {
+        sections: {},
+        panels: {},
+      };
+      Object.values(newLayout).forEach((widget) => {
+        if (widget.type === 'section') {
+          updatedLayout.sections[widget.id] = {
+            collapsed: widget.isCollapsed,
+            title: widget.title,
+            id: widget.id,
+            gridData: {
+              i: widget.id,
+              y: widget.row,
+            },
+          };
+          Object.values(widget.panels).forEach((panel) => {
+            updatedLayout.panels[panel.id] = {
+              ...currLayout.panels[panel.id],
+              gridData: {
+                ...convertGridPanelToDashboardGridData(panel),
+                sectionId: widget.id,
+              },
+            };
+          });
+        } else {
+          // widget is a panel
+          updatedLayout.panels[widget.id] = {
+            ...currLayout.panels[widget.id],
+            gridData: convertGridPanelToDashboardGridData(widget),
+          };
+        }
+      });
+      if (!areLayoutsEqual(currLayout, updatedLayout)) {
+        dashboardInternalApi.layout$.next(updatedLayout);
       }
     },
-    [dashboardApi, viewMode]
+    [dashboardInternalApi.layout$, viewMode]
   );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const currentPanels = dashboardApi.panels$.getValue();
-      if (!currentPanels[id]) return;
+      const panels = dashboardInternalApi.layout$.getValue().panels;
+      if (!panels[id]) return;
 
       if (!panelRefs.current[id]) {
         panelRefs.current[id] = React.createRef();
       }
-      const type = currentPanels[id].type;
+
+      const type = panels[id].type;
       return (
         <DashboardGridItem
           ref={panelRefs.current[id]}
@@ -122,12 +160,44 @@ export const DashboardGrid = ({
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainerRef={dashboardContainerRef}
-          data-grid-row={currentPanels[id].gridData.y} // initialize data-grid-row
+          data-grid-row={panels[id].gridData.y} // initialize data-grid-row
         />
       );
     },
-    [appFixedViewport, dashboardApi, dashboardContainerRef]
+    [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
   );
+
+  useEffect(() => {
+    /**
+     * ResizeObserver fires the callback on `.observe()` with the initial size of the observed
+     * element; we want to ignore this first call and scroll to the bottom on the **second**
+     * callback - i.e. after the row is actually added to the DOM
+     */
+    let first = false;
+    const scrollToBottomOnResize = new ResizeObserver(() => {
+      if (first) {
+        first = false;
+      } else {
+        dashboardApi.scrollToBottom();
+        scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
+      }
+    });
+
+    /**
+     * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
+     * to the bottom of the screen
+     */
+    const scrollToBottomSubscription = dashboardApi.scrollToBottom$.subscribe(() => {
+      if (!layoutRef.current) return;
+      first = true; // ensure that only the second resize callback actually triggers scrolling
+      scrollToBottomOnResize.observe(layoutRef.current);
+    });
+
+    return () => {
+      scrollToBottomOnResize.disconnect();
+      scrollToBottomSubscription.unsubscribe();
+    };
+  }, [dashboardApi]);
 
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
@@ -139,9 +209,7 @@ export const DashboardGrid = ({
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-          keyboardDragTopLimit:
-            dashboardContainerRef?.current?.getBoundingClientRect().top ||
-            DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
+          keyboardDragTopLimit: topOffset,
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
@@ -158,7 +226,7 @@ export const DashboardGrid = ({
     onLayoutChange,
     expandedPanelId,
     viewMode,
-    dashboardContainerRef,
+    topOffset,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
@@ -185,8 +253,18 @@ export const DashboardGrid = ({
   }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);
 
   return (
-    <div className={dashboardClasses} css={dashboardStyles}>
+    <div ref={layoutRef} className={dashboardClasses} css={dashboardStyles}>
       {memoizedgridLayout}
     </div>
   );
+};
+
+const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => {
+  return {
+    i: panel.id,
+    y: panel.row,
+    x: panel.column,
+    w: panel.width,
+    h: panel.height,
+  };
 };

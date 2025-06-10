@@ -35,6 +35,7 @@ import {
   useFleetStatus,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import type { NewPackagePolicyInput } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -132,6 +133,57 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+// Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
+export const updateAgentlessCloudConnectorConfig = (
+  packagePolicy: NewPackagePolicy,
+  newAgentPolicy: NewAgentPolicy,
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+) => {
+  const input = packagePolicy.inputs?.filter(
+    (pinput: NewPackagePolicyInput) => pinput.enabled === true
+  )[0];
+
+  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
+  if (
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
+    newAgentPolicy?.supports_agentless
+  ) {
+    let targetCsp;
+    if (input?.type.includes('aws')) {
+      targetCsp = 'aws';
+    }
+    if (input?.type.includes('gcp')) {
+      targetCsp = 'gcp';
+    }
+    if (input?.type.includes('azure')) {
+      targetCsp = 'azure';
+    }
+
+    if (targetCsp !== 'aws') {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: undefined,
+        },
+      });
+      return;
+    }
+
+    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled,
+            target_csp: targetCsp,
+          },
+        },
+      });
+    }
+  }
+};
 
 const DEFAULT_PACKAGE_POLICY = {
   name: '',
@@ -179,8 +231,6 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  // Used to initialize the package policy once
-  const isInitializedRef = useRef(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
@@ -258,7 +308,7 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (isInitializedRef.current || !packageInfo) {
+      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
         return;
       }
 
@@ -270,7 +320,6 @@ export function useOnSubmit({
       });
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      isInitializedRef.current = true;
       const basePackagePolicy = packageToPackagePolicy(
         packageInfo,
         agentPolicies.map((policy) => policy.id),
@@ -283,7 +332,14 @@ export function useOnSubmit({
       setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [
+    packageInfo,
+    agentPolicies,
+    updatePackagePolicy,
+    integrationToEnable,
+    isInitialized,
+    packagePolicy.package?.name,
+  ]);
 
   useEffect(() => {
     if (
@@ -339,6 +395,8 @@ export function useOnSubmit({
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
+  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
+
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
   });
@@ -353,7 +411,12 @@ export function useOnSubmit({
     async ({
       force,
       overrideCreatedAgentPolicy,
-    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
+      skipConfirmModal,
+    }: {
+      overrideCreatedAgentPolicy?: AgentPolicy;
+      force?: boolean;
+      skipConfirmModal?: boolean;
+    } = {}) => {
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -472,7 +535,7 @@ export function useOnSubmit({
       const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
-      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
         if (agentCount) {
           setFormState('SUBMITTED');
         } else if (hasAzureArmTemplate) {
@@ -494,27 +557,29 @@ export function useOnSubmit({
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
-        if (promptForAgentEnrollment && hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-          return;
-        }
-        if (promptForAgentEnrollment && hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
-          return;
-        }
-        if (promptForAgentEnrollment && hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-          return;
-        }
-        if (promptForAgentEnrollment) {
-          setFormState('SUBMITTED_NO_AGENTS');
-          return;
-        }
+        if (!skipConfirmModal) {
+          if (promptForAgentEnrollment && hasAzureArmTemplate) {
+            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+            return;
+          }
+          if (promptForAgentEnrollment && hasCloudFormation) {
+            setFormState('SUBMITTED_CLOUD_FORMATION');
+            return;
+          }
+          if (promptForAgentEnrollment && hasGoogleCloudShell) {
+            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+            return;
+          }
+          if (promptForAgentEnrollment) {
+            setFormState('SUBMITTED_NO_AGENTS');
+            return;
+          }
 
-        if (isAgentlessConfigured) {
-          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
-        } else {
-          onSaveNavigate(data!.item);
+          if (isAgentlessConfigured) {
+            onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+          } else {
+            onSaveNavigate(data!.item);
+          }
         }
 
         notifications.toasts.addSuccess({

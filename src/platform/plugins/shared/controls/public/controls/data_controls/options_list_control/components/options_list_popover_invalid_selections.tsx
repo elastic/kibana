@@ -18,25 +18,35 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
+  UseEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-
 import { BehaviorSubject } from 'rxjs';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
+const optionsListPopoverInvalidSelectionsStyles = {
+  title: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingLeft: euiTheme.size.m,
+    }),
+};
+
 export const OptionsListPopoverInvalidSelections = () => {
-  const { api } = useOptionsListContext();
+  const { componentApi } = useOptionsListContext();
+  const styles = useMemoizedStyles(optionsListPopoverInvalidSelectionsStyles);
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
-    api.invalidSelections$,
-    api.fieldFormatter
+    componentApi.invalidSelections$,
+    componentApi.fieldFormatter
   );
   const defaultPanelTitle = useStateFromPublishingSubject(
-    api.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
@@ -65,11 +75,7 @@ export const OptionsListPopoverInvalidSelections = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiTitle
-        size="xxs"
-        className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__invalidSelectionLabel"
-      >
+      <EuiTitle size="xxs" data-test-subj="optionList__invalidSelectionLabel" css={styles.title}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon
@@ -94,7 +100,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          api.deselectOption(changedOption.key);
+          componentApi.deselectOption(changedOption.key);
         }}
       >
         {(list) => list}

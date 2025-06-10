@@ -23,7 +23,7 @@ export interface ExceptionsPagination {
 
 export interface FlattenedCodeSignature {
   subject_name: string;
-  trusted: string;
+  trusted: boolean;
 }
 
 export type Flattened<T> = {

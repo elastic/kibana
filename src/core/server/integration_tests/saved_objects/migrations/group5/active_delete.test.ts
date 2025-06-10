@@ -25,6 +25,8 @@ import {
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
   getReindexingMigratorTestKit,
+  getUpToDateBaselineTypes,
+  getCompatibleBaselineTypes,
 } from '../kibana_migrator_test_kit.fixtures';
 
 describe('when upgrading to a new stack version', () => {
@@ -49,7 +51,8 @@ describe('when upgrading to a new stack version', () => {
         await clearLog();
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const { client, runMigrations } = await getUpToDateMigratorTestKit({
-          filterDeprecated: true,
+          removedTypes: ['server'],
+          types: getUpToDateBaselineTypes(['deprecated', 'server']),
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -158,7 +161,7 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-        expect(indexContents.hits.hits.length).toEqual(25);
+        expect(indexContents.hits.hits.length).toEqual(15);
       });
     });
   });
@@ -172,7 +175,8 @@ describe('when upgrading to a new stack version', () => {
 
         await clearLog();
         const { client, runMigrations } = await getCompatibleMigratorTestKit({
-          filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
+          removedTypes: ['server'],
+          types: getCompatibleBaselineTypes(['deprecated', 'server']),
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -285,8 +289,7 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-
-        expect(indexContents.hits.hits.length).toEqual(25);
+        expect(indexContents.hits.hits.length).toEqual(15);
       });
     });
   });
@@ -326,7 +329,6 @@ describe('when upgrading to a new stack version', () => {
         Object {
           "basic": 10,
           "complex": 4,
-          "deprecated": 10,
           "task": 10,
         }
       `);

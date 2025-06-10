@@ -11,16 +11,12 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, searchClassicNavigation, indexManagement } = getPageObjects([
-    'common',
-    'searchClassicNavigation',
-    'indexManagement',
-  ]);
+  const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/203607
-  describe.skip('Search Classic Navigation', () => {
+  describe('Search Classic Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -47,7 +43,7 @@ export default function searchSolutionNavigation({
     it('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
-        { id: 'Content', label: 'Content' },
+        { id: 'Data', label: 'Data' },
         { id: 'Indices', label: 'Index Management' },
         { id: 'Connectors', label: 'Connectors' },
         { id: 'Crawlers', label: 'Web Crawlers' },
@@ -56,6 +52,7 @@ export default function searchSolutionNavigation({
         { id: 'SearchApplications', label: 'Search Applications' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        { id: 'Synonyms', label: 'Synonyms' },
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Elasticsearch', label: 'Elasticsearch' },
         { id: 'VectorSearch', label: 'Vector Search' },
@@ -68,71 +65,79 @@ export default function searchSolutionNavigation({
 
       await searchClassicNavigation.expectNavItemExists('Home');
 
-      // > Index Management
-      await searchClassicNavigation.clickNavItem('Indices');
-      await searchClassicNavigation.expectNavItemActive('Indices');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Index Management');
-      // > Connectors
-      await searchClassicNavigation.clickNavItem('Connectors');
-      await searchClassicNavigation.expectNavItemActive('Connectors');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Connectors');
-      // > Crawlers
-      await searchClassicNavigation.clickNavItem('Crawlers');
-      await searchClassicNavigation.expectNavItemActive('Crawlers');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Web Crawlers');
+      const sideNavTestCases: Array<{
+        navItem: string;
+        breadcrumbs: string[];
+        pageTestSubject: string;
+      }> = [
+        {
+          navItem: 'Indices',
+          breadcrumbs: ['Data', 'Index Management'],
+          pageTestSubject: 'indexManagementHeaderContent',
+        },
+        {
+          navItem: 'Connectors',
+          breadcrumbs: ['Data', 'Connectors'],
+          pageTestSubject: 'searchCreateConnectorPage',
+        },
+        {
+          navItem: 'Crawlers',
+          breadcrumbs: ['Data', 'Web Crawlers'],
+          pageTestSubject: 'searchConnectorsPage',
+        },
+        {
+          navItem: 'Playground',
+          breadcrumbs: ['Build', 'Playground'],
+          pageTestSubject: 'svlPlaygroundPage',
+        },
+        {
+          navItem: 'SearchApplications',
+          breadcrumbs: ['Build', 'Search Applications'],
+          pageTestSubject: 'searchApplicationsListPage',
+        },
+        {
+          navItem: 'InferenceEndpoints',
+          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          pageTestSubject: 'inferenceEndpointsPage',
+        },
+        {
+          navItem: 'Synonyms',
+          breadcrumbs: ['Relevance', 'Synonyms'],
+          pageTestSubject: 'searchSynonymsOverviewPage',
+        },
+        {
+          navItem: 'Elasticsearch',
+          breadcrumbs: ['Getting started with Elasticsearch'],
+          pageTestSubject: 'elasticsearchGuide',
+        },
+        {
+          navItem: 'VectorSearch',
+          breadcrumbs: ['Getting started', 'Vector Search'],
+          pageTestSubject: 'vectorSearchGuidePage',
+        },
+        {
+          navItem: 'SemanticSearch',
+          breadcrumbs: ['Getting started', 'Semantic Search'],
+          pageTestSubject: 'semanticSearchGuidePage',
+        },
+        {
+          navItem: 'AISearch',
+          breadcrumbs: ['Getting started', 'AI Search'],
+          pageTestSubject: 'aiSearchGuidePage',
+        },
+      ];
 
-      // Check Build
-      // > Playground
-      await searchClassicNavigation.clickNavItem('Playground');
-      await searchClassicNavigation.expectNavItemActive('Playground');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Playground');
-      // > SearchApplications
-      await searchClassicNavigation.clickNavItem('SearchApplications');
-      await searchClassicNavigation.expectNavItemActive('SearchApplications');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
-
-      // Check Relevance
-      // > InferenceEndpoints
-      await searchClassicNavigation.clickNavItem('InferenceEndpoints');
-      await searchClassicNavigation.expectNavItemActive('InferenceEndpoints');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Relevance');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Inference Endpoints');
-
-      // Check Getting started
-      // > Elasticsearch
-      await searchClassicNavigation.clickNavItem('Elasticsearch');
-      await searchClassicNavigation.expectNavItemActive('Elasticsearch');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists(
-        'Getting started with Elasticsearch'
-      );
-      // > VectorSearch
-      await searchClassicNavigation.clickNavItem('VectorSearch');
-      await searchClassicNavigation.expectNavItemActive('VectorSearch');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Vector Search');
-      // > SemanticSearch
-      await searchClassicNavigation.clickNavItem('SemanticSearch');
-      await searchClassicNavigation.expectNavItemActive('SemanticSearch');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Semantic Search');
-      // > AISearch
-      await searchClassicNavigation.clickNavItem('AISearch');
-      await searchClassicNavigation.expectNavItemActive('AISearch');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Getting started');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('AI Search');
+      for (const testCase of sideNavTestCases) {
+        await searchClassicNavigation.clickNavItem(testCase.navItem);
+        // Wait for the date test subj to ensure the page is loaded before continuing
+        await testSubjects.existOrFail(testCase.pageTestSubject);
+        await searchClassicNavigation.expectNavItemActive(testCase.navItem);
+        for (const breadcrumb of testCase.breadcrumbs) {
+          await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists(breadcrumb);
+        }
+      }
 
       await expectNoPageReload();
-    });
-
-    it("should redirect to index management when clicking on 'Indices'", async () => {
-      await searchClassicNavigation.clickNavItem('Indices');
-      await indexManagement.expectToBeOnSearchIndexManagement();
-      await indexManagement.expectToBeOnIndexManagement();
     });
   });
 }
