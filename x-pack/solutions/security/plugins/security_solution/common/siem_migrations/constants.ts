@@ -37,10 +37,16 @@ export const SIEM_RULE_MIGRATION_EVALUATE_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/e
 export const LOOKUPS_INDEX_PREFIX = 'lookup_';
 
 export enum SiemMigrationTaskStatus {
+  /** The Migration is not yet started */
   READY = 'ready',
+  /** The Migration is in progress */
   RUNNING = 'running',
+  /** The Migration process has been stopped for some reason unrelated to the user, usually a server restart. */
   STOPPED = 'stopped',
+  /** The Migration is completed without any issues */
   FINISHED = 'finished',
+  /** The Migration is explicitly aborted by user */
+  ABORTED = 'aborted',
 }
 
 export enum SiemMigrationStatus {

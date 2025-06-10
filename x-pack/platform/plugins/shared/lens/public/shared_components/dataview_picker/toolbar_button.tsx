@@ -106,7 +106,7 @@ const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
       min-width: 0;
       border-width: ${euiTheme.border.width.thin};
       border-style: solid;
-      border-color: ${euiTheme.border.color}; // Lighten the border color for all states
+      border-color: ${euiTheme.colors.borderBasePlain}; // Lighten the border color for all states
 
       // Override background color for non-disabled buttons
       &:not(:disabled) {
