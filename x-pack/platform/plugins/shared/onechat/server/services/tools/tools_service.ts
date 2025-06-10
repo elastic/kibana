@@ -37,6 +37,7 @@ export class ToolsService {
   }
 
   start({ getRunner }: ToolsServiceStartDeps): ToolsServiceStart {
+
     const registry = createInternalRegistry({
       providers: [...this.providers.values()],
       getRunner,

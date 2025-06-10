@@ -18,7 +18,8 @@ import { RunnerFactoryImpl } from './runner';
 import { EsqlToolServiceImpl } from './tools/esql/esql_tool_service';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
-import { EsqlToolProviderImpl } from './tools/esql/esql_provider';
+import { z } from 'zod';
+import { Parser } from 'expr-eval';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -40,6 +41,21 @@ export class ServiceManager {
       tools: this.services.tools.setup(),
       agents: this.services.agents.setup({ logger }),
     };
+
+    this.internalSetup.tools.register({
+      id: 'calculator',
+      description: `A simple calculator. Useful for getting the result of a math expression.`,
+      schema: z.object({
+        input: z.string().describe('the expression to evaluate'),
+      }),
+      handler: async ({ input }) => {
+        try {
+          return Parser.evaluate(input).toString();
+        } catch (e) {
+          throw new Error(`Error evaluating expression: ${e.message}`);
+        }
+      },
+    });
 
     return this.internalSetup;
   }

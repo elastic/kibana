@@ -10,11 +10,11 @@ import type {
     Logger,
     ElasticsearchServiceStart,
   } from '@kbn/core/server';
-  import { EsqlToolClient, createClient } from './client';
+  import { EsqlToolRegistry, createEsqlToolRegistry } from './esql_registry';
   import { createStorage } from './storage';
   
   export interface EsqlToolService {
-    getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
+    getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolRegistry>;
   }
   
   export class EsqlToolServiceImpl implements EsqlToolService {
@@ -39,7 +39,7 @@ import type {
         };
       }
   
-    async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
+    async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolRegistry> {
         try {
             const { internalUser, currentUser } = this.getScopedUsers({ request });
             const storage = createStorage({ 
@@ -47,7 +47,7 @@ import type {
                 esClient: internalUser,
             });
 
-            const client = createClient({ 
+            const client = createEsqlToolRegistry({ 
                 storage, 
                 esClient: currentUser,
             });

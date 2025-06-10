@@ -6,6 +6,8 @@
  */
 
 import { createInternalError } from '../base/errors';
+import { UnknownKeysParam, ZodObject, ZodTypeAny } from 'zod';
+
 
 /**
  * Represents a plain toolId, without source information attached to it.
@@ -155,10 +157,7 @@ export interface ToolDescriptor {
 }
 
 export interface EsqlTool extends ToolDescriptor {
-  /**
-   * The name of the tool.
-   */
-  name: string;
+
   /**
    * The ESQL query to be executed.
    */
@@ -179,6 +178,15 @@ export interface EsqlTool extends ToolDescriptor {
      */
     description: string;
   }>;
+  /**
+   * Zod schema for validating tool parameters
+   */
+  schema: ZodObject<any, UnknownKeysParam, ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>;
+
+  /**
+   * Handler function to execute the tool
+   */
+  handler: (params: any) => Promise<any>;
 }
 
 
