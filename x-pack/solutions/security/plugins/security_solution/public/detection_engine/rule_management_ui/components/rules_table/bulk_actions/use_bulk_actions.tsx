@@ -622,7 +622,7 @@ export const useBulkActions = ({
             {
               key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
               name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
-              'data-test-subj': 'setAlertSuppressionBulkEditRuleForThreshold',
+              'data-test-subj': 'setAlertSuppressionForThresholdBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression_for_threshold),
               disabled: isAlertSuppressionDisabled,
               toolTipProps: { position: 'right' },

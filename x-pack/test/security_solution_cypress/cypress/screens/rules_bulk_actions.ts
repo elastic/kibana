@@ -102,6 +102,19 @@ export const RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX =
 export const RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING =
   '[data-test-subj="bulkEditRulesInvestigationFieldsWarning"]';
 
+// ALERT SUPPRESSION
+export const ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="alertSuppressionBulkEditRule"]';
+
+export const SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="setAlertSuppressionBulkEditRule"]';
+
+export const SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM =
+  '[data-test-subj="setAlertSuppressionForThresholdBulkEditRule"]';
+
+export const DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="deleteAlertSuppressionBulkEditRule"]';
+
 // ENABLE/DISABLE
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
