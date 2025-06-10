@@ -66,6 +66,14 @@ describe('Component BulkEditRuleErrorsList', () => {
       BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
       "2 machine learning rules can't be edited (test failure)",
     ],
+    [
+      BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION,
+      "2 threshold rules can't be edited with this alert suppression action. Please use dedicated to threshold rules action.",
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION,
+      "2 rules can't be edited with this alert suppression action. Please use Set alert suppression action.",
+    ],
     [undefined, "2 rules can't be edited (test failure)"],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {
     const ruleErrors: DryRunResult['ruleErrors'] = [

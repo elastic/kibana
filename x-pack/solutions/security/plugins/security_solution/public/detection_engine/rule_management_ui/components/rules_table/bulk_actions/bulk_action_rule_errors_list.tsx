@@ -89,7 +89,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.thresholdRuleInSuppressionDescription"
-            defaultMessage="{rulesCount, plural, =1 {# Threshold rule} other {# Threshold rules}} can't be edited with this alert suppression action. Please use dedicated to threshold rules action."
+            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited with this alert suppression action. Please use dedicated to threshold rules action."
             values={{ rulesCount }}
           />
         </li>
