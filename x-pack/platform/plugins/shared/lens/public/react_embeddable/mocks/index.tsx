@@ -192,27 +192,28 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(
-        async () =>
-          ({
-            api: {
-              enhancements: { dynamicActions: {} },
-              setDynamicActions: jest.fn(),
-              dynamicActionsState$: {},
-            } as unknown as EmbeddableDynamicActionsManager['api'],
-            anyStateChange$: of(undefined),
-            comparators: {
-              enhancements: jest.fn(),
-            },
-            getLatestState: jest.fn(),
-            serializeState: jest.fn(),
-            reinitializeState: jest.fn(),
-            startDynamicActions: jest.fn(),
-          } as EmbeddableDynamicActionsManager)
-      ),
+      initializeEmbeddableDynamicActions: jest.fn(async () => mockDynamicActionsManager()),
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
+}
+
+export function mockDynamicActionsManager() {
+  return {
+    api: {
+      enhancements: { dynamicActions: {} },
+      setDynamicActions: jest.fn(),
+      dynamicActionsState$: {},
+    } as unknown as EmbeddableDynamicActionsManager['api'],
+    anyStateChange$: of(undefined),
+    comparators: {
+      enhancements: jest.fn(),
+    },
+    getLatestState: jest.fn(),
+    serializeState: jest.fn(),
+    reinitializeState: jest.fn(),
+    startDynamicActions: jest.fn(),
+  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (
