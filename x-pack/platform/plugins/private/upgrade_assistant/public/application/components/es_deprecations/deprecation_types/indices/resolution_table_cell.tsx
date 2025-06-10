@@ -37,13 +37,13 @@ type RecommendedActionType =
 const recommendedReadOnlyText = i18n.translate(
   'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyText',
   {
-    defaultMessage: 'Recommended to set to read-only',
+    defaultMessage: 'Recommended: set to read-only',
   }
 );
 const recommendedReindexText = i18n.translate(
   'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexText',
   {
-    defaultMessage: 'Recommended to reindex',
+    defaultMessage: 'Recommended: reindex',
   }
 );
 
