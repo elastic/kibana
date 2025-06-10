@@ -30,10 +30,10 @@ describe('NoDataFound Component', () => {
     ).toBeInTheDocument();
 
     // Check that the add integration link is present and has the correct href
-    const addLink = screen.getByRole('link', { name: /add integration/i });
-    expect(addLink).toBeInTheDocument();
-    expect(addLink).toHaveAttribute('href', '/test-integration-path');
-    expect(addLink).not.toBeDisabled();
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeInTheDocument();
+    expect(addButton).toHaveAttribute('href', '/test-integration-path');
+    expect(addButton).not.toBeDisabled();
   });
 
   it('should disable the add integration link when loading', () => {
@@ -43,7 +43,7 @@ describe('NoDataFound Component', () => {
 
     renderWithTestProvider(<NoDataFound />);
 
-    const addLink = screen.getByRole('link', { name: /add integration/i });
-    expect(addLink).toBeDisabled();
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeDisabled();
   });
 });

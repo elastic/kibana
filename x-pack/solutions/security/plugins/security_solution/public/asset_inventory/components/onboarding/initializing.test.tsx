@@ -39,10 +39,10 @@ describe('Initializing', () => {
 
     expect(screen.getByRole('heading', { name: /discovering your assets/i })).toBeInTheDocument();
 
-    const addLink = screen.getByRole('link', { name: /add integration/i });
-    expect(addLink).toBeInTheDocument();
-    expect(addLink).toHaveAttribute('href', '/test-integration-path');
-    expect(addLink).not.toBeDisabled();
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeInTheDocument();
+    expect(addButton).toHaveAttribute('href', '/test-integration-path');
+    expect(addButton).not.toBeDisabled();
   });
 
   it('should disable the add integration button when loading', () => {
@@ -52,7 +52,7 @@ describe('Initializing', () => {
 
     renderWithTestProvider(<Initializing />);
 
-    const addLink = screen.getByRole('link', { name: /add integration/i });
-    expect(addLink).toBeDisabled();
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeDisabled();
   });
 });
