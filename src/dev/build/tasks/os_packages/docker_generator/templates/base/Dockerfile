@@ -92,7 +92,9 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates && \
+      # This command will fail and stop the build
+      cat /this-file-does-not-exist
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
