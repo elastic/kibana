@@ -11,9 +11,14 @@ import { ESQLCommand } from '@kbn/esql-ast';
 import { isSingleItem } from '../../../shared/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { SuggestionRawDefinition } from '../../types';
-import { isExpressionComplete } from '../../helper';
 
-export type SortPosition = 'expression' | 'complete_expression' | 'after_order' | 'after_nulls';
+export type SortPosition =
+  | 'empty_expression'
+  | 'expression'
+  | 'order_complete'
+  | 'after_order'
+  | 'nulls_complete'
+  | 'after_nulls';
 
 export const sortModifierSuggestions = {
   ASC: {
@@ -50,21 +55,29 @@ export const sortModifierSuggestions = {
   } as SuggestionRawDefinition,
 };
 
-export const getSortPos = (query: string, command: ESQLCommand<'sort'>): SortPosition |  => {
+export const getSortPos = (
+  query: string,
+  command: ESQLCommand<'sort'>
+): SortPosition | undefined => {
   const lastArg = command.args[command.args.length - 1];
   if (!lastArg || /,\s+$/.test(query)) {
-    return 'expression';
+    return 'empty_expression';
   }
 
   if (isSingleItem(lastArg) && lastArg.type !== 'order') {
-    if (isExpressionComplete(lastArg)) {
-      return 'complete_expression';
-    }
     return 'expression';
+  }
+
+  if (/(?:asc|desc)$/i.test(query)) {
+    return 'order_complete';
   }
 
   if (/(?:asc|desc)\s+$/i.test(query)) {
     return 'after_order';
+  }
+
+  if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
+    return 'nulls_complete';
   }
 
   if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
