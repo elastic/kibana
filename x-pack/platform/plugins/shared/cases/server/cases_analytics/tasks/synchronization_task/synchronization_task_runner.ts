@@ -37,7 +37,7 @@ enum ReindexStatus {
   MISSING_TASK_ID = 'missing_task_id',
 }
 
-const LOOKBACK_WINDOW = 5 * 60 * 1000;
+const LOOKBACK_WINDOW = 5 * 20 * 1000;
 
 export class SynchronizationTaskRunner implements CancellableTask {
   private readonly sourceIndex: string;
@@ -171,6 +171,8 @@ export class SynchronizationTaskRunner implements CancellableTask {
         },
         /** If `true`, the request refreshes affected shards to make this operation visible to search. */
         refresh: true,
+        /** Makes sure the task id is */
+        wait_for_completion: false,
       });
 
       this.handleDebug(JSON.stringify(reindexResponse));

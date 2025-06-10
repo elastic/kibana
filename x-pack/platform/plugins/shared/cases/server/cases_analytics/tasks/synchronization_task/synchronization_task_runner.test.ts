@@ -146,6 +146,7 @@ describe('SynchronizationTaskRunner', () => {
         id: painlessScriptId,
       },
       refresh: true,
+      wait_for_completion: false,
     });
 
     expect(result).toEqual({
@@ -225,6 +226,7 @@ describe('SynchronizationTaskRunner', () => {
         id: painlessScriptId,
       },
       refresh: true,
+      wait_for_completion: false,
     });
 
     expect(result).toEqual({
@@ -321,6 +323,7 @@ describe('SynchronizationTaskRunner', () => {
         id: painlessScriptId,
       },
       refresh: true,
+      wait_for_completion: false,
     });
 
     expect(result).toEqual({
