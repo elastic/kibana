@@ -260,7 +260,7 @@ export function getFieldNamesByType(
 
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
-  if (type.includes('time_literal')) {
+  if (type.includes('time_duration')) {
     // return only singular
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
