@@ -19,7 +19,7 @@ import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 const degradedDocsAlertingFeatures = {
   ruleTypeId: DEGRADED_DOCS_RULE_TYPE_ID,
-  consumers: [AlertConsumers.STACK_ALERTS, AlertConsumers.ALERTS],
+  consumers: [AlertConsumers.ALERTS],
 };
 
 const canManageRules: SubFeaturePrivilegeGroupConfig = {
