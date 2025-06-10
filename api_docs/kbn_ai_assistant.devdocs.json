@@ -1840,9 +1840,9 @@
             "label": "status",
             "description": [],
             "signature": [
-              "State<{ errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+              "State<{ errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; modelStats?: Partial<",
+              " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
               "> | undefined; kbState: ",
               {

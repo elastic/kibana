@@ -244,7 +244,9 @@ describe('test helper methods', () => {
             },
             {
               bool: {
-                should: [{ term: { 'some.field': 'some.status' } }],
+                should: [
+                  { term: { 'some.field': { value: 'some.status', case_insensitive: true } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -274,7 +276,9 @@ describe('test helper methods', () => {
             },
             {
               bool: {
-                should: [{ term: { 'result.evaluation': 'pass' } }],
+                should: [
+                  { term: { 'result.evaluation': { value: 'pass', case_insensitive: true } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -303,7 +307,9 @@ describe('test helper methods', () => {
             },
             {
               bool: {
-                should: [{ term: { 'vulnerability.severity': 'low' } }],
+                should: [
+                  { term: { 'vulnerability.severity': { value: 'low', case_insensitive: true } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -331,6 +337,12 @@ describe('test helper methods', () => {
       return {
         sort: sortField ? [{ [sortField]: sortDirection }] : [],
         size: size || 0,
+        // TODO: Asset Invnetory - remove temp runtime mapping
+        runtime_mappings: {
+          'related.entity': {
+            type: 'keyword',
+          },
+        },
         _source: false,
         fields: [
           '_id',

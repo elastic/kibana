@@ -16,6 +16,7 @@
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/datemath",
+    "@kbn/file-upload-common",
   ],
   "exclude": [
     "target/**/*",
