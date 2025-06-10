@@ -6,6 +6,8 @@
  */
 
 import { omit } from 'lodash';
+import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
@@ -53,11 +55,17 @@ export class AlertData {
     return Object.keys(nonTechnicalFields);
   }
 
+  getAllRelevantFields(): string[] {
+    const ruleFields = this.getRelevantRuleFields();
+    const aadFields = this.getRelevantAADFields();
+    return Array.from(new Set([...ruleFields, ...aadFields]));
+  }
+
   getAlertTags(): string[] {
     return this.alert.tags || [];
   }
 
-  getRuleQueryIndex() {
+  getRuleQueryIndex(): string | null {
     const ruleParameters = this.getRuleParameters();
     const ruleTypeId = this.getRuleTypeId();
     if (!ruleParameters) {
@@ -65,10 +73,14 @@ export class AlertData {
     }
     switch (ruleTypeId) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as ThresholdParams;
-        return customThresholdParams.searchConfiguration.index;
+        const customThresholdParams = ruleParameters as CustomThresholdParams;
+        if (typeof customThresholdParams.searchConfiguration.index === 'object')
+          return (customThresholdParams.searchConfiguration.index as DataViewSpec)?.id || null;
+        if (typeof customThresholdParams.searchConfiguration.index === 'string')
+          return customThresholdParams.searchConfiguration.index;
+        return null;
       default:
-        return '';
+        return null;
     }
   }
 
