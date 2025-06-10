@@ -686,6 +686,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

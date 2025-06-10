@@ -63,6 +63,7 @@ export function ChatHeader({
   loading,
   title,
   isConversationOwnedByCurrentUser,
+  isConversationApp,
   onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
@@ -82,6 +83,7 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   isConversationOwnedByCurrentUser: boolean;
+  isConversationApp: boolean;
   onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
@@ -280,7 +282,10 @@ export function ChatHeader({
 
               <EuiFlexItem grow={false}>
                 {!!elasticManagedLlm && !tourCalloutDismissed ? (
-                  <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
+                  <ElasticLlmTourCallout
+                    zIndex={isConversationApp ? 999 : undefined}
+                    dismissTour={() => setTourCalloutDismissed(true)}
+                  >
                     <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
                   </ElasticLlmTourCallout>
                 ) : (
