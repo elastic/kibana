@@ -49,7 +49,7 @@ export const errorHandler = <E extends Error>(
 
     return res.customError({
       statusCode: error.statusCode,
-      body: error,
+      body: error.message,
     });
   }
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
