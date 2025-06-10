@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/controls-as-a-panel-example-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "plugin": {
+    "id": "controlsAsAPanelExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "controls",
+      "developerExamples",
+      "embeddable",
+      "presentationUtil",
+      "uiActions",
+      "dataViews",
+      "embeddableExamples"
+    ]
+  }
+}

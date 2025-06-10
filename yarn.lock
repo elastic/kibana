@@ -4426,6 +4426,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/controls-as-a-panel-example-plugin@link:examples/controls_as_a_panel_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
