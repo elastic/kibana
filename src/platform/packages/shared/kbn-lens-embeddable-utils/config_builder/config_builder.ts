@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi, LensEmbeddableInput, LensRuntimeState } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { LensAttributes, LensConfig, LensConfigOptions } from './types';
@@ -22,7 +22,6 @@ import {
   buildPartitionChart,
   reverseBuildMetric
 } from './charts';
-import { FatalErrorsService } from '@kbn/core/packages/fatal-errors/browser-internal';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -42,7 +41,7 @@ export class LensConfigBuilder {
   };
 
   private reverseCharts = {
-    metric: reverseBuildMetric,
+    'lnsMetric': reverseBuildMetric,
   };
 
   private formulaAPI: FormulaPublicApi | undefined;
@@ -85,13 +84,12 @@ export class LensConfigBuilder {
     return chartState as LensAttributes;
   }
 
-  async reverseBuild(attributes: LensAttributes): Promise<{ config: LensConfig; options: LensConfigOptions }> {
+  async reverseBuild(state: LensRuntimeState): Promise<{ config: LensConfig; options: LensConfigOptions }> {
+    const attributes = state.attributes as LensAttributes;
     const chartType = attributes.visualizationType;
-    const chartBuilder = this.reverseCharts[chartType as 'metric'];
+    const chartBuilder = this.reverseCharts[chartType as 'lnsMetric'];
 
-    // todo: handle options.embeddable
-
-    const config: LensConfig = await chartBuilder(attributes);
+    const config: LensConfig = await chartBuilder(attributes, this.dataViewsAPI, this.formulaAPI);
     const options: LensConfigOptions = {
       filters: attributes.state?.filters || [],
       query: attributes.state?.query || { language: 'kuery', query: '' },

@@ -14,6 +14,7 @@ import type { PersistedIndexPatternLayer } from '../../../types';
 import type { TimeScaleUnit } from '../../../../../../common/expressions';
 
 import { insertOrReplaceFormulaColumn } from './parse';
+import { generateFormula } from './generate';
 
 /** @public **/
 export interface FormulaPublicApi {
@@ -49,6 +50,7 @@ export interface FormulaPublicApi {
     dataView: DataView,
     dateRange?: DateRange
   ) => PersistedIndexPatternLayer | undefined;
+  generateFormula: typeof generateFormula,
 }
 
 /** @public **/
@@ -96,5 +98,6 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
         { indexPattern, dateRange }
       ).layer;
     },
+    generateFormula,
   };
 };

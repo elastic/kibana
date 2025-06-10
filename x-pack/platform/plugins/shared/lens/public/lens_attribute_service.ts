@@ -21,6 +21,8 @@ import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
 import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
+import { LensConfigBuilder, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import { createFormulaPublicApi } from './async_services';
 
 type Reference = LensSavedObject['references'][number];
 
@@ -78,6 +80,29 @@ export function getLensAttributeService(
       managed: boolean;
     }> => {
       const { meta, item } = await savedObjectStore.load(savedObjectId);
+      const configBuilder = new LensConfigBuilder(
+        startDependencies.dataViews,
+        createFormulaPublicApi(),
+      );
+
+      const withInjectedReferences = inject(
+        { 
+          attributes: {
+            ...item.attributes,
+            state: item.attributes.state as LensSavedObjectAttributes['state'],
+            references: item.references,
+          }
+        } as unknown as EmbeddableStateWithType,
+        item.references
+      ) as unknown as LensRuntimeState;
+
+      const config = await configBuilder.reverseBuild(
+        withInjectedReferences
+      );
+
+      console.log(JSON.stringify(config, null, 2));
+
+
       return {
         attributes: {
           ...item.attributes,

@@ -13,6 +13,7 @@ import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedLayer,
   FormBasedPersistedState,
+  FormulaPublicApi,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -30,14 +31,11 @@ import {
   LensBaseConfig,
   LensBaseLayer,
   LensBaseXYLayer,
-  LensBreakdownConfig,
   LensConfig,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
-import { AnyColumnWithSourceField } from '@kbn/visualizations-plugin/common';
-import { access } from 'fs';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -358,6 +356,8 @@ export const addLayerFormulaColumns = (
 export const buildQuery = (
   accessor: string | undefined,
   layer: FormBasedLayer,
+  dataView: DataViewsCommon | undefined,
+  formulaAPI?: FormulaPublicApi 
 ): string | undefined => {
   if (!accessor) {
     return undefined;
@@ -368,12 +368,11 @@ export const buildQuery = (
     return undefined;
   }
 
-  if ('sourceField' in column && column.sourceField) {
-    return column.sourceField;
+  if ('operationType' in column && column.operationType) {
+    // convert to formula
+    return formulaAPI!.generateFormula(column, layer, '', undefined);
   } else if ('formula' in column && column.formula) {
     return column.formula as string;
-  } else if ('operationType' in column && column.operationType === 'static_value') {
-    return (column as AnyColumnWithSourceField).value;
   }
 
   return undefined;

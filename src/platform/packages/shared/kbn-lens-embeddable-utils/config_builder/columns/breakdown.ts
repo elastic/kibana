@@ -114,7 +114,7 @@ export const fromBreakdownColumn = (
 ): LensBreakdownConfig => {
   if (column.operationType === 'date_histogram') {
     return fromHistogramColumn(column as DateHistogramIndexPatternColumn);
-  } else if (column.operationType === 'top_values') {
+  } else if (column.operationType === 'terms') {
     return fromTopValuesColumn(column as TermsIndexPatternColumn);
   } else if (column.operationType === 'intervals') {
     return fromIntervalsColumn(column as RangeIndexPatternColumn);

@@ -34,6 +34,7 @@ import {
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
+import { DataViewsCommon } from '../config_builder';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -101,7 +102,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
 }
 
 function reverseBuildVisualizationState(
-  visualization: MetricVisualizationState, layer: FormBasedLayer
+  visualization: MetricVisualizationState, layer: FormBasedLayer, dataViews: DataViewsCommon, formulaAPI?: FormulaPublicApi
 ): LensMetricConfig {
 
   if (visualization.metricAccessor === undefined) {
@@ -114,16 +115,15 @@ function reverseBuildVisualizationState(
     index: layer.indexPatternId || '',
   } as LensMetricConfig['dataset'];
 
-  const query = buildQuery(visualization.metricAccessor, layer);
+  const query = buildQuery(visualization.metricAccessor, layer, dataViews, formulaAPI);
   const breakdown = visualization.breakdownByAccessor ? fromBreakdownColumn(layer.columns[visualization.breakdownByAccessor]) : undefined ;
-  const querySecondaryMetric = buildQuery(visualization.secondaryMetricAccessor, layer);
-  const queryMaxValue = buildQuery(visualization.maxAccessor, layer);
+  const querySecondaryMetric = buildQuery(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI);
+  const queryMaxValue = buildQuery(visualization.maxAccessor, layer, dataViews, formulaAPI);
   
 
   return {
     chartType: 'metric',    
     title: '',
-    label: '',
     dataset,
     value: query!,
     seriesColor: visualization.color,
@@ -131,15 +131,7 @@ function reverseBuildVisualizationState(
     breakdown,
     querySecondaryMetric,
     queryMaxValue,
-    compactValues: true,
-    decimals: 2,
-    normalizeByUnit: 's',
-    randomSampling: 1,
-    useGlobalFilter: true,
-    format: 'number',
-    filter: '',
     trendLine: Boolean(visualization.trendlineLayerId),
-
   };
 }
 
@@ -287,7 +279,9 @@ export async function buildMetric(
 
 // gets full lens attributes in and builds LensMetricConfig out of it
 export async function reverseBuildMetric(
-  attributes: LensAttributes
+  attributes: LensAttributes,
+  dataView: DataViewsCommon,
+  formulaAPI?: FormulaPublicApi
 ): Promise<LensMetricConfig> {
   const { state } = attributes;
   const visualization = state.visualization as MetricVisualizationState;
@@ -295,7 +289,7 @@ export async function reverseBuildMetric(
 
   const layer = Object.values(layers)[0] as FormBasedLayer;
   
-  const visualizationState = reverseBuildVisualizationState(visualization, layer);
+  const visualizationState = reverseBuildVisualizationState(visualization, layer, dataView, formulaAPI);
 
   return visualizationState;
 }
