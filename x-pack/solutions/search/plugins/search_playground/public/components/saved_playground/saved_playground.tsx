@@ -129,7 +129,7 @@ export const SavedPlayground = () => {
     <>
       <Header
         playgroundName={playgroundName}
-        hasChanges={formState.isDirty}
+        hasChanges={false}
         pageMode={pageMode}
         viewMode={viewMode}
         showDocs={false}
