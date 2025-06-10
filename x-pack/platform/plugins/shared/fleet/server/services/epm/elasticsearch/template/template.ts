@@ -322,16 +322,21 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? '*';
         break;
       case 'ip':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'string';
+        break;
       case 'keyword':
+        dynProperties = keyword(field);
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
+        break;
       case 'match_only_text':
       case 'text':
       case 'wildcard':
-        dynProperties.type = field.object_type;
         matchingType = field.object_type_mapping_type ?? 'string';
-        // Copy additional fields/properties from the original field definition
-        // This ensures all properties like ignore_above, null_value, etc. are preserved
-        const wildcardMapping = generateWildcardMappingForDynamic(field);
-        dynProperties = { ...dynProperties, ...wildcardMapping, type: field.object_type };
+        const textMapping = generateTextMappingForDynamic(field);
+        dynProperties = { ...dynProperties, ...textMapping, type: field.object_type };
         if (field.multi_fields) {
           dynProperties.fields = generateMultiFields(field.multi_fields);
         }
@@ -743,8 +748,8 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   }
   return mapping;
 }
-
-function generateWildcardMappingForDynamic(field: Field): IndexTemplateMapping {
+//  This is a duplicate of the above function, but without the default 'ignore_above' value for dynamic mappings. We dont want to enforce due to backwards compatibility
+function generateTextMappingForDynamic(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {};
   if (field.null_value) {
     mapping.null_value = field.null_value;
