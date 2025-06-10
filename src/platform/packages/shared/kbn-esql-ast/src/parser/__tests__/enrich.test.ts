@@ -64,7 +64,7 @@ describe('ENRICH', () => {
             {
               type: 'source',
               name: 'mode:a',
-              cluster: {
+              prefix: {
                 type: 'literal',
                 literalType: 'keyword',
                 valueUnquoted: 'mode',
