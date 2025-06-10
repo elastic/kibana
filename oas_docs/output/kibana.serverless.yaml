@@ -6778,25 +6778,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -6872,25 +6854,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -7351,25 +7315,7 @@ paths:
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
                                 type: string
@@ -7447,25 +7393,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
                                       type: string
@@ -7848,25 +7776,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -7942,25 +7852,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -8401,25 +8293,7 @@ paths:
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
                                 type: string
@@ -8497,25 +8371,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
                                       type: string
@@ -8894,25 +8750,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -8988,25 +8826,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -61704,6 +61524,12 @@ components:
           enum:
             - delete
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61721,6 +61547,12 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
           type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
@@ -61753,6 +61585,12 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61845,6 +61683,12 @@ components:
             $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayload'
           minItems: 1
           type: array
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61868,6 +61712,12 @@ components:
           enum:
             - enable
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61888,6 +61738,12 @@ components:
           enum:
             - export
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61905,6 +61761,12 @@ components:
         action:
           enum:
             - run
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
           type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
