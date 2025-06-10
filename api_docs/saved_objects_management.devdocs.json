@@ -318,7 +318,7 @@
               },
               ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; render?: ((value: any, record: ",
+              " | undefined; render?: ((value: any, item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
