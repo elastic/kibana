@@ -110,7 +110,7 @@ describe('generateMaintenanceWindowEvents', () => {
   it('should generate events for rrule repeating by specific days', () => {
     const result = generateMaintenanceWindowEvents({
       duration: 1 * 60 * 60 * 1000,
-      expirationDate: moment(new Date('2023-02-28T00:00:00.000Z'))
+      expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(5, 'weeks')
         .toISOString(),
