@@ -8,7 +8,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { type PropsWithChildren, useMemo } from 'react';
+import React, { type PropsWithChildren, useMemo, useState } from 'react';
 import {
   type CombinedRuntimeState,
   InternalStateProvider,
@@ -26,6 +26,7 @@ import { createDiscoverServicesMock } from './services';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const DiscoverTestProvider = ({
   services: originalServices,
@@ -45,6 +46,7 @@ export const DiscoverTestProvider = ({
   currentTabId?: string;
   usePortalsRenderer?: boolean;
 }>) => {
+  const [queryClient] = useState(() => new QueryClient());
   const services = useMemo(
     () => originalServices ?? createDiscoverServicesMock(),
     [originalServices]
@@ -97,7 +99,9 @@ export const DiscoverTestProvider = ({
 
   return (
     <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
 };

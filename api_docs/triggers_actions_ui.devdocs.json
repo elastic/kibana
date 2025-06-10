@@ -2407,6 +2407,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.selectMessagePreconfigured",
+            "type": "string",
+            "tags": [],
+            "label": "selectMessagePreconfigured",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionTypeModel.actionTypeTitle",
             "type": "string",
             "tags": [],
@@ -3636,6 +3650,38 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleDefinitionProps.navigateToEditRuleForm",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToEditRuleForm",
+            "description": [],
+            "signature": [
+              "((ruleId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleDefinitionProps.navigateToEditRuleForm.$1",
+                "type": "string",
+                "tags": [],
+                "label": "ruleId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5247,6 +5293,27 @@
                 "docId": "kibSharePluginApi",
                 "section": "def-public.SharePublicStart",
                 "text": "SharePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/rules_app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
               },
               " | undefined"
             ],

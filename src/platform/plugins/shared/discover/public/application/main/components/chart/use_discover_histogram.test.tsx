@@ -376,6 +376,7 @@ describe('useDiscoverHistogram', () => {
           dataRequestParams: {
             timeRangeAbsolute: timeRangeAbs,
             timeRangeRelative: timeRangeRel,
+            searchSessionId: '123',
           },
         })
       );

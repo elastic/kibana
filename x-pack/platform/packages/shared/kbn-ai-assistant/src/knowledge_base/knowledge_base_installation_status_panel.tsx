@@ -41,7 +41,7 @@ const WarmUpModel = ({
           : 'xpack.aiAssistant.welcomeMessage.knowledgeBasePausedTextLabel',
         {
           defaultMessage: knowledgeBase.isWarmingUpModel
-            ? 'Re-deploying knowledge base model...'
+            ? 'Redeploying knowledge base model...'
             : pendingDeployment
             ? 'Your knowledge base model has been stopped'
             : 'Knowledge base model paused due to inactivity.',
@@ -64,7 +64,7 @@ const WarmUpModel = ({
             onClick={handleWarmup}
           >
             {i18n.translate('xpack.aiAssistant.knowledgeBase.wakeUpKnowledgeBaseModel', {
-              defaultMessage: 'Re-deploy Model',
+              defaultMessage: 'Redeploy Model',
             })}
           </EuiButton>
         </EuiFlexItem>

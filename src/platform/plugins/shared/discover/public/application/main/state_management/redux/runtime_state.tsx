@@ -16,6 +16,7 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
+import type { TabState } from './types';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -67,6 +68,33 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+export const selectTabRuntimeAppState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
+};
+
+export const selectTabRuntimeGlobalState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): TabState['lastPersistedGlobalState'] | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
+
+  if (!globalState) {
+    return undefined;
+  }
+
+  const { time: timeRange, refreshInterval, filters } = globalState;
+  return {
+    timeRange,
+    refreshInterval,
+    filters,
+  };
+};
 
 export const useCurrentTabRuntimeState = <T,>(
   runtimeStateManager: RuntimeStateManager,
