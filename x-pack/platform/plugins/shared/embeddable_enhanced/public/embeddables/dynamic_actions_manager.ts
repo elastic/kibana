@@ -11,7 +11,7 @@ import {
   SerializedPanelState,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager, DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
 import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_action_storage';
@@ -78,7 +78,11 @@ export function initializeDynamicActionsManager(
 
       const extractResults = enhancement.extract(latestState.enhancements.dynamicActions);
       return {
-        rawState: extractResults.state,
+        rawState: {
+          enhancements: {
+            dynamicActions: extractResults.state as DynamicActionsState
+          }
+        },
         references: extractResults.references
       };
     },

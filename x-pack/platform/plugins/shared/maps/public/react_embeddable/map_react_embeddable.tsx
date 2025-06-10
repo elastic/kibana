@@ -122,6 +122,8 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         ...dynamicActionsState
       };
 
+      debugger;
+
       // by-reference embeddable
       if (rawState.savedObjectId) {
         return {
