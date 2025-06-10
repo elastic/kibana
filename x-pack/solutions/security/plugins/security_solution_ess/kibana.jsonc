@@ -19,7 +19,8 @@
       "securitySolution",
       "management",
       "navigation",
-      "licensing"
+      "licensing",
+      "cloud",
     ],
     "optionalPlugins": [],
     "requiredBundles": [

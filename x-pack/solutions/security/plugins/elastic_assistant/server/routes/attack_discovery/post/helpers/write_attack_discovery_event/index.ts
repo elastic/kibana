@@ -9,18 +9,21 @@ import { type IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuthenticatedUser } from '@kbn/core/server';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../../common/constants';
+import { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
 
 const MAX_LENGTH = 1024;
 
-export const writeAttackDiscoveryEvent = ({
+export const writeAttackDiscoveryEvent = async ({
   action,
   alertsContextCount,
   attackDiscoveryAlertsEnabled,
   authenticatedUser,
   connectorId,
+  dataClient,
   duration,
   end,
   eventLogger,
+  eventLogIndex,
   executionUuid,
   loadingMessage,
   message,
@@ -39,6 +42,8 @@ export const writeAttackDiscoveryEvent = ({
     | 'generation-dismissed';
   /** The number of alerts sent as context to the LLM for the generation */
   alertsContextCount?: number;
+  /** This client is used to wait for an event log refresh */
+  dataClient: AttackDiscoveryDataClient | null;
   /** Feature flag */
   attackDiscoveryAlertsEnabled: boolean;
   /** The authenticated user generating Attack discoveries */
@@ -51,6 +56,8 @@ export const writeAttackDiscoveryEvent = ({
   end?: Date;
   /** Event log writer */
   eventLogger: IEventLogger;
+  /** Event log index (to refresh) */
+  eventLogIndex: string;
   /** The unique identifier (kibana.alert.rule.execution.uuid) for the generation */
   executionUuid: string;
   /** The loading message (kibana.alert.rule.execution.status) logged for the generation */
@@ -131,7 +138,10 @@ export const writeAttackDiscoveryEvent = ({
       },
     };
 
-    // console.log('--> logging event', JSON.stringify(attackDiscoveryEvent, null, 2));
-    eventLogger.logEvent(attackDiscoveryEvent);
+    try {
+      eventLogger.logEvent(attackDiscoveryEvent);
+    } finally {
+      await dataClient?.refreshEventLogIndex(eventLogIndex);
+    }
   }
 };

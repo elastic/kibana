@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
 import type {
   BootstrapPrebuiltRulesResponse,
   PackageInstallStatus,
@@ -32,6 +33,7 @@ export const bootstrapPrebuiltRulesHandler = async (
     const ctx = await context.resolve(['securitySolution', 'alerting', 'core']);
     const securityContext = ctx.securitySolution;
     const config = securityContext.getConfig();
+    const securityAIPromptsEnabled = config.experimentalFeatures.securityAIPromptsEnabled;
 
     const savedObjectsClient = ctx.core.savedObjects.client;
     const detectionRulesClient = securityContext.getDetectionRulesClient();
@@ -47,7 +49,7 @@ export const bootstrapPrebuiltRulesHandler = async (
     const packageResults: PackageInstallStatus[] = [];
 
     // Install packages sequentially to avoid high memory usage
-    const prebuiltRulesResult = await installPrebuiltRulesPackage(config, securityContext);
+    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext);
     packageResults.push({
       name: prebuiltRulesResult.package.name,
       version: prebuiltRulesResult.package.version,
@@ -69,6 +71,18 @@ export const bootstrapPrebuiltRulesHandler = async (
         name: endpointResult.package.name,
         version: endpointResult.package.version,
         status: endpointResult.status,
+      });
+    }
+
+    const securityAiPromptsResult = securityAIPromptsEnabled
+      ? await installSecurityAiPromptsPackage(config, securityContext)
+      : null;
+
+    if (securityAiPromptsResult !== null) {
+      packageResults.push({
+        name: securityAiPromptsResult.package.name,
+        version: securityAiPromptsResult.package.version,
+        status: securityAiPromptsResult.status,
       });
     }
 

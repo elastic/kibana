@@ -241,7 +241,7 @@
             "label": "getAll",
             "description": [],
             "signature": [
-              "(size?: number) => Promise<",
+              "(size?: number, sort?: string | undefined) => Promise<",
               "TransportResult",
               "<",
               "SearchResponse",
@@ -267,6 +267,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.getAll.$2",
+                "type": "string",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

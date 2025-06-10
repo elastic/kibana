@@ -15,6 +15,8 @@ import {
   createInferenceRequestError,
   type ToolOptions,
   ChatCompleteOptions,
+  getConnectorModel,
+  getConnectorProvider,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getInferenceAdapter } from './adapters';
@@ -26,6 +28,7 @@ import {
   retryWithExponentialBackoff,
   getRetryFilter,
 } from './utils';
+import { withChatCompleteSpan } from '../tracing/with_chat_complete_span';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -57,7 +60,8 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
       return await getInferenceExecutor({ connectorId, request, actions });
     }).pipe(
       switchMap((executor) => {
-        const connectorType = executor.getConnector().type;
+        const connector = executor.getConnector();
+        const connectorType = connector.type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
         if (!inferenceAdapter) {
@@ -81,23 +85,36 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           })
         );
 
-        return inferenceAdapter.chatComplete({
-          system,
-          executor,
-          messages,
-          toolChoice,
-          tools,
-          temperature,
-          logger,
-          functionCalling,
-          modelName,
-          abortSignal,
-          metadata,
-        });
-      }),
-      chunksIntoMessage({
-        toolOptions: { toolChoice, tools },
-        logger,
+        return withChatCompleteSpan(
+          {
+            system,
+            messages,
+            model: getConnectorModel(connector),
+            provider: getConnectorProvider(connector),
+          },
+          () => {
+            return inferenceAdapter
+              .chatComplete({
+                system,
+                executor,
+                messages,
+                toolChoice,
+                tools,
+                temperature,
+                logger,
+                functionCalling,
+                modelName,
+                abortSignal,
+                metadata,
+              })
+              .pipe(
+                chunksIntoMessage({
+                  toolOptions: { toolChoice, tools },
+                  logger,
+                })
+              );
+          }
+        );
       }),
       retryWithExponentialBackoff({
         maxRetry: maxRetries,

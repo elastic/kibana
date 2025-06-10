@@ -32,6 +32,7 @@ import type {
   PublishesSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
+  SearchEmbeddableSerializedState,
   SearchEmbeddableStateManager,
 } from './types';
 
@@ -74,10 +75,11 @@ export const initializeSearchEmbeddableApi = async (
 ): Promise<{
   api: PublishesSavedSearch & PublishesWritableDataViews & Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
+  anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
+  reinitializeState: (lastSaved?: SearchEmbeddableSerializedState) => void;
 }> => {
-  const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
     discoverServices.data,
@@ -197,38 +199,30 @@ export const initializeSearchEmbeddableApi = async (
       canEditUnifiedSearch,
     },
     stateManager,
+    anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
     comparators: {
-      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
-      columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
-      grid: [grid$, (value) => grid$.next(value), (a, b) => deepEqual(a, b)],
-      sampleSize: [
-        sampleSize$,
-        (value) => sampleSize$.next(value),
-        (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
-      ],
-      rowsPerPage: [
-        rowsPerPage$,
-        (value) => rowsPerPage$.next(value),
-        (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
-      ],
-      rowHeight: [
-        rowHeight$,
-        (value) => rowHeight$.next(value),
-        (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
-      ],
-      headerRowHeight: [
-        headerRowHeight$,
-        (value) => headerRowHeight$.next(value),
-        (a, b) => (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
-      ],
-
-      /** The following can't currently be changed from the dashboard */
-      serializedSearchSource: [
-        serializedSearchSource$,
-        (value) => serializedSearchSource$.next(value),
-      ],
-      viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
-      density: [density$, (value) => density$.next(value)],
+      sort: (a, b) => deepEqual(a ?? [], b ?? []),
+      columns: 'deepEquality',
+      grid: (a, b) => deepEqual(a ?? {}, b ?? {}),
+      sampleSize: (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
+      rowsPerPage: (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
+      rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
+      headerRowHeight: (a, b) =>
+        (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
+      serializedSearchSource: 'referenceEquality',
+      viewMode: 'referenceEquality',
+      density: 'referenceEquality',
+    },
+    reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => {
+      sort$.next(lastSaved?.sort);
+      columns$.next(lastSaved?.columns);
+      grid$.next(lastSaved?.grid);
+      sampleSize$.next(lastSaved?.sampleSize);
+      rowsPerPage$.next(lastSaved?.rowsPerPage);
+      rowHeight$.next(lastSaved?.rowHeight);
+      headerRowHeight$.next(lastSaved?.headerRowHeight);
+      savedSearchViewMode$.next(lastSaved?.viewMode);
+      density$.next(lastSaved?.density);
     },
   };
 };

@@ -150,125 +150,134 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
     ],
     footer: [
       {
-        id: 'gettingStarted',
-        type: 'navItem',
-        title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-          defaultMessage: 'Getting Started',
-        }),
-        link: 'serverlessElasticsearch',
-        icon: 'launch',
-      },
-      {
         type: 'navGroup',
-        id: 'project_settings_project_nav',
-        title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
-          defaultMessage: 'Project settings',
-        }),
-        icon: 'gear',
-        breadcrumbStatus: 'hidden',
+        id: 'search_project_nav_footer',
         children: [
           {
-            link: 'management:trained_models',
-            title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
-              defaultMessage: 'Trained Models',
+            id: 'gettingStarted',
+            title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+              defaultMessage: 'Getting Started',
             }),
+            link: 'serverlessElasticsearch',
+            icon: 'launch',
           },
           {
-            id: 'management',
-            title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
-              defaultMessage: 'Management',
+            id: 'project_settings_project_nav',
+            title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
+              defaultMessage: 'Project settings',
             }),
+            icon: 'gear',
+            breadcrumbStatus: 'hidden',
+            renderAs: 'accordion',
             spaceBefore: null,
-            renderAs: 'panelOpener',
             children: [
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.data', {
-                  defaultMessage: 'Data',
+                link: 'management:trained_models',
+                title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
+                  defaultMessage: 'Trained Models',
                 }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:index_management', breadcrumbStatus: 'hidden' },
-                  { link: 'management:transform', breadcrumbStatus: 'hidden' },
-                  { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
-                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
-                  { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
-                  { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
-                  { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-                  { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
-                ],
               },
               {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.access', {
-                  defaultMessage: 'Access',
+                id: 'management',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
+                  defaultMessage: 'Management',
                 }),
-                breadcrumbStatus: 'hidden',
+                spaceBefore: null,
+                renderAs: 'panelOpener',
                 children: [
-                  { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-                  { link: 'management:roles', breadcrumbStatus: 'hidden' },
                   {
-                    cloudLink: 'userAndRoles',
-                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.access.userAndRoles', {
-                      defaultMessage: 'Manage Organization Members',
+                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.data', {
+                      defaultMessage: 'Data',
                     }),
-                  },
-                ],
-              },
-              {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.alertsAndInsights', {
-                  defaultMessage: 'Alerts and insights',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
-                  { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
-                ],
-              },
-              {
-                title: 'Machine Learning',
-                children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
-              },
-              {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
-                  defaultMessage: 'Content',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-                  { link: 'management:objects', breadcrumbStatus: 'hidden' },
-                  { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
-                  { link: 'management:reporting', breadcrumbStatus: 'hidden' },
-                  { link: 'management:tags', breadcrumbStatus: 'hidden' },
-                ],
-              },
-              {
-                title: i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
-                  defaultMessage: 'Other',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                  {
-                    link: 'management:observabilityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
-                    title: i18n.translate(
-                      'xpack.serverlessSearch.nav.mngt.other.aiAssistantSettings',
-                      { defaultMessage: 'AI Assistant Settings' }
-                    ),
+                    children: [
+                      { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+                      { link: 'management:transform', breadcrumbStatus: 'hidden' },
+                      { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+                      { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
+                      { link: 'management:jobsListLink', breadcrumbStatus: 'hidden' },
+                      { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+                      { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+                      { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.access', {
+                      defaultMessage: 'Access',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+                      { link: 'management:roles', breadcrumbStatus: 'hidden' },
+                      {
+                        cloudLink: 'userAndRoles',
+                        title: i18n.translate(
+                          'xpack.serverlessSearch.nav.mngt.access.userAndRoles',
+                          {
+                            defaultMessage: 'Manage Organization Members',
+                          }
+                        ),
+                      },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.alertsAndInsights', {
+                      defaultMessage: 'Alerts and insights',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
+                      { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: 'Machine Learning',
+                    children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
+                      defaultMessage: 'Content',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                      { link: 'management:objects', breadcrumbStatus: 'hidden' },
+                      { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
+                      { link: 'management:reporting', breadcrumbStatus: 'hidden' },
+                      { link: 'management:tags', breadcrumbStatus: 'hidden' },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
+                      defaultMessage: 'Other',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                    children: [
+                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                        title: i18n.translate(
+                          'xpack.serverlessSearch.nav.mngt.other.aiAssistantSettings',
+                          { defaultMessage: 'AI Assistant Settings' }
+                        ),
+                      },
+                    ],
                   },
                 ],
+              },
+              {
+                id: 'cloudLinkDeployment',
+                cloudLink: 'deployment',
+                title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                  defaultMessage: 'Performance',
+                }),
+              },
+              {
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
               },
             ],
-          },
-          {
-            id: 'cloudLinkDeployment',
-            cloudLink: 'deployment',
-            title: i18n.translate('xpack.serverlessSearch.nav.performance', {
-              defaultMessage: 'Performance',
-            }),
-          },
-          {
-            id: 'cloudLinkBilling',
-            cloudLink: 'billingAndSub',
           },
         ],
       },

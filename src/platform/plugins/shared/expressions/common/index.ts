@@ -93,6 +93,7 @@ export {
   isDatatable,
   ExpressionType,
   PointSeriesColumnNames,
+  DimensionType,
 } from './expression_types';
 export type {
   AnyExpressionTypeDefinition,

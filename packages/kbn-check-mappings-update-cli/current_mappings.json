@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -970,6 +981,10 @@
             "type": "integer"
           }
         }
+      },
+      "sections": {
+        "dynamic": false,
+        "properties": {}
       },
       "timeFrom": {
         "doc_values": false,
@@ -2473,6 +2488,27 @@
       }
     }
   },
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "intercept_trigger_record": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
+        "type": "text"
+      }
+    }
+  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}
@@ -3068,6 +3104,19 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
   },
   "security-ai-prompt": {
     "dynamic": false,

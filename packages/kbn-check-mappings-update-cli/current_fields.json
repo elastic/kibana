@@ -21,6 +21,9 @@
     "actions.actionTypeId",
     "actions.group",
     "alertTypeId",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "consumer",
     "createdAt",
     "createdBy",
@@ -282,6 +285,7 @@
     "refreshInterval.pause",
     "refreshInterval.section",
     "refreshInterval.value",
+    "sections",
     "timeFrom",
     "timeRestore",
     "timeTo",
@@ -743,6 +747,13 @@
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
+  "intercept_interaction_record": [],
+  "intercept_trigger_record": [
+    "firstRegisteredAt",
+    "installedOn",
+    "recurrent",
+    "triggerAfter"
+  ],
   "inventory-view": [],
   "kql-telemetry": [],
   "legacy-url-alias": [
@@ -927,6 +938,9 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
   "security-ai-prompt": [
     "description",
     "model",

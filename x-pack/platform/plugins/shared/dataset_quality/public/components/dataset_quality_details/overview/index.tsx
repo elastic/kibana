@@ -7,7 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
@@ -17,7 +18,13 @@ const Summary = dynamic(() => import('./summary'));
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview() {
-  const { dataStream, isNonAggregatable, updateTimeRange } = useDatasetQualityDetailsState();
+  const {
+    dataStream,
+    isNonAggregatable,
+    canUserReadFailureStore,
+    updateTimeRange,
+    loadingState: { dataStreamSettingsLoading },
+  } = useDatasetQualityDetailsState();
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
   const handleRefresh = useCallback(
@@ -32,6 +39,16 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
+      {!dataStreamSettingsLoading && !canUserReadFailureStore && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={noAccessToFailureStoreWarningDescription}
+            color="warning"
+            iconType="warning"
+          />
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      )}
       <Summary />
       <EuiSpacer size="m" />
       <DocumentTrends lastReloadTime={lastReloadTime} />

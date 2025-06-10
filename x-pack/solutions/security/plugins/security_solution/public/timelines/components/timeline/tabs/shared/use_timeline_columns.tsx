@@ -17,12 +17,10 @@ import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  let { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
+  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
-  if (newDataViewPickerEnabled) {
-    browserFields = experimentalBrowserFields;
-  }
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const localColumns = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 

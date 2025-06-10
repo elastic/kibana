@@ -27,6 +27,7 @@ interface Props {
   isLoading?: boolean;
   lastUpdated: Date | null;
   onToggleShowAnonymized: () => void;
+  refetchFindAttackDiscoveries?: () => void;
   selectedAttackDiscoveries: Record<string, boolean>;
   selectedConnectorAttackDiscoveries: AttackDiscoveryAlert[];
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
@@ -39,6 +40,7 @@ const SummaryComponent: React.FC<Props> = ({
   isLoading = false,
   lastUpdated,
   onToggleShowAnonymized,
+  refetchFindAttackDiscoveries,
   selectedAttackDiscoveries,
   selectedConnectorAttackDiscoveries,
   setSelectedAttackDiscoveries,
@@ -66,6 +68,7 @@ const SummaryComponent: React.FC<Props> = ({
 
           <EuiFlexItem grow={false}>
             <SelectedActions
+              refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
               selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
               selectedAttackDiscoveries={selectedAttackDiscoveries}
               setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}

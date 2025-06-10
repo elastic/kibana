@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
+import { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
@@ -285,7 +285,7 @@ function generateSearchQuery({
   dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
-}): MsearchMultisearchBody {
+}): SearchSearchRequestBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
 

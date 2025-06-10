@@ -81,6 +81,7 @@ export const findAttackDiscoveriesRoute = (
           const result = await dataClient.findAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
             findAttackDiscoveryAlertsParams: {
+              alertIds: query.alert_ids,
               ids: query.ids,
               search: query.search,
               shared: query.shared,

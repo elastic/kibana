@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
-export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<undefined>) {
+export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const scrollToBottom$ = new Subject<void>();
   let scrollPosition: number | undefined;
 
   function setScrollToPanelId(id: string | undefined) {
@@ -44,7 +45,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = highlightPanelId$.value;
 
       if (id && panelRef) {
-        untilEmbeddableLoaded(id).then(() => {
+        untilLoaded(id).then(() => {
           panelRef.classList.add('dshDashboardGrid__item--highlighted');
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
@@ -59,18 +60,22 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = scrollToPanelId$.value;
       if (!id) return;
 
-      untilEmbeddableLoaded(id).then(() => {
+      untilLoaded(id).then(() => {
         setScrollToPanelId(undefined);
         if (scrollPosition !== undefined) {
-          window.scrollTo({ top: scrollPosition });
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
           scrollPosition = undefined;
         } else {
-          panelRef.scrollIntoView({ block: 'start' });
+          panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
         }
       });
     },
     scrollToTop: () => {
-      window.scroll(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    scrollToBottom$,
+    scrollToBottom: () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);

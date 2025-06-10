@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writer } from 'mustache';
+import Mustache, { type RenderOptions } from 'mustache';
 import { getServices } from '../../kibana_services';
 
 const TEMPLATE_TAGS: [string, string] = ['{', '}'];
@@ -33,22 +33,7 @@ interface TemplateContext {
   };
 }
 
-// Extend the MustacheWriter class to include the escapedValue method
-class CustomMustacheWriter extends Writer {
-  escapedValue(
-    token: Array<string | number>,
-    context: { lookup: (name: string | number) => string }
-  ) {
-    const value = context.lookup(token[1]);
-    if (value != null) {
-      return value;
-    }
-  }
-}
-
-// Can not use 'Mustache' since its a global object
-const mustacheWriter = new CustomMustacheWriter();
-
+// replace template strings without the default mustache escaping
 export function replaceTemplateStrings(text: string) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
   const variables: TemplateContext = {
@@ -75,6 +60,9 @@ export function replaceTemplateStrings(text: string) {
       },
     },
   };
-  mustacheWriter.parse(text, TEMPLATE_TAGS);
-  return mustacheWriter.render(text, variables, {});
+  const config: RenderOptions = {
+    tags: TEMPLATE_TAGS,
+    escape: (s: string) => s,
+  };
+  return Mustache.render(text, variables, undefined, config);
 }

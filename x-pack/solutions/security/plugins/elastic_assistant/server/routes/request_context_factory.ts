@@ -83,6 +83,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+    const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
 
     return {
       core: coreContext,
@@ -111,7 +112,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       savedObjectsClient,
       telemetry: core.analytics,
 
-      // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
+      // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
         const currentUser = await getCurrentUser();
@@ -127,7 +128,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           licensing: context.licensing,
           currentUser,
-          modelIdOverride: params?.modelIdOverride,
+          elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           // uses internal user to interact with ML API
@@ -151,6 +152,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          actionsClient,
+          logger: this.logger,
           rulesClient,
         });
       }),

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MonitorOverviewState } from '../../state';
+import {
+  DEFAULT_OVERVIEW_VIEW,
+  MonitorOverviewState,
+  OverviewView,
+  isOverviewView,
+} from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { CLIENT_DEFAULTS, UseLogicalAndField } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
@@ -36,6 +41,7 @@ export interface SyntheticsUrlParams {
   cloneId?: string;
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
+  view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -93,6 +99,7 @@ export const getSupportedUrlParams = (params: {
     packagePolicyId,
     spaceId,
     useLogicalAndFor,
+    view,
   } = filteredParams;
 
   return {
@@ -126,6 +133,7 @@ export const getSupportedUrlParams = (params: {
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
+    view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
   };
 };
 

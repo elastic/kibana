@@ -20,7 +20,7 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
-import { AGENTS_INDEX } from '../../constants';
+import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
   isESClientError,
@@ -89,6 +89,7 @@ export type GetAgentsOptions =
     }
   | {
       kuery: string;
+      showAgentless?: boolean;
       showInactive?: boolean;
       perPage?: number;
     };
@@ -107,6 +108,7 @@ export async function getAgents(
     agents = (
       await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
+        showAgentless: options.showAgentless,
         showInactive: options.showInactive ?? false,
       })
     ).agents;
@@ -185,7 +187,9 @@ export async function getAgentTags(
       },
     });
     const buckets = result.aggregations?.tags.buckets;
-    return buckets?.map((bucket) => bucket.key) ?? [];
+    return (buckets?.map((bucket) => bucket.key) ?? []).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase())
+    );
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       return [];
@@ -198,6 +202,7 @@ export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
+    showAgentless?: boolean;
     showInactive: boolean;
     spaceId?: string;
     getStatusSummary?: boolean;
@@ -223,6 +228,7 @@ export async function getAgentsByKuery(
     sortField = options.sortField ?? 'enrolled_at',
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
+    showAgentless = true,
     showInactive = false,
     getStatusSummary = false,
     showUpgradeable,
@@ -239,9 +245,26 @@ export async function getAgentsByKuery(
     filters.push(kuery);
   }
 
+  // Hides agents enrolled in agentless policies by excluding the first 1000 agentless policy IDs
+  // from the search. This limitation is to avoid hitting the `max_clause_count` limit.
+  // In the future, we should hopefully be able to filter agentless agents using metadata:
+  // https://github.com/elastic/elastic-agent/issues/7946
+  if (showAgentless === false) {
+    const agentlessPolicies = await agentPolicyService.list(soClient, {
+      perPage: 1000,
+      kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+    });
+    if (agentlessPolicies.items.length > 0) {
+      filters.push(
+        `NOT policy_id: (${agentlessPolicies.items.map((policy) => `"${policy.id}"`).join(' or ')})`
+      );
+    }
+  }
+
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+
   if (!includeUnenrolled(kuery)) {
     filters.push(ENROLLED_AGENT_CONDITION);
   }
@@ -384,6 +407,7 @@ export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showAgentless?: boolean;
     showInactive: boolean;
   }
 ): Promise<{
@@ -491,23 +515,28 @@ export const getByIds = async (
   const agentsHits = await getAgentsById(esClient, soClient, agentIds);
   const currentNamespace = getCurrentNamespace(soClient);
   const response: Agent[] = [];
+  const throwNotFoundError = (agentId: string): never => {
+    throw new AgentNotFoundError(`Agent ${agentId} not found`, { agentId });
+  };
 
   for (const agentHit of agentsHits) {
-    let throwError = false;
-
-    if ('notFound' in agentHit && !options?.ignoreMissing) {
-      throwError = true;
-    } else if ((await isAgentInNamespace(agentHit as Agent, currentNamespace)) !== true) {
-      throwError = true;
+    const wasFound = !('notFound' in agentHit);
+    if (!wasFound) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
 
-    if (throwError) {
-      throw new AgentNotFoundError(`Agent ${agentHit.id} not found`, { agentId: agentHit.id });
+    const isAccessible = await isAgentInNamespace(agentHit as Agent, currentNamespace);
+    if (!isAccessible) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
 
-    if (!(`notFound` in agentHit)) {
-      response.push(agentHit);
-    }
+    response.push(agentHit);
   }
 
   return response;

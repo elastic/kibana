@@ -11,6 +11,9 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
+import { RULE_TAGS_FILTER_SUBJ } from '../constants';
 import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER,
@@ -23,7 +26,8 @@ import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
-  isDisabled = false,
+  isDisabled: isDisabledProp = false,
+  error,
 }) => {
   const {
     ruleTypeIds,
@@ -33,7 +37,11 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
     },
   } = useAlertsFiltersFormContext();
 
-  const { tags, isLoading, isError } = useGetRuleTagsQuery({
+  const {
+    tags,
+    isLoading,
+    isError: isErrorLoadingRuleTags,
+  } = useGetRuleTagsQuery({
     enabled: true,
     perPage: 10000,
     // Only search tags from allowed rule type ids
@@ -62,19 +70,22 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
     [onChange]
   );
 
+  const isInvalid = Boolean(error) || isErrorLoadingRuleTags;
+  const isDisabled = isDisabledProp || isErrorLoadingRuleTags || !options.length;
+
   return (
     <EuiFormRow
       label={RULE_TAGS_FILTER_LABEL}
-      isDisabled={isDisabled || isError}
-      isInvalid={isError}
-      error={RULE_TAGS_LOAD_ERROR_MESSAGE}
+      isDisabled={isDisabled}
+      isInvalid={isInvalid}
+      error={error ?? RULE_TAGS_LOAD_ERROR_MESSAGE}
       fullWidth
     >
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || isError || !options.length}
-        isInvalid={isError}
+        isDisabled={isDisabled}
+        isInvalid={isInvalid}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onSelectedOptionsChange}
@@ -82,14 +93,28 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
           !options.length ? RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TAGS_FILTER_PLACEHOLDER
         }
         fullWidth
+        compressed
+        data-test-subj={RULE_TAGS_FILTER_SUBJ}
       />
     </EuiFormRow>
   );
 };
 
-export const filterMetadata = {
+const isEmpty = (value?: string[]) => !Boolean(value?.length);
+
+export const filterMetadata: AlertsFilterMetadata<string[]> = {
   id: 'ruleTags',
   displayName: RULE_TAGS_FILTER_LABEL,
   component: AlertsFilterByRuleTags,
-  isEmpty: (value?: string[]) => !Boolean(value?.length),
-} as const satisfies AlertsFilterMetadata<string[]>;
+  isEmpty,
+  toKql: (value?: string[]) => {
+    if (!value || isEmpty(value)) {
+      return null;
+    }
+    return toKqlExpression(
+      value.length === 1
+        ? nodeBuilder.is(ALERT_RULE_TAGS, value[0])
+        : nodeBuilder.or(value.map((tag) => nodeBuilder.is(ALERT_RULE_TAGS, tag)))
+    );
+  },
+};

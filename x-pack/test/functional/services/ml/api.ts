@@ -1591,6 +1591,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
+    async startTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Starting trained model deployment with id "${modelId}"`);
+      const url = `/_ml/trained_models/${modelId}/deployment/_start`;
+
+      const { body, status } = await esSupertest.post(url);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment started');
+    },
+
     async stopTrainedModelDeploymentES(deploymentId: string, force: boolean = false) {
       log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
       const url = `/_ml/trained_models/${deploymentId}/deployment/_stop${
@@ -1662,7 +1672,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     getCompressedModelDefinition(modelType: ModelType) {
       return fs.readFileSync(
         require.resolve(
-          `./resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
+          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
         ),
         'utf-8'
       );
@@ -1670,7 +1680,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     getTrainedModelConfig(modelName: SupportedTrainedModelNamesType) {
       const configFileContent = fs.readFileSync(
-        require.resolve(`./resources/trained_model_definitions/${modelName}/config.json`),
+        require.resolve(
+          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/config.json`
+        ),
         'utf-8'
       );
       return JSON.parse(configFileContent) as PutTrainedModelConfig;
@@ -1678,7 +1690,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     getTrainedModelVocabulary(modelName: SupportedTrainedModelNamesType) {
       const vocabularyFileContent = fs.readFileSync(
-        require.resolve(`./resources/trained_model_definitions/${modelName}/vocabulary.json`),
+        require.resolve(
+          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/vocabulary.json`
+        ),
         'utf-8'
       );
       return JSON.parse(vocabularyFileContent) as TrainedModelVocabulary;
@@ -1686,7 +1700,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     getTrainedModelDefinitionPath(modelName: SupportedTrainedModelNamesType) {
       return require.resolve(
-        `./resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
+        `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
       );
     },
 

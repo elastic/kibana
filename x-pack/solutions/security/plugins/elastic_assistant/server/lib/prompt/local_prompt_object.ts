@@ -20,7 +20,6 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
   GEMINI_USER_PROMPT,
-  STRUCTURED_SYSTEM_PROMPT,
   BEDROCK_CHAT_TITLE,
   GEMINI_CHAT_TITLE,
   DEFAULT_CHAT_TITLE,
@@ -94,15 +93,6 @@ export const localPrompts: Prompt[] = [
     provider: 'gemini',
     prompt: {
       default: GEMINI_SYSTEM_PROMPT,
-    },
-  },
-  {
-    promptId: promptDictionary.systemPrompt,
-    promptGroupId: promptGroupId.aiAssistant,
-    provider: 'openai',
-    model: 'oss',
-    prompt: {
-      default: STRUCTURED_SYSTEM_PROMPT,
     },
   },
   {

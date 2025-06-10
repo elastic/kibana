@@ -141,6 +141,7 @@ const CurrentComponent: React.FC<Props> = ({
                   attackDiscovery={attackDiscovery}
                   isSelected={false}
                   initialIsOpen={getInitialIsOpen(i)}
+                  setSelectedAttackDiscoveries={noop}
                   showAnonymized={showAnonymized}
                   replacements={selectedConnectorReplacements}
                 />

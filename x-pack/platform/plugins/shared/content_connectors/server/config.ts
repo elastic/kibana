@@ -12,11 +12,17 @@ export * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    ui: true,
+  },
   schema: configSchema,
 };
 

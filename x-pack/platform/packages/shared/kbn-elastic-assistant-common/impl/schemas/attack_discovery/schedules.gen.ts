@@ -71,7 +71,7 @@ export const IntervalSchedule = z.object({
 });
 
 /**
- * Optionally groups actions by use cases. Use `default` for alert notifications.
+ * Groups actions by use cases. Use `default` for alert notifications.
  */
 export type AttackDiscoveryScheduleActionGroup = z.infer<typeof AttackDiscoveryScheduleActionGroup>;
 export const AttackDiscoveryScheduleActionGroup = z.string();
@@ -140,7 +140,7 @@ export const AttackDiscoveryScheduleAction = z.object({
    * The action type used for sending notifications.
    */
   actionTypeId: z.string(),
-  group: AttackDiscoveryScheduleActionGroup,
+  group: AttackDiscoveryScheduleActionGroup.optional(),
   id: AttackDiscoveryScheduleActionId,
   params: AttackDiscoveryScheduleActionParams,
   uuid: NonEmptyString.optional(),

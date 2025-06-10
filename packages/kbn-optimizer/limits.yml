@@ -10,7 +10,7 @@ pageLoadAssetSize:
   banners: 17946
   canvas: 29355
   cases: 180037
-  charts: 55000
+  charts: 60000
   cloud: 21076
   cloudDataMigration: 19170
   cloudExperiments: 109746
@@ -82,6 +82,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 18000
   interactiveSetup: 80000
+  intercepts: 26158
   inventory: 27430
   kibanaOverview: 56279
   kibanaReact: 74422
@@ -90,7 +91,7 @@ pageLoadAssetSize:
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 8000
+  links: 9000
   lists: 22900
   logsDataAccess: 16759
   logsShared: 281060
@@ -112,11 +113,13 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 111036
+  onechat: 25000
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 11550
   presentationUtil: 9000
   productDocBase: 22500
+  productIntercept: 23846
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600
@@ -161,14 +164,12 @@ pageLoadAssetSize:
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
-  threatIntelligence: 44299
   timelines: 327300
   transform: 41007
   triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
-  unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000

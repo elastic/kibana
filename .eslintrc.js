@@ -257,6 +257,10 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use react-use/lib/{method} instead.',
   },
   {
+    name: 'react-use/lib',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
     name: 'react-router-dom',
     importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
@@ -384,6 +388,19 @@ const RESTRICTED_IMPORTS = [
   {
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
+  },
+];
+
+/**
+ * Imports that are deprecated and should be phased out
+ * They are not restricted until fully removed,
+ * but will log a warning
+ **/
+const DEPRECATED_IMPORTS = [
+  {
+    name: 'enzyme',
+    message:
+      'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
   },
 ];
 
@@ -759,9 +776,13 @@ module.exports = {
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/*config.*ts',
+        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
+        'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
-        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
@@ -910,6 +931,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -2081,7 +2103,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',

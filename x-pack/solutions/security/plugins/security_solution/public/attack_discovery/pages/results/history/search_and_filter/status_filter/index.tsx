@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import * as i18n from '../translations';
+import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
 interface Props {
   isLoading?: boolean;
@@ -29,6 +30,7 @@ const StatusFilterComponent: React.FC<Props> = ({
   setStatusItems,
   statusItems,
 }) => {
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onFilterButtonClick = useCallback(() => {
@@ -62,8 +64,11 @@ const StatusFilterComponent: React.FC<Props> = ({
   );
 
   const onSelectableChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => setStatusItems(newOptions),
-    [setStatusItems]
+    (newOptions: EuiSelectableOption[]) => {
+      setStatusItems(newOptions);
+      invalidateFindAttackDiscoveries();
+    },
+    [invalidateFindAttackDiscoveries, setStatusItems]
   );
 
   return (
