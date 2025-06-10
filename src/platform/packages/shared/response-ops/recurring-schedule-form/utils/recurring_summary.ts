@@ -38,8 +38,7 @@ export const recurringSummary = (
       schedule = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
     }
 
-    const frequency =
-      schedule.customFrequency ?? (schedule.frequency as RecurrenceFrequency);
+    const frequency = schedule.customFrequency ?? (schedule.frequency as RecurrenceFrequency);
     const interval = schedule.interval || 1;
     const frequencySummary = RECURRING_SCHEDULE_FORM_FREQUENCY_SUMMARY(interval)[frequency];
 
@@ -96,11 +95,10 @@ export const recurringSummary = (
       : null;
 
     const every = RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY(
-        !dailyWithWeekdays ? frequencySummary : null,
-        onSummary,
-        untilSummary
-
-      ).trim();
+      !dailyWithWeekdays ? frequencySummary : null,
+      onSummary,
+      untilSummary
+    ).trim();
 
     return every;
   }
