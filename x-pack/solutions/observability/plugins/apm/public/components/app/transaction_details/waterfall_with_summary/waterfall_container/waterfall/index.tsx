@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -36,6 +37,7 @@ interface Props {
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  onErrorClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
@@ -76,6 +78,7 @@ export function Waterfall({
   waterfallItemId,
   showCriticalPath,
   onNodeClick,
+  onErrorClick,
   displayLimit,
   isEmbeddable,
   scrollElement,
@@ -179,6 +182,7 @@ export function Waterfall({
             waterfall={waterfall}
             timelineMargins={timelineMargins}
             onClickWaterfallItem={onNodeClick}
+            onClickWaterfallError={onErrorClick}
             showCriticalPath={showCriticalPath}
             maxLevelOpen={
               waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal

@@ -22,6 +22,7 @@ export function TraceWaterfallEmbeddable({
   displayLimit,
   scrollElement,
   onNodeClick,
+  onErrorClick,
 }: ApmTraceWaterfallEmbeddableEntryProps) {
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
@@ -47,6 +48,7 @@ export function TraceWaterfallEmbeddable({
           waterfall={waterfallFetchResult.waterfall}
           displayLimit={displayLimit}
           onNodeClick={(node) => onNodeClick?.(node.id)}
+          onErrorClick={onErrorClick}
           isEmbeddable
           scrollElement={scrollElement}
         />

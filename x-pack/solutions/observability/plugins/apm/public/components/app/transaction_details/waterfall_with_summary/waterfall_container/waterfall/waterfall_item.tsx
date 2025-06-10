@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -126,6 +127,7 @@ interface IWaterfallItemProps {
     color: string;
   }>;
   onClick?: (flyoutDetailTab: string) => unknown;
+  onErrorClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
   isEmbeddable?: boolean;
 }
 
@@ -228,6 +230,7 @@ export function WaterfallItem({
   errorCount,
   marginLeftLevel,
   onClick,
+  onErrorClick,
   segments,
   isEmbeddable = false,
 }: IWaterfallItemProps) {
@@ -300,7 +303,7 @@ export function WaterfallItem({
 
         <Duration item={item} />
         {isEmbeddable ? (
-          <EmbeddableErrorIcon errorCount={errorCount} />
+          <EmbeddableRelatedErrors item={item} errorCount={errorCount} onClick={onErrorClick} />
         ) : (
           <RelatedErrors item={item} errorCount={errorCount} />
         )}
@@ -320,12 +323,46 @@ export function WaterfallItem({
   );
 }
 
-function EmbeddableErrorIcon({ errorCount }: { errorCount: number }) {
-  const theme = useEuiTheme();
-  if (errorCount <= 0) {
-    return null;
+function EmbeddableRelatedErrors({
+  item,
+  errorCount,
+  onClick,
+}: {
+  item: IWaterfallSpanOrTransaction;
+  errorCount: number;
+  onClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  const viewRelatedErrorsLabel = i18n.translate(
+    'xpack.apm.waterfall.embeddableRelatedErrors.errorCount',
+    {
+      defaultMessage:
+        '{errorCount, plural, one {View related error} other {View # related errors}}',
+      values: { errorCount },
+    }
+  );
+
+  if (errorCount > 0) {
+    return (
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
+        onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
+          e.stopPropagation();
+          onClick?.({ traceId: item.doc.trace.id, docId: item.id });
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
+      >
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
+    );
   }
-  return <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />;
+
+  return <FailureBadge outcome={item.doc.event?.outcome} />;
 }
 
 function RelatedErrors({

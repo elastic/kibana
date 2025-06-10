@@ -20,6 +20,7 @@ import { WindowScroller, AutoSizer } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
+import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
@@ -38,6 +39,7 @@ interface AccordionWaterfallProps {
   waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  onClickWaterfallError?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
   showCriticalPath: boolean;
   maxLevelOpen: number;
   displayLimit?: number;
@@ -152,7 +154,15 @@ const VirtualRow = React.memo(
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const { euiTheme } = useEuiTheme();
-  const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
+  const {
+    duration,
+    waterfallItemId,
+    onClickWaterfallItem,
+    onClickWaterfallError,
+
+    timelineMargins,
+    node,
+  } = props;
   const {
     criticalPathSegmentsById,
     getErrorCount,
@@ -216,6 +226,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
               onClick={onWaterfallItemClick}
+              onErrorClick={onClickWaterfallError}
               segments={segments}
               isEmbeddable={isEmbeddable}
             />
