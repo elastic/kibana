@@ -27,6 +27,11 @@ import { usePrivilegedUserActivityParams, useStackByOptions, useToggleOptions } 
 import type { TableItemType } from './types';
 import { VisualizationToggleOptions } from './types';
 
+const PICK_VISUALIZATION_LEGEND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.pickVisualizationLegend',
+  { defaultMessage: 'Select a visualization to display' }
+);
+
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.title',
   { defaultMessage: 'Privileged user activity' }
@@ -92,7 +97,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
                   setToggleOption(id as VisualizationToggleOptions);
                   setSelectedStackByOption(defaultStackByOption);
                 }}
-                legend={'ABOUT_CONTROL_LEGEND'}
+                legend={PICK_VISUALIZATION_LEGEND}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
