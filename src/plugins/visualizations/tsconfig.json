@@ -73,7 +73,8 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": [
     "target/**/*",
