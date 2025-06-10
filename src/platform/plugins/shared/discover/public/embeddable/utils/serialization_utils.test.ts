@@ -17,12 +17,20 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import type { SearchEmbeddableSerializedState } from '../types';
 import { deserializeState, serializeState } from './serialization_utils';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mock-uuid'),
+}));
+
 describe('Serialization utils', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const uuid = 'mySearchEmbeddable';
 
   const mockedSavedSearchAttributes: SearchEmbeddableSerializedState['attributes'] = {
     kibanaSavedObjectMeta: {
-      searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+      searchSourceJSON: '{"indexRefName":"data-view-mock-uuid"}',
     },
     title: 'test1',
     sort: [['order_date', 'desc']],
@@ -34,7 +42,7 @@ describe('Serialization utils', () => {
     isTextBasedQuery: false,
     references: [
       {
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        name: 'data-view-mock-uuid',
         id: dataViewMock.id ?? 'test-id',
         type: 'index-pattern',
       },
@@ -50,7 +58,7 @@ describe('Serialization utils', () => {
         },
         references: [
           {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            name: 'data-view-mock-uuid',
             id: dataViewMock.id ?? 'test-id',
             type: 'index-pattern',
           },
