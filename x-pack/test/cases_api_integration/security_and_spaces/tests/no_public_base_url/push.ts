@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import type { RecordingServiceNowSimulator } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {

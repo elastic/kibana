@@ -16,8 +16,10 @@ import type {
   ActionTypeExecutorResult,
   FindActionResult,
 } from '@kbn/actions-plugin/server/types';
-import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import {
+  getServiceNowServer,
+  RecordingServiceNowSimulator,
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import type {
   Case,
   CaseConnector,

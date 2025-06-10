@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
