@@ -49,24 +49,29 @@ interface StartDeps {
   share?: SharePluginStart;
 }
 
+interface ConfigSchema {
+  accessControlEnabled?: boolean;
+}
+
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
-
+    const { accessControlEnabled } = this.initializerContext.config.get();
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
+        accessControlEnabled,
       })
     );
 
