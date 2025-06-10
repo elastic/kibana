@@ -24,31 +24,28 @@ export const createCompletionCommand = (
   command.prompt = prompt;
 
   const withCtx = ctx.WITH();
+  if (withCtx && withCtx.getText().toUpperCase() === 'WITH') {
+    const inferenceIdCtx = ctx._inferenceId;
+    const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
+    const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+    command.inferenceId = inferenceId;
 
-  const inferenceIdCtx = ctx._inferenceId;
-  const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+    const optionWith = Builder.option(
+      {
+        name: 'with',
+        args: [inferenceId],
+      },
+      withCtx && inferenceIdCtx
+        ? {
+            location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
+          }
+        : undefined
+    );
 
-  if (inferenceId.text.includes(EDITOR_MARKER)) {
-    inferenceId.incomplete = true;
+    optionWith.incomplete = withCtx && inferenceId.incomplete;
+
+    command.args.push(optionWith);
   }
-
-  const optionWith = Builder.option(
-    {
-      name: 'with',
-      args: [inferenceId],
-    },
-    withCtx && inferenceIdCtx
-      ? {
-          location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
-        }
-      : undefined
-  );
-
-  optionWith.incomplete = withCtx && inferenceId.incomplete;
-
-  command.args.push(optionWith);
-  command.inferenceId = inferenceId;
 
   if (ctx._targetField) {
     const targetField = createColumn(ctx._targetField);

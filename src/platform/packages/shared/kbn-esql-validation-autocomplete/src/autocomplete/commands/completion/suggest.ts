@@ -42,18 +42,20 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
       : CompletionPosition.AFTER_TARGET_ID;
   }
 
-  if (inferenceId.incomplete && /WITH\s*$/i.test(innerText)) {
-    return CompletionPosition.AFTER_WITH;
-  }
+  if (inferenceId) {
+    if (inferenceId.incomplete && /WITH\s*$/i.test(innerText)) {
+      return CompletionPosition.AFTER_WITH;
+    }
 
-  if (!inferenceId.incomplete) {
-    return CompletionPosition.AFTER_INFERENCE_ID;
+    if (!inferenceId.incomplete) {
+      return CompletionPosition.AFTER_INFERENCE_ID;
+    }
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
   const expressionType = getExpressionType(expressionRoot);
 
-  if (isExpressionComplete(expressionType, innerText) && inferenceId.incomplete) {
+  if (isExpressionComplete(expressionType, innerText)) {
     return CompletionPosition.AFTER_PROMPT;
   }
 

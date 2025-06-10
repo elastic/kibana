@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLCommandOption } from '../../types';
+import { ESQLCommandOption, ESQLSingleAstItem } from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {
@@ -211,6 +211,14 @@ describe('COMPLETION command', () => {
       const { errors } = EsqlQuery.fromSrc(text);
 
       expect(errors.length).toBe(1);
+    });
+
+    it('only adds WITH when it is completely present', () => {
+      const text = `FROM index | COMPLETION prompt WIT`;
+      const { ast } = EsqlQuery.fromSrc(text);
+
+      expect(ast.commands[1].args.length).toBe(1);
+      expect((ast.commands[1].args[0] as ESQLSingleAstItem).type).toBe('column');
     });
   });
 });
