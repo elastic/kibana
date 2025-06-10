@@ -11,11 +11,13 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  EmbeddableApiContext,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesDescription,
   PublishesFilters,
   PublishesQuery,
   PublishesDataViews,
@@ -23,7 +25,7 @@ import type {
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
-  PublishesSavedSearch,
+  PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -119,6 +121,17 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   HasDynamicActions &
   HasSupportedTriggers;
+
+export interface PublishesSavedSearch {
+  savedSearch$: PublishingSubject<SavedSearch>;
+}
+
+export const apiPublishesSavedSearch = (
+  api: EmbeddableApiContext['embeddable']
+): api is PublishesSavedSearch => {
+  const embeddable = api as PublishesSavedSearch;
+  return Boolean(embeddable.savedSearch$);
+};
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

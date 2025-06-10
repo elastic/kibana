@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import { apiPublishesSavedSearch, type SearchEmbeddableApi } from '@kbn/discover-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
   type EmbeddableApiContext,
@@ -17,7 +17,6 @@ import {
   apiCanAccessViewMode,
   apiPublishesQuery,
   apiPublishesFilters,
-  apiPublishesSavedSearch,
   apiHasType,
   apiIsOfType,
   getInheritedViewMode,

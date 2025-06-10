@@ -54,10 +54,6 @@ export {
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {
-  apiPublishesSavedSearch,
-  type PublishesSavedSearch,
-} from './interfaces/fetch/publishes_saved_search';
-export {
   apiHasAppContext,
   type EmbeddableAppContext,
   type HasAppContext,
