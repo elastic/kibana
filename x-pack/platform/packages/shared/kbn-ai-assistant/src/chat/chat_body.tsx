@@ -34,6 +34,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -44,6 +45,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -377,6 +379,15 @@ export function ChatBody({
     conversation.refresh();
   };
 
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
   const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
@@ -517,6 +528,7 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               ) : (
                 <ChatTimeline
@@ -543,6 +555,7 @@ export function ChatBody({
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               )}
             </EuiPanel>
@@ -673,6 +686,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
