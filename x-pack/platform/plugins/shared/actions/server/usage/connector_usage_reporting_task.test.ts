@@ -61,10 +61,12 @@ describe('ConnectorUsageReportingTask', () => {
     lastReportedUsageDate,
     projectId,
     attempts = 0,
+    enabled = true,
   }: {
     lastReportedUsageDate: Date;
     projectId?: string;
     attempts?: number;
+    enabled?: boolean;
   }) => {
     const timestamp = new Date(new Date().setMinutes(-15));
     const task = new ConnectorUsageReportingTask({
@@ -74,6 +76,7 @@ describe('ConnectorUsageReportingTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -117,6 +120,7 @@ describe('ConnectorUsageReportingTask', () => {
       core: createSetup(),
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -146,6 +150,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -179,6 +184,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -207,6 +213,7 @@ describe('ConnectorUsageReportingTask', () => {
       core,
       taskManager: mockTaskManagerSetup,
       config: {
+        enabled: true,
         url: 'usage-api',
         ca: {
           path: './ca.crt',
@@ -273,6 +280,32 @@ describe('ConnectorUsageReportingTask', () => {
     });
   });
 
+  it('returns the existing state and logs a warnin when the usage API is disabled', async () => {
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-id',
+      enabled: false,
+    });
+
+    const response = await taskRunner.run();
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Usage API is disabled, actions:connector_usage_reporting will be skipped'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
   it('runs the task', async () => {
     readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
@@ -305,7 +338,7 @@ describe('ConnectorUsageReportingTask', () => {
       },
     ];
 
-    expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api', report, {
+    expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api/api/v1/usage', report, {
       headers: { 'Content-Type': 'application/json' },
       timeout: 30000,
       httpsAgent: expect.any(Object),

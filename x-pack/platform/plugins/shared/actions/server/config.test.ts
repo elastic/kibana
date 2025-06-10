@@ -38,7 +38,8 @@ describe('config validation', () => {
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
         "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
+          "enabled": true,
+          "url": "https://usage-api.usage-api",
         },
       }
     `);
@@ -84,7 +85,8 @@ describe('config validation', () => {
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
         "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
+          "enabled": true,
+          "url": "https://usage-api.usage-api",
         },
       }
     `);
@@ -225,7 +227,8 @@ describe('config validation', () => {
           "verificationMode": "none",
         },
         "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
+          "enabled": true,
+          "url": "https://usage-api.usage-api",
         },
       }
     `);

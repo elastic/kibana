@@ -28,6 +28,7 @@ export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
 export const CONNECTOR_USAGE_TYPE = `connector_request_body_bytes`;
 export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`;
 export const MAX_PUSH_ATTEMPTS = 5;
+export const USAGE_API_PATH = '/api/v1/usage';
 
 export class ConnectorUsageReportingTask {
   private readonly logger: Logger;
@@ -35,6 +36,7 @@ export class ConnectorUsageReportingTask {
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
   private readonly usageApiUrl: string;
+  private readonly enabled: boolean = true;
 
   constructor({
     logger,
@@ -54,7 +56,8 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = config.url;
+    this.usageApiUrl = `${config.url}${USAGE_API_PATH}`;
+    this.enabled = config.enabled;
     const caCertificatePath = config.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
@@ -112,6 +115,15 @@ export class ConnectorUsageReportingTask {
 
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
+
+    if (!this.enabled) {
+      this.logger.warn(
+        `Usage API is disabled, ${CONNECTOR_USAGE_REPORTING_TASK_TYPE} will be skipped`
+      );
+      return {
+        state,
+      };
+    }
 
     if (!this.projectId) {
       this.logger.warn(
