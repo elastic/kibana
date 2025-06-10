@@ -7,9 +7,6 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { isEmpty } from 'lodash';
-import { useRouteMatch } from 'react-router-dom';
-import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../../common/constants';
 import {
   getMaintenanceWindowsAction,
   selectMaintenanceWindowsState,
@@ -19,17 +16,9 @@ export function useMaintenanceWindows() {
   const dispatch = useDispatch();
   const { isLoading, data } = useSelector(selectMaintenanceWindowsState);
 
-  // reload again on monitor add/edit pages even if data is already present
-
-  const isMonitorAddEditPage = useRouteMatch({
-    path: [MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE],
-  });
-
   useEffect(() => {
-    if (isEmpty(data) || isMonitorAddEditPage) {
-      dispatch(getMaintenanceWindowsAction.get());
-    }
-  }, [data, dispatch, isMonitorAddEditPage]);
+    dispatch(getMaintenanceWindowsAction.get());
+  }, [dispatch]);
 
   return {
     isLoading,
