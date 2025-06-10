@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { FIELD_TYPES, type FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
