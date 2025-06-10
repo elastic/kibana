@@ -546,7 +546,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
       // Act
       samlSessionManager.setSessionForRole(role, sessionInfo);
-      const cachedSessionInfo = samlSessionManager.getSessionForRole(role);
+      const cachedSessionInfo = samlSessionManager.getSessionInfoForRole(role);
 
       // Assert
       expect(cachedSessionInfo).toBeDefined();
