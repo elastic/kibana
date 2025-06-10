@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { packagePolicyService } from '../..';
+import * as packagePolicyModule from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { deleteESAsset, removeInstallation, cleanupAssets } from './remove';
@@ -40,6 +41,9 @@ jest.mock('../..', () => {
 jest.mock('../../audit_logging');
 
 jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
+jest
+  .spyOn(packagePolicyModule, 'getPackagePolicySavedObjectType')
+  .mockResolvedValue('fleet-package-policies');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;

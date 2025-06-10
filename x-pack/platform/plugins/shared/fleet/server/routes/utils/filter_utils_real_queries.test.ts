@@ -178,8 +178,8 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           astPath: 'arguments.0',
           error: null,
           isSavedObjectAttr: false,
-          key: 'ingest-package-policies.attributes.package.name',
-          type: 'ingest-package-policies',
+          key: 'fleet-package-policies.attributes.package.name',
+          type: 'fleet-package-policies',
         },
       ]);
     });
@@ -198,10 +198,10 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
         {
           astPath: 'arguments.0',
           error:
-            "This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key",
+            "This key 'fleet-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
-          key: 'ingest-package-policies.package.name',
-          type: 'ingest-package-policies',
+          key: 'fleet-package-policies.package.name',
+          type: 'fleet-package-policies',
         },
       ]);
     });
@@ -222,8 +222,8 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           astPath: 'arguments.0',
           error: null,
           isSavedObjectAttr: false,
-          key: 'ingest-package-policies.package.name',
-          type: 'ingest-package-policies',
+          key: 'fleet-package-policies.package.name',
+          type: 'fleet-package-policies',
         },
       ]);
     });
@@ -761,7 +761,7 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'ingest-package-policies.package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
+        `KQLSyntaxError: This key 'fleet-package-policies.package.is_managed' does NOT exist in fleet-package-policies saved object index patterns`
       );
     });
 
@@ -774,7 +774,7 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
+        `KQLSyntaxError: This key 'package.is_managed' does NOT exist in fleet-package-policies saved object index patterns`
       );
     });
 
@@ -786,7 +786,7 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'ingest-package-policies.non_existent_parameter' does NOT exist in ingest-package-policies saved object index patterns`
+        `KQLSyntaxError: This key 'fleet-package-policies.non_existent_parameter' does NOT exist in fleet-package-policies saved object index patterns`
       );
     });
   });

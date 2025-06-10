@@ -37,6 +37,7 @@ jest.mock('../../services/package_policy', () => {
     packagePolicyService: {
       list: jest.fn(),
     },
+    getPackagePolicySavedObjectType: jest.fn(),
   };
 });
 

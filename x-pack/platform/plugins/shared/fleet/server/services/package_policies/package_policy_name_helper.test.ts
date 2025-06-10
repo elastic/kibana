@@ -7,9 +7,14 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { packagePolicyService } from '../package_policy';
+import * as packagePolicyModule from '../package_policy';
 
 import { incrementPackageName, incrementPackagePolicyCopyName } from './package_policy_name_helper';
+
+const { packagePolicyService } = packagePolicyModule;
+jest
+  .spyOn(packagePolicyModule, 'getPackagePolicySavedObjectType')
+  .mockResolvedValue('fleet-package-policies');
 
 describe('Package policy name helper', () => {
   describe('increment package name', () => {
