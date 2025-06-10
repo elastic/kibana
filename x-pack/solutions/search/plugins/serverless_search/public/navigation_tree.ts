@@ -139,11 +139,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             ],
           },
           {
-            id: 'chat',
-            title: 'Chat',
-            children: [{ id: 'onechat', title: 'Onechat', link: 'onechat' }],
-          },
-          {
             id: 'otherTools',
             title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
               defaultMessage: 'Other tools',
