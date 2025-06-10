@@ -11,7 +11,7 @@ import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/publi
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
 import { CanvasSetup } from '../public';
 
