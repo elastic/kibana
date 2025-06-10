@@ -29,7 +29,7 @@ export const ConnectToElasticsearch = () => {
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup direction="column" gutterSize="s">
@@ -52,7 +52,7 @@ export const ConnectToElasticsearch = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="flexStart" gutterSize="l">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup direction="column" gutterSize="s">

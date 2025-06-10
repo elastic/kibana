@@ -13,7 +13,7 @@ import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 export const SearchHomepageBody = () => (
   <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
     <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <ConnectToElasticsearch />
       </EuiFlexItem>
     </EuiFlexGroup>
