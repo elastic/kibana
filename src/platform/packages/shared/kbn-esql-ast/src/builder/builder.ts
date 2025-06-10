@@ -113,7 +113,7 @@ export namespace Builder {
 
     export namespace source {
       export type SourceTemplate = {
-        cluster?: string | ESQLSource['cluster'];
+        cluster?: string | ESQLSource['prefix'];
         index?: string | ESQLSource['index'];
         selector?: string | ESQLSource['selector'];
       } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'cluster' | 'index' | 'selector'> &
@@ -127,7 +127,7 @@ export namespace Builder {
           typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
             ? { sourceType: 'index', index: indexOrTemplate }
             : indexOrTemplate;
-        const cluster: ESQLSource['cluster'] = !template.cluster
+        const prefix: ESQLSource['prefix'] = !template.cluster
           ? undefined
           : typeof template.cluster === 'string'
           ? Builder.expression.literal.string(template.cluster, { unquoted: true })
@@ -146,7 +146,7 @@ export namespace Builder {
           ...template,
           ...Builder.parserFields(fromParser),
           type: 'source',
-          cluster,
+          prefix,
           index,
           selector,
           name: template.name ?? '',
@@ -161,7 +161,7 @@ export namespace Builder {
 
       export const index = (
         indexName: string,
-        cluster?: string | ESQLSource['cluster'],
+        cluster?: string | ESQLSource['prefix'],
         selector?: string | ESQLSource['selector'],
         template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
         fromParser?: Partial<AstNodeParserFields>
