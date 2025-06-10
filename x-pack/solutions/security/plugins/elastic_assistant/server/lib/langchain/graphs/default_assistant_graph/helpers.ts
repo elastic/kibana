@@ -126,7 +126,7 @@ export const streamGraph = async ({
     const pushStreamUpdate = async () => {
       for await (const { event, data, tags } of stream) {
         if ((tags || []).includes(AGENT_NODE_TAG)) {
-          if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
+          if (event === 'on_chat_model_stream') {
             const msg = data.chunk as AIMessageChunk;
             if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
               push({ payload: msg.content as string, type: 'content' });
