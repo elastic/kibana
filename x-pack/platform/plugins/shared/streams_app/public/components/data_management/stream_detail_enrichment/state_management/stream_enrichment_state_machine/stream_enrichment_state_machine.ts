@@ -27,7 +27,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { dataSourceConverter, processorConverter } from '../../utils';
+import { dataSourceConverter, isGrokProcessor, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -198,6 +198,17 @@ export const streamEnrichmentMachine = setup({
       samples: getDataSourcesSamples(context),
     })),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+    updateGrokCollectionCustomPatterns: assign(({ context }, params: { id: string }) => {
+      const processorRefContext = context.processorsRefs
+        .find((p) => p.id === params.id)
+        ?.getSnapshot().context;
+      if (processorRefContext && isGrokProcessor(processorRefContext.processor)) {
+        context.grokCollection.setCustomPatterns(
+          processorRefContext?.processor.grok.pattern_definitions ?? {}
+        );
+      }
+      return { grokCollection: context.grokCollection };
+    }),
   },
   guards: {
     hasMultipleProcessors: ({ context }) => context.processorsRefs.length > 1,
@@ -226,6 +237,12 @@ export const streamEnrichmentMachine = setup({
 
       if (!processorRef) return false;
       return processorRef.getSnapshot().context.isNew;
+    },
+    isDraftProcessor: ({ context }, params: { id: string }) => {
+      const processorRef = context.processorsRefs.find((p) => p.id === params.id);
+
+      if (!processorRef) return false;
+      return processorRef.getSnapshot().matches('draft');
     },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
@@ -377,12 +394,23 @@ export const streamEnrichmentMachine = setup({
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'processor.change': {
-                  guard: { type: 'isStagedProcessor', params: ({ event }) => event },
-                  actions: [
-                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                  ],
-                },
+                'processor.change': [
+                  {
+                    guard: { type: 'isStagedProcessor', params: ({ event }) => event },
+                    actions: [
+                      { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                    ],
+                  },
+                  {
+                    guard: { type: 'isDraftProcessor', params: ({ event }) => event },
+                    actions: [
+                      {
+                        type: 'updateGrokCollectionCustomPatterns',
+                        params: ({ event }) => event,
+                      },
+                    ],
+                  }
+                ],
                 'processor.delete': {
                   actions: [
                     { type: 'stopProcessor', params: ({ event }) => event },
