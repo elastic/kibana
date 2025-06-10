@@ -59,6 +59,7 @@ import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscrip
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import * as KibanaHook from '../../common/hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -122,6 +123,7 @@ describe('<CspPolicyTemplateForm />', () => {
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
     integrationToEnable,
+    defaultSetupTechnology = SetupTechnology.AGENT_BASED,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
@@ -129,6 +131,7 @@ describe('<CspPolicyTemplateForm />', () => {
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
     integrationToEnable?: string;
+    defaultSetupTechnology?: SetupTechnology;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -153,6 +156,7 @@ describe('<CspPolicyTemplateForm />', () => {
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
               integrationToEnable={integrationToEnable}
+              defaultSetupTechnology={defaultSetupTechnology}
             />
           )}
         </TestProvider>
@@ -687,6 +691,61 @@ describe('<CspPolicyTemplateForm />', () => {
         name: 'cspm-2',
       },
     });
+  });
+
+  it('should render setup technology selector for AWS and allow to select cloud connectors in edit mode', async () => {
+    const awsVarsMock = {
+      access_key_id: { type: 'text' },
+      secret_access_key: { type: 'password', isSecret: true },
+      session_token: { type: 'text' },
+      shared_credential_file: { type: 'text' },
+      credential_profile_name: { type: 'text' },
+      role_arn: { type: 'text' },
+      external_id: { type: 'text' },
+      'aws.credentials.type': { value: 'cloud_connectors', type: 'text' },
+      'aws.credentials.external_id': { value: 'external_id', type: 'text' },
+    };
+    const newPackagePolicy = getMockPolicyAWS(awsVarsMock);
+
+    jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+      services: {
+        cloud: {
+          cloudId:
+            'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+          serverless: { projectId: '' },
+          isCloudEnabled: true,
+        },
+        uiSettings: {
+          get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+        },
+      },
+    } as any);
+
+    const { getByTestId, queryByLabelText } = render(
+      <WrappedComponent
+        newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+        isAgentlessEnabled={true}
+        edit={true}
+        packageInfo={getAwsPackageInfoMock() as PackageInfo}
+      />
+    );
+    const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+    // default state
+    expect(setupTechnologySelector).toBeInTheDocument();
+    expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+    const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+    const roleARNOption = queryByLabelText('Role ARN');
+    const externalIdOption = queryByLabelText('External Id');
+
+    expect(awsCredentialsTypeSelector).not.toBeNull();
+    expect(awsCredentialsTypeSelector).toBeDisabled();
+
+    expect(roleARNOption).toBeInTheDocument();
+    expect(roleARNOption).toBeEnabled();
+    expect(externalIdOption).toBeInTheDocument();
+    expect(externalIdOption).toBeEnabled();
   });
 
   describe('K8S', () => {
@@ -1628,9 +1687,8 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
-            csp: 'aws',
-            cloudId: 'mock-cloud-id',
-            deploymentId: 'mock-deployment-id',
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             serverless: { projectId: '' },
             isCloudEnabled: true,
           },
@@ -1640,11 +1698,12 @@ describe('<CspPolicyTemplateForm />', () => {
         },
       } as any);
 
-      const { getByTestId, getByLabelText } = render(
+      const { getByTestId } = render(
         <WrappedComponent
-          newPolicy={newPackagePolicy}
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
           isAgentlessEnabled={true}
           packageInfo={getAwsPackageInfoMock() as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
@@ -1652,16 +1711,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-
-      expect(
-        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
-      ).toBeInTheDocument();
-      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
-
-      // select agent-based and check for cloudformation option
-      await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
-      await userEvent.click(agentlessOption);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1675,62 +1725,6 @@ describe('<CspPolicyTemplateForm />', () => {
           expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
-    });
-
-    it('should render setup technology selector for AWS and allow to select cloud connectors in edit mode', async () => {
-      const awsVarsMock = {
-        access_key_id: { type: 'text' },
-        secret_access_key: { type: 'password', isSecret: true },
-        session_token: { type: 'text' },
-        shared_credential_file: { type: 'text' },
-        credential_profile_name: { type: 'text' },
-        role_arn: { type: 'text' },
-        external_id: { type: 'text' },
-        'aws.credentials.type': { value: 'cloud_connectors', type: 'text' },
-        'aws.credentials.external_id': { value: 'external_id', type: 'text' },
-      };
-      const newPackagePolicy = getMockPolicyAWS(awsVarsMock);
-
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
-        services: {
-          cloud: {
-            csp: 'aws',
-            cloudId: 'mock-cloud-id',
-            deploymentId: 'mock-deployment-id',
-            serverless: { projectId: '' },
-            isCloudEnabled: true,
-          },
-          uiSettings: {
-            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
-          },
-        },
-      } as any);
-
-      const { getByTestId, queryByLabelText } = render(
-        <WrappedComponent
-          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
-          isAgentlessEnabled={true}
-          edit={true}
-          packageInfo={getAwsPackageInfoMock() as PackageInfo}
-        />
-      );
-      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-
-      // default state
-      expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
-
-      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
-      const roleARNOption = queryByLabelText('Role ARN');
-      const externalIdOption = queryByLabelText('External Id');
-
-      expect(awsCredentialsTypeSelector).not.toBeNull();
-      expect(awsCredentialsTypeSelector).toBeDisabled();
-
-      expect(roleARNOption).toBeInTheDocument();
-      expect(roleARNOption).toBeEnabled();
-      expect(externalIdOption).toBeInTheDocument();
-      expect(externalIdOption).toBeEnabled();
     });
 
     it.skip('should render setup technology selector for GCP for organisation account type', async () => {

@@ -492,19 +492,24 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
   const encodedCloudId = cloud?.cloudId?.split(':')[1];
-
   if (!encodedCloudId) return undefined;
 
   // Decode the base64 encoded cloudId
   // region-1.cloudprovider.env.example.com:443$es-cluster-id-1234567890abcdef$deployment-id-abcdef1234567890
   const decodedCloudId = atob(encodedCloudId);
   const providerMatch = decodedCloudId.match(/\.(aws|gcp|azure)\./);
+  if (!providerMatch) return undefined;
+  // Extract the cloud provider from the match
   const cloudProvider = providerMatch?.[1];
+  // Split the decodedCloudId by '$' to get the cloud resources include cluster uuid and deployment id
   const cloudResources = decodedCloudId.split('$');
+
+  if (!cloudProvider || cloudResources.length < 2) return undefined;
+  // The last part of the decodedCloudId is the deployment ID
   const deploymentId = cloudResources[cloudResources.length - 1];
 
   const elasticResourceId =
-    cloud?.isCloudEnabled && cloudProvider !== 'aws' && !!deploymentId
+    cloud?.isCloudEnabled && cloudProvider === 'aws' && !!deploymentId
       ? deploymentId
       : cloud?.serverless?.projectId;
 
