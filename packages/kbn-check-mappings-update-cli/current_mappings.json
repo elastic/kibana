@@ -923,6 +923,7 @@
     }
   },
   "dashboard": {
+    "dynamic": false,
     "properties": {
       "controlGroupInput": {
         "properties": {
