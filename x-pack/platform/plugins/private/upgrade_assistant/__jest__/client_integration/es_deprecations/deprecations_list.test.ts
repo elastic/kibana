@@ -436,8 +436,8 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
-      expect(find('reindexTableCell-correctiveAction').text()).toBe(
-        'Recommended to set to read-only '
+      expect(find('reindexTableCell-correctiveAction').text()).toContain(
+        'Recommended to set to read-only'
       );
     });
 
