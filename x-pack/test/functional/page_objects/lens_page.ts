@@ -1922,7 +1922,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async clickShareModal() {
+    async clickShareButton() {
       return await testSubjects.click('lnsApp_shareButton');
     },
 
@@ -1948,15 +1948,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureShareMenuIsOpen(action: 'link') {
-      await this.clickShareModal();
-
-      if (!(await testSubjects.exists('shareContextModal'))) {
-        await this.clickShareModal();
-      }
-      if (!(await this.isShareActionEnabled(action))) {
+      if (
+        (await testSubjects.exists('shareContextModal')) &&
+        !(await this.isShareActionEnabled(action))
+      ) {
         throw Error(`${action} sharing feature is disabled`);
       }
       return await testSubjects.click(action);
+    },
+
+    /**
+     * @description handles scenario where clicking the share button asynchronously sets the share URL in the user's clipboard
+     */
+    async resolveCopyLink() {
+      let shareValue: string | undefined | null;
+
+      await retry.try(async () => {
+        shareValue = await testSubjects.getAttribute('lnsApp_shareButton', 'data-share-url');
+        return Boolean(shareValue);
+      });
+
+      return shareValue;
     },
 
     async openPermalinkShare() {
@@ -1993,15 +2005,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getUrl() {
-      await this.ensureShareMenuIsOpen('link');
-      const url = await share.getSharedUrl();
+      await this.clickShareButton();
+
+      // This approach allows us to cater to both variations for getting the copied URL
+      const url = await Promise.race([
+        (async () => {
+          await this.ensureShareMenuIsOpen('link');
+          const _url = await share.getSharedUrl();
+          // close share modal after url is copied
+          await this.closeShareModal();
+          return _url;
+        })(),
+        this.resolveCopyLink(),
+      ]);
 
       if (!url) {
         throw Error('No data-share-url attribute found');
       }
 
-      // close share modal after url is copied
-      await this.closeShareModal();
       return url;
     },
 

@@ -56,8 +56,35 @@ export const ShareMenuTabs = () => {
     objectTypeMeta.config?.link?.delegatedShareUrlHandler
   ) {
     void (async function () {
-      const shareableUrl = await objectTypeMeta.config?.link?.delegatedShareUrlHandler!();
+      let shareableUrl: string | null = null;
+
+      // this ensures that we are creating a new link every time the user clicks on the share button
+      if (!(shareableUrl = anchorElement!.getAttribute('data-share-url'))) {
+        // disable the anchor element to prevent multiple clicks
+        anchorElement?.setAttribute('disabled', String(true));
+        shareableUrl = (await objectTypeMeta.config?.link?.delegatedShareUrlHandler!()) || null;
+        anchorElement?.setAttribute('data-share-url', shareableUrl!);
+        anchorElement?.setAttribute('disabled', String(false));
+      }
+
+      if (!shareableUrl) {
+        toasts.addError(
+          new Error(
+            i18n.translate('share.shareContextMenu.copyLinkError', {
+              defaultMessage: 'Unable to copy link to clipboard',
+            })
+          ),
+          {
+            title: i18n.translate('share.shareContextMenu.copyLinkErrorTitle', {
+              defaultMessage: 'Copy link error',
+            }),
+          }
+        );
+        return;
+      }
+
       copyToClipboard(shareableUrl!);
+
       toasts.addSuccess({
         title: i18n.translate('share.shareContextMenu.copyLinkSuccess', {
           defaultMessage: 'Link copied to clipboard',

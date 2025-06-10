@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
-      await lens.clickShareModal();
+      await lens.clickShareButton();
 
       expect(await lens.isExportActionEnabled()).to.eql(true);
       expect(await lens.isShareActionEnabled('link'));
