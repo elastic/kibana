@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import { Streams } from '../models/streams';
 
-export function getIndexPatterns(stream: Streams.all.Definition | undefined) {
+export function getIndexPatternsForStream<T extends Streams.all.Definition | undefined>(
+  stream: T
+): T extends Streams.all.Definition ? string[] : undefined;
+
+export function getIndexPatternsForStream(stream: Streams.all.Definition | undefined) {
   if (!stream) {
     return undefined;
   }

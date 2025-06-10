@@ -140,7 +140,7 @@ export function StreamDetailSignificantEventsView({
         setQueryToEdit(undefined);
       }}
       query={queryToEdit}
-      name={definition?.stream.name ?? ''}
+      name={definition.stream.name}
     />
   ) : null;
 
@@ -178,7 +178,7 @@ export function StreamDetailSignificantEventsView({
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
                   defaultMessage: 'Add significant event query',
                 })}
-              </EuiButton>{' '}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -189,7 +189,7 @@ export function StreamDetailSignificantEventsView({
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
-            name={definition?.stream.name}
+            definition={definition.stream}
             response={significantEventsFetchState}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);

@@ -8,6 +8,7 @@
 import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
+import { Streams } from '@kbn/streams-schema';
 import { SignificantEventsTable } from './significant_events_table';
 
 const stories: Meta<{}> = {
@@ -31,10 +32,25 @@ function generateValues() {
 
 const xFormatter = niceTimeFormatter([start, end]);
 
+const logsStreamDefinition: Streams.WiredStream.Definition = {
+  name: 'logs',
+  description: '',
+  ingest: {
+    wired: {
+      fields: {},
+      routing: [],
+    },
+    lifecycle: {
+      inherit: {},
+    },
+    processing: [],
+  },
+};
+
 export const Empty: StoryFn<{}> = () => {
   return (
     <SignificantEventsTable
-      name="logs"
+      definition={logsStreamDefinition}
       response={{
         loading: false,
         value: [],
@@ -48,7 +64,7 @@ export const Empty: StoryFn<{}> = () => {
 export const SomeThings: StoryFn<{}> = () => {
   return (
     <SignificantEventsTable
-      name="logs"
+      definition={logsStreamDefinition}
       onDeleteClick={() => {
         return new Promise<void>((resolve) =>
           setTimeout(() => {

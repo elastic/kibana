@@ -49,6 +49,8 @@ export { type RoutingDefinition, routingDefinitionListSchema } from './src/model
 export { type ContentPack, contentPackSchema } from './src/content';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+
 export {
   keepFields,
   namespacePrefixes,

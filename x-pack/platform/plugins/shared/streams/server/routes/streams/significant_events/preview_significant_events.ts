@@ -7,7 +7,12 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
+import {
+  SignificantEventsPreviewResponse,
+  StreamQueryKql,
+  Streams,
+  getIndexPatternsForStream,
+} from '@kbn/streams-schema';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { notFound } from '@hapi/boom';
 import type { ChangePointType } from '@kbn/es-types/src';
@@ -70,7 +75,7 @@ function createSearchRequest({
 
 export async function previewSignificantEvents(
   params: {
-    name: string;
+    definition: Streams.all.Definition;
     query: PreviewStreamQuery;
     from: Date;
     to: Date;
@@ -80,7 +85,7 @@ export async function previewSignificantEvents(
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { bucketSize, from, to, name, query } = params;
+  const { bucketSize, from, to, definition, query } = params;
   const { scopedClusterClient } = dependencies;
 
   const searchRequest = createSearchRequest({
@@ -91,7 +96,7 @@ export async function previewSignificantEvents(
   });
 
   const response = (await scopedClusterClient.asCurrentUser.search({
-    index: name,
+    index: getIndexPatternsForStream(definition),
     track_total_hits: false,
     ...searchRequest,
   })) as InferSearchResponseOf<unknown, ReturnType<typeof createSearchRequest>>;

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
 import { TickFormatter } from '@elastic/charts';
+import { Streams } from '@kbn/streams-schema';
 import { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './change_point';
@@ -37,13 +38,13 @@ function WithLoadingSpinner({ onClick, ...props }: React.ComponentProps<typeof E
 }
 
 export function SignificantEventsTable({
-  name,
+  definition,
   response,
   onDeleteClick,
   onEditClick,
   xFormatter,
 }: {
-  name?: string;
+  definition: Streams.all.Definition;
   response: Pick<AbortableAsyncState<SignificantEventItem[]>, 'value' | 'loading' | 'error'>;
   onDeleteClick?: (query: SignificantEventItem) => void;
   onEditClick?: (query: SignificantEventItem) => void;
@@ -68,7 +69,7 @@ export function SignificantEventsTable({
       render: (_, record) => (
         <EuiLink
           target="_blank"
-          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(record, name))}
+          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(record, definition))}
         >
           {record.query.title}
         </EuiLink>

@@ -6,9 +6,13 @@
  */
 
 import { v4 } from 'uuid';
+import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
-export function buildDiscoverParams(significantEvent: SignificantEventItem, name?: string) {
+export function buildDiscoverParams(
+  significantEvent: SignificantEventItem,
+  definition: Streams.all.Definition
+) {
   return {
     timeRange: {
       from: 'now-7d',
@@ -20,7 +24,7 @@ export function buildDiscoverParams(significantEvent: SignificantEventItem, name
     },
     dataViewSpec: {
       id: v4(),
-      title: name,
+      title: getIndexPatternsForStream(definition).join(','),
       timeFieldName: '@timestamp',
     },
   };
