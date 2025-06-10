@@ -52,11 +52,13 @@ export async function exec(
 
   if (bufferLogs) {
     try {
+      const isDockerBuild = cmd === 'docker' && args[0] === 'build';
       const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
         map((chunk) => handleBufferChunk(chunk, level))
       );
+      // docker build uses stderr as a normal output stream
       const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
-        map((chunk) => handleBufferChunk(chunk, 'error'))
+        map((chunk) => handleBufferChunk(chunk, isDockerBuild ? level : 'error'))
       );
       const close$ = fromEvent(proc, 'close');
       const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
