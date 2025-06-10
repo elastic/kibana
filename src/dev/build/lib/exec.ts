@@ -73,14 +73,12 @@ export async function exec(
       });
 
       if (result.failed) {
-        throw new Error(
-          `${build.getBuildDesc()} [${build.getBuildArch()}] failed with exit code: ${
-            result.exitCode
-          }`
-        );
+        throw new Error(`${result.exitCode}`);
       }
     } catch (error) {
-      throw error;
+      throw new Error(
+        `${build.getBuildDesc()} [${build.getBuildArch()}] failed with: ${error.message}`
+      );
     }
   } else {
     log[level](chalk.dim('$'), cmd, ...args);
