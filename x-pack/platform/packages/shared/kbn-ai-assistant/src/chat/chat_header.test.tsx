@@ -52,6 +52,7 @@ describe('ChatHeader', () => {
     loading: false,
     title: 'My title',
     isConversationOwnedByCurrentUser: false,
+    isConversationApp: false,
     onDuplicateConversation: jest.fn(),
     onSaveTitle: jest.fn(),
     onToggleFlyoutPositionMode: jest.fn(),
