@@ -61486,35 +61486,10 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppression'
-    Security_Detections_API_BulkActionEditPayloadAddSetAlertSuppression:
-      type: object
-      properties:
-        type:
-          enum:
-            - add_alert_suppression
-            - set_alert_suppression
-          type: string
-        value:
-          type: object
-          properties:
-            duration:
-              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
-              nullable: true
-            group_by:
-              items:
-                type: string
-              maxItems: 3
-              type: array
-            missing_fields_strategy:
-              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
-      required:
-        - type
-        - value
     Security_Detections_API_BulkActionEditPayloadAlertSuppression:
       anyOf:
-        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAddSetAlertSuppression'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
     Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
       type: object
@@ -61523,23 +61498,8 @@ components:
           enum:
             - delete_alert_suppression
           type: string
-        value:
-          type: object
-          properties:
-            duration:
-              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
-              nullable: true
-            group_by:
-              items:
-                type: string
-              type: array
-            missing_fields_strategy:
-              $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
-          required:
-            - group_by
       required:
         - type
-        - value
     Security_Detections_API_BulkActionEditPayloadIndexPatterns:
       description: |
         Edits index patterns of rulesClient.
@@ -61645,6 +61605,30 @@ components:
       required:
         - type
         - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
+      required:
+        - type
+        - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression_for_threshold
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_ThresholdAlertSuppression'
+      required:
+        - type
+        - value
     Security_Detections_API_BulkActionEditPayloadTags:
       description: |
         Edits tags of rules.
@@ -61698,6 +61682,8 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
