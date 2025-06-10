@@ -1175,7 +1175,6 @@ exports[`XYChart component it renders area 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -2733,7 +2732,6 @@ exports[`XYChart component it renders bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -4291,7 +4289,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -5849,7 +5846,6 @@ exports[`XYChart component it renders line 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -7407,7 +7403,6 @@ exports[`XYChart component it renders stacked area 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -8965,7 +8960,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -10523,7 +10517,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -12114,7 +12107,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart
@@ -13916,7 +13908,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart
@@ -15711,7 +15702,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart
