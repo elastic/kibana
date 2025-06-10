@@ -19,10 +19,14 @@ describe('fetchWatchesWithPagination (iterative version with pageSize)', () => {
       },
     },
     asInternalUser: {} as any,
-  } as IScopedClusterClient;
+  } as unknown as IScopedClusterClient;
 
-  const sampleWatches = [{ _id: 1 }, { _id: 2 }, { _id: 3 }] as WatcherQueryWatch[];
-  const pageSize = 3;
+  const sampleWatches = [
+    { _id: 'watch1' },
+    { _id: 'watch2' },
+    { _id: 'watch3' },
+  ] as WatcherQueryWatch[];
+  let pageSize = 3;
 
   beforeEach(() => {
     mockQueryWatches.mockClear();
@@ -57,7 +61,11 @@ describe('fetchWatchesWithPagination (iterative version with pageSize)', () => {
 
   describe('when watches span multiple pages', () => {
     it('should accumulate all watches across multiple pages', async () => {
-      const additionalWatches = [{ _id: 4 }, { _id: 5 }, { _id: 6 }] as WatcherQueryWatch[];
+      const additionalWatches = [
+        { _id: 'watch4' },
+        { _id: 'watch5' },
+        { _id: 'watch6' },
+      ] as WatcherQueryWatch[];
       const totalCount = sampleWatches.length + additionalWatches.length;
 
       mockQueryWatches
@@ -79,17 +87,7 @@ describe('fetchWatchesWithPagination (iterative version with pageSize)', () => {
   });
 
   it('should not exceed the Elasticsearch max result window (from + size <= 10000)', async () => {
-    const mockQueryWatches = jest.fn();
-    const mockScopedClusterClient: IScopedClusterClient = {
-      asCurrentUser: {
-        watcher: {
-          queryWatches: mockQueryWatches,
-        },
-      },
-      asInternalUser: {} as any,
-    } as IScopedClusterClient;
-
-    const pageSize = 1000;
+    pageSize = 1000;
     const totalWatches = 11000; // simulate more than allowed
 
     // Mock 10 pages of 1000 watches
