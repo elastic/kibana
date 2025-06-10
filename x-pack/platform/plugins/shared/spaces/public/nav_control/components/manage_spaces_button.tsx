@@ -7,7 +7,6 @@
 
 import { EuiButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CSSProperties } from 'react';
 import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -16,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface Props {
   isDisabled?: boolean;
   size?: 's' | 'm';
-  style?: CSSProperties;
+  fullWidth?: boolean;
   onClick?: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -25,7 +24,7 @@ interface Props {
 export const ManageSpacesButton: React.FC<Props> = ({
   isDisabled,
   size,
-  style,
+  fullWidth,
   onClick,
   capabilities,
   navigateToApp,
@@ -48,12 +47,15 @@ export const ManageSpacesButton: React.FC<Props> = ({
       size={size || 's'}
       isDisabled={isDisabled}
       onClick={navigateToManageSpaces}
-      style={style}
       data-test-subj="manageSpaces"
-      css={css`
-        margin: ${euiTheme.size.m};
-        width: calc(100% - ${euiTheme.size.m} * 2);
-      `}
+      css={
+        fullWidth
+          ? { width: `100%` }
+          : css`
+              margin: ${euiTheme.size.m};
+              width: calc(100% - ${euiTheme.size.m} * 2);
+            `
+      }
     >
       <FormattedMessage
         id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
