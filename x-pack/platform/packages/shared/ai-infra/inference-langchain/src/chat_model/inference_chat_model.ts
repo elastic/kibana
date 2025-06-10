@@ -162,7 +162,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   getLsParams(options: this['ParsedCallOptions']): LangSmithParams {
     const params = this.invocationParams(options);
     return {
-      ls_provider: `inference-${getConnectorProvider(this.connector)}`,
+      ls_provider: `inference-${getConnectorProvider(this.connector).toLowerCase()}`,
       ls_model_name: options.model ?? this.model ?? getConnectorDefaultModel(this.connector),
       ls_model_type: 'chat',
       ls_temperature: params.temperature ?? this.temperature ?? undefined,
