@@ -652,6 +652,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
                 "plugin": "profiling",
                 "path": "x-pack/solutions/observability/plugins/profiling/server/lib/setup/get_has_setup_privileges.ts"
               },
@@ -4275,6 +4279,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
               },
               {
                 "plugin": "ruleRegistry",
