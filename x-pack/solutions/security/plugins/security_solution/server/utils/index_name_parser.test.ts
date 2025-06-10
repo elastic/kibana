@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineIndexWithNamespaces } from './utils';
+import { combineIndexWithNamespaces } from './index_name_parser';
 
 describe('combineIndexWithNamespaces', () => {
   describe('valid cases', () => {

@@ -27,7 +27,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { combineIndexWithNamespaces } from './utils';
+import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('suggestions');
@@ -81,7 +81,7 @@ export const getEndpointSuggestionsRequestHandler = (
     let index = '';
 
     if (request.params.suggestion_type === 'eventFilters') {
-      if (!endpointContext.experimentalFeatures?.endpointManagementSpaceAwarenessEnabled) {
+      if (!endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         index = eventsIndexPattern;
       } else {
         logger.debug('Using space-aware index pattern');

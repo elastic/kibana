@@ -40,7 +40,7 @@ import {
   SUGGESTIONS_INTERNAL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { combineIndexWithNamespaces } from './utils';
+import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -48,7 +48,7 @@ jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   };
 });
 
-jest.mock('./utils', () => ({
+jest.mock('../../../utils/index_name_parser', () => ({
   combineIndexWithNamespaces: jest.fn(),
 }));
 
