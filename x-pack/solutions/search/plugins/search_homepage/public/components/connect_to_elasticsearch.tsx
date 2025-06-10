@@ -31,79 +31,93 @@ export const ConnectToElasticsearch = () => {
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <span>
-                  {i18n.translate('xpack.searchHomepage.connectToElasticsearch.title', {
-                    defaultMessage: 'Connect to Elasticsearch',
-                  })}
-                </span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                {i18n.translate('xpack.searchHomepage.connectToElasticsearch.description', {
-                  defaultMessage:
-                    'Set up your connection to Elasticsearch to start searching and analyzing your data.',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="xxs">
+                  <EuiTitle size="m">
                     <span>
-                      {i18n.translate(
-                        'xpack.searchHomepage.connectToElasticsearch.elasticSearchEndpointLabel',
-                        {
-                          defaultMessage: 'Elasticsearch endpoint',
-                        }
-                      )}
+                      {i18n.translate('xpack.searchHomepage.connectToElasticsearch.title', {
+                        defaultMessage: 'Connect to Elasticsearch',
+                      })}
                     </span>
                   </EuiTitle>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.description', {
+                      defaultMessage:
+                        'Set up your connection to Elasticsearch to start searching and analyzing your data.',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="flexStart" gutterSize="l">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="column" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiCopy textToCopy={LOCALHOST_URL}>
-                        {(copy) => (
-                          <EuiButtonIcon
-                            onClick={copy}
-                            iconType="copyClipboard"
-                            display="base"
-                            size="m"
-                          />
-                        )}
-                      </EuiCopy>
+                      <EuiTitle size="xxs">
+                        <span>
+                          {i18n.translate(
+                            'xpack.searchHomepage.connectToElasticsearch.elasticSearchEndpointLabel',
+                            {
+                              defaultMessage: 'Elasticsearch endpoint',
+                            }
+                          )}
+                        </span>
+                      </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiFieldText value={LOCALHOST_URL} readOnly />
+                      <EuiFlexGroup gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiCopy textToCopy={LOCALHOST_URL}>
+                            {(copy) => (
+                              <EuiButtonIcon onClick={copy} iconType="copyClipboard" size="m" />
+                            )}
+                          </EuiCopy>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiFieldText value={LOCALHOST_URL} readOnly style={{ width: 400 }} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="xxs">
-                    <span>
-                      {i18n.translate('xpack.searchHomepage.connectToElasticsearch.apiKeysLabel', {
-                        defaultMessage: 'API Keys',
-                      })}
-                    </span>
-                  </EuiTitle>
-                  <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                  <EuiFlexGroup direction="column" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiButton iconType="key">
-                        {i18n.translate(
-                          'xpack.searchHomepage.connectToElasticsearch.createApiKey',
-                          {
-                            defaultMessage: 'Create API Key',
-                          }
-                        )}
-                      </EuiButton>
+                      <EuiTitle size="xxs">
+                        <span>
+                          {i18n.translate(
+                            'xpack.searchHomepage.connectToElasticsearch.apiKeysLabel',
+                            {
+                              defaultMessage: 'API Keys',
+                            }
+                          )}
+                        </span>
+                      </EuiTitle>
                     </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiButtonEmpty iconType="gear">Manage API keys</EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiBadge>0 active</EuiBadge>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                        <EuiFlexItem grow={false}>
+                          <EuiButton iconType="key">
+                            {i18n.translate(
+                              'xpack.searchHomepage.connectToElasticsearch.createApiKey',
+                              {
+                                defaultMessage: 'Create API Key',
+                              }
+                            )}
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty iconType="gear">Manage API keys</EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge>0 active</EuiBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -111,7 +125,7 @@ export const ConnectToElasticsearch = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
               <EuiCard

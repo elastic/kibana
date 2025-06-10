@@ -21,7 +21,7 @@ export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHea
       defaultMessage: 'Your vector database just got faster',
     })}
     description={
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" direction="column">
+      <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem>
           {i18n.translate('xpack.searchHomepage.description', {
             defaultMessage:
@@ -29,35 +29,41 @@ export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHea
           })}
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                <EuiIcon type="checkInCircleFilled" color="primary" />
-                <small>
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="checkInCircleFilled" color="primary" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
                     defaultMessage: 'Feature update',
                   })}
-                </small>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                <EuiIcon type="checkInCircleFilled" color="primary" />
-                <small>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="checkInCircleFilled" color="primary" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
                     defaultMessage: 'Feature update',
                   })}
-                </small>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                <EuiIcon type="checkInCircleFilled" color="primary" />
-                <small>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="checkInCircleFilled" color="primary" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
                     defaultMessage: 'Feature update',
                   })}
-                </small>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
