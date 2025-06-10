@@ -65,7 +65,7 @@ describe('CoreApp', () => {
     describe('`/internal/core/_settings` route', () => {
       it('is not registered by default', async () => {
         const routerMock = mockRouter.create();
-        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+        internalCoreSetup.http.router.create.mockReturnValue(routerMock);
 
         const localCoreApp = new CoreAppsService(coreContext);
         await localCoreApp.setup(internalCoreSetup, emptyPlugins());
@@ -84,7 +84,7 @@ describe('CoreApp', () => {
 
       it('is registered when enabled', async () => {
         const routerMock = mockRouter.create();
-        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+        internalCoreSetup.http.router.create.mockReturnValue(routerMock);
 
         coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
         const localCoreApp = new CoreAppsService(coreContext);
@@ -103,7 +103,7 @@ describe('CoreApp', () => {
 
       it('it fetches the persisted document when enabled', async () => {
         const routerMock = mockRouter.create();
-        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+        internalCoreSetup.http.router.create.mockReturnValue(routerMock);
 
         coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
         const localCoreApp = new CoreAppsService(coreContext);
