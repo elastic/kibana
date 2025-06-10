@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common';
+
+export const UsageCostMessage: React.FC = () => {
+  const { docLinks } = useKibana().services;
+  return (
+    <EuiText size="xs">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.descriptionText"
+        defaultMessage="Learn more about {elasticLLM} and its {usageCost}."
+        values={{
+          elasticLLM: (
+            <EuiLink
+              data-test-subj="read-only-link"
+              href={docLinks.links.alerting.elasticManagedLlm}
+              target="_blank"
+              rel="noopener noreferrer"
+              external
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.title.link"
+                defaultMessage="Elastic Managed LLM connector"
+              />
+            </EuiLink>
+          ),
+          usageCost: (
+            <EuiLink
+              href={docLinks.links.alerting.elasticManagedLlmUsageCost}
+              target="_blank"
+              rel="noopener noreferrer"
+              external
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.usageCost.link"
+                defaultMessage="usage cost"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  );
+};
+// eslint-disable-next-line import/no-default-export
+export { UsageCostMessage as default };
