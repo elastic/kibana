@@ -34,7 +34,5 @@
     "@kbn/custom-icons",
     "@kbn/data-views-plugin",
     "@kbn/data-view-utils",
-    "@kbn/presentation-publishing",
-    "@kbn/es-query", 
   ]
 }
