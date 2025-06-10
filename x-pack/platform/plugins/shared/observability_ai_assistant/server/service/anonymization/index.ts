@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { withInferenceSpan } from '@kbn/inference-plugin/server';
+import { withInferenceSpan } from '@kbn/inference-tracing';
 import { ElasticsearchClient } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { OperatorFunction, map } from 'rxjs';
