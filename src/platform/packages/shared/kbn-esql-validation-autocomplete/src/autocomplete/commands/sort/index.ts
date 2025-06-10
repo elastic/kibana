@@ -14,6 +14,7 @@ import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import {
   getFieldsOrFunctionsSuggestions,
   handleFragment,
+  isExpressionComplete,
   pushItUpInTheList,
   suggestForExpression,
 } from '../../helper';
@@ -31,7 +32,7 @@ export async function suggest(
   const { pos, nulls } = getSortPos(commandText);
 
   switch (pos) {
-    case 'space2': {
+    case 'after_expression': {
       const commandSuggestions = [
         sortModifierSuggestions.ASC,
         sortModifierSuggestions.DESC,
@@ -41,18 +42,18 @@ export async function suggest(
         { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
 
-      const suggestions = await suggestForExpression({
-        ...params,
-        expressionRoot: command.args[0],
-        location: Location.WHERE,
-        preferredExpressionType: 'boolean',
-      });
+      // const suggestions = await suggestForExpression({
+      //   ...params,
+      //   expressionRoot: command.args[0],
+      //   location: Location.WHERE,
+      //   preferredExpressionType: 'boolean',
+      // });
 
-      if (getExpressionType(command.args[0]) !== 'unknown') {
-        suggestions.push(...commandSuggestions);
-      }
+      // if (getExpressionType(command.args[0]) !== 'unknown') {
+      //   suggestions.push(...commandSuggestions);
+      // }
 
-      return suggestions;
+      return commandSuggestions;
     }
     case 'order': {
       return handleFragment(
@@ -125,20 +126,6 @@ export async function suggest(
     }
   }
 
-  const fieldSuggestions = await getColumnsByType('any', [], {
-    openSuggestions: true,
-  });
-
-  const functionSuggestions = await getFieldsOrFunctionsSuggestions(
-    ['any'],
-    Location.SORT,
-    getColumnsByType,
-    {
-      functions: true,
-      fields: false,
-    }
-  );
-
   const expressionSuggestions = await suggestForExpression({
     ...params,
     expressionRoot: command.args[0],
@@ -148,7 +135,7 @@ export async function suggest(
 
   return await handleFragment(
     innerText,
-    (fragment) => getExpressionType(command.args[0]) !== 'unknown',
+    () => isExpressionComplete(getExpressionType(command.args[0]), innerText),
     () => {
       return expressionSuggestions;
     },
