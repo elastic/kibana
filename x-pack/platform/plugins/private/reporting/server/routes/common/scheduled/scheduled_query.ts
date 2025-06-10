@@ -26,8 +26,7 @@ import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 export const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
 export const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;
 
-// TODO - remove .keyword when mapping is fixed
-const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id.keyword';
+const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
@@ -85,6 +84,7 @@ export function transformResponse(
         created_by: so.attributes.createdBy,
         enabled: so.attributes.enabled,
         jobtype: so.attributes.jobType,
+        object_type: so.attributes.meta.objectType,
         last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
         next_run: _rrule.after(new Date())?.toISOString(),
         notification: so.attributes.notification,
@@ -210,9 +210,12 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
             if (so.attributes.createdBy !== username && !canManageReporting) {
               bulkErrors.push({
                 message: `Insufficient privileges to disable scheduled report "${so.id}".`,
-                status: 403,
+                status: 404,
                 id: so.id,
               });
+              logger.warn(
+                `User "${username}" attempted to disable scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+              );
             } else if (so.attributes.enabled === false) {
               logger.debug(`Scheduled report ${so.id} is already disabled`);
               disabledScheduledReportIds.add(so.id);
