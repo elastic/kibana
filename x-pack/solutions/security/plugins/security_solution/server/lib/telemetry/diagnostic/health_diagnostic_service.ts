@@ -84,8 +84,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.analytics = start.analytics;
     this.receiver = start.receiver;
 
-    // TODO: remove before merging!
-    // 'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
     await Promise.all([
       this.artifactService.start(start.receiver),
       this.scheduleTask(start.taskManager),
@@ -274,7 +272,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
-    // TODO: run as part of the configuration task instead of getting the artifact each time the task runs?
     try {
       const artifact = await this.artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
