@@ -217,7 +217,7 @@ export class RuleMigrationsTaskClient {
 
   /** Creates a new evaluator for the rule migration task */
   async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
-    const { evaluationId, langsmithSettings, connectorId, invocationConfig, abortController } =
+    const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
       params;
 
     const migrationLogger = this.logger.get('evaluate');
@@ -233,7 +233,7 @@ export class RuleMigrationsTaskClient {
 
     await migrationTaskEvaluator.evaluate({
       connectorId,
-      langsmithSettings,
+      langsmithOptions,
       invocationConfig,
     });
   }

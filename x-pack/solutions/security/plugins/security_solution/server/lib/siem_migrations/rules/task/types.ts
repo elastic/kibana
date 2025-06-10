@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
+import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import type { getRuleMigrationAgent } from './agent';
@@ -59,7 +59,7 @@ export interface RuleMigrationTaskStopResult {
 export interface RuleMigrationTaskEvaluateParams {
   evaluationId: string;
   connectorId: string;
-  langsmithSettings: LangSmithEvaluationSettings;
+  langsmithOptions: LangSmithEvaluationOptions;
   invocationConfig: MigrateRuleGraphConfig;
   abortController: AbortController;
 }
