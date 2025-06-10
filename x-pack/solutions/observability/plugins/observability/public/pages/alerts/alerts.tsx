@@ -141,10 +141,7 @@ function InternalAlertsPage() {
       alertSearchBarStateProps.onRangeToChange(new Date(end).toISOString());
     }
   };
-  const chartProps = {
-    baseTheme: charts.theme.useChartsBaseTheme(),
-    onBrushEnd,
-  };
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -276,7 +273,10 @@ function InternalAlertsPage() {
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
-              chartProps={chartProps}
+              chartProps={{
+                themeOverrides: charts.theme.useChartsBaseTheme(),
+                onBrushEnd,
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
