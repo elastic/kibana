@@ -7,19 +7,19 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
-import CasesProvider from '../../cases_context';
+import { SECURITY_SOLUTION_OWNER } from '../../../../../common';
+import { canUseCases } from '../../../../client/helpers/can_use_cases';
+import CasesProvider from '../../../cases_context';
 import { ActionWrapper } from './action_wrapper';
 import { getMockServices } from './mocks';
 import type { CasesActionContextProps } from './types';
 
-jest.mock('../../cases_context', () =>
+jest.mock('../../../cases_context', () =>
   jest.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>)
 );
 
-jest.mock('../../../client/helpers/can_use_cases', () => {
-  const actual = jest.requireActual('../../../client/helpers/can_use_cases');
+jest.mock('../../../../client/helpers/can_use_cases', () => {
+  const actual = jest.requireActual('../../../../client/helpers/can_use_cases');
   return {
     ...actual,
     canUseCases: jest.fn(),

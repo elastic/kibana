@@ -32,6 +32,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
@@ -115,6 +116,7 @@ export interface DashboardStartDependencies {
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
+  cases?: CasesPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 

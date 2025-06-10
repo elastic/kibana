@@ -6,7 +6,7 @@
  */
 
 import { unmountComponentAtNode } from 'react-dom';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import {
@@ -16,7 +16,7 @@ import {
   mockLensAttributes,
   getMockServices,
 } from './mocks';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { waitFor } from '@testing-library/react';
 import { openModal } from './open_modal';
 import type { CasesActionContextProps } from './types';
@@ -24,7 +24,7 @@ import type { CasesActionContextProps } from './types';
 const element = document.createElement('div');
 document.body.appendChild(element);
 
-jest.mock('../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => ({
+jest.mock('../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => ({
   useCasesAddToExistingCaseModal: jest.fn(),
 }));
 
@@ -34,7 +34,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
 }));
 
-jest.mock('../../../common/lib/kibana', () => {
+jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: jest.fn(),
     KibanaContextProvider: jest

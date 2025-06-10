@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -50,6 +51,7 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
+export let cases: CasesPublicStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -73,6 +75,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
+  cases = deps.cases;
 
   servicesReady$.next(true);
 };

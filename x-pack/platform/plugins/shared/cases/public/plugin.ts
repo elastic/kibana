@@ -30,7 +30,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_fra
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
 import { registerInternalAttachments } from './internal_attachments';
-import { registerActions } from './components/visualizations/actions';
+import { registerActions } from './components/internal_attachments/visualizations/actions';
 import type {
   CasesPublicSetup,
   CasesPublicStart,

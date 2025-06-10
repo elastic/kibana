@@ -55,6 +55,8 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { cases } from '../services/kibana_services';
+import { AddToCaseOpenModal } from '../dashboard_app/top_nav/cases/add_to_case_modal';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -79,9 +81,17 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
+  const {
+    ui: { getCasesContext },
+    helpers: { canUseCases },
+  } = cases;
+
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
+  const canCases = useMemo(() => canUseCases(), [canUseCases]);
+  const CasesContext = useMemo(() => getCasesContext(), [getCasesContext]);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -256,6 +266,7 @@ export function InternalDashboardTopNav({
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     isLabsShown,
     setIsLabsShown,
+    setIsAddToCaseModalOpen,
     maybeRedirect,
     showResetChange,
   });
@@ -380,6 +391,11 @@ export function InternalDashboardTopNav({
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+      ) : null}
+      {isAddToCaseModalOpen && canCases ? (
+        <CasesContext permissions={canCases} owner={[]}>
+          <AddToCaseOpenModal savedObjectId={lastSavedId} dashboardTitle={dashboardTitle} />
+        </CasesContext>
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}

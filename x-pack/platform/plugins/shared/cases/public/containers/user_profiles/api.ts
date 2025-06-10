@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { UserProfile } from '@kbn/security-plugin/common';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { isEmpty } from 'lodash';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL, DEFAULT_USER_SIZE } from '../../../common/constants';
 
@@ -35,12 +35,12 @@ export const suggestUserProfiles = async ({
 };
 
 export interface BulkGetUserProfilesArgs {
-  security: SecurityPluginStart;
+  userProfile: UserProfileService;
   uids: string[];
 }
 
 export const bulkGetUserProfiles = async ({
-  security,
+  userProfile,
   uids,
 }: BulkGetUserProfilesArgs): Promise<UserProfile[]> => {
   const cleanUids: string[] = uids.filter((uid) => !isEmpty(uid));
@@ -48,15 +48,15 @@ export const bulkGetUserProfiles = async ({
     return [];
   }
 
-  return security.userProfiles.bulkGet({ uids: new Set(cleanUids), dataPath: 'avatar' });
+  return userProfile.bulkGet({ uids: new Set(cleanUids), dataPath: 'avatar' });
 };
 
 export interface GetCurrentUserProfileArgs {
-  security: SecurityPluginStart;
+  userProfile: UserProfileService;
 }
 
 export const getCurrentUserProfile = async ({
-  security,
+  userProfile,
 }: GetCurrentUserProfileArgs): Promise<UserProfile> => {
-  return security.userProfiles.getCurrent({ dataPath: 'avatar' });
+  return userProfile.getCurrent({ dataPath: 'avatar' });
 };

@@ -12,6 +12,7 @@ import './_dashboard_app.scss';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { parse, ParsedQuery } from 'query-string';
 import React from 'react';
@@ -146,25 +147,31 @@ export async function mountApp({
 
   const app = (
     <KibanaRenderContextProvider {...coreStart}>
-      <DashboardMountContext.Provider value={mountContext}>
-        <HashRouter>
-          <Routes>
-            <Route
-              path={[
-                CREATE_NEW_DASHBOARD_URL,
-                `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
-                `${VIEW_DASHBOARD_URL}/:id`,
-              ]}
-              render={renderDashboard}
-            />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-            <Route exact path="/">
-              <Redirect to={LANDING_PAGE_PATH} />
-            </Route>
-            <Route render={renderNoMatch} />
-          </Routes>
-        </HashRouter>
-      </DashboardMountContext.Provider>
+      <KibanaContextProvider
+        services={{
+          ...coreStart,
+        }}
+      >
+        <DashboardMountContext.Provider value={mountContext}>
+          <HashRouter>
+            <Routes>
+              <Route
+                path={[
+                  CREATE_NEW_DASHBOARD_URL,
+                  `${VIEW_DASHBOARD_URL}/:id/:expandedPanelId`,
+                  `${VIEW_DASHBOARD_URL}/:id`,
+                ]}
+                render={renderDashboard}
+              />
+              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+              <Route exact path="/">
+                <Redirect to={LANDING_PAGE_PATH} />
+              </Route>
+              <Route render={renderNoMatch} />
+            </Routes>
+          </HashRouter>
+        </DashboardMountContext.Provider>
+      </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
 

@@ -27,11 +27,13 @@ import { ShowShareModal } from './share/show_share_modal';
 export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
+  setIsAddToCaseModalOpen,
   maybeRedirect,
   showResetChange,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  setIsAddToCaseModalOpen: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
@@ -214,6 +216,14 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      addToCase: {
+        ...topNavStrings.addToCase,
+        id: 'add-to-case',
+        testId: 'dashboardAddToCaseButton',
+        disableButton: disableTopNav,
+        run: () => setIsAddToCaseModalOpen(true),
+      },
     };
   }, [
     disableTopNav,
@@ -229,6 +239,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     resetChanges,
     isResetting,
+    setIsAddToCaseModalOpen,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -275,6 +286,7 @@ export const useDashboardMenuItems = ({
         ].filter(Boolean) as TopNavMenuData[])
       : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
+    const addToCaseMenuItem = [menuItems.addToCase];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
@@ -282,6 +294,7 @@ export const useDashboardMenuItems = ({
       ...labsMenuItem,
       menuItems.fullScreen,
       ...duplicateMenuItem,
+      ...addToCaseMenuItem,
       ...mayberesetChangesMenuItem,
       ...shareMenuItem,
       ...editMenuItem,
@@ -294,6 +307,7 @@ export const useDashboardMenuItems = ({
     menuItems.interactiveSave,
     menuItems.edit,
     menuItems.fullScreen,
+    menuItems.addToCase,
     hasExportIntegration,
     dashboardApi.isManaged,
     showResetChange,
