@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences } from '../migrations/references';

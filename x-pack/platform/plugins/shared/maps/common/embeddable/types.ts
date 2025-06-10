@@ -6,7 +6,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
 
 export type MapEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;
