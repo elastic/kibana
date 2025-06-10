@@ -221,27 +221,20 @@ export const buildAuthenticationsColumns = (
     },
   },
   {
-    field: 'url',
+    field: 'type',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type"
         defaultMessage="Type"
       />
     ),
-    render: (url?: string) => {
-      if (!url) {
-        return getEmptyTagValue();
-      }
-
-      const type = getLoginTypeFromUrl(url);
-
+    render: (type?: string) => {
       if (!type) {
         return getEmptyTagValue();
       }
 
       return type;
     },
-    truncateText: true,
   },
   // TODO Add the column depending on this ticket output https://github.com/elastic/security-team/issues/12713
   // {
@@ -293,26 +286,4 @@ const getResultColor = (value: string) => {
     return 'danger';
   }
   return 'default';
-};
-
-// TODO Verify if we can improve this logic https://github.com/elastic/security-team/issues/12713
-const getLoginTypeFromUrl = (url: string) => {
-  if (url.startsWith('/api/v1/authn')) {
-    return i18n.translate(
-      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',
-      { defaultMessage: 'Direct' }
-    );
-  }
-
-  if (
-    url.startsWith('/oauth2/v1/authorize') ||
-    url.startsWith('/oauth2/v1/token') ||
-    url.includes('/sso/saml')
-  ) {
-    return i18n.translate(
-      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.federated',
-      { defaultMessage: 'Federated' }
-    );
-  }
-  return undefined;
 };
