@@ -129,7 +129,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
         },
         processes: {
           terms: {
-            field: 'elastic_agent.process',
+            field: 'component.id',
             size: AGGREGATION_MAX_SIZE,
             order: {
               _count: 'desc',
