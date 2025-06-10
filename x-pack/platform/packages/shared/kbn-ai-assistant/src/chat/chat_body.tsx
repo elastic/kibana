@@ -29,6 +29,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -39,6 +40,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -400,6 +402,7 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               ) : (
                 <ChatTimeline
@@ -423,6 +426,7 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               )}
             </EuiPanel>
@@ -543,6 +547,7 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
