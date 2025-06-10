@@ -9,7 +9,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface AIAssistantPluginStartDependencies {
@@ -18,5 +17,4 @@ export interface AIAssistantPluginStartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  spaces?: SpacesPluginStart;
 }
