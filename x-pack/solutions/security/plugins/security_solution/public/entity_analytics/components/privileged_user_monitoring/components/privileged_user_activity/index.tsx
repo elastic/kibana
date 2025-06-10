@@ -17,6 +17,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { LinkAnchor } from '../../../../../common/components/links';
@@ -37,14 +38,17 @@ const TITLE = i18n.translate(
   { defaultMessage: 'Privileged user activity' }
 );
 
-export const UserActivityPrivilegedUsersPanel: React.FC = () => {
+export const UserActivityPrivilegedUsersPanel: React.FC<{
+  sourcererDataView: DataViewSpec;
+}> = ({ sourcererDataView }) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USER_ACTIVITY_QUERY_ID);
   const { from, to } = useGlobalTime();
   const [selectedToggleOption, setToggleOption] = useState<VisualizationToggleOptions>(
     VisualizationToggleOptions.GRANTED_RIGHTS
   );
+
   const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
-    usePrivilegedUserActivityParams(selectedToggleOption);
+    usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
 
   const setSelectedChartOptionCallback = useCallback(

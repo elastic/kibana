@@ -5,10 +5,28 @@
  * 2.0.
  */
 
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import {
+  parse,
+  Walker,
+  walk,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+  mutate,
+} from '@kbn/esql-ast';
+
+import { partition } from 'lodash/fp';
 import { getPrivilegedMonitorUsersJoin } from '../../helpers';
 
-export const getGrantedRightsEsqlSource = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
+export const getGrantedRightsEsqlSource = (
+  namespace: string,
+  indexPattern: string,
+  fields: DataViewFieldMap
+) =>
+  removeInvalidForkBranchesFromESQL(
+    fields,
+    `FROM ${indexPattern} METADATA _id, _index
   ${getPrivilegedMonitorUsersJoin(namespace)}
   | FORK
     (
@@ -33,11 +51,15 @@ export const getGrantedRightsEsqlSource = (namespace: string) => {
       | EVAL target_user = COALESCE(user.target.name, user.target.full_name, winlog.event_data.TargetUserName)
       | EVAL privileged_user = user.name
     )
-  | KEEP @timestamp, privileged_user, target_user, group_name, host_ip, _id, _index`;
-};
+  | KEEP @timestamp, privileged_user, target_user, group_name, host_ip, _id, _index`
+  );
 
-export const getAccountSwitchesEsqlSource = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
+export const getAccountSwitchesEsqlSource = (
+  namespace: string,
+  indexPattern: string,
+  fields: DataViewFieldMap
+) => {
+  return `FROM ${indexPattern} METADATA _id, _index
     ${getPrivilegedMonitorUsersJoin(namespace)}
     | WHERE process.command_line.caseless RLIKE "(su|sudo su|sudo -i|sudo -s|ssh [^@]+@[^\s]+)"
     | RENAME process.command_line.caseless AS command_process, process.group_leader.user.name AS target_user, process.parent.real_group.name AS group_name, process.real_user.name as privileged_user, host.ip AS host_ip
@@ -45,8 +67,14 @@ export const getAccountSwitchesEsqlSource = (namespace: string) => {
 };
 
 // TODO Verify if we can improve the type field logic https://github.com/elastic/security-team/issues/12713
-export const getAuthenticationsEsqlSource = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
+export const getAuthenticationsEsqlSource = (
+  namespace: string,
+  indexPattern: string,
+  fields: DataViewFieldMap
+) =>
+  removeInvalidForkBranchesFromESQL(
+    fields,
+    `FROM ${indexPattern} METADATA _id, _index
   ${getPrivilegedMonitorUsersJoin(namespace)}
   | WHERE user.name IS NOT NULL
   | FORK
@@ -74,5 +102,77 @@ export const getAuthenticationsEsqlSource = (namespace: string) => {
         | EVAL host_ip = host.ip
       )
   | RENAME  user.name as privileged_user
-  | KEEP @timestamp, privileged_user, source, host_ip, result, destination, _id, _index, event.outcome, type`;
-};
+  | KEEP @timestamp, privileged_user, source, host_ip, result, destination, _id, _index, event.outcome, type`
+  );
+
+// retrieves FORK pattern from the query for ES|QL using ast parsing
+export function removeInvalidForkBranchesFromESQL(fields: DataViewFieldMap, esql: string) {
+  const { root } = parse(esql);
+
+  const forkIndex = root.commands.findIndex((cmd) => cmd.name === 'fork');
+  const forkCommand = root.commands[forkIndex];
+
+  if (!forkCommand) {
+    return esql;
+  }
+
+  const forkArguments = forkCommand?.args;
+
+  if (!forkArguments || forkArguments.length < 2) {
+    throw new Error('Invalid ESQL query: FORK command must have at least two arguments');
+  }
+
+  const evalCommands = Walker.commands(forkCommand).filter(
+    (command) => command.name === 'eval' || command.name === 'EVAL'
+  );
+  // Columns create by the eval command
+  const evalColumns = evalCommands
+    .map((command) => {
+      if (isFunctionExpression(command.args[0]) && isColumn(command.args[0].args[0])) {
+        return command.args[0].args[0].name;
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  const [invalidBranches, validBranches] = partition((forkArgument) => {
+    const missingColumns: string[] = [];
+    walk(forkArgument, {
+      visitColumn: (node) => {
+        if (!evalColumns.includes(node.name) && !fields[node.name]) {
+          missingColumns.push(node.name);
+        }
+      },
+    });
+
+    return missingColumns.length > 0;
+  }, forkArguments);
+
+  if (invalidBranches.length === 0) {
+    return esql;
+  } else {
+    if (validBranches.length === 0) {
+      // No valid FORK branches found
+      return undefined;
+    }
+
+    if (validBranches.length === 1) {
+      // remove the fork command from query and add the valid branch back to the root
+      const [validBranch] = validBranches;
+      mutate.generic.commands.remove(root, forkCommand);
+
+      validBranch.commands.reverse().forEach((command) => {
+        mutate.generic.commands.insert(root, command, forkIndex);
+      });
+
+      return BasicPrettyPrinter.multiline(root);
+    }
+
+    // Remove the invalid branch
+    invalidBranches.forEach((branch) => {
+      mutate.generic.commands.args.remove(root, branch); // TODO parse?
+    });
+
+    return BasicPrettyPrinter.multiline(root);
+  }
+}
