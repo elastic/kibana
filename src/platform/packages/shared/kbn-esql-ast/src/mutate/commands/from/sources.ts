@@ -55,7 +55,7 @@ export const find = (
     if (index !== source.index?.valueUnquoted) {
       return false;
     }
-    if (cluster && typeof cluster === 'string' && cluster !== source.cluster?.valueUnquoted) {
+    if (cluster && typeof cluster === 'string' && cluster !== source.prefix?.valueUnquoted) {
       return false;
     }
 

@@ -8,9 +8,18 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLFieldWithMetadata, JoinIndexAutocompleteItem } from '../validation/types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
+import { METADATA_FIELDS } from '../shared/constants';
+
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
+  name: field,
+  type: 'keyword',
+}));
 
 export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
@@ -53,7 +62,7 @@ export const policies = [
   },
 ];
 
-export const joinIndices: JoinIndexAutocompleteItem[] = [
+export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
     mode: 'lookup',
@@ -68,6 +77,38 @@ export const joinIndices: JoinIndexAutocompleteItem[] = [
     name: 'lookup_index',
     mode: 'lookup',
     aliases: [],
+  },
+];
+
+export const timeseriesIndices: IndexAutocompleteItem[] = [
+  {
+    name: 'timeseries_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+  {
+    name: 'timeseries_index_with_alias',
+    mode: 'time_series',
+    aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
+  },
+  {
+    name: 'time_series_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+];
+
+export const editorExtensions = [
+  {
+    name: 'Logs Count by Host',
+    query: 'from logs* | STATS count(*) by host',
+  },
+];
+
+export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
+  {
+    inference_id: 'inference_1',
+    task_type: 'completion',
   },
 ];
 
@@ -88,6 +129,9 @@ export function getCallbackMocks(): ESQLCallbacks {
         };
         return [field];
       }
+      if (/METADATA/i.test(query)) {
+        return [...fields, ...metadataFields];
+      }
       return fields;
     }),
     getSources: jest.fn(async () =>
@@ -99,5 +143,13 @@ export function getCallbackMocks(): ESQLCallbacks {
     ),
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
+    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }

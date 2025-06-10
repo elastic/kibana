@@ -85,6 +85,10 @@ export function sloBurnRateRuleType(
           name: 'sloErrorBudgetConsumed',
           description: sloErrorBudgetConsumedActionVariableDescription,
         },
+        {
+          name: 'grouping',
+          description: groupingObjectActionVariableDescription,
+        },
       ],
     },
     alerts: {
@@ -191,5 +195,12 @@ export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
   {
     defaultMessage: 'The consumed error budget at the time of firing the alert.',
+  }
+);
+
+export const groupingObjectActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.groupingObjectActionVariableDescription',
+  {
+    defaultMessage: 'The object containing groups that are reporting data',
   }
 );

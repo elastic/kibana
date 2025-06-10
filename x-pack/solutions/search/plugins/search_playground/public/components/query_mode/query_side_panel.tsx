@@ -9,12 +9,12 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { generateSearchQuery } from '@kbn/search-queries';
 import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { createQuery } from '../../utils/create_query';
 import { SearchQuery } from './search_query';
 import { QueryFieldsPanel } from './query_fields_panel';
 import { ChatPrompt } from './chat_prompt';
@@ -75,7 +75,7 @@ export const QuerySidePanel = ({
       const updatedQueryFields = { ...queryFields, [index]: currentIndexFields };
 
       queryFieldsOnChange(updatedQueryFields);
-      const updatedQuery = createQuery(updatedQueryFields, sourceFields, fields);
+      const updatedQuery = generateSearchQuery(updatedQueryFields, sourceFields, fields);
       elasticsearchQueryChange(updatedQuery);
       // ensure the userQuery is cleared so it doesn't diverge from the generated query.
       userElasticsearchQueryChange(null);

@@ -15,16 +15,16 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../../common';
-import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
 import { TableHeader } from './header';
 
 interface ActionNameProps {
   disableActions?: boolean;
-  migrationRule: RuleMigration;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  migrationRule: RuleMigrationRule;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 const ActionName = ({
@@ -82,8 +82,8 @@ const ActionName = ({
 
 interface CreateActionsColumnProps {
   disableActions?: boolean;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 export const createActionsColumn = ({
@@ -121,7 +121,7 @@ export const createActionsColumn = ({
         }
       />
     ),
-    render: (_, rule: RuleMigration) => {
+    render: (_, rule: RuleMigrationRule) => {
       return (
         <ActionName
           disableActions={disableActions}

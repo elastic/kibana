@@ -10,9 +10,7 @@
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -31,7 +29,6 @@
     "@kbn/object-utils",
     "@kbn/alerting-plugin",
     "@kbn/std",
-    "@kbn/safer-lodash-set",
     "@kbn/streams-schema",
     "@kbn/es-errors",
     "@kbn/server-route-repository-utils",
@@ -46,7 +43,13 @@
     "@kbn/content-packs-schema",
     "@kbn/cloud-plugin",
     "@kbn/es-types",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/rule-data-utils",
     "@kbn/features-plugin",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/zod-helpers",
+    "@kbn/core-http-server-utils",
+    "@kbn/inference-common"
   ]
 }

@@ -37,6 +37,7 @@ import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
+import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -80,11 +81,10 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-const NotesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.notes}>
+const Notes = () => (
+  <SecurityRoutePageWrapper pageName={SecurityPageName.notes}>
     <NotesContainer />
-    <SpyRoute pageName={SecurityPageName.notes} />
-  </TrackApplicationView>
+  </SecurityRoutePageWrapper>
 );
 
 export const ManagementContainer = memo(() => {
@@ -163,7 +163,7 @@ export const ManagementContainer = memo(() => {
       />
 
       {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
       )}
 
       {canReadEndpointList && (

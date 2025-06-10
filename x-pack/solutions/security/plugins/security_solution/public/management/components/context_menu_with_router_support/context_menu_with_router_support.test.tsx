@@ -99,11 +99,9 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   it('should close menu when a menu item is clicked and call menu item onclick callback', async () => {
     render();
     clickMenuTriggerButton();
-    await act(async () => {
-      const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
-      fireEvent.click(renderResult.getByTestId('menu-item-one'));
-      await menuPanelRemoval;
-    });
+    const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
+    fireEvent.click(renderResult.getByTestId('menu-item-one'));
+    await menuPanelRemoval;
 
     expect(getContextMenuPanel()).toBeNull();
   });

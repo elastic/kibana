@@ -24,7 +24,8 @@
     "@kbn/wc-index-schema-builder",
     "@kbn/wc-genai-utils",
     "@kbn/inference-plugin",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*"

@@ -1,6 +1,8 @@
 disabled:
   # Stateful base config for deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
+  - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
+
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
   - src/platform/test/functional/firefox/config.base.ts
@@ -151,11 +153,6 @@ enabled:
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
-  - x-pack/test/api_integration/apis/management/config.ts
-  - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
-  - x-pack/test/api_integration/apis/ml/config.ts
-  - x-pack/test/api_integration/apis/monitoring/config.ts
-  - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
@@ -164,7 +161,6 @@ enabled:
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
-  - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
@@ -174,6 +170,7 @@ enabled:
   - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
+  - x-pack/test/fleet_tasks/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
@@ -192,6 +189,7 @@ enabled:
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
@@ -270,11 +268,8 @@ enabled:
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/functional_search/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
-  - x-pack/test/monitoring_api_integration/config.ts
-  - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
@@ -284,10 +279,6 @@ enabled:
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/saved_object_api_integration/spaces_only/config.ts
-  - x-pack/test/saved_object_api_integration/user_profiles/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
@@ -312,6 +303,7 @@ enabled:
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/chips.config.ts
   - x-pack/test/security_api_integration/features.config.ts
+  - x-pack/test/security_api_integration/session_cookie.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_shard_missing.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
@@ -370,13 +362,19 @@ enabled:
   - x-pack/platform/test/api_integration/apis/console/config.ts
   - x-pack/platform/test/api_integration/apis/content_management/config.ts
   - x-pack/platform/test/api_integration/apis/features/config.ts
+  - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/logstash/config.ts
+  - x-pack/platform/test/api_integration/apis/management/config.ts
+  - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
+  - x-pack/platform/test/api_integration/apis/ml/config.ts
+  - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
+  - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/search/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
@@ -390,3 +388,12 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
+  - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
+  - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
+  - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
+  - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/plugin_api_integration/config.ts
+  - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts

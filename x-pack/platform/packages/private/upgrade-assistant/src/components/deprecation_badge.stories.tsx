@@ -13,13 +13,13 @@ const meta: Meta<typeof DeprecationBadge> = {
   component: DeprecationBadge,
   title: 'Upgrade Assistant/Deprecation Badge',
   argTypes: {
-    isCritical: {
+    level: {
       name: 'Deprecation is critical?',
       control: { type: 'boolean' },
     },
     isResolved: {
       name: 'Deprecation is resolved?',
-      control: { type: 'boolean' },
+      control: { type: 'select', options: ['none', 'info', 'warning', 'critical', 'fetch_error'] },
     },
   },
 };
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof DeprecationBadge>;
 
 export const Primary: Story = {
   args: {
-    isCritical: false,
+    level: 'info',
     isResolved: false,
   },
 };

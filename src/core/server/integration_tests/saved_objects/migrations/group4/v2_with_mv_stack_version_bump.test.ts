@@ -54,6 +54,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
 
     if (!beforeUpgrade) {
       Object.assign<typeof type, Partial<typeof type>>(type, {
+        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           1: {
             changes: [
@@ -90,6 +91,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
       name: 'test_mv',
       namespaceType: 'single',
       migrations: {},
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: {
           changes: [],
@@ -183,6 +185,8 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
       ...getBaseMigratorParams({ migrationAlgorithm: 'v2' }),
       logFilePath,
       types: [switchType, modelVersionType],
+      // add any removed type so it doesn't skip CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+      removedTypes: ['removedType'],
     });
     await runMigrations();
 

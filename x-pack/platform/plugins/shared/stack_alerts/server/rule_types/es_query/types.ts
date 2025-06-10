@@ -8,7 +8,7 @@
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import type { ActionContext } from './action_context';
-import type { EsQueryRuleState } from './rule_type_params';
+import type { EsQueryAlertState, EsQueryRuleState } from './rule_type_params';
 import type { ActionGroupId } from '../../../common/es_query';
 import type { StackAlertType } from '../types';
 
@@ -35,7 +35,7 @@ export type OnlyEsqlQueryRuleParams = Omit<
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   P,
   EsQueryRuleState,
-  {},
+  EsQueryAlertState,
   ActionContext,
   typeof ActionGroupId,
   StackAlertType

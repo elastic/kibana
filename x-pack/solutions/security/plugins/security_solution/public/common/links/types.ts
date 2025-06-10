@@ -122,9 +122,15 @@ export interface LinkItem {
    */
   title: string;
   /**
-   * Reserved for links management, this property is set automatically
+   * Flag indicating the link is not authorized for the current user due to RBAC permissions.
+   * This property is set automatically by the application links updater.
    * */
   unauthorized?: boolean;
+  /**
+   * Flag indicating the link is not available for the current product license/subscription.
+   * This property is set automatically by the application links updater.
+   * */
+  unavailable?: boolean;
   /**
    * Locations where the link is visible in the UI
    */

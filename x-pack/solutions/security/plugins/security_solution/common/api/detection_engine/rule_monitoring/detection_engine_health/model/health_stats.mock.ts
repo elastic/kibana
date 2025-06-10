@@ -64,6 +64,7 @@ const getEmptyHealthOverviewStats = (): HealthOverviewStats => {
     indexing_duration_ms: getZeroAggregatedMetric(),
     top_errors: [],
     top_warnings: [],
+    frozen_indices_queried_max_count: 0,
   };
 };
 

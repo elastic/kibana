@@ -31,11 +31,12 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/es-query",
     "@kbn/core-http-server-mocks",
-    "@kbn/spaces-plugin",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-utils",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/logging-mocks",
+    "@kbn/spaces-utils",
   ],
   "exclude": ["target/**/*"]
 }

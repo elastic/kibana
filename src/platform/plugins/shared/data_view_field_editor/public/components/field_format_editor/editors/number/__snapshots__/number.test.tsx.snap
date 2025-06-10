@@ -6,7 +6,7 @@ exports[`NumberFormatEditor should render normally 1`] = `
     helpText={
       <span>
         <EuiLink
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/numeral.html"
+          href="https://www.elastic.co/docs/explore-analyze/numeral-formatting"
           target="_blank"
         >
           <Memo(MemoizedFormattedMessage)

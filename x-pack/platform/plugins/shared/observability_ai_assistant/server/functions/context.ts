@@ -55,6 +55,9 @@ export function registerContextFunction({
         };
 
         if (!isKnowledgeBaseReady) {
+          resources.logger.warn(
+            'Knowledge base is not ready yet. Returning context function response without knowledge base entries.'
+          );
           return { content };
         }
 
