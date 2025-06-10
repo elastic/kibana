@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import * as i18n from './translations';
-
-import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
+import { AlertSelectionOld } from '../alert_selection/alert_selection_old';
+import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 export interface UseSettingsView {
   settingsView: React.ReactNode;
@@ -23,39 +32,77 @@ export interface UseSettingsView {
 }
 
 interface Props {
+  connectorId: string | undefined;
+  onConnectorIdSelected: (connectorId: string) => void;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;
-  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   settings: AlertsSelectionSettings;
+  showConnectorSelector: boolean;
+  stats: AttackDiscoveryStats | null;
 }
 
 export const useSettingsView = ({
+  connectorId,
+  onConnectorIdSelected,
   onSettingsReset,
   onSettingsSave,
   onSettingsChanged,
   settings,
+  showConnectorSelector,
+  stats,
 }: Props): UseSettingsView => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const [alertSummaryStackBy0, setAlertSummaryStackBy0] = useState<string>(DEFAULT_STACK_BY_FIELD);
   const [alertsPreviewStackBy0, setAlertsPreviewStackBy0] =
     useState<string>(DEFAULT_STACK_BY_FIELD);
 
-  const settingsView = useMemo(() => {
-    return (
-      <AlertSelection
-        alertsPreviewStackBy0={alertsPreviewStackBy0}
-        alertSummaryStackBy0={alertSummaryStackBy0}
-        filterManager={filterManager.current}
-        settings={settings}
-        onSettingsChanged={onSettingsChanged}
-        setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
-        setAlertSummaryStackBy0={setAlertSummaryStackBy0}
-      />
-    );
-  }, [alertSummaryStackBy0, alertsPreviewStackBy0, onSettingsChanged, settings]);
+  const settingsView = useMemo(
+    () =>
+      attackDiscoveryAlertsEnabled ? (
+        <AlertSelection
+          alertsPreviewStackBy0={alertsPreviewStackBy0}
+          alertSummaryStackBy0={alertSummaryStackBy0}
+          connectorId={connectorId}
+          filterManager={filterManager.current}
+          onConnectorIdSelected={onConnectorIdSelected}
+          onSettingsChanged={onSettingsChanged}
+          setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
+          setAlertSummaryStackBy0={setAlertSummaryStackBy0}
+          settings={settings}
+          showConnectorSelector={showConnectorSelector}
+          stats={stats}
+        />
+      ) : (
+        <>
+          <EuiSpacer size="s" />
+          <AlertSelectionOld
+            alertsPreviewStackBy0={alertsPreviewStackBy0}
+            alertSummaryStackBy0={alertSummaryStackBy0}
+            filterManager={filterManager.current}
+            onSettingsChanged={onSettingsChanged}
+            setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
+            setAlertSummaryStackBy0={setAlertSummaryStackBy0}
+            settings={settings}
+          />
+        </>
+      ),
+    [
+      alertSummaryStackBy0,
+      alertsPreviewStackBy0,
+      connectorId,
+      onConnectorIdSelected,
+      onSettingsChanged,
+      attackDiscoveryAlertsEnabled,
+      settings,
+      showConnectorSelector,
+      stats,
+    ]
+  );
 
   useEffect(() => {
     let isSubscribed = true;

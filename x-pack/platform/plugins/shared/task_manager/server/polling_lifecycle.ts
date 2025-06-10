@@ -8,8 +8,8 @@
 import type { Observable } from 'rxjs';
 import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional, none } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';

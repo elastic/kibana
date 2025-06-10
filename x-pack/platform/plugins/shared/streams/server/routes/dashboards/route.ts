@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
@@ -66,9 +67,7 @@ const listDashboardsRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
@@ -104,9 +103,7 @@ const linkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -147,9 +144,7 @@ const unlinkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -185,9 +180,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -244,9 +237,7 @@ const bulkDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

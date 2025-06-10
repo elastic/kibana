@@ -27,6 +27,8 @@ import {
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from './grouping_settings';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -117,6 +119,9 @@ const sourcererDataView = {
 };
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
+const dataViewSpec: DataViewSpec = { title: 'test' };
+const dataView: DataView = createStubDataView({ spec: dataViewSpec });
+
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
   accordionButtonContent: defaultGroupTitleRenderers,
@@ -124,6 +129,7 @@ const testProps: AlertsTableComponentProps = {
     aggregations: defaultGroupStatsAggregations,
     renderer: defaultGroupStatsRenderer,
   },
+  dataViewSpec: dataView.toSpec(),
   defaultFilters: [],
   defaultGroupingOptions,
   globalFilters: [],
@@ -131,12 +137,8 @@ const testProps: AlertsTableComponentProps = {
     query: 'query',
     language: 'language',
   },
-  hasIndexMaintenance: true,
-  hasIndexWrite: true,
   loading: false,
   renderChildComponent,
-  runtimeMappings: {},
-  signalIndexName: 'test',
   tableId: TableId.test,
 };
 
@@ -321,7 +323,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
@@ -334,7 +336,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -382,7 +384,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -431,7 +433,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     // level 2 pagination is reset
@@ -439,7 +441,7 @@ describe('GroupedAlertsTable', () => {
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-0')
         .getAttribute('aria-current')
-    ).toEqual('true');
+    ).toEqual('page');
     expect(
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-1')
@@ -485,11 +487,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });
@@ -534,11 +536,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });

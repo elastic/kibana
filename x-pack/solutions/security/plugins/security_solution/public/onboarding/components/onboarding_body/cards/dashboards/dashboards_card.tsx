@@ -80,6 +80,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
             items={DASHBOARDS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.dashboards}
           />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>

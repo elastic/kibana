@@ -10,7 +10,7 @@ import React from 'react';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
-import { StatusBadge } from './status_badge';
+import { StatusBadge } from '../../common/status_badge';
 
 export const createStatusColumn = (): TableColumn => {
   return {

@@ -619,7 +619,6 @@ const ReputationLinkComponent: React.FC<{
                 idx={id}
                 overflowIndexStart={overflowIndexStart}
                 url={urlTemplate}
-                data-test-subj="externalLinkComponent"
                 key={`reputationLink-${id}`}
               >
                 <>{showDomain ? domain : name ?? domain}</>

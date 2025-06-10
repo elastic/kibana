@@ -17,7 +17,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
-import { useEsqlMode } from '../../hooks/use_esql_mode';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -37,14 +36,6 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
    * Adhoc data views functionality
    */
   useAdHocDataViews();
-
-  /**
-   * State changes (data view, columns), when a text base query result is returned
-   */
-  useEsqlMode({
-    dataViews: services.dataViews,
-    stateContainer,
-  });
 
   /**
    * SavedSearch dependent initializing

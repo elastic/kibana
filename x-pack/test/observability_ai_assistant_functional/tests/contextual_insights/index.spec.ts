@@ -103,6 +103,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     describe('when there are no connectors', () => {
       it('should not show the contextual insight component', async () => {
         await navigateToError();
+
+        await new Promise((resolve, reject) => {
+          setTimeout(resolve, 30_000);
+        });
+
         await testSubjects.missingOrFail(ui.pages.contextualInsights.button);
       });
     });
@@ -122,7 +127,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        void proxy.interceptConversation('This error is nothing to worry about. Have a nice day!');
+        void proxy.interceptWithResponse('This error is nothing to worry about. Have a nice day!');
 
         await openContextualInsights();
 

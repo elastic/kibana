@@ -10,10 +10,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { Header } from '.';
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../assistant/use_assistant_availability');
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const defaultProps = {
   stats: null,
@@ -31,15 +35,33 @@ const defaultProps = {
 
 describe('Actions', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
     });
 
-    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
   });
 
-  it('renders the connector selector', () => {
+  it('renders the connector selector when the feature flag is false', () => {
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
     render(
       <TestProviders>
         <Header {...defaultProps} />
@@ -49,6 +71,18 @@ describe('Actions', () => {
     const connectorSelector = screen.getByTestId('addNewConnectorButton');
 
     expect(connectorSelector).toBeInTheDocument();
+  });
+
+  it('does NOT render the connector selector when the feature flag is true', () => {
+    render(
+      <TestProviders>
+        <Header {...defaultProps} />
+      </TestProviders>
+    );
+
+    const connectorSelector = screen.queryByTestId('addNewConnectorButton');
+
+    expect(connectorSelector).not.toBeInTheDocument();
   });
 
   it('does NOT render the connector selector when connectors are NOT configured', () => {
@@ -81,8 +115,17 @@ describe('Actions', () => {
     expect(onGenerate).toHaveBeenCalled();
   });
 
-  it('displays the cancel button when loading', () => {
+  it('displays the cancel button when loading and the feature flag is false', () => {
     const isLoading = true;
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
     render(
       <TestProviders>
@@ -95,8 +138,41 @@ describe('Actions', () => {
     expect(cancel).toBeInTheDocument();
   });
 
+  it('does NOT display the cancel button when loading and the feature flag is true', () => {
+    const isLoading = true;
+    const featureFlagValue = true;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
+    render(
+      <TestProviders>
+        <Header {...defaultProps} isLoading={isLoading} />
+      </TestProviders>
+    );
+
+    const cancel = screen.queryByTestId('cancel');
+
+    expect(cancel).not.toBeInTheDocument();
+  });
+
   it('invokes onCancel when the cancel button is clicked', () => {
     const isLoading = true;
+    const featureFlagValue = false;
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(featureFlagValue),
+        },
+      },
+    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+
     const onCancel = jest.fn();
 
     render(

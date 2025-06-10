@@ -2,21 +2,23 @@
 navigation_title: "Microsoft Teams"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/teams-action-type.html
+applies_to:
+  stack: all
+  serverless: all
 ---
 
 # Microsoft Teams connector and action [teams-action-type]
 
-
 The Microsoft Teams connector uses a webhook to send notifications.
-
 
 ## Create connectors in {{kib}} [define-teams-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-% TO DO: Use `:class: screenshot`
-![Teams connector](../images/teams-connector.png)
-
+:::{image} ../images/teams-connector.png
+:alt: Teams connector
+:screenshot:
+:::
 
 ### Connector configuration [teams-connector-configuration]
 
@@ -28,24 +30,23 @@ Name
 Webhook URL
 :   The URL of the incoming webhook. Refer to [Configure Microsoft Teams](#configuring-teams). If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
-
 ## Test connectors [teams-action-configuration]
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-% TO DO: Use `:class: screenshot`
-![Teams params test](../images/teams-params-test.png)
+:::{image} ../images/teams-params-test.png
+:alt: Teams params test
+:screenshot:
+:::
 
 Microsoft Teams actions have the following properties.
 
 Message
 :   The message text. Markdown, images, and other advanced formatting are not yet supported.
 
-
 ## Connector networking configuration [teams-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
 
 ## Configure Microsoft Teams [configuring-teams]
 
@@ -85,4 +86,3 @@ Microsoft 365 connectors are being [retired](https://devblogs.microsoft.com/micr
         ```
 
 5. Save the workflow and copy the HTTP POST URL from the first step. This is the URL required by the Microsoft Teams connector.
-

@@ -381,7 +381,7 @@
               "\nUsed for toast notifications."
             ],
             "signature": [
-              "NotificationsSetup"
+              "NotificationsStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,

@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     const supertest = getService('supertest');
     const USER_PROMPT = 'What is Kibana Lens?';
 
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         await chatComplete({
           userPrompt: USER_PROMPT,
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           when: () => true,
         });
 
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_PROMPT,
@@ -134,15 +134,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('The first request', () => {
-        it('contains the retrieve_elastic_doc function', () => {
+        it('enables the LLM to call `retrieve_elastic_doc`', () => {
+          expect(firstRequestBody.tool_choice).to.be('auto');
           expect(firstRequestBody.tools?.map((t) => t.function.name)).to.contain(
             'retrieve_elastic_doc'
           );
-        });
-
-        it('leaves the LLM to choose the correct tool by leave tool_choice as auto and passes tools', () => {
-          expect(firstRequestBody.tool_choice).to.be('auto');
-          expect(firstRequestBody.tools?.length).to.not.be(0);
         });
       });
 
@@ -173,16 +169,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lastMessage.content).to.be.a('string');
         });
 
-        it('should send 3 documents to the llm', () => {
-          expect(parsedContent.documents.length).to.be(3);
+        it('should send 1 document to the llm', () => {
+          expect(parsedContent.documents.length).to.be(1);
         });
 
-        it('should contain the word "lens" in the document content', () => {
-          const document = parsedContent.documents.find(
-            (doc) => doc.title === 'Enhancements and bug fixes'
-          );
+        it('should validate the structure and content of the retrieved document', () => {
+          const document = parsedContent.documents[0];
           expect(document).to.not.be(undefined);
-          expect(document?.content).to.contain('lens');
+          expect(document).to.eql({
+            title: 'Lens',
+            url: 'https://www.elastic.co/docs/explore-analyze/visualize/lens',
+            content:
+              '## Lens\nTo create a visualization, drag the data fields you want to visualize to the workspace, then Lens uses visualization best practices to apply the fields and create a visualization that best displays the data.\n\nWith Lens, you can:\n\n- Create area, line, and bar charts with layers to display multiple indices and chart types.\n- Change the aggregation function to change the data in the visualization.\n- Create custom tables.\n- Perform math on aggregations using Formula.\n- Use time shifts to compare the data in two time intervals, such as month over month.\n- Add annotations and reference lines.',
+            summarized: false,
+          });
         });
       });
     });

@@ -430,6 +430,55 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.getConnectorModel",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorModel",
+        "description": [
+          "\nGuesses the model based on the connector type and configuration.\n\nInferred from the type for \"legacy\" connectors,\nand from the provider config field for inference connectors."
+        ],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
+          },
+          ") => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/get_connector_model.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.getConnectorModel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/get_connector_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.getConnectorProvider",
         "type": "Function",
         "tags": [],
@@ -3547,16 +3596,16 @@
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentImage",
-            "text": "MessageContentImage"
+            "section": "def-common.MessageContentText",
+            "text": "MessageContentText"
           },
           " | ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.MessageContentText",
-            "text": "MessageContentText"
+            "section": "def-common.MessageContentImage",
+            "text": "MessageContentImage"
           },
           ")[]"
         ],

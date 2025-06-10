@@ -84,6 +84,7 @@
     "@kbn/code-editor",
     "@kbn/logging",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-test-helpers-model-versions",
   ],
   "exclude": [
     "target/**/*",

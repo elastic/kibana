@@ -30,7 +30,6 @@ import {
   RunnableSequence,
   RunnableLambda,
 } from '@langchain/core/runnables';
-import type { Logger } from '@kbn/logging';
 import {
   InferenceConnector,
   ChatCompleteAPI,
@@ -43,6 +42,7 @@ import {
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
+  ConnectorTelemetryMetadata,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -60,11 +60,11 @@ import {
 export interface InferenceChatModelParams extends BaseChatModelParams {
   connector: InferenceConnector;
   chatComplete: ChatCompleteAPI;
-  logger: Logger;
   functionCallingMode?: FunctionCallingMode;
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -96,6 +96,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   private readonly connector: InferenceConnector;
   // @ts-ignore unused for now
   private readonly logger: Logger;
+  private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -106,7 +107,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     super(args);
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
-    this.logger = args.logger;
+    this.telemetryMetadata = args.telemetryMetadata;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -161,7 +162,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   getLsParams(options: this['ParsedCallOptions']): LangSmithParams {
     const params = this.invocationParams(options);
     return {
-      ls_provider: `inference-${getConnectorProvider(this.connector)}`,
+      ls_provider: `inference-${getConnectorProvider(this.connector).toLowerCase()}`,
       ls_model_name: options.model ?? this.model ?? getConnectorDefaultModel(this.connector),
       ls_model_type: 'chat',
       ls_temperature: params.temperature ?? this.temperature ?? undefined,
@@ -186,6 +187,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal ?? this.signal,
+      metadata: { connectorTelemetry: this.telemetryMetadata },
     };
   }
 

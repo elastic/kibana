@@ -17,24 +17,18 @@ import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '.
 import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
 
 const privMonLinks: LinkItem = {
-  id: SecurityPageName.privilegedUserMonitoring,
+  id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   landingImage: privilegedUserMonitoringPageImg,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.privilegedUserMonitoring.Description',
-    {
-      defaultMessage: '???????????????????', // TODO
-    }
-  ),
   path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.privilegedUserMonitoring', {
-      defaultMessage: 'Privileged User Monitoring',
+      defaultMessage: 'Privileged user monitoring',
     }),
   ],
   experimentalKey: 'privilegeMonitoringEnabled',
-  hideTimeline: true,
-  skipUrlState: true,
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };
@@ -46,7 +40,7 @@ export const entityAnalyticsLinks: LinkItem = {
   globalNavPosition: 10,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
   ],
   links: [privMonLinks],

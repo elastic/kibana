@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 
 import {
   ALERT_SUPPRESSION_START,

@@ -42,6 +42,9 @@ import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import { isRuleSnoozed } from './application/lib';
+import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
+import { getUntrackModalLazy } from './common/get_untrack_modal';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -119,8 +122,22 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleSnoozeModal: (props) => {
       return getRuleSnoozeModalLazy(props);
     },
-    getRulesSettingsLink: () => {
-      return getRulesSettingsLinkLazy();
+    getRulesSettingsLink: (props) => {
+      return getRulesSettingsLinkLazy(props);
+    },
+    getUntrackModal: (props) => {
+      return getUntrackModalLazy(props);
+    },
+    getRuleHelpers: (rule) => {
+      return {
+        isRuleSnoozed: isRuleSnoozed({
+          isSnoozedUntil: rule.isSnoozedUntil,
+          muteAll: rule.muteAll,
+        }),
+        getNextRuleSnoozeSchedule: getNextRuleSnoozeSchedule({
+          snoozeSchedule: rule.snoozeSchedule,
+        }),
+      };
     },
   };
 }

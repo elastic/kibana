@@ -112,6 +112,8 @@
               "UserProfileService",
               ">; rendering: jest.Mocked<",
               "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               "HttpSetupMock",
               "; notifications: ",
@@ -119,8 +121,8 @@
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-common.MockedKeys",
-                "text": "MockedKeys"
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
               },
               "<",
               "NotificationsSetup",
@@ -237,6 +239,8 @@
               "UserProfileService",
               ">; rendering: jest.Mocked<",
               "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
             "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",

@@ -83,6 +83,10 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
+    rulesSettings: { enabled: true },
+    maintenanceWindow: { enabled: true },
+    disabledRuleTypes: true,
+    enabledRuleTypes: true,
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
     deprecate('maxEphemeralActionsPerAlert', '9.0.0', {

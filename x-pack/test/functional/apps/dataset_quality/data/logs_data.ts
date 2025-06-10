@@ -189,6 +189,40 @@ export function createDegradedFieldsRecord({
     });
 }
 
+export function createFailedLogRecord({
+  to,
+  count = 1,
+  dataset,
+  namespace = defaultNamespace,
+}: {
+  to: string;
+  count?: number;
+  dataset: string;
+  namespace?: string;
+}) {
+  return timerange(moment(to).subtract(count, 'minute'), moment(to))
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return Array(count)
+        .fill(0)
+        .flatMap((_, index) => [
+          log
+            .create()
+            .dataset(dataset)
+            .namespace(namespace)
+            .message(MESSAGE_LOG_LEVELS[0].message)
+            .logLevel('anyLogLevel')
+            .service(SERVICE_NAMES[0])
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+            })
+            .timestamp(timestamp),
+        ]);
+    });
+}
+
 export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
 export const defaultNamespace = 'default';
 export const productionNamespace = 'production';
@@ -220,4 +254,25 @@ export const ANOTHER_1024_CHARS =
 
 export const CONSISTENT_TAGS = [
   'this_is_here_to_remove_variance_introduced_by_the_geoip_processor',
+];
+
+export const processors = [
+  {
+    script: {
+      tag: 'normalize log level',
+      lang: 'painless',
+      source: `
+        String level = ctx['log.level'];
+        if ('info'.equals(level)) {
+          ctx['log.level'] = 'info';
+        } else if ('debug'.equals(level)) {
+          ctx['log.level'] = 'debug';
+        } else if ('error'.equals(level)) {
+          ctx['log.level'] = 'error';
+        } else {
+          throw new Exception("Not a valid log level");
+        }
+      `,
+    },
+  },
 ];

@@ -17,6 +17,7 @@ import {
   getCloudRegion,
   getCloudProvider,
   MORE_THAN_1024_CHARS,
+  STACKTRACE_MESSAGE,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
@@ -125,6 +126,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             'cloud.availability_zone': isMalformed
               ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
               : `${cloudRegion}a`,
+            'error.stack_trace': isMalformed ? STACKTRACE_MESSAGE : undefined,
           })
           .timestamp(timestamp);
       };

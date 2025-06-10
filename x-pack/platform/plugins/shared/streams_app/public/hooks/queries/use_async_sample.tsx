@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Condition,
   SampleDocument,
-  WiredStreamGetResponse,
+  Streams,
   conditionToQueryDsl,
-  getFields,
+  getConditionFields,
   isAlwaysCondition,
 } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { useAbortController } from '@kbn/react-hooks';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../use_kibana';
 import { emptyEqualsToAlways } from '../../util/condition';
 
 interface Options {
   condition?: Condition;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
   size?: number;
-  streamDefinition: WiredStreamGetResponse;
+  streamDefinition: Streams.WiredStream.GetResponse;
 }
 
 export const useAsyncSample = (options: Options) => {
@@ -36,9 +38,11 @@ export const useAsyncSample = (options: Options) => {
     },
   } = useKibana();
 
+  const controller = useAbortController();
+
   // Documents
   const [isLoadingDocuments, toggleIsLoadingDocuments] = useToggle(false);
-  const [documentsError, setDocumentsError] = useState();
+  const [documentsError, setDocumentsError] = useState<Error | undefined>();
   const [documents, setDocuments] = useState<SampleDocument[]>([]);
 
   // Document counts / percentage
@@ -55,6 +59,10 @@ export const useAsyncSample = (options: Options) => {
     return condition && isAlwaysCondition(condition) ? undefined : condition;
   }, [options.condition]);
 
+  const refresh = useCallback(() => {
+    return setRefreshId((id) => id + 1);
+  }, []);
+
   useEffect(() => {
     if (!options.start || !options.end) {
       setDocuments([]);
@@ -66,22 +74,26 @@ export const useAsyncSample = (options: Options) => {
 
     // Documents
     toggleIsLoadingDocuments(true);
-    setDocuments([]);
     const documentSubscription = data.search
-      .search({
-        params: {
-          index: options.streamDefinition.stream.name,
-          body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
+      .search(
+        {
+          params: {
+            index: options.streamDefinition.stream.name,
+            body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
+          },
         },
-      })
+        { abortSignal: controller.signal }
+      )
       .subscribe({
         next: (result) => {
           if (!isRunningResponse(result)) {
             toggleIsLoadingDocuments(false);
-          }
-
-          if (result.rawResponse.hits?.hits) {
-            setDocuments((prev) => result.rawResponse.hits.hits.map((hit) => hit._source));
+            if (result.rawResponse.hits?.hits) {
+              setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
+            }
+            return;
+          } else if (!isEmpty(result.rawResponse.hits?.hits)) {
+            setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
           }
         },
         error: (e) => {
@@ -93,12 +105,15 @@ export const useAsyncSample = (options: Options) => {
     toggleIsLoadingDocumentCounts(true);
     setApproximateMatchingPercentage(undefined);
     const documentCountsSubscription = data.search
-      .search({
-        params: {
-          index: options.streamDefinition.stream.name,
-          body: getDocumentCountForSampleRateSearchBody(options),
+      .search(
+        {
+          params: {
+            index: options.streamDefinition.stream.name,
+            body: getDocumentCountForSampleRateSearchBody(options),
+          },
         },
-      })
+        { abortSignal: controller.signal }
+      )
       .pipe(
         filter((result) => !isRunningResponse(result)),
         switchMap((response) => {
@@ -111,17 +126,20 @@ export const useAsyncSample = (options: Options) => {
 
           const probability = calculateProbability(docCount);
 
-          return data.search.search({
-            params: {
-              index: options.streamDefinition.stream.name,
-              body: getDocumentCountsSearchBody(
-                options,
-                runtimeMappings,
-                probability,
-                convertedCondition
-              ),
+          return data.search.search(
+            {
+              params: {
+                index: options.streamDefinition.stream.name,
+                body: getDocumentCountsSearchBody(
+                  options,
+                  runtimeMappings,
+                  probability,
+                  convertedCondition
+                ),
+              },
             },
-          });
+            { abortSignal: controller.signal }
+          );
         })
       )
       .subscribe({
@@ -175,7 +193,7 @@ export const useAsyncSample = (options: Options) => {
     isLoadingDocumentCounts,
     documentCountsError,
     approximateMatchingPercentage,
-    refresh: () => setRefreshId((id) => id + 1),
+    refresh,
   };
 };
 
@@ -185,7 +203,10 @@ export type AsyncSample = ReturnType<typeof useAsyncSample>;
 // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
 // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
 // ingest in the painless condition checks.
-const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?: Condition) => {
+const getRuntimeMappings = (
+  streamDefinition: Streams.WiredStream.GetResponse,
+  condition?: Condition
+) => {
   if (!condition) return {};
 
   const wiredMappedFields =
@@ -195,7 +216,7 @@ const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?
   );
 
   return Object.fromEntries(
-    getFields(condition)
+    getConditionFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
       .map((field) => [
         field.name,

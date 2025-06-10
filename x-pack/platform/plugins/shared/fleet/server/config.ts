@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.3';
+const REGISTRY_SPEC_MAX_VERSION = '3.4';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -38,6 +38,9 @@ export const config: PluginConfigDescriptor = {
     agentless: {
       enabled: true,
       isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -49,6 +52,7 @@ export const config: PluginConfigDescriptor = {
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
     integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -164,6 +168,11 @@ export const config: PluginConfigDescriptor = {
                   ca: schema.maybe(schema.string()),
                 })
               ),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
         })
@@ -296,10 +305,12 @@ export const config: PluginConfigDescriptor = {
       ),
       autoUpgrades: schema.maybe(
         schema.object({
+          taskInterval: schema.maybe(schema.string()),
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

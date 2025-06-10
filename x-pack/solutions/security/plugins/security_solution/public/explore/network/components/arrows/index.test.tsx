@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
@@ -15,24 +15,24 @@ import { ArrowBody, ArrowHead } from '.';
 describe('arrows', () => {
   describe('ArrowBody', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ArrowBody height={3} />
         </TestProviders>
       );
-      expect(wrapper.find('ArrowBody')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
   describe('ArrowHead', () => {
     test('it renders an arrow head icon', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <ArrowHead direction={'arrowLeft'} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="arrow-icon"]').first().exists()).toBe(true);
+      expect(screen.getByTestId('arrow-icon')).toBeInTheDocument();
     });
   });
 });

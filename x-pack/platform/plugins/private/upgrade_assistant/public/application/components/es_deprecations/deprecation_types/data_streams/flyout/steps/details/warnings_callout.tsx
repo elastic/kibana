@@ -19,7 +19,7 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
   learnMoreUrl,
 }) => {
   return (
-    <EuiCallOut color="primary">
+    <EuiCallOut color="primary" data-test-subj="dataStreamMigrationWarningsCallout">
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"

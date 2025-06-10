@@ -7,16 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '../../comparators';
+import { WithAllKeys } from '../../state_manager';
+import { initializeStateManager } from '../../state_manager/state_manager';
+import { StateComparators, StateManager } from '../../state_manager/types';
 import { PublishesWritableDescription } from './publishes_description';
-import { PublishesWritableTitle } from './publishes_title';
+import { PublishesTitle, PublishesWritableTitle } from './publishes_title';
 
 export interface SerializedTitles {
   title?: string;
   description?: string;
   hidePanelTitles?: boolean;
 }
+
+const defaultTitlesState: WithAllKeys<SerializedTitles> = {
+  title: undefined,
+  description: undefined,
+  hidePanelTitles: undefined,
+};
+
+export const titleComparators: StateComparators<SerializedTitles> = {
+  title: 'referenceEquality',
+  description: 'referenceEquality',
+  hidePanelTitles: (a, b) => Boolean(a) === Boolean(b),
+};
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
@@ -29,44 +42,23 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
 export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
 
 export const initializeTitleManager = (
-  rawState: SerializedTitles
-): {
-  api: TitlesApi;
-  comparators: StateComparators<SerializedTitles>;
-  serialize: () => SerializedTitles;
+  initialTitlesState: SerializedTitles
+): StateManager<SerializedTitles> & {
+  api: {
+    hideTitle$: PublishesTitle['hideTitle$'];
+    setHideTitle: PublishesWritableTitle['setHideTitle'];
+  };
 } => {
-  const title$ = new BehaviorSubject<string | undefined>(rawState.title);
-  const description$ = new BehaviorSubject<string | undefined>(rawState.description);
-  const hideTitle$ = new BehaviorSubject<boolean | undefined>(rawState.hidePanelTitles);
-
-  const setTitle = (value: string | undefined) => {
-    if (value !== title$.value) title$.next(value);
-  };
-  const setHideTitle = (value: boolean | undefined) => {
-    if (value !== hideTitle$.value) hideTitle$.next(value);
-  };
-  const setDescription = (value: string | undefined) => {
-    if (value !== description$.value) description$.next(value);
-  };
-
+  const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
   return {
+    ...stateManager,
     api: {
-      title$,
-      hideTitle$,
-      setTitle,
-      setHideTitle,
-      description$,
-      setDescription,
+      ...stateManager.api,
+      // SerializedTitles defines hideTitles as hidePanelTitles
+      // This state is persisted and this naming conflict will be resolved TBD
+      // add named APIs that match interface names as a work-around
+      hideTitle$: stateManager.api.hidePanelTitles$,
+      setHideTitle: stateManager.api.setHidePanelTitles,
     },
-    comparators: {
-      title: [title$, setTitle],
-      description: [description$, setDescription],
-      hidePanelTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
-    } as StateComparators<SerializedTitles>,
-    serialize: () => ({
-      title: title$.value,
-      hidePanelTitles: hideTitle$.value,
-      description: description$.value,
-    }),
   };
 };

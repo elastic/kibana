@@ -82,7 +82,6 @@ export interface OwnProps {
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
-  showLegend?: boolean;
   globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
@@ -103,12 +102,11 @@ const StatefulTopNComponent: React.FC<Props> = ({
   kqlMode,
   onFilterAdded,
   paddingSize,
-  showLegend,
   scopeId,
   toggleTopN,
 }) => {
   const { uiSettings } = useKibana().services;
-  const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  const { from, deleteQuery, to } = useGlobalTime();
 
   const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
   const applyGlobalQueriesAndFilters = !isActiveTimeline(scopeId ?? '');
@@ -149,7 +147,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   return (
     <TopN
       filterQuery={combinedQueries?.filterQuery}
-      data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}
       field={field as AlertsStackByField}
@@ -162,7 +159,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       setAbsoluteRangeDatePickerTarget={
         isActiveTimeline(scopeId ?? '') ? InputsModelId.timeline : InputsModelId.global
       }
-      setQuery={setQuery}
       scopeId={scopeId}
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}

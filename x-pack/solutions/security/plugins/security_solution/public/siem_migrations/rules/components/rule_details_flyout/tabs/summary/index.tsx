@@ -13,7 +13,7 @@ import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { USER_AVATAR_ITEM_TEST_ID } from '../../../../../../common/components/user_profiles/test_ids';
 import { useBulkGetUserProfiles } from '../../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import { type RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleTranslationResult,
   SIEM_MIGRATIONS_ASSISTANT_USER,
@@ -21,19 +21,19 @@ import {
 import * as i18n from './translations';
 
 interface SummaryTabProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
 }
 
-export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration }) => {
+export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ migrationRule }) => {
   const userProfileIds = useMemo<Set<string>>(() => {
-    if (!ruleMigration.comments) {
+    if (!migrationRule.comments) {
       return new Set();
     }
-    return ruleMigration.comments.reduce((acc, { created_by: createdBy }) => {
+    return migrationRule.comments.reduce((acc, { created_by: createdBy }) => {
       if (createdBy !== SIEM_MIGRATIONS_ASSISTANT_USER) acc.add(createdBy);
       return acc;
     }, new Set<string>());
-  }, [ruleMigration.comments]);
+  }, [migrationRule.comments]);
   const { isLoading: isLoadingUserProfiles, data: userProfiles } = useBulkGetUserProfiles({
     uids: userProfileIds,
   });
@@ -42,7 +42,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration
     if (isLoadingUserProfiles) {
       return undefined;
     }
-    return ruleMigration.comments?.map(
+    return migrationRule.comments?.map(
       ({ message, created_at: createdAt, created_by: createdBy }) => {
         const profile = userProfiles?.find(({ uid }) => uid === createdBy);
         const isCreatedByAssistant = createdBy === SIEM_MIGRATIONS_ASSISTANT_USER || !profile;
@@ -63,7 +63,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration
             />
           ),
           event:
-            ruleMigration.translation_result === RuleTranslationResult.UNTRANSLATABLE
+            migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE
               ? i18n.COMMENT_EVENT_UNTRANSLATABLE
               : i18n.COMMENT_EVENT_TRANSLATED,
           timestamp: moment(createdAt).format('ll'), // Date formats https://momentjs.com/docs/#/displaying/format/
@@ -73,8 +73,8 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration
     );
   }, [
     isLoadingUserProfiles,
-    ruleMigration.comments,
-    ruleMigration.translation_result,
+    migrationRule.comments,
+    migrationRule.translation_result,
     userProfiles,
   ]);
 
