@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the degraded icon in the leading control column if degraded doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 2);
+          const cellElement = await dataGrid.getCellElement(1, 1);
           const degradedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
           expect(degradedButton).to.not.be.empty();
         });
