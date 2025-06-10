@@ -280,7 +280,7 @@ describe('ConnectorUsageReportingTask', () => {
     });
   });
 
-  it('returns the existing state and logs a warnin when the usage API is disabled', async () => {
+  it('returns the existing state and logs a warning when the usage API is disabled', async () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
 

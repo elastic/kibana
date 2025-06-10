@@ -36,7 +36,7 @@ export class ConnectorUsageReportingTask {
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
   private readonly usageApiUrl: string;
-  private readonly enabled: boolean = true;
+  private readonly enabled: boolean;
 
   constructor({
     logger,
@@ -57,7 +57,7 @@ export class ConnectorUsageReportingTask {
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
     this.usageApiUrl = `${config.url}${USAGE_API_PATH}`;
-    this.enabled = config.enabled;
+    this.enabled = config.enabled ?? true;
     const caCertificatePath = config.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
