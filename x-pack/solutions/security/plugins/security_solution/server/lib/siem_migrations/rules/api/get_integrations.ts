@@ -39,7 +39,7 @@ export const registerSiemRuleMigrationsIntegrationsRoute = (
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
             const relatedIntegrations: Record<string, RelatedIntegration> = {};
-            const packages = await ruleMigrationsClient.data.integrations.getIntegrationPackages();
+            const packages = await ruleMigrationsClient.data.integrations.getSecurityLogsPackages();
             packages?.forEach(({ id, version, integration }) => {
               relatedIntegrations[id] = { package: id, version, integration };
             });
