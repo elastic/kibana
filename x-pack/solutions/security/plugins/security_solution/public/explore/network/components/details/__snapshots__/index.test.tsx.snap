@@ -1,6 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`IP Overview Component rendering it renders the default IP Overview 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -32,14 +40,6 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div
@@ -356,6 +356,14 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
 `;
 
 exports[`IP Overview Component rendering it renders the side panel IP overview 1`] = `
+.c1 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c1 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -387,14 +395,6 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
 }
 
 <div

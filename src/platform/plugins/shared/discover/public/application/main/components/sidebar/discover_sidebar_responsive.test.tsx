@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiThemeProvider } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -210,7 +210,9 @@ async function mountComponent(
       <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={appState}>
           <InternalStateProvider value={internalState}>
-            <DiscoverSidebarResponsive {...props} />
+            <EuiThemeProvider>
+              <DiscoverSidebarResponsive {...props} />
+            </EuiThemeProvider>
           </InternalStateProvider>
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
