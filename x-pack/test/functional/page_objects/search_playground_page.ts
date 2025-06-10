@@ -443,17 +443,29 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const modeSelectedValue = await testSubjects.getAttribute(mode, 'aria-pressed');
         expect(modeSelectedValue).to.be('true');
       },
-      async selectPageMode(mode: 'chatMode' | 'queryMode') {
+      async selectPageMode(mode: 'chatMode' | 'queryMode', playgroundId?: string) {
         await testSubjects.existOrFail(mode);
         await testSubjects.click(mode);
         switch (mode) {
           case 'queryMode':
-            expect(await browser.getCurrentUrl()).contain('/app/search_playground/search/query');
+            expect(await browser.getCurrentUrl()).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
           case 'chatMode':
             const url = await browser.getCurrentUrl();
-            expect(url).contain('/app/search_playground/search');
-            expect(url).not.contain('/app/search_playground/search/query');
+            expect(url).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search`
+                : '/app/search_playground/search'
+            );
+            expect(url).not.contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
         }
       },
@@ -552,6 +564,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const editorViewDiv = await codeEditor.findByClassName('view-lines');
         const queryResponse = await editorViewDiv.getVisibleText();
         expect(queryResponse).to.contain(text);
+      },
+    },
+    SavedPlaygroundPage: {
+      async expectPlaygroundNameHeader(name: string) {
+        await testSubjects.existOrFail('playgroundName');
+        const nameTitle = await testSubjects.find('playgroundName');
+        expect(await nameTitle.getVisibleText()).to.be(name);
       },
     },
   };
