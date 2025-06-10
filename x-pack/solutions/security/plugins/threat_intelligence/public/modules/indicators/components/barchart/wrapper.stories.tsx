@@ -10,7 +10,6 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
 import type { StoryObj } from '@storybook/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -27,19 +26,6 @@ export default {
 };
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
-
-const mockIndexPattern: DataView = {
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
-    } as DataViewField,
-    {
-      name: 'threat.feed.name',
-      type: 'string',
-    } as DataViewField,
-  ],
-} as DataView;
 
 const validDate: string = '1 Jan 2022 00:00:00 GMT';
 const numberOfDays: number = 1;
@@ -139,7 +125,6 @@ export const Default: StoryObj = {
           series={[]}
           field={mockField}
           onFieldChange={mockOnFieldChange}
-          indexPattern={mockIndexPattern}
         />
       </StoryProvidersComponent>
     );
@@ -167,7 +152,6 @@ export const InitialLoad: StoryObj = {
           isFetching={false}
           field={mockField}
           onFieldChange={mockOnFieldChange}
-          indexPattern={mockIndexPattern}
         />
       </StoryProvidersComponent>
     );
@@ -180,22 +164,22 @@ export const UpdatingData: StoryObj = {
   render: () => {
     const mockIndicators: ChartSeries[] = [
       {
-        x: '1 Jan 2022 06:00:00 GMT',
+        x: new Date('1 Jan 2022 06:00:00 GMT').getTime(),
         y: 0,
         g: '[Filebeat] AbuseCH Malware',
       },
       {
-        x: '1 Jan 2022 06:00:00 GMT',
+        x: new Date('1 Jan 2022 06:00:00 GMT').getTime(),
         y: 0,
         g: '[Filebeat] AbuseCH MalwareBazaar',
       },
       {
-        x: '1 Jan 2022 12:00:00 GMT',
+        x: new Date('1 Jan 2022 12:00:00 GMT').getTime(),
         y: 25,
         g: '[Filebeat] AbuseCH Malware',
       },
       {
-        x: '1 Jan 2022 18:00:00 GMT',
+        x: new Date('1 Jan 2022 18:00:00 GMT').getTime(),
         y: 15,
         g: '[Filebeat] AbuseCH MalwareBazaar',
       },
@@ -218,7 +202,6 @@ export const UpdatingData: StoryObj = {
           isFetching={true}
           field={mockField}
           onFieldChange={mockOnFieldChange}
-          indexPattern={mockIndexPattern}
         />
       </StoryProvidersComponent>
     );

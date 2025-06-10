@@ -125,6 +125,7 @@ describe('Network Details', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
+      sourcererDataView: {},
     });
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
@@ -145,6 +146,7 @@ describe('Network Details', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
+      sourcererDataView: {},
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
@@ -165,6 +167,7 @@ describe('Network Details', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
+      sourcererDataView: {},
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
@@ -187,6 +190,7 @@ describe('Network Details', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
+      sourcererDataView: {},
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,

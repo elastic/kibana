@@ -104,7 +104,7 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readFlappingSettingsUI = true)', async () => {
@@ -130,7 +130,7 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readQueryDelaySettingsUI = true)', async () => {
@@ -156,19 +156,19 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('clicking the settings link opens the rules settings modal', async () => {
     const result = render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+      expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
     });
 
     await userEvent.click(result.getByText('Settings'));
 
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);
+      expect(result.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
   });
 
