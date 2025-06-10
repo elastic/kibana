@@ -37,7 +37,7 @@ export function transformSearchSourceOut(kibanaSavedObjectMeta: unknown): {
 
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
-    return {};
+    return { kibanaSavedObjectMeta: {} };
   }
   // Dashboards do not yet support ES|QL (AggregateQuery) in the search source
   return {

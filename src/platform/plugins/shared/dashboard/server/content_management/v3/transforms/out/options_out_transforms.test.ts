@@ -13,13 +13,13 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_managem
 describe('transformOptionsOut', () => {
   it('should parse JSON and set default options', () => {
     const optionsJSON = JSON.stringify({});
-    const result = transformOptionsOut(optionsJSON);
+    const { options: result } = transformOptionsOut(optionsJSON);
     expect(result).toEqual(DEFAULT_DASHBOARD_OPTIONS);
   });
 
   it('should override default options with provided options', () => {
     const optionsJSON = JSON.stringify({ hidePanelTitles: true });
-    const result = transformOptionsOut(optionsJSON);
+    const { options: result } = transformOptionsOut(optionsJSON);
     expect(result).toEqual({
       ...DEFAULT_DASHBOARD_OPTIONS,
       hidePanelTitles: true,
@@ -31,7 +31,7 @@ describe('transformOptionsOut', () => {
       hidePanelTitles: true,
       unsupportedOption: 'value',
     });
-    const result = transformOptionsOut(optionsJSON);
+    const { options: result } = transformOptionsOut(optionsJSON);
     expect(result).toEqual({
       ...DEFAULT_DASHBOARD_OPTIONS,
       hidePanelTitles: true,
