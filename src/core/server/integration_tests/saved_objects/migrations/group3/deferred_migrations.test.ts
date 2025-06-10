@@ -54,18 +54,15 @@ describe('deferred migrations', () => {
         '1.0.0': jest.fn(noop),
         '2.0.0': jest.fn(noop),
         '3.0.0': {
-          // @ts-expect-error
           deferred: true,
           transform: jest.fn(noop),
         },
         '4.0.0': jest.fn(noop),
         '5.0.0': {
-          // @ts-expect-error
           deferred: true,
           transform: jest.fn(noop),
         },
         '6.0.0': {
-          // @ts-expect-error
           deferred: true,
           transform: jest.fn(noop),
         },
