@@ -23,7 +23,7 @@ describe('transformPanelsIn', () => {
     jest.clearAllMocks();
   });
 
-  it('should transform panels', () => {
+  it('should transform panels', async () => {
     const panels = [
       {
         type: 'foo',
@@ -54,7 +54,7 @@ describe('transformPanelsIn', () => {
         ],
       },
     ];
-    const { panelsJSON, sections, references } = transformPanelsIn(
+    const { panelsJSON, sections, references } = await transformPanelsIn(
       panels as DashboardPanel[],
       embeddableStartMock
     );
