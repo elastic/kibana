@@ -1104,6 +1104,8 @@
       "@kbn/inference-langchain/*": ["x-pack/platform/packages/shared/ai-infra/inference-langchain/*"],
       "@kbn/inference-plugin": ["x-pack/platform/plugins/shared/inference"],
       "@kbn/inference-plugin/*": ["x-pack/platform/plugins/shared/inference/*"],
+      "@kbn/inference-tracing": ["x-pack/platform/packages/shared/kbn-inference-tracing"],
+      "@kbn/inference-tracing/*": ["x-pack/platform/packages/shared/kbn-inference-tracing/*"],
       "@kbn/infra-forge": ["x-pack/platform/packages/private/kbn-infra-forge"],
       "@kbn/infra-forge/*": ["x-pack/platform/packages/private/kbn-infra-forge/*"],
       "@kbn/infra-plugin": ["x-pack/solutions/observability/plugins/infra"],

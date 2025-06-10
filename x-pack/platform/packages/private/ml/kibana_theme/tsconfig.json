@@ -16,5 +16,11 @@
   "kbn_references": [
     "@kbn/ui-theme",
     "@kbn/core-theme-browser",
+    "@kbn/inference-langchain",
+    "@kbn/zod",
+    "@kbn/utility-types",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-server",
+    "@kbn/inference-common",
   ]
 }
