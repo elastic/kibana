@@ -31,6 +31,10 @@ import {
   createTracesContextServiceMock,
 } from '@kbn/discover-utils/src/__mocks__';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
+
+export const FEATURE_ID_1 = 'discover:feature1';
+export const FEATURE_ID_2 = 'discover:feature2';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -65,6 +69,7 @@ export const createContextAwarenessMocks = ({
 
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
+    restrictedToProductFeature: FEATURE_ID_1,
     profile: {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
@@ -193,5 +198,10 @@ const createProfileProviderServicesMock = () => {
     logsContextService: createLogsContextServiceMock(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     tracesContextService: createTracesContextServiceMock(),
-  } as ProfileProviderServices;
+    core: {
+      pricing: pricingServiceMock.createStartContract() as ReturnType<
+        typeof pricingServiceMock.createStartContract
+      >,
+    },
+  } as unknown as ProfileProviderServices;
 };

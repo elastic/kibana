@@ -8,7 +8,7 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { createContextAwarenessMocks } from '../__mocks__';
+import { FEATURE_ID_1, FEATURE_ID_2, createContextAwarenessMocks } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
@@ -89,6 +89,94 @@ describe('registerEnabledProfileProviders', () => {
       context,
     });
     expect(rootProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
+  });
+
+  it('should register restricted profile when product feature is available', async () => {
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      dataSourceProfileProviderMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+
+    // Mock feature availability
+    jest
+      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
+      .mockImplementation((featureId) => {
+        if (featureId === FEATURE_ID_1) {
+          return true;
+        }
+        return false;
+      });
+
+    // Sanity check
+    expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).toBeTruthy();
+
+    registerEnabledProfileProviders({
+      profileService: dataSourceProfileServiceMock,
+      providers: [dataSourceProfileProviderMock],
+      enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
+    });
+    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
+    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+      rootContext,
+      dataSource: createEsqlDataSource(),
+      query: { esql: 'from my-example-logs' },
+    });
+
+    const profile = dataSourceProfileServiceMock.getProfile({ context: dataSourceContext });
+    const baseImpl = () => ({});
+    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
+    expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledTimes(1);
+    expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
+      context: dataSourceContext,
+    });
+  });
+
+  it('should not register restricted profile when product feature is not available', async () => {
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      dataSourceProfileProviderMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+
+    // Mock feature availability
+    jest
+      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
+      .mockImplementation((featureId) => {
+        if (featureId === FEATURE_ID_2) {
+          return true;
+        }
+        return false;
+      });
+
+    // Sanity check
+    expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).not.toBeTruthy();
+
+    registerEnabledProfileProviders({
+      profileService: dataSourceProfileServiceMock,
+      providers: [dataSourceProfileProviderMock],
+      enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
+    });
+    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
+    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+      rootContext,
+      dataSource: createEsqlDataSource(),
+      query: { esql: 'from my-example-logs' },
+    });
+
+    const profile = dataSourceProfileServiceMock.getProfile({ context: dataSourceContext });
+    const baseImpl = () => ({});
+    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
+    expect(dataSourceProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
+    expect(profile).toMatchObject({});
   });
 });
 
