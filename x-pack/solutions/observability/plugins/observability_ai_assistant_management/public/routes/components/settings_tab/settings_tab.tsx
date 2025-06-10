@@ -132,6 +132,7 @@ export function SettingsTab() {
                 values={{
                   link: (
                     <EuiLink
+                      data-test-subj="observabilityAiAssistantManagementSettingsTabAdditionalCostsIncurLink"
                       href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
                       target="_blank"
                     >
