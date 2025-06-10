@@ -8,17 +8,20 @@ import {
   ActorRefFrom,
   MachineImplementationsFrom,
   SnapshotFrom,
+  assertEvent,
   assign,
   sendTo,
   setup,
 } from 'xstate5';
 import { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { isEqual, omit } from 'lodash';
 import {
   DataSourceInput,
   DataSourceContext,
   DataSourceEvent,
   DataSourceMachineDeps,
+  DataSourceToParentEvent,
 } from './types';
 import {
   createDataCollectionFailureNofitier,
@@ -45,33 +48,36 @@ export const dataSourceMachine = setup({
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNofitier),
     storeDataSource: assign(
       ({ context }, params: { dataSource: EnrichmentDataSourceWithUIAttributes }) => ({
-        dataSource: {
-          ...params.dataSource,
-          id: context.dataSource.id,
-        },
+        dataSource: { ...params.dataSource, id: context.dataSource.id },
       })
     ),
-    storeData: assign((_, params: { data: SampleDocument[] }) => ({
-      data: params.data,
+    storeData: assign((_, params: { data: SampleDocument[] }) => ({ data: params.data })),
+    toggleDataSourceActivity: assign(({ context }) => ({
+      dataSource: { ...context.dataSource, enabled: !context.dataSource.enabled },
     })),
-    notifyChangeEventToParent: sendTo(
+    notifyParent: sendTo(
       ({ context }) => context.parentRef,
-      ({ context }) => ({ type: 'dataSource.change', id: context.dataSource.id })
-    ),
-    notifyDataChangeToParent: sendTo(
-      ({ context }) => context.parentRef,
-      ({ context }) => ({ type: 'dataSource.dataChange', id: context.dataSource.id })
-    ),
-    notifyDeleteEventToParent: sendTo(
-      ({ context }) => context.parentRef,
-      ({ context }) => ({ type: 'dataSource.delete', id: context.dataSource.id })
+      ({ context }, params: { eventType: DataSourceToParentEvent['type'] }) => ({
+        type: params.eventType,
+        id: context.dataSource.id,
+      })
     ),
   },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
+    isDeletable: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
+    shouldCollectData: ({ context, event }) => {
+      assertEvent(event, 'dataSource.change');
+      /**
+       * Determines if the dataSource update contains substantive changes.
+       * Ignores cosmetic changes like name updates that don't affect functionality.
+       */
+      const ignoredProps = ['name'];
+      return !isEqual(omit(context.dataSource, ignoredProps), omit(event.dataSource, ignoredProps));
+    },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgB0uAdvnNgDYBukAxANoAMAuoqAA7awCWaftnJcQAD0QAmABwBGEqwBsAdgCsATgAsW1nJmsVSrQBoQAT0RyNSkip1brGgMxaVzmWq0Bfb2dQYOATEZJTU9EzMcpxIILwCQiJikghqzhqKrGpyanrKKjLuZpYI1rb2Ok6u7p4+fiABWHhEpGDkKABGNEyNQS0kaNhQUN0AgoRCdILmbDE8fILCorEpGu6KGtkuzvbKssWISnokckcyzs5KO1rOUs6+-uhNwa3tXT1PfSGEABYo5DBZmJ4oskitEDItHYZFIlEocqwpLDDKYLIgNBpWCQXGp5BpYXJbpcHg1Ps0Qm1Ot0ICR+BBuoxeuTSL9-oCOMCFollqAUrsTq4cioVKxnHp9mjSvo1CQZHKNDJMaKpCo1iSmS8SJT3jSIGAOnhyIR+ACAMJ-AFwRlkzWsy1A2Ig7nJKyimVKGzGCqsTaig4IfEytSaVyqeFwtRKdU2-ra6kkPUGijGs0WmCwRjiWAYNCkFAAM1z+AAFBqWua2WAACL6w3EAAq-AAtmAAJTWwLMrVveOJusmqAVy2wB3zBJLF0IfmExxqYWi8Uyf1yLJQuF3GGQrRKJFSaOdzVxyAkGjYFAQAdVp6MMD4fDYfAkbg0dD5h9NhNPU20boTB-jQZ8FHOIuQncEEEcDIIy0NQpBgwxWB0Zc5HWDQ5DuYxzhFLw93qMsQgvWAqQ+A9+kGYYxgmfgpjQGYOUdUCwV5Q41mxVU9C0GxYM0f0jgUU5WBkD14RyZxsl8epyGwPV4FifCwE5ccmIkRAAFo5AUKQUIuSE1ncfErn9ITZXcVxdAMAzrH3Z5+goKhYFoBgIEU0EeRUiCpGXewSB2C5OK0WF8XsKM8JjCke0gFznXAy5oVheFciRI57CMjxFBDTjNhcJE6keUjwuImk6W6KKwOYhAlEjEgrkcbcd19JRlykH0fMq2C4IS-RrK+V5CoTWtkwHId01K5SUhXGCSE44LVRuU4FWXLIZBIbIMM2U5ZGFbquyPGlT3PS8nlGtyUkhOK4QRJKUWQj1sS0OVVUjAoYW2zVCMK47J3sDJdFuPQUJsNC5H9KR8TsXRt0VUH-LVCSgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgDEqGOBxAdBGADZhpgDaADALqKgAO2sASzQDsAO24gAHogBMAVjnUALAA4AbPLkqAjNqVK1KmQBoQAT0QB2agE45N1XJlsbNte7baAvl9PkseESk-pRB1GjYUFCMAIKEwgBuQmbsXEggfILCYhLSCEZK1NoazgDMTtqlNpWmFgi6bNRq2jKlKnKlpWyWamzyPn7oAVTBQ6E0EVGx8QJJaCnaabz8QiLi6XktSopKnnYqSlUq7bWIDU0tbR1dPX1yAyAhgTR0zPgAtgKiX1AkqRKZVY5DaIUraahgmQ6dQqGyWbTtSyneqHJoOGQyJSWNhqSxglSlB5PEa0JhgD5fH5-RYAlbZdagPIyNxNWGwyz6GzlLHIvSlNFKDFYnF4hGE3yPMbPMDUMCiFAAI0YEDIUpJhAAFihRDB-ulAfTcoh9LZdO5SoZ1FpDMjdoVDAo2Ls5LioeLBhRpbL5UrIKSFXhRIQfgBhLU6uAkSSwDDMagoABmbwAFMSgmHtTAACJgAO4INgAAqAneYAAlKrPSS5Yrlf7A8GdRmI7A9cssmsjQglDYZNQcZ42mVdnjbYKmm1mtoOdPXO7JVWwjXfRBqPRsCgID8s0MSOT8Nh8NQePR0AnD+9aEMQ9h6Ix4oe4hF8G2MnTOyD6i0VLZMWx7K0Fr2MiVT8s4sLdNoNhsGCehKD4EqiNgdDwOkabELSHbAoyiAALRyOCbDHJ0aiwaUSiVCY5h4So1g4kYCjbGwMFqDYRJqmErzkp83w6phQIMlIoKNGCnRVPI3RqIcpTItYdgOGoLpwrCGIyJY7GLjQy7Kvxhqfrh-JEQSFpkRRpQYnIyLyD+2LHL0alScxbESuhMraX6AgQIwukfjh9TlDYygcvIPTaDiVF1Po4Kke0sU2CoA5yOpLkcVpPp1nQeZBqG4YwKh7YCV2ULWNoHTtAolhyIK5RqGO0VXHFCW9AYGnDEu6V+uum7bkMPnYUJCCWL2TQYris6kXCEXGgiRSTgiRHmbR8EpZpMpbrAtaQH1gl5B0jSGD0JE9liU0ouC+iChNsKCnorXjGtDBkhA21dgBELdPFBKtM4WjIo0hzTgoVUDm4egcghXhAA */
   id: 'dataSource',
   context: ({ input }) => ({
     parentRef: input.parentRef,
@@ -82,9 +88,26 @@ export const dataSourceMachine = setup({
   initial: 'determining',
   on: {
     'dataSource.delete': {
-      guard: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
+      guard: 'isDeletable',
       target: '.deleted',
     },
+    'dataSource.toggleActivity': [
+      {
+        guard: 'isEnabled',
+        target: '.disabled',
+        actions: [
+          { type: 'toggleDataSourceActivity' },
+          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+        ],
+      },
+      {
+        target: '.enabled',
+        actions: [
+          { type: 'toggleDataSourceActivity' },
+          { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+        ],
+      },
+    ],
   },
   states: {
     determining: {
@@ -93,26 +116,25 @@ export const dataSourceMachine = setup({
     enabled: {
       initial: 'loadingData',
       on: {
-        'dataSource.change': {
-          target: '.debouncingChanges',
-          reenter: true,
-          actions: [
-            { type: 'storeDataSource', params: ({ event }) => event },
-            { type: 'notifyChangeEventToParent' },
-          ],
-        },
-        'dataSource.toggleActivity': {
-          target: 'disabled',
-          actions: [
-            {
-              type: 'storeDataSource',
-              params: ({ context }) => ({ dataSource: { ...context.dataSource, enabled: false } }),
-            },
-            { type: 'notifyChangeEventToParent' },
-          ],
-        },
+        'dataSource.change': [
+          {
+            guard: 'shouldCollectData',
+            target: '.debouncingChanges',
+            reenter: true,
+            actions: [
+              { type: 'storeDataSource', params: ({ event }) => event },
+              { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+            ],
+          },
+          {
+            actions: [
+              { type: 'storeDataSource', params: ({ event }) => event },
+              { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
+            ],
+          },
+        ],
       },
-      exit: [{ type: 'notifyDataChangeToParent' }],
+      exit: [{ type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } }],
       states: {
         idle: {},
         debouncingChanges: {
@@ -128,26 +150,22 @@ export const dataSourceMachine = setup({
               dataSource: context.dataSource,
               streamName: context.streamName,
             }),
-            onSnapshot: [
-              {
-                guard: ({ event }) => event.snapshot.context === undefined,
-              },
-              {
-                target: 'idle',
-                actions: [
-                  {
-                    type: 'storeData',
-                    params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
-                  },
-                  { type: 'notifyDataChangeToParent' },
-                ],
-              },
-            ],
+            onSnapshot: {
+              guard: ({ event }) => Array.isArray(event.snapshot.context),
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeData',
+                  params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
+                },
+                { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
+              ],
+            },
             onError: {
               target: 'idle',
               actions: [
                 { type: 'storeData', params: () => ({ data: [] }) },
-                { type: 'notifyDataChangeToParent' },
+                { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
                 { type: 'notifyDataCollectionFailure' },
               ],
             },
@@ -155,24 +173,11 @@ export const dataSourceMachine = setup({
         },
       },
     },
-    disabled: {
-      on: {
-        'dataSource.toggleActivity': {
-          target: 'enabled',
-          actions: [
-            {
-              type: 'storeDataSource',
-              params: ({ context }) => ({ dataSource: { ...context.dataSource, enabled: true } }),
-            },
-            { type: 'notifyChangeEventToParent' },
-          ],
-        },
-      },
-    },
+    disabled: {},
     deleted: {
       id: 'deleted',
       type: 'final',
-      entry: [{ type: 'notifyDeleteEventToParent' }],
+      entry: [{ type: 'notifyParent', params: { eventType: 'dataSource.delete' } }],
     },
   },
 });
