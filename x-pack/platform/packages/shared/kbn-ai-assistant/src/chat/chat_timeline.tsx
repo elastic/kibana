@@ -13,6 +13,7 @@ import { omit } from 'lodash';
 import {
   ChatActionClickPayload,
   ChatState,
+  KnowledgeBaseState,
   type Feedback,
   type Message,
   type ObservabilityAIAssistantChatService,
@@ -26,6 +27,7 @@ import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
+import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -107,7 +109,7 @@ const euiCommentListClassName = css`
   padding-bottom: 32px;
 `;
 
-const stickyElasticLlmCalloutContainerClassName = css`
+const stickyCalloutContainerClassName = css`
   position: sticky;
   top: 0;
   z-index: 1;
@@ -122,6 +124,7 @@ export function ChatTimeline({
   isConversationOwnedByCurrentUser,
   isArchived,
   showElasticLlmCalloutInChat,
+  knowledgeBase,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -196,10 +199,17 @@ export function ChatTimeline({
     anonymizationEnabled,
   ]);
 
+  const showKnowledgeBaseReindexingCallout =
+    knowledgeBase.status.value?.enabled &&
+    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.isReIndexing;
   return (
     <EuiCommentList className={euiCommentListClassName}>
+      <div className={stickyCalloutContainerClassName}>
+        {showKnowledgeBaseReindexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+      </div>
       {showElasticLlmCalloutInChat ? (
-        <div className={stickyElasticLlmCalloutContainerClassName}>
+        <div className={stickyCalloutContainerClassName}>
           <ElasticLlmConversationCallout />
         </div>
       ) : null}
