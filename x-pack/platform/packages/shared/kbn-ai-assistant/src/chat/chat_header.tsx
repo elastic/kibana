@@ -209,25 +209,25 @@ export function ChatHeader({
 
             <EuiFlexItem grow={false}>
               {!!elasticManagedLlm && !tourCalloutDismissed ? (
-                  <ElasticLlmTourCallout
-                    zIndex={isConversationApp ? 999 : undefined}
-                    dismissTour={() => setTourCalloutDismissed(true)}
-                  >
-                    <ChatActionsMenu
-                      connectors={connectors}
-                      conversationId={conversationId}
-                      disabled={licenseInvalid}
-                      onCopyConversationClick={onCopyConversation}
-                    />
-                  </ElasticLlmTourCallout>
-                ) : (
+                <ElasticLlmTourCallout
+                  zIndex={isConversationApp ? 999 : undefined}
+                  dismissTour={() => setTourCalloutDismissed(true)}
+                >
                   <ChatActionsMenu
                     connectors={connectors}
                     conversationId={conversationId}
                     disabled={licenseInvalid}
                     onCopyConversationClick={onCopyConversation}
                   />
-                )}
+                </ElasticLlmTourCallout>
+              ) : (
+                <ChatActionsMenu
+                  connectors={connectors}
+                  conversationId={conversationId}
+                  disabled={licenseInvalid}
+                  onCopyConversationClick={onCopyConversation}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
