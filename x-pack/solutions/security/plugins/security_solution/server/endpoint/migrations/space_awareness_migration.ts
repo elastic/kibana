@@ -43,8 +43,8 @@ import type { ReferenceDataSavedObject } from '../lib/reference_data/types';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
 const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
-const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
-const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
+export const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
+export const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
   'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
 const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 

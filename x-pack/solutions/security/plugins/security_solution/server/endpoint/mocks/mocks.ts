@@ -103,7 +103,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const { esClient, fleetStartServices, savedObjectsServiceStart } =
+  const { esClient, fleetStartServices, savedObjectsServiceStart, exceptionListsClient } =
     createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
@@ -139,7 +139,8 @@ export const createMockEndpointAppContextService = (
     setup: jest.fn(),
     getLicenseService: jest.fn().mockReturnValue(licenseServiceMock),
     getFeatureUsageService: jest.fn().mockReturnValue(featureUsageMock),
-    getExceptionListsClient: jest.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
     getTelemetryService: jest.fn(),
