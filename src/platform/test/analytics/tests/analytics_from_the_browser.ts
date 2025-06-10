@@ -154,12 +154,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             event_type: 'test-plugin-lifecycle',
             context: initialContext,
             properties: { plugin: 'analyticsPluginA', step: 'setup' },
+            trace: null,
           },
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[startEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: reportEventContext,
             properties: { plugin: 'analyticsPluginA', step: 'start' },
+            trace: null,
           },
         ]);
       });

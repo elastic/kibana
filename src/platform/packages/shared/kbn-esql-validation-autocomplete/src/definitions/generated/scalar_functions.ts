@@ -90,6 +90,7 @@ const absDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -157,6 +158,7 @@ const acosDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=.9\n| EVAL acos=ACOS(a)'],
@@ -222,6 +224,7 @@ const asinDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=.9\n| EVAL asin=ASIN(a)'],
@@ -287,6 +290,7 @@ const atanDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=12.9\n| EVAL atan=ATAN(a)'],
@@ -552,6 +556,7 @@ const atan2Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)'],
@@ -596,6 +601,7 @@ const bitLengthDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -642,6 +648,7 @@ const byteLengthDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -709,6 +716,7 @@ const cbrtDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW d = 1000.0\n| EVAL c = CBRT(d)'],
@@ -773,6 +781,7 @@ const ceilDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL a=CEIL(a)'],
@@ -830,6 +839,7 @@ const cidrMatchDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -1120,6 +1130,7 @@ const coalesceDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
@@ -1208,6 +1219,7 @@ const concatDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -1274,6 +1286,7 @@ const cosDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL cos=COS(a)'],
@@ -1338,6 +1351,7 @@ const coshDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL cosh=COSH(a)'],
@@ -1584,6 +1598,7 @@ const dateDiffDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -1703,6 +1718,7 @@ const dateExtractDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -1810,6 +1826,7 @@ const dateFormatDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -1897,6 +1914,7 @@ const dateParseDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW date_string = "2022-05-06"\n| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)'],
@@ -1917,7 +1935,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'time_literal',
+          type: 'date_period',
           optional: false,
         },
         {
@@ -1982,6 +2000,7 @@ const dateTruncDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -2014,6 +2033,7 @@ const eDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW E()'],
@@ -2099,6 +2119,7 @@ const endsWithDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_E = ENDS_WITH(last_name, "d")'],
@@ -2163,6 +2184,7 @@ const expDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW d = 5.0\n| EVAL s = EXP(d)'],
@@ -2227,6 +2249,7 @@ const floorDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL a=FLOOR(a)'],
@@ -2271,6 +2294,7 @@ const fromBase64Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = "ZWxhc3RpYw=="\n| EVAL d = FROM_BASE64(a)'],
@@ -2511,6 +2535,7 @@ const greatestDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)'],
@@ -2596,6 +2621,7 @@ const hashDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -2863,6 +2889,7 @@ const hypotDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = 3.0, b = 4.0\n| EVAL c = HYPOT(a, b)'],
@@ -2907,6 +2934,7 @@ const ipPrefixDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -3189,6 +3217,7 @@ const leastDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)'],
@@ -3244,6 +3273,7 @@ const leftDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL left = LEFT(last_name, 3)'],
@@ -3288,6 +3318,7 @@ const lengthDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -3455,6 +3486,7 @@ const locateDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = "hello"\n| EVAL a_ll = LOCATE(a, "ll")'],
@@ -3760,6 +3792,7 @@ const logDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: (fnDef: ESQLFunction) => {
     const messages = [];
@@ -3851,6 +3884,7 @@ const log10Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: (fnDef: ESQLFunction) => {
     const messages = [];
@@ -3918,6 +3952,7 @@ const ltrimDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -4709,6 +4744,7 @@ const md5Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -5403,6 +5439,7 @@ const multiMatchDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -5685,6 +5722,7 @@ const mvAppendDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -5752,6 +5790,7 @@ const mvAvgDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=[3, 5, 1, 6]\n| EVAL avg_a = MV_AVG(a)'],
@@ -5837,6 +5876,7 @@ const mvConcatDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -6015,6 +6055,7 @@ const mvCountDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=["foo", "zoo", "bar"]\n| EVAL count_a = MV_COUNT(a)'],
@@ -6189,6 +6230,7 @@ const mvDedupeDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=["foo", "foo", "bar", "foo"]\n| EVAL dedupe_a = MV_DEDUPE(a)'],
@@ -6364,6 +6406,7 @@ const mvFirstDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a="foo;bar;baz"\n| EVAL first_a = MV_FIRST(SPLIT(a, ";"))'],
@@ -6539,6 +6582,7 @@ const mvLastDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a="foo;bar;baz"\n| EVAL last_a = MV_LAST(SPLIT(a, ";"))'],
@@ -6674,6 +6718,7 @@ const mvMaxDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -6742,6 +6787,7 @@ const mvMedianDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -6813,6 +6859,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -6950,6 +6997,7 @@ const mvMinDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -7113,6 +7161,7 @@ const mvPercentileDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -7158,6 +7207,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -7485,6 +7535,7 @@ const mvSliceDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -7672,6 +7723,7 @@ const mvSortDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
@@ -7737,6 +7789,7 @@ const mvSumDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)'],
@@ -7982,6 +8035,7 @@ const mvZipDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -8012,6 +8066,7 @@ const nowDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW current_date = NOW()', 'FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour'],
@@ -8040,6 +8095,7 @@ const piDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW PI()'],
@@ -8304,6 +8360,7 @@ const powDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -8421,6 +8478,7 @@ const repeatDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3)'],
@@ -8606,6 +8664,7 @@ const replaceDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW str = "Hello World"\n| EVAL str = REPLACE(str, "World", "Universe")\n| KEEP str'],
@@ -8650,6 +8709,7 @@ const reverseDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -8708,6 +8768,7 @@ const rightDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL right = RIGHT(last_name, 3)'],
@@ -8893,6 +8954,7 @@ const roundDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -9095,6 +9157,7 @@ const roundToDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -9141,6 +9204,7 @@ const rtrimDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -9288,6 +9352,7 @@ const scalbDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['row x = 3.0, y = 10 | eval z = scalb(x, y)'],
@@ -9332,6 +9397,7 @@ const sha1Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -9378,6 +9444,7 @@ const sha256Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -9445,6 +9512,7 @@ const signumDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW d = 100.0\n| EVAL s = SIGNUM(d)'],
@@ -9509,6 +9577,7 @@ const sinDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL sin=SIN(a)'],
@@ -9573,6 +9642,7 @@ const sinhDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL sinh=SINH(a)'],
@@ -9607,6 +9677,7 @@ const spaceDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW message = CONCAT("Hello", SPACE(1), "World!");'],
@@ -9691,6 +9762,7 @@ const splitDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW words="foo;bar;baz;qux;quux;corge"\n| EVAL word = SPLIT(words, ";")'],
@@ -9756,6 +9828,7 @@ const sqrtDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW d = 100.0\n| EVAL s = SQRT(d)'],
@@ -9901,6 +9974,7 @@ const stContainsDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10048,6 +10122,7 @@ const stDisjointDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10105,6 +10180,7 @@ const stDistanceDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10171,10 +10247,491 @@ const stEnvelopeDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
     'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL envelope = ST_ENVELOPE(city_boundary)\n| KEEP abbrev, airport, envelope',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohashDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohash',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geohash', {
+    defaultMessage:
+      'Calculates the `geohash` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHASH_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohash_grid` aggregation.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'bounds',
+          type: 'geo_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'FROM airports\n| EVAL geohash = ST_GEOHASH(location, 1)\n| STATS\n    count = COUNT(*),\n    centroid = ST_CENTROID_AGG(location)\n      BY geohash\n| WHERE count >= 10\n| EVAL geohashString = ST_GEOHASH_TO_STRING(geohash)\n| KEEP count, centroid, geohashString\n| SORT count DESC, geohashString ASC',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohashToLongDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohash_to_long',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geohash_to_long',
+    {
+      defaultMessage:
+        'Converts an input value representing a geohash grid-ID in string format into a long.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['ROW geohash = "u3bu"\n| EVAL geohashLong = ST_GEOHASH_TO_LONG(geohash)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohashToStringDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohash_to_string',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geohash_to_string',
+    {
+      defaultMessage:
+        'Converts an input value representing a geohash grid-ID in long format into a string.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'ROW geohash = TO_LONG(13686180)\n| EVAL geohashString = ST_GEOHASH_TO_STRING(geohash)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohexDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohex',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geohex', {
+    defaultMessage:
+      'Calculates the `geohex`, the H3 cell-id, of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHEX_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohex_grid` aggregation.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      license: 'PLATINUM',
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'bounds',
+          type: 'geo_shape',
+          optional: true,
+        },
+      ],
+      license: 'PLATINUM',
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'FROM airports\n| EVAL geohex = ST_GEOHEX(location, 1)\n| STATS\n    count = COUNT(*),\n    centroid = ST_CENTROID_AGG(location)\n      BY geohex\n| WHERE count >= 10\n| EVAL geohexString = ST_GEOHEX_TO_STRING(geohex)\n| KEEP count, centroid, geohexString\n| SORT count DESC, geohexString ASC',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohexToLongDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohex_to_long',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geohex_to_long',
+    {
+      defaultMessage:
+        'Converts an input value representing a geohex grid-ID in string format into a long.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['ROW geohex = "841f059ffffffff"\n| EVAL geohexLong = ST_GEOHEX_TO_LONG(geohex)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeohexToStringDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geohex_to_string',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geohex_to_string',
+    {
+      defaultMessage:
+        'Converts an input value representing a Geohex grid-ID in long format into a string.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['ROW geohex = 595020895127339007\n| EVAL geohexString = ST_GEOHEX_TO_STRING(geohex)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeotileDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geotile',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geotile', {
+    defaultMessage:
+      'Calculates the `geotile` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOTILE_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geotile_grid` aggregation.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'bounds',
+          type: 'geo_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'FROM airports\n| EVAL geotile = ST_GEOTILE(location, 2)\n| STATS\n    count = COUNT(*),\n    centroid = ST_CENTROID_AGG(location)\n      BY geotile\n| EVAL geotileString = ST_GEOTILE_TO_STRING(geotile)\n| SORT count DESC, geotileString ASC\n| KEEP count, centroid, geotileString',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeotileToLongDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geotile_to_long',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geotile_to_long',
+    {
+      defaultMessage:
+        'Converts an input value representing a geotile grid-ID in string format into a long.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['ROW geotile = "4/8/5"\n| EVAL geotileLong = ST_GEOTILE_TO_LONG(geotile)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stGeotileToStringDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_geotile_to_string',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.st_geotile_to_string',
+    {
+      defaultMessage:
+        'Converts an input value representing a geotile grid-ID in long format into a string.',
+    }
+  ),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'grid_id',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'ROW geotile = 1152921508901814277\n| EVAL geotileString = ST_GEOTILE_TO_STRING(geotile)',
   ],
 };
 
@@ -10318,6 +10875,7 @@ const stIntersectsDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10465,6 +11023,7 @@ const stWithinDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10512,6 +11071,7 @@ const stXDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10579,6 +11139,7 @@ const stXmaxDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10646,6 +11207,7 @@ const stXminDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10693,6 +11255,7 @@ const stYDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10760,6 +11323,7 @@ const stYmaxDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10827,6 +11391,7 @@ const stYminDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -10914,6 +11479,7 @@ const startsWithDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_S = STARTS_WITH(last_name, "B")'],
@@ -10979,6 +11545,7 @@ const substringDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11047,6 +11614,7 @@ const tanDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL tan=TAN(a)'],
@@ -11111,6 +11679,7 @@ const tanhDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL tanh=TANH(a)'],
@@ -11139,6 +11708,7 @@ const tauDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW TAU()'],
@@ -11225,6 +11795,7 @@ const termDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM books\n| WHERE TERM(author, "gabriel")'],
@@ -11249,6 +11820,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11296,6 +11868,7 @@ const toBase64Definition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = "elastic"\n| EVAL e = TO_BASE64(a)'],
@@ -11391,6 +11964,7 @@ const toBooleanDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW str = ["true", "TRuE", "false", "", "yes", "1"]\n| EVAL bool = TO_BOOLEAN(str)'],
@@ -11449,6 +12023,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11519,6 +12094,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11615,6 +12191,7 @@ const toDateNanosDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11671,6 +12248,7 @@ const toDateperiodDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11778,6 +12356,7 @@ const toDatetimeDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -11845,6 +12424,7 @@ const toDegreesDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW rad = [1.57, 3.14, 4.71]\n| EVAL deg = TO_DEGREES(rad)'],
@@ -11980,6 +12560,7 @@ const toDoubleDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12037,6 +12618,7 @@ const toGeopointDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW wkt = "POINT(42.97109630194 14.7552534413725)"\n| EVAL pt = TO_GEOPOINT(wkt)'],
@@ -12102,6 +12684,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12219,6 +12802,7 @@ const toIntegerDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)'],
@@ -12273,6 +12857,7 @@ const toIpDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12412,6 +12997,7 @@ const toLongDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12458,6 +13044,7 @@ const toLowerDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12525,6 +13112,7 @@ const toRadiansDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW deg = [90.0, 180.0, 270.0]\n| EVAL rad = TO_RADIANS(deg)'],
@@ -12699,6 +13287,7 @@ const toStringDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a=10\n| EVAL j = TO_STRING(a)', 'ROW a=[10, 9, 8]\n| EVAL j = TO_STRING(a)'],
@@ -12753,6 +13342,7 @@ const toTimedurationDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12863,6 +13453,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -12909,6 +13500,7 @@ const toUpperDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW message = "Some Text"\n| EVAL message_upper = TO_UPPER(message)'],
@@ -12963,6 +13555,7 @@ const toVersionDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW v = TO_VERSION("1.2.3")'],
@@ -13007,6 +13600,7 @@ const trimDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -13048,6 +13642,7 @@ const caseDefinition: FunctionDefinition = {
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -13135,6 +13730,15 @@ export const scalarFunctionDefinitions = [
   stDisjointDefinition,
   stDistanceDefinition,
   stEnvelopeDefinition,
+  stGeohashDefinition,
+  stGeohashToLongDefinition,
+  stGeohashToStringDefinition,
+  stGeohexDefinition,
+  stGeohexToLongDefinition,
+  stGeohexToStringDefinition,
+  stGeotileDefinition,
+  stGeotileToLongDefinition,
+  stGeotileToStringDefinition,
   stIntersectsDefinition,
   stWithinDefinition,
   stXDefinition,
