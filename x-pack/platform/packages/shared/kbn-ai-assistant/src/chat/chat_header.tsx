@@ -20,6 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import {
+  ElasticLlmTourCallout,
+  getElasticManagedLlmConnector,
+  ElasticLlmCalloutKey,
+  useElasticLlmCalloutDismissed,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -47,6 +53,7 @@ export function ChatHeader({
   loading,
   title,
   onCopyConversation,
+  isConversationApp,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
@@ -58,6 +65,7 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   onCopyConversation: () => void;
+  isConversationApp: boolean;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
@@ -80,6 +88,12 @@ export function ChatHeader({
       );
     }
   };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.TOUR_CALLOUT,
+    false
+  );
 
   return (
     <EuiPanel
@@ -194,12 +208,26 @@ export function ChatHeader({
             ) : null}
 
             <EuiFlexItem grow={false}>
-              <ChatActionsMenu
-                connectors={connectors}
-                conversationId={conversationId}
-                disabled={licenseInvalid}
-                onCopyConversationClick={onCopyConversation}
-              />
+              {!!elasticManagedLlm && !tourCalloutDismissed ? (
+                  <ElasticLlmTourCallout
+                    zIndex={isConversationApp ? 999 : undefined}
+                    dismissTour={() => setTourCalloutDismissed(true)}
+                  >
+                    <ChatActionsMenu
+                      connectors={connectors}
+                      conversationId={conversationId}
+                      disabled={licenseInvalid}
+                      onCopyConversationClick={onCopyConversation}
+                    />
+                  </ElasticLlmTourCallout>
+                ) : (
+                  <ChatActionsMenu
+                    connectors={connectors}
+                    conversationId={conversationId}
+                    disabled={licenseInvalid}
+                    onCopyConversationClick={onCopyConversation}
+                  />
+                )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

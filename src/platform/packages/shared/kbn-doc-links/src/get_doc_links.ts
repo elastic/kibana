@@ -678,6 +678,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}observability-create-slo-burn-rate-alert-rule.html`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
       aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
+      elasticManagedLlm: `${DOCS_WEBSITE_URL}reference/kibana/connectors-kibana/elastic-managed-llm`,
+      elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     alerting: {
       guide: isServerless
