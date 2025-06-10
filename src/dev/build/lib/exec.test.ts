@@ -72,27 +72,31 @@ describe('exec', () => {
 
   it('collects and logs output when bufferLogs is true', async () => {
     await exec(log, process.execPath, ['-e', 'console.log("buffered output")'], {
-      level: 'info',
       build: mockBuild,
     });
 
     expect(testWriter.messages).toMatchInlineSnapshot(`
-          Array [
-            "--- test-build [x64]",
-            "   │ info $ <nodedir>/node -e console.log(\\"buffered output\\")",
-            "   │ info buffered output",
-          ]
-      `);
+      Array [
+        "--- test-build [x64]",
+        "   │ debg $ <nodedir>/node -e console.log(\\"buffered output\\")",
+        "   │ debg buffered output",
+      ]
+    `);
   });
 
   it('throws error when command fails with bufferLogs enabled', async () => {
-    await expect(
-      exec(log, process.execPath, ['-e', 'process.exit(1)'], {
-        build: mockBuild,
-      })
-    ).rejects.toThrow();
-
-    expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
+    try {
+      await expect(
+        await exec(log, process.execPath, ['-e', 'process.exit(1)'], {
+          build: mockBuild,
+        })
+      ).rejects.toThrow();
+    } catch (error) {
+      expect(error).toBeTruthy();
+      expect(error.message).toMatchInlineSnapshot(
+        `"Command failed with exit code 1: <nodedir>/node -e process.exit(1)"`
+      );
+    }
   });
 
   it('handles stderr output when bufferLogs is true', async () => {

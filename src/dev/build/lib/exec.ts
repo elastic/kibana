@@ -28,6 +28,13 @@ interface LogLine {
   chunk: string;
 }
 
+const handleBufferChunk = (chunk: Buffer, level: LogLine['level']): LogLine => {
+  return {
+    level,
+    chunk: chunk.toString().trim(),
+  };
+};
+
 export async function exec(
   log: ToolingLog,
   cmd: string,
@@ -46,10 +53,10 @@ export async function exec(
   if (bufferLogs) {
     try {
       const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
-        map((chunk) => ({ level: 'info', chunk: chunk.toString().trim() }))
+        map((chunk) => handleBufferChunk(chunk, level))
       );
       const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
-        map((chunk) => ({ level: 'error', chunk: chunk.toString().trim() }))
+        map((chunk) => handleBufferChunk(chunk, 'error'))
       );
       const close$ = fromEvent(proc, 'close');
       const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
@@ -66,7 +73,11 @@ export async function exec(
       });
 
       if (result.failed) {
-        throw new Error(`${result.exitCode}`);
+        throw new Error(
+          `${build.getBuildDesc()} [${build.getBuildArch()}] failed with exit code: ${
+            result.exitCode
+          }`
+        );
       }
     } catch (error) {
       throw error;
