@@ -20,7 +20,8 @@ import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
-import { InferenceEndpointsAutocompleteResult, InferenceTaskType } from '@kbn/esql-types';
+import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
