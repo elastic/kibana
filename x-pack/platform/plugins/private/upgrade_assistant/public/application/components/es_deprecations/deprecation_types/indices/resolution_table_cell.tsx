@@ -136,7 +136,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexTooltipText',
         {
           defaultMessage:
-            'The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed.',
+            'The reindex operation transforms an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed.',
         }
       ),
     },
