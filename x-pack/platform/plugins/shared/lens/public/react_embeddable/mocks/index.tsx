@@ -192,7 +192,7 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(async () => mockDynamicActionsManager()),
+      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };

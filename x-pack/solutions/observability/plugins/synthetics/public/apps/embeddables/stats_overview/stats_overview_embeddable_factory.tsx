@@ -75,7 +75,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const filters$ = new BehaviorSubject(initialState.rawState.filters);
 
       const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState

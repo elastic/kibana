@@ -68,7 +68,7 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState.rawState;
 
-    const dynamicActionsManager = await deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState

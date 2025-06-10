@@ -37,7 +37,7 @@ export const getImageEmbeddableFactory = ({
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState

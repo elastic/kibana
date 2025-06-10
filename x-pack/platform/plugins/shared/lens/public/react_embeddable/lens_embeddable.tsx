@@ -60,7 +60,7 @@ export const createLensEmbeddableFactory = (
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const dynamicActionsManager =
-        await services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+        services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
           uuid,
           () => titleManager.api.title$.getValue(),
           initialState

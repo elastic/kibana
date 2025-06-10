@@ -68,7 +68,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const titleManager = initializeTitleManager(initialState.rawState);
 
     // Initialize dynamic actions
-    const dynamicActionsManager = await embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
