@@ -272,7 +272,7 @@ async function safeMappingCall(
       filter_path: ['*.mappings'],
     });
     return result as IndicesGetMappingResponse;
-  } catch (err: any) {
+  } catch (err) {
     const type = err?.meta?.body?.error?.type;
     if (
       retries > 0 &&
@@ -354,7 +354,7 @@ async function getIndicesInfoForPattern({
   esClient: ElasticsearchClient;
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
-  const indices = Array.isArray(pattern.pattern) ? pattern.pattern : [pattern.pattern];
+  const indices = [pattern.pattern];
   const resp = await processAsyncInChunks(indices, (indexChunk) =>
     safeEsCall(() =>
       esClient.indices.get({
