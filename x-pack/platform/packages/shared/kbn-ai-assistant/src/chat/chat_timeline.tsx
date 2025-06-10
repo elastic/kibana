@@ -199,14 +199,14 @@ export function ChatTimeline({
     anonymizationEnabled,
   ]);
 
-  const showKnowledgeBaseReindexingCallout =
+  const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled &&
     knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
     knowledgeBase.status.value?.isReIndexing;
   return (
     <EuiCommentList className={euiCommentListClassName}>
       <div className={stickyCalloutContainerClassName}>
-        {showKnowledgeBaseReindexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
       </div>
       {showElasticLlmCalloutInChat ? (
         <div className={stickyCalloutContainerClassName}>

@@ -72,7 +72,7 @@ export function WelcomeMessage({
     [triggersActionsUi]
   );
 
-  const showKnowledgeBaseReindexingCallout =
+  const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled &&
     knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
     knowledgeBase.status.value?.isReIndexing;
@@ -85,8 +85,8 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
+        {showKnowledgeBaseReIndexingCallout && <KnowledgeBaseReindexingCallout />}
         {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
-        {showKnowledgeBaseReindexingCallout && <KnowledgeBaseReindexingCallout />}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
