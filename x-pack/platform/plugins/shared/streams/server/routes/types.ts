@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { ContentClient } from '../lib/content/content_client';
