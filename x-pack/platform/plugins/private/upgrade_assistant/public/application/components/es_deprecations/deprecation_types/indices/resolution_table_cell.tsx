@@ -117,7 +117,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonReadonly',
         {
           defaultMessage:
-            'Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
+            'Old indices can maintain compatibility with the next major version if they are set to read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to set it to a read-only index.',
         }
       ),
     },
