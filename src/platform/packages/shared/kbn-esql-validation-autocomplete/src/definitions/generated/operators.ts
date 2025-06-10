@@ -346,7 +346,7 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -363,7 +363,7 @@ const addDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -377,6 +377,7 @@ const addDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -552,6 +553,7 @@ const divDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
@@ -1074,6 +1076,7 @@ const equalsDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -1455,6 +1458,7 @@ const greaterThanDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -1839,6 +1843,7 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -2086,6 +2091,7 @@ const inDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
@@ -2467,6 +2473,7 @@ const lessThanDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -2795,6 +2802,7 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -2882,6 +2890,7 @@ const likeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
@@ -3567,6 +3576,7 @@ const modDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
@@ -3767,6 +3777,7 @@ const mulDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4330,6 +4341,7 @@ const notEqualsDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4777,6 +4789,7 @@ const rlikeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -5069,7 +5082,7 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -5086,7 +5099,7 @@ const subDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -5100,6 +5113,7 @@ const subDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],

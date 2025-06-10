@@ -503,7 +503,7 @@ function UserAvatarEditor({
         </FormRow>
       ) : (
         <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 64 }}>
+          <EuiFlexItem grow={false} css={{ width: 64 }}>
             <FormRow
               label={
                 <FormLabel for="data.avatar.initials">
@@ -551,7 +551,7 @@ function UserAvatarEditor({
                     onClick={() => formik.setFieldValue('data.avatar.color', getRandomColor())}
                     size="xs"
                     flush="right"
-                    style={{ height: euiTheme.base }}
+                    css={{ height: euiTheme.base }}
                   >
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.randomizeButton"
@@ -677,7 +677,7 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
         <EuiBadgeGroup
           gutterSize="xs"
           data-test-subj="remainingRoles"
-          style={{
+          css={{
             maxWidth: '200px',
           }}
         >
@@ -1020,7 +1020,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   const { count } = useFormChangesContext();
 
   return (
-    <EuiFlexGroup alignItems="center" style={{ width: '100%' }} responsive={false}>
+    <EuiFlexGroup alignItems="center" css={{ width: '100%' }} responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>

@@ -47,6 +47,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
@@ -857,6 +858,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     throw new ResponseActionsNotSupportedError('runscript');
+  }
+
+  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+    throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
