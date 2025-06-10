@@ -494,6 +494,7 @@ src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
@@ -554,6 +555,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
@@ -776,6 +778,7 @@ src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
+src/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
