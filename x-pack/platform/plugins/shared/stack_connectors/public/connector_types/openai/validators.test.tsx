@@ -13,8 +13,7 @@ describe('validateUrl', () => {
   const code = 'ERR_FIELD_FORMAT';
   const formatType = 'URL';
   const errorMessage = { code, formatType, message };
-  const validator = (value: string) =>
-    validateURL(message)({ value } as ValidationFuncArg<any, any>);
+  const validator = (value: any) => validateURL(message)({ value } as ValidationFuncArg<any, any>);
 
   test('should return undefined for a valid URL', () => {
     expect(validator('https://example.com')).toBeUndefined();
