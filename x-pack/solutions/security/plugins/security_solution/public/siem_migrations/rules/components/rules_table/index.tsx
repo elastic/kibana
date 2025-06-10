@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useGetAIConnectors } from '../../../../common/hooks/use_get_ai_connectors';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useAIConnectors } from '../../../../common/hooks/use_get_ai_connectors';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -81,16 +80,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const migrationId = migrationStats.id;
     const { addError } = useAppToasts();
 
-    const {
-      services: { http },
-    } = useKibana();
-
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
-    const { aiConnectors } = useGetAIConnectors(http);
+    const { aiConnectors } = useAIConnectors();
 
     // Filters
     const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();

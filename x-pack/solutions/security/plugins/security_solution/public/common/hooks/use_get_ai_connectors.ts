@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import { useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
 import * as i18n from './translations';
+import { useKibana } from '../lib/kibana';
 
-const QUERY_KEY = ['siem_migrations', 'ai_connectors'];
+const QUERY_KEY = ['ai_connectors'];
 
-export const useGetAIConnectors = (http: HttpSetup) => {
+export const useAIConnectors = () => {
+  const {
+    services: { http },
+  } = useKibana();
   const { addError } = useAppToasts();
   const { data, ...rest } = useQuery({
     queryKey: QUERY_KEY,
