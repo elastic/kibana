@@ -50,6 +50,50 @@ const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_RULES_TO_BULK_EDIT = 2000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
+interface ValidationError {
+  body: string;
+  statusCode: number;
+}
+
+const validateBulkAction = (
+  body: PerformRulesBulkActionRequestBody
+): ValidationError | undefined => {
+  if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+    return {
+      body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+      statusCode: 400,
+    };
+  }
+
+  if (body?.ids && body.query !== undefined) {
+    return {
+      body: `Both query and ids are sent. Define either ids or query in request payload.`,
+      statusCode: 400,
+    };
+  }
+
+  // Validate that ids and gap range params are not used together
+  if (body?.ids && (body.gaps_range_start || body.gaps_range_end)) {
+    return {
+      body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
+      statusCode: 400,
+    };
+  }
+
+  // Validate that both gap range params are provided if any is used
+  if (
+    (body.gaps_range_start && !body.gaps_range_end) ||
+    (!body.gaps_range_start && body.gaps_range_end)
+  ) {
+    return {
+      body: `Both gaps_range_start and gaps_range_end must be provided together.`,
+      statusCode: 400,
+    };
+  }
+
+  return undefined;
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml']
@@ -89,18 +133,9 @@ export const performBulkActionRoute = (
         const { body } = request;
         const siemResponse = buildSiemResponse(response);
 
-        if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
-          return siemResponse.error({
-            body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
-            statusCode: 400,
-          });
-        }
-
-        if (body?.ids && body.query !== undefined) {
-          return siemResponse.error({
-            body: `Both query and ids are sent. Define either ids or query in request payload.`,
-            statusCode: 400,
-          });
+        const validationError = validateBulkAction(body);
+        if (validationError) {
+          return siemResponse.error(validationError);
         }
 
         const isDryRun = request.query.dry_run;
@@ -148,6 +183,15 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
+          let gapRange;
+
+          // If gap range params are present, set up the gap range parameter
+          if (body.gaps_range_start && body.gaps_range_end) {
+            gapRange = {
+              start: body.gaps_range_start,
+              end: body.gaps_range_end,
+            };
+          }
 
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
@@ -158,6 +202,7 @@ export const performBulkActionRoute = (
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
+            gapRange,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
