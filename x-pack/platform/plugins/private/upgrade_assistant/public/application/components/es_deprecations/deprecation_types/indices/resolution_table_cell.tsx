@@ -144,7 +144,7 @@ const i18nTexts = {
       text: i18n.translate(
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionUnfreezeText',
         {
-          defaultMessage: 'Recommended to unfreeze',
+          defaultMessage: 'Recommended: unfreeze',
         }
       ),
       tooltipText: i18n.translate(
