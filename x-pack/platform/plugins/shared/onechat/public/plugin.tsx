@@ -66,11 +66,12 @@ export class OnechatPlugin
       deepLinks: [{ id: 'chat', path: '/chat', title: 'Chat' }],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
-        const [coreStart, _depsStart] = await coreSetup.getStartServices();
+        const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
 
         coreStart.chrome.docTitle.change(ONECHAT_TITLE);
+        const services = getServices();
 
-        return renderApp({ core: coreStart, element, history, services: getServices() });
+        return renderApp({ core: coreStart, services, element, history });
       },
     });
     return {};

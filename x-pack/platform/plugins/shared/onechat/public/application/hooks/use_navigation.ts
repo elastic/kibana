@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { ONECHAT_FRAMEWORK_APP_ID } from '../../../common/features';
+import { ONECHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export const useNavigation = () => {
@@ -16,14 +16,14 @@ export const useNavigation = () => {
 
   const navigateToOnechatUrl = useCallback(
     (path: string) => {
-      application.navigateToApp(ONECHAT_FRAMEWORK_APP_ID, { path });
+      application.navigateToApp(ONECHAT_APP_ID, { path });
     },
     [application]
   );
 
   const createOnechatUrl = useCallback(
     (path: string) => {
-      return application.getUrlForApp(ONECHAT_FRAMEWORK_APP_ID, { path });
+      return application.getUrlForApp(ONECHAT_APP_ID, { path });
     },
     [application]
   );

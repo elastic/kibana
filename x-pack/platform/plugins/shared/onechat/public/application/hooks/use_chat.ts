@@ -129,7 +129,7 @@ export const useChat = ({
           onError?.(err);
 
           notifications.toasts.addError(err, {
-            title: i18n.translate('xpack.workchatApp.chat.chatError.title', {
+            title: i18n.translate('xpack.onechat.chat.chatError.title', {
               defaultMessage: 'Error loading chat response',
             }),
             toastMessage: `${err.code} - ${err.message}`,

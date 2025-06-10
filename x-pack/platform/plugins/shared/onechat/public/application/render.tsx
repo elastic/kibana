@@ -17,23 +17,27 @@ import { OnechatRoutes } from './routes';
 import { OneChatServicesContext } from './context/onechat_services_context';
 import type { OnechatInternalService } from '../services';
 import { InitialMessageProvider } from './context/initial_message_context';
+import { OnechatStartDependencies } from '../types';
 
 export const renderApp = async ({
   core,
+  plugins,
   element,
   history,
   services,
 }: {
   core: CoreStart;
+  plugins: OnechatStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
   services: OnechatInternalService;
 }) => {
+  const kibanaServices = { ...core, plugins };
   const queryClient = new QueryClient();
 
   ReactDOM.render(
     core.rendering.addContext(
-      <KibanaContextProvider>
+      <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <OneChatServicesContext.Provider value={services}>
