@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { type ESQLAstCommand, type ESQLAstChangePointCommand, LeafPrinter } from '@kbn/esql-ast';
-import type { ESQLRealField } from '../../../validation/types';
+import uniqBy from 'lodash/uniqBy';
+import type { ESQLFieldWithMetadata } from '../../../validation/types';
 
 export const fieldsSuggestionsAfter = (
   command: ESQLAstCommand,
-  previousCommandFields: ESQLRealField[],
-  userDefinedColumns: ESQLRealField[]
+  previousCommandFields: ESQLFieldWithMetadata[],
+  userDefinedColumns: ESQLFieldWithMetadata[]
 ) => {
   const { target } = command as ESQLAstChangePointCommand;
-  previousCommandFields.push(
-    {
-      name: target ? LeafPrinter.column(target.type) : 'type',
-      type: 'keyword' as const,
-    },
-    {
-      name: target ? LeafPrinter.column(target.pvalue) : 'pvalue',
-      type: 'double' as const,
-    }
+
+  return uniqBy(
+    [
+      ...previousCommandFields,
+      {
+        name: target ? LeafPrinter.column(target.type) : 'type',
+        type: 'keyword' as const,
+      },
+      {
+        name: target ? LeafPrinter.column(target.pvalue) : 'pvalue',
+        type: 'double' as const,
+      },
+    ],
+    'name'
   );
-  return previousCommandFields;
 };

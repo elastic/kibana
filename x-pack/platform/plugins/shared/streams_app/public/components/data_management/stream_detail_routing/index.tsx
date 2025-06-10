@@ -10,9 +10,10 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +35,7 @@ import {
 } from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }
 
@@ -99,6 +100,7 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
     <EuiFlexItem
@@ -125,12 +127,12 @@ export function StreamDetailRoutingImpl() {
           `}
           paddingSize="xs"
         >
-          <EuiResizableContainer>
+          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
                   initialSize={40}
-                  minSize="400px"
+                  minSize="150px"
                   tabIndex={0}
                   paddingSize="s"
                   color="subdued"

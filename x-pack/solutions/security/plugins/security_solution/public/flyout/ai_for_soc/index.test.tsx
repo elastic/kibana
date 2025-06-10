@@ -28,8 +28,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 jest.mock('./context');
-jest.mock('./components/attack_discovery', () => ({
-  ...jest.requireActual('./components/attack_discovery'),
+jest.mock('./components/attack_discovery_widget', () => ({
   AttackDiscoveryWidget: jest.fn(),
 }));
 

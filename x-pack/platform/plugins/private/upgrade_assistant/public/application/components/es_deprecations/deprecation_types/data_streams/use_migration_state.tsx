@@ -20,7 +20,7 @@ import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 import { readOnlyExecute } from './readonly_state';
 
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL = 3000;
 
 export interface MigrationState {
   loadingState: LoadingState;

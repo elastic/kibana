@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, PhaseName, isIlmLifecycle } from '@kbn/streams-schema';
+import { PhaseName, Streams, isIlmLifecycle } from '@kbn/streams-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +19,7 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import { AreaSeries, Axis, BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { TimeState } from '@kbn/es-query';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
@@ -34,7 +34,7 @@ export function IngestionRate({
   stats,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
 }) {
@@ -107,7 +107,7 @@ function ChartAreaSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
@@ -133,7 +133,8 @@ function ChartAreaSeries({
           name="Ingestion rate"
           data={ingestionRate.buckets}
           color="#61A2FF"
-          xScaleType="time"
+          // Defaults to multi layer time axis as of Elastic Charts v70
+          xScaleType={ScaleType.Time}
           xAccessor={'key'}
           yAccessors={['value']}
         />
@@ -172,7 +173,7 @@ function ChartBarSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
@@ -200,7 +201,8 @@ function ChartBarSeries({
             name={capitalize(tier)}
             data={buckets}
             color={ilmPhases[tier as PhaseName].color}
-            xScaleType="time"
+            // Defaults to multi layer time axis as of Elastic Charts v70
+            xScaleType={ScaleType.Time}
             xAccessor={'key'}
             yAccessors={['value']}
             stackAccessors={[0]}

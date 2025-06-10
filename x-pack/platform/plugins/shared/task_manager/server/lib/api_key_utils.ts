@@ -7,8 +7,8 @@
 
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {
@@ -55,15 +55,8 @@ export const getApiKeyFromRequest = (request: KibanaRequest) => {
 export const createApiKey = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
   security: SecurityServiceStart
 ) => {
-  if (!canEncryptSo) {
-    throw Error(
-      'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
-    );
-  }
-
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     throw Error('API keys are not enabled, cannot create API key.');
   }
@@ -132,12 +125,10 @@ export const createApiKey = async (
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
-  security: SecurityServiceStart,
-  spaces?: SpacesPluginStart
+  security: SecurityServiceStart
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, canEncryptSo, security);
-  const space = await spaces?.spacesService.getActiveSpace(request);
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
+  const space = getSpaceIdFromPath(request.url.pathname);
   const user = security.authc.getCurrentUser(request);
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
@@ -149,7 +140,7 @@ export const getApiKeyAndUserScope = async (
         apiKey: encodedApiKeyResult.apiKey,
         userScope: {
           apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId: space?.id || 'default',
+          spaceId: space?.spaceId || 'default',
           // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
           apiKeyCreatedByUser: isRequestApiKeyType(user),

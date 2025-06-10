@@ -18,6 +18,7 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   type ESQLAstCommand,
+  lastItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -48,7 +49,11 @@ import {
   FunctionDefinitionTypes,
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
-import type { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+  ReferenceMaps,
+} from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 import type { ReasonTypes, ESQLCallbacks } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
@@ -232,6 +237,11 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
     return true;
   }
 
+  if (bothStringTypes(argType, item.literalType)) {
+    // all functions accept keyword literals for text parameters
+    return true;
+  }
+
   if (item.literalType === 'null') {
     // all parameters accept null, but this is not yet reflected
     // in our function definitions so we let it through here
@@ -259,7 +269,7 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
 export function getColumnForASTNode(
   node: ESQLColumn | ESQLIdentifier,
   { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLRealField | ESQLUserDefinedColumn | undefined {
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
   return getColumnByName(formatted, { fields, userDefinedColumns });
 }
@@ -282,7 +292,7 @@ export function unescapeColumnName(columnName: string) {
 export function getColumnByName(
   columnName: string,
   { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLRealField | ESQLUserDefinedColumn | undefined {
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
   return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
 }
@@ -406,7 +416,7 @@ export function getAllArrayTypes(
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
-        types.push('time_literal');
+        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -440,6 +450,18 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
 }
 
 /**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+/**
  * Checks if an AST function argument is of the correct type
  * given the definition.
  */
@@ -464,12 +486,15 @@ export function checkFunctionArgMatchesDefinition(
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
+        (signature) =>
+          signature.returnType === 'unknown' ||
+          argType === signature.returnType ||
+          bothStringTypes(argType, signature.returnType)
       );
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg.unit);
+    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -481,7 +506,9 @@ export function checkFunctionArgMatchesDefinition(
       ? validHit.type
       : [validHit.type];
 
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some(
+      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
+    );
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
@@ -549,7 +576,7 @@ export function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 export function isUserDefinedColumn(
-  column: ESQLRealField | ESQLUserDefinedColumn | undefined
+  column: ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined
 ): column is ESQLUserDefinedColumn {
   return Boolean(column && 'location' in column);
 }
@@ -589,8 +616,11 @@ export function getColumnExists(
   return false;
 }
 
+const removeSourceNameQuotes = (sourceName: string) =>
+  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
+
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index) || index.startsWith('-')) {
+  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));
@@ -631,6 +661,11 @@ export function isRestartingExpression(text: string) {
 export function findPreviousWord(text: string) {
   const words = text.split(/\s+/);
   return words[words.length - 2];
+}
+
+export function withinQuotes(text: string) {
+  const quoteCount = (text.match(/"/g) || []).length;
+  return quoteCount % 2 === 1;
 }
 
 export function endsInWhitespace(text: string) {
@@ -712,11 +747,11 @@ export function getBracketsToClose(text: string) {
       }
 
       const substr = text.slice(i, i + openBracket.length);
-      if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
         break;
       }
     }
@@ -808,12 +843,19 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+// --- Expression types helpers ---
+
+/**
+ * Type guard to check if the type is 'param'
+ */
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
 /**
  * Determines the type of the expression
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLRealField>,
+  fields?: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
 ): SupportedDataType | 'unknown' {
   if (!root) {
@@ -827,12 +869,12 @@ export function getExpressionType(
     return getExpressionType(root[0], fields, userDefinedColumns);
   }
 
-  if (isLiteralItem(root) && root.literalType !== 'param') {
+  if (isLiteralItem(root)) {
     return root.literalType;
   }
 
   if (isTimeIntervalItem(root)) {
-    return 'time_literal';
+    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
@@ -855,6 +897,12 @@ export function getExpressionType(
 
   if (isColumnItem(root) && fields && userDefinedColumns) {
     const column = getColumnForASTNode(root, { fields, userDefinedColumns });
+    const lastArg = lastItem(root.args);
+    // If the last argument is a param, we return its type (param literal type)
+    // This is useful for cases like `where ??field`
+    if (isParam(lastArg)) {
+      return lastArg.literalType;
+    }
     if (!column) {
       return 'unknown';
     }
@@ -904,7 +952,6 @@ export function getExpressionType(
     if (!signaturesWithCorrectArity.length) {
       return 'unknown';
     }
-
     const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
 
     // When functions are passed null for any argument, they generally return null
@@ -918,7 +965,8 @@ export function getExpressionType(
           param &&
           (param.type === 'any' ||
             param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
+            isParamExpressionType(argType))
         );
       });
     });
@@ -933,16 +981,18 @@ export function getExpressionType(
   return 'unknown';
 }
 
-export function transformMapToRealFields(
+// --- Fields helpers ---
+
+export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLRealField[] {
-  const realFields: ESQLRealField[] = [];
+): ESQLFieldWithMetadata[] {
+  const esqlFields: ESQLFieldWithMetadata[] = [];
 
   for (const [, userDefinedColumns] of inputMap) {
     for (const userDefinedColumn of userDefinedColumns) {
       // Only include userDefinedColumns that have a known type
       if (userDefinedColumn.type) {
-        realFields.push({
+        esqlFields.push({
           name: userDefinedColumn.name,
           type: userDefinedColumn.type as FieldType,
         });
@@ -950,7 +1000,7 @@ export function transformMapToRealFields(
     }
   }
 
-  return realFields;
+  return esqlFields;
 }
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
@@ -982,17 +1032,17 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
-  previousPipeFields: ESQLRealField[]
+  previousPipeFields: ESQLFieldWithMetadata[]
 ) {
-  const cacheCopy = new Map<string, ESQLRealField>();
-  previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
+  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
+  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDef = getCommandDefinition(lastCommand.name);
 
   // If the command has a fieldsSuggestionsAfter function, use it to get the fields
   if (commandDef.fieldsSuggestionsAfter) {
     const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
 
@@ -1004,7 +1054,7 @@ export async function getCurrentQueryAvailableFields(
   } else {
     // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
     const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
     const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');

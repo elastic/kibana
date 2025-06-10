@@ -83,12 +83,6 @@ const columnHeaders: Record<string, string> = {
       defaultMessage: 'Type',
     }
   ),
-  [ASSET_FIELDS.ENTITY_SOURCE]: i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.source',
-    {
-      defaultMessage: 'Source',
-    }
-  ),
   [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
     'xpack.securitySolution.assetInventory.allAssets.lastSeen',
     {
@@ -119,7 +113,6 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
   { id: ASSET_FIELDS.ENTITY_ID },
   { id: ASSET_FIELDS.ENTITY_TYPE },
-  { id: ASSET_FIELDS.ENTITY_SOURCE },
   { id: ASSET_FIELDS.TIMESTAMP },
 ];
 

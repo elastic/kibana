@@ -9,6 +9,7 @@ import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
 import { DataStream, DataRetention } from '.';
+import { DataStreamOptions } from './data_streams';
 
 export interface ComponentTemplateSerialized {
   template: {
@@ -16,6 +17,7 @@ export interface ComponentTemplateSerialized {
     aliases?: Aliases;
     mappings?: Mappings;
     lifecycle?: DataStream['lifecycle'];
+    data_stream_options?: DataStreamOptions;
   };
   version?: number;
   deprecated?: boolean;

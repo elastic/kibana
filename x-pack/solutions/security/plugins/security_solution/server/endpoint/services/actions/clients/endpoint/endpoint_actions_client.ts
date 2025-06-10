@@ -67,7 +67,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    return this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   private async checkAgentIds(ids: string[]): Promise<{
@@ -78,7 +91,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }> {
     const uniqueIds = [...new Set(ids)];
     const foundEndpointHosts = await this.options.endpointService
-      .getEndpointMetadataService()
+      .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const invalidIds = ids.filter((id) => !validIds.includes(id));

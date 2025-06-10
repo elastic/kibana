@@ -8,9 +8,58 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import type { PromptContext } from '@kbn/elastic-assistant';
-import * as i18n from '../constants/translations';
+import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
+
+const ALERT_FROM_FLYOUT = i18n.translate('xpack.securitySolution.alertSummary.alertFromFlyout', {
+  defaultMessage: 'Alert (from flyout)',
+});
+const PROMPT_1_TITLE = i18n.translate('xpack.securitySolution.alertSummary.prompt1Title', {
+  defaultMessage: 'Detailed Alert Analysis',
+});
+const PROMPT_1_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertSummary.prompt1Description',
+  {
+    defaultMessage: 'Dive deeper into what happened with this alert.',
+  }
+);
+const PROMPT_1_PROMPT = i18n.translate('xpack.securitySolution.alertSummary.prompt1Prompt', {
+  defaultMessage:
+    "Provide a thorough breakdown of this alert, including the attack technique, potential impact, and risk assessment. Explain the technical details in a way that's immediately actionable",
+});
+const PROMPT_2_TITLE = i18n.translate('xpack.securitySolution.alertSummary.prompt2Title', {
+  defaultMessage: 'Best practices for noisy alerts',
+});
+const PROMPT_2_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertSummary.prompt2Description',
+  {
+    defaultMessage: 'Find Related Threat Intelligence Articles from Elastic Security Labs.',
+  }
+);
+const PROMPT_2_PROMPT = i18n.translate('xpack.securitySolution.alertSummary.prompt2Prompt', {
+  defaultMessage:
+    'Can you provide relevant Elastic Security Labs intelligence about the threat indicators or techniques in this alert? Include any known threat actors, campaigns, or similar attack patterns documented in ESL research.',
+});
+const PROMPT_3_TITLE = i18n.translate('xpack.securitySolution.alertSummary.prompt3Title', {
+  defaultMessage: 'Alert Remediation Strategy',
+});
+const PROMPT_3_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertSummary.prompt3Description',
+  {
+    defaultMessage: 'Generate Step-by-Step Remediation Plan.',
+  }
+);
+const PROMPT_3_PROMPT = i18n.translate('xpack.securitySolution.alertSummary.prompt3Prompt', {
+  defaultMessage:
+    'Based on this alert, please outline a comprehensive remediation plan including immediate containment steps, investigation actions, and long-term mitigation strategies to prevent similar incidents.',
+});
+const SUGGESTED_PROMPTS_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertSummary.suggestedPromptsContextTooltip',
+  {
+    defaultMessage: 'Add this alert as context.',
+  }
+);
 
 interface Props {
   getPromptContext: PromptContext['getPromptContext'];
@@ -29,21 +78,21 @@ interface Prompt {
 const prompts: Prompt[] = [
   {
     icon: 'bullseye',
-    prompt: i18n.PROMPT_1_PROMPT,
-    title: i18n.PROMPT_1_TITLE,
-    description: i18n.PROMPT_1_DESCRIPTION,
+    prompt: PROMPT_1_PROMPT,
+    title: PROMPT_1_TITLE,
+    description: PROMPT_1_DESCRIPTION,
   },
   {
     icon: 'cloudStormy',
-    prompt: i18n.PROMPT_2_PROMPT,
-    title: i18n.PROMPT_2_TITLE,
-    description: i18n.PROMPT_2_DESCRIPTION,
+    prompt: PROMPT_2_PROMPT,
+    title: PROMPT_2_TITLE,
+    description: PROMPT_2_DESCRIPTION,
   },
   {
     icon: 'database',
-    prompt: i18n.PROMPT_3_PROMPT,
-    title: i18n.PROMPT_3_TITLE,
-    description: i18n.PROMPT_3_DESCRIPTION,
+    prompt: PROMPT_3_PROMPT,
+    title: PROMPT_3_TITLE,
+    description: PROMPT_3_DESCRIPTION,
   },
 ];
 export const SuggestedPrompts = memo(({ getPromptContext, ruleName, timestamp }: Props) => {
@@ -57,7 +106,7 @@ export const SuggestedPrompts = memo(({ getPromptContext, ruleName, timestamp }:
     (prompt: Prompt) => {
       setPromptOverlay({
         title: `${prompt.title}: ${ruleName} - ${timestamp}`,
-        description: i18n.ALERT_FROM_FLYOUT,
+        description: ALERT_FROM_FLYOUT,
         prompt: prompt.prompt,
       });
     },
@@ -71,7 +120,7 @@ export const SuggestedPrompts = memo(({ getPromptContext, ruleName, timestamp }:
     getPromptContext,
     null,
     promptOverlay?.prompt ?? '',
-    i18n.SUGGESTED_PROMPTS_CONTEXT_TOOLTIP,
+    SUGGESTED_PROMPTS_CONTEXT_TOOLTIP,
     isAssistantEnabled
   );
 

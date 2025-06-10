@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Condition, RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Condition, RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
@@ -20,7 +20,7 @@ import { StreamRoutingServiceDependencies } from './types';
  */
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 export interface UpsertStreamInput {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   routing: RoutingDefinition[];
 }
 
@@ -54,7 +54,7 @@ export function createUpsertStreamActor({
  */
 export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2023-10-31'>;
 export interface ForkStreamInput {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   if: Condition;
   destination: string;
 }

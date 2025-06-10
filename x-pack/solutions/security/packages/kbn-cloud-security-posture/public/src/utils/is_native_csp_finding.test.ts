@@ -50,7 +50,6 @@ describe('isNativeCspFinding', () => {
         dataset: undefined,
       },
     } as CspFinding;
-
     expect(isNativeCspFinding(findingWithUndefinedDataset)).toBe(false);
   });
 });

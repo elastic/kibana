@@ -592,10 +592,6 @@
                 "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/authorization/api_authorization.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
@@ -654,6 +650,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
               },
               {
                 "plugin": "profiling",
@@ -4253,6 +4253,22 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
@@ -4265,28 +4281,16 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/search_strategy/search_strategy.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
               },
               {
                 "plugin": "cases",
@@ -4377,6 +4381,22 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
@@ -4395,22 +4415,6 @@
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
               },
               {
                 "plugin": "transform",

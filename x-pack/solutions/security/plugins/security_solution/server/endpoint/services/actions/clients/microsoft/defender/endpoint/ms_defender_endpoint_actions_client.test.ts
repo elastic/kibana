@@ -27,6 +27,7 @@ import type {
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../../../action_details_by_id');
@@ -51,7 +52,7 @@ describe('MS Defender response actions client', () => {
     msClientMock = new MicrosoftDefenderEndpointActionsClient(clientConstructorOptionsMock);
   });
 
-  const supporteResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
+  const supportedResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
     upload: false,
     scan: false,
     execute: false,
@@ -65,10 +66,11 @@ describe('MS Defender response actions client', () => {
     isolate: true,
     release: true,
     processPendingActions: true,
+    getCustomScripts: false,
   };
 
   it.each(
-    Object.entries(supporteResponseActionClassMethods).reduce((acc, [key, value]) => {
+    Object.entries(supportedResponseActionClassMethods).reduce((acc, [key, value]) => {
       if (!value) {
         acc.push(key as keyof ResponseActionsClient);
       }
@@ -297,6 +299,12 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         true;
+
+      getActionDetailsByIdMock.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
     });
 
     it('should write action request doc with agent policy info when space awareness is enabled', async () => {
@@ -359,5 +367,27 @@ describe('MS Defender response actions client', () => {
         'Unable to find Elastic agent IDs for Microsoft Defender agent ids: [1-2-3]'
       );
     });
+
+    it.each(
+      responseActionsClientMock.getClientSupportedResponseActionMethodNames(
+        'microsoft_defender_endpoint'
+      )
+    )(
+      'should error when %s is called with agents not valid for active space',
+      async (methodName) => {
+        (
+          clientConstructorOptionsMock.endpointService.getInternalFleetServices().agent
+            .getByIds as jest.Mock
+        ).mockImplementation(async () => {
+          throw new AgentNotFoundError('Agent some-id not found');
+        });
+        const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
+
+        // @ts-expect-error `options` type is too broad because we're getting it from a helper
+        await expect(msClientMock[methodName](options)).rejects.toThrow('Agent some-id not found');
+
+        expect(clientConstructorOptionsMock.connectorActions.execute).not.toHaveBeenCalled();
+      }
+    );
   });
 });

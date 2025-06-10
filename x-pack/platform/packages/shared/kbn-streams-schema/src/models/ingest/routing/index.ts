@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { Condition, conditionSchema } from '../conditions';
+import { Condition, conditionSchema } from '../../../conditions';
 
 export interface RoutingDefinition {
   destination: string;

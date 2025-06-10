@@ -25,7 +25,7 @@ import {
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import { ESQLRealField } from '../validation/types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 
@@ -199,7 +199,7 @@ export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
 };
 
 export const buildFieldsDefinitionsWithMetadata = (
-  fields: ESQLRealField[],
+  fields: ESQLFieldWithMetadata[],
   options?: {
     advanceCursor?: boolean;
     openSuggestions?: boolean;
@@ -399,7 +399,7 @@ export function getCompatibleLiterals(
   getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('time_literal')) {
+  if (types.includes('time_duration')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];

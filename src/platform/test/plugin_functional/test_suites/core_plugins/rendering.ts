@@ -104,7 +104,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'console.autocompleteDefinitions.endpointsAvailability (stack?|serverless?)',
         'console.ui.enabled (boolean?)',
         'console.ui.embeddedEnabled (boolean?)',
-        'dashboard.allowByValueEmbeddables (boolean?)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean?)',
         'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean?)',
         'unifiedSearch.autocomplete.valueSuggestions.terminateAfter (duration?)',
@@ -217,6 +216,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.storageExplorerAvailable (boolean?|true?)',
+        // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean?)',
         'xpack.apm.serverless.enabled (true?|never)',
         'xpack.observability_onboarding.serverless.enabled (true?|never)',
@@ -262,6 +262,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agents.enabled (boolean?)',
         'xpack.fleet.agentless.enabled (boolean?)',
         'xpack.fleet.agentless.isDefault (boolean?)',
+        'xpack.fleet.agentless.customIntegrations.enabled (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
@@ -290,6 +291,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (boolean?)',
         'xpack.infra.featureFlags.logsUIEnabled (boolean?)',
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
+        // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
@@ -356,6 +358,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.alerting.maintenanceWindow.enabled (boolean?)',
         'xpack.alerting.rulesSettings.enabled (boolean?)',
         'xpack.alerting.disabledRuleTypes (array?)',
+        'xpack.alerting.enabledRuleTypes (array?)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',

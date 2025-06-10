@@ -25,7 +25,6 @@ import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
-import { CustomHttpRequestError } from '@kbn/osquery-plugin/server/common/error';
 
 jest.mock('../../utils');
 const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;
@@ -85,18 +84,6 @@ describe('Action List Handler', () => {
       await actionListHandler(defaultParams);
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: 'index_not_found_exception',
-      });
-    });
-
-    it('should return `badRequest` when sentinel_one feature flag is not enabled and agentType is `sentinel_one`', async () => {
-      apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-        ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-        responseActionsSentinelOneV1Enabled: false,
-      };
-      await actionListHandler({ ...defaultParams, agentTypes: 'sentinel_one' });
-      expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled'),
       });
     });
 
