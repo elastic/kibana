@@ -185,12 +185,17 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
               requestAnimationFrame(onTabContentRender);
             }, []);
             return (
-              <SelectedTabContent
-                {...{
-                  state: selectedTabState,
-                  dispatch,
-                }}
-              />
+              <div
+                css={{ display: 'contents' }}
+                data-test-subj={`tabbedModal-${selectedTabId}-content`}
+              >
+                <SelectedTabContent
+                  {...{
+                    state: selectedTabState,
+                    dispatch,
+                  }}
+                />
+              </div>
             );
           })}
         </Fragment>

@@ -1941,9 +1941,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async isShareActionEnabled(action: 'link') {
       switch (action) {
         case 'link':
-          return await testSubjects.isEnabled('link');
+          return await testSubjects.isEnabled('tabbedModal-link-content');
         default:
-          return await testSubjects.isEnabled(action);
+          return await testSubjects.isEnabled(`tabbedModal-${action}-content`);
       }
     },
 
