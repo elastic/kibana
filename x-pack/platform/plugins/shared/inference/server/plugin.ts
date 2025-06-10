@@ -7,12 +7,9 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
-  createClient as createInferenceClient,
-  createChatModel,
-  type BoundInferenceClient,
-  type InferenceClient,
-} from './inference_client';
+import { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { initLangfuseProcessor, initPhoenixProcessor } from '@kbn/inference-tracing';
+import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import {
@@ -23,8 +20,6 @@ import {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { initLangfuseProcessor } from './tracing/langfuse/init_langfuse_processor';
-import { initPhoenixProcessor } from './tracing/phoenix/init_phoenix_processor';
 
 export class InferencePlugin
   implements
