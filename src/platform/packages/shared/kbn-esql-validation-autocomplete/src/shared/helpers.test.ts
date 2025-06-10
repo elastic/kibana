@@ -83,16 +83,13 @@ describe('getExpressionType', () => {
         expression: 'NULL',
         expectedType: 'null',
       },
-      // TODO — consider whether we need to be worried about
-      // differentiating between time_duration, and date_period
-      // instead of just using time_literal
       {
         expression: '1 second',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '1 day',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '?value',
