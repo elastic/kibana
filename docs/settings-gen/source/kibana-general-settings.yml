@@ -974,6 +974,817 @@ groups:
             self: all
         # example: |
 
+      - setting: execution_context.enabled
+        # id:
+        description: |
+          Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header. This setting is available in {{ecloud}} 8.1.0 and later versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: logging.root
+        id: logging-root
+        description: |
+          The `root` logger has is a [dedicated logger](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#dedicated-loggers) and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` *must* also be explicitly configured.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: logging.root.appenders
+        id: logging-root-appenders
+        description: |
+          A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they’re re-configured explicitly. You can override the default behavior by configuring a different [appender](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) to apply to `root`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: logging.root.level
+        id: logging-root-level
+        description: |
+          Level at which a log record should be logged. Supported levels are: *all*, *fatal*, *error*, *warn*, *info*, *debug*, *trace*, *off*. Levels are ordered from *all* (highest) to *off* and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to [change the overall log level](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#change-overall-log-level).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        tip: "Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging [cli commands](docs-content://deploy-manage/monitor/logging-configuration/kib-advanced-logging.md#logging-cli-migration) to set log level to `verbose` or silence all logs."
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: info
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        example: |
+          The following example shows a valid verbose `logging.root` configuration:
+
+          ```text
+          logging:
+            appenders:
+              console_appender:
+                type: console
+                layout:
+                  type: pattern
+                  highlight: true
+            root:
+              appenders: [console_appender]
+              level: all
+          ```
+
+      - setting: logging.loggers[]
+        id: logging-loggers
+        description: |
+          Allows you to [customize a specific logger instance](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#customize-specific-log-records).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: logging.appenders[]
+        # id:
+        description: |
+          [Appenders](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) define how and where log messages are displayed (eg. **stdout** or console) and stored (eg. file on the disk).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: map.includeElasticMapsService
+        # id:
+        description: |
+          Set to `false` to disable connections to Elastic Maps Service. When `includeElasticMapsService` is turned off, only tile layer configured by [`map.tilemap.url`](#tilemap-url) is available in [Maps](docs-content://explore-analyze/visualize/maps.md).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: map.emsUrl
+        # id:
+        description: |
+          Specifies the URL of a self hosted [{{hosted-ems}}](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md#elastic-maps-server).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: map.tilemap.options.attribution
+        id: tilemap-settings
+        description: |
+          The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: "© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: map.tilemap.options.maxZoom
+        id: tilemap-max-zoom
+        description: |
+          The maximum zoom level.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 10
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: map.tilemap.options.minZoom
+        id: tilemap-min-zoom
+        description: |
+          The minimum zoom level.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 1
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: map.tilemap.options.subdomains
+        id: tilemap-subdomains
+        description: |
+          An array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: map.tilemap.url
+        id: tilemap-url
+        description: |
+          The URL to the service that {{kib}} uses as the default basemap in [maps](docs-content://explore-analyze/visualize/maps.md) and [vega maps](docs-content://explore-analyze/visualize/custom-visualizations-with-vega.md#vega-with-a-map). By default, {{kib}} sets a basemap from the [Elastic Maps Service](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md), but users can point to their own Tile Map Service.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        example: |
+          For example: "https://tiles.elastic.co/v2/default/{{z}}/{x}/{{y}}.png?elastic_tile_service_tos=agree&my_app_name=kibana"
+
+      - setting: migrations.batchSize
+        # id:
+        description: |
+          Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If upgrade migrations results in {{kib}} crashing with an out of memory exception or fails due to an Elasticsearch `circuit_breaking_exception`, use a smaller `batchSize` value to reduce the memory pressure.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 1000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: migrations.discardUnknownObjects
+        # id:
+        description: |
+          Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. This setting is available in {{ecloud}} 8.4.0 and later versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: undefined
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: migrations.discardCorruptObjects
+        # id:
+        description: |
+          Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined. This setting is available in {{ecloud}} 8.4.0 and later versions.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: migrations.maxBatchSizeBytes
+        # id:
+        description: |
+          Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster's `http.max_content_length` configuration option.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 100mb
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: migrations.retryAttempts
+        # id:
+        description: |
+          The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 15
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: newsfeed.enabled
+        # id:
+        description: |
+          Controls whether to enable the newsfeed system for the {{kib}} UI notification center. Set to `false` to disable the newsfeed system.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: node.roles
+        # id:
+        description: |
+          Indicates which roles to configure the {{kib}} process with, which will effectively run {{kib}} in different modes. Valid options are `background_tasks` and `ui`, or `*` to select all roles.
+        state: tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: '*'
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: notifications.connectors.default.email
+        # id:
+        description: |
+          Choose the default email connector for user notifications. As of `8.6.0`, {{kib}} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a *Case* to a user. To enable notifications, an email connector must be [preconfigured](/reference/connectors-kibana/pre-configured-connectors.md) in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: ops.interval
+        # id:
+        description: |
+          Set the interval in milliseconds to sample system and process performance metrics. The minimum value is 100.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 5000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: ops.cGroupOverrides.cpuPath
+        id: ops-cGroupOverrides-cpuPath
+        description: |
+          Override for cgroup cpu path when mounted in a manner that is inconsistent with `/proc/self/cgroup`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: ops.cGroupOverrides.cpuAcctPath
+        id: ops-cGroupOverrides-cpuAcctPath
+        description: |
+          Override for cgroup cpuacct path when mounted in a manner that is inconsistent with `/proc/self/cgroup`.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: path.data
+        id: path-data
+        description: |
+          The path where {{kib}} stores persistent data not saved in {{es}}.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: data
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: permissionsPolicy.report_to
+        # id:
+        description: |
+          Add sources for the [Permissions Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: pid.file
+        # id:
+        description: |
+          Specifies the path where {{kib}} creates the process ID file.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: savedObjects.maxImportExportSize
+        id: savedObjects-maxImportExportSize
+        description: |
+          The maximum count of saved objects that can be imported or exported. This setting exists to prevent the {{kib}} server from running out of memory when handling large numbers of saved objects. It is recommended to only raise this setting if you are confident your server can hold this many objects in memory.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 10000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: savedObjects.maxImportPayloadBytes
+        id: savedObjects-maxImportPayloadBytes
+        description: |
+          The maximum byte size of a saved objects import that the {{kib}} server will accept. This setting exists to prevent the {{kib}} server from running out of memory when handling a large import payload. Note that this setting overrides the more general [`server.maxPayload`](#server-maxPayload) for saved object imports only.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: 26214400
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: server.basePath
+        id: server-basePath
+        description: |
+          Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: server.defaultRoute
+        # id:
+        description: |
+          Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+        # example: |
+
+      - setting: server.publicBaseUrl
+        id: $$$server-publicBaseUrl
+        description: |
+          The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: server.compression.enabled
+        id: server-compression
+        description: |
+          Set to `false` to disable HTTP compression for all responses.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: server.cors.enabled
+        # id:
+        description: |
+          Set to `true` to allow cross-origin API calls.
+        state: tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+      - setting: server.cors.allowCredentials
+        # id:
+        description: |
+          Set to `true` to allow browser code to access response body whenever request performed with user credentials.
+        state: tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        # example: |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
