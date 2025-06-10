@@ -15,8 +15,8 @@ import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID } from '../../common/content_management';
 import {
+  INTERNAL_API_VERSION,
   PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
   PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
 } from './constants';
 import {
@@ -48,7 +48,8 @@ export function registerAPIRoutes({
   // Create API route
   const createRoute = versionedRouter.post({
     path: `${PUBLIC_API_PATH}/{id?}`,
-    access: 'public',
+    access: 'internal',
+    enableQueryVersion: true,
     summary: 'Create a dashboard',
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
@@ -67,7 +68,7 @@ export function registerAPIRoutes({
 
   createRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -127,7 +128,8 @@ export function registerAPIRoutes({
 
   const updateRoute = versionedRouter.put({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal',
+    enableQueryVersion: true,
     summary: `Update an existing dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
@@ -146,7 +148,7 @@ export function registerAPIRoutes({
 
   updateRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -194,7 +196,8 @@ export function registerAPIRoutes({
   // List API route
   const listRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}`,
-    access: 'public',
+    access: 'internal',
+    enableQueryVersion: true,
     summary: `Get a list of dashboards`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
@@ -213,7 +216,7 @@ export function registerAPIRoutes({
 
   listRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           query: schema.object({
@@ -282,7 +285,8 @@ export function registerAPIRoutes({
   // Get API route
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal',
+    enableQueryVersion: true,
     summary: `Get a dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
@@ -301,7 +305,7 @@ export function registerAPIRoutes({
 
   getRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
@@ -349,7 +353,8 @@ export function registerAPIRoutes({
   // Delete API route
   const deleteRoute = versionedRouter.delete({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal',
+    enableQueryVersion: true,
     summary: `Delete a dashboard`,
     description: TECHNICAL_PREVIEW_WARNING,
     options: {
@@ -368,7 +373,7 @@ export function registerAPIRoutes({
 
   deleteRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: INTERNAL_API_VERSION,
       validate: {
         request: {
           params: schema.object({
