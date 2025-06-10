@@ -35,7 +35,10 @@ import {
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
+  LensLayerQuery,
+  LensLayerQueryConfig,
 } from './types';
+import { getObjKey } from '@kbn/core/packages/saved-objects/import-export-server-internal/src/export/utils';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -328,7 +331,7 @@ export const buildQuery = (
   layer: FormBasedLayer,
   dataView: DataViewsCommon | undefined,
   formulaAPI?: FormulaPublicApi 
-): string | undefined => {
+): LensLayerQuery | undefined => {
   if (!accessor) {
     return undefined;
   }
@@ -338,12 +341,33 @@ export const buildQuery = (
     return undefined;
   }
 
+  let formula: string | undefined;
   if ('operationType' in column && column.operationType) {
     // convert to formula
-    return formulaAPI!.generateFormula(column, layer, '', undefined);
+    formula = formulaAPI!.generateFormula(column, layer, '', undefined);
   } else if ('formula' in column && column.formula) {
-    return column.formula as string;
+    formula = column.formula as string;
   }
 
-  return undefined;
+  const params: Partial<LensLayerQueryConfig> = {}
+  if (column.customLabel) {
+    params.label = column.label;
+  }
+
+  if (column.scale) {
+    params.scale = column.scale;
+  }
+  
+  if (column.params?.format) {
+    params.format = column.params.format;
+  }
+
+  if (Object.keys(params).length > 0) {
+    return formula;
+  }
+
+  return {
+    query: formula || '',
+    ...params,
+  };
 }

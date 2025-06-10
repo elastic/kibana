@@ -46,6 +46,15 @@ function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
 function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
   const layer = config;
 
+  // missing features:
+  // layer.customLabel
+  // layer.scale
+  // layer.params.format
+
+  // vis.icon
+  // vis.secondaryMetricPrefix
+  // vis.secondaryMetricColor
+
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
@@ -120,6 +129,35 @@ function reverseBuildVisualizationState(
   const querySecondaryMetric = buildQuery(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI);
   const queryMaxValue = buildQuery(visualization.maxAccessor, layer, dataViews, formulaAPI);
   
+  const props: Partial<LensMetricConfig> = {};
+
+  if (visualization.showBar) {
+    props.trendLine = visualization.showBar;
+  }
+
+  if (visualization.color) {
+    props.seriesColor = visualization.color;
+  }
+
+  if (visualization.secondaryTrend) {
+    // just static color is supported for now
+    // visualization.secondaryTrend.type
+    if (visualization.secondaryTrend.type === 'static' && visualization.secondaryTrend.color) {
+      props.secondaryMetricColor = visualization.secondaryTrend.color;
+    }
+  }
+
+  if (visualization.secondaryPrefix) {
+    props.secondaryMetricPrefix = visualization.secondaryPrefix;
+  }
+
+  if (visualization.icon) {
+    props.icon = visualization.icon;
+  }
+
+  if (visualization.trendlineMetricAccessor) {
+    // implement all the trendline properties (should be possible)
+  }
 
   return {
     chartType: 'metric',    
@@ -131,7 +169,7 @@ function reverseBuildVisualizationState(
     breakdown,
     querySecondaryMetric,
     queryMaxValue,
-    trendLine: Boolean(visualization.trendlineLayerId),
+    ...props,
   };
 }
 

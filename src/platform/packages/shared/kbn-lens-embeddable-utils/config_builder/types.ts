@@ -40,7 +40,14 @@ export interface TimeRange {
   type: 'relative' | 'absolute';
 }
 
-export type LensLayerQuery = string;
+export interface LensLayerQueryConfig {
+  query: string;
+  scale?: 'ordinal' | 'interval' | 'ratio' | 'nominal';
+  format?: any; // TODO: define format type
+  label?: string; 
+}
+
+export type LensLayerQuery = string | LensLayerQueryConfig;
 export interface LensDataviewDataset {
   index: string;
   timeFieldName?: string;
@@ -60,6 +67,12 @@ export interface LensBaseConfig {
   dataset?: LensDataset;
 }
 
+export interface LensColorConfig {
+  type: 'static' | 'palette';
+  color?: string;
+  palette?: string;
+}
+
 export interface LensBaseLayer {
   label?: string;
   filter?: string;
@@ -69,7 +82,7 @@ export interface LensBaseLayer {
   compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
-  seriesColor?: string;
+  seriesColor?: string | LensColorConfig;
   value: LensLayerQuery;
 }
 
@@ -159,6 +172,9 @@ export interface LensMetricConfigBase {
   breakdown?: LensBreakdownConfig;
   trendLine?: boolean;
   subtitle?: string;
+  secondaryMetricPrefix?: string;
+  secondaryMetricColor?: string | LensColorConfig;
+  icon?: string;
 }
 
 export type LensMetricConfig = Identity<LensBaseConfig & LensBaseLayer & LensMetricConfigBase>;
