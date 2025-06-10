@@ -50,8 +50,6 @@ export const removeAliases = async (
   }
 
   return esClient.indices.updateAliases({
-    body: {
-      actions: aliasesToRemove,
-    },
+    actions: aliasesToRemove,
   });
 };

@@ -15,6 +15,7 @@ export class OnboardingHomePage {
   private readonly kubernetesQuickStartCard: Locator;
   private readonly useCaseHost: Locator;
   private readonly autoDetectElasticAgent: Locator;
+  private readonly otelHostCard: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -30,6 +31,7 @@ export class OnboardingHomePage {
       .getByTestId('observabilityOnboardingUseCaseCard-host')
       .getByRole('radio');
     this.autoDetectElasticAgent = this.page.getByTestId('integration-card:auto-detect-logs');
+    this.otelHostCard = this.page.getByTestId('integration-card:otel-logs');
   }
 
   public async selectHostUseCase() {
@@ -50,5 +52,9 @@ export class OnboardingHomePage {
 
   public async selectOtelKubernetesQuickstart() {
     await this.otelKubernetesQuickStartCard.click();
+  }
+
+  public async selectOtelHostQuickstart() {
+    await this.otelHostCard.click();
   }
 }

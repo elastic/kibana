@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 
 import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
@@ -22,14 +22,22 @@ import {
 
 export const waitForMetadataTransformsReady = usageTracker.track(
   'waitForMetadataTransformsReady',
-  async (esClient: Client, version: string): Promise<void> => {
+  async (
+    esClient: Client,
+    /** The version of the Endpoint Package */
+    version: string
+  ): Promise<void> => {
     await waitFor(() => areMetadataTransformsReady(esClient, version));
   }
 );
 
 export const stopMetadataTransforms = usageTracker.track(
   'stopMetadataTransforms',
-  async (esClient: Client, version: string): Promise<void> => {
+  async (
+    esClient: Client,
+    /** The version of the Endpoint Package */
+    version: string
+  ): Promise<void> => {
     const transformIds = await getMetadataTransformIds(esClient, version);
 
     await Promise.all(
@@ -51,6 +59,7 @@ export const startMetadataTransforms = usageTracker.track(
     esClient: Client,
     // agentIds to wait for
     agentIds: string[],
+    /** The version of the Endpoint Package */
     version: string
   ): Promise<void> => {
     const transformIds = await getMetadataTransformIds(esClient, version);
@@ -80,7 +89,9 @@ export const startMetadataTransforms = usageTracker.track(
       }
     }
 
-    await waitForCurrentMetdataDocs(esClient, agentIds);
+    if (agentIds.length > 0) {
+      await waitForCurrentMetdataDocs(esClient, agentIds);
+    }
 
     try {
       await esClient.transform.startTransform({
@@ -97,6 +108,7 @@ export const startMetadataTransforms = usageTracker.track(
 
 async function getMetadataTransformStats(
   esClient: Client,
+  /** The version of the Endpoint Package */
   version: string
 ): Promise<TransformGetTransformStatsTransformStats[]> {
   const transformId = isEndpointPackageV2(version)
@@ -110,7 +122,11 @@ async function getMetadataTransformStats(
   ).transforms;
 }
 
-async function getMetadataTransformIds(esClient: Client, version: string): Promise<string[]> {
+async function getMetadataTransformIds(
+  esClient: Client,
+  /** The version of the Endpoint Package */
+  version: string
+): Promise<string[]> {
   return (await getMetadataTransformStats(esClient, version)).map((transform) => transform.id);
 }
 

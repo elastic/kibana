@@ -6,13 +6,7 @@
  */
 
 import { AppStatus, PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import {
-  AppLink,
-  appToResult,
-  getAppResults,
-  scoreApp,
-  keywordScoreWeighting,
-} from './get_app_results';
+import { AppLink, appToResult, getAppResults, scoreApp } from './get_app_results';
 
 const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'app1',
@@ -246,35 +240,35 @@ describe('scoreApp', () => {
   });
 
   describe('when the term is included in the keywords but not in the title', () => {
-    it(`returns 100 * ${keywordScoreWeighting} if one of the app meta keywords is an exact match`, () => {
+    it(`returns 100 if one of the app meta keywords is an exact match`, () => {
       expect(
         scoreApp('bar', createAppLink({ title: 'foo', keywords: ['bar'], deepLinks: [] }))
-      ).toBe(100 * keywordScoreWeighting);
+      ).toBe(100);
       expect(
         scoreApp('bar', createAppLink({ title: 'foo', keywords: ['BAR'], deepLinks: [] }))
-      ).toBe(100 * keywordScoreWeighting);
+      ).toBe(100);
     });
-    it(`returns 90 * ${keywordScoreWeighting} if any of the keywords start with the term`, () => {
+    it(`returns 90 if any of the keywords start with the term`, () => {
       expect(
         scoreApp(
           'viz',
           createAppLink({ title: 'Foo', keywords: ['Vizualize', 'Viz view'], deepLinks: [] })
         )
-      ).toBe(90 * keywordScoreWeighting);
+      ).toBe(90);
     });
-    it(`returns 75 * ${keywordScoreWeighting} if the term is included in any of the keywords`, () => {
+    it(`returns 75 if the term is included in any of the keywords`, () => {
       expect(
         scoreApp(
           'board',
           createAppLink({ title: 'Foo', keywords: ['dashboard app'], deepLinks: [] })
         )
-      ).toBe(75 * keywordScoreWeighting);
+      ).toBe(75);
       expect(
         scoreApp(
           'shboa',
           createAppLink({ title: 'Foo', keywords: ['dashboard app'], deepLinks: [] })
         )
-      ).toBe(75 * keywordScoreWeighting);
+      ).toBe(75);
     });
   });
 

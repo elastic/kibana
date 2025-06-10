@@ -21,7 +21,7 @@ export interface LogFilesState {
 
 type ObservabilityOnboardingFlowState = LogFilesState | undefined;
 
-type ObservabilityOnboardingType = 'logFiles' | 'autoDetect' | 'kubernetes';
+type ObservabilityOnboardingType = 'autoDetect';
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;

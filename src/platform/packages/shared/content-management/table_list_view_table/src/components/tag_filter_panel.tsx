@@ -24,8 +24,10 @@ import {
   useEuiTheme,
   EuiPopoverFooter,
   EuiButton,
+  useGeneratedHtmlId,
+  type EuiSelectableProps,
+  type ExclusiveUnion,
 } from '@elastic/eui';
-import type { EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -48,7 +50,6 @@ interface Context {
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
-  isInUse: boolean;
   options: TagOptionItem[];
   totalActiveFilters: number;
   onFilterButtonClick: () => void;
@@ -68,11 +69,12 @@ export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
   const componentContext = React.useContext(TagFilterContext);
+  const titleId = useGeneratedHtmlId();
+
   if (!componentContext)
     throw new Error('TagFilterPanel must be used within a TagFilterContextProvider');
   const {
     isPopoverOpen,
-    isInUse,
     options,
     totalActiveFilters,
     onFilterButtonClick,
@@ -110,20 +112,26 @@ export const TagFilterPanel: FC<{}> = ({}) => {
     };
   }
 
+  const tagsLabel = i18n.translate('contentManagement.tableList.tagFilterPanel.tagsLabel', {
+    defaultMessage: 'Tags',
+  });
+
   return (
     <>
       <EuiPopover
+        aria-labelledby={titleId}
         button={
           <EuiFilterButton
             iconType="arrowDown"
             iconSide="right"
             onClick={onFilterButtonClick}
             data-test-subj="tagFilterPopoverButton"
+            isSelected={isPopoverOpen}
             hasActiveFilters={totalActiveFilters > 0}
             numActiveFilters={totalActiveFilters}
             grow
           >
-            Tags
+            {tagsLabel}
           </EuiFilterButton>
         }
         isOpen={isPopoverOpen}
@@ -131,11 +139,10 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         panelPaddingSize="none"
         anchorPosition="downCenter"
         panelProps={{ css: { width: euiTheme.base * 18 } }}
-        panelStyle={isInUse ? { transition: 'none' } : undefined}
       >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
-            <EuiFlexItem>Tags</EuiFlexItem>
+            <EuiFlexItem id={titleId}>{tagsLabel}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {totalActiveFilters > 0 && (
                 <EuiButtonEmpty flush="both" onClick={clearTagSelection} css={clearSelectionBtnCSS}>
@@ -152,13 +159,23 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         </EuiPopoverTitle>
         <EuiSelectable<any>
           singleSelection={false}
-          aria-label="some aria label"
           options={options}
           renderOption={(option) => option.view}
-          emptyMessage="There aren't any tags"
-          noMatchesMessage="No tag matches the search"
+          emptyMessage={i18n.translate(
+            'contentManagement.tableList.tagFilterPanel.listEmptyMessage',
+            {
+              defaultMessage: "There aren't any tags",
+            }
+          )}
+          noMatchesMessage={i18n.translate(
+            'contentManagement.tableList.tagFilterPanel.listNoMatchesMessage',
+            {
+              defaultMessage: 'No tag matches the search',
+            }
+          )}
           onChange={onSelectChange}
           data-test-subj="tagSelectableList"
+          aria-label={tagsLabel}
           {...searchProps}
         >
           {(list, search) => {

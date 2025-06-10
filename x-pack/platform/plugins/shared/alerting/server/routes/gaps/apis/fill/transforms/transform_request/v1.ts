@@ -6,8 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { FillGapByIdQueryV1 } from '../../../../../../../common/routes/gaps/apis/fill';
-import { FillGapByIdParams } from '../../../../../../application/rule/methods/fill_gap_by_id/types';
+import type { FillGapByIdQueryV1 } from '../../../../../../../common/routes/gaps/apis/fill';
+import type { FillGapByIdParams } from '../../../../../../application/rule/methods/fill_gap_by_id/types';
 
 export const transformRequest = ({ rule_id, gap_id }: FillGapByIdQueryV1): FillGapByIdParams => ({
   gapId: gap_id,

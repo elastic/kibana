@@ -7,7 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,

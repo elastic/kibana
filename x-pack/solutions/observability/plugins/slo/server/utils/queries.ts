@@ -6,7 +6,7 @@
  */
 import { reject } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -56,7 +56,7 @@ export function termsQuery(
   field: string,
   ...values: Array<string | boolean | undefined | number | null>
 ): QueryDslQueryContainer[] {
-  const filtered = reject(values, isUndefinedOrNull);
+  const filtered = reject(values, isUndefinedOrNull) as Array<NonNullable<(typeof values)[number]>>;
 
   if (!filtered.length) {
     return [];

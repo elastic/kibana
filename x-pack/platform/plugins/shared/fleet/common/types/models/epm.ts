@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -14,7 +14,7 @@ import type {
   monitoringTypes,
   installationStatuses,
 } from '../../constants';
-import type { ValueOf } from '..';
+import type { CloudConnectors, ValueOf } from '..';
 
 import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
 
@@ -126,23 +126,23 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export type PackagePolicyAssetsMap = AssetsMap & { __brand: 'PackagePolicyAssetsMap' };
+
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
-  assetsMap: AssetsMap;
   paths: string[];
   archiveIterator: ArchiveIterator;
 }
@@ -204,6 +204,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
   team?: string;
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests: {
       cpu: string;
@@ -584,6 +585,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
+  packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -610,14 +612,22 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface InstallFailedAttempt {
+export interface FailedAttempt {
   created_at: string;
-  target_version: string;
   error: {
     name: string;
     message: string;
     stack?: string;
   };
+}
+
+export interface InstallFailedAttempt extends FailedAttempt {
+  target_version: string;
+}
+
+export interface CustomAssetFailedAttempt extends FailedAttempt {
+  type: string;
+  name: string;
 }
 
 export enum INSTALL_STATES {
@@ -671,7 +681,9 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
+  latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
 }
 
 export interface PackageUsageStats {
@@ -724,6 +736,7 @@ export interface EsAssetReference {
 
 export interface PackageAssetReference {
   id: string;
+  path?: string; // Package installed prior to 9.1.0 will not have that property
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 }
 

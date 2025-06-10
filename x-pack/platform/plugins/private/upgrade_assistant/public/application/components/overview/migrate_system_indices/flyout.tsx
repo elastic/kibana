@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, ReactNode } from 'react';
 import { startCase } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -22,6 +22,11 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiInMemoryTable,
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiScreenReaderOnly,
+  EuiBasicTableColumn,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import {
@@ -29,10 +34,15 @@ import {
   SystemIndicesMigrationFeature,
   MIGRATION_STATUS,
 } from '../../../../../common/types';
+import { MigrateSystemIndicesButton } from './migrate_button';
 
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
   data: SystemIndicesMigrationStatus;
+  beginSystemIndicesMigration: () => void;
+  isInitialRequest: boolean;
+  isLoading: boolean;
+  migrationStatus?: MIGRATION_STATUS;
 }
 
 const i18nTexts = {
@@ -82,6 +92,33 @@ const i18nTexts = {
       defaultMessage: 'Status',
     }
   ),
+  errorTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.errorTooltipLabel',
+    {
+      defaultMessage: 'Migration failed for the following indices: ',
+    }
+  ),
+  unknownErrorLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.unknownErrorLabel',
+    {
+      defaultMessage: 'Unknown error',
+    }
+  ),
+  migrationNotNeeded: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.migrationNotNeeded',
+    {
+      defaultMessage: 'Systems indices migration not needed',
+    }
+  ),
+};
+
+const getFailedIndices = (feature: SystemIndicesMigrationFeature) => {
+  return feature.indices
+    .filter((index) => index.failure_cause && index.failure_cause.error)
+    .map((index) => ({
+      index: index.index,
+      reason: index?.failure_cause?.error.type,
+    }));
 };
 
 const renderMigrationStatus = (status: MIGRATION_STATUS) => {
@@ -138,46 +175,111 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     );
   }
 
-  return '';
+  return null;
 };
 
-const columns = [
-  {
-    field: 'feature_name',
-    name: i18nTexts.featureNameTableColumn,
-    sortable: true,
-    truncateText: true,
-    render: (name: string) => startCase(name),
-  },
-  {
-    field: 'migration_status',
-    name: i18nTexts.statusTableColumn,
-    sortable: true,
-    render: renderMigrationStatus,
-  },
-];
+export const SystemIndicesFlyout = ({
+  closeFlyout,
+  data,
+  beginSystemIndicesMigration,
+  isInitialRequest,
+  isLoading,
+  migrationStatus,
+}: SystemIndicesFlyoutProps) => {
+  const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>({});
 
-export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+  const toggleRow = (feature: SystemIndicesMigrationFeature) => {
+    setExpandedRows((prev) => {
+      const newRows = { ...prev };
+      if (newRows[feature.feature_name]) {
+        delete newRows[feature.feature_name];
+      } else {
+        const failedIndices = getFailedIndices(feature);
+        const errorDetails = failedIndices.map(({ index, reason }) => ({
+          title: index,
+          description: reason || i18nTexts.unknownErrorLabel,
+        }));
+
+        newRows[feature.feature_name] = <EuiDescriptionList listItems={errorDetails} />;
+      }
+      return newRows;
+    });
+  };
+
+  const columns = [
+    {
+      field: 'feature_name',
+      name: i18nTexts.featureNameTableColumn,
+      sortable: true,
+      truncateText: true,
+      render: (name: string) => startCase(name),
+    },
+    {
+      field: 'migration_status',
+      name: i18nTexts.statusTableColumn,
+      sortable: true,
+      render: renderMigrationStatus,
+    },
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.systemIndices.expandRow"
+              defaultMessage="Expand row"
+            />
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (feature: SystemIndicesMigrationFeature) => {
+        return feature.migration_status === 'ERROR' ? (
+          <EuiButtonIcon
+            onClick={() => toggleRow(feature)}
+            aria-label={expandedRows[feature.feature_name] ? 'Collapse' : 'Expand'}
+            iconType={expandedRows[feature.feature_name] ? 'arrowDown' : 'arrowRight'}
+          />
+        ) : null;
+      },
+    },
+  ] as Array<EuiBasicTableColumn<SystemIndicesMigrationFeature>>;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
+          <h2 id="migrateSystemIndicesFlyoutTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">
-        <EuiText>
-          <p>{i18nTexts.flyoutDescription}</p>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiInMemoryTable<SystemIndicesMigrationFeature>
-          data-test-subj="featuresTable"
-          itemId="feature_name"
-          items={data.features}
-          columns={columns}
-          pagination={true}
-          sorting={true}
-        />
+        {migrationStatus === 'NO_MIGRATION_NEEDED' && (
+          <EuiCallOut
+            title={i18nTexts.migrationNotNeeded}
+            iconType="cheer"
+            color="success"
+            data-test-subj="noMigrationNeededCallout"
+          />
+        )}
+
+        {migrationStatus !== 'NO_MIGRATION_NEEDED' && (
+          <>
+            <EuiText>
+              <p>{i18nTexts.flyoutDescription}</p>
+            </EuiText>
+            <EuiSpacer size="l" />
+            <EuiInMemoryTable<SystemIndicesMigrationFeature>
+              data-test-subj="featuresTable"
+              itemId="feature_name"
+              items={data.features}
+              columns={columns}
+              itemIdToExpandedRowMap={expandedRows}
+              pagination={true}
+              sorting={true}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -186,6 +288,18 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
+          {migrationStatus !== 'NO_MIGRATION_NEEDED' && (
+            <EuiFlexItem grow={false}>
+              <MigrateSystemIndicesButton
+                buttonProps={{ fill: true }}
+                beginSystemIndicesMigration={beginSystemIndicesMigration}
+                isInitialRequest={isInitialRequest}
+                isLoading={isLoading}
+                isMigrating={migrationStatus === 'IN_PROGRESS'}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

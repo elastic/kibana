@@ -9,10 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React from 'react';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { PreferenceFormattedDate } from '../../../../../../common/components/formatted_date';
-import { useKibana } from '../../../../../../common/lib/kibana';
 import { MAX_SECONDS_BADGE_WIDTH } from '../helpers';
 import * as i18n from '../translations';
 
@@ -22,15 +22,14 @@ interface Props {
 
 const GenerationTimingComponent: React.FC<Props> = ({ interval }) => {
   const { euiTheme } = useEuiTheme();
-  const { theme } = useKibana().services;
-  const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="generationTiming" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiBadge
           css={css`
-            width: ${MAX_SECONDS_BADGE_WIDTH}px;
+            max-width: ${MAX_SECONDS_BADGE_WIDTH}px;
           `}
           color="hollow"
           data-test-subj="clockBadge"

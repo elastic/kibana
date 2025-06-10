@@ -29,5 +29,6 @@ export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
     type: 'boolean',
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'oblt',
   },
 };

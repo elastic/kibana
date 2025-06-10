@@ -6,6 +6,8 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataStreamOptions } from '../../../../common/types/data_streams';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
 
@@ -29,43 +31,61 @@ export const saveTemplate = async ({
   template,
   client,
   isLegacy,
+  dataStreamOptions,
 }: {
   template: TemplateDeserialized;
   client: IScopedClusterClient;
   isLegacy?: boolean;
+  dataStreamOptions?: DataStreamOptions;
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)
-    : serializeTemplate(template);
+    : serializeTemplate(template, dataStreamOptions);
 
   if (isLegacy) {
-    const {
-      order,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      index_patterns,
-      version,
-      settings,
-      mappings,
-      aliases,
-    } = serializedTemplate as LegacyTemplateSerialized;
+    const { settings } = serializedTemplate as LegacyTemplateSerialized;
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
-      order,
-      body: {
-        index_patterns,
-        version,
-        // @ts-expect-error Types of property auto_expand_replicas are incompatible.
-        settings,
-        mappings,
-        aliases,
-      },
+      ...serializedTemplate,
+      // @ts-expect-error Types of property auto_expand_replicas are incompatible.
+      settings,
     });
   }
 
   return await client.asCurrentUser.indices.putIndexTemplate({
     name: template.name,
-    // @ts-expect-error LegacyTemplateSerialized | TemplateSerialized conflicts with @elastic/elasticsearch IndicesPutIndexTemplateRequest
-    body: serializedTemplate,
+    ...(serializedTemplate as Omit<IndicesPutIndexTemplateRequest, 'name'>),
   });
+};
+
+export const getTemplateDataStreamOptions = async ({
+  name,
+  client,
+  isLegacy,
+}: {
+  name: string;
+  client: IScopedClusterClient;
+  isLegacy?: boolean;
+}): Promise<DataStreamOptions | undefined> => {
+  if (isLegacy) {
+    return undefined;
+  }
+  const existingTemplate = await client.asCurrentUser.transport.request<{
+    index_templates?: Array<{
+      index_template?: { template?: { data_stream_options?: unknown } };
+    }>;
+  }>({
+    method: 'GET',
+    path: `/_index_template/${name}`,
+  });
+  // TODO: Replace with the following when the client includes data_stream_options in IndicesIndexTemplateSummary
+  // https://github.com/elastic/kibana/issues/220614
+  // const existingTemplate = await client.asCurrentUser.indices.getIndexTemplate({
+  //   name,
+  // });
+
+  return existingTemplate?.index_templates?.[0]?.index_template?.template?.data_stream_options as
+    | DataStreamOptions
+    | undefined;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 export type ValidNormalizedTypes = `${Exclude<
   KBN_FIELD_TYPES,

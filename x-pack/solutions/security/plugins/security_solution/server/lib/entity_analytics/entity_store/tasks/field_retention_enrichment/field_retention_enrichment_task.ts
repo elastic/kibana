@@ -14,7 +14,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
-import { getEnabledStoreEntityTypes } from '../../../../../../common/entity_analytics/entity_store/utils';
+import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_analytics/utils';
 import {
   EngineComponentResourceEnum,
   type EntityType,
@@ -201,7 +201,7 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const entityTypes = getEntityAnalyticsEntityTypes();
 
     for (const entityType of entityTypes) {
       const start = Date.now();

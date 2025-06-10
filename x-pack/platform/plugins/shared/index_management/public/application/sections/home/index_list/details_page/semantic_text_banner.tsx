@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { documentationService } from '../../../../services';
 
 interface SemanticTextBannerProps {
   isSemanticTextEnabled: boolean;
@@ -31,10 +39,10 @@ const defaultLicenseMessage = (
   />
 );
 
-const platinumLicenseMessage = (
+const getPlatinumLicenseMessage = () => (
   <FormattedMessage
     id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
-    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started."
+    defaultMessage="{label} Add a field to your mapping and choose 'Semantic text' to get started. Documents will be automatically chunked to fit model context limits, to avoid truncation. {learnMore}"
     values={{
       label: (
         <strong>
@@ -43,6 +51,14 @@ const platinumLicenseMessage = (
             defaultMessage="semantic_text field type now available!"
           />
         </strong>
+      ),
+      learnMore: (
+        <EuiLink href={documentationService.getConfigureChunkingDocLink()} target="_blank">
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.learnMore"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
       ),
     }}
   />
@@ -58,10 +74,10 @@ export function SemanticTextBanner({
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
       <EuiPanel color="accentSecondary" data-test-subj="indexDetailsMappingsSemanticTextBanner">
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiText size="m" color="primary">
-              {isPlatinumLicense ? platinumLicenseMessage : defaultLicenseMessage}
+              {isPlatinumLicense ? getPlatinumLicenseMessage() : defaultLicenseMessage}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

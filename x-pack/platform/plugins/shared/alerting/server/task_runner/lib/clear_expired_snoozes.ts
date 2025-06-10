@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isSnoozeExpired } from '../../lib';
 import { partiallyUpdateRuleWithEs } from '../../saved_objects';
 

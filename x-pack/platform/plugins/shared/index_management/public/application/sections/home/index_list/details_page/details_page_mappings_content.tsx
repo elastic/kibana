@@ -120,6 +120,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     prefix: 'pendingFieldListId',
   });
 
+  const hasSemanticText = hasSemanticTextField(state.fields);
+
   const [isAddingFields, setAddingFields] = useState<boolean>(false);
 
   useUnsavedChangesPrompt({
@@ -222,7 +224,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
-      const hasSemanticText = hasSemanticTextField(state.fields);
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
@@ -540,13 +541,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 )}
                 onClick={onToggleChange}
               >
-                <EuiFilterButton hasActiveFilters={!isJSONVisible} withNext>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={!isJSONVisible}
+                  hasActiveFilters={!isJSONVisible}
+                  withNext
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.tableView"
                     defaultMessage="List"
                   />
                 </EuiFilterButton>
-                <EuiFilterButton hasActiveFilters={isJSONVisible}>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={isJSONVisible}
+                  hasActiveFilters={isJSONVisible}
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.json"
                     defaultMessage="JSON"
@@ -555,7 +565,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {hasMLPermissions && (
+          {hasMLPermissions && !hasSemanticText && (
             <EuiFlexItem grow={true}>
               <SemanticTextBanner
                 isSemanticTextEnabled={isSemanticTextEnabled}

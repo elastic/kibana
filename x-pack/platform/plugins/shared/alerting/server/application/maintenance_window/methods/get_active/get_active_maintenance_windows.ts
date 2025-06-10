@@ -6,7 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';

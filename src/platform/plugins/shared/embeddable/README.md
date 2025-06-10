@@ -23,13 +23,6 @@ An embeddable API shares state via a publishing subject, a read only RxJS Observ
 
 For example, [publishes_panel_title](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts) publishing package defines interfaces and type guards for title state. [initializeTitles](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts) provides an implemenation for the titles publishing package. `panelTitle` is provided as a publishing subject. [PresentationPanelInternal React component](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_internal.tsx) uses a hook to consume `panelTitle` as React state. Changes to `panelTitle` publishing subject updates React state, which in turn, causes the UI to re-render with the current value. [CustomizePanelEditor React component](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_actions/customize_panel_action/customize_panel_editor.tsx) uses `api.setPanelTitle` to set the title on save.
 
-#### Comparators
-Comparators allow a page to track changes to an embeddable's state. For example, Dashboard uses comparators to display a UI notification for unsaved changes, to reset changes, and persist unsaved changes to session storage.
-
-A comparator must be provided for each property in an embeddable's RuntimeState. A comparator is a 3 element tuple: where the first element is a publishing subject providing the current value. The second element is a setter allowing the page to reset the value. The third element is an optional comparator function which provides logic to diff this property.
-
-For example, [initializeTitles](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/titles_api.ts) provides an implemenation for the titles publishing package. Comparitors are provided for each property from `SerializedTitles`.
-
 ### Best practices
 
 #### Do not use Embeddables to share Components between plugins

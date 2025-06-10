@@ -6,15 +6,15 @@
  */
 
 import React, {
-  useState,
-  useEffect,
   MouseEvent,
-  useCallback,
-  useMemo,
-  RefObject,
   ReactElement,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react';
-import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
@@ -43,7 +43,7 @@ export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
   depth?: number;
-  onProcessSelected?: (process: Process) => void;
+  onProcessSelected?: (process: Process, isManualSelection?: boolean) => void;
   jumpToEntityId?: string;
   investigatedAlertId?: string;
   selectedProcess?: Process | null;
@@ -57,6 +57,7 @@ export interface ProcessDeps {
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
   handleCollapseProcessTree?: () => void;
+
   trackEvent(name: SessionViewTelemetryKey): void;
 }
 
@@ -187,7 +188,9 @@ export function ProcessTreeNode({
         return;
       }
 
-      onProcessSelected?.(process);
+      // we pass true here to let the parent SessionView component that the process was selected
+      // by a user clicking on a row in the tree
+      onProcessSelected?.(process, true);
 
       if (isSessionLeader && scrollerRef.current) {
         scrollerRef.current.scrollTop = 0;

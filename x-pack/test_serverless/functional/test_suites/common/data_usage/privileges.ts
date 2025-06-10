@@ -42,21 +42,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await es.indices.putIndexTemplate({
         name: 'test-datastream',
-        body: {
-          index_patterns: ['test-datastream'],
-          data_stream: {},
-          priority: 200,
-        },
+        index_patterns: ['test-datastream'],
+        data_stream: {},
+        priority: 200,
       });
 
       await es.indices.createDataStream({ name: 'test-datastream' });
       await es.indices.putIndexTemplate({
         name: 'no-permission-test-datastream',
-        body: {
-          index_patterns: ['no-permission-test-datastream'],
-          data_stream: {},
-          priority: 200,
-        },
+        index_patterns: ['no-permission-test-datastream'],
+        data_stream: {},
+        priority: 200,
       });
 
       await es.indices.createDataStream({ name: 'no-permission-test-datastream' });

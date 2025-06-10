@@ -23,13 +23,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   DataStreamMetadata,
-  DataStreamReindexStatus,
+  DataStreamMigrationStatus,
+  DataStreamResolutionType,
+  DataStreamsAction,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_migration_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
-import { getPrimaryButtonLabel } from '../../messages';
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
@@ -37,11 +38,19 @@ import { getPrimaryButtonLabel } from '../../messages';
 
 export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: ReindexState;
-  startReindex: () => void;
+  migrationState: MigrationState;
+  correctiveAction: DataStreamsAction;
+  initAction: (resolutionType: DataStreamResolutionType) => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, reindexState, startReindex, lastIndexCreationDateFormatted, meta }) => {
+}> = ({
+  closeFlyout,
+  migrationState,
+  initAction,
+  lastIndexCreationDateFormatted,
+  correctiveAction,
+  meta,
+}) => {
   const {
     services: {
       api,
@@ -49,12 +58,15 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
     },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
-    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
-  const isCompleted = status === DataStreamReindexStatus.completed;
-  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
+    loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
+  const isCompleted = status === DataStreamMigrationStatus.completed;
+  const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
+  const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
+
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const reindexExcluded = correctiveAction.metadata.excludedActions?.includes('reindex');
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -73,12 +85,13 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this data stream."
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
+                  defaultMessage="You do not have sufficient privileges to migrate this data stream."
                 />
               }
               color="danger"
               iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
             />
           </Fragment>
         )}
@@ -91,15 +104,15 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutDescription"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
                 />
 
                 <EuiSpacer size="s" />
@@ -108,7 +121,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -124,36 +137,36 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {(hasFetchFailed || hasReindexingFailed) && (
+        {(hasFetchFailed || hasMigrationFailed) && (
           <>
             <EuiCallOut
               color="danger"
               iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'migrationFailedCallout'}
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.fetchFailedCalloutTitle"
-                    defaultMessage="Data stream reindex status not available"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.fetchFailedCalloutTitle"
+                    defaultMessage="Data stream migration status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Data stream reindexing error"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.migrationFailedCalloutTitle"
+                    defaultMessage="Data stream migration error"
                   />
                 )
               }
             >
-              {reindexState.errorMessage}
+              {migrationState.errorMessage}
             </EuiCallOut>
             <EuiSpacer />
           </>
         )}
 
-        <EuiText>
+        <EuiText data-test-subj="dataStreamDetailsText">
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.notCompatibleIndicesText"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.notCompatibleIndicesText"
               defaultMessage="You have {backingIndicesCount} backing indices on this data stream that were created in ES 7.x and will not be compatible with next version."
               values={{
                 backingIndicesCount: meta.indicesRequiringUpgradeCount,
@@ -162,7 +175,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </p>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.requiredUpgradeText"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.requiredUpgradeText"
               defaultMessage="{allBackingIndices} total backing indices, and {backingIndicesRequireingUpgrade} requires upgrade."
               values={{
                 allBackingIndices: meta.allIndicesCount,
@@ -171,33 +184,38 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
             />
           </p>
           <ul>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.readOnlyText"
-              tagName="li"
-              defaultMessage="If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed."
-            />
-            <li>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.reindexOptionListTitle"
-                defaultMessage="Reindex"
-              />
-              <ul>
+            {!readOnlyExcluded && (
+              <li>
                 <FormattedMessage
-                  tagName="li"
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.reindexOption.rolledOverIndex"
-                  defaultMessage="The current write index will be rolled over and reindexed."
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.readOnlyText"
+                  defaultMessage="If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed."
                 />
+              </li>
+            )}
+            {!reindexExcluded && (
+              <li>
                 <FormattedMessage
-                  tagName="li"
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.reindexOption.additionalIndices"
-                  defaultMessage="Additional backing indices will be reindexed and remain editable."
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOptionListTitle"
+                  defaultMessage="Reindex"
                 />
-              </ul>
-            </li>
+                <ul>
+                  <FormattedMessage
+                    tagName="li"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.rolledOverIndex"
+                    defaultMessage="The current write index will be rolled over and reindexed."
+                  />
+                  <FormattedMessage
+                    tagName="li"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.additionalIndices"
+                    defaultMessage="Additional backing indices will be reindexed and remain editable."
+                  />
+                </ul>
+              </li>
+            )}
           </ul>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.reindexDescription"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.migrationDescription"
               defaultMessage="If you no longer need this data, you can also proceed by deleting these indices. {indexManagementLinkHtml}"
               values={{
                 indexManagementLinkHtml: (
@@ -207,7 +225,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                     )}`}
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.indexMgmtLink"
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.indexMgmtLink"
                       defaultMessage="Go to index management"
                     />
                   </EuiLink>
@@ -221,26 +239,50 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.detailsStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'primary'}
-                    iconType={status === DataStreamReindexStatus.cancelled ? 'play' : undefined}
-                    onClick={startReindex}
+                    color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'primary'}
+                    iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
+                    onClick={() => initAction('reindex')}
                     isLoading={loading}
-                    disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startReindexingButton"
+                    disabled={loading || !hasRequiredPrivileges || reindexExcluded}
+                    data-test-subj="startDataStreamReindexingButton"
                   >
-                    {getPrimaryButtonLabel(status)}
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.initReindexButtonLabel"
+                      defaultMessage="Reindex"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {!readOnlyExcluded && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color={'primary'}
+                    onClick={() => initAction('readonly')}
+                    disabled={!hasRequiredPrivileges || readOnlyExcluded}
+                    data-test-subj="startDataStreamReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkReadOnlyButtonLabel"
+                      defaultMessage="Mark read-only"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               )}

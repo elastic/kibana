@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
 import type {
   HealthIntervalGranularity,
-  RuleHealthSnapshot,
-  RuleHealthStats,
   HealthHistory,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
@@ -21,6 +19,7 @@ import {
   getRuleExecutionStatsAggregation,
   normalizeRuleExecutionStatsAggregationResult,
 } from './rule_execution_stats';
+import type { HealthOverInterval, HealthOverviewStats } from './types';
 
 export const getRuleHealthAggregation = (
   granularity: HealthIntervalGranularity
@@ -57,7 +56,7 @@ const getRuleExecutionStatsHistoryAggregation = (
 export const normalizeRuleHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): Omit<RuleHealthSnapshot, 'state_at_the_moment'> => {
+): HealthOverInterval => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeRuleExecutionStatsAggregationResult(
@@ -76,7 +75,7 @@ export const normalizeRuleHealthAggregationResult = (
 
 const normalizeHistoryOverInterval = (
   aggregations: Record<string, RawData>
-): HealthHistory<RuleHealthStats> => {
+): HealthHistory<HealthOverviewStats> => {
   const statsHistory = aggregations.statsHistory || {};
 
   return {

@@ -8,6 +8,8 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import { isObjectLike } from 'lodash';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -17,7 +19,33 @@ export {
 } from './handlers';
 
 export { isESClientError } from './utils';
-export { FleetError as FleetError } from '../../common/errors';
+export {
+  FleetError as FleetError,
+  OutputInvalidError as OutputInvalidError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
+} from '../../common/errors';
+
+export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta> {
+  public readonly statusCode: number | undefined;
+
+  constructor(message?: string, statusCode?: number, public readonly meta?: TMeta) {
+    super(message, meta);
+
+    if (statusCode) {
+      this.statusCode = statusCode;
+    } else if (isObjectLike(meta)) {
+      const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
+
+      // If the original error had a status code, and it is not a `401`, then set that status code here.
+      // We don't set it for `401` because the error is likely due to internal processing or lack
+      // of access to specific SO/Indexes, and we don't want Kibana/UI logout a user out due to this
+      // `401`
+      if (typeof metaStatusCode === 'number' && metaStatusCode !== 401) {
+        this.statusCode = metaStatusCode;
+      }
+    }
+  }
+}
 
 export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}
@@ -57,9 +85,16 @@ export class AgentlessAgentCreateError extends FleetError {
     super(`Error creating agentless agent in Fleet, ${message}`);
   }
 }
+
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
     super(`Error deleting agentless agent in Fleet, ${message}`);
+  }
+}
+
+export class AgentlessAgentUpgradeError extends FleetError {
+  constructor(message: string) {
+    super(`Error upgrading agentless agent in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentConfigError extends FleetError {
@@ -85,6 +120,13 @@ export class PackagePolicyRequestError extends FleetError {}
 export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
 export class PackagePolicyOutputError extends FleetError {}
 export class PackagePolicyContentPackageError extends FleetError {}
+export class CustomPackagePolicyNotAllowedForAgentlessError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because custom packages are not allowed to be deployed as agentless. Please choose a different deployment mode.`
+    );
+  }
+}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
@@ -109,7 +151,6 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
-export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
@@ -126,7 +167,9 @@ export class InputNotFoundError extends FleetNotFoundError {}
 export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
 export class ArchiveNotFoundError extends FleetNotFoundError {}
-
+export class IndexNotFoundError extends FleetNotFoundError {}
+export class CustomIntegrationNotFoundError extends FleetNotFoundError {}
+export class NotACustomIntegrationError extends FleetNotFoundError {}
 export class PackagePolicyNotFoundError extends FleetNotFoundError<{
   /** The package policy ID that was not found */
   packagePolicyId: string;

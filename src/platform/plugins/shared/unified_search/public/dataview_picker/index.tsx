@@ -16,7 +16,10 @@ export type { DataViewPickerProps } from './data_view_picker';
  * The Lazily-loaded `DataViewsList` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const DataViewsListLazy = React.lazy(() => import('./dataview_list'));
+export const DataViewsListLazy = React.lazy(async () => {
+  const { DataViewsList } = await import('../ui_module');
+  return { default: DataViewsList };
+});
 
 /**
  * A `DataViewsList` component that is wrapped by the `withSuspense` HOC. This component can
@@ -29,7 +32,10 @@ export const DataViewsList = withSuspense(DataViewsListLazy);
  * The Lazily-loaded `DataViewSelector` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const DataViewSelectorLazy = React.lazy(() => import('./data_view_selector'));
+export const DataViewSelectorLazy = React.lazy(async () => {
+  const { DataViewSelector } = await import('../ui_module');
+  return { default: DataViewSelector };
+});
 
 /**
  * A `DataViewSelector` component that is wrapped by the `withSuspense` HOC. This component can
@@ -42,7 +48,10 @@ export const DataViewSelector = withSuspense(DataViewSelectorLazy);
  * The Lazily-loaded `DataViewPicker` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const DataViewPickerLazy = React.lazy(() => import('./data_view_picker'));
+export const DataViewPickerLazy = React.lazy(async () => {
+  const { DataViewPicker } = await import('../ui_module');
+  return { default: DataViewPicker };
+});
 
 /**
  * A `DataViewPicker` component that is wrapped by the `withSuspense` HOC. This component can

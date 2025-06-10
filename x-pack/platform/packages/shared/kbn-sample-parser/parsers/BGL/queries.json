@@ -1,0 +1,821 @@
+{
+  "queries": [
+    {
+      "id": "e1",
+      "title": "DDR Errors Detected and Corrected with Rank, Symbol, and Seconds",
+      "description": "Returns log messages indicating DDR errors that were detected and corrected, including rank, symbol, and seconds information.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ddr error(s) detected AND corrected AND rank AND symbol AND seconds",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e2",
+      "title": "DDR Errors Detected and Corrected with Rank, Symbol, and Bit",
+      "description": "Returns log messages indicating DDR errors that were detected and corrected, including rank, symbol, and bit information.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ddr errors(s) detected AND corrected AND rank AND symbol AND bit",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "title": "L3 EDRAM Errors Detected and Corrected",
+      "description": "Returns log messages indicating L3 EDRAM errors that were detected and corrected.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "L3 EDRAM error(s) detected AND corrected",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e6",
+      "title": "L3 EDRAM Errors Detected and Corrected with Seconds",
+      "description": "Returns log messages indicating L3 EDRAM errors that were detected and corrected, including seconds information.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "L3 EDRAM error(s) detected AND corrected AND seconds",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e17",
+      "title": "Cannot Get Assembly Information for Node Card",
+      "description": "Returns log messages indicating an inability to get assembly information for a node card.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Can not get assembly information for node card",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e21",
+      "title": "Error Creating Node Map with Bad File Descriptor",
+      "description": "Returns log messages indicating an error in creating a node map due to a bad file descriptor.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error creating node map AND Bad file descriptor",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e22",
+      "title": "Error Creating Node Map with Block Device Required",
+      "description": "Returns log messages indicating an error in creating a node map due to a block device being required.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error creating node map AND Block device required",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e23",
+      "title": "Error Creating Node Map with No Child Processes",
+      "description": "Returns log messages indicating an error in creating a node map due to no child processes.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error creating node map AND No child processes",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e24",
+      "title": "Error Creating Node Map with Permission Denied",
+      "description": "Returns log messages indicating an error in creating a node map due to permission being denied.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error creating node map AND Permission denied",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e25",
+      "title": "Error Loading with Invalid or Missing Program Image and Exec Format Error",
+      "description": "Returns log messages indicating an error in loading due to an invalid or missing program image and an exec format error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error loading AND invalid or missing program image AND Exec format error",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e26",
+      "title": "Error Loading with Invalid or Missing Program Image and Permission Denied",
+      "description": "Returns log messages indicating an error in loading due to an invalid or missing program image and permission being denied.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error loading AND invalid or missing program image AND Permission denied",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e27",
+      "title": "Error Loading with Program Image Too Big",
+      "description": "Returns log messages indicating an error in loading due to the program image being too big.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error loading AND program image too big",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e28",
+      "title": "Error Loading with Invalid or Missing Program Image and No Such File or Directory",
+      "description": "Returns log messages indicating an error in loading due to an invalid or missing program image and no such file or directory.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error loading AND invalid or missing program image AND No such file or directory",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e29",
+      "title": "Error Reading Message Prefix with Link Severed",
+      "description": "Returns log messages indicating an error in reading the message prefix due to the link being severed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error reading message prefix AND Link has been severed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e30",
+      "title": "Error Reading Message Prefix with Connection Reset by Peer",
+      "description": "Returns log messages indicating an error in reading the message prefix due to the connection being reset by the peer.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error reading message prefix AND Connection reset by peer",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e31",
+      "title": "Error Reading Message Prefix with Connection Timed Out",
+      "description": "Returns log messages indicating an error in reading the message prefix due to the connection timing out.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error reading message prefix AND Connection timed out",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e32",
+      "title": "Error Reading Message Prefix with Link Severed",
+      "description": "Returns log messages indicating an error in reading the message prefix due to the link being severed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error reading message prefix AND Link has been severed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e33",
+      "title": "Failed to Read Message Prefix with Control Stream",
+      "description": "Returns log messages indicating a failure to read the message prefix due to the control stream.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "failed to read message prefix AND control stream",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e34",
+      "title": "Generated Core Files for Program",
+      "description": "Returns log messages indicating that core files were generated for a program.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "generated core files for program",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e40",
+      "title": "Poll Control Descriptors with Debugger Died",
+      "description": "Returns log messages indicating an issue with poll control descriptors due to the debugger dying.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pollControlDescriptors AND Detected the debugger died",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e44",
+      "title": "Critical Input Interrupt with Warning and Torus Y+ Wire",
+      "description": "Returns log messages indicating a critical input interrupt with a warning related to the torus Y+ wire.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "critical input interrupt AND warning AND torus y+ wire",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e45",
+      "title": "Critical Input Interrupt with Warning and Torus Z- Wire",
+      "description": "Returns log messages indicating a critical input interrupt with a warning related to the torus Z- wire.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "critical input interrupt AND warning AND torus z- wire",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e46",
+      "title": "Critical Input Interrupt with Warning, Torus Z+ Wire, and Suppressing Further Interrupts",
+      "description": "Returns log messages indicating a critical input interrupt with a warning related to the torus Z+ wire and suppressing further interrupts.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "critical input interrupt AND warning AND torus z+ wire AND suppressing further interrupts",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e47",
+      "title": "Critical Input Interrupt with Warning, Tree C1 Wire, and Suppressing Further Interrupts",
+      "description": "Returns log messages indicating a critical input interrupt with a warning related to the tree C1 wire and suppressing further interrupts.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "critical input interrupt AND warning AND tree C1 wire AND suppressing further interrupts",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e51",
+      "title": "Data Cache Search Parity Error Detected and Attempting to Correct",
+      "description": "Returns log messages indicating a data cache search parity error that was detected and an attempt to correct it.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "data cache search parity error detected AND attempting to correct",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e77",
+      "title": "Instruction Cache Parity Error Corrected",
+      "description": "Returns log messages indicating an instruction cache parity error that was corrected.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "instruction cache parity error corrected",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e80",
+      "title": "Lustre Mount Failed",
+      "description": "Returns log messages indicating a failed Lustre mount.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Lustre mount FAILED",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e81",
+      "title": "Lustre Mount Failed",
+      "description": "Returns log messages indicating a failed Lustre mount.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Lustre mount FAILED",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e82",
+      "title": "Machine Check DCR Read Timeout",
+      "description": "Returns log messages indicating a machine check DCR read timeout.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "MACHINE CHECK DCR read timeout",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e89",
+      "title": "NFS Mount Failed",
+      "description": "Returns log messages indicating a failed NFS mount.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "NFS Mount failed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e90",
+      "title": "Node Card Not Fully Functional",
+      "description": "Returns log messages indicating that a node card is not fully functional.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Node card is not fully functional",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e94",
+      "title": "NodeCard Not Fully Functional",
+      "description": "Returns log messages indicating that a NodeCard is not fully functional.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "NodeCard is not fully functional",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e95",
+      "title": "PrepareForService Shutting Down Node Card",
+      "description": "Returns log messages indicating that PrepareForService is shutting down a node card.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PrepareForService shutting down Node card",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e96",
+      "title": "PrepareForService Shutting Down NodeCard",
+      "description": "Returns log messages indicating that PrepareForService is shutting down a NodeCard.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PrepareForService shutting down NodeCard",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e107",
+      "title": "RTS Internal Error",
+      "description": "Returns log messages indicating an RTS internal error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rts internal error",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e108",
+      "title": "RTS Panic and Stopping Execution",
+      "description": "Returns log messages indicating an RTS panic and stopping execution.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rts panic AND stopping execution",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e109",
+      "title": "RTS Tree/Torus Link Training Failed",
+      "description": "Returns log messages indicating an RTS tree/torus link training failure.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rts tree/torus link training failed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e111",
+      "title": "RTS Kernel Terminated for Reason",
+      "description": "Returns log messages indicating that the RTS kernel was terminated for a reason.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rts kernel terminated for reason",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e113",
+      "title": "Shutdown Complete",
+      "description": "Returns log messages indicating that a shutdown is complete.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "shutdown complete",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e117",
+      "title": "Suppressing Further Interrupts of Same Type",
+      "description": "Returns log messages indicating that further interrupts of the same type are being suppressed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "suppressing further interrupts of same type",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e118",
+      "title": "Total DDR Errors Detected and Corrected",
+      "description": "Returns log messages indicating the total number of DDR errors that were detected and corrected.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "total of ddr error(s) detected AND corrected",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e119",
+      "title": "Total DDR Errors Detected and Corrected with Seconds",
+      "description": "Returns log messages indicating the total number of DDR errors that were detected and corrected, including seconds information.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "total of ddr error(s) detected AND corrected AND seconds",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e120",
+      "title": "Wait State Enable",
+      "description": "Returns log messages indicating that the wait state is enabled.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "wait state enable",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

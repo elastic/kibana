@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
 import { STATUS_OPTIONS } from '../constants';
 import * as i18n from '../translations';
-import { MaintenanceWindowStatus } from '../../../../common';
+import type { MaintenanceWindowStatus } from '../../../../common';
 
 export interface RuleStatusFilterProps {
   selectedStatus: MaintenanceWindowStatus[];
@@ -47,6 +47,7 @@ export const StatusFilter: React.FC<RuleStatusFilterProps> = React.memo(
             <EuiFilterButton
               data-test-subj="status-filter-button"
               iconType="arrowDown"
+              isSelected={isPopoverOpen}
               hasActiveFilters={selectedStatus.length > 0}
               numActiveFilters={selectedStatus.length}
               numFilters={selectedStatus.length}

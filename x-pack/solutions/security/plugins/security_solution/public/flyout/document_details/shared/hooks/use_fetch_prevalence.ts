@@ -163,50 +163,48 @@ const buildAggregationSearchRequest = (
 ): IEsSearchRequest => ({
   params: {
     index: selectedPatterns,
-    body: {
-      query,
-      aggs: {
-        // with this aggregation, we can in a single call retrieve all the values for each field/value pairs
-        [FIELD_NAMES_AGG_KEY]: {
-          filters: {
-            filters: highlightedFieldsFilters,
-          },
-          aggs: {
-            // this sub aggregation allows us to retrieve all the hosts which have the field/value pair
-            [HOST_NAME_AGG_KEY]: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-            // this sub aggregation allows us to retrieve all the users which have the field/value pair
-            [USER_NAME_AGG_KEY]: {
-              cardinality: {
-                field: 'user.name',
-              },
-            },
-            // we use this sub aggregation to differentiate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
-            [EVENT_KIND_AGG_KEY]: {
-              terms: {
-                field: 'event.kind',
-                size: 10, // there should be only 8 different value for the event.kind field
-              },
-            },
-          },
+    query,
+    aggs: {
+      // with this aggregation, we can in a single call retrieve all the values for each field/value pairs
+      [FIELD_NAMES_AGG_KEY]: {
+        filters: {
+          filters: highlightedFieldsFilters,
         },
-        // retrieve all the unique hosts in the environment
-        [HOSTS_AGG_KEY]: {
-          cardinality: {
-            field: 'host.name',
+        aggs: {
+          // this sub aggregation allows us to retrieve all the hosts which have the field/value pair
+          [HOST_NAME_AGG_KEY]: {
+            cardinality: {
+              field: 'host.name',
+            },
           },
-        },
-        // retrieve all the unique users in the environment
-        [USERS_AGG_KEY]: {
-          cardinality: {
-            field: 'user.name',
+          // this sub aggregation allows us to retrieve all the users which have the field/value pair
+          [USER_NAME_AGG_KEY]: {
+            cardinality: {
+              field: 'user.name',
+            },
+          },
+          // we use this sub aggregation to differentiate between alerts (event.kind === 'signal') and documents (event.kind !== 'signal')
+          [EVENT_KIND_AGG_KEY]: {
+            terms: {
+              field: 'event.kind',
+              size: 10, // there should be only 8 different value for the event.kind field
+            },
           },
         },
       },
-      size: 0,
+      // retrieve all the unique hosts in the environment
+      [HOSTS_AGG_KEY]: {
+        cardinality: {
+          field: 'host.name',
+        },
+      },
+      // retrieve all the unique users in the environment
+      [USERS_AGG_KEY]: {
+        cardinality: {
+          field: 'user.name',
+        },
+      },
     },
+    size: 0,
   },
 });

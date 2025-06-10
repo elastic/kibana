@@ -20,47 +20,45 @@ describe('buildLastEventTimeQuery', () => {
     });
     expect(query).toMatchInlineSnapshot(`
       Object {
+        "_source": false,
         "allow_no_indices": true,
-        "body": Object {
-          "_source": false,
-          "fields": Array [
-            Object {
-              "field": "@timestamp",
-              "format": "strict_date_optional_time",
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Object {
-                "bool": Object {
-                  "should": Array [
-                    Object {
-                      "term": Object {
-                        "source.ip": "12345567",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "destination.ip": "12345567",
-                      },
-                    },
-                  ],
-                },
-              },
-            },
+        "fields": Array [
+          Object {
+            "field": "@timestamp",
+            "format": "strict_date_optional_time",
           },
-          "size": 1,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "desc",
-              },
-            },
-          ],
-        },
+        ],
         "ignore_unavailable": true,
         "index": Array [
           ".siem-signals-default",
+        ],
+        "query": Object {
+          "bool": Object {
+            "filter": Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "source.ip": "12345567",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "destination.ip": "12345567",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        "size": 1,
+        "sort": Array [
+          Object {
+            "@timestamp": Object {
+              "order": "desc",
+            },
+          },
         ],
         "track_total_hits": false,
       }

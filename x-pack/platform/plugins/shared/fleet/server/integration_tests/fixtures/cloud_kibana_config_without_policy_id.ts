@@ -8,6 +8,14 @@
 export const CLOUD_KIBANA_WITHOUT_PACKAGE_POLICY_ID_CONFIG = {
   xpack: {
     fleet: {
+      internal: {
+        registry: {
+          kibanaVersionCheckEnabled: false,
+          spec: {
+            min: '1.0',
+          },
+        },
+      },
       packages: [
         {
           name: 'apm',

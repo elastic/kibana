@@ -65,7 +65,9 @@ describe('useCreateCaseModal', () => {
     });
 
     const result1 = result.current;
-    act(() => rerender());
+
+    rerender();
+
     const result2 = result.current;
 
     expect(Object.is(result1, result2)).toBe(true);

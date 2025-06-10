@@ -122,7 +122,7 @@ export class BundleCache {
     }
   }
 
-  public writeWebpackAsset(compilation: webpack.compilation.Compilation) {
+  public writeWebpackAsset(compilation: webpack.Compilation) {
     if (!this.path) {
       return;
     }

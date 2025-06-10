@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 // eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({

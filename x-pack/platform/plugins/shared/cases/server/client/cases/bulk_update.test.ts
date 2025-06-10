@@ -399,6 +399,29 @@ describe('update', () => {
         Operations.updateCase,
       ]);
     });
+
+    it('should filter out empty user profiles', async () => {
+      const casesWithEmptyAssignee = {
+        cases: [
+          {
+            ...cases.cases[0],
+            assignees: [{ uid: '' }, { uid: '2' }],
+          },
+        ],
+      };
+      await bulkUpdate(casesWithEmptyAssignee, clientArgs, casesClientMock);
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: expect.arrayContaining([
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({
+                assignees: [{ uid: '2' }],
+              }),
+            }),
+          ]),
+        })
+      );
+    });
   });
 
   describe('Category', () => {
@@ -878,6 +901,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-1",
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
@@ -922,6 +946,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-2",
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {

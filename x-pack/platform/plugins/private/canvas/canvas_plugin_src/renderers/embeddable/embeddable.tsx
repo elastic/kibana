@@ -6,9 +6,9 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { omit } from 'lodash';
 import {
@@ -19,15 +19,11 @@ import {
   TimeRange,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { apiHasSerializableState, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import {
-  CanvasContainerApi,
-  EmbeddableInput,
-  RendererFactory,
-  RendererHandlers,
-} from '../../../types';
+import { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
@@ -46,13 +42,29 @@ const renderReactEmbeddable = ({
 }: {
   type: string;
   uuid: string;
-  input: EmbeddableInput;
+  input: { filters?: Filter[] };
   container: CanvasContainerApi;
   handlers: RendererHandlers;
   core: CoreStart;
 }) => {
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
+    const subscriptionRef = useRef<Subscription | undefined>(undefined);
+
+    // Clean up subscriptionRef onUnmount
+    useEffect(() => {
+      return () => {
+        subscriptionRef.current?.unsubscribe();
+      };
+    }, []);
+
+    // set intial panel state onMount
+    useMemo(() => {
+      container.setSerializedStateForChild(uuid, {
+        rawState: omit(input, ['disableTriggers', 'filters']),
+      });
+    }, []);
+
     const searchApi = useMemo(() => {
       return {
         filters$: new BehaviorSubject<Filter[] | undefined>(input.filters),
@@ -62,27 +74,30 @@ const renderReactEmbeddable = ({
     }, []);
 
     return (
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={type}
         maybeId={uuid}
         getParentApi={(): CanvasContainerApi => ({
           ...container,
-          getSerializedStateForChild: () => ({
-            rawState: omit(input, ['disableTriggers', 'filters']),
-          }),
           ...searchApi,
         })}
         key={`${type}_${uuid}`}
-        onAnyStateChange={(newState) => {
-          const newExpression = embeddableInputToExpression(
-            newState.rawState as unknown as EmbeddableInput,
-            type,
-            undefined,
-            true
-          );
-          if (newExpression) handlers.onEmbeddableInputChange(newExpression);
-        }}
         onApiAvailable={(api) => {
+          if (apiPublishesUnsavedChanges(api) && apiHasSerializableState(api)) {
+            subscriptionRef.current = api.hasUnsavedChanges$.subscribe((hasUnsavedChanges) => {
+              if (!hasUnsavedChanges) return;
+              const newState = api.serializeState();
+              // canvas auto-saves so update child state on any change
+              container.setSerializedStateForChild(uuid, newState);
+              const newExpression = embeddableInputToExpression(
+                newState.rawState,
+                type,
+                undefined,
+                true
+              );
+              if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+            });
+          }
           children[uuid] = {
             ...api,
             setFilters: (filters: Filter[] | undefined) => {
@@ -117,7 +132,7 @@ const renderReactEmbeddable = ({
 export const embeddableRendererFactory = (
   core: CoreStart,
   plugins: StartDeps
-): RendererFactory<EmbeddableExpression<EmbeddableInput> & { canvasApi: CanvasContainerApi }> => {
+): RendererFactory<EmbeddableExpression & { canvasApi: CanvasContainerApi }> => {
   return () => ({
     name: 'embeddable',
     displayName: strings.getDisplayName(),
@@ -146,7 +161,7 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
-        api.setFilters(input.filters);
+        api.setFilters((input as { filters?: Filter[] }).filters);
       }
     },
   });

@@ -17,7 +17,7 @@ import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/compo
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import type { SetRuleQuery } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useGetSavedQuery } from '../../../../../../../common/use_get_saved_query';
 import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
@@ -68,6 +68,7 @@ export function KqlQueryEdit({
           isDisabled: isSavedQueryRule,
           defaultSavedQuery: savedQuery,
           resetToSavedQuery: isSavedQueryRule,
+          bubbleSubmitEvent: true,
         }}
       />
     </>

@@ -22,7 +22,6 @@ import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
 import { useExplorerData } from '../../../explorer/actions';
 import { useJobSelection } from '../../../components/job_selector/use_job_selection';
-import { useTableInterval } from '../../../components/controls/select_interval';
 import { useTableSeverity } from '../../../components/controls/select_severity';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
@@ -33,6 +32,7 @@ import { getInfluencers } from '../../../explorer/explorer_utils';
 import { useMlJobService } from '../../../services/job_service';
 import type { ExplorerState } from '../../../explorer/explorer_data';
 import { getExplorerDefaultState } from '../../../explorer/explorer_data';
+import type { LoadExplorerDataConfig } from '../../../explorer/actions/load_explorer_data';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -100,7 +100,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
     }
   }, [explorerData]);
 
-  const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
   const showCharts = useObservable(
@@ -127,15 +126,13 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   );
 
   const loadExplorerDataConfig = useMemo(
-    () => ({
+    (): LoadExplorerDataConfig => ({
       lastRefresh,
-      influencersFilterQuery,
+      influencersFilterQuery: influencersFilterQuery!,
       noInfluencersConfigured,
       selectedCells,
       selectedJobs,
-      tableInterval: tableInterval.val,
-      tableSeverity: tableSeverity.val,
-      viewBySwimlaneFieldName: viewByFieldName,
+      viewBySwimlaneFieldName: viewByFieldName!,
     }),
     [
       lastRefresh,
@@ -143,8 +140,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       noInfluencersConfigured,
       selectedCells,
       selectedJobs,
-      tableInterval,
-      tableSeverity,
       viewByFieldName,
     ]
   );
@@ -188,7 +183,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (
-          <AnomalyDetectionEmptyState />
+          <AnomalyDetectionEmptyState showDocsLink />
         ) : (
           <Explorer
             {...{

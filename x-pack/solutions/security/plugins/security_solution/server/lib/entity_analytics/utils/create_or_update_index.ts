@@ -40,7 +40,7 @@ export const createOrUpdateIndex = async ({
           indices.map(async (index) => {
             try {
               await retryTransientEsErrors(
-                () => esClient.indices.putMapping({ index, body: options.mappings }),
+                () => esClient.indices.putMapping({ index, ...options.mappings }),
                 { logger }
               );
               logger.info(`Update mappings for ${index}`);

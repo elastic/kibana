@@ -11,38 +11,58 @@ import React, { FC, useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
-  useEuiTheme,
   euiFontSize,
-  type EuiThemeComputed,
   type UseEuiTheme,
   EuiSpacer,
   EuiAccordion,
-  EuiHorizontalRule,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { Theme, css } from '@emotion/react';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { SubItemTitle } from '../subitem_title';
 import { PanelNavItem } from './panel_nav_item';
 
 const accordionButtonClassName = 'sideNavPanelAccordion__button';
 
-const getClassnames = (euiTheme: EuiThemeComputed<{}>) => ({
-  title: css`
-    text-transform: uppercase;
-    color: ${euiTheme.colors.darkShade};
+const styles = {
+  title: ({ euiTheme }: Theme) => css`
+    color: ${euiTheme.colors.textSubdued};
     padding-left: ${euiTheme.size.s};
-    padding-bottom: ${euiTheme.size.s};
-    ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xxs')}
+    padding-top: ${euiTheme.size.s};
+    ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
     font-weight: ${euiTheme.font.weight.medium};
   `,
-  accordion: css`
+  panelGroup: ({ euiTheme }: Theme) => css`
+    padding: 0 calc(${euiTheme.size.xs} * 2);
+  `,
+  accordion: ({ euiTheme }: Theme) => css`
     margin-bottom: ${euiTheme.size.s};
     .${accordionButtonClassName} {
       font-weight: ${euiTheme.font.weight.bold};
       ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
     }
   `,
-});
+  listGroup: () => css`
+    padding-left: 0;
+    padding-right: 0;
+    gap: 0;
+  `,
+  listGroupItemButton: ({ euiTheme }: Theme) => css`
+    .euiListGroupItem__button,
+    .euiAccordion__button {
+      font-weight: ${euiTheme.font.weight.regular};
+
+      &:focus,
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    &.euiAccordion {
+      margin-top: ${euiTheme.size.s};
+    }
+  `,
+};
 
 const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
   return children.some((child) => {
@@ -56,21 +76,18 @@ const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
-  /** Flag to indicate if the group is the first in the list of groups when looping */
-  isFirstInList?: boolean;
-  /** Flag to indicate if an horizontal rule preceeds this group */
-  hasHorizontalRuleBefore?: boolean;
+  parentId: string;
+  nodeIndex: number;
 }
 
-export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
-  const { euiTheme } = useEuiTheme();
-  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
+export const PanelGroup: FC<Props> = ({ navNode, parentId, nodeIndex }) => {
+  const { id, title, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
-  const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
+
+  const isFirstInList = nodeIndex === 0;
+
   const removePaddingTop = !hasTitle && !isFirstInList;
-  const someChildIsGroup = filteredChildren?.some((child) => !!child.children);
-  const firstChildIsGroup = !!filteredChildren?.[0]?.children;
   const groupTestSubj = `panelGroup panelGroupId-${navNode.id}`;
 
   let spaceBefore = _spaceBefore;
@@ -78,23 +95,24 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     if (!hasTitle && isFirstInList) {
       // If the first group has no title, we don't add any space.
       spaceBefore = null;
-    } else {
-      spaceBefore = hasHorizontalRuleBefore ? 'm' : 'l';
     }
   }
 
-  const renderChildren = useCallback(() => {
-    if (!filteredChildren) return null;
+  const renderChildren = useCallback(
+    (parentNode: ChromeProjectNavigationNode) => {
+      if (!filteredChildren) return null;
 
-    return filteredChildren.map((item, i) => {
-      const isItem = item.renderAs === 'item' || !item.children;
-      return isItem ? (
-        <PanelNavItem key={item.id} item={item} />
-      ) : (
-        <PanelGroup navNode={item} key={item.id} />
-      );
-    });
-  }, [filteredChildren]);
+      return filteredChildren.map((item, i) => {
+        const isItem = item.renderAs === 'item' || !item.children;
+        return isItem ? (
+          <PanelNavItem key={item.id} item={item} />
+        ) : (
+          <PanelGroup navNode={item} parentId={parentNode.id} key={item.id} nodeIndex={i} />
+        );
+      });
+    },
+    [filteredChildren]
+  );
 
   if (!filteredChildren?.length || !someChildIsVisible(filteredChildren)) {
     return null;
@@ -103,53 +121,48 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
   if (navNode.renderAs === 'accordion') {
     return (
       <>
-        {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
+        {spaceBefore != null && <EuiSpacer size={spaceBefore} />}
         <EuiAccordion
           id={id}
-          buttonContent={title}
-          className={classNames.accordion}
+          buttonContent={withBadge ? <SubItemTitle item={navNode} /> : title}
+          arrowDisplay="right"
+          css={[styles.panelGroup, styles.listGroupItemButton, styles.accordion]}
           buttonClassName={accordionButtonClassName}
           data-test-subj={groupTestSubj}
+          initialIsOpen={navNode.defaultIsCollapsed === false}
           buttonProps={{
             'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
           }}
         >
-          <>
-            {!firstChildIsGroup && <EuiSpacer size="s" />}
-            {renderChildren()}
-          </>
+          {renderChildren(navNode)}
         </EuiAccordion>
-        {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}
       </>
     );
   }
 
   return (
-    <div data-test-subj={groupTestSubj}>
-      {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
+    <div data-test-subj={groupTestSubj} css={styles.panelGroup}>
+      {spaceBefore != null && <EuiSpacer size={spaceBefore} />}
       {hasTitle && (
         <EuiTitle
-          size="xxxs"
-          className={classNames.title}
+          size="xs"
+          css={styles.title}
+          id={`panelGroupTitleId-${navNode.id}`}
           data-test-subj={`panelGroupTitleId-${navNode.id}`}
         >
           <h2>{title}</h2>
         </EuiTitle>
       )}
-      <EuiListGroup
-        css={{
-          paddingLeft: 0,
-          paddingRight: 0,
-          paddingTop: removePaddingTop ? 0 : undefined,
-          marginTop:
-            hasHorizontalRuleBefore && !hasTitle ? `calc(${euiTheme.size.s} * -1)` : undefined,
-          // Remove the gap between groups if some items are groups
-          gap: someChildIsGroup ? 0 : undefined,
-        }}
-      >
-        {renderChildren()}
-      </EuiListGroup>
-      {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}
+      <div style={{ paddingTop: removePaddingTop ? 0 : undefined }}>
+        <EuiListGroup
+          css={[styles.listGroup, styles.listGroupItemButton]}
+          aria-labelledby={
+            hasTitle ? `panelGroupTitleId-${navNode.id}` : `panelTitleId-${parentId}`
+          }
+        >
+          {renderChildren(navNode)}
+        </EuiListGroup>
+      </div>
     </div>
   );
 };

@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Workspace } from '../../types';
+import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectStyleProps {
   workspace: Workspace;
@@ -17,15 +20,15 @@ interface SelectStyleProps {
 
 export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
+    <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarHeaderStyles}>
         <EuiIcon type="brush" size="s" />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',
         })}
       </div>
 
-      <div className="form-group form-group-sm gphFormGroup--small">
+      <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
         {colors.map((c) => {
           const onSelectColor = () => {
             workspace.colorSelected(c);
@@ -35,7 +38,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
             <EuiIcon
               type="stopFilled"
               color={c}
-              className="gphColorPicker__color"
+              css={colorPickerIconStyles}
               aria-hidden="true"
               onClick={onSelectColor}
             />
@@ -45,3 +48,13 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
     </div>
   );
 };
+
+const colorPickerIconStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    margin: euiTheme.size.xs,
+    cursor: 'pointer',
+
+    '&:hover, &:focus': {
+      transform: 'scale(1.4)',
+    },
+  });

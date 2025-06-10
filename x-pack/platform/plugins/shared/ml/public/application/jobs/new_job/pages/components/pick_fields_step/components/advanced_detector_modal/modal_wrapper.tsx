@@ -16,6 +16,7 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 const MAX_MODAL_WIDTH = 1200;
@@ -32,14 +33,16 @@ export const ModalWrapper: FC<PropsWithChildren<Props>> = ({
   saveEnabled,
   children,
 }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'mlCreateDetectorModalTitle' });
   return (
     <EuiModal
       onClose={closeModal}
       maxWidth={MAX_MODAL_WIDTH}
       data-test-subj="mlCreateDetectorModal"
+      aria-labelledby={titleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={titleId}>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.title"
             defaultMessage="Create detector"

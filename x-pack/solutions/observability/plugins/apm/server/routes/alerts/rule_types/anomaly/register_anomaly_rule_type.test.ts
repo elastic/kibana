@@ -244,3 +244,130 @@ describe('Transaction duration anomaly alert', () => {
     });
   });
 });
+
+describe('recovered alerts', () => {
+  it('should returns the recovered alerts', async () => {
+    jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+      Promise.resolve([
+        {
+          jobId: '1',
+          environment: 'development',
+        },
+        {
+          jobId: '2',
+          environment: 'production',
+        },
+      ] as unknown as ApmMlJob[])
+    );
+
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+    services.alertsClient.getRecoveredAlerts.mockReturnValue([
+      {
+        alert: {
+          getId: jest.fn().mockReturnValue('test-id'),
+          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          scheduledExecutionOptions: undefined,
+          meta: {},
+          state: {},
+          context: {},
+          id: 'synthtrace-high-cardinality-0_Synthtrace: many_errors_request',
+          alertAsData: undefined,
+        },
+        hit: {
+          'service.name': 'packetbeat',
+          'service.environment': 'production',
+          'transaction.type': 'output',
+          'processor.event': 'transaction',
+          'kibana.alert.severity': 'minor',
+          'kibana.alert.evaluation.value': 42.801142973792565,
+          'kibana.alert.evaluation.threshold': 3,
+          'kibana.alert.reason':
+            'minor throughput anomaly with a score of 42.801142973792565, was detected in the last 30 mins for packetbeat.',
+          'agent.name': 'go',
+          labels: { worker: 'netclient' },
+          'service.language.name': 'go',
+          'kibana.alert.rule.category': 'APM Anomaly',
+          'kibana.alert.rule.consumer': 'alerts',
+          'kibana.alert.rule.execution.uuid': '46b2b08d-3373-48c1-9b93-00026b882042',
+          'kibana.alert.rule.name': 'APM Anomaly rule',
+          'kibana.alert.rule.parameters': {
+            windowSize: 30,
+            windowUnit: 'm',
+            anomalySeverityType: 'warning',
+            anomalyDetectorTypes: ['txLatency', 'txThroughput', 'txFailureRate'],
+            environment: 'ENVIRONMENT_ALL',
+          },
+          'kibana.alert.rule.producer': 'apm',
+          'kibana.alert.rule.revision': 12,
+          'kibana.alert.rule.rule_type_id': 'apm.anomaly',
+          'kibana.alert.rule.tags': [],
+          'kibana.alert.rule.uuid': 'e3aa20a8-25cb-49b8-94c8-3d930bde1219',
+          'kibana.space_ids': ['default'],
+          '@timestamp': '2025-03-05T14:37:29.661Z',
+          'event.action': 'active',
+          'event.kind': 'signal',
+          'kibana.alert.rule.execution.timestamp': '2025-03-05T14:37:29.661Z',
+          'kibana.alert.action_group': 'threshold_met',
+          'kibana.alert.flapping': false,
+          'kibana.alert.flapping_history': [],
+          'kibana.alert.instance.id': 'packetbeat_output_apm-production-3c88-apm_tx_metrics_1',
+          'kibana.alert.maintenance_window_ids': [],
+          'kibana.alert.consecutive_matches': 3,
+          'kibana.alert.status': 'active',
+          'kibana.alert.uuid': 'fe7fbfe4-4b26-4264-b0e7-28e69ce21376',
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.duration.us': 120043000,
+          'kibana.alert.start': '2025-03-05T14:35:29.618Z',
+          'kibana.alert.time_range': { gte: '2025-03-05T14:35:29.618Z' },
+          'kibana.version': '9.1.0',
+          tags: [],
+          'kibana.alert.previous_action_group': 'threshold_met',
+        },
+      },
+    ]);
+    const ml = {
+      mlSystemProvider: () => ({
+        mlAnomalySearch: () => ({
+          aggregations: {
+            anomaly_groups: {
+              buckets: [],
+            },
+          },
+        }),
+      }),
+      anomalyDetectorsProvider: jest.fn(),
+    } as unknown as MlPluginSetup;
+
+    registerAnomalyRuleType({
+      ...dependencies,
+      ml,
+    });
+
+    const params = {
+      anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+      anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
+      windowSize: 5,
+      windowUnit: 'm',
+    };
+
+    await executor({ params });
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'production',
+        reason:
+          'minor throughput anomaly with a score of 42.801142973792565, was detected in the last 30 mins for packetbeat.',
+        serviceName: 'packetbeat',
+        threshold: 'minor',
+        transactionType: 'output',
+        triggerValue: 'minor',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/packetbeat?transactionType=output&environment=production',
+      },
+      id: 'test-id',
+    });
+  });
+});

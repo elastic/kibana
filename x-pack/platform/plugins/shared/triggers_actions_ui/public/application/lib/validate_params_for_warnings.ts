@@ -7,7 +7,7 @@
 
 import { some } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import Mustache from 'mustache';
 
 const publicUrlWarning = i18n.translate(
@@ -34,7 +34,7 @@ export function validateParamsForWarnings(
 
     try {
       const variables = new Set(
-        (Mustache.parse(value) as Array<[string, string]>)
+        Mustache.parse(value)
           .filter(([type]) => type === 'name')
           .map(([, v]) => v)
       );

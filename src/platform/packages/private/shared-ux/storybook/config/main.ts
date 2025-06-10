@@ -15,7 +15,4 @@ module.exports = {
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
   ],
-  reactOptions: {
-    strictMode: true,
-  },
 };

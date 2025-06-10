@@ -53,10 +53,10 @@ const mockOpenLeftPanel = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 describe('useNavigateToServiceDetails', () => {
-  describe('when preview navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,
@@ -118,10 +118,10 @@ describe('useNavigateToServiceDetails', () => {
     });
   });
 
-  describe('when preview navigation is disabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,

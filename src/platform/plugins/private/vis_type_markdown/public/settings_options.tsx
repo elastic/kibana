@@ -13,11 +13,17 @@ import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SwitchOption, RangeOption } from '@kbn/vis-default-editor-plugin/public';
+import { css } from '@emotion/react';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel
+      paddingSize="s"
+      css={css`
+        flex-grow: 1 !important;
+      `}
+    >
       <RangeOption
         label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
           defaultMessage: 'Base font size in points',

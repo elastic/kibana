@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
     it('Should write doc correctly and apply the routing rule', async () => {
       const res = await es.index({
         index: TEST_WRITE_INDEX,
-        body: {
+        document: {
           '@timestamp': '2020-01-01T09:09:00',
           message: 'hello',
           data_stream: {

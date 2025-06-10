@@ -86,5 +86,7 @@ export {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
 } from './triggers';
 
-export const convertToLensModule = import('./convert_to_lens');
+export const getConvertToLensModule = async () => {
+  return await import('./convert_to_lens');
+};
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';

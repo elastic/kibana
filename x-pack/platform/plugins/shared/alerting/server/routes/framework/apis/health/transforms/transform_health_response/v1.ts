@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingFrameworkHealth } from '../../../../../../types';
+import type { AlertingFrameworkHealth } from '../../../../../../types';
 import type { HealthFrameworkResponseBodyV1 } from '../../../../../../../common/routes/framework/apis/health';
 
 export const transformHealthBodyResponse = (

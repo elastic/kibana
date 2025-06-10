@@ -12,6 +12,7 @@ export type {
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
+  ChatCompleteRetryConfiguration,
 } from './api';
 export type {
   BoundChatCompleteAPI,
@@ -43,6 +44,7 @@ export {
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
   ToolChoiceType,
+  type ToolCallbacksOf,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,

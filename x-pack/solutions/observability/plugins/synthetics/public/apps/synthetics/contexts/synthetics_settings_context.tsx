@@ -56,6 +56,7 @@ export interface SyntheticsSettingsContextValues {
   isDev?: boolean;
   isServerless?: boolean;
   setBreadcrumbs?: (crumbs: ChromeBreadcrumb[]) => void;
+  darkMode: boolean;
 }
 
 const { BASE_PATH } = CONTEXT_DEFAULTS;
@@ -76,6 +77,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isDev: false,
   canSave: false,
   canManagePrivateLocations: false,
+  darkMode: false,
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -91,6 +93,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     commonlyUsedRanges,
     isDev,
     isServerless,
+    darkMode,
   } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -103,6 +106,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
 
   const value = useMemo(() => {
     return {
+      darkMode,
       canSave,
       isDev,
       basePath,
@@ -116,6 +120,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       canManagePrivateLocations,
     };
   }, [
+    darkMode,
     canSave,
     isDev,
     basePath,

@@ -8,7 +8,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../..';
-import type { RenderCellValueContext } from '../../../../public/detections/configurations/security_solution_detections/fetch_page_context';
+import type { AlertsUserProfilesData } from '../../../../public/detections/configurations/security_solution_detections/fetch_page_context';
 import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 /** The following props are provided to the function called by `renderCellValue` */
@@ -21,7 +21,7 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   browserFields?: BrowserFields;
   data: TimelineNonEcsData[];
   ecsData?: Ecs;
-  eventId: string; // _id
+  eventId?: string; // _id
   header: ColumnHeaderOptions;
   isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
@@ -32,5 +32,5 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   truncate?: boolean;
   key?: string;
   closeCellPopover?: () => void;
-  context?: RenderCellValueContext;
+  context?: AlertsUserProfilesData;
 };

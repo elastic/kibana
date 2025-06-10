@@ -8,8 +8,8 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createMetricsStream } from './metrics_stream';
-import { JsonValue } from '@kbn/utility-types';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import type { JsonValue } from '@kbn/utility-types';
+import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 
 beforeEach(() => {
   jest.resetAllMocks();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export function trackDeprecatedRouteUsage(route: string, usageCounter?: UsageCounter) {
   if (usageCounter) {

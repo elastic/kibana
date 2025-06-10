@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Bulk AlertSummary Actions API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/alert_summary/_bulk_action:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PerformAlertSummaryBulkAction
+      summary: Apply a bulk action to alert summaries
+      description: Apply a bulk action to multiple alert summaries. The bulk action is applied to all alert summaries that match the filter or to the list of alert summaries by their IDs.
+      tags:
+        - Bulk API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delete:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
+                create:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AlertSummaryCreateProps'
+                update:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AlertSummaryUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertSummaryBulkCrudActionResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    AlertSummaryBulkActionSkipReason:
+      type: string
+      enum:
+        - ALERT_SUMMARY_NOT_MODIFIED
+
+    AlertSummaryBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        alertId:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/AlertSummaryBulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+
+    AlertSummaryDetailsInError:
+      type: object
+      properties:
+        alertId:
+          type: string
+        id:
+          type: string
+      required:
+        - id
+
+    NormalizedAlertSummaryError:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+        err_code:
+          type: string
+        alert_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertSummaryDetailsInError'
+      required:
+        - message
+        - status_code
+        - alert_summaries
+
+    AlertSummaryResponse:
+      type: object
+      required:
+        - id
+        - alertId
+        - summary
+        - replacements
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        alertId:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        'timestamp':
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+        summary:
+          type: string
+        recommendedActions:
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        updatedAt:
+          type: string
+        updatedBy:
+          type: string
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        namespace:
+          type: string
+          description: Kibana space
+
+    AlertSummaryBulkCrudActionResults:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertSummaryResponse'
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertSummaryResponse'
+        deleted:
+          type: array
+          items:
+            type: string
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertSummaryBulkActionSkipResult'
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+
+    AlertSummaryBulkCrudActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status_code:
+          type: integer
+        message:
+          type: string
+        alert_summaries_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/AlertSummaryBulkCrudActionResults'
+            summary:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedAlertSummaryError'
+          required:
+            - results
+            - summary
+      required:
+        - attributes
+
+    AlertSummaryCreateProps:
+      type: object
+      required:
+        - alertId
+        - summary
+        - replacements
+      properties:
+        alertId:
+          type: string
+        summary:
+          type: string
+        recommendedActions:
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+
+    AlertSummaryUpdateProps:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        summary:
+          type: string
+        recommendedActions:
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

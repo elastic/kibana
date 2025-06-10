@@ -158,7 +158,9 @@ export const GlobalAppStyle = () => {
   return (
     <Global
       styles={css`
-        ${bannerStyles(euiTheme)} ${chromeStyles(euiTheme)} ${renderingOverrides(euiTheme)}
+        ${bannerStyles(euiTheme)}
+        ${chromeStyles(euiTheme)} 
+        ${renderingOverrides(euiTheme)}
       `}
     />
   );

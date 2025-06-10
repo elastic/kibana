@@ -61,10 +61,12 @@ export function CodeBlock({ children }: { children: React.ReactNode }) {
 
 export function EsqlCodeBlock({
   value,
+  lang,
   actionsDisabled,
   onActionClick,
 }: {
   value: string;
+  lang: string;
   actionsDisabled: boolean;
   onActionClick: ChatActionClickHandler;
 }) {
@@ -72,7 +74,7 @@ export function EsqlCodeBlock({
     <CodeBlockWrapper>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiCodeBlock isCopyable fontSize="m">
+          <EuiCodeBlock language={lang} isCopyable fontSize="m">
             {value}
           </EuiCodeBlock>
         </EuiFlexItem>

@@ -48,19 +48,17 @@ export async function getDerivedServiceAnnotations({
         apm: {
           events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
         },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [...filter, ...rangeQuery(start, end)],
-            },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [...filter, ...rangeQuery(start, end)],
           },
-          aggs: {
-            versions: {
-              terms: {
-                field: SERVICE_VERSION,
-              },
+        },
+        aggs: {
+          versions: {
+            terms: {
+              field: SERVICE_VERSION,
             },
           },
         },
@@ -78,19 +76,17 @@ export async function getDerivedServiceAnnotations({
         apm: {
           events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
         },
-        body: {
-          track_total_hits: false,
-          size: 1,
-          query: {
-            bool: {
-              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
-            },
+        track_total_hits: false,
+        size: 1,
+        query: {
+          bool: {
+            filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
           },
-          sort: {
-            '@timestamp': 'asc',
-          },
-          fields: requiredFields,
         },
+        sort: {
+          '@timestamp': 'asc',
+        },
+        fields: requiredFields,
       });
 
       const event = unflattenKnownApmEventFields(

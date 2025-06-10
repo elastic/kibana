@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { TELEMETRY_DOC_ID } from './telemetry';
 
 export const telemetryMappingsType: SavedObjectsType = {

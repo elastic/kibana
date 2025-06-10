@@ -10,8 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { render, screen, within } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormBasedDataPanel, FormBasedDataPanelProps } from './datapanel';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
@@ -28,6 +27,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
+import { renderWithProviders } from '../../test_utils/test_utils';
 
 const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -241,11 +241,8 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 const renderFormBasedDataPanel = async (propsOverrides?: Partial<FormBasedDataPanelProps>) => {
-  const { rerender, ...rest } = render(
-    <FormBasedDataPanel {...defaultProps} {...propsOverrides} />,
-    {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    }
+  const { rerender, ...rest } = renderWithProviders(
+    <FormBasedDataPanel {...defaultProps} {...propsOverrides} />
   );
   await waitToLoad();
   return {

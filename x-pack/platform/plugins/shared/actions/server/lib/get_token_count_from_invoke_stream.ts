@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
@@ -106,7 +106,7 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
 };
 
 const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
-  let responseBody: string = '';
+  let responseBody = '';
   const destroyStream = () => {
     // Pause the stream to prevent further data events
     responseStream.pause();

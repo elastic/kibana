@@ -7,18 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
+import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
 import { timeUnits } from '@kbn/esql-validation-autocomplete';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
+const getQueryPart = (queryString: string, cursorColumn: number, variable: string) => {
+  const queryStringTillCursor = queryString.slice(0, cursorColumn);
+  const lastChar = queryStringTillCursor.slice(-1);
+  const secondLastChar = queryStringTillCursor.slice(-2, -1);
+
+  if (lastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  } else if (secondLastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  }
+
+  return [
+    queryString.slice(0, cursorColumn - 1),
+    variable,
+    queryString.slice(cursorColumn - 1),
+  ].join('');
+};
+
 export const updateQueryStringWithVariable = (
   queryString: string,
   variable: string,
   cursorPosition: monaco.Position
 ) => {
-  const variableName = `?${variable}`;
   const cursorColumn = cursorPosition?.column ?? 0;
   const cursorLine = cursorPosition?.lineNumber ?? 0;
   const lines = queryString.split('\n');
@@ -26,20 +52,13 @@ export const updateQueryStringWithVariable = (
   if (lines.length > 1) {
     const queryArray = queryString.split('\n');
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
-    const queryWithVariable = [
-      queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variableName,
-      queryPartToBeUpdated.slice(cursorColumn - 1),
-    ].join('');
+
+    const queryWithVariable = getQueryPart(queryPartToBeUpdated, cursorColumn, variable);
     queryArray[cursorLine - 1] = queryWithVariable;
     return queryArray.join('\n');
   }
 
-  return [
-    queryString.slice(0, cursorColumn - 1),
-    variableName,
-    queryString.slice(cursorColumn - 1),
-  ].join('');
+  return [getQueryPart(queryString, cursorColumn, variable)].join('');
 };
 
 export const getQueryForFields = (queryString: string, cursorPosition?: monaco.Position) => {
@@ -65,10 +84,23 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+export const getVariableSuggestion = (variableType: ESQLVariableType) => {
+  switch (variableType) {
+    case ESQLVariableType.FIELDS:
+      return 'field';
+    case ESQLVariableType.FUNCTIONS:
+      return 'function';
+    case ESQLVariableType.TIME_LITERAL:
+      return 'interval';
+    default:
+      return 'variable';
+  }
+};
+
+export const getRecurrentVariableName = (name: string, existingNames: Set<string>) => {
   let newName = name;
   let i = 1;
-  while (existingNames.includes(newName)) {
+  while (existingNames.has(newName)) {
     newName = `${name}${i}`;
     i++;
   }
@@ -89,13 +121,86 @@ export const getFlyoutStyling = () => {
   `;
 };
 
-export const validateVariableName = (variableName: string) => {
+export const validateVariableName = (variableName: string, prefix: '??' | '?') => {
   let text = variableName
-    // variable name can only contain letters, numbers and underscores
-    .replace(/[^a-zA-Z0-9_]/g, '');
-  if (text.charAt(0) === '_') {
-    text = text.substring(1);
+    // variable name can only contain letters, numbers, underscores and questionmarks
+    .replace(/[^a-zA-Z0-9_?]/g, '');
+
+  if (!text.startsWith('?')) {
+    text = `?${text}`;
+  }
+
+  const match = text.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  if (leadingQuestionMarksCount > 2) {
+    text = '??'.concat(text.substring(leadingQuestionMarksCount));
+  }
+
+  // Remove unnecessary leading underscores
+  if (text.charAt(prefix.length) === '_') {
+    text = `${prefix}${text.substring(prefix.length + 1)}`;
   }
 
   return text;
+};
+
+export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariableType) => {
+  const match = str.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+  if (
+    leadingQuestionMarksCount === 2 &&
+    variableType !== ESQLVariableType.FIELDS &&
+    variableType !== ESQLVariableType.FUNCTIONS
+  ) {
+    return ESQLVariableType.FIELDS;
+  }
+
+  if (
+    leadingQuestionMarksCount === 1 &&
+    variableType !== ESQLVariableType.TIME_LITERAL &&
+    variableType !== ESQLVariableType.VALUES
+  ) {
+    return ESQLVariableType.VALUES;
+  }
+
+  return variableType;
+};
+
+export const getVariableNamePrefix = (type: ESQLVariableType) => {
+  switch (type) {
+    case ESQLVariableType.FIELDS:
+    case ESQLVariableType.FUNCTIONS:
+      return VariableNamePrefix.IDENTIFIER;
+    case ESQLVariableType.VALUES:
+    case ESQLVariableType.TIME_LITERAL:
+    default:
+      return VariableNamePrefix.VALUE;
+  }
+};
+
+export const checkVariableExistence = (
+  esqlVariables: ESQLControlVariable[],
+  variableName: string
+): boolean => {
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
+  const match = variableName.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  return esqlVariables.some((variable) => {
+    const prefix = getVariableNamePrefix(variable.type);
+    if (leadingQuestionMarksCount === 2) {
+      if (prefix === VariableNamePrefix.IDENTIFIER) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    if (leadingQuestionMarksCount === 1) {
+      if (prefix === VariableNamePrefix.VALUE) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    return false;
+  });
 };

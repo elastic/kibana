@@ -8,12 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -26,13 +27,19 @@ import {
   UserMessage,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
+import {
+  DimensionEditor,
+  DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
+} from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState } from './types';
+import { MetricVisualizationState, SecondaryTrend } from './types';
+import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
+import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -61,19 +68,18 @@ export const metricLabel = i18n.translate('xpack.lens.metric.label', {
 
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
+  theme: ThemeServiceStart,
   props: VisualizationConfigProps<MetricVisualizationState>
 ): {
   groups: VisualizationDimensionGroupConfig[];
 } => {
-  const currentData = props.frame.activeData?.[props.state.layerId];
-
-  const isMetricNumeric = Boolean(
-    props.state.metricAccessor &&
-      isNumericFieldForDatatable(currentData, props.state.metricAccessor)
+  const datasource = props.frame.datasourceLayers[props.state.layerId];
+  const isPrimaryMetricNumeric = Boolean(
+    props.state.metricAccessor && getAccessorType(datasource, props.state.metricAccessor).isNumeric
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
-    const hasDynamicColoring = Boolean(isMetricNumeric && props.state.palette);
+    const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
       const stops = getOverridePaletteStops(paletteService, props.state.palette);
@@ -86,11 +92,46 @@ const getMetricLayerConfiguration = (
 
     return {
       triggerIconType: 'color',
-      color: props.state.color ?? getDefaultColor(props.state, isMetricNumeric),
+      color: props.state.color ?? getDefaultColor(props.state, isPrimaryMetricNumeric),
     };
   };
 
+  const isSecondaryMetricNumeric = Boolean(
+    props.state.secondaryMetricAccessor &&
+      getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
+  );
+
+  const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    const colorMode = getColorMode(props.state.secondaryTrend, isSecondaryMetricNumeric);
+
+    if (colorMode === 'dynamic') {
+      const stops = getTrendPalette(colorMode, props.state.secondaryTrend, theme.getTheme());
+      if (stops == null) {
+        return {};
+      }
+
+      return {
+        triggerIconType: 'colorBy',
+        palette: stops,
+      };
+    }
+
+    if (colorMode === 'static') {
+      const color =
+        props.state.secondaryTrend?.type === 'static'
+          ? props.state.secondaryTrend.color
+          : (getDefaultConfigForMode(colorMode) as Extract<SecondaryTrend, { type: 'static' }>)
+              .color;
+      return {
+        triggerIconType: 'color',
+        color,
+      };
+    }
+    return {};
+  };
+
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const canCollapseBy = isPrimaryMetricNumeric && props.state.collapseFn;
 
   return {
     groups: [
@@ -135,6 +176,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.secondaryMetricAccessor,
+                ...getSecondaryAccessorDisplayConfig(),
               },
             ]
           : [],
@@ -160,7 +202,7 @@ const getMetricLayerConfiguration = (
               },
             ]
           : [],
-        isHidden: !props.state.maxAccessor && !isMetricNumeric,
+        isHidden: !props.state.maxAccessor && !isPrimaryMetricNumeric,
         supportsMoreColumns: !props.state.maxAccessor,
         filterOperations: isSupportedMetric,
         enableDimensionEditor: true,
@@ -181,7 +223,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -282,6 +324,7 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
   delete state.secondaryPrefix;
+  delete state.secondaryTrend;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -358,7 +401,7 @@ export const getMetricVisualization = ({
 
   getConfiguration(props) {
     return props.layerId === props.state.layerId
-      ? getMetricLayerConfiguration(paletteService, props)
+      ? getMetricLayerConfiguration(paletteService, theme, props)
       : getTrendlineLayerConfiguration(props);
   },
 
@@ -500,7 +543,33 @@ export const getMetricVisualization = ({
   },
 
   toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
-    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
+    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, theme),
+
+  getPersistableState: (state, datasource, datasourceState) => {
+    const datasourceLayer = datasource?.getPublicAPI({
+      state: datasourceState?.state,
+      layerId: state.layerId,
+      indexPatterns: {},
+    });
+    // early return if there's no datasource found
+    if (!datasourceLayer) {
+      return { state, savedObjectReferences: [] };
+    }
+    // this should clean up the secondary trend state if in conflict
+    const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
+    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
+    // if there are no conflicts, it's all persistable as is
+    if (colorMode === state.secondaryTrend?.type) {
+      return { state, savedObjectReferences: [] };
+    }
+    return {
+      state: {
+        ...state,
+        secondaryTrend: getDefaultConfigForMode(colorMode),
+      },
+      savedObjectReferences: [],
+    };
+  },
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };
@@ -572,6 +641,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionEditorDataExtraComponent {...props} />;
   },
 
   DimensionEditorComponent(props) {
@@ -657,9 +730,9 @@ export const getMetricVisualization = ({
     const hasStaticColoring = !!state.color;
     const hasDynamicColoring = !!state.palette;
 
-    const currentData = frame?.activeData?.[state.layerId];
-    const isMetricNumeric = Boolean(
-      state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
+    const { isNumeric: isMetricNumeric } = getAccessorType(
+      frame?.datasourceLayers[state.layerId],
+      state.metricAccessor
     );
 
     return {

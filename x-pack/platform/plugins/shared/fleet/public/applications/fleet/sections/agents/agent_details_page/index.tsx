@@ -23,6 +23,7 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
+  useUrlParams,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -33,12 +34,15 @@ import {
   AgentDetailsContent,
   AgentDiagnosticsTab,
 } from './components';
+import { AgentSettings } from './components/agent_settings';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { urlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const {
     isLoading,
     isInitialRequest,
@@ -70,7 +74,12 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
-  const host = agentData?.item?.local_metadata?.host;
+  const agent =
+    agentData?.item &&
+    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
+      ? agentData.item
+      : null;
+  const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
@@ -109,14 +118,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const headerRightContent = useMemo(
     () =>
-      agentData && agentData.item ? (
+      agent ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
             {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
-                  agent={agentData.item}
+                  agent={agent}
                   agentPolicy={agentPolicyData?.item}
                   assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                   onCancelReassign={
@@ -160,6 +169,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
         isSelected: tabId === 'diagnostics',
       },
+      {
+        id: 'settings',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
+        isSelected: tabId === 'settings',
+      },
     ];
     return tabs;
   }, [getHref, agentId, tabId]);
@@ -190,8 +207,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             }
             error={error}
           />
-        ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
+        ) : agent ? (
+          <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
         ) : (
           <Error
             title={
@@ -236,6 +253,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
         render={() => {
           return <AgentDiagnosticsTab agent={agent} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_settings}
+        render={() => {
+          return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './flyout_container.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -18,9 +16,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
+  type UseEuiTheme,
+  euiBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
+import { flyoutContainerStyles } from './flyout.styles';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -61,6 +63,7 @@ export function FlyoutContainer({
   isInlineEditing?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
+  const euiThemeContext = useEuiTheme();
 
   const closeFlyout = useCallback(() => {
     setFocusTrapIsEnabled(false);
@@ -69,12 +72,14 @@ export function FlyoutContainer({
 
   useEffect(() => {
     if (!isInlineEditing) {
-      document.body.classList.toggle('lnsBody--overflowHidden', isOpen);
+      if (isOpen) {
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      }
       return () => {
         if (isOpen) {
           setFocusTrapIsEnabled(false);
         }
-        document.body.classList.remove('lnsBody--overflowHidden');
+        document.body.style.overflow = '';
       };
     }
   }, [isInlineEditing, isOpen]);
@@ -100,20 +105,22 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          className="lnsDimensionContainer"
-          css={css`
-            box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
-          `}
+          css={[
+            css`
+              box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
+            `,
+            flyoutContainerStyles(euiThemeContext),
+            dimensionContainerStyles.self(euiThemeContext),
+          ]}
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
               // running this onAnimationEnd, otherwise the flyout pushes content when animating.
-              // The EuiFocusTrap is disabled when inline editing as it causes bugs with comboboxes
-              setFocusTrapIsEnabled(!Boolean(isInlineEditing));
+              setFocusTrapIsEnabled(true);
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header(euiThemeContext)}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -131,12 +138,7 @@ export function FlyoutContainer({
               )}
               <EuiFlexItem grow={true}>
                 <EuiTitle size="xs">
-                  <h2
-                    id="lnsDimensionContainerTitle"
-                    className="lnsDimensionContainer__headerTitle"
-                  >
-                    {label}
-                  </h2>
+                  <h2 id="lnsDimensionContainerTitle">{label}</h2>
                 </EuiTitle>
               </EuiFlexItem>
 
@@ -157,10 +159,18 @@ export function FlyoutContainer({
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
-          <div className="lnsDimensionContainer__content">{children}</div>
+          <div
+            className="eui-yScroll"
+            css={css`
+              flex: 1;
+              z-index: 1;
+            `}
+          >
+            {children}
+          </div>
 
           {customFooter || (
-            <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+            <EuiFlyoutFooter css={dimensionContainerStyles.footer(euiThemeContext)}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -183,3 +193,24 @@ export function FlyoutContainer({
     </div>
   );
 }
+
+const dimensionContainerStyles = {
+  self: (euiThemeContext: UseEuiTheme) => {
+    return css`
+      // But with custom positioning to keep it within the sidebar contents
+      max-width: none !important;
+      left: 0;
+      ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
+        height: 100% !important;
+        position: absolute;
+        top: 0 !important;
+      }
+    `;
+  },
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+  footer: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+};

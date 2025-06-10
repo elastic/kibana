@@ -10,8 +10,9 @@
  */
 
 import React, { Fragment, lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper, mount } from 'enzyme';
+import { nextTick } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
@@ -22,12 +23,10 @@ import {
   GenericValidationResult,
   RuleTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
 import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -35,13 +34,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connect
 }));
 const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-);
-
-jest.mock(
-  '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query',
-  () => ({
-    useLoadRuleTypesQuery: jest.fn(),
-  })
 );
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -66,7 +58,6 @@ const initLegacyShims = () => {
 const ALERTS_FEATURE_ID = 'alerts';
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 describe('alert_form', () => {
   beforeEach(() => {
@@ -101,92 +92,6 @@ describe('alert_form', () => {
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
   };
-
-  describe('alert_form edit alert', () => {
-    let wrapper: ReactWrapper<any>;
-
-    beforeEach(async () => {
-      const { useLoadRuleTypesQuery } = jest.requireMock(
-        '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query'
-      );
-      useLoadRuleTypesQuery.mockReturnValue({
-        ruleTypesState: {
-          data: new Map(),
-        },
-      });
-      ruleTypeRegistry.list.mockReturnValue([ruleType]);
-      ruleTypeRegistry.get.mockReturnValue(ruleType);
-      ruleTypeRegistry.has.mockReturnValue(true);
-      actionTypeRegistry.list.mockReturnValue([actionType]);
-      actionTypeRegistry.has.mockReturnValue(true);
-      actionTypeRegistry.get.mockReturnValue(actionType);
-
-      const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
-
-      const initialAlert = {
-        name: 'test',
-        ruleTypeId: ruleType.id,
-        params: {},
-        consumer: ALERTS_FEATURE_ID,
-        schedule: {
-          interval: '1m',
-        },
-        actions: [],
-        tags: [],
-        muteAll: false,
-        enabled: false,
-        mutedInstanceIds: [],
-      } as unknown as Rule;
-
-      wrapper = mountWithIntl(
-        <I18nProvider>
-          <KibanaReactContext.Provider>
-            <QueryClientProvider
-              client={
-                new QueryClient({
-                  defaultOptions: {
-                    queries: {
-                      retry: false,
-                    },
-                  },
-                })
-              }
-            >
-              <RuleForm
-                rule={initialAlert}
-                config={{
-                  isUsingSecurity: true,
-                  minimumScheduleInterval: { value: '1m', enforce: false },
-                }}
-                dispatch={() => {}}
-                errors={{ name: [], 'schedule.interval': [] }}
-                operation="create"
-                actionTypeRegistry={actionTypeRegistry}
-                ruleTypeRegistry={ruleTypeRegistry}
-                onChangeMetaData={() => {}}
-              />
-            </QueryClientProvider>
-          </KibanaReactContext.Provider>
-        </I18nProvider>
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-    });
-
-    it('renders alert name', async () => {
-      const alertNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
-      expect(alertNameField.exists()).toBeTruthy();
-      expect(alertNameField.first().prop('value')).toBe('test');
-    });
-
-    it('renders registered selected alert type', async () => {
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedRuleTypeTitle"]');
-      expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-  });
 
   describe('alert_form > action_form', () => {
     describe('action_form in alert', () => {
@@ -251,27 +156,29 @@ describe('alert_form', () => {
         const actionWrapper = mount(
           <I18nProvider>
             <KibanaReactContext.Provider>
-              <ActionForm
-                actions={initialAlert.actions}
-                defaultActionGroupId={'default'}
-                setActionIdByIndex={(id: string, index: number) => {
-                  initialAlert.actions[index].id = id;
-                }}
-                setActions={() => {}}
-                setActionParamsProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
-                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-                }
-                actionTypeRegistry={actionTypeRegistry}
-                featureId="alerting"
-                producerId="alerting"
-                ruleTypeId=".es-query"
-              />
+              <QueryClientProvider client={new QueryClient()}>
+                <ActionForm
+                  actions={initialAlert.actions}
+                  defaultActionGroupId={'default'}
+                  setActionIdByIndex={(id: string, index: number) => {
+                    initialAlert.actions[index].id = id;
+                  }}
+                  setActions={() => {}}
+                  setActionParamsProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
+                    (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                  }
+                  actionTypeRegistry={actionTypeRegistry}
+                  featureId="alerting"
+                  producerId="alerting"
+                  ruleTypeId=".es-query"
+                />
+              </QueryClientProvider>
             </KibanaReactContext.Provider>
           </I18nProvider>
         );

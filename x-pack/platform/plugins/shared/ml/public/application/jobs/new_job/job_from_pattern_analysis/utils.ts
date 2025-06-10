@@ -6,12 +6,12 @@
  */
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_PAGES } from '../../../../locator';
 import type { CategorizationType } from './quick_create_job';
+import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
 
 export async function redirectToADJobWizards(
   categorizationType: CategorizationType,
@@ -23,9 +23,9 @@ export async function redirectToADJobWizards(
   timeRange: TimeRange,
   share: SharePluginStart
 ) {
-  const locator = share.url.locators.get(ML_APP_LOCATOR)!;
+  const locator = new MlManagementLocatorInternal(share);
 
-  const url = await locator.getUrl({
+  const { url } = await locator.getUrl({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS,
     pageState: {
       categorizationType,

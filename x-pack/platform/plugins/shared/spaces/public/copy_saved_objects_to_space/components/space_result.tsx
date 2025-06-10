@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_result.scss';
-
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -14,7 +12,9 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense, useState } from 'react';
 
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
@@ -47,12 +47,15 @@ const getInitialDestinationMap = (objects: SummarizedCopyToSpaceResult['objects'
 
 export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
   const { space } = props;
-
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
-      className="spcCopyToSpaceResult"
+      css={css`
+        padding-bottom: ${euiTheme.size.s};
+        border-bottom: ${euiTheme.border.thin};
+      `}
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -82,12 +85,16 @@ export const SpaceResult = (props: Props) => {
   const onDestinationMapChange = (value?: Map<string, string>) => {
     setDestinationMap(value || getInitialDestinationMap(objects));
   };
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
-      className="spcCopyToSpaceResult"
+      css={css`
+        padding-bottom: ${euiTheme.size.s};
+        border-bottom: ${euiTheme.border.thin};
+      `}
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>

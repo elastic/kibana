@@ -1,0 +1,280 @@
+{
+  "queries": [
+    {
+      "id": "memory_store_started",
+      "title": "MemoryStore Started",
+      "description": "Identifies logs where MemoryStore started with a specified capacity.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "MemoryStore started capacity",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "registered_signal_handlers",
+      "title": "Registered Signal Handlers",
+      "description": "Identifies logs where signal handlers for TERM, HUP, and INT were registered.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Registered signal handlers TERM HUP INT",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "remoting_started",
+      "title": "Remoting Started",
+      "description": "Identifies logs where remoting started and is listening on specified addresses.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Remoting started; listening on addresses :\\[akka\\.tcp://.*\\]"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "slf4jlogger_started",
+      "title": "Slf4jLogger Started",
+      "description": "Identifies logs where Slf4jLogger started.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Slf4jLogger started",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "starting_executor",
+      "title": "Starting Executor",
+      "description": "Identifies logs where an executor is starting on a specified host.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting executor ID host",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "starting_remoting",
+      "title": "Starting Remoting",
+      "description": "Identifies logs where remoting is starting.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting remoting",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "successfully_registered_with_driver",
+      "title": "Successfully Registered with Driver",
+      "description": "Identifies logs where the system successfully registered with the driver.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Successfully registered driver",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "started_netty_block_transfer_service",
+      "title": "Started Netty Block Transfer Service",
+      "description": "Identifies logs where the Netty Block Transfer Service started on a specified port.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Successfully started service 'org\\.apache\\.spark\\.network\\.netty\\.NettyBlockTransferService' on port .*\\."
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "started_spark_executor_actor_system",
+      "title": "Started Spark Executor Actor System",
+      "description": "Identifies logs where the Spark Executor Actor System started on a specified port.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Successfully started service 'sparkExecutorActorSystem' on port .*\\."
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "partition_rdd_not_found",
+      "title": "Partition RDD Not Found",
+      "description": "Identifies logs where a partition RDD was not found and is being computed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Partition rdd not found computing",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mapred_job_id_deprecated",
+      "title": "Mapred Job ID Deprecated",
+      "description": "Identifies logs where the mapred.job.id is deprecated and suggests using mapreduce.job.id instead.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mapred.job.id deprecated mapreduce.job.id",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mapred_task_id_deprecated",
+      "title": "Mapred Task ID Deprecated",
+      "description": "Identifies logs where the mapred.task.id is deprecated and suggests using mapreduce.task.attempt.id instead.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mapred.task.id deprecated mapreduce.task.attempt.id",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mapred_task_is_map_deprecated",
+      "title": "Mapred Task Is Map Deprecated",
+      "description": "Identifies logs where the mapred.task.is.map is deprecated and suggests using mapreduce.task.ismap instead.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mapred.task.is.map deprecated mapreduce.task.ismap",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mapred_task_partition_deprecated",
+      "title": "Mapred Task Partition Deprecated",
+      "description": "Identifies logs where the mapred.task.partition is deprecated and suggests using mapreduce.task.partition instead.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mapred.task.partition deprecated mapreduce.task.partition",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mapred_tip_id_deprecated",
+      "title": "Mapred Tip ID Deprecated",
+      "description": "Identifies logs where the mapred.tip.id is deprecated and suggests using mapreduce.task.id instead.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mapred.tip.id deprecated mapreduce.task.id",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

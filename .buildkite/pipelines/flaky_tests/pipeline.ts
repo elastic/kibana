@@ -8,7 +8,7 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue } from '#pipeline-utils';
+import { BuildkiteStep, expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -113,9 +113,11 @@ if (totalJobs > MAX_JOBS) {
 }
 
 const steps: BuildkiteStep[] = [];
+const envFromLabels = collectEnvFromLabels(process.env.GITHUB_PR_LABELS);
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
+    ...envFromLabels,
   },
   steps,
 };
@@ -193,6 +195,31 @@ for (const testSuite of testSuites) {
         },
       });
       break;
+    case 'elastic_synthetics':
+      const synthGroup = groups.find((g) => g.key === testSuite.key);
+      if (!synthGroup) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
+        label: synthGroup.name,
+        agents: expandAgentQueue('n2-4-spot'),
+        key: `synthetics-suite-${suiteIndex++}`,
+        depends_on: 'build',
+        timeout_in_minutes: 30,
+        parallelism: testSuite.count,
+        concurrency,
+        concurrency_group: process.env.UUID,
+        concurrency_method: 'eager',
+        cancel_on_build_failing: true,
+        retry: {
+          automatic: [{ exit_status: '-1', limit: 3 }],
+        },
+      });
+      break;
+
     default:
       throw new Error(`unknown test suite: ${testSuite.key}`);
   }

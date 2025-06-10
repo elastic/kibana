@@ -9,7 +9,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 describe('remove cases from alerts', () => {

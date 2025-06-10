@@ -44,6 +44,7 @@ const config = new Config(
   false,
   true,
   true,
+  {},
   {}
 );
 

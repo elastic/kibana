@@ -80,6 +80,13 @@ export const TableView = (props: Props) => {
         const button = (
           <EuiToolTip content={tooltipText}>
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.columnName.openNodeDetailsButton.ariaLabel',
+                {
+                  defaultMessage: 'Open host details {nodeName}',
+                  values: { nodeName: value },
+                }
+              )}
               data-test-subj="infraColumnsButton"
               onClick={() => toggleAssetPopover(uniqueID, item.node.id)}
             >
@@ -118,7 +125,17 @@ export const TableView = (props: Props) => {
         const handleClick = () => props.onFilter(`${grouping.field}:"${value}"`);
         return (
           <EuiToolTip content="Set Filter">
-            <EuiButtonEmpty data-test-subj="infraColumnsButton" onClick={handleClick}>
+            <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.groupByColumn.setFilterButton.ariaLabel',
+                {
+                  defaultMessage: 'Set Filter {groupByName} to {value}',
+                  values: { groupByName: fieldToName((grouping && grouping.field) || ''), value },
+                }
+              )}
+              data-test-subj="infraColumnsButton"
+              onClick={handleClick}
+            >
               {value}
             </EuiButtonEmpty>
           </EuiToolTip>
@@ -128,7 +145,7 @@ export const TableView = (props: Props) => {
     {
       field: 'value',
       name: i18n.translate('xpack.infra.tableView.columnName.last1m', {
-        defaultMessage: 'Last 1m',
+        defaultMessage: 'Last 1 min.',
       }),
       sortable: true,
       truncateText: true,
@@ -137,7 +154,7 @@ export const TableView = (props: Props) => {
     },
     {
       field: 'avg',
-      name: i18n.translate('xpack.infra.tableView.columnName.avg', { defaultMessage: 'Avg' }),
+      name: i18n.translate('xpack.infra.tableView.columnName.avg', { defaultMessage: 'Avg.' }),
       sortable: true,
       truncateText: true,
       dataType: 'number',

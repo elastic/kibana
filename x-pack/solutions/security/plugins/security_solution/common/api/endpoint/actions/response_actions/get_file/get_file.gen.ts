@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
+import { BaseActionSchema } from '../../../model/schema/common.gen';
 
 export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
 export const GetFileRouteRequestBody = BaseActionSchema.merge(
@@ -27,6 +27,9 @@ export const GetFileRouteRequestBody = BaseActionSchema.merge(
   })
 );
 
+export type GetFileRouteResponse = z.infer<typeof GetFileRouteResponse>;
+export const GetFileRouteResponse = z.object({});
+
 export type EndpointGetFileActionRequestBody = z.infer<typeof EndpointGetFileActionRequestBody>;
 export const EndpointGetFileActionRequestBody = GetFileRouteRequestBody;
 export type EndpointGetFileActionRequestBodyInput = z.input<
@@ -34,4 +37,4 @@ export type EndpointGetFileActionRequestBodyInput = z.input<
 >;
 
 export type EndpointGetFileActionResponse = z.infer<typeof EndpointGetFileActionResponse>;
-export const EndpointGetFileActionResponse = SuccessResponse;
+export const EndpointGetFileActionResponse = GetFileRouteResponse;

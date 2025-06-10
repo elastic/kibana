@@ -16,8 +16,19 @@ import { mockGlobalState } from '../../../../common/mock';
 
 const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ ...mockedExperimentalFeatures, serviceEntityStoreEnabled: true }),
+  useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
 }));
+
+const mockUseUiSettings = jest.fn().mockReturnValue([true]);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSettings(),
+  };
+});
+
 jest.mock('../../../../common/hooks/use_global_filter_query');
 
 describe('useEntitiesListFilters', () => {

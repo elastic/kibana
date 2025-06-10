@@ -67,7 +67,7 @@ export function defineChangeUserPasswordRoutes({
       try {
         const esClient = (await context.core).elasticsearch.client;
         await esClient.asCurrentUser.security.changePassword(
-          { username, body: { password: newPassword } },
+          { username, password: newPassword },
           options
         );
       } catch (error) {

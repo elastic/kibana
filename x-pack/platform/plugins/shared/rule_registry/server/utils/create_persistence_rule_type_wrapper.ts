@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import dateMath from '@elastic/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -30,9 +30,9 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+import type { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -108,22 +108,20 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
 
   for (const alertChunk of alertChunks) {
     const request: estypes.SearchRequest = {
-      body: {
-        query: {
-          ids: {
-            values: alertChunk.map((alert) => alert._id),
-          },
+      query: {
+        ids: {
+          values: alertChunk.map((alert) => alert._id),
         },
-        aggs: {
-          uuids: {
-            terms: {
-              field: ALERT_UUID,
-              size: CHUNK_SIZE,
-            },
-          },
-        },
-        size: 0,
       },
+      aggs: {
+        uuids: {
+          terms: {
+            field: ALERT_UUID,
+            size: CHUNK_SIZE,
+          },
+        },
+      },
+      size: 0,
     };
     const response = await ruleDataClient.getReader({ namespace: spaceId }).search(request);
     const uuidsMap: Record<string, boolean> = {};
@@ -413,48 +411,46 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 const suppressionAlertSearchRequest = {
-                  body: {
-                    size: filteredDuplicates.length,
-                    query: {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              [ALERT_START]: {
-                                gte: suppressionWindowStart.toISOString(),
-                              },
+                  size: filteredDuplicates.length,
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            [ALERT_START]: {
+                              gte: suppressionWindowStart.toISOString(),
                             },
                           },
-                          {
-                            terms: {
-                              [ALERT_INSTANCE_ID]: filteredDuplicates.map(
-                                (alert) => alert._source[ALERT_INSTANCE_ID]
-                              ),
-                            },
-                          },
-                          {
-                            bool: {
-                              must_not: {
-                                term: {
-                                  [ALERT_WORKFLOW_STATUS]: 'closed',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    collapse: {
-                      field: ALERT_INSTANCE_ID,
-                    },
-                    sort: [
-                      {
-                        [ALERT_START]: {
-                          order: 'desc' as const,
                         },
-                      },
-                    ],
+                        {
+                          terms: {
+                            [ALERT_INSTANCE_ID]: filteredDuplicates.map(
+                              (alert) => alert._source[ALERT_INSTANCE_ID]
+                            ),
+                          },
+                        },
+                        {
+                          bool: {
+                            must_not: {
+                              term: {
+                                [ALERT_WORKFLOW_STATUS]: 'closed',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
                   },
+                  collapse: {
+                    field: ALERT_INSTANCE_ID,
+                  },
+                  sort: [
+                    {
+                      [ALERT_START]: {
+                        order: 'desc' as const,
+                      },
+                    },
+                  ],
                 };
 
                 const response = await ruleDataClient

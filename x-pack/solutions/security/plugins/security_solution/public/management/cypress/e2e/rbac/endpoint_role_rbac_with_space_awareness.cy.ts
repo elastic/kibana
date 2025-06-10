@@ -107,6 +107,7 @@ describe(
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',
+          'Global Artifact ManagementNone',
           'Elastic Defend Policy ManagementNone',
           'Response Actions HistoryNone',
           'Host IsolationAll',
@@ -123,6 +124,10 @@ describe(
           'not.exist'
         );
       });
+    });
+
+    it('should include new Global Artifact Management privilege', () => {
+      cy.getByTestSubj('securitySolution_siemV2_global_artifact_management').should('exist');
     });
   }
 );

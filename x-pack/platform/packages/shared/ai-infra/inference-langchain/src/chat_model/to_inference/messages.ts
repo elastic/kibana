@@ -21,6 +21,7 @@ import {
   isHumanMessage,
   isSystemMessage,
   isToolMessage,
+  MessageContent,
 } from '@langchain/core/messages';
 import { isMessageContentText, isMessageContentImageUrl } from '../utils/langchain';
 
@@ -57,15 +58,16 @@ export const messagesToInference = (messages: BaseMessage[]) => {
           // langchain does not have the function name on tool messages
           name: message.tool_call_id,
           toolCallId: message.tool_call_id,
-          response: message.content,
+          response: toolResponseContentToInference(message.content),
         });
       }
+
       if (isFunctionMessage(message) && message.additional_kwargs.function_call) {
         output.messages.push({
           role: MessageRole.Tool,
           name: message.additional_kwargs.function_call.name,
           toolCallId: generateFakeToolCallId(),
-          response: message.content,
+          response: toolResponseContentToInference(message.content),
         });
       }
 
@@ -76,6 +78,22 @@ export const messagesToInference = (messages: BaseMessage[]) => {
       system: string | undefined;
     }
   );
+};
+
+const toolResponseContentToInference = (toolResponse: MessageContent) => {
+  const content =
+    typeof toolResponse === 'string'
+      ? toolResponse
+      : toolResponse
+          .filter(isMessageContentText)
+          .map((part) => part.text)
+          .join('\n');
+
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    return { response: content };
+  }
 };
 
 const toolCallToInference = (toolCall: ToolCall): ToolCallInference => {

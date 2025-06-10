@@ -9,17 +9,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import * as Rx from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { showErrorDialog, ToastsService } from './toasts';
-import { EventReporter, eventTypes } from './toasts/telemetry';
+import { Coordinator, notificationCoordinator } from './notification_coordinator';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -27,10 +25,8 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
-  i18n: I18nStart;
   overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
 }
@@ -38,19 +34,19 @@ export interface StartDeps {
 /** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
-  private uiSettingsErrorSubscription?: Subscription;
+  private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
+  private readonly coordinator = notificationCoordinator.bind(new Coordinator());
 
   constructor() {
     this.toasts = new ToastsService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
-    eventTypes.forEach((eventType) => {
-      analytics.registerEventType(eventType);
-    });
-
-    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
+    const notificationSetup = {
+      coordinator: this.coordinator,
+      toasts: this.toasts.setup({ uiSettings, analytics }),
+    };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
@@ -69,13 +65,11 @@ export class NotificationsService {
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
-    const eventReporter = new EventReporter({ analytics: startDeps.analytics });
-
     return {
       toasts: this.toasts.start({
-        eventReporter,
         overlays,
         targetDomElement: toastsContainer,
+        notificationCoordinator: this.coordinator,
         ...startDeps,
       }),
       showErrorDialog: ({ title, error }) =>

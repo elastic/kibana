@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 // Failing: See https://github.com/elastic/kibana/issues/183663
-describe.skip('multi select filter', () => {
+describe('multi select filter', () => {
   it('should render the amount of options available', async () => {
     const onChange = jest.fn();
     const props = {

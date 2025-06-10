@@ -172,7 +172,7 @@ describe('deserialize', () => {
         },
         Object {
           "aggregatable": true,
-          "color": "#D36086",
+          "color": "#61A2FF",
           "hopSize": 5,
           "icon": Object {
             "id": "folderOpen",

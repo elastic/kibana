@@ -7,10 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { CanvasContainerApi } from '../../../types';
@@ -23,12 +22,16 @@ import { coreServices } from '../../services/kibana_services';
 
 const reload$ = new Subject<void>();
 
+export function forceReload() {
+  reload$.next();
+}
+
 export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
 
   const createNewEmbeddable = useCallback(
-    (type: string, embeddableInput: EmbeddableInput) => {
+    (type: string, embeddableInput: object) => {
       if (trackCanvasUiMetric) {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
@@ -41,6 +44,12 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   );
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
+    const panelStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
+
+    function getSerializedStateForChild(childId: string) {
+      return panelStateMap[childId]?.value ?? { rawState: {} };
+    }
+
     return {
       getAppContext: () => ({
         getCurrentPath: () => {
@@ -51,28 +60,35 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         currentAppId: CANVAS_APP,
       }),
       reload$,
-      reload: () => {
-        reload$.next();
-      },
       viewMode$: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,
-        initialState,
+        serializedState,
       }: {
         panelType: string;
-        initialState: EmbeddableInput;
+        serializedState: SerializedPanelState<object>;
       }) => {
-        createNewEmbeddable(panelType, initialState);
+        createNewEmbeddable(panelType, serializedState.rawState);
       },
       disableTriggers: true,
       // this is required to disable inline editing now enabled by default
       canEditInline: false,
       type: 'canvas',
-      /**
-       * getSerializedStateForChild is left out here because we cannot access the state here. That method
-       * is injected in `x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx`
-       */
-    } as unknown as CanvasContainerApi;
+      getSerializedStateForChild,
+      lastSavedStateForChild$: (childId: string) => panelStateMap[childId] ?? of(undefined),
+      // Canvas auto saves so lastSavedState is the same as currentState
+      getLastSavedStateForChild: getSerializedStateForChild,
+      setSerializedStateForChild: (
+        childId: string,
+        serializePanelState: SerializedPanelState<object>
+      ) => {
+        if (!panelStateMap[childId]) {
+          panelStateMap[childId] = new BehaviorSubject(serializePanelState);
+          return;
+        }
+        panelStateMap[childId].next(serializePanelState);
+      },
+    } as CanvasContainerApi;
   }, [createNewEmbeddable]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);

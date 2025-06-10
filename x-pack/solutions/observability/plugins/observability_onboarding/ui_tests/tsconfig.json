@@ -7,7 +7,7 @@
     "**/*"
   ],
   "kbn_references": [
-    "@kbn/scout"
+    "@kbn/scout-oblt"
   ],
   "exclude": [
     "target/**/*"

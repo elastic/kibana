@@ -7,13 +7,16 @@
 
 import { isEmpty } from 'lodash';
 import React from 'react';
-import type { RenderCellValue } from '@elastic/eui';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
+import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Alert } from '@kbn/alerting-types';
+import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import {
   alertFieldNameMap,
   ALERT_ANOMALY_SCORE,
@@ -21,51 +24,42 @@ import {
 } from '../../../common/constants/alerts';
 import { getFieldFormatterProvider } from '../../application/contexts/kibana/use_field_formatter';
 
-export const getMappedNonEcsValue = ({
-  data,
-  fieldName,
-}: {
-  data: any[];
-  fieldName: string;
-}): string[] | undefined => {
-  const item = data.find((d) => d.field === fieldName);
-  if (item != null && item.value != null) {
-    return item.value;
-  }
-  return undefined;
-};
-
-const getRenderValue = (mappedNonEcsValue: any) => {
+const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
-  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
+  const rawValue = alert[fieldName];
+  const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {
     if (typeof value === 'object') {
-      return JSON.stringify(value);
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return 'Error: Unable to parse JSON value.';
+      }
     }
     return value;
   }
 
-  return '—';
+  return '--';
 };
 
-export const getRenderCellValue: RenderCellValue = ({ columnId, data, fieldFormats }) => {
+export const AlertsTableCellValue: GetAlertsTableProp<'renderCellValue'> = ({
+  columnId,
+  alert,
+}) => {
+  const {
+    services: { fieldFormats },
+  } = useAlertsTableContext();
   const alertValueFormatter = getAlertFormatters(fieldFormats);
-  if (!isDefined(data)) return;
-
-  const mappedNonEcsValue = getMappedNonEcsValue({
-    data,
-    fieldName: columnId,
-  });
-  const value = getRenderValue(mappedNonEcsValue);
+  const value = getAlertFieldValue(alert, columnId);
 
   return alertValueFormatter(columnId, value);
 };
 
-export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
+export function getAlertFormatters(fieldFormats: FieldFormatsStart) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: string | number | undefined): React.ReactElement => {
+  return (columnId: string, value: string | number | undefined) => {
     if (!isDefined(value)) return <>{'—'}</>;
 
     switch (columnId) {
@@ -111,5 +105,3 @@ export function getAlertEntryFormatter(fieldFormats: FieldFormatsRegistry) {
     };
   };
 }
-
-export type RegisterFormatter = ReturnType<typeof getAlertFormatters>;

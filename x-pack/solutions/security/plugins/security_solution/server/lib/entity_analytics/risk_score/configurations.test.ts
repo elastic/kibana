@@ -12,6 +12,7 @@ describe('getTransformOptions', () => {
     const options = getTransformOptions({
       dest: 'dest',
       source: ['source'],
+      namespace: 'tests',
     });
 
     expect(options).toMatchInlineSnapshot(`
@@ -19,6 +20,7 @@ describe('getTransformOptions', () => {
         "_meta": Object {
           "managed": true,
           "managed_by": "security-entity-analytics",
+          "space_id": "tests",
           "version": 3,
         },
         "dest": Object {

@@ -13,4 +13,4 @@ components:
         kuery:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
         policyId:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+          type: string

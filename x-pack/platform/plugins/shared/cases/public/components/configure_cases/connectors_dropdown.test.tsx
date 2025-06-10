@@ -52,25 +52,14 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "atofe7",
-                    "next": undefined,
-                    "styles": "
-                  margin-right: 13px;
-                  margin-bottom: 0 !important;
-                ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="minusInCircle"
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <span
-                data-test-subj="dropdown-connector-no-connector"
+                data-test-subj="dropdown-connector-no-connector-label"
               >
                 No connector selected
               </span>
@@ -89,18 +78,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -126,18 +104,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -163,18 +130,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -200,18 +156,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -237,18 +182,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "13a1e3t",
-                    "next": undefined,
-                    "styles": "
-                            margin-right: 12px;
-                            margin-bottom: 0 !important;
-                          ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="logoSecurity"
               />
@@ -268,18 +202,7 @@ describe('ConnectorsDropdown', () => {
                 aria-label="This connector is deprecated. Update it, or create a new one."
                 color="warning"
                 content="This connector is deprecated. Update it, or create a new one."
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "pxiz1g",
-                    "next": undefined,
-                    "styles": "
-                              margin-left: 8px
-                              margin-bottom: 0 !important;
-                            ",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
                 size="m"
                 type="warning"
               />

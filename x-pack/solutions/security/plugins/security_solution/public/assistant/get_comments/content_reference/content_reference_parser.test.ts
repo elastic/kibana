@@ -8,12 +8,14 @@
 import unified from 'unified';
 import markdown from 'remark-parse-no-trim';
 import type { Parent } from 'mdast';
-import { ContentReferenceParser } from './content_reference_parser';
+import { contentReferenceParser } from './content_reference_parser';
 
 describe('ContentReferenceParser', () => {
-  it('extracts references from poem', async () => {
-    const file = unified().use([[markdown, {}], ContentReferenceParser])
-      .parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
+  it('extracts references from poem', () => {
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({ contentReferences: null }),
+    ]).parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
 A furry friend, from head to toes.{reference(ccaSI)}
 Loyal companion, always near,{reference(ccaSI)}
 Chasing squirrels, full of cheer.{reference(ccaSI)}
@@ -37,8 +39,11 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('extracts reference after linebreak', async () => {
-    const file = unified().use([[markdown, {}], ContentReferenceParser]).parse(`First line
+  it('extracts reference after linebreak', () => {
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({ contentReferences: null }),
+    ]).parse(`First line
 {reference(FTQJp)}
 `) as Parent;
 
@@ -50,9 +55,9 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('eats empty content reference', async () => {
+  it('eats empty content reference', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('There is an empty content reference.{reference()}') as Parent;
 
     expect(file.children[0].children).toEqual(
@@ -60,16 +65,51 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
         expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
         expect.objectContaining({
           type: 'contentReference',
-          contentReferenceCount: -1,
-          contentReferenceId: '',
+          contentReferenceCount: 1,
         }),
       ])
     );
   });
 
-  it('eats space preceding content reference', async () => {
+  it('invalid content reference has correct contentReferenceCount', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([
+        [markdown, {}],
+        contentReferenceParser({
+          contentReferences: {
+            valid1: { id: 'valid1', type: 'SecurityAlertsPage' },
+            valid2: { id: 'valid2', type: 'SecurityAlertsPage' },
+          },
+        }),
+      ])
+      .parse(
+        'There {reference(valid1)} is one invalid content reference {reference(invalid)} and two valid ones. {reference(valid2)}'
+      ) as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 1,
+          contentReferenceId: 'valid1',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: undefined,
+          contentReferenceId: 'invalid',
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: 2,
+          contentReferenceId: 'valid2',
+        }),
+      ])
+    );
+  });
+
+  it('eats space preceding content reference', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Delete space after punctuation. {reference(example)}') as Parent;
 
     expect(file.children[0].children).toEqual(
@@ -80,22 +120,42 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('parses when there is no space preceding the content reference', async () => {
+  it('parses when there is no space preceding the content reference', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('No preceding space.{reference(example)}') as Parent;
 
     expect(file.children[0].children).toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: 'contentReference' })])
+    );
+  });
+
+  it('correct content reference count when contentReferences is null', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
+      .parse('No preceding space.{reference(example)} {reference(example2)}') as Parent;
+
+    expect(file.children[0].children).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'text', value: 'No preceding space.' }),
-        expect.objectContaining({ type: 'contentReference' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceId: 'example',
+          contentReferenceCount: 1,
+          contentReference: undefined,
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceId: 'example2',
+          contentReferenceCount: 2,
+          contentReference: undefined,
+        }),
       ])
     );
   });
 
-  it('handles single citation block', async () => {
+  it('handles single citation block', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello wolrd') as Parent;
 
     expect(file.children[0].children).toEqual([
@@ -155,9 +215,9 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles multiple citation blocks with different referenceIds', async () => {
+  it('handles multiple citation blocks with different referenceIds', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(example2)}') as Parent;
 
     expect(file.children[0].children).toEqual([
@@ -236,9 +296,9 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles multiple citation blocks with same referenceIds', async () => {
+  it('handles multiple citation blocks with same referenceIds', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(example)}') as Parent;
 
     expect(file.children[0].children).toEqual([
@@ -317,9 +377,9 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles partial citation blocks', async () => {
+  it('handles partial citation blocks', () => {
     const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(') as Parent;
 
     expect(file.children[0].children).toEqual([

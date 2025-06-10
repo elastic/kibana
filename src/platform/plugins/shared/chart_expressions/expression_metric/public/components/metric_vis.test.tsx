@@ -8,30 +8,23 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import userEvent from '@testing-library/user-event';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import {
-  LayoutDirection,
-  Metric,
-  MetricElementEvent,
-  MetricWNumber,
-  MetricWProgress,
-  MetricWTrend,
-  Settings,
-} from '@elastic/charts';
+import { MetricWTrend } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { DimensionsVisParam, MetricVisParam } from '../../common';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
+import { setupChartMocks, cleanChartMocks } from './chart_testing_utilities';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
-  const convertFn = (v: unknown) => `${id}-${v}`;
+  const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
   return { getConverterFor: () => convertFn };
 });
 
@@ -52,8 +45,9 @@ jest.mock('../services', () => ({
     get: jest.fn(() => ({ getColorForValue: mockGetColorForValue })),
   }),
   getThemeService: () => {
-    const { getThemeService } = jest.requireActual('../__mocks__/theme_service');
-    return getThemeService();
+    const { chartPluginMock } = jest.requireActual('@kbn/charts-plugin/public/mocks');
+    const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
+    return themeServiceMock;
   },
   getUiSettingsService: () => {
     return {
@@ -82,6 +76,11 @@ const defaultMetricParams: MetricVisParam = {
   valuesTextAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  secondaryTrend: {
+    visuals: undefined,
+    baseline: undefined,
+    palette: undefined,
+  },
 };
 
 const table: Datatable = {
@@ -186,7 +185,7 @@ const table: Datatable = {
     },
     {
       [dayOfWeekColumnId]: 'Wednesday',
-      [basePriceColumnId]: 28.984375,
+      [basePriceColumnId]: 29.984375,
       [minPriceColumnId]: 13.639539930555555,
     },
     {
@@ -202,7 +201,7 @@ const table: Datatable = {
     {
       [dayOfWeekColumnId]: 'Thursday',
       [basePriceColumnId]: 25.348011363636363,
-      [minPriceColumnId]: 13.34375,
+      [minPriceColumnId]: 13.34376,
     },
     {
       [dayOfWeekColumnId]: '__other__',
@@ -212,18 +211,61 @@ const table: Datatable = {
   ],
 };
 
-const defaultProps = {
-  renderComplete: () => {},
-  fireEvent: () => {},
-  filterable: true,
-  renderMode: 'view',
-  uiSettings: {} as unknown as IUiSettingsClient,
-} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
+function getDefaultProps() {
+  return {
+    renderComplete: jest.fn(),
+    fireEvent: jest.fn(),
+    filterable: true,
+  } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
+}
+
+type RenderChartPropsType = Partial<Omit<MetricVisComponentProps, 'config'>> &
+  Pick<MetricVisComponentProps, 'config'>;
 
 describe('MetricVisComponent', function () {
+  beforeAll(() => {
+    setupChartMocks();
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    cleanChartMocks();
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     mockDeserialize.mockClear();
   });
+
+  async function waitForChartToRender(renderComplete: MetricVisComponentProps['renderComplete']) {
+    // Interestingly we have to wrap this into an act() call to avoid
+    // issues with the React scheduling when testing
+    await act(async () => {
+      // wait for 1 rAF tick (~16ms)
+      jest.advanceTimersByTime(30);
+    });
+    // wait for render complete callback
+    await waitFor(() => expect(renderComplete).toHaveBeenCalled());
+  }
+
+  async function renderChart(props: RenderChartPropsType) {
+    const defaultProps = getDefaultProps();
+    const allProps = { ...defaultProps, data: table, ...props };
+    const result = render(<MetricVis {...allProps} />);
+    // quick lifecycle check (this comes from the willRender callback)
+    expect(allProps.fireEvent).toHaveBeenCalledWith(expect.objectContaining({ name: 'chartSize' }));
+    // wait for render complete callback
+    await waitForChartToRender(defaultProps.renderComplete);
+    return {
+      ...result,
+      props: allProps,
+      rerender: async (newProps: Partial<RenderChartPropsType>) => {
+        result.rerender(<MetricVis {...allProps} {...newProps} />);
+        await waitForChartToRender(allProps.renderComplete);
+        return { props: { ...allProps, ...newProps } };
+      },
+    };
+  }
 
   describe('single metric', () => {
     const config: Props['config'] = {
@@ -236,145 +278,139 @@ describe('MetricVisComponent', function () {
       },
     };
 
-    it('should render a single metric value', () => {
-      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
-
-      const { data } = component.find(Metric).props();
-
-      expect(data).toBeDefined();
-      expect(data?.length).toBe(1);
-
-      const visConfig = data![0][0]!;
-
-      expect(visConfig).toMatchInlineSnapshot(`
-        Object {
-          "color": "#ffffff",
-          "extra": <span />,
-          "icon": [Function],
-          "subtitle": undefined,
-          "title": "Median products.base_price",
-          "value": 28.984375,
-          "valueFormatter": [Function],
-        }
-      `);
+    it('should render a single metric value', async () => {
+      await renderChart({ config });
+      // test that a metric is rendered
+      expect(screen.getByText(table.columns[1].name)).toBeInTheDocument();
+      expect(screen.getByText(table.rows[0][basePriceColumnId])).toBeInTheDocument();
     });
-    it('should display subtitle', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: { ...config.metric, subtitle: 'subtitle' },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      );
 
-      const [[visConfig]] = component.find(Metric).props().data!;
-
-      expect(visConfig!.subtitle).toBe('subtitle');
-    });
-    it('should display secondary metric', () => {
-      const getMetricConfig = (localConfig: MetricVisComponentProps['config']) =>
-        shallow(<MetricVis config={localConfig} data={table} {...defaultProps} />)
-          .find(Metric)
-          .props().data![0][0]!;
-
-      const configNoPrefix = getMetricConfig({
-        ...config,
-        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
-        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+    it('should display subtitle', async () => {
+      await renderChart({
+        config: {
+          ...config,
+          metric: { ...config.metric, subtitle: 'subtitle' },
+        },
+        data: table,
       });
 
-      expect(configNoPrefix!.extra).toEqual(
-        <span>
-          {table.columns.find((col) => col.id === minPriceColumnId)!.name}
-          {` number-13.6328125`}
-        </span>
-      );
-
-      const configWithPrefix = getMetricConfig({
-        ...config,
-        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
-        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-      });
-
-      expect(configWithPrefix!.extra).toEqual(
-        <span>
-          {'secondary prefix'}
-          {` number-13.6328125`}
-        </span>
-      );
-
-      expect(configWithPrefix).toMatchInlineSnapshot(`
-        Object {
-          "color": "#ffffff",
-          "extra": <span>
-            secondary prefix
-             number-13.6328125
-          </span>,
-          "icon": [Function],
-          "subtitle": "subtitle",
-          "title": "Median products.base_price",
-          "value": 28.984375,
-          "valueFormatter": [Function],
-        }
-      `);
+      // check for the subtitle
+      expect(screen.getByText('subtitle')).toBeInTheDocument();
+      // and check that the metric is still rendering
+      expect(screen.getByText(table.columns[1].name)).toBeInTheDocument();
     });
 
-    it('should display progress bar if min and max provided', () => {
-      const getConfig = (max?: string, direction: LayoutDirection = 'vertical') =>
-        shallow(
-          <MetricVis
-            config={{
-              ...config,
-              metric: {
-                ...config.metric,
-                progressDirection: direction,
-              },
-              dimensions: {
-                ...config.dimensions,
-                max,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        )
-          .find(Metric)
-          .props().data![0][0]!;
-
-      expect(getConfig(undefined)).not.toHaveProperty('domainMax');
-      expect(getConfig(undefined)).not.toHaveProperty('progressBarDirection');
-
-      expect(getConfig('foobar')).not.toHaveProperty('domainMax');
-      expect(getConfig('foobar')).not.toHaveProperty('progressBarDirection');
-
-      const configWithProgress = getConfig(basePriceColumnId) as MetricWProgress;
-
-      expect(configWithProgress.domainMax).toEqual(table.rows[0][basePriceColumnId]);
-      expect(configWithProgress.progressBarDirection).toBe('vertical');
-
-      expect(configWithProgress).toMatchInlineSnapshot(`
-        Object {
-          "color": "#ffffff",
-          "domainMax": 28.984375,
-          "extra": <span />,
-          "icon": [Function],
-          "progressBarDirection": "vertical",
-          "subtitle": undefined,
-          "title": "Median products.base_price",
-          "value": 28.984375,
-          "valueFormatter": [Function],
-        }
-      `);
-
+    it('should display secondary metric', async () => {
+      const { rerender } = await renderChart({
+        config: {
+          ...config,
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+        },
+      });
+      // for the secondary metric
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       expect(
-        (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
-      ).toBe('horizontal');
+        screen.getByText(`${secondaryLabel} number-${table.rows[0][minPriceColumnId]}`)
+      ).toBeInTheDocument();
+
+      await rerender({
+        config: {
+          ...config,
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+        },
+      });
+
+      expect(screen.getByText(/secondary prefix/)).toBeInTheDocument();
+      expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
     });
 
-    it('should configure trendline if provided', () => {
+    it('should display progress bar if min and max provided', async () => {
+      const { rerender } = await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            progressDirection: 'vertical',
+          },
+          dimensions: {
+            ...config.dimensions,
+            max: basePriceColumnId,
+          },
+        },
+      });
+      const maxLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
+      // both are using the same column
+      const primaryLabel = maxLabel;
+
+      expect(screen.getByRole('meter')).toBeInTheDocument();
+      expect(screen.getByLabelText(`Percentage of ${maxLabel}`)).toBeInTheDocument();
+
+      // now check that without the max accessor the meter div goes away
+      await rerender({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            progressDirection: 'vertical',
+          },
+          dimensions: {
+            ...config.dimensions,
+            max: undefined,
+          },
+        },
+      });
+
+      // metric is still there, sanity check
+      expect(screen.getByText(primaryLabel)).toBeInTheDocument();
+
+      // the progress bar is gone
+      expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(`Percentage of ${maxLabel}`)).not.toBeInTheDocument();
+
+      // Try again with an invalid max accessor
+      await rerender({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            progressDirection: 'vertical',
+          },
+          dimensions: {
+            ...config.dimensions,
+            max: 'foobar',
+          },
+        },
+      });
+
+      // metric is still there, sanity check
+      expect(screen.getByText(primaryLabel)).toBeInTheDocument();
+
+      // the progress bar is gone
+      expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(`Percentage of ${maxLabel}`)).not.toBeInTheDocument();
+
+      // change direction to horizontal and it should be back
+      await rerender({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            progressDirection: 'horizontal',
+          },
+          dimensions: {
+            ...config.dimensions,
+            max: basePriceColumnId,
+          },
+        },
+      });
+
+      expect(screen.getByRole('meter')).toBeInTheDocument();
+      expect(screen.getByLabelText(`Percentage of ${maxLabel}`)).toBeInTheDocument();
+    });
+
+    it('should configure trendline if provided', async () => {
       const trends = {
         [DEFAULT_TRENDLINE_NAME]: [
           { x: 1, y: 2 },
@@ -384,31 +420,29 @@ describe('MetricVisComponent', function () {
         ],
       };
 
-      const tileConfig = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: {
-              ...config.metric,
-              trends,
-            },
-            dimensions: {
-              ...config.dimensions,
-              breakdownBy: undefined,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      )
-        .find(Metric)
-        .props().data![0][0]! as MetricWTrend;
+      await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            trends,
+          },
+          dimensions: {
+            ...config.dimensions,
+            breakdownBy: undefined,
+          },
+        },
+      });
+      const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
 
-      expect(tileConfig.trend).toEqual(trends[DEFAULT_TRENDLINE_NAME]);
-      expect(tileConfig.trendShape).toEqual('area');
+      expect(screen.getByTitle(`${primaryLabel} over time.`)).toBeInTheDocument();
+      expect(
+        screen.getByText('A line chart showing the trend of the primary metric over time.')
+      ).toBeInTheDocument();
+      expect(screen.getByRole('img')).toBeInTheDocument();
     });
 
-    it('should display multi-values non-numeric values formatted and without quotes', () => {
+    it('should display multi-values non-numeric values formatted and without quotes', async () => {
       const newTable: Datatable = {
         ...table,
         // change the format id for the columns
@@ -426,19 +460,12 @@ describe('MetricVisComponent', function () {
           [minPriceColumnId]: [String(row[minPriceColumnId]), String(10)],
         })),
       };
-      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+      await renderChart({ config, data: newTable });
 
-      const [[visConfig]] = component.find(Metric).props().data!;
-
-      expect(visConfig!.value).toMatchInlineSnapshot(`
-        Array [
-          "text-28.984375",
-          "text-100",
-        ]
-      `);
+      expect(screen.getByText(/\[text\-28\.984375, text\-100\]/i)).toBeInTheDocument();
     });
 
-    it('should display multi-values numeric values formatted and without quotes', () => {
+    it('should display multi-values numeric values formatted and without quotes', async () => {
       const newTable = {
         ...table,
         rows: table.rows.map((row) => ({
@@ -447,30 +474,55 @@ describe('MetricVisComponent', function () {
           [minPriceColumnId]: [row[minPriceColumnId], 10],
         })),
       };
-      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
-
-      const [[visConfig]] = component.find(Metric).props().data!;
-
-      expect(visConfig!.value).toMatchInlineSnapshot(`
-        Array [
-          "number-28.984375",
-          "number-100",
-        ]
-      `);
+      await renderChart({ config, data: newTable });
+      expect(screen.getByText(/\[number\-28\.984375, number\-100\]/i)).toBeInTheDocument();
     });
 
-    it('should display an empty tile if no data is provided', () => {
+    it('should display an empty tile if no data is provided', async () => {
       const newTable = {
         ...table,
         rows: [],
       };
-      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
-
-      const [[visConfig]] = component.find(Metric).props().data!;
-
-      expect(visConfig!.value).toMatchInlineSnapshot(`NaN`);
+      await renderChart({ config, data: newTable });
+      const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
+      expect(screen.getByTitle(primaryLabel)).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
   });
+
+  it('should convert null values to NaN', async () => {
+    const metricId = faker.lorem.word();
+
+    const tableWNull: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: null }],
+    };
+    await renderChart({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: metricId,
+        },
+      },
+      data: tableWNull,
+    });
+
+    expect(screen.getByTitle(metricId)).toBeInTheDocument();
+    expect(screen.getByText('N/A')).toBeInTheDocument();
+  });
+
+  // do not test with undefined as it relies on a Kibana formatter behaviour which is mocked here
 
   describe('metric grid', () => {
     const config: Props['config'] = {
@@ -483,346 +535,123 @@ describe('MetricVisComponent', function () {
       },
     };
 
-    it('should render a grid if breakdownBy dimension supplied', () => {
-      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
+    it('should render a grid if breakdownBy dimension supplied', async () => {
+      await renderChart({ config });
 
-      const { data } = component.find(Metric).props();
+      // check for the labels
+      expect(screen.getAllByRole('button', { name: /terms\-/ })).toHaveLength(table.rows.length);
 
-      expect(data).toBeDefined();
-      expect(data?.flat().length).toBe(table.rows.length);
-
-      const visConfig = data![0];
-
-      expect(visConfig).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "#ffffff",
-            "extra": <span />,
-            "icon": undefined,
-            "subtitle": "Median products.base_price",
-            "title": "terms-Friday",
-            "value": 28.984375,
-            "valueFormatter": [Function],
-          },
-          Object {
-            "color": "#ffffff",
-            "extra": <span />,
-            "icon": undefined,
-            "subtitle": "Median products.base_price",
-            "title": "terms-Wednesday",
-            "value": 28.984375,
-            "valueFormatter": [Function],
-          },
-          Object {
-            "color": "#ffffff",
-            "extra": <span />,
-            "icon": undefined,
-            "subtitle": "Median products.base_price",
-            "title": "terms-Saturday",
-            "value": 25.984375,
-            "valueFormatter": [Function],
-          },
-          Object {
-            "color": "#ffffff",
-            "extra": <span />,
-            "icon": undefined,
-            "subtitle": "Median products.base_price",
-            "title": "terms-Sunday",
-            "value": 25.784375,
-            "valueFormatter": [Function],
-          },
-          Object {
-            "color": "#ffffff",
-            "extra": <span />,
-            "icon": undefined,
-            "subtitle": "Median products.base_price",
-            "title": "terms-Thursday",
-            "value": 25.348011363636363,
-            "valueFormatter": [Function],
-          },
-        ]
-      `);
+      // now check for the values
+      const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
+      expect(screen.getAllByText(primaryLabel)).toHaveLength(table.rows.length);
+      for (const row of table.rows) {
+        expect(screen.getByTitle(`number-${row[basePriceColumnId]}`)).toBeInTheDocument();
+      }
     });
 
-    it('should display secondary prefix or secondary metric', () => {
-      const componentWithSecondaryDimension = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-            // secondary prefix included to make sure it's overridden
-            metric: { ...config.metric, secondaryPrefix: 'howdy' },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      );
+    it('should display secondary prefix or secondary metric', async () => {
+      const { rerender } = await renderChart({
+        config: {
+          ...config,
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+          metric: { ...config.metric, secondaryPrefix: 'howdy' },
+        },
+      });
 
-      expect(
-        componentWithSecondaryDimension
-          .find(Metric)
-          .props()
-          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
-          .data?.[0].map((datum) => datum?.extra)
-      ).toMatchInlineSnapshot(`
-        Array [
-          <span>
-            howdy
-             number-13.6328125
-          </span>,
-          <span>
-            howdy
-             number-13.639539930555555
-          </span>,
-          <span>
-            howdy
-             number-13.34375
-          </span>,
-          <span>
-            howdy
-             number-13.4921875
-          </span>,
-          <span>
-            howdy
-             number-13.34375
-          </span>,
-        ]
-      `);
+      for (const row of table.rows) {
+        expect(
+          screen.getByText(new RegExp(`howdy number-${row[minPriceColumnId]}`, 'i'))
+        ).toBeInTheDocument();
+      }
 
-      const componentWithExtraText = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: { ...config.metric, secondaryPrefix: 'howdy' },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      );
+      // Now remove the prefix and check the secondary label is there
+      await rerender({
+        config: {
+          ...config,
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+          metric: { ...config.metric, secondaryPrefix: undefined },
+        },
+      });
 
-      expect(
-        componentWithExtraText
-          .find(Metric)
-          .props()
-          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
-          .data?.[0].map((datum) => datum?.extra)
-      ).toMatchInlineSnapshot(`
-        Array [
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-        ]
-      `);
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      for (const row of table.rows) {
+        expect(
+          screen.getByText(new RegExp(`${secondaryLabel} number-${row[minPriceColumnId]}`, 'i'))
+        ).toBeInTheDocument();
+      }
     });
 
-    it('should respect maxCols and minTiles', () => {
-      const getConfigs = (maxCols?: number, minTiles?: number) =>
-        shallow(
-          <MetricVis
-            config={{
-              ...config,
-              metric: {
-                ...config.metric,
-                ...(maxCols ? { maxCols } : {}),
-                minTiles,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        )
-          .find(Metric)
-          .props().data!;
+    it('should respect maxCols and minTiles', async () => {
+      // start with no constraints
+      const { rerender } = await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+          },
+        },
+      });
 
-      const configsWithDefaults = getConfigs(undefined, undefined);
-      expect(configsWithDefaults.length).toBe(2);
-      expect(configsWithDefaults[0].length).toBe(5);
+      // 5 columns x 2 rows by default
+      expect(screen.getByRole('list')).toHaveStyle({
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+      });
 
-      const configsWithCustomCols = getConfigs(2, undefined);
-      expect(configsWithCustomCols.length).toBe(3);
-      expect(configsWithCustomCols[0].length).toBe(2);
-      expect(configsWithCustomCols[1].length).toBe(2);
-      expect(configsWithCustomCols[2].length).toBe(2);
+      // now configure maxCols: 2
+      await rerender({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            maxCols: 2,
+          },
+        },
+      });
 
-      const configsWithMinTiles = getConfigs(5, 10);
-      expect(configsWithMinTiles.length).toBe(2);
-      expect(configsWithMinTiles[1].length).toBe(5);
-      expect(configsWithMinTiles).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-Friday",
-              "value": 28.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-Wednesday",
-              "value": 28.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-Saturday",
-              "value": 25.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-Sunday",
-              "value": 25.784375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-Thursday",
-              "value": 25.348011363636363,
-              "valueFormatter": [Function],
-            },
-          ],
-          Array [
-            Object {
-              "color": "#ffffff",
-              "extra": <span />,
-              "icon": undefined,
-              "subtitle": "Median products.base_price",
-              "title": "terms-__other__",
-              "value": 24.984375,
-              "valueFormatter": [Function],
-            },
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-          ],
-        ]
-      `);
+      // changed to 2 columns x 3 rows now
+      expect(screen.getByRole('list')).toHaveStyle({
+        'grid-template-columns': 'repeat(2, minmax(0, 1fr)',
+        'grid-template-rows': 'repeat(3, minmax(64px, 1fr)',
+      });
+
+      // now configure maxCols: 5 and minTiles: 10
+      await rerender({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            maxCols: 5,
+            minTiles: 10,
+          },
+        },
+      });
+
+      // changed to 5 columns x 2 rows now
+      expect(screen.getByRole('list')).toHaveStyle({
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+      });
     });
 
-    it('should display progress bar if max provided', () => {
-      expect(
-        shallow(
-          <MetricVis
-            config={{
-              ...config,
-              metric: {
-                ...config.metric,
-              },
-              dimensions: {
-                ...config.dimensions,
-                max: basePriceColumnId,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        )
-          .find(Metric)
-          .props().data
-      ).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            Object {
-              "color": "#ffffff",
-              "domainMax": 28.984375,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-Friday",
-              "value": 28.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "domainMax": 28.984375,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-Wednesday",
-              "value": 28.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "domainMax": 25.984375,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-Saturday",
-              "value": 25.984375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "domainMax": 25.784375,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-Sunday",
-              "value": 25.784375,
-              "valueFormatter": [Function],
-            },
-            Object {
-              "color": "#ffffff",
-              "domainMax": 25.348011363636363,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-Thursday",
-              "value": 25.348011363636363,
-              "valueFormatter": [Function],
-            },
-          ],
-          Array [
-            Object {
-              "color": "#ffffff",
-              "domainMax": 24.984375,
-              "extra": <span />,
-              "icon": undefined,
-              "progressBarDirection": "vertical",
-              "subtitle": "Median products.base_price",
-              "title": "terms-__other__",
-              "value": 24.984375,
-              "valueFormatter": [Function],
-            },
-          ],
-        ]
-      `);
+    it('should display progress bar if max provided', async () => {
+      await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+          },
+          dimensions: {
+            ...config.dimensions,
+            max: basePriceColumnId,
+          },
+        },
+      });
+
+      expect(screen.getAllByRole('meter')).toHaveLength(table.rows.length);
+      expect(screen.getAllByLabelText(/Percentage of terms/)).toHaveLength(table.rows.length);
     });
-    it('should configure trendlines if provided', () => {
+    it('should configure trendlines if provided', async () => {
       // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
@@ -870,215 +699,136 @@ describe('MetricVisComponent', function () {
         ],
       };
 
-      const data = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: {
-              ...config.metric,
-              trends,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      )
-        .find(Metric)
-        .props().data![0] as MetricWTrend[];
+      await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            trends,
+          },
+        },
+      });
 
-      data?.forEach((tileConfig) => {
-        // title has been formatted, so clean it up before using as index
-        expect(tileConfig.trend).toEqual(trends[tileConfig.title!.replace('terms-', '')]);
-        expect(tileConfig.trendShape).toEqual('area');
+      const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
+      expect(screen.getAllByTitle(`${primaryLabel} over time.`)).toHaveLength(table.rows.length);
+      expect(
+        screen.getAllByText('A line chart showing the trend of the primary metric over time.')
+      ).toHaveLength(table.rows.length);
+      expect(screen.getAllByRole('img')).toHaveLength(table.rows.length);
+    });
+
+    it('renders with no data', async () => {
+      await renderChart({
+        config: { ...config, metric: { ...config.metric, minTiles: 6 } },
+        data: { type: 'datatable', rows: [], columns: table.columns },
+      });
+
+      // will show 10 (5 x 2) empty tiles (higher than config)
+      expect(screen.getAllByRole('presentation')).toHaveLength(10);
+      expect(screen.getByRole('list')).toHaveStyle({
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
       });
     });
+  });
 
-    it('renders with no data', () => {
-      const component = shallow(
-        <MetricVis
-          config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
-          data={{ type: 'datatable', rows: [], columns: table.columns }}
-          {...defaultProps}
-        />
-      );
+  it('should constrain dimensions in edit mode', async () => {
+    // single tile
+    const { rerender, props } = await renderChart({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: basePriceColumnId,
+          breakdownBy: undefined,
+        },
+      },
+    });
 
-      const { data } = component.find(Metric).props();
+    expect(props.fireEvent).toHaveBeenLastCalledWith({
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: {
+            unit: 'pixels',
+            value: 300,
+          },
+          y: {
+            unit: 'pixels',
+            value: 300,
+          },
+        },
+      },
+    });
 
-      expect(data).toBeDefined();
-      expect(data).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-          ],
-          Array [
-            undefined,
-          ],
-        ]
-      `);
+    // multiple tiles
+    const { props: newProps } = await rerender({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: basePriceColumnId,
+          breakdownBy: dayOfWeekColumnId,
+        },
+      },
+    });
+
+    expect(newProps.fireEvent).toHaveBeenLastCalledWith({
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: {
+            unit: 'pixels',
+            value: 1000,
+          },
+          y: {
+            unit: 'pixels',
+            value: 400,
+          },
+        },
+      },
     });
   });
 
-  it('should constrain dimensions in edit mode', () => {
-    const getDimensionsRequest = (multipleTiles: boolean) => {
-      const fireEvent = jest.fn();
-      const wrapper = shallow(
-        <MetricVis
-          data={table}
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-              breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
-            },
-          }}
-          {...defaultProps}
-          fireEvent={fireEvent}
-        />
-      );
-
-      wrapper.find(Settings).props().onWillRender!();
-
-      return fireEvent.mock.calls[0][0].data;
-    };
-
-    expect(getDimensionsRequest(false)).toMatchInlineSnapshot(`
-      Object {
-        "maxDimensions": Object {
-          "x": Object {
-            "unit": "pixels",
-            "value": 300,
-          },
-          "y": Object {
-            "unit": "pixels",
-            "value": 300,
-          },
-        },
-      }
-    `);
-
-    expect(getDimensionsRequest(true)).toMatchInlineSnapshot(`
-      Object {
-        "maxDimensions": Object {
-          "x": Object {
-            "unit": "pixels",
-            "value": 1000,
-          },
-          "y": Object {
-            "unit": "pixels",
-            "value": 400,
-          },
-        },
-      }
-    `);
-  });
-
-  it('should report render complete', () => {
-    const renderCompleteSpy = jest.fn();
-    const component = shallow(
-      <MetricVis
-        config={{
+  describe('filter events', () => {
+    const fireFilter = async ({
+      filterable,
+      breakdown,
+    }: {
+      filterable: boolean;
+      breakdown?: boolean;
+    }) => {
+      // make it work with Jest fake timers
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const { props } = await renderChart({
+        config: {
           metric: {
             ...defaultMetricParams,
           },
           dimensions: {
             metric: basePriceColumnId,
-          },
-        }}
-        data={table}
-        {...defaultProps}
-        renderComplete={renderCompleteSpy}
-      />
-    );
-    component.find(Settings).props().onRenderChange!(false);
-
-    expect(renderCompleteSpy).not.toHaveBeenCalled();
-
-    component.find(Settings).props().onRenderChange!(true);
-
-    expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should convert null values to NaN', () => {
-    const metricId = faker.lorem.word();
-
-    const tableWNull: Datatable = {
-      type: 'datatable',
-      columns: [
-        {
-          id: metricId,
-          name: metricId,
-          meta: {
-            type: 'number',
+            breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
           },
         },
-      ],
-      rows: [{ [metricId]: null }],
+        filterable,
+      });
+
+      if (filterable) {
+        const els = screen.getAllByRole('button');
+        await user.click(els[els.length - 1]); // always click the latest element
+      } else {
+        // just shallow check that the metric is there
+        expect(screen.getAllByTitle('Median products.base_price').length).toBeGreaterThan(0);
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      }
+      return props;
     };
 
-    const metricConfig = shallow(
-      <MetricVis
-        config={{
-          metric: {
-            ...defaultMetricParams,
-          },
-          dimensions: {
-            metric: metricId,
-          },
-        }}
-        data={tableWNull}
-        {...defaultProps}
-      />
-    )
-      .find(Metric)
-      .props().data![0][0]! as MetricWNumber;
-
-    expect(metricConfig.value).toBeNaN();
-  });
-
-  describe('filter events', () => {
-    const fireEventSpy = jest.fn();
-
-    afterEach(() => fireEventSpy.mockClear());
-
-    const fireFilter = (event: MetricElementEvent, filterable: boolean, breakdown?: boolean) => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-              breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-          filterable={filterable}
-          fireEvent={fireEventSpy}
-        />
-      );
-
-      component.find(Settings).props().onElementClick!([event]);
-    };
-
-    test('without breakdown', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 0,
-        columnIndex: 0,
-      };
-
-      fireFilter(event, true, false);
-
-      expect(fireEventSpy).toHaveBeenCalledTimes(1);
-      expect(fireEventSpy).toHaveBeenCalledWith({
+    test('without breakdown', async () => {
+      const { fireEvent } = await fireFilter({ filterable: true });
+      expect(fireEvent).toHaveBeenLastCalledWith({
         name: 'filter',
         data: {
           data: [
@@ -1093,17 +843,10 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    test('with breakdown', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
-      };
+    test('with breakdown', async () => {
+      const { fireEvent } = await fireFilter({ filterable: true, breakdown: true });
 
-      fireFilter(event, true, true);
-
-      expect(fireEventSpy).toHaveBeenCalledTimes(1);
-      expect(fireEventSpy).toHaveBeenCalledWith({
+      expect(fireEvent).toHaveBeenLastCalledWith({
         name: 'filter',
         data: {
           data: [
@@ -1118,27 +861,13 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('should do nothing if primary metric is not filterable', () => {
-      const props = {
-        ...defaultProps,
-        filterable: false,
-      };
-      const metricComponent = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-            },
-          }}
-          data={table}
-          {...props}
-        />
+    it('should do nothing if primary metric is not filterable', async () => {
+      const { fireEvent } = await fireFilter({ filterable: false });
+      expect(fireEvent).not.toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          name: 'filter',
+        })
       );
-
-      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 
@@ -1146,83 +875,63 @@ describe('MetricVisComponent', function () {
     afterEach(() => mockGetColorForValue.mockClear());
 
     describe('by palette', () => {
-      const colorFromPalette = 'color-from-palette';
+      const colorFromPalette = faker.color.rgb();
       mockGetColorForValue.mockReturnValue(colorFromPalette);
 
-      it('should fetch color from palette if provided', () => {
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                // should be overridden
-                color: 'static-color',
-                palette: {
-                  type: 'palette',
-                  name: 'default',
-                  params: {
-                    colors: [],
-                    gradient: true,
-                    stops: [],
-                    range: 'number',
-                    rangeMin: 2,
-                    rangeMax: 10,
-                  },
+      it('should fetch color from palette if provided', async () => {
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              // should be overridden
+              color: 'static-color',
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
                 },
               },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
+            },
+          },
+        });
 
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(colorFromPalette);
-        expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
-          Array [
-            Array [
-              28.984375,
-              Object {
-                "colors": Array [],
-                "gradient": true,
-                "range": "number",
-                "rangeMax": 10,
-                "rangeMin": 2,
-                "stops": Array [],
-              },
-              Object {
-                "max": 57.96875,
-                "min": 0,
-              },
-            ],
-          ]
-        `);
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
       });
 
       describe('percent-based', () => {
-        const renderWithPalette = (
+        const renderWithPalette = async (
           palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
-          shallow(
-            <MetricVis
-              config={{
-                dimensions,
-                metric: {
-                  ...defaultMetricParams,
-                  palette,
-                },
-              }}
-              data={table}
-              {...defaultProps}
-            />
-          );
+          await renderChart({
+            config: {
+              dimensions,
+              metric: {
+                ...defaultMetricParams,
+                palette,
+              },
+            },
+          });
 
-        const dimensionsAndExpectedBounds = [
+        const dimensionsAndExpectedBounds: Array<
+          [
+            string,
+            {
+              metric: string;
+              max?: string;
+              breakdownBy?: string;
+            }
+          ]
+        > = [
           [
             'breakdown-by and max',
             {
@@ -1237,11 +946,10 @@ describe('MetricVisComponent', function () {
 
         it.each(dimensionsAndExpectedBounds)(
           'should set correct data bounds with %s dimension',
-          // @ts-expect-error
-          (label, dimensions) => {
+          async (_label, dimensions) => {
             mockGetColorForValue.mockClear();
 
-            renderWithPalette(
+            await renderWithPalette(
               {
                 type: 'palette',
                 name: 'default',
@@ -1255,7 +963,7 @@ describe('MetricVisComponent', function () {
                   rangeMax: 10,
                 },
               },
-              dimensions as DimensionsVisParam
+              dimensions
             );
 
             expect(
@@ -1270,53 +978,42 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
-      it('uses static color if no palette', () => {
-        const staticColor = 'static-color';
+      it('uses static color if no palette', async () => {
+        const staticColor = faker.color.rgb();
 
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                color: staticColor,
-                palette: undefined,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              color: staticColor,
+              palette: undefined,
+            },
+          },
+        });
 
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(staticColor);
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: staticColor });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
 
-      it('defaults if no static color', () => {
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                color: undefined,
-                palette: undefined,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
-
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(euiThemeVars.euiColorEmptyShade);
+      it('defaults if no static color', async () => {
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              color: undefined,
+              palette: undefined,
+            },
+          },
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
     });
@@ -1326,7 +1023,8 @@ describe('MetricVisComponent', function () {
     function nonNullable<T>(v: T): v is NonNullable<T> {
       return v != null;
     }
-    const getFormattedMetrics = (
+
+    const getFormattedMetrics = async (
       value: number | string,
       secondaryValue: number | string | undefined,
       fieldFormatter: SerializedFieldFormat<SerializableRecord> | undefined
@@ -1341,38 +1039,27 @@ describe('MetricVisComponent', function () {
         },
       };
 
-      const component = shallow(
-        <MetricVis
-          config={config}
-          data={{
-            type: 'datatable',
-            columns: [
-              {
-                id: '1',
-                name: '',
-                meta: { type: 'number', params: fieldFormatter },
-              },
-              secondaryValue
-                ? {
-                    id: '2',
-                    name: '',
-                    meta: { type: 'number', params: fieldFormatter },
-                  }
-                : undefined,
-            ].filter(nonNullable) as DatatableColumn[],
-            rows: [{ '1': value, '2': secondaryValue }],
-          }}
-          {...defaultProps}
-        />
-      );
-
-      const {
-        value: primaryMetric,
-        valueFormatter,
-        extra,
-      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
-
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
+      await renderChart({
+        data: {
+          type: 'datatable',
+          columns: [
+            {
+              id: '1',
+              name: '',
+              meta: { type: 'number', params: fieldFormatter },
+            },
+            secondaryValue
+              ? {
+                  id: '2',
+                  name: '',
+                  meta: { type: 'number', params: fieldFormatter },
+                }
+              : undefined,
+          ].filter(nonNullable) as DatatableColumn[],
+          rows: [{ '1': value, '2': secondaryValue }],
+        },
+        config,
+      });
     };
 
     it.each`
@@ -1382,8 +1069,8 @@ describe('MetricVisComponent', function () {
       ${'percent'}  | ${'0%'} | ${'0%'}
     `(
       'applies $id custom field format pattern when passed over',
-      ({ id, pattern, finalPattern }) => {
-        getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
+      async ({ id, pattern, finalPattern }) => {
+        await getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
         expect(mockDeserialize).toHaveBeenCalledTimes(2);
         expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
       }
@@ -1395,16 +1082,16 @@ describe('MetricVisComponent', function () {
       ${'percent'}
     `(
       'does not apply the metric compact format if user customized default settings pattern for $id',
-      ({ id }) => {
+      async ({ id }) => {
         mockIsOverridden.mockReturnValueOnce(true);
-        getFormattedMetrics(394.2393, 983123.984, { id });
+        await getFormattedMetrics(394.2393, 983123.984, { id });
         expect(mockDeserialize).toHaveBeenCalledTimes(2);
         expect(mockDeserialize).toHaveBeenCalledWith({ id });
       }
     );
 
-    it('applies a custom duration configuration to the formatter', () => {
-      getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
+    it('applies a custom duration configuration to the formatter', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
@@ -1412,8 +1099,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not override duration custom configuration when set', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not override duration custom configuration when set', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'duration',
         params: { useShortSuffix: false },
       });
@@ -1424,8 +1111,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not override duration configuration at visualization level when set', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not override duration configuration at visualization level when set', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
       });
@@ -1436,8 +1123,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak bytes format when passed', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not tweak bytes format when passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
       });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
@@ -1446,8 +1133,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak bit format when passed', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not tweak bit format when passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
         params: { pattern: '0.0bitd' },
       });
@@ -1458,51 +1145,92 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak legacy bits format when passed', () => {
+    it('does not tweak legacy bits format when passed', async () => {
       const legacyBitFormat = {
         id: 'number',
         params: { pattern: `0,0bitd` },
       };
-      getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
+      await getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
     });
 
-    it('calls the formatter only once when no secondary value is passed', () => {
-      getFormattedMetrics(394.2393, undefined, { id: 'number' });
+    it('calls the formatter only once when no secondary value is passed', async () => {
+      await getFormattedMetrics(394.2393, undefined, { id: 'number' });
       expect(mockDeserialize).toHaveBeenCalledTimes(1);
     });
 
-    it('still call the numeric formatter when no format is passed', () => {
-      const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, undefined);
+    it('still call the numeric formatter when no format is passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, undefined);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
-      expect(primary).toBe('number-394.2393');
-      expect(secondary).toBe('number-983123.984');
+      expect(screen.getByTitle('number-394.2393')).toBeInTheDocument();
+      expect(screen.getByText('number-983123.984')).toBeInTheDocument();
+    });
+
+    it('still call the string formatter for ES|QL keyword value', async () => {
+      await renderChart({
+        data: {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'a',
+              name: 'alpha',
+              meta: {
+                esType: 'keyword',
+                type: 'string',
+                sourceParams: {
+                  indexPattern: 'index',
+                },
+              },
+            },
+          ],
+          rows: [{ a: '12h50m30s' }],
+          meta: {
+            type: 'es_ql',
+          },
+        },
+        config: {
+          dimensions: {
+            metric: 'a',
+          },
+          metric: {
+            color: '#FFFFFF',
+            iconAlign: 'left',
+            maxCols: 3,
+            titlesTextAlign: 'left',
+            valueFontSize: 'default',
+            valuesTextAlign: 'right',
+            secondaryTrend: {
+              visuals: undefined,
+              baseline: undefined,
+              palette: undefined,
+            },
+          },
+        },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(1);
+      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'string' });
+      expect(screen.getByText('string-12h50m30s')).toBeInTheDocument();
     });
   });
 
   describe('overrides', () => {
-    it('should apply overrides to the settings component', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
-        />
-      );
+    it('should apply overrides to the settings component', async () => {
+      const color = faker.color.rgb();
+      await renderChart({
+        config: {
+          metric: {
+            ...defaultMetricParams,
+          },
+          dimensions: {
+            metric: basePriceColumnId,
+          },
+        },
+        overrides: { settings: { theme: { metric: { border: color } } } },
+      });
 
-      const settingsComponent = component.find(Settings);
-      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
-      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+      expect(screen.getByRole('figure')).toHaveStyle({ borderColor: color });
     });
   });
 });

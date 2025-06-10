@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateRuleAction,
   CreateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/create';

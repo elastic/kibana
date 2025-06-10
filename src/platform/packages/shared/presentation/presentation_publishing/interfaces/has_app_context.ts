@@ -21,7 +21,8 @@ export interface HasAppContext {
 
 export const apiHasAppContext = (unknownApi: unknown): unknownApi is HasAppContext => {
   return (
-    (unknownApi as HasAppContext).getAppContext !== undefined &&
+    Boolean(unknownApi) &&
+    (unknownApi as HasAppContext)?.getAppContext !== undefined &&
     typeof (unknownApi as HasAppContext).getAppContext === 'function'
   );
 };

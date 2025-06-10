@@ -10,24 +10,21 @@ import { screen } from '@testing-library/react';
 
 import { connector } from '../mock';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('Webhook fields: Preview', () => {
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('does not render any fields', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={null} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={null} />);
     expect(screen.queryByTestId('card-list-item')).not.toBeInTheDocument();
   });
 
   it('shows the warning comment callout', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={null} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={null} />);
     expect(screen.getByTestId('create-comment-warning')).toBeInTheDocument();
   });
 
@@ -37,7 +34,7 @@ describe('Webhook fields: Preview', () => {
       config: { createCommentUrl: 'https://example.com', createCommentJson: {} },
     };
 
-    appMockRenderer.render(<FieldsPreview connector={configuredConnector} fields={null} />);
+    renderWithTestingProviders(<FieldsPreview connector={configuredConnector} fields={null} />);
     expect(screen.queryByTestId('create-comment-warning')).not.toBeInTheDocument();
   });
 });

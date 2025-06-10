@@ -8,10 +8,13 @@
 import expect from '@kbn/expect';
 import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { CaseStatuses, UserCommentAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  CaseStatuses,
+  UserCommentAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
   createCase,

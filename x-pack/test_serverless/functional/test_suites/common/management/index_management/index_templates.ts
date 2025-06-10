@@ -53,9 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await es.indices.putIndexTemplate({
           name: TEST_TEMPLATE,
-          body: {
-            index_patterns: [INDEX_PATTERN],
-          },
+          index_patterns: [INDEX_PATTERN],
         });
       });
 

@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityCommon.createMlUsers();
       await ml.api.createIngestPipeline(testModelId);
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToMl();
       await ml.navigation.navigateToTrainedModels();
     });
 

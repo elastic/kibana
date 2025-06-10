@@ -16,7 +16,11 @@ import { ErrorMarker } from './error_marker';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MemoryRouter>
+    <MemoryRouter
+      initialEntries={[
+        '/services/{serviceName}/errors?comparisonEnabled=false&latencyAggregationType=avg&offset=1d&rangeFrom=now-15m&rangeTo=now&serviceGroup=&transactionType=request',
+      ]}
+    >
       <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -54,7 +58,9 @@ describe('ErrorMarker', () => {
     return component;
   }
   function getKueryDecoded(url: string) {
-    return decodeURIComponent(url.substring(url.indexOf('kuery='), url.indexOf('&')));
+    return decodeURIComponent(
+      url.substring(url.indexOf('kuery='), url.indexOf('&latencyAggregationType'))
+    );
   }
   it('renders link with trace and transaction', () => {
     const component = openPopover(mark);

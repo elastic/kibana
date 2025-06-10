@@ -183,35 +183,27 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
-   * @param options
    * @param options.filter kql "filter" expression
    * @param options.listId the "list_id" of an exception list
    * @param options.id the "id" of an exception list
    * @param options.namespaceType saved object namespace (single | agnostic)
+   *
    * @returns Summary of exception list item os types
    */
-  public getExceptionListSummary = async ({
-    filter,
-    listId,
-    id,
-    namespaceType,
-  }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
+  public getExceptionListSummary = async (
+    options: GetExceptionListSummaryOptions
+  ): Promise<ExceptionListSummarySchema | null> => {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSummary',
-        {
-          filter,
-          id,
-          listId,
-          namespaceType,
-        },
+        options,
         this.getServerExtensionCallbackContext()
       );
     }
 
-    return getExceptionListSummary({ filter, id, listId, namespaceType, savedObjectsClient });
+    return getExceptionListSummary({ ...options, savedObjectsClient });
   };
 
   /**
@@ -1057,32 +1049,21 @@ export class ExceptionListClient {
    * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns the ndjson of the list and items to export or null if none exists
    */
-  public exportExceptionListAndItems = async ({
-    listId,
-    id,
-    namespaceType,
-    includeExpiredExceptions,
-  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+  public exportExceptionListAndItems = async (
+    options: ExportExceptionListAndItemsOptions
+  ): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreExport',
-        {
-          id,
-          includeExpiredExceptions,
-          listId,
-          namespaceType,
-        },
+        options,
         this.getServerExtensionCallbackContext()
       );
     }
 
     return exportExceptionListAndItems({
-      id,
-      includeExpiredExceptions,
-      listId,
-      namespaceType,
+      ...options,
       savedObjectsClient,
     });
   };

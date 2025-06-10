@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import { Rule } from '../../../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import type { Rule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';
 

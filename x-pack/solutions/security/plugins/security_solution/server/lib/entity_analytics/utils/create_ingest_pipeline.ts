@@ -20,21 +20,19 @@ export const createEventIngestedFromTimestamp = async (
   try {
     const pipeline = {
       id: ingestTimestampPipeline,
-      body: {
-        _meta: {
-          managed_by: 'entity_analytics',
-          managed: true,
-        },
-        description: 'Pipeline for adding timestamp value to event.ingested',
-        processors: [
-          {
-            set: {
-              field: 'event.ingested',
-              value: '{{_ingest.timestamp}}',
-            },
-          },
-        ],
+      _meta: {
+        managed_by: 'entity_analytics',
+        managed: true,
       },
+      description: 'Pipeline for adding timestamp value to event.ingested',
+      processors: [
+        {
+          set: {
+            field: 'event.ingested',
+            value: '{{_ingest.timestamp}}',
+          },
+        },
+      ],
     };
 
     await esClient.ingest.putPipeline(pipeline);

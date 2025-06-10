@@ -9,7 +9,7 @@ import type { RetrievalQAChain } from 'langchain/chains';
 import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
 import type {
@@ -131,39 +131,6 @@ describe('ProductDocumentationTool', () => {
           documents: [
             {
               citation: '{reference(exampleContentReferenceId)}',
-              content: 'exampleContent',
-              title: 'exampleTitle',
-              url: 'exampleUrl',
-              summarized: false,
-            },
-          ],
-        },
-      });
-    });
-
-    it('does not include citations if contentReferencesStore is false', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: undefined,
-      }) as DynamicStructuredTool;
-
-      (retrieveDocumentation as jest.Mock).mockResolvedValue({
-        documents: [
-          {
-            title: 'exampleTitle',
-            url: 'exampleUrl',
-            content: 'exampleContent',
-            summarized: false,
-          },
-        ] as RetrieveDocumentationResultDoc[],
-      });
-
-      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
-
-      expect(result).toEqual({
-        content: {
-          documents: [
-            {
               content: 'exampleContent',
               title: 'exampleTitle',
               url: 'exampleUrl',

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('builtin alertTypes', () => {
     loadTestFile(require.resolve('./index_threshold'));
     loadTestFile(require.resolve('./es_query'));
+    loadTestFile(require.resolve('./disabled_rule_types'));
   });
 }

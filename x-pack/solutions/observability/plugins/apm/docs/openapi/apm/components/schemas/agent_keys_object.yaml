@@ -5,10 +5,14 @@ required:
 properties:
   name:
     type: string
-    description: Agent name
+    description: The name of the APM agent key.
   privileges:
     type: array
-    description: Privileges configuration
+    description: >
+      The APM agent key privileges. It can take one or more of the following values:
+      
+      * `event:write`, which is required for ingesting APM agent events.
+      * `config_agent:read`, which is required for APM agents to read agent configuration remotely.
     items:
       type: string
       enum:

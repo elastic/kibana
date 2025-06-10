@@ -7,7 +7,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useRef, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
@@ -15,7 +15,10 @@ import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { Refetch } from '../../store/inputs/model';
-
+import { TimelineId } from '../../../../common/types/timeline';
+import { selectTimelineById } from '../../../timelines/store/selectors';
+import type { State } from '../../store';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
   queryId: string;
@@ -35,11 +38,15 @@ export const useRefetchByRestartingSession = ({
   const session = useRef(data.search.session);
 
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
+
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
     inputId === InputsModelId.global
       ? getGlobalQuery(state, queryId)
-      : getTimelineQuery(state, queryId)
+      : getTimelineQuery(state, `${TimelineId.active}-${activeTab}`)
   );
 
   const refetchByRestartingSession = useCallback(() => {

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
@@ -61,5 +62,6 @@ export const pickupUpdatedMappings =
       .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });
       })
+      .catch(catchRetryableSearchPhaseExecutionException)
       .catch(catchRetryableEsClientErrors);
   };

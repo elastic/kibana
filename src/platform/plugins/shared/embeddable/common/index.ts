@@ -8,13 +8,8 @@
  */
 
 export type {
-  EmbeddableInput,
   CommonEmbeddableStartContract,
   EmbeddableStateWithType,
-  PanelState,
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
 } from './types';
-export { ViewMode } from './types';
-export type { SavedObjectEmbeddableInput } from './lib';
-export { isSavedObjectEmbeddableInput } from './lib';

@@ -8,7 +8,10 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Demo } from './test_samples/demo';
 
-storiesOf('UrlDrilldownCollectConfig', module).add('default', () => <Demo />);
+// eslint-disable-next-line import/no-default-export
+export default {
+  title: 'UrlDrilldownCollectConfig',
+  render: () => <Demo />,
+};

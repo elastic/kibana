@@ -7,21 +7,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildObservableVariable, createEmptyLensState } from '../helper';
+import { createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
   LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
+  LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
 } from '../types';
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
-import { getEmbeddableVariables } from './utils';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
@@ -29,13 +28,13 @@ export function initializeInternalApi(
   titleManager: ReturnType<typeof initializeTitleManager>,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
-  const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
-  const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
+  const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
+  const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
   if (apiHasAbortController(parentApi)) {
     expressionAbortController$.next(parentApi.abortController);
   }
-  const [renderCount$] = buildObservableVariable<number>(0);
+  const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
     initialState.attributes || createEmptyLensState().attributes
@@ -69,17 +68,9 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
-  const [esqlVariables$] = buildObservableVariable(
-    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
-  );
-
-  const query = initialState.attributes.state.query;
-
-  const panelEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-  esqlVariables$.subscribe((newVariables) => {
-    const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
-    panelEsqlVariables$.next(esqlVariables);
-  });
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : new BehaviorSubject<ESQLControlVariable[]>([]);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -87,7 +78,7 @@ export function initializeInternalApi(
     attributes$,
     overrides$,
     disableTriggers$,
-    esqlVariables$: panelEsqlVariables$,
+    esqlVariables$,
     dataLoading$,
     hasRenderCompleted$,
     expressionParams$,
@@ -114,6 +105,8 @@ export function initializeInternalApi(
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
     updateAbortController: (abortController: AbortController | undefined) =>
       expressionAbortController$.next(abortController),
+    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
+      disableTriggers$.next(disableTriggers),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),

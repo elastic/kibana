@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { ObservedServiceDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -37,13 +37,11 @@ export const buildObservedServiceDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        ...buildFieldsTermAggregation(SERVICE_FIELDS),
-      },
-      query: { bool: { filter } },
-      size: 0,
+    aggregations: {
+      ...buildFieldsTermAggregation(SERVICE_FIELDS),
     },
+    query: { bool: { filter } },
+    size: 0,
   };
 
   return dslQuery;

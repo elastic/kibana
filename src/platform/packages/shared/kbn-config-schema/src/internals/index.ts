@@ -312,19 +312,25 @@ export const internals: JoiRoot = Joi.extend(
         method(key, value) {
           return this.$_addRule({ name: 'entries', args: { key, value } });
         },
-        validate(value, { error }, args, options) {
+        validate(value, { error, prefs }, args, options) {
           const result = new Map();
           for (const [entryKey, entryValue] of value) {
             let validatedEntryKey: any;
             try {
-              validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
+              validatedEntryKey = Joi.attempt(entryKey, args.key, {
+                presence: 'required',
+                stripUnknown: prefs.stripUnknown,
+              });
             } catch (e) {
               return error('map.key', { entryKey, reason: e });
             }
 
             let validatedEntryValue: any;
             try {
-              validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
+              validatedEntryValue = Joi.attempt(entryValue, args.value, {
+                presence: 'required',
+                stripUnknown: prefs.stripUnknown,
+              });
             } catch (e) {
               return error('map.value', { entryKey, reason: e });
             }
@@ -381,19 +387,25 @@ export const internals: JoiRoot = Joi.extend(
         method(key, value) {
           return this.$_addRule({ name: 'entries', args: { key, value } });
         },
-        validate(value, { error }, args) {
+        validate(value, { error, prefs }, args) {
           const result = {} as Record<string, any>;
           for (const [entryKey, entryValue] of Object.entries(value)) {
             let validatedEntryKey: any;
             try {
-              validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
+              validatedEntryKey = Joi.attempt(entryKey, args.key, {
+                presence: 'required',
+                stripUnknown: prefs.stripUnknown,
+              });
             } catch (e) {
               return error('record.key', { entryKey, reason: e });
             }
 
             let validatedEntryValue: any;
             try {
-              validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
+              validatedEntryValue = Joi.attempt(entryValue, args.value, {
+                presence: 'required',
+                stripUnknown: prefs.stripUnknown,
+              });
             } catch (e) {
               return error('record.value', { entryKey, reason: e });
             }

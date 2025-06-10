@@ -8,21 +8,19 @@
  */
 
 import { createHash } from 'crypto';
+import { BehaviorSubject } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
   type ThemeName,
-  DEFAULT_THEME_NAME,
   parseDarkModeValue,
-  parseThemeNameValue,
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
-import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
@@ -36,6 +34,7 @@ interface FactoryOptions {
   uiPlugins: UiPlugins;
   auth: HttpAuth;
   userSettingsService?: InternalUserSettingsServiceSetup;
+  themeName$: BehaviorSubject<ThemeName>;
 }
 
 interface RenderedOptions {
@@ -55,6 +54,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   uiPlugins,
   auth,
   userSettingsService,
+  themeName$,
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
@@ -64,11 +64,9 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    let themeName: ThemeName = DEFAULT_THEME_NAME;
+    const themeName = themeName$.getValue();
 
     try {
-      themeName = parseThemeNameValue(await uiSettingsClient.get('theme:name'));
-
       const authenticated = isAuthenticated(request);
 
       if (authenticated) {
@@ -84,15 +82,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       // just use the default values in case of connectivity issues with ES
     }
 
-    // keeping legacy themeTag support - note that the browser is now overriding it during setup.
-    if (darkMode === 'system') {
-      darkMode = false;
-    }
-
-    const themeTag = getThemeTag({
-      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
-      darkMode,
-    });
+    const colorMode = darkMode === false ? 'light' : darkMode === true ? 'dark' : 'system';
+    // Amsterdam theme is called `v8` internally
+    // and should be kept this way for compatibility reasons.
+    const themeTagName = themeName === 'amsterdam' ? 'v8' : themeName;
     const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
@@ -116,7 +109,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     });
 
     const body = renderTemplate({
-      themeTag,
+      colorMode,
+      themeTagName,
       jsDependencyPaths,
       publicPathMap,
     });

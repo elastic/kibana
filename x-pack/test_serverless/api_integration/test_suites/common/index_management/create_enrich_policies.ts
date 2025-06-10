@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
@@ -35,30 +35,26 @@ export default function ({ getService }: FtrProviderContext) {
       try {
         await es.indices.create({
           index: INDEX_A_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                firstName: {
-                  type: 'text',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              firstName: {
+                type: 'text',
               },
             },
           },
         });
         await es.indices.create({
           index: INDEX_B_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                age: {
-                  type: 'long',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              age: {
+                type: 'long',
               },
             },
           },

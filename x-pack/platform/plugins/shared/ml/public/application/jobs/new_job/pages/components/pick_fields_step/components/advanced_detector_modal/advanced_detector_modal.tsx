@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect } from 'react';
 
@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
   EuiComboBox,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import {
@@ -100,7 +101,27 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
-
+  const aggDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'aggDescriptionTitleId',
+  });
+  const fieldDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'fieldDescriptionTitleId',
+  });
+  const byFieldDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'byFieldDescriptionTitleId',
+  });
+  const overFieldDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'overFieldDescriptionTitleId',
+  });
+  const partitionFieldDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'partitionFieldDescriptionTitleId',
+  });
+  const excludeFrequentDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'excludeFrequentDescriptionTitleId',
+  });
+  const descriptionDescriptionTitleId = useGeneratedHtmlId({
+    prefix: 'descriptionDescriptionTitleId',
+  });
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
@@ -248,7 +269,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
-            <AggDescription>
+            <AggDescription titleId={aggDescriptionTitleId}>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
@@ -256,11 +277,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
                 renderOption={renderOption}
+                aria-labelledby={aggDescriptionTitleId}
               />
             </AggDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
-            <FieldDescription>
+            <FieldDescription titleId={fieldDescriptionTitleId}>
               <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={currentFieldOptions}
@@ -268,6 +290,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
+                titleId={fieldDescriptionTitleId}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -275,7 +298,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiHorizontalRule margin="l" />
         <EuiFlexGrid columns={2}>
           <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
-            <ByFieldDescription>
+            <ByFieldDescription titleId={byFieldDescriptionTitleId}>
               <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
@@ -283,11 +306,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                titleId={byFieldDescriptionTitleId}
               />
             </ByFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
-            <OverFieldDescription>
+            <OverFieldDescription titleId={overFieldDescriptionTitleId}>
               <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
@@ -295,11 +319,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                titleId={overFieldDescriptionTitleId}
               />
             </OverFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
-            <PartitionFieldDescription>
+            <PartitionFieldDescription titleId={partitionFieldDescriptionTitleId}>
               <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
@@ -307,11 +332,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                titleId={partitionFieldDescriptionTitleId}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
-            <ExcludeFrequentDescription>
+            <ExcludeFrequentDescription titleId={excludeFrequentDescriptionTitleId}>
               <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
@@ -319,6 +345,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
+                titleId={excludeFrequentDescriptionTitleId}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
@@ -326,7 +353,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiHorizontalRule margin="l" />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <DescriptionDescription>
+            <DescriptionDescription titleId={descriptionDescriptionTitleId}>
               <EuiTextArea
                 rows={2}
                 fullWidth={true}
@@ -334,6 +361,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 value={descriptionOption}
                 onChange={(e) => setDescriptionOption(e.target.value)}
                 data-test-subj="mlAdvancedDetectorDescriptionInput"
+                aria-labelledby={descriptionDescriptionTitleId}
               />
             </DescriptionDescription>
           </EuiFlexItem>

@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Uptime APIs
+  description: Kibana APIs for the Uptime app
+  version: "1.0.1"
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: uptime
+    x-displayName: Uptime
+    # description:
+    externalDocs:
+      url: https://www.elastic.co/docs/solutions/observability/uptime
+      description: Uptime monitoring
+servers:
+  - url: /
+paths:
+  /api/uptime/settings:
+    get:
+      summary: Get uptime settings
+      description: >
+        You must have `read` privileges for the uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-uptime-settings
+      tags:
+        - uptime
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+               type: object
+              examples:
+                getUptimeSettingsResponseExample1:
+                  value: |-
+                    {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                    }
+    put:
+      summary: Update uptime settings
+      description: >
+        Update uptime setting attributes like `heartbeatIndices`, `certExpirationThreshold`, `certAgeThreshold`, `defaultConnectors`, or `defaultEmail`.
+        You must have `all` privileges for the uptime feature in the Observability section of the Kibana feature privileges.
+        A partial update is supported, provided settings keys will be merged with existing settings.
+      operationId: put-uptime-settings
+      tags:
+        - uptime
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                certAgeThreshold:
+                  type: number
+                  description: The number of days after a certificate is created to trigger an alert.
+                  default: 730
+                certExpirationThreshold:
+                  type: number
+                  description: The number of days before a certificate expires to trigger an alert. 
+                  default: 30
+                defaultConnectors:
+                  type: array
+                  description: A list of connector IDs to be used as default connectors for new alerts.
+                  default: []
+                defaultEmail:
+                  type: object
+                  description: >
+                    The default email configuration for new alerts.
+                  properties:
+                    bcc:
+                      type: array
+                      items:
+                        - type: string
+                      default: []
+                    cc:
+                      type: array
+                      items:
+                        - type: string
+                      default: []
+                    to:
+                      type: array
+                      items:
+                        - type: string
+                      default: []
+                heartbeatIndices:
+                  type: string
+                  description: >
+                    An index pattern string to be used within the Uptime app and alerts to query Heartbeat data. 
+                  default: heartbeat-*
+            examples:
+              putUptimeSettingsRequestExample1:
+                summary: Update multiple settings
+                description: Run `PUT api/uptime/settings` to update multiple Uptime settings.
+                value: |-                
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                  }
+              putUptimeSettingsRequestExample2:
+                summary: Update a setting
+                description: Run `PUT api/uptime/settings` to update a single Uptime setting.
+                value: |-                  
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+               type: object
+              examples:
+                putUptimeSettingsResponseExample1:
+                  description: A successful response from `PUT api/uptime/settings`.
+                  value: |-
+                    {
+                        "heartbeatIndices": "heartbeat-8*",
+                        "certExpirationThreshold": 30,
+                        "certAgeThreshold": 730,
+                        "defaultConnectors": [
+                            "08990f40-09c5-11ee-97ae-912b222b13d4",
+                            "db25f830-2318-11ee-9391-6b0c030836d6"
+                        ],
+                        "defaultEmail": {
+                            "to": [],
+                            "cc": [],
+                            "bcc": []
+                        }
+                    }

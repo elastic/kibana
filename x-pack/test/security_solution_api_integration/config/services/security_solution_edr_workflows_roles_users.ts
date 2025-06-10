@@ -12,6 +12,7 @@ import {
   getAllEndpointSecurityRoles,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 
+import { EndpointSecurityTestRolesLoader } from '@kbn/security-solution-plugin/scripts/endpoint/common/role_and_user_loader';
 import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
 export const ROLE = ENDPOINT_SECURITY_ROLE_NAMES;
@@ -20,10 +21,17 @@ const rolesMapping = getAllEndpointSecurityRoles();
 
 export function RolesUsersProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
+  const kbnServer = getService('kibanaServer');
+  const log = getService('log');
+
   return {
+    /** Endpoint security test roles loader */
+    loader: new EndpointSecurityTestRolesLoader(kbnServer, log),
+
     /**
      * Creates an user with specific values
      * @param user
+     * @deprecated use `.loader.*` methods instead
      */
     async createUser(user: { name: string; roles: string[]; password?: string }): Promise<void> {
       const { name, roles, password } = user;
@@ -33,6 +41,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
     /**
      * Deletes specified users by username
      * @param names[]
+     * @deprecated use `.loader.*` methods instead
      */
     async deleteUsers(names: string[]): Promise<void> {
       for (const name of names) {
@@ -43,6 +52,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
     /**
      * Creates a role using predefined role config if defined or a custom one. It also allows define extra privileges.
      * @param options
+     * @deprecated use `.loader.*` methods instead
      */
     async createRole(options: {
       predefinedRole?: EndpointSecurityRoleNames;
@@ -87,6 +97,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
     /**
      * Deletes specified roles by name
      * @param roles[]
+     * @deprecated use `.loader.*` methods instead
      */
     async deleteRoles(roles: string[]): Promise<void> {
       for (const role of roles) {

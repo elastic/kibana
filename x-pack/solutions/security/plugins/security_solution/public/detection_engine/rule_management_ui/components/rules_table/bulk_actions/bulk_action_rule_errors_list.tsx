@@ -29,7 +29,9 @@ const BulkEditRuleErrorItem = ({
   message,
   rulesCount,
 }: BulkActionRuleErrorItemProps) => {
-  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization'
+  );
 
   switch (errorCode) {
     case BulkActionsDryRunErrCodeEnum.IMMUTABLE:

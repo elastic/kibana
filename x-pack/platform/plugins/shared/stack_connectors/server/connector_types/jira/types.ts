@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,

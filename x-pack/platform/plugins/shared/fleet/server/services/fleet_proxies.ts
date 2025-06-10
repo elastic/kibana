@@ -30,7 +30,7 @@ import type {
 
 import { appContextService } from './app_context';
 
-import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
+import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
@@ -206,7 +206,7 @@ async function updateRelatedSavedObject(
   await pMap(
     fleetServerHosts,
     (fleetServerHost) =>
-      updateFleetServerHost(soClient, fleetServerHost.id, {
+      fleetServerHostService.update(soClient, esClient, fleetServerHost.id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
       }),
@@ -224,7 +224,7 @@ async function updateRelatedSavedObject(
   );
 
   await pMap(downloadSources, (downloadSource) =>
-    downloadSourceService.update(soClient, downloadSource.id, {
+    downloadSourceService.update(soClient, esClient, downloadSource.id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
     })
@@ -237,7 +237,7 @@ export async function getFleetProxyRelatedSavedObjects(
 ) {
   const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
     await Promise.all([
-      listFleetServerHostsForProxyId(soClient, proxyId),
+      fleetServerHostService.listAllForProxyId(soClient, proxyId),
       outputService.listAllForProxyId(soClient, proxyId),
       downloadSourceService.listAllForProxyId(soClient, proxyId),
     ]);

@@ -121,9 +121,8 @@ const mockKibana = () => {
         },
       },
       triggersActionsUi: {
-        getAddRuleFlyout: jest.fn(() => (
-          <div data-test-subj="add-rule-flyout">mocked component</div>
-        )),
+        ruleTypeRegistry: {},
+        actionTypeRegistry: {},
       },
       uiSettings: {
         get: (settings: string) => {
@@ -157,8 +156,8 @@ describe('SLO Details Page', () => {
       data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
-    useDeleteSloMock.mockReturnValue({ mutateAsync: mockDelete });
-    useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
+    useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/1234', search: '', state: '', hash: '' });
@@ -230,7 +229,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(2);
@@ -245,7 +243,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorRateChart')).toBeTruthy();

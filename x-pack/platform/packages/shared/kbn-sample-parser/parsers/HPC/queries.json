@@ -1,0 +1,330 @@
+{
+  "queries": [
+    {
+      "id": "startup_boot_command",
+      "title": "Startup Message (boot command)",
+      "description": "Returns log messages that indicate a boot command was issued.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "boot command",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_closing",
+      "title": "Shutdown Message (closing)",
+      "description": "Returns log messages that indicate a shutdown process with the term 'closing'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "closing"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_starting",
+      "title": "Startup Message (starting)",
+      "description": "Returns log messages that indicate a startup process with the term 'starting'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "starting"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "shutdown_halt_command",
+      "title": "Shutdown Message (halt command)",
+      "description": "Returns log messages that indicate a halt command was issued.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "halt command",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_boot_halt_asserted",
+      "title": "Error Message (boot command Error: HALT asserted)",
+      "description": "Returns log messages that indicate a boot command error with HALT asserted.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "boot.*Error: HALT asserted"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "critical_message",
+      "title": "Critical Message (critical)",
+      "description": "Returns log messages that contain the term 'critical'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "critical"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_command_aborted",
+      "title": "Error Message (Command has been aborted)",
+      "description": "Returns log messages that indicate a command has been aborted.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "Command has been aborted"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_failed_subcommands",
+      "title": "Error Message (Failed subcommands)",
+      "description": "Returns log messages that indicate failed subcommands.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "Failed subcommands"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "link_error",
+      "title": "Link Error Message (Link error)",
+      "description": "Returns log messages that indicate a link error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "Link error"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "link_error_broadcast_tree",
+      "title": "Link Error Message (Link error on broadcast tree Interconnect)",
+      "description": "Returns log messages that indicate a link error on the broadcast tree interconnect.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Link error on broadcast tree Interconnect.*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_message",
+      "title": "Warning Message (warning)",
+      "description": "Returns log messages that contain the term 'warning'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "warning"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "temperature_warning",
+      "title": "Temperature Warning Message (Temperature exceeds warning threshold)",
+      "description": "Returns log messages that indicate temperature exceeds the warning threshold.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Temperature.*exceeds warning threshold"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_server_filesystem_panic",
+      "title": "Error Message (ServerFileSystem domain panic)",
+      "description": "Returns log messages that indicate a ServerFileSystem domain panic.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "ServerFileSystem.*domain panic"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_server_filesystem_full",
+      "title": "Error Message (ServerFileSystem domain is full)",
+      "description": "Returns log messages that indicate a ServerFileSystem domain is full.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "ServerFileSystem.*domain.*is full"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_not_responding",
+      "title": "Error Message (not responding)",
+      "description": "Returns log messages that indicate a system or service is not responding.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "not responding"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_not_responding_hyphen",
+      "title": "Error Message (not-responding)",
+      "description": "Returns log messages that indicate a system or service is not-responding.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "not-responding"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "power_control_problem",
+      "title": "Power/Control Problem Message (power/control problem)",
+      "description": "Returns log messages that indicate a power or control problem.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": "power/control problem"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "psu_failure",
+      "title": "PSU Failure Message (psu failure)",
+      "description": "Returns log messages that indicate a PSU failure.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "psu failure.*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_risboot_timeout",
+      "title": "Error Message (risBoot command Error: Timed out)",
+      "description": "Returns log messages that indicate a risBoot command error due to timeout.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "risBoot.*Error: Timed out"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "network_connection_failure",
+      "title": "Network Connection Failure Message (detected a failed network connection)",
+      "description": "Returns log messages that indicate a failed network connection.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "detected a failed network connection"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

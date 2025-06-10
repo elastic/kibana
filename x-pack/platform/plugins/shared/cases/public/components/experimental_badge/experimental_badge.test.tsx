@@ -8,26 +8,22 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { ExperimentalBadge } from './experimental_badge';
 
 describe('ExperimentalBadge', () => {
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders the experimental badge', () => {
-    appMockRenderer.render(<ExperimentalBadge />);
+    renderWithTestingProviders(<ExperimentalBadge />);
 
     expect(screen.getByTestId('case-experimental-badge')).toBeInTheDocument();
   });
 
   it('renders the title correctly', () => {
-    appMockRenderer.render(<ExperimentalBadge />);
+    renderWithTestingProviders(<ExperimentalBadge />);
 
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });

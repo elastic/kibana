@@ -16,7 +16,7 @@ interface NegatedValue {
   negate: boolean;
 }
 
-type FilterValue = string | number | NegatedValue;
+type FilterValue = string | number | NegatedValue | string[];
 
 export type NavFilter = Record<string, FilterValue>;
 
@@ -72,12 +72,24 @@ export const composeQueryFilters = (
   filterParams: NavFilter = {},
   dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID
 ): Filter[] => {
-  return Object.entries(filterParams).map(([key, filterValue]) =>
-    createFilter(key, filterValue, dataViewId)
-  );
+  return Object.entries(filterParams).flatMap(([key, filterValue]) => {
+    if (Array.isArray(filterValue)) {
+      return filterValue.map((value) => createFilter(key, value, dataViewId));
+    }
+
+    if (!filterValue) {
+      return [];
+    }
+
+    return createFilter(key, filterValue, dataViewId);
+  });
 };
 
-export const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
+export const createFilter = (
+  key: string,
+  filterValue: Exclude<FilterValue, string[]>,
+  dataViewId: string
+): Filter => {
   let negate = false;
   let value = filterValue;
   if (typeof filterValue === 'object') {

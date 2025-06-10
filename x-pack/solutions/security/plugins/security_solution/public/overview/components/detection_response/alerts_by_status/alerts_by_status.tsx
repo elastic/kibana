@@ -18,7 +18,7 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
@@ -195,17 +195,17 @@ export const AlertsByStatus = ({
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusAcknowledged = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusClosed = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 

@@ -29,15 +29,21 @@ paths:
                 status:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
                   nullable: true
-                timelineId:
-                  type: string
-                  nullable: true
                 templateTimelineId:
                   type: string
                   nullable: true
+                  description: A unique identifier for the Timeline template.
+                  example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                 templateTimelineVersion:
                   type: number
                   nullable: true
+                  description: Timeline template version number.
+                  example: 12
+                timelineId:
+                  type: string
+                  nullable: true
+                  description: A unique identifier for the Timeline.
+                  example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                 timelineType:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                   nullable: true
@@ -60,5 +66,8 @@ paths:
                 properties:
                   body:
                     type: string
+                    description: The error message
+                    example: update timeline error
                   statusCode:
                     type: number
+                    example: 405

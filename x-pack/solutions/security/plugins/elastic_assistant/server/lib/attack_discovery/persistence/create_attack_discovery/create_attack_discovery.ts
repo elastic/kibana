@@ -30,11 +30,11 @@ export const createAttackDiscovery = async ({
   logger,
 }: CreateAttackDiscoveryParams): Promise<AttackDiscoveryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateScheme(createdAt, spaceId, user, attackDiscoveryCreate);
+  const document = transformToCreateScheme(createdAt, spaceId, user, attackDiscoveryCreate);
   const id = attackDiscoveryCreate?.id || uuidv4();
   try {
     const response = await esClient.create({
-      body,
+      document,
       id,
       index: attackDiscoveryIndex,
       refresh: 'wait_for',

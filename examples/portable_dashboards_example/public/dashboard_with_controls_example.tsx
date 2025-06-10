@@ -9,7 +9,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
@@ -30,7 +29,6 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       .addNewPanel(
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
-          initialState: {},
         },
         true
       )
@@ -70,7 +68,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
             return {
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
-                viewMode: ViewMode.VIEW,
+                viewMode: 'view',
                 controlGroupState,
               }),
             };

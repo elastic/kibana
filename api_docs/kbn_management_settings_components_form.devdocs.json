@@ -17,7 +17,7 @@
           "FormProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/components/form/form.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,7 +33,7 @@
             "signature": [
               "FormProps"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/components/form/form.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/components/form/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,7 +84,7 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/components/form/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,7 +107,7 @@
           "FormProviderProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/components/form/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +121,7 @@
             "signature": [
               "FormProviderProps"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/components/form/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -161,7 +161,7 @@
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/components/form/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -194,7 +194,7 @@
           " & ",
           "Services"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/components/form/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

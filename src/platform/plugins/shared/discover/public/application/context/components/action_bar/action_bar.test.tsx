@@ -9,8 +9,10 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ActionBar, ActionBarProps } from './action_bar';
+import type { ActionBarProps } from './action_bar';
+import { ActionBar } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiThemeProvider } from '@elastic/eui';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 import { SurrDocType } from '../../services/context';
 
@@ -26,7 +28,11 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       onChangeCount,
       type,
     } as ActionBarProps;
-    const wrapper = mountWithIntl(<ActionBar {...props} />);
+    const wrapper = mountWithIntl(
+      <EuiThemeProvider>
+        <ActionBar {...props} />
+      </EuiThemeProvider>
+    );
 
     const input = findTestSubject(wrapper, `${type}CountPicker`);
     const btn = findTestSubject(wrapper, `${type}LoadMoreButton`);
@@ -82,7 +88,11 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
     });
 
     test(`${type}: Load button disabled when defaultStepSize is 0`, () => {
-      const wrapperWhenZeroStep = mountWithIntl(<ActionBar {...props} defaultStepSize={0} />);
+      const wrapperWhenZeroStep = mountWithIntl(
+        <EuiThemeProvider>
+          <ActionBar {...props} defaultStepSize={0} />
+        </EuiThemeProvider>
+      );
       const inputWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}CountPicker`);
       const btnWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}LoadMoreButton`);
       expect(btnWhenZeroStep.props().disabled).toBe(true);

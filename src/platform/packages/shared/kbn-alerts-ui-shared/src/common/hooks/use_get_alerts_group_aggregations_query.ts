@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export interface UseGetAlertsGroupAggregationsQueryProps {

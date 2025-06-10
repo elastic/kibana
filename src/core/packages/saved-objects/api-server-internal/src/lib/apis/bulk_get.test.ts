@@ -17,7 +17,7 @@ import {
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { SavedObjectsBulkGetObject } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectsRawDocSource, type SavedObject } from '@kbn/core-saved-objects-server';

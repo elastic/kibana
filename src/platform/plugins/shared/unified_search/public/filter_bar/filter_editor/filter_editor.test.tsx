@@ -44,6 +44,7 @@ describe('<FilterEditor />', () => {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
           colorMode: 'DARK',
           modifications: [],
+          highContrastMode: false,
         } as UseEuiTheme<{}>,
         filter: {
           meta: {
@@ -91,6 +92,7 @@ describe('<FilterEditor />', () => {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
           colorMode: 'DARK',
           modifications: [],
+          highContrastMode: false,
         } as UseEuiTheme<{}>,
         filter: {
           meta: {
@@ -126,6 +128,7 @@ describe('<FilterEditor />', () => {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
           colorMode: 'DARK',
           modifications: [],
+          highContrastMode: false,
         } as UseEuiTheme<{}>,
         filter: {
           meta: {

@@ -2,6 +2,7 @@
 .buildkite/scripts/steps/checks/packages.sh
 .buildkite/scripts/steps/checks/bazel_packages.sh
 .buildkite/scripts/steps/checks/verify_notice.sh
+.buildkite/scripts/steps/checks/plugin_list_docs.sh
 .buildkite/scripts/steps/checks/event_log.sh
 .buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
@@ -20,3 +21,4 @@
 .buildkite/scripts/steps/checks/styled_components_mapping.sh
 .buildkite/scripts/steps/checks/dependencies_missing_owner.sh
 .buildkite/scripts/steps/checks/validate_pipelines.sh
+.buildkite/scripts/steps/checks/check_scout_config.sh

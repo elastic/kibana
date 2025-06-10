@@ -6,23 +6,37 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
-import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest, DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  CreatePackagePolicyResponse,
+  GetInfoResponse,
+  GetOneAgentPolicyResponse,
+  GetOnePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import { agentPolicyRouteService, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import type { DeepPartial } from 'utility-types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { startMetadataTransforms, stopMetadataTransforms } from '../utils/transforms';
+import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
-import type { HostMetadata, HostPolicyResponse } from '../types';
+import type { HostMetadata, HostMetadataInterface, HostPolicyResponse } from '../types';
+import { HostPolicyResponseActionStatus } from '../types';
 import type {
   BuildFleetAgentBulkCreateOperationsResponse,
   DeleteIndexedFleetAgentsResponse,
   IndexedFleetAgentResponse,
 } from './index_fleet_agent';
-import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from './index_fleet_agent';
+import {
+  buildFleetAgentBulkCreateOperations,
+  deleteIndexedFleetAgents,
+  indexFleetAgentForHost,
+} from './index_fleet_agent';
 import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
@@ -41,8 +55,13 @@ import {
   deleteIndexedFleetEndpointPolicies,
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
-import { metadataCurrentIndexPattern } from '../constants';
 import {
+  METADATA_DATASTREAM,
+  metadataCurrentIndexPattern,
+  POLICY_RESPONSE_INDEX,
+} from '../constants';
+import {
+  createToolingLogger,
   EndpointDataLoadingError,
   fetchActiveSpaceId,
   mergeAndAppendArrays,
@@ -68,6 +87,27 @@ export interface IndexedHostsResponse
   metadataIndex: string;
   policyResponseIndex: string;
 }
+
+export const buildIndexHostsResponse = (): IndexedHostsResponse => {
+  return {
+    hosts: [],
+    agents: [],
+    policyResponses: [],
+    metadataIndex: METADATA_DATASTREAM,
+    policyResponseIndex: POLICY_RESPONSE_INDEX,
+    fleetAgentsIndex: '',
+    endpointActionResponses: [],
+    endpointActionResponsesIndex: '',
+    endpointActions: [],
+    endpointActionsIndex: '',
+    actionResponses: [],
+    responsesIndex: '',
+    actions: [],
+    actionsIndex: '',
+    integrationPolicies: [],
+    agentPolicies: [],
+  };
+};
 
 /**
  * Indexes the requested number of documents for the endpoint host metadata currently being output by the generator.
@@ -118,24 +158,11 @@ export const indexEndpointHostDocs = usageTracker.track(
     const timestamp = new Date().getTime();
     const kibanaVersion = await fetchKibanaVersion(kbnClient);
     const activeSpaceId = await fetchActiveSpaceId(kbnClient);
-    const response: IndexedHostsResponse = {
-      hosts: [],
-      agents: [],
-      policyResponses: [],
-      metadataIndex,
-      policyResponseIndex,
-      fleetAgentsIndex: '',
-      endpointActionResponses: [],
-      endpointActionResponsesIndex: '',
-      endpointActions: [],
-      endpointActionsIndex: '',
-      actionResponses: [],
-      responsesIndex: '',
-      actions: [],
-      actionsIndex: '',
-      integrationPolicies: [],
-      agentPolicies: [],
-    };
+    const response: IndexedHostsResponse = buildIndexHostsResponse();
+
+    response.metadataIndex = metadataIndex;
+    response.policyResponseIndex = policyResponseIndex;
+
     let hostMetadata: HostMetadata;
     let wasAgentEnrolled = false;
 
@@ -375,6 +402,141 @@ export const deleteIndexedEndpointHosts = async (
   mergeAndAppendArrays(response, await deleteIndexedFleetAgents(esClient, indexedData));
   mergeAndAppendArrays(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
   mergeAndAppendArrays(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
+
+  return response;
+};
+
+interface IndexEndpointHostForPolicyOptions {
+  esClient: Client;
+  kbnClient: KbnClient;
+  /** The Endpoint integration policy ID that should be used to index new Endpoint host */
+  integrationPolicyId: string;
+  /**
+   * The Fleet agent policy ID. By default, the first agent policy ID listed in the Integration Policy will be used,
+   * but since an Integration policy can be shared with multiple agent policies, this options can be used to target
+   * a specific one.
+   */
+  agentPolicyId?: string;
+  overrides?: DeepPartial<HostMetadataInterface>;
+  logger?: ToolingLog;
+}
+/**
+ * Indexes a new Endpoint host for a given policy (Endpoint integration policy).
+ *
+ * NOTE: consider stopping the Endpoint metadata
+ */
+export const indexEndpointHostForPolicy = async ({
+  esClient,
+  kbnClient,
+  integrationPolicyId,
+  agentPolicyId,
+  overrides = {},
+  logger = createToolingLogger(),
+}: IndexEndpointHostForPolicyOptions): Promise<IndexedHostsResponse> => {
+  const response: IndexedHostsResponse = buildIndexHostsResponse();
+  const [kibanaVersion, integrationPolicy] = await Promise.all([
+    fetchKibanaVersion(kbnClient),
+    kbnClient
+      .request<GetOnePackagePolicyResponse>({
+        path: packagePolicyRouteService.getInfoPath(integrationPolicyId),
+        method: 'GET',
+        headers: { 'elastic-api-version': '2023-10-31' },
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
+      .then((res) => res.data.item),
+  ]);
+
+  logger.verbose(`Integration policy:\n${JSON.stringify(integrationPolicy, null, 2)}`);
+
+  if (agentPolicyId && !integrationPolicy.policy_ids.includes(agentPolicyId)) {
+    throw new EndpointError(
+      `indexEndpointHostForPolicy(): Invalid agent policy id [${agentPolicyId}]. Agent policy id not listed in integration policy`
+    );
+  }
+
+  const agentPolicy = await kbnClient
+    .request<GetOneAgentPolicyResponse>({
+      method: 'GET',
+      path: agentPolicyRouteService.getInfoPath(agentPolicyId ?? integrationPolicy.policy_ids[0]),
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((res) => res.data.item);
+
+  logger.verbose(`Agent policy:\n${JSON.stringify(agentPolicy, null, 2)}`);
+
+  const timestamp = Date.now() - 3.6e6; // Subtract 1 hour
+
+  const docOverrides: DeepPartial<HostMetadataInterface> = merge({
+    '@timestamp': timestamp,
+    agent: {
+      version: kibanaVersion,
+    },
+    Endpoint: {
+      policy: {
+        applied: {
+          name: integrationPolicy.name,
+          id: integrationPolicy.id,
+          endpoint_policy_version: integrationPolicy.revision,
+          status: HostPolicyResponseActionStatus.success,
+        },
+      },
+    },
+    ...overrides,
+  });
+
+  const hostMetadataDoc = merge(
+    new EndpointDocGenerator().generateHostMetadata(
+      undefined,
+      EndpointDocGenerator.createDataStreamFromIndex(METADATA_DATASTREAM)
+    ),
+    docOverrides
+  );
+
+  logger.verbose(
+    `New endpoint host metadata doc to be indexed for integration policy [${integrationPolicyId}]:\n${JSON.stringify(
+      hostMetadataDoc,
+      null,
+      2
+    )}`
+  );
+
+  await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
+
+  // Create the Fleet agent
+  const indexedFleetAgent = await indexFleetAgentForHost(
+    esClient,
+    hostMetadataDoc,
+    agentPolicyId ?? integrationPolicy.policy_ids[0],
+    kibanaVersion,
+    undefined,
+    agentPolicy.space_ids
+  );
+
+  mergeAndAppendArrays(response, indexedFleetAgent);
+
+  logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
+  logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
+
+  await esClient
+    .index({
+      index: METADATA_DATASTREAM,
+      id: uuidv4(),
+      body: hostMetadataDoc,
+      op_type: 'create',
+      refresh: 'wait_for',
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+
+  response.hosts.push(hostMetadataDoc);
+  response.metadataIndex = METADATA_DATASTREAM;
+
+  logger.info(`New endpoint host metadata doc indexed with agent id [${hostMetadataDoc.agent.id}]`);
+
+  await startMetadataTransforms(
+    esClient,
+    [hostMetadataDoc.agent.id],
+    integrationPolicy.package?.version ?? ''
+  );
 
   return response;
 };

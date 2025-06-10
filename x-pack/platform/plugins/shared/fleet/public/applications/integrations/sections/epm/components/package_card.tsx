@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -60,19 +61,24 @@ export function PackageCard({
   isUpdateAvailable,
   showLabels = true,
   showInstallationStatus,
+  showCompressedInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
   titleLineClamp,
+  titleBadge,
   descriptionLineClamp,
   maxCardHeight,
+  minCardHeight,
+  showDescription = true,
+  showReleaseBadge = true,
+  hasDataStreams,
 }: PackageCardProps) {
   const theme = useEuiTheme();
-
   let releaseBadge: React.ReactNode | null = null;
-  if (release && release !== 'ga') {
+  if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
@@ -210,17 +216,22 @@ export function PackageCard({
             [class*='euiCard__description'] {
               flex-grow: 1;
               ${descriptionLineClamp
-                ? shouldShowInstallationStatus({ installStatus, showInstallationStatus })
+                ? shouldShowInstallationStatus({
+                    installStatus,
+                    showInstallationStatus,
+                    isActive: hasDataStreams,
+                  })
                   ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                   : getLineClampStyles(descriptionLineClamp)
                 : ''}
             }
 
             [class*='euiCard__titleButton'] {
+              width: 100%;
               ${getLineClampStyles(titleLineClamp)}
             }
 
-            min-height: 127px;
+            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
             border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
             max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
             overflow: ${maxCardHeight ? 'hidden' : null};
@@ -228,9 +239,9 @@ export function PackageCard({
           data-test-subj={testid}
           betaBadgeProps={quickstartBadge(isQuickstart)}
           layout="horizontal"
-          title={title || ''}
+          title={<CardTitle title={title} titleBadge={titleBadge} />}
           titleSize="xs"
-          description={description}
+          description={showDescription ? description : ''}
           hasBorder
           icon={
             <CardIcon
@@ -238,7 +249,7 @@ export function PackageCard({
               packageName={name}
               integrationName={integration}
               version={version}
-              size="xl"
+              size={showDescription ? 'xl' : 'xxl'}
             />
           }
           onClick={onClickProp ?? onCardClick}
@@ -254,6 +265,8 @@ export function PackageCard({
             <InstallationStatus
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
+              compressed={showCompressedInstallationStatus}
+              hasDataStreams={hasDataStreams}
             />
           </EuiFlexGroup>
         </EuiCard>
@@ -261,6 +274,30 @@ export function PackageCard({
     </WithGuidedOnboardingTour>
   );
 }
+
+const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
+  ({ title, titleBadge }) => {
+    if (!titleBadge) {
+      return title;
+    }
+    return (
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
   return isQuickstart

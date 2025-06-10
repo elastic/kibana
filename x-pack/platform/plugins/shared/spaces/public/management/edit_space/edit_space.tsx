@@ -75,6 +75,8 @@ export const EditSpace: FC<PageProps> = ({
     logger,
     notifications,
     isRoleManagementEnabled,
+    license,
+    enableSecurityLink,
   } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
@@ -83,6 +85,7 @@ export const EditSpace: FC<PageProps> = ({
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
+  const isSecurityEnabled = Boolean(license?.isEnabled());
   const [tabs, selectedTabContent] = useTabs({
     space,
     features,
@@ -91,6 +94,8 @@ export const EditSpace: FC<PageProps> = ({
     capabilities,
     history,
     currentSelectedTabId: selectedTabId,
+    isSecurityEnabled,
+    enableSecurityLink,
     ...props,
   });
 

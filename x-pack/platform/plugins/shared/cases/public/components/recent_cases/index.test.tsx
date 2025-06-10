@@ -6,23 +6,27 @@
  */
 
 import React from 'react';
-import { configure, waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
 import RecentCases from '.';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noCasesCapabilities, TestProviders } from '../../common/mock';
+
+import {
+  allCasesCapabilities,
+  noCasesCapabilities,
+  renderWithTestingProviders,
+} from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
 jest.mock('../../common/navigation/hooks');
 
-configure({ testIdAttribute: 'data-test-subj' });
 const defaultProps: RecentCasesProps = {
   maxCasesToShow: 10,
 };
@@ -36,7 +40,6 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {
-  let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     useGetCurrentUserProfileMock.mockReturnValue({
@@ -49,8 +52,6 @@ describe('RecentCases', () => {
       fullName: 'Elastic',
       username: 'elastic',
     });
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('shows a loading status', () => {
@@ -59,29 +60,19 @@ describe('RecentCases', () => {
       isLoading: true,
     }));
 
-    const { getAllByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
-    expect(getAllByTestId('loadingPlaceholders')).toHaveLength(3);
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
+
+    expect(screen.getAllByTestId('loadingPlaceholders')).toHaveLength(3);
   });
 
   it('render cases', () => {
-    const { getAllByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
-    expect(getAllByTestId('case-details-link')).toHaveLength(8);
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
+    expect(screen.getAllByTestId('case-details-link')).toHaveLength(8);
   });
 
   it('render max cases correctly', () => {
-    appMockRender.render(
-      <TestProviders>
-        <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);
+
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
       queryParams: { perPage: 2 },
@@ -89,27 +80,20 @@ describe('RecentCases', () => {
   });
 
   it('render formatted date correctly', async () => {
-    const result = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);
+
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
       queryParams: { perPage: 2 },
     });
 
     await waitFor(() =>
-      expect(result.getAllByTestId('recent-cases-creation-relative-time')).toHaveLength(8)
+      expect(screen.getAllByTestId('recent-cases-creation-relative-time')).toHaveLength(8)
     );
   });
 
   it('sets the reporter filters correctly', async () => {
-    const { getByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
@@ -117,7 +101,7 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const recentCasesFilter = getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
@@ -155,11 +139,7 @@ describe('RecentCases', () => {
   it('sets the reporter filters to the user info without the profile uid when it cannot find the current user profile', async () => {
     useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
 
-    const { getByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
@@ -167,7 +147,7 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const recentCasesFilter = getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
@@ -189,11 +169,7 @@ describe('RecentCases', () => {
   });
 
   it('sets the assignees filters correctly', async () => {
-    const { getByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
@@ -201,7 +177,7 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const recentCasesFilter = getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 
@@ -232,11 +208,7 @@ describe('RecentCases', () => {
   it('sets empty assignees filter when no profile uid available', async () => {
     useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
 
-    const { getByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<RecentCases {...defaultProps} />);
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['securitySolution'] },
@@ -244,7 +216,7 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    const recentCasesFilter = getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 
@@ -260,18 +232,21 @@ describe('RecentCases', () => {
   });
 
   it('sets all available solutions correctly', () => {
-    appMockRender = createAppMockRenderer({ owner: [] });
+    const coreStart = coreMock.createStart();
     /**
      * We set securitySolutionCasesV2 capability to not have
      * any access to cases. This tests that we get the owners
      * that have at least read access.
      */
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      generalCasesV3: allCasesCapabilities(),
       securitySolutionCasesV2: noCasesCapabilities(),
     };
 
-    appMockRender.render(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);
+    renderWithTestingProviders(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />, {
+      wrapperProps: { owner: [], coreStart },
+    });
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
       filterOptions: { reporters: [], owner: ['cases'] },

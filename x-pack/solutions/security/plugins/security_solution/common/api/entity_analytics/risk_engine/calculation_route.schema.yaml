@@ -45,11 +45,11 @@ components:
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
               description: A list of service risk scores
-            universal:
+            generic:
               type: array
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
-              description: A list of universal risk scores
+              description: A list of generic risk scores
             refresh:
               type: string
               enum: [wait_for]

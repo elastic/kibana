@@ -116,7 +116,7 @@ export class ElasticsearchService
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
-    this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser);
+    this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser).pipe(takeUntil(this.stop$));
     registerAnalyticsContextProvider(deps.analytics, this.clusterInfo$);
 
     return {

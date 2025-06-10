@@ -15,7 +15,7 @@ import {
   createWaitForExecutionCount,
   getEventLog,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createEsDocuments } from '../create_test_data';
 
 const NODE_RULES_MONITORING_COLLECTION_URL = `/api/monitoring_collection/node_rules`;

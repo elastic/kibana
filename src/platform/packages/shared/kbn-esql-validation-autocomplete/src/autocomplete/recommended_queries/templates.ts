@@ -34,6 +34,22 @@ export const getRecommendedQueries = ({
       ),
       queryString: `${fromCommand}\n  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.label',
+        {
+          defaultMessage: 'Search all fields',
+        }
+      ),
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.description',
+        {
+          defaultMessage: 'Use WHERE to filter/search data',
+        }
+      ),
+      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
+      sortText: 'D',
+    },
     ...(timeField
       ? [
           {
@@ -114,6 +130,21 @@ export const getRecommendedQueries = ({
               }
             ),
             queryString: `${fromCommand}\n  | STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ \n  | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */\n | KEEP event_rate`,
+          },
+          {
+            label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.label',
+              {
+                defaultMessage: 'Detect change points',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.description',
+              {
+                defaultMessage: 'Change point on count aggregation',
+              }
+            ),
+            queryString: `${fromCommand}\n | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend) \n | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate(

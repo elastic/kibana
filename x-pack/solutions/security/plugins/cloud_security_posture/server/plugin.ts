@@ -14,11 +14,12 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
-import type {
-  PostDeletePackagePoliciesResponse,
-  PackagePolicy,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
+import {
+  type PostDeletePackagePoliciesResponse,
+  type PackagePolicy,
+  type NewPackagePolicy,
+  type UpdatePackagePolicy,
+  FleetError,
 } from '@kbn/fleet-plugin/common';
 import type {
   TaskManagerSetupContract,
@@ -118,13 +119,13 @@ export class CspPlugin
             const license = await plugins.licensing.getLicense();
             if (isCspPackage(packagePolicy.package?.name)) {
               if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
-                throw new Error(
+                throw new FleetError(
                   'To use this feature you must upgrade your subscription or start a trial'
                 );
               }
 
               if (!isSingleEnabledInput(packagePolicy.inputs)) {
-                throw new Error('Only one enabled input is allowed per policy');
+                throw new FleetError('Only one enabled input is allowed per policy');
               }
             }
 

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  luceneStringToDsl,
-  DataViewBase,
-  Query,
-} from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, luceneStringToDsl } from '@kbn/es-query';
 
 export const getQueryDsl = (query: Query, indexPattern?: DataViewBase) => {
   if (query.language === 'kuery') {

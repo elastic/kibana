@@ -140,6 +140,7 @@ const callOptions = {
 const handleLLMNewToken = jest.fn();
 const callRunManager = {
   handleLLMNewToken,
+  handleCustomEvent: jest.fn().mockResolvedValue({}),
 } as unknown as CallbackManagerForLLMRun;
 const onFailedAttempt = jest.fn();
 const defaultArgs = {
@@ -149,6 +150,7 @@ const defaultArgs = {
   streaming: false,
   maxRetries: 0,
   onFailedAttempt,
+  convertSystemMessageToHumanContent: false,
 };
 
 const testMessage = 'Yes, your name is Andrew. How can I assist you further, Andrew?';
@@ -188,7 +190,6 @@ describe('ActionsClientChatVertexAI', () => {
   describe('_generate streaming: false', () => {
     it('returns the expected content when _generate is invoked', async () => {
       const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
-
       const result = await actionsClientChatVertexAI._generate(
         callMessages,
         callOptions,
@@ -220,7 +221,7 @@ describe('ActionsClientChatVertexAI', () => {
       expect(onFailedAttempt).toHaveBeenCalled();
     });
 
-    it('rejects with the expected error the message has invalid content', async () => {
+    it('resolves to expected result when message has invalid content', async () => {
       actionsClient.execute.mockImplementation(
         jest.fn().mockResolvedValue({
           data: {
@@ -235,7 +236,7 @@ describe('ActionsClientChatVertexAI', () => {
 
       await expect(
         actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError("Cannot read properties of undefined (reading 'text')");
+      ).resolves.toEqual({ generations: [], llmOutput: {} });
     });
   });
 

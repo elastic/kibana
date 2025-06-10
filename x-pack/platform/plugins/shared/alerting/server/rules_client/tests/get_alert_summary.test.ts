@@ -6,7 +6,8 @@
  */
 
 import { omit, mean } from 'lodash';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import type { ConstructorOptions } from '../rules_client';
+import { RulesClient } from '../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,13 +19,13 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-import { SavedObject } from '@kbn/core/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { SavedObject } from '@kbn/core/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
-import { RawRule } from '../../types';
+import type { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';

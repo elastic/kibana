@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 
 const esQuery = {
-  body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } },
 };
 
 describe('wrapScopedClusterClient', () => {

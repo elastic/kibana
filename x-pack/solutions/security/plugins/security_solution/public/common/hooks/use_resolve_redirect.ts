@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { safeDecode, encode } from '@kbn/rison';
+import { encode, safeDecode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store';
@@ -28,8 +28,9 @@ export const useResolveRedirect = () => {
   const { spaces } = useKibana().services;
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { resolveTimelineConfig, savedObjectId, show, activeTab, graphEventId } =
-    useDeepEqualSelector((state) => getTimeline(state, TimelineId.active) ?? timelineDefaults);
+  const { resolveTimelineConfig, savedObjectId, show, activeTab } = useDeepEqualSelector(
+    (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
+  );
 
   const redirect = useCallback(() => {
     const searchQuery = new URLSearchParams(search);
@@ -40,7 +41,6 @@ export const useResolveRedirect = () => {
       id: savedObjectId ?? '',
       isOpen: !!show,
       activeTab,
-      graphEventId,
     };
     const timelineSearch =
       (safeDecode(timelineRison ?? '') as TimelineUrl | null) ?? currentTimelineState;
@@ -72,7 +72,6 @@ export const useResolveRedirect = () => {
     updateHasRedirected(true);
   }, [
     activeTab,
-    graphEventId,
     hasRedirected,
     pathname,
     resolveTimelineConfig,

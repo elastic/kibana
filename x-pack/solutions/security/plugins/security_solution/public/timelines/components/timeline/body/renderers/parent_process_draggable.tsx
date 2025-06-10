@@ -19,6 +19,7 @@ interface Props {
   processParentName: string | null | undefined;
   processPpid: number | undefined | null;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ParentProcessDraggable = React.memo<Props>(
@@ -30,6 +31,7 @@ export const ParentProcessDraggable = React.memo<Props>(
     processParentPid,
     processPpid,
     text,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processParentName) &&
@@ -53,6 +55,7 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processParentName) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.parent.name"
@@ -66,6 +69,7 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(endgameParentProcessName) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.parent_process_name"
@@ -79,6 +83,7 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processParentPid) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.parent.pid"
@@ -93,6 +98,7 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processPpid) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.ppid"

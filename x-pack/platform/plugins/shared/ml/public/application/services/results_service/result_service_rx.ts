@@ -319,49 +319,47 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
       return mlApi.results
         .anomalySearch$(
           {
-            body: {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:model_plot',
-                        analyze_wildcard: true,
-                      },
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:model_plot',
+                      analyze_wildcard: true,
                     },
-                    {
-                      bool: {
-                        must: mustCriteria,
-                        should: shouldCriteria,
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                times: {
-                  date_histogram: {
-                    field: 'timestamp',
-                    fixed_interval: `${intervalMs}ms`,
-                    min_doc_count: 0,
                   },
-                  aggs: {
-                    actual: {
-                      avg: {
-                        field: 'actual',
-                      },
+                  {
+                    bool: {
+                      must: mustCriteria,
+                      should: shouldCriteria,
+                      minimum_should_match: 1,
                     },
-                    modelUpper: {
-                      [modelAggs.max]: {
-                        field: 'model_upper',
-                      },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              times: {
+                date_histogram: {
+                  field: 'timestamp',
+                  fixed_interval: `${intervalMs}ms`,
+                  min_doc_count: 0,
+                },
+                aggs: {
+                  actual: {
+                    avg: {
+                      field: 'actual',
                     },
-                    modelLower: {
-                      [modelAggs.min]: {
-                        field: 'model_lower',
-                      },
+                  },
+                  modelUpper: {
+                    [modelAggs.max]: {
+                      field: 'model_upper',
+                    },
+                  },
+                  modelLower: {
+                    [modelAggs.min]: {
+                      field: 'model_lower',
                     },
                   },
                 },
@@ -472,27 +470,25 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
       return mlApi.results
         .anomalySearch$(
           {
-            body: {
-              size: maxResults !== undefined ? maxResults : 100,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: false,
-                      },
+            size: maxResults !== undefined ? maxResults : 100,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:record',
+                      analyze_wildcard: false,
                     },
-                    {
-                      bool: {
-                        must: boolCriteria,
-                      },
+                  },
+                  {
+                    bool: {
+                      must: boolCriteria,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-              sort: [{ record_score: { order: 'desc' } }],
             },
+            sort: [{ record_score: { order: 'desc' } }],
           },
           jobIds
         )
@@ -558,45 +554,43 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
       return mlApi.results
         .anomalySearch$(
           {
-            body: {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:bucket',
-                        analyze_wildcard: false,
-                      },
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:bucket',
+                      analyze_wildcard: false,
                     },
-                    {
-                      bool: {
-                        must: boolCriteria,
-                      },
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                jobs: {
-                  terms: {
-                    field: 'job_id',
-                    min_doc_count: 1,
-                    size: maxJobs,
                   },
-                  aggs: {
-                    times: {
-                      date_histogram: {
-                        field: 'timestamp',
-                        fixed_interval: `${intervalMs}ms`,
-                        min_doc_count: 1,
-                      },
-                      aggs: {
-                        events: {
-                          terms: {
-                            field: 'scheduled_events',
-                            size: maxEvents,
-                          },
+                  {
+                    bool: {
+                      must: boolCriteria,
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              jobs: {
+                terms: {
+                  field: 'job_id',
+                  min_doc_count: 1,
+                  size: maxJobs,
+                },
+                aggs: {
+                  times: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: `${intervalMs}ms`,
+                      min_doc_count: 1,
+                    },
+                    aggs: {
+                      events: {
+                        terms: {
+                          field: 'scheduled_events',
+                          size: maxEvents,
                         },
                       },
                     },
@@ -737,27 +731,25 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
       return mlApi.results
         .anomalySearch$(
           {
-            body: {
-              size: maxResults !== undefined ? maxResults : 100,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      query_string: {
-                        query: 'result_type:record',
-                        analyze_wildcard: false,
-                      },
+            size: maxResults !== undefined ? maxResults : 100,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:record',
+                      analyze_wildcard: false,
                     },
-                    {
-                      bool: {
-                        must: boolCriteria,
-                      },
+                  },
+                  {
+                    bool: {
+                      must: boolCriteria,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-              sort: [{ record_score: { order: 'desc' } }],
             },
+            sort: [{ record_score: { order: 'desc' } }],
           },
           jobIds
         )

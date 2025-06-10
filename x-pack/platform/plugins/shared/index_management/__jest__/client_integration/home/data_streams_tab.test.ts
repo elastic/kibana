@@ -30,6 +30,8 @@ jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 const nonBreakingSpace = ' ';
 
+const getRedirectUrl = jest.fn(() => '/app/path');
+
 const urlServiceMock = {
   locators: {
     get: () => ({
@@ -39,6 +41,7 @@ const urlServiceMock = {
         state: {},
       }),
       getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      getRedirectUrl,
       navigate: async () => {},
       useUrl: () => '',
     }),
@@ -846,24 +849,24 @@ describe('Data Streams tab', () => {
         });
       });
 
-      test('clicking index template name navigates to the index template details', async () => {
+      test('index template name navigates to the index template details', async () => {
         const {
-          actions: { clickNameAt, clickDetailPanelIndexTemplateLink },
+          actions: { clickNameAt },
           findDetailPanelIndexTemplateLink,
-          component,
-          find,
         } = testBed;
+
+        getRedirectUrl.mockClear();
 
         await clickNameAt(0);
 
         const indexTemplateLink = findDetailPanelIndexTemplateLink();
         expect(indexTemplateLink.text()).toBe('indexTemplate');
 
-        await clickDetailPanelIndexTemplateLink();
-
-        component.update();
-        expect(find('summaryTab').exists()).toBeTruthy();
-        expect(find('title').text().trim()).toBe('indexTemplate');
+        expect(indexTemplateLink.prop('href')).toBe('/app/path');
+        expect(getRedirectUrl).toHaveBeenCalledWith({
+          page: 'index_template',
+          indexTemplate: 'indexTemplate',
+        });
       });
 
       test('shows data retention detail when configured', async () => {

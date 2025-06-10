@@ -11,65 +11,63 @@ Object {
   ],
   \\"ignore_unavailable\\": true,
   \\"track_total_hits\\": false,
-  \\"body\\": {
-    \\"query\\": {
-      \\"bool\\": {
-        \\"filter\\": [
-          {
-            \\"terms\\": {
-              \\"event.dataset\\": [
-                \\"entityanalytics_okta.user\\",
-                \\"entityanalytics_entra_id.user\\"
-              ]
-            }
-          },
-          {
-            \\"term\\": {
-              \\"event.kind\\": \\"asset\\"
-            }
+  \\"query\\": {
+    \\"bool\\": {
+      \\"filter\\": [
+        {
+          \\"terms\\": {
+            \\"event.dataset\\": [
+              \\"entityanalytics_okta.user\\",
+              \\"entityanalytics_entra_id.user\\"
+            ]
           }
-        ],
-        \\"should\\": [
-          {
-            \\"term\\": {
-              \\"user.name\\": \\"test-user-name\\"
-            }
-          },
-          {
-            \\"terms\\": {
-              \\"user.email\\": [
-                \\"test-user-name@mail.com\\"
-              ]
-            }
-          }
-        ],
-        \\"minimum_should_match\\": 1
-      }
-    },
-    \\"size\\": 0,
-    \\"aggs\\": {
-      \\"datasets\\": {
-        \\"terms\\": {
-          \\"field\\": \\"event.dataset\\"
         },
-        \\"aggs\\": {
-          \\"latest_hit\\": {
-            \\"top_hits\\": {
-              \\"fields\\": [
-                \\"*\\",
-                \\"_index\\",
-                \\"_id\\"
-              ],
-              \\"_source\\": false,
-              \\"size\\": 1,
-              \\"sort\\": [
-                {
-                  \\"@timestamp\\": {
-                    \\"order\\": \\"desc\\"
-                  }
+        {
+          \\"term\\": {
+            \\"event.kind\\": \\"asset\\"
+          }
+        }
+      ],
+      \\"should\\": [
+        {
+          \\"term\\": {
+            \\"user.name\\": \\"test-user-name\\"
+          }
+        },
+        {
+          \\"terms\\": {
+            \\"user.email\\": [
+              \\"test-user-name@mail.com\\"
+            ]
+          }
+        }
+      ],
+      \\"minimum_should_match\\": 1
+    }
+  },
+  \\"size\\": 0,
+  \\"aggs\\": {
+    \\"datasets\\": {
+      \\"terms\\": {
+        \\"field\\": \\"event.dataset\\"
+      },
+      \\"aggs\\": {
+        \\"latest_hit\\": {
+          \\"top_hits\\": {
+            \\"fields\\": [
+              \\"*\\",
+              \\"_index\\",
+              \\"_id\\"
+            ],
+            \\"_source\\": false,
+            \\"size\\": 1,
+            \\"sort\\": [
+              {
+                \\"@timestamp\\": {
+                  \\"order\\": \\"desc\\"
                 }
-              ]
-            }
+              }
+            ]
           }
         }
       }

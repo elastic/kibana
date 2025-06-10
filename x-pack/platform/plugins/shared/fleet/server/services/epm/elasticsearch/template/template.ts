@@ -1063,7 +1063,6 @@ const updateExistingDataStream = async ({
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
   const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
@@ -1108,7 +1107,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          body: mappings || {},
+          ...mappings,
           write_index_only: true,
         }),
       { logger }
@@ -1140,9 +1139,11 @@ const updateExistingDataStream = async ({
     }
   }
 
-  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+  const filterDimensionMappings = (
+    templates?: Array<Record<string, MappingDynamicTemplate | undefined>>
+  ) =>
     templates?.filter(
-      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+      (template) => (Object.values(template)[0]?.mapping as any)?.time_series_dimension
     ) ?? [];
 
   const currentDynamicDimensionMappings = filterDimensionMappings(
@@ -1151,8 +1152,8 @@ const updateExistingDataStream = async ({
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
   const sortMappings = (
-    a: Record<string, MappingDynamicTemplate>,
-    b: Record<string, MappingDynamicTemplate>
+    a: Record<string, MappingDynamicTemplate | undefined>,
+    b: Record<string, MappingDynamicTemplate | undefined>
   ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
 
   const dynamicDimensionMappingsChanged = !deepEqual(
@@ -1163,7 +1164,6 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
     currentSourceType !== settings?.index?.mapping?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
@@ -1212,19 +1212,22 @@ const updateExistingDataStream = async ({
   }
 
   try {
-    logger.debug(`Updating settings for ${dataStreamName}`);
+    logger.debug(`Updating index settings of data stream  ${dataStreamName}`);
 
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings!.index!.default_pipeline },
+          settings: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );
   } catch (err) {
+    logger.error(`Error updating index settings of data stream ${dataStreamName}: ${err}`);
     // Same as above - Check if this error can happen because of invalid settings;
     // We are returning a 500 but in that case it should be a 400 instead
-    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
+    throw new PackageESError(
+      `Could not update index settings of data stream ${dataStreamName}: ${err.message}`
+    );
   }
 };

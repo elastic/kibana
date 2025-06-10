@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,

@@ -6,18 +6,18 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
-import {
+import type {
   AxiosInstance,
   Method,
   AxiosResponse,
   AxiosRequestConfig,
-  AxiosHeaders,
   AxiosHeaderValue,
 } from 'axios';
-import { Logger } from '@kbn/core/server';
+import { AxiosHeaders } from 'axios';
+import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ConnectorUsageCollector, SSLSettings } from '../types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({

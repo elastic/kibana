@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionTypeIndex, RuleUiAction } from '../../../types';
+import type { ActionConnector, ActionTypeIndex, RuleUiAction } from '../../../types';
 
 export const getValidConnectors = (
   connectors: ActionConnector[],

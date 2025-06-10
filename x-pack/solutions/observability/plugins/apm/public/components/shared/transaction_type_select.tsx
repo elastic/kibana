@@ -7,6 +7,7 @@
 
 import { EuiSelect } from '@elastic/eui';
 import type { FormEvent } from 'react';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from '@emotion/styled';
@@ -42,6 +43,10 @@ export function TransactionTypeSelect() {
     <>
       <EuiSelectWithWidth
         fullWidth={isSmall}
+        aria-label={i18n.translate(
+          'xpack.apm.serviceOverview.filterByTransactionTypeSelect.ariaLabel',
+          { defaultMessage: 'Filter by transaction type select' }
+        )}
         data-test-subj="headerFilterTransactionType"
         onChange={handleChange}
         options={options}

@@ -122,6 +122,42 @@ describe('getLatestAvailableAgentVersion', () => {
 
     expect(res).toEqual('8.12.2');
   });
+
+  it('should return latest build compatible version when kibana version is older than latest available', async () => {
+    mockKibanaVersion = '8.12.2';
+    mockedReadFile.mockResolvedValue(
+      `["8.13.0", "8.12.2+build20240501", "8.12.2+build20240501", "8.12.2",  "8.12.1", "8.12.0"]`
+    );
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.13.0',
+              version_number: '8.13.0',
+            },
+            {
+              title: 'Elastic Agent 8.12.2',
+              version_number: '8.12.2',
+            },
+            {
+              title: 'Elastic Agent 8.12.1',
+              version_number: '8.12.1',
+            },
+            {
+              title: 'Elastic Agent 8.12.0',
+              version_number: '8.12.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getLatestAvailableAgentVersion({ ignoreCache: true });
+
+    expect(res).toEqual('8.12.2+build20240501');
+  });
 });
 
 describe('getAvailableVersions', () => {
@@ -230,12 +266,24 @@ describe('getAvailableVersions', () => {
         JSON.stringify([
           [
             {
+              title: 'Elastic Agent 9.0.0',
+              version_number: '9.0.0-rc1',
+            },
+            {
               title: 'Elastic Agent 8.0.0',
-              version_number: '8.0.0-rc1',
+              version_number: '8.0.0-rc2',
             },
             {
               title: 'Elastic Agent 8.0.0',
               version_number: '8.0.0-beta1',
+            },
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-alpha1',
+            },
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-unkown',
             },
           ],
         ])

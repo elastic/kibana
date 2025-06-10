@@ -145,6 +145,24 @@ export default function (providerContext: FtrProviderContext) {
             Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql([]);
         });
+
+        it('should allow to install kibana in another space from the default space', async () => {
+          await apiClient.installPackageKibanaAssets({
+            pkgName: 'nginx',
+            pkgVersion: '1.20.0',
+            spaceIds: [TEST_SPACE_1],
+          });
+
+          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
+          expect(
+            Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
+          ).eql([TEST_SPACE_1]);
+        });
       });
 
       describe('with package installed in test space', () => {

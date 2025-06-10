@@ -10,7 +10,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 
 import { transformFromLegacyActions } from './transform_legacy_actions';
 import { transformToNotifyWhen } from './transform_to_notify_when';
-import { LegacyIRuleActionsAttributes } from './types';
+import type { LegacyIRuleActionsAttributes } from './types';
 
 jest.mock('./transform_to_notify_when', () => ({
   transformToNotifyWhen: jest.fn(),

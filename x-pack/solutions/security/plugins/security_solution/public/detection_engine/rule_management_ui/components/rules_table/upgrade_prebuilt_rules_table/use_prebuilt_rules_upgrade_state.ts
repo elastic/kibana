@@ -134,12 +134,19 @@ export function usePrebuiltRulesUpgradeState(
           fieldState === FieldUpgradeStateEnum.SolvableConflict ||
           fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
+      const hasNonSolvableFieldConflicts = Object.values(fieldsUpgradeState).some(
+        ({ state: fieldState }) => fieldState === FieldUpgradeStateEnum.NonSolvableConflict
+      );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
+        conflict: getWorstConflictLevelAmongFields(ruleUpgradeInfo.diff.fields),
         fieldsUpgradeState,
         hasUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasFieldConflicts
+          : false,
+        hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
+          ? hasRuleTypeChange || hasNonSolvableFieldConflicts
           : false,
       };
     }
@@ -205,4 +212,23 @@ function calcFieldsState(
   }
 
   return fieldsState;
+}
+
+function getWorstConflictLevelAmongFields(
+  fieldsDiff: FieldsDiff<Record<string, unknown>>
+): ThreeWayDiffConflict {
+  let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
+
+  for (const { conflict } of Object.values<{ conflict: ThreeWayDiffConflict }>(fieldsDiff)) {
+    if (conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+      // return early as there is no higher severity
+      return ThreeWayDiffConflict.NON_SOLVABLE;
+    }
+
+    if (conflict === ThreeWayDiffConflict.SOLVABLE) {
+      mostSevereFieldConflict = ThreeWayDiffConflict.SOLVABLE;
+    }
+  }
+
+  return mostSevereFieldConflict;
 }

@@ -43,41 +43,43 @@ export default {
   argTypes,
 };
 
-export const Popover = ({ showIcon, buttonType }: Params) => {
-  return (
-    <Component
-      type={buttonType}
-      label="Add element"
-      iconType={showIcon ? 'plusInCircle' : undefined}
-      panelPaddingSize="none"
-    >
-      {() => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: 'Open editor',
-              items: [
-                {
-                  name: 'Lens',
-                  icon: 'lensApp',
-                },
-                {
-                  name: 'Maps',
-                  icon: 'logoMaps',
-                },
-                {
-                  name: 'TSVB',
-                  icon: 'visVisualBuilder',
-                },
-              ],
-            },
-          ]}
-        />
-      )}
-    </Component>
-  );
-};
+export const Popover = {
+  render: ({ showIcon, buttonType }: Params) => {
+    return (
+      <Component
+        type={buttonType}
+        label="Add element"
+        iconType={showIcon ? 'plusInCircle' : undefined}
+        panelPaddingSize="none"
+      >
+        {() => (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                title: 'Open editor',
+                items: [
+                  {
+                    name: 'Lens',
+                    icon: 'lensApp',
+                  },
+                  {
+                    name: 'Maps',
+                    icon: 'logoMaps',
+                  },
+                  {
+                    name: 'TSVB',
+                    icon: 'visVisualBuilder',
+                  },
+                ],
+              },
+            ]}
+          />
+        )}
+      </Component>
+    );
+  },
 
-Popover.argTypes = argTypes;
+  argTypes,
+};

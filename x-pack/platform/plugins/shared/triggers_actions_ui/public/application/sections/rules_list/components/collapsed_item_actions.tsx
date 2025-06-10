@@ -18,8 +18,10 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import {
@@ -27,7 +29,6 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { isRuleSnoozed } from '../../../lib';
-import './collapsed_item_actions.scss';
 import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
 import {
   SNOOZE_FAILED_MESSAGE,
@@ -69,9 +70,17 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const { euiTheme } = useEuiTheme();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+
+  const collapsedItemActionsCss = css`
+    .collapsedItemActions__deleteButton {
+      color: ${euiTheme.colors.textDanger};
+    }
+  `;
 
   useEffect(() => {
     setIsDisabled(!item.enabled);
@@ -119,25 +128,6 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
     ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
     : false;
-
-  const button = (
-    <EuiButtonIcon
-      disabled={!item.isEditable}
-      data-test-subj="selectActionButton"
-      data-testid="selectActionButton"
-      iconType="boxesHorizontal"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
-        {
-          defaultMessage: 'Actions for "{name}" column',
-          values: {
-            name: item.name,
-          },
-        }
-      )}
-    />
-  );
 
   const isSnoozed = useMemo(() => {
     return isRuleSnoozed(item);
@@ -342,27 +332,46 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   ];
 
   return (
-    <>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        ownFocus
-        panelPaddingSize="none"
-        data-test-subj="collapsedItemActions"
-      >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={panels}
-          className="actCollapsedItemActions"
-          data-test-subj="collapsedActionPanel"
-          data-testid="collapsedActionPanel"
-        />
-      </EuiPopover>
-      {isUntrackAlertsModalOpen && (
-        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
-      )}
-    </>
+    item.isEditable && (
+      <>
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              data-test-subj="selectActionButton"
+              data-testid="selectActionButton"
+              iconType="boxesHorizontal"
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
+                {
+                  defaultMessage: 'Actions for "{name}" column',
+                  values: {
+                    name: item.name,
+                  },
+                }
+              )}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          ownFocus
+          panelPaddingSize="none"
+          data-test-subj="collapsedItemActions"
+        >
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={panels}
+            className="actCollapsedItemActions"
+            data-test-subj="collapsedActionPanel"
+            data-testid="collapsedActionPanel"
+            css={collapsedItemActionsCss}
+          />
+        </EuiPopover>
+        {isUntrackAlertsModalOpen && (
+          <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
+        )}
+      </>
+    )
   );
 };
 

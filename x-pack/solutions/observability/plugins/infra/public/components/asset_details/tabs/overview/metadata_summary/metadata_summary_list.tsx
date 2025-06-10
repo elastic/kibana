@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
@@ -143,6 +144,12 @@ const MetadataSummaryListWrapper = ({
       id="metadata"
       extraAction={
         <EuiButtonEmpty
+          aria-label={i18n.translate(
+            'xpack.infra.assetDetails.metadataSummary.showAllMetadataButton.ariaLabel',
+            {
+              defaultMessage: 'Show all metadata',
+            }
+          )}
           data-test-subj="infraAssetDetailsMetadataShowAllButton"
           onClick={onClick}
           size="xs"
@@ -165,7 +172,7 @@ const MetadataSummaryListWrapper = ({
           {visibleMetadata
             .filter((metadataValue) => metadataValue)
             .map((metadataValue) => (
-              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
+              <EuiFlexItem key={metadataValue.field} grow={false} css={{ width: '200px' }}>
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>

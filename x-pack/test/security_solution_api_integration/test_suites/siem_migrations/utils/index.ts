@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export * from './mocks';
+export * from './resources';
 export * from './rules';

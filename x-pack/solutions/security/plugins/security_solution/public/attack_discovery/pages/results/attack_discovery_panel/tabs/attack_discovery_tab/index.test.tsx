@@ -13,6 +13,10 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../../mock/mock_attack_discovery';
 import { ATTACK_CHAIN, DETAILS, SUMMARY } from './translations';
+import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { useKibana } from '../../../../../../common/lib/kibana';
+
+jest.mock('../../../../../../common/lib/kibana');
 
 describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
@@ -44,6 +48,8 @@ describe('AttackDiscoveryTab', () => {
       expect(summaryMarkdown).toHaveTextContent(
         'A multi-stage malware attack was detected on foo.hostname involving bar.username. A suspicious application delivered malware, attempted credential theft, and established persistence.'
       );
+      expect(screen.getAllByTestId('entityButton')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
     });
 
     it('renders the details using the real host and username', () => {
@@ -53,6 +59,8 @@ describe('AttackDiscoveryTab', () => {
       expect(detailsMarkdown).toHaveTextContent(
         `The following attack progression appears to have occurred on the host foo.hostname involving the user bar.username: A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation. This application spawned child processes to copy a malicious file named "unix1" to the user's home directory and make it executable. The malicious "unix1" file was then executed, attempting to access the user's login keychain and potentially exfiltrate credentials. The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing. This appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.`
       );
+      expect(screen.getAllByTestId('entityButton')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
     });
   });
 
@@ -171,6 +179,73 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
       const detailsMarkdown = markdownFormatters[1];
 
       expect(detailsMarkdown.textContent).toEqual(expected);
+    });
+  });
+
+  describe('horizontal overflow for content', () => {
+    it.each([['summaryContent'], ['detailsContent']])(
+      'enables horizontal scrolling for the %s content',
+      (contentTestId) => {
+        render(
+          <TestProviders>
+            <AttackDiscoveryTab
+              attackDiscovery={mockAttackDiscovery}
+              replacements={mockReplacements}
+            />
+          </TestProviders>
+        );
+
+        const content = screen.getByTestId(contentTestId);
+
+        expect(content).toHaveStyle('overflow-x: auto');
+      }
+    );
+  });
+
+  describe('when configurations capabilities is defined (for AI4DSOC)', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [SECURITY_FEATURE_ID]: {
+                configurations: true,
+              },
+            },
+          },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <AttackDiscoveryTab
+            attackDiscovery={mockAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('renders the summary with disabled badges using the host and username', () => {
+      const markdownFormatters = screen.getAllByTestId('attackDiscoveryMarkdownFormatter');
+      const summaryMarkdown = markdownFormatters[0];
+
+      expect(summaryMarkdown).toHaveTextContent(
+        'A multi-stage malware attack was detected on foo.hostname involving bar.username. A suspicious application delivered malware, attempted credential theft, and established persistence.'
+      );
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
+    });
+
+    it('renders the details with disabled badgesusing the host and username', () => {
+      const markdownFormatters = screen.getAllByTestId('attackDiscoveryMarkdownFormatter');
+      const detailsMarkdown = markdownFormatters[1];
+
+      expect(detailsMarkdown).toHaveTextContent(
+        `The following attack progression appears to have occurred on the host foo.hostname involving the user bar.username: A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation. This application spawned child processes to copy a malicious file named "unix1" to the user's home directory and make it executable. The malicious "unix1" file was then executed, attempting to access the user's login keychain and potentially exfiltrate credentials. The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing. This appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.`
+      );
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
     });
   });
 });

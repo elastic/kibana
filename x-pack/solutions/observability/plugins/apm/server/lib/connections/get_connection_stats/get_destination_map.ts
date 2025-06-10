@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -86,11 +86,9 @@ export const getDestinationMap = ({
       apm: {
         events: [ProcessorEvent.span],
       },
-      body: {
-        size: 0,
-        track_total_hits: true,
-        query,
-      },
+      size: 0,
+      track_total_hits: true,
+      query,
     });
 
     const totalDocCount = hitCountResponse.hits.total.value;
@@ -102,46 +100,44 @@ export const getDestinationMap = ({
       apm: {
         events: [ProcessorEvent.span],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query,
-        aggs: {
-          sampling: {
-            random_sampler: {
-              ...randomSampler,
-              probability: samplingProbability,
-            },
-            aggs: {
-              connections: {
-                composite: {
-                  size: 10000,
-                  sources: asMutableArray([
-                    {
-                      dependencyName: {
-                        terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+      track_total_hits: false,
+      size: 0,
+      query,
+      aggs: {
+        sampling: {
+          random_sampler: {
+            ...randomSampler,
+            probability: samplingProbability,
+          },
+          aggs: {
+            connections: {
+              composite: {
+                size: 10000,
+                sources: asMutableArray([
+                  {
+                    dependencyName: {
+                      terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                    },
+                  },
+                  // make sure we get samples for both successful
+                  // and failed calls
+                  { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
+                ] as const),
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    metrics: asMutableArray([
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_ID },
+                    ] as const),
+                    sort: [
+                      {
+                        '@timestamp': 'asc' as const,
                       },
-                    },
-                    // make sure we get samples for both successful
-                    // and failed calls
-                    { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
-                  ] as const),
-                },
-                aggs: {
-                  sample: {
-                    top_metrics: {
-                      size: 1,
-                      metrics: asMutableArray([
-                        { field: SPAN_TYPE },
-                        { field: SPAN_SUBTYPE },
-                        { field: SPAN_ID },
-                      ] as const),
-                      sort: [
-                        {
-                          '@timestamp': 'asc' as const,
-                        },
-                      ],
-                    },
+                    ],
                   },
                 },
               },
@@ -170,24 +166,22 @@ export const getDestinationMap = ({
       apm: {
         events: [ProcessorEvent.transaction],
       },
-      body: {
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  [PARENT_ID]: Array.from(destinationsBySpanId.keys()),
-                },
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                [PARENT_ID]: Array.from(destinationsBySpanId.keys()),
               },
-              // add a 5m buffer at the end of the time range for long running spans
-              ...rangeQuery(startWithOffset, endWithOffset + 1000 * 1000 * 60 * 5),
-            ],
-          },
+            },
+            // add a 5m buffer at the end of the time range for long running spans
+            ...rangeQuery(startWithOffset, endWithOffset + 1000 * 1000 * 60 * 5),
+          ],
         },
-        size: destinationsBySpanId.size,
-        fields: asMutableArray([SERVICE_NAME, SERVICE_ENVIRONMENT, AGENT_NAME, PARENT_ID] as const),
       },
+      size: destinationsBySpanId.size,
+      fields: asMutableArray([SERVICE_NAME, SERVICE_ENVIRONMENT, AGENT_NAME, PARENT_ID] as const),
     });
 
     transactionResponse.hits.hits.forEach((hit) => {

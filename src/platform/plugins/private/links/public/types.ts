@@ -18,10 +18,10 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DashboardLocatorParams, DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
@@ -38,7 +38,7 @@ export type LinksParentApi = PresentationContainer &
   };
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
-  DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
+  DefaultEmbeddableApi<LinksSerializedState> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceSerializedState, LinksByValueSerializedState>;
 
@@ -51,17 +51,15 @@ export interface LinksByValueSerializedState {
 }
 
 export type LinksSerializedState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> &
   (LinksByReferenceSerializedState | LinksByValueSerializedState);
 
 export interface LinksRuntimeState
   extends Partial<LinksByReferenceSerializedState>,
     SerializedTitles {
-  error?: Error;
   links?: ResolvedLink[];
   layout?: LinksLayoutType;
-  defaultPanelTitle?: string;
-  defaultPanelDescription?: string;
+  defaultTitle?: string;
+  defaultDescription?: string;
 }
 
 export type ResolvedLink = Link & {

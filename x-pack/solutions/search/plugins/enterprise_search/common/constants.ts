@@ -34,31 +34,31 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
 
 export { SEARCH_INDICES_START, SEARCH_INDICES };
 
-export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
+export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
-    defaultMessage: 'Overview',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.home.navTitle', {
+    defaultMessage: 'Home',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/elasticsearch/overview',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
 };
 
-export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
+export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
-    defaultMessage: 'Content',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.data.navTitle', {
+    defaultMessage: 'Data',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
   URL: '/app/elasticsearch/content',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
@@ -75,7 +75,7 @@ export const AI_SEARCH_PLUGIN = {
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
   URL: '/app/elasticsearch/ai_search',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
 };
 
 export const ANALYTICS_PLUGIN = {
@@ -129,7 +129,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 
 export const APPLICATIONS_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
   }),
@@ -146,7 +146,7 @@ export const VECTOR_SEARCH_PLUGIN = {
       'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
   ID: SEARCH_VECTOR_SEARCH,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
     defaultMessage: 'Vector Search',
   }),
@@ -163,7 +163,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
       'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
   }),
   ID: SEARCH_SEMANTIC_SEARCH,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.SemanticSearch.productName', {
     defaultMessage: 'Semantic Search',
   }),

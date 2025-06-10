@@ -13,19 +13,16 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
-import type {
-  RuleStepProps,
-  AboutStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { RuleStepProps, AboutStepRule } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
@@ -284,7 +281,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiToolTip
               content={
                 ruleSource?.type === 'external'
-                  ? I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  ? I18n.FIELD_NOT_EDITABLE_TOOLTIP_TEXT(I18n.AUTHOR_FIELD_LABEL)
                   : undefined
               }
               display="block"
@@ -307,7 +304,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiToolTip
               content={
                 ruleSource?.type === 'external'
-                  ? I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  ? I18n.FIELD_NOT_EDITABLE_TOOLTIP_TEXT(I18n.LICENSE_FIELD_LABEL)
                   : undefined
               }
               display="block"

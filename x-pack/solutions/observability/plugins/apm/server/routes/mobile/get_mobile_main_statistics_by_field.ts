@@ -69,35 +69,33 @@ export async function getMobileMainStatisticsByField({
             },
           ],
         },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
-          aggs: {
-            main_statistics: {
-              terms: {
-                field,
-                size: 1000,
-              },
-              aggs: {
-                latency: {
-                  avg: {
-                    field: TRANSACTION_DURATION,
-                  },
+        },
+        aggs: {
+          main_statistics: {
+            terms: {
+              field,
+              size: 1000,
+            },
+            aggs: {
+              latency: {
+                avg: {
+                  field: TRANSACTION_DURATION,
                 },
-                sessions: {
-                  cardinality: {
-                    field: SESSION_ID,
-                  },
+              },
+              sessions: {
+                cardinality: {
+                  field: SESSION_ID,
                 },
               },
             },
@@ -135,31 +133,29 @@ export async function getMobileMainStatisticsByField({
           },
         ],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          main_statistics: {
-            terms: {
-              field,
-              size: 1000,
-            },
-            aggs: {
-              crashes: {
-                filter: {
-                  term: {
-                    [ERROR_TYPE]: 'crash',
-                  },
+      },
+      aggs: {
+        main_statistics: {
+          terms: {
+            field,
+            size: 1000,
+          },
+          aggs: {
+            crashes: {
+              filter: {
+                term: {
+                  [ERROR_TYPE]: 'crash',
                 },
               },
             },

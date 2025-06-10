@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { deleteConnectorRequestParamsSchemaV1 } from '..';
+import type { deleteConnectorRequestParamsSchemaV1 } from '..';
 
 export type DeleteConnectorRequestParams = TypeOf<typeof deleteConnectorRequestParamsSchemaV1>;

@@ -16,6 +16,7 @@ import {
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
+  getAwsPackageInfoMock,
   getMockPackageInfo,
   getMockPackageInfoCspmAWS,
   getMockPackageInfoCspmAzure,
@@ -53,10 +54,11 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
-import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import * as KibanaHook from '../../common/hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -72,7 +74,6 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]
@@ -88,10 +89,6 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
-
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      secretsStorage: true,
-    } as any);
 
     (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
       createReactQueryResponseWithRefetch({
@@ -124,12 +121,14 @@ describe('<CspPolicyTemplateForm />', () => {
     edit = false,
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
+    integrationToEnable,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
+    integrationToEnable?: string;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -143,6 +142,7 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={true}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
             />
           )}
           {!edit && (
@@ -152,6 +152,7 @@ describe('<CspPolicyTemplateForm />', () => {
               packageInfo={packageInfo}
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
+              integrationToEnable={integrationToEnable}
             />
           )}
         </TestProvider>
@@ -421,6 +422,89 @@ describe('<CspPolicyTemplateForm />', () => {
           enabled: input.policy_template === 'kspm',
         })),
         name: 'kspm-2',
+      },
+    });
+  });
+
+  it('KSPM - calls onChange with isExtensionLoaded the second time after increment of package version', () => {
+    const policy = getMockPolicyK8s();
+
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'kspm',
+    }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
+
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+
+    (usePackagePolicyList as jest.Mock).mockImplementation(() =>
+      createReactQueryResponseWithRefetch({
+        status: 'success',
+        data: {
+          items: [getPosturePolicy(getMockPolicyEKS(), CLOUDBEAT_EKS)],
+        },
+      })
+    );
+
+    render(
+      <WrappedComponent
+        newPolicy={policy}
+        packageInfo={{ name: 'kspm' } as PackageInfo}
+        onChange={onChange}
+        integrationToEnable="kspm"
+      />
+    );
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).nthCalledWith(1, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens on mount and increments kspm template enabled input
+    expect(onChange).nthCalledWith(2, {
+      isExtensionLoaded: undefined,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.type === 'cloudbeat/cis_k8s',
+        })),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    /*
+      3rd call happens when policies are fetched and the package version is incremented 
+      in that case isExtensionLoaded is set to 'true'
+    */
+    expect(onChange).nthCalledWith(3, {
+      isExtensionLoaded: true,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.policy_template === 'kspm',
+        })),
+        name: 'kspm-1',
       },
     });
   });
@@ -1480,7 +1564,10 @@ describe('<CspPolicyTemplateForm />', () => {
 
   describe('Agentless', () => {
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
 
       const { queryByTestId } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
@@ -1492,12 +1579,76 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
 
-      const { getByTestId, getByLabelText } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
+      const { getByTestId, queryByLabelText } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getPackageInfoMock() as PackageInfo}
+        />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+
+      expect(
+        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+      ).toBeInTheDocument();
+      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      await userEvent.click(setupTechnologySelector);
+      const agentlessOption = await queryByLabelText(/agentless/i);
+      if (agentlessOption) {
+        await userEvent.click(agentlessOption);
+
+        const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+        const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+          'option'
+        );
+        const optionValues = options.map((option) => option.value);
+        await waitFor(() => {
+          expect(options).toHaveLength(2);
+          expect(optionValues).toEqual(
+            expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          );
+        });
+      }
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            csp: 'aws',
+            cloudId: 'mock-cloud-id',
+            deploymentId: 'mock-deployment-id',
+            serverless: { projectId: '' },
+            isCloudEnabled: true,
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId, getByLabelText } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      screen.logTestingPlaygroundURL();
 
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -1520,9 +1671,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });

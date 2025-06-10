@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, header } = getPageObjects([
+  const { common, indexManagement, header, solutionNavigation } = getPageObjects([
     'common',
     'indexManagement',
     'header',
+    'solutionNavigation',
   ]);
   const testSubjects = getService('testSubjects');
 
@@ -25,9 +25,10 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       });
     },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
+    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await common.navigateToApp('elasticsearchStart', {
+          basePath,
           shouldLoginIfPrompted: false,
         });
         if (!expectRedirect) {
@@ -36,11 +37,17 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
     async navigateToIndexDetailPage(indexName: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
-          shouldLoginIfPrompted: false,
-        });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'elasticsearchIndexManagement',
       });
+      const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');
+      for (const indexNameLink of indexNamesList) {
+        if ((await indexNameLink.getVisibleText()).includes(indexName)) {
+          await indexNameLink.click();
+          return;
+        }
+      }
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
@@ -54,7 +61,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         await common.navigateToApp(`indexManagement`);
         await indexManagement.changeTabs('indicesTab');
         await header.waitUntilLoadingHasFinished();
-        await indexManagement.expectToBeOnIndicesManagement();
+        await indexManagement.expectToBeOnIndexManagement();
       });
     },
   };

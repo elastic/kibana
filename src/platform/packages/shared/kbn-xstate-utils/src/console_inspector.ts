@@ -44,7 +44,7 @@ export const createConsoleInspector = () => {
         '🔔 %c%s%c received event %c%s%c from %c%s%c:',
         ...styleAsActor(eventEvent.actorRef.id),
         ...styleAsKeyword(eventEvent.event.type),
-        ...styleAsKeyword(eventEvent.sourceRef?.id),
+        ...styleAsKeyword(eventEvent.sourceRef?.sessionId),
         eventEvent
       );
     } else {

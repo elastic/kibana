@@ -10,7 +10,8 @@
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
 import { ShareMenuProvider, type IShareContext } from './context';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen, render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
 import {
   BrowserShortUrlClient,
@@ -20,9 +21,6 @@ import {
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClientFactory,
 } from '../url_service/short_urls/short_url_client_factory';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 const navigate = jest.fn(async () => {});
 const getUrl = jest.fn(
   async (location: KibanaLocation, params: LocatorGetUrlParams): Promise<string> => {
@@ -50,95 +48,80 @@ const service = new UrlService<BrowserShortUrlClientFactoryCreateParams, Browser
 });
 
 const mockShareContext: IShareContext = {
-  shareMenuItems: [],
-  allowEmbed: true,
+  shareMenuItems: [
+    {
+      shareType: 'link',
+      config: {
+        shortUrlService: service.shortUrls.get(null),
+      },
+    },
+    {
+      shareType: 'embed',
+      config: {
+        shortUrlService: service.shortUrls.get(null),
+        anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
+      },
+    },
+    {
+      shareType: 'integration',
+      groupId: 'export',
+      id: 'csv',
+      config: {
+        icon: 'empty',
+        label: 'CSV',
+      },
+    },
+  ],
   allowShortUrl: true,
-  anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
-  urlService: service,
-  theme: themeServiceMock.createStartContract(),
-  objectTypeMeta: { title: 'title' },
+  objectTypeMeta: {
+    title: 'title',
+    config: {
+      embed: {
+        disabled: false,
+      },
+    },
+  },
   objectType: 'type',
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
-  toasts: toastsServiceMock.createStartContract(),
-  i18n: i18nServiceMock.createStartContract(),
 };
 
-const mockGenerateExport = jest.fn();
-const mockGenerateExportUrl = jest.fn().mockImplementation(() => 'generated-export-url');
-const CSV = 'CSV' as const;
-const PNG = 'PNG' as const;
-
 describe('Share modal tabs', () => {
-  describe('link tab', () => {
-    it('should not render the link tab when the disableShareUrl prop is true', async () => {
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, disabledShareUrl: true }}>
+  it('does not render an export tab', () => {
+    render(
+      <IntlProvider locale="en">
+        <ShareMenuProvider shareContext={{ ...mockShareContext }}>
           <ShareMenuTabs />
         </ShareMenuProvider>
-      );
-      expect(wrapper.find('[data-test-subj="link"]').exists()).toBeFalsy();
-    });
+      </IntlProvider>
+    );
+    expect(screen.queryByTestId('export')).not.toBeInTheDocument();
   });
 
-  describe('export tab', () => {
-    it('should render export tab when there are share menu items that are not disabled', async () => {
-      const testItem = [
-        {
-          shareMenuItem: { name: 'test', disabled: false },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
+  describe('link tab', () => {
+    it('should not render the link tab when it is configured as disabled', async () => {
+      const disabledLinkShareContext = {
+        ...mockShareContext,
+        objectTypeMeta: {
+          ...mockShareContext.objectTypeMeta,
+          config: {
+            ...mockShareContext.objectTypeMeta.config,
+            link: {
+              disabled: true,
+            },
+          },
         },
-      ];
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
-      );
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
-    });
-    it('should not render export tab when the license is disabled', async () => {
-      const testItems = [
-        {
-          shareMenuItem: { name: 'test', disabled: true },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-      ];
+      };
 
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItems }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
+      render(
+        <IntlProvider locale="en">
+          <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
+            <ShareMenuTabs />
+          </ShareMenuProvider>
+        </IntlProvider>
       );
-
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeFalsy();
-    });
-
-    it('would render the export tab when there is at least one export type which is not disabled', async () => {
-      const testItem = [
-        {
-          shareMenuItem: { name: 'test', disabled: false },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-        {
-          shareMenuItem: { name: 'test', disabled: true },
-          label: PNG,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-      ];
-      const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
-          <ShareMenuTabs />
-        </ShareMenuProvider>
-      );
-      expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
+      expect(screen.queryByTestId('link')).not.toBeInTheDocument();
     });
   });
 });

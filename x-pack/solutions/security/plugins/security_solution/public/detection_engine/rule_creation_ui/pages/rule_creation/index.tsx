@@ -19,6 +19,7 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -48,14 +49,14 @@ import {
   StepRuleActions,
   StepRuleActionsReadOnly,
 } from '../../../rule_creation/components/step_rule_actions';
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as RuleI18n from '../../../common/translations';
 import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/helpers';
+import type { DefineStepRule } from '../../../common/types';
+import { RuleStep } from '../../../common/types';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { formatRule } from './helpers';
@@ -68,7 +69,7 @@ import {
   ruleStepsOrder,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
@@ -77,7 +78,6 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
@@ -217,24 +217,6 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
-
-  const defineStepFormFields = defineStepForm.getFields();
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid:
-      defineStepFormFields.threatIndex?.isValid &&
-      defineStepFormFields.threatQueryBar?.isValid &&
-      defineStepFormFields.threatMapping?.isValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
@@ -378,6 +360,11 @@ const CreateRulePageComponent: React.FC = () => {
 
     return { valid, warnings };
   }, [validateStep]);
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
+  );
 
   const editStep = useCallback(
     async (step: RuleStep) => {
@@ -731,6 +718,7 @@ const CreateRulePageComponent: React.FC = () => {
           }}
         >
           <StepRuleActions
+            ruleTypeId={ruleTypeMappings[ruleType]}
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
@@ -785,6 +773,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
+      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]
@@ -918,7 +907,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

@@ -103,6 +103,20 @@
           },
           {
             "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.ServerSentEventError.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/sse-utils",
             "id": "def-common.ServerSentEventError.toJSON",
             "type": "Function",
             "tags": [],

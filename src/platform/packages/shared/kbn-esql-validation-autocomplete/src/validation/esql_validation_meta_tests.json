@@ -85,6 +85,10 @@
       "type": "date_nanos"
     },
     {
+      "name": "functionNamedParametersField",
+      "type": "function_named_parameters"
+    },
+    {
       "name": "any#Char$Field",
       "type": "double"
     },
@@ -164,70 +168,70 @@
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "row",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -335,7 +339,7 @@
     {
       "query": "row var = 1 in (",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [in] function expects at least 2 arguments, got 1."
       ],
       "warning": []
@@ -1002,9 +1006,7 @@
     },
     {
       "query": "row 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1067,9 +1069,7 @@
     },
     {
       "query": "row 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1132,9 +1132,7 @@
     },
     {
       "query": "row 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1197,9 +1195,7 @@
     },
     {
       "query": "row 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1262,9 +1258,7 @@
     },
     {
       "query": "row 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1327,9 +1321,7 @@
     },
     {
       "query": "row 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1392,9 +1384,7 @@
     },
     {
       "query": "row 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1457,9 +1447,7 @@
     },
     {
       "query": "row 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1522,9 +1510,7 @@
     },
     {
       "query": "row 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1587,9 +1573,7 @@
     },
     {
       "query": "row 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1652,9 +1636,7 @@
     },
     {
       "query": "row 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1717,9 +1699,7 @@
     },
     {
       "query": "row 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1782,9 +1762,7 @@
     },
     {
       "query": "row 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1847,9 +1825,7 @@
     },
     {
       "query": "row 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1912,9 +1888,7 @@
     },
     {
       "query": "row 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1977,9 +1951,7 @@
     },
     {
       "query": "row 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2042,9 +2014,7 @@
     },
     {
       "query": "row 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2107,9 +2077,7 @@
     },
     {
       "query": "row 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2168,7 +2136,7 @@
     {
       "query": "from index | limit ",
       "error": [
-        "SyntaxError: missing INTEGER_LITERAL at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2178,30 +2146,23 @@
       "warning": []
     },
     {
-      "query": "from index | limit 4.5",
-      "error": [
-        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit a",
       "error": [
-        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit doubleField",
       "error": [
-        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit textField",
       "error": [
-        "SyntaxError: mismatched input 'textField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2220,7 +2181,7 @@
     {
       "query": "from index | keep ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2239,8 +2200,8 @@
       "error": [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: mismatched input '.' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "Unknown column [.]"
       ],
       "warning": []
@@ -2267,28 +2228,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2351,7 +2312,7 @@
     {
       "query": "from index | drop ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2365,8 +2326,8 @@
       "error": [
         "SyntaxError: token recognition error at: '4'",
         "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: mismatched input '.' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "Unknown column [.]"
       ],
       "warning": []
@@ -2487,7 +2448,7 @@
     {
       "query": "from a_index | mv_expand ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2547,7 +2508,7 @@
     {
       "query": "from a_index | rename",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -2569,14 +2530,14 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename missingField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "Unknown column [missingField]"
       ],
       "warning": []
@@ -2624,28 +2585,24 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename key* as keywords",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [key*]",
         "Unknown column [keywords]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | rename s* as strings",
-      "error": [
-        "Unknown column [s*]",
-        "Unknown column [strings]"
-      ],
+      "query": "row a = 10 | rename a as `this``is fine`",
+      "error": [],
       "warning": []
     },
     {
-      "query": "row a = 10 | rename a as `this``is fine`",
+      "query": "ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow",
       "error": [],
       "warning": []
     },
@@ -2659,7 +2616,7 @@
     {
       "query": "from a_index | dissect",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2680,7 +2637,7 @@
     {
       "query": "from a_index | dissect textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2700,29 +2657,30 @@
     {
       "query": "from a_index | dissect doubleField \"%{firstWord}\"",
       "error": [
-        "DISSECT only supports keyword, text types values, found [doubleField] of type [double]"
+        "DISSECT only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '='"
+        "SyntaxError: mismatched input '<EOF>' expecting '='",
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET}",
-        "Invalid option for DISSECT: [option]"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option = 1",
       "error": [
-        "Invalid option for DISSECT: [option]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
@@ -2734,14 +2692,14 @@
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" ignore_missing = true",
       "error": [
-        "Invalid option for DISSECT: [ignore_missing]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [ignore_missing]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" append_separator = true",
       "error": [
-        "Invalid value for DISSECT append_separator: expected a string, but was [true]"
+        "Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [true]"
       ],
       "warning": []
     },
@@ -2753,7 +2711,7 @@
     {
       "query": "from a_index | grok",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2774,7 +2732,7 @@
     {
       "query": "from a_index | grok textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2786,19 +2744,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
-        "GROK only supports keyword, text types values, found [doubleField] of type [double]"
+        "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },
@@ -3212,6 +3170,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | where dateField > ?_tstart AND dateField < ?_tend",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField > ?_tstart AND dateNanosField < ?_tend",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where - doubleField > 0",
       "error": [],
       "warning": []
@@ -3554,21 +3522,21 @@
     {
       "query": "from a_index | where *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4288,126 +4256,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where counterIntegerField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | where dateNanosField IS NULL",
       "error": [],
       "warning": []
@@ -4455,7 +4303,7 @@
     {
       "query": "from a_index | eval ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4498,7 +4346,7 @@
     {
       "query": "from a_index | eval a=b, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [b]"
       ],
       "warning": []
@@ -4525,7 +4373,7 @@
     {
       "query": "from a_index | eval a=round(doubleField), ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5069,111 +4917,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval counterIntegerField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval dateNanosField IS NULL",
       "error": [],
       "warning": []
@@ -5631,21 +5374,21 @@
     {
       "query": "from a_index | eval *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5679,7 +5422,7 @@
       ]
     },
     {
-      "query": "from a_index | eval var0 = log(-1, -20)",
+      "query": "from a_index | eval col0 = log(-1, -20)",
       "error": [],
       "warning": [
         "Log of a negative number results in null: -1",
@@ -6971,7 +6714,7 @@
     {
       "query": "from a_index | eval not",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [not] function expects exactly one argument, got 0."
       ],
       "warning": []
@@ -6979,7 +6722,7 @@
     {
       "query": "from a_index | eval in",
       "error": [
-        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6994,8 +6737,7 @@
     {
       "query": "from a_index | eval textField in textField)",
       "error": [
-        "SyntaxError: missing '(' at 'textField'",
-        "Error: [in] function expects at least 2 arguments, got 1."
+        "Invalid query [from a_index | eval textField in textField)]"
       ],
       "warning": []
     },
@@ -7035,7 +6777,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)",
+      "query": "from a_index | eval result = case(false, 0, 1) | stats col0 = sum(result)",
       "error": [],
       "warning": []
     },
@@ -7106,9 +6848,7 @@
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7176,9 +6916,7 @@
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7246,9 +6984,7 @@
     },
     {
       "query": "from a_index | eval 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7316,9 +7052,7 @@
     },
     {
       "query": "from a_index | eval 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7386,9 +7120,7 @@
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7456,9 +7188,7 @@
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7526,9 +7256,7 @@
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7596,9 +7324,7 @@
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7666,9 +7392,7 @@
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7736,9 +7460,7 @@
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7806,9 +7528,7 @@
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7876,9 +7596,7 @@
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7946,9 +7664,7 @@
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8016,9 +7732,7 @@
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8086,9 +7800,7 @@
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8156,9 +7868,7 @@
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8226,9 +7936,7 @@
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8296,9 +8004,7 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8366,9 +8072,7 @@
     },
     {
       "query": "from a_index | eval 1 ms + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8436,9 +8140,7 @@
     },
     {
       "query": "from a_index | eval 1 s + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8506,9 +8208,7 @@
     },
     {
       "query": "from a_index | eval 1 m + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8576,9 +8276,7 @@
     },
     {
       "query": "from a_index | eval 1 h + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8646,9 +8344,7 @@
     },
     {
       "query": "from a_index | eval 1 d + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8716,9 +8412,7 @@
     },
     {
       "query": "from a_index | eval 1 w + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8786,9 +8480,7 @@
     },
     {
       "query": "from a_index | eval 1 mo + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8856,9 +8548,7 @@
     },
     {
       "query": "from a_index | eval 1 q + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8926,9 +8616,7 @@
     },
     {
       "query": "from a_index | eval 1 y + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8996,9 +8684,7 @@
     },
     {
       "query": "from a_index | eval 1 yr + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9028,7 +8714,7 @@
     {
       "query": "from a_index | sort ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9047,7 +8733,7 @@
     {
       "query": "from a_index | sort doubleField, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9216,7 +8902,7 @@
     {
       "query": "from a_index | enrich _:policy",
       "error": [
-        "Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9246,7 +8932,7 @@
     {
       "query": "from a_index | enrich any:policy",
       "error": [
-        "Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [any] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9373,7 +9059,7 @@
     {
       "query": "from a_index | enrich _unknown:policy",
       "error": [
-        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9387,7 +9073,7 @@
     {
       "query": "from a_index |enrich policy on ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -9416,81 +9102,81 @@
     {
       "query": "from a_index | enrich policy on textField with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 ",
+      "query": "from a_index | enrich policy on textField with col0 ",
       "error": [
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "Unknown column [var0]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = c ",
+      "query": "from a_index | enrich policy on textField with col0 = c ",
       "error": [
-        "Unknown column [var0]",
+        "Unknown column [col0]",
         "Unknown column [c]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = , ",
+      "query": "from a_index |enrich policy on doubleField with col0 = , ",
       "error": [
-        "SyntaxError: mismatched input ',' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "Unknown column [var0]"
+        "SyntaxError: mismatched input ',' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 ",
       "error": [
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, yetAnotherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, yetAnotherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = otherField, var1 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = otherField, col1 = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}",
-        "Unknown column [var1]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 = yetAnotherField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, `this``is fine` = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, `this``is fine` = yetAnotherField",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
       ],
       "warning": []
     },
@@ -9505,7 +9191,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy with var0 = otherField | eval var0",
+      "query": "from a_index | enrich policy with col0 = otherField | eval col0",
       "error": [],
       "warning": []
     },
@@ -9716,7 +9402,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
@@ -9873,6 +9559,31 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -9952,6 +9663,42 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from index metadata _id",
       "error": [],
       "warning": []
@@ -9971,7 +9718,7 @@
     {
       "query": "from index METADATA _id, _source2",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode]"
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]"
       ],
       "warning": []
     },
