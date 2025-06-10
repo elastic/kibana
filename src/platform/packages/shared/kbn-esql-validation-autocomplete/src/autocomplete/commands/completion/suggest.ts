@@ -184,9 +184,6 @@ function inferenceEndpointToCompletionItem(
       'kbn-esql-validation-autocomplete.esql.definitions.completionInferenceIdDoc',
       {
         defaultMessage: 'Inference endpoint used for the completion',
-        values: {
-          inferenceId: inferenceEndpoint.inference_id,
-        },
       }
     ),
     kind: 'Reference',
