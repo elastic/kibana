@@ -19,6 +19,7 @@ import {
   EuiBadge,
   EuiSplitPanel,
   EuiCard,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -125,7 +126,7 @@ export const ConnectToElasticsearch = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ maxWidth: 430 }}>
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
               <EuiCard
@@ -180,22 +181,41 @@ export const ConnectToElasticsearch = () => {
               />
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              <EuiTitle size="xxs">
-                <span>
-                  {i18n.translate('xpack.searchHomepage.connectToElasticsearch.needAdviceTitle', {
-                    defaultMessage: 'Need advice? Engage a Customer Engineer.',
-                  })}
-                </span>
-              </EuiTitle>
-              <EuiText>
-                {i18n.translate(
-                  'xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription',
-                  {
-                    defaultMessage:
-                      'Get expert advice on best practices, performance, upgrade paths and efficiency. ',
-                  }
-                )}
-              </EuiText>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <span>
+                      {i18n.translate(
+                        'xpack.searchHomepage.connectToElasticsearch.needAdviceTitle',
+                        {
+                          defaultMessage: 'Need advice? Engage a Customer Engineer.',
+                        }
+                      )}
+                    </span>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate(
+                      'xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription',
+                      {
+                        defaultMessage:
+                          'Get expert advice on best practices, performance, upgrade paths and efficiency. ',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiLink href="https://www.elastic.co/contact/support" target="_blank">
+                    {i18n.translate(
+                      'xpack.searchHomepage.connectToElasticsearch.customerEngineerRequestForm',
+                      {
+                        defaultMessage: 'Customer Engineer Request Form',
+                      }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
