@@ -28,7 +28,8 @@ export const changeDataViewStyles = ({
   return {
     trigger: {
       maxWidth: fullWidth ? undefined : MIN_WIDTH,
-      border: theme.border.thin,
+      backgroundColor: theme.colors.backgroundBasePlain,
+      border: `${theme.border.width.thin} solid ${theme.colors.borderBasePlain}`,
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
     },
