@@ -84,7 +84,7 @@ describe('exec', () => {
     `);
   });
 
-  it('throws error when command fails with bufferLogs enabled', async () => {
+  it('throws error when command fails when bufferLogs is true', async () => {
     try {
       await expect(
         await exec(log, process.execPath, ['-e', 'process.exit(1)'], {
