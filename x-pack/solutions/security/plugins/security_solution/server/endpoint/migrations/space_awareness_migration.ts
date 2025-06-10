@@ -69,10 +69,6 @@ export const migrateEndpointDataToSupportSpaces = async (
     return;
   }
 
-  // TODO:PT should we have a brief delay here before staring migration to give fleet a chance to complete its migration?
-
-  // TODO:PT should the migration state be deleted if one of the below migrations fails?
-
   await Promise.all([
     migrateArtifactsToSpaceAware(endpointService),
     migrateResponseActionsToSpaceAware(endpointService),
@@ -305,6 +301,8 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.started = new Date().toISOString();
   migrationState.metadata.data = migrationStats;
   await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+  // FIXME:PT need to ensure that 9.1 package is installed OR that the index has  mappings
 
   const policyInfoBuilder = new AgentPolicyInfoBuilder(endpointService, logger);
   const esClient = endpointService.getInternalEsClient();
