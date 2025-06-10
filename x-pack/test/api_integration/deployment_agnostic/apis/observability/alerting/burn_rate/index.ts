@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Observability Alerting', () => {
-    loadTestFile(require.resolve('./burn_rate'));
-    loadTestFile(require.resolve('./es_query'));
-    loadTestFile(require.resolve('./custom_threshold'));
+  describe('SLO Burn rate rule', () => {
+    loadTestFile(require.resolve('./burn_rate_rule'));
+    // movd to feature flag config until custom roles are supported in serverless
+    // loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }

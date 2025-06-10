@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('ElasticSearch query rule', () => {
     loadTestFile(require.resolve('./query_dsl'));
     loadTestFile(require.resolve('./query_dsl_with_group_by'));
-    loadTestFile(require.resolve('./consumers_and_privileges'));
+    // movd to feature flag config until custom roles are supported in serverless
+    // loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }

@@ -13,7 +13,7 @@ export default createServerlessFeatureFlagTestConfig({
     '--xpack.actions.preconfigured',
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
   ],
-  testFiles: [require.resolve('./oblt.synthetics.index.ts')],
+  testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic Feature Flag API Integration Tests',
   },

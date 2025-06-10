@@ -8,7 +8,7 @@
 import { createStatefulFeatureFlagTestConfig } from '../../default_configs/feature_flag.stateful.config.base';
 
 export default createStatefulFeatureFlagTestConfig({
-  testFiles: [require.resolve('./oblt.synthetics.index.ts')],
+  testFiles: [require.resolve('./oblt.index.ts')],
   kbnServerArgs: ['--xpack.actions.preconfigured'],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests',
