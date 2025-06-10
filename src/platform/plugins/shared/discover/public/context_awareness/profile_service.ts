@@ -63,7 +63,7 @@ export interface BaseProfileProvider<TProfile extends PartialProfile, TContext> 
    */
   isExperimental?: boolean;
   /**
-   * Profile available only if the specified product feature is active.
+   * Profile available only if the registered product feature is active. Applies only to serverless deployments.
    * For more details, see the [Kibana Pricing Tiers service](./../../../../../../core/packages/pricing/server-internal/README.md).
    *
    * ```ts
