@@ -15,6 +15,7 @@ export type {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
   EnhancementRegistryDefinition,
+  EmbeddablePersistableStateService,
 } from './types';
 
 export const plugin = async () => {
