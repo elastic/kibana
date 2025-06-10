@@ -26,23 +26,46 @@ export const fetchRulesByQueryOrIds = async ({
   gapRange?: { start: string; end: string };
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
-    const { rules, errors } = await rulesClient.bulkGetRules({ ids });
-    return {
-      results: rules.map((rule) => ({
-        item: rule.id,
-        result: rule,
-      })),
-      errors: errors.map(({ id, error }) => {
-        let message = 'Error resolving the rule';
-        if (error.statusCode === 404) {
-          message = 'Rule not found';
-        }
-        return {
-          item: id,
-          error: new Error(message),
-        };
-      }),
-    };
+    const fallbackErrorMessage = 'Error resolving the rule'
+    try {
+      const { rules, errors } = await rulesClient.bulkGetRules({ ids });
+      return {
+        results: rules.map((rule) => ({
+          item: rule.id,
+          result: rule,
+        })),
+        errors: errors.map(({ id, error }) => {
+          let message = fallbackErrorMessage
+          if (error.statusCode === 404) {
+            message = 'Rule not found';
+          }
+          return {
+            item: id,
+            error: new Error(message),
+          };
+        }),
+      };
+    } catch (error) {
+      // When there is an authorization error or it doesn't resolve any rule, 
+      // bulkGetRules will not return a partial object but throw an error instead.
+      let message = error.message || fallbackErrorMessage
+      if (error.message === 'No rules found for bulk get') {
+        message = 'Rule not found'
+      }
+      return {
+        results: [],
+        errors: ids.map(
+          (id) => {
+            return {
+              item: id,
+              // We do this to remove any status code set by the bulkGetRules client
+              error: new Error(message)
+            }
+          }
+        )
+      };
+    }
+
   }
 
   let ruleIdsWithGaps: string[] | undefined;
