@@ -292,11 +292,12 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
-  const relatedDashboardsTab = alertDetail ? (
-    <RelatedDashboards relatedDashboards={validDashboards || []} alertId={alertId} />
-  ) : (
-    <EuiLoadingSpinner />
-  );
+  const relatedDashboardsTab =
+    alertDetail && rule ? (
+      <RelatedDashboards relatedDashboards={validDashboards || []} alertId={alertId} rule={rule} />
+    ) : (
+      <EuiLoadingSpinner />
+    );
 
   const tabs: Array<Omit<EuiTabbedContentTab, 'id'> & { id: TabId }> = [
     {

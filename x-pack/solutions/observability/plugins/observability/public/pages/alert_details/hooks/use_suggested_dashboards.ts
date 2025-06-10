@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
@@ -31,8 +31,6 @@ interface SuggestedDashboardResponse {
 
 export const useSuggestedDashboards = (alertId: string): SuggestedDashboardResponse => {
   const { http } = useKibana().services;
-
-  if (!http) throw Error();
 
   const { data, isLoading } = useQuery<GetRelatedDashboardsResponse>({
     queryKey: ['relatedDashboards', alertId],

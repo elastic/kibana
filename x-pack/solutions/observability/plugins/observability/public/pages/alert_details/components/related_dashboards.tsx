@@ -7,17 +7,20 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { Dashboards } from './related_dashboards/dashboards';
 import { useSuggestedDashboards } from '../hooks/use_suggested_dashboards';
 import { DashboardMetadata } from './related_dashboards/dashboard';
+import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
   alertId: string;
   relatedDashboards: Array<{ id: string }>;
+  rule: Rule;
 }
 
-export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboardsProps) {
+export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedDashboardsProps) {
   const [dashboardsMeta, setDashboardsMeta] = useState<DashboardMetadata[]>([]);
   const [isLoadingLinkedDashboards, setIsLoadingLinkedDashboards] = useState(true);
 
@@ -40,6 +43,22 @@ export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboa
   const {
     services: { dashboard: dashboardService },
   } = useKibana();
+
+  const onAddSuggestedDashboard = (d: DashboardMetadata) => {
+    // We are doing an optimistic update here, without waiting for the API result
+    setDashboardsMeta((value) => [...value, d]);
+  };
+
+  const onFailAddSuggestedDashboard = (dashboardId: string) => {
+    // If the update fails we need to revert the change
+    setDashboardsMeta((value) => value.filter(({ id }) => id !== dashboardId));
+  };
+
+  const { onClickAddSuggestedDashboard } = useAddSuggestedDashboards({
+    rule,
+    onAddSuggestedDashboard,
+    onFailAddSuggestedDashboard,
+  });
 
   useEffect(() => {
     if (!relatedDashboards?.length || !dashboardService) {
@@ -104,9 +123,7 @@ export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboa
               defaultMessage: 'Add to linked dashboards',
             }
           ),
-          onClick: (d) => {
-            setDashboardsMeta((value) => [...value, d]);
-          },
+          onClick: onClickAddSuggestedDashboard,
         }}
       />
     </div>
