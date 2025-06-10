@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { chunk, uniqBy } from 'lodash';
+import pMap from 'p-map';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
@@ -143,21 +144,31 @@ export const createPrebuiltRuleAssetsClient = (
           return [];
         }
 
-        const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
-        const filter = versions
-          .map((v) => `(${attr}.rule_id: ${v.rule_id} AND ${attr}.version: ${v.version})`)
-          .join(' OR ');
+        const processChunk = async (versionsChunk: RuleVersionSpecifier[]) => {
+          const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
+          const filter = versionsChunk
+            .map((v) => `(${attr}.rule_id: ${v.rule_id} AND ${attr}.version: ${v.version})`)
+            .join(' OR ');
 
-        // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
-        // simplifies deduplication but too many tests get broken.
-        // See https://github.com/elastic/kibana/issues/218198
-        const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
-          type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          filter,
-          perPage: MAX_PREBUILT_RULES_COUNT,
-        });
+          // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
+          // simplifies deduplication but too many tests get broken.
+          // See https://github.com/elastic/kibana/issues/218198
+          const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
+            type: PREBUILT_RULE_ASSETS_SO_TYPE,
+            filter,
+            perPage: MAX_PREBUILT_RULES_COUNT,
+          });
 
-        const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
+          const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
+          return ruleAssets;
+        };
+
+        const versionChunks = chunk(versions, 1024);
+
+        const ruleAssets = await pMap(versionChunks, processChunk, {
+          concurrency: 2,
+        }).then((results) => results.flat());
+
         // Rule assets may have duplicates we have to get rid of.
         // In particular prebuilt rule assets package v8.17.1 has duplicates.
         const uniqueRuleAssets = uniqBy(ruleAssets, 'rule_id');
