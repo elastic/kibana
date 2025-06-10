@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { Duration } from 'moment';
 import { IRouter, Logger, ReservedPrivilegesSet } from '@kbn/core/server';
 import { CoreSetup } from '@kbn/core/server';
-import { Duration } from 'moment';
 import { runDeleteUnusedUrlsTask } from './task';
 
 export const registerDeleteUnusedUrlsRoute = ({
