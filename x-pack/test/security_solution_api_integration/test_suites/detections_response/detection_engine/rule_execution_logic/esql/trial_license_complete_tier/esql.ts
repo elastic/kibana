@@ -1760,7 +1760,8 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle shard failures and include warning in logs', async () => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from packetbeat-* metadata _id | where agent.type=="packetbeat" and broken==1`,
+          query: `from packetbeat-* METADATA _id | limit 101`,
+          from: 'now-100000h',
         };
 
         const { logs } = await previewRule({
@@ -1773,7 +1774,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               warnings: expect.arrayContaining([
                 expect.stringContaining(
-                  'The ESQL query failed to run successfully due to unavailable shards'
+                  'The ES|QL query failed to run successfully due to unavailable shards'
                 ),
               ]),
             }),
