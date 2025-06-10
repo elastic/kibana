@@ -5,39 +5,25 @@
  * 2.0.
  */
 
+import { ConversationRound, toStructuredToolIdentifier } from '@kbn/onechat-common';
+import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import {
   type ConversationEvent,
   isAssistantMessage,
   isUserMessage,
   isToolResult,
   type ToolCall,
-  type UserMessage,
-  type AssistantMessage,
 } from '../../../common/conversation_events';
-import type { ProgressionEvent } from '../../../common/chat_events';
-import type { ChatStatus } from '../hooks/use_chat';
 
 export interface ConversationRoundToolCall {
   toolCall: ToolCall;
   toolResult?: string;
 }
 
-export interface ConversationRound {
-  userMessage: UserMessage;
-  assistantMessage?: AssistantMessage;
-  toolCalls: ConversationRoundToolCall[];
-  progressionEvents: ProgressionEvent[];
-  loading: boolean;
-}
-
 export const getConversationRounds = ({
   conversationEvents,
-  progressionEvents,
-  chatStatus,
 }: {
   conversationEvents: ConversationEvent[];
-  progressionEvents: ProgressionEvent[];
-  chatStatus: ChatStatus;
 }): ConversationRound[] => {
   const toolCallMap = new Map<string, ConversationRoundToolCall>();
   const rounds: ConversationRound[] = [];
@@ -46,16 +32,15 @@ export const getConversationRounds = ({
 
   conversationEvents.forEach((item) => {
     if (isUserMessage(item)) {
-      if (current?.userMessage) {
+      if (current?.userInput) {
         throw new Error('chained user message');
       }
       if (!current) {
         current = {
-          toolCalls: [],
-          progressionEvents: [],
+          steps: [],
         };
       }
-      current.userMessage = item;
+      current.userInput = { message: item.content };
     }
     if (isToolResult(item)) {
       const toolCallItem = toolCallMap.get(item.toolCallId);
@@ -64,16 +49,21 @@ export const getConversationRounds = ({
       }
     }
     if (isAssistantMessage(item)) {
-      if (item.toolCalls.length) {
+      if (item.toolCalls.length > 0) {
         item.toolCalls.forEach((toolCall) => {
-          const roundToolCall = {
-            toolCall,
-          };
-          current!.toolCalls!.push(roundToolCall);
-          toolCallMap.set(toolCall.toolCallId, roundToolCall);
+          const { toolCallId, toolName, args } = toolCall;
+          current!.steps!.push(
+            createToolCallStep({
+              toolCallId,
+              toolId: toStructuredToolIdentifier(toolName),
+              args,
+              result: '',
+            })
+          );
+          toolCallMap.set(toolCallId, { toolCall });
         });
       } else {
-        current!.assistantMessage = item;
+        current!.assistantResponse = { message: item.content };
         rounds.push(current as ConversationRound);
         current = undefined;
       }
@@ -82,18 +72,6 @@ export const getConversationRounds = ({
 
   if (current) {
     rounds.push(current as ConversationRound);
-  }
-
-  if (rounds.length > 0) {
-    const lastRound = rounds[rounds.length - 1];
-
-    if (progressionEvents) {
-      lastRound.progressionEvents = progressionEvents;
-    }
-
-    if (chatStatus === 'loading') {
-      lastRound.loading = true;
-    }
   }
 
   return rounds;

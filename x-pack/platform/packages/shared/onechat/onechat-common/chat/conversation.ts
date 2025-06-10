@@ -64,6 +64,13 @@ export type ToolCallStep = ConversationRoundStepMixin<
   ToolCallWithResult
 >;
 
+export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): ToolCallStep => {
+  return {
+    type: ConversationRoundStepType.toolCall,
+    ...toolCallWithResult,
+  };
+};
+
 export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
   return step.type === ConversationRoundStepType.toolCall;
 };

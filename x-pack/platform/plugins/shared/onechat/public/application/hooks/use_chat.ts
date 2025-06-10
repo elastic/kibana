@@ -103,7 +103,10 @@ export const useChat = ({
             setPendingMessages(getAllStreamMessages());
           }
 
-          if (event.type === ChatEventType.conversationCreated) {
+          if (
+            event.type === ChatEventType.conversationCreated ||
+            event.type === ChatEventType.conversationUpdated
+          ) {
             const { conversationId: id, title } = event.data;
             onConversationUpdate({ id, title });
           }
