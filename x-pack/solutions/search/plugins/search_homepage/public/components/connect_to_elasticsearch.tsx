@@ -127,7 +127,7 @@ export const ConnectToElasticsearch = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ maxWidth: 430 }}>
-          <EuiSplitPanel.Outer>
+          <EuiSplitPanel.Outer hasShadow={false} color="subdued">
             <EuiSplitPanel.Inner>
               <EuiCard
                 textAlign="left"
