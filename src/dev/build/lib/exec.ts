@@ -23,6 +23,11 @@ interface Options {
   build?: Build;
 }
 
+interface LogLine {
+  level: Exclude<LogLevel, 'silent'>;
+  chunk: string;
+}
+
 export async function exec(
   log: ToolingLog,
   cmd: string,
@@ -39,24 +44,33 @@ export async function exec(
   });
 
   if (bufferLogs) {
-    const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe(map((chunk) => chunk.toString()));
-    const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe(map((chunk) => chunk.toString()));
-    const close$ = fromEvent(proc, 'close');
+    try {
+      const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
+        map((chunk) => ({ level: 'info', chunk: chunk.toString().trim() }))
+      );
+      const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
+        map((chunk) => ({ level: 'error', chunk: chunk.toString().trim() }))
+      );
+      const close$ = fromEvent(proc, 'close');
+      const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
+      const result = await proc;
 
-    await merge(stdout$, stderr$)
-      .pipe(takeUntil(close$), toArray())
-      .toPromise()
-      .then((logs) => {
-        log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
+      log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
 
-        log.indent(4, () => {
-          log[level](chalk.dim('$'), cmd, ...args);
+      log.indent(4, () => {
+        log[level](chalk.dim('$'), cmd, ...args);
 
-          if (logs?.length) {
-            logs.forEach((line: string) => log[level](line.trim()));
-          }
-        });
+        if (logs?.length) {
+          logs.forEach((line) => log[line.level](line.chunk));
+        }
       });
+
+      if (result.failed) {
+        throw new Error(`${result.exitCode}`);
+      }
+    } catch (error) {
+      throw error;
+    }
   } else {
     log[level](chalk.dim('$'), cmd, ...args);
 
