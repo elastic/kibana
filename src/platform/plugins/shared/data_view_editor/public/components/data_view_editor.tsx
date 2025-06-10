@@ -26,6 +26,7 @@ export const DataViewEditor = ({
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  isManaged,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<DataViewEditorContext>(services);
@@ -40,6 +41,7 @@ export const DataViewEditor = ({
           requireTimestampField={requireTimestampField}
           editData={editData}
           allowAdHocDataView={allowAdHocDataView}
+          isManaged={isManaged}
         />
       </EuiFlyout>
     </KibanaReactContextProvider>

@@ -75,6 +75,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  isManaged?: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -93,13 +94,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
   allowAdHoc,
   showManagementLink,
   dataViewEditorService,
+  isManaged,
 }: Props) => {
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const { euiTheme } = useEuiTheme();
-  const canSave = dataViews.getCanSaveSync();
+  const canSave = dataViews.getCanSaveSync() && !isManaged;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists

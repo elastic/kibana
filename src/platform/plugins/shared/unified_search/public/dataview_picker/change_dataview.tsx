@@ -173,11 +173,15 @@ export function ChangeDataView({
             onClick={async () => {
               if (onEditDataView) {
                 const dataView = await dataViews.get(currentDataViewId!);
+                const isManaged = Boolean(
+                  managedDataViews?.find((dv) => dv.id === currentDataViewId)
+                );
                 dataViewEditor.openEditor({
                   editData: dataView,
                   onSave: (updatedDataView) => {
                     onEditDataView(updatedDataView);
                   },
+                  isManaged,
                 });
               } else {
                 application.navigateToApp('management', {
@@ -272,6 +276,7 @@ export function ChangeDataView({
     onEditDataView,
     searchListInputId,
     selectableProps,
+    managedDataViews,
   ]);
 
   return (
