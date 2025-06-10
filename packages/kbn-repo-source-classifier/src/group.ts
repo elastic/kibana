@@ -18,6 +18,7 @@ const DEFAULT_MODULE_ATTRS: ModuleAttrs = {
   group: 'common',
   visibility: 'shared',
 };
+const KIBANA_SOLUTIONS = ['observability', 'security', 'search'];
 
 const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugins']
   .map<Record<string, ModuleAttrs>>((type) => ({
@@ -37,21 +38,24 @@ const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugi
       group: 'platform',
       visibility: 'private',
     },
-    [`x-pack/solutions/observability/${type}`]: {
-      group: 'observability',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/security/${type}`]: {
-      group: 'security',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/search/${type}`]: {
-      group: 'search',
-      visibility: 'private',
-    },
+    ...KIBANA_SOLUTIONS.reduce<Record<string, ModuleAttrs>>((acc, solution) => {
+      acc[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      acc[`x-pack/solutions/${solution}/test`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      return acc;
+    }, {}),
   }))
   .reduce((acc, current) => ({ ...acc, ...current }), {
     'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    'x-pack/platform/test': {
       group: 'platform',
       visibility: 'shared',
     },
