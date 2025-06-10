@@ -7,18 +7,27 @@
 
 import type { PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
-import { useCurrentEuiTheme } from '../../../hooks/use_current_eui_theme';
-export const useDataVizChartTheme = (): PartialTheme => {
-  const euiTheme = useCurrentEuiTheme();
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+
+interface DataVizChartThemeOptions {
+  disableGridLines?: boolean;
+}
+
+export const useDataVizChartTheme = (options: DataVizChartThemeOptions = {}): PartialTheme => {
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const chartTheme = useMemo<PartialTheme>(() => {
-    const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
+    const AREA_SERIES_COLOR = euiTheme.colors.vis.euiColorVis0;
     return {
       axes: {
         tickLabel: {
-          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-          fontFamily: euiTheme.euiFontFamily,
+          fontSize: parseInt(euiFontSizeXS, 10),
+          fontFamily: euiTheme.font.family,
           fontStyle: 'italic',
         },
+        ...(options.disableGridLines
+          ? { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } }
+          : {}),
       },
       background: { color: 'transparent' },
       chartMargins: {
@@ -50,6 +59,6 @@ export const useDataVizChartTheme = (): PartialTheme => {
         area: { visible: true, opacity: 1 },
       },
     };
-  }, [euiTheme]);
+  }, [euiFontSizeXS, euiTheme, options.disableGridLines]);
   return chartTheme;
 };

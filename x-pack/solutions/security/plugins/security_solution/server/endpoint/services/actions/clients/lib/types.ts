@@ -78,6 +78,25 @@ export interface GetFileDownloadMethodResponse {
   mimeType?: string;
 }
 
+export interface CustomScript {
+  /**
+   * Unique identifier for the script
+   */
+  id: string;
+  /**
+   * Display name of the script
+   */
+  name: string;
+  /**
+   * Description of what the script does
+   */
+  description: string;
+}
+
+export interface CustomScriptsResponse {
+  data: CustomScript[];
+}
+
 /**
  * The interface required for a Response Actions provider
  */
@@ -136,6 +155,11 @@ export interface ResponseActionsClient {
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
 
   /**
+   * Retrieves a list of all custom scripts for a given agent type - ** not a Response Action **
+   */
+  getCustomScripts: () => Promise<CustomScriptsResponse>;
+
+  /**
    * Retrieve a file for download
    * @param actionId
    * @param fileId
@@ -154,6 +178,7 @@ export interface ResponseActionsClient {
    * @param actionRequest
    * @param options
    */
+
   scan: (
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions

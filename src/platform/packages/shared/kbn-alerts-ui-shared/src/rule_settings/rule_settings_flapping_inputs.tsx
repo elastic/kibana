@@ -83,7 +83,7 @@ export const RuleSettingsFlappingInputs = (props: RuleSettingsFlappingInputsProp
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         <RuleSettingsRangeInput
           fullWidth
