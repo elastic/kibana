@@ -23,39 +23,34 @@ export type LogDocumentProfileProvider = DocumentProfileProvider<{
 }>;
 
 export const createObservabilityLogDocumentProfileProvider = (
-  observabilityBaseProfileProvider: ProfileProviderServices['baseProfileProvider']
-): LogDocumentProfileProvider =>
-  extendProfileProvider(observabilityBaseProfileProvider, {
-    profileId: 'observability-log-document-profile',
-    profile: {
-      getDocViewer: createGetDocViewer(observabilityBaseProfileProvider),
-    },
-    resolve: ({ record, rootContext, dataSourceContext }) => {
-      console.log('observability [LOG] document profile resolved');
-      if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
-        return { isMatch: false };
-      }
+  services: ProfileProviderServices
+): LogDocumentProfileProvider => ({
+  profileId: 'observability-log-document-profile',
+  profile: {
+    getDocViewer: createGetDocViewer(services),
+  },
+  resolve: ({ record, rootContext, dataSourceContext }) => {
+    if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+      return { isMatch: false };
+    }
 
-      const isLogRecord = getIsLogRecord(
-        record,
-        observabilityBaseProfileProvider.logsContextService.isLogsIndexPattern
-      );
+    const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
 
-      if (!isLogRecord) {
-        return { isMatch: false };
-      }
+    if (!isLogRecord) {
+      return { isMatch: false };
+    }
 
-      return {
-        isMatch: true,
-        context: {
-          type: DocumentType.Log,
-          logOverviewContext$: isLogsDataSourceContext(dataSourceContext)
-            ? dataSourceContext.logOverviewContext$
-            : new BehaviorSubject<LogOverviewContext | undefined>(undefined),
-        },
-      };
-    },
-  });
+    return {
+      isMatch: true,
+      context: {
+        type: DocumentType.Log,
+        logOverviewContext$: isLogsDataSourceContext(dataSourceContext)
+          ? dataSourceContext.logOverviewContext$
+          : new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+      },
+    };
+  },
+});
 
 const getIsLogRecord = (
   record: DataTableRecord,
