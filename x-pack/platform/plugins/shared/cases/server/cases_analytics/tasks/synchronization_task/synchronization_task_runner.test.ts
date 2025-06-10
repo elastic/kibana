@@ -6,22 +6,42 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { SynchronizationTaskRunner } from './synchronization_task_runner';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import { CAI_CASES_INDEX_NAME } from '../../cases_index/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
   const sourceIndex = '.source-index';
-  const destIndex = '.dest-index';
-  const sourceQuery = 'source-query';
+  const destIndex = CAI_CASES_INDEX_NAME;
+
+  const painlessScriptId = 'painlessScriptId';
+  const painlessScript = {
+    lang: 'painless',
+    source: 'ctx._source.remove("foobar");',
+  };
+
+  const lastSyncSuccess = new Date('2025-06-10T09:25:00.000Z');
+  const lastSyncAttempt = new Date('2025-06-10T09:30:00.000Z');
+  const newAttemptTime = new Date('2025-06-10T09:40:00.000Z');
+
+  const syncTaskId = 'foobar';
+
   const taskInstance = {
     params: {
       sourceIndex,
       destIndex,
-      sourceQuery,
+    },
+    state: {
+      lastSyncSuccess,
+      lastSyncAttempt,
+      syncTaskId,
     },
   } as unknown as ConcreteTaskInstance;
 
@@ -29,17 +49,8 @@ describe('SynchronizationTaskRunner', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('reindexes as expected', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const painlessScriptId = 'painlessScriptId';
-    const painlessScript = {
-      lang: 'painless',
-      source: 'ctx._source.remove("foobar");',
-    };
-
-    esClient.indices.getMapping.mockResolvedValueOnce({
+    jest.useFakeTimers().setSystemTime(newAttemptTime);
+    esClient.indices.getMapping.mockResolvedValue({
       [destIndex]: {
         mappings: {
           _meta: {
@@ -49,10 +60,25 @@ describe('SynchronizationTaskRunner', () => {
       },
     });
 
-    esClient.getScript.mockResolvedValueOnce({
+    esClient.getScript.mockResolvedValue({
       found: true,
       _id: painlessScriptId,
       script: painlessScript,
+    });
+
+    esClient.reindex.mockResolvedValue({
+      task: syncTaskId,
+    });
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('reindexes when the previous sync task is completed and the index is available', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: true,
+      task: {} as TasksTaskInfo,
     });
 
     const getESClient = async () => esClient;
@@ -65,6 +91,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
+    expect(esClient.tasks.get).toBeCalledWith({ task_id: syncTaskId });
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
@@ -76,21 +103,267 @@ describe('SynchronizationTaskRunner', () => {
     expect(esClient.reindex).toBeCalledWith({
       source: {
         index: sourceIndex,
-        query: sourceQuery,
+        /*
+         * The previous attempt was successful so we will reindex with
+         * a new time.
+         *
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         */
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  type: 'cases',
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        'cases.created_at': {
+                          gte: lastSyncAttempt.toISOString(),
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        'cases.updated_at': {
+                          gte: lastSyncAttempt.toISOString(),
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
       },
       dest: { index: destIndex },
-      script: painlessScript,
+      script: {
+        id: painlessScriptId,
+      },
       refresh: true,
     });
-    expect(result).toEqual({ state: {} });
+
+    expect(result).toEqual({
+      state: {
+        // because the previous sync task was completed lastSyncSuccess is now lastSyncAttempt
+        lastSyncSuccess: lastSyncAttempt,
+        // we set a new value for lastSyncAttempt
+        lastSyncAttempt: newAttemptTime,
+        syncTaskId,
+      },
+    });
+  });
+
+  it('reindexes using the lookback window when there is no previous sync task and the index is available', async () => {
+    /*
+     * If lastSyncSuccess is missing we reindex only SOs that were
+     * created/updated in the last 5 minutes.
+     */
+    const expectedSyncTime = new Date(newAttemptTime.getTime() - 5 * 60 * 1000);
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance: {
+        ...taskInstance,
+        state: {},
+      },
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).toBeCalledWith({
+      source: {
+        index: sourceIndex,
+        /*
+         * The previous attempt was successful so we will reindex with
+         * a new time.
+         *
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         */
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  type: 'cases',
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        'cases.created_at': {
+                          gte: expectedSyncTime.toISOString(),
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        'cases.updated_at': {
+                          gte: expectedSyncTime.toISOString(),
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      dest: { index: destIndex },
+      script: {
+        id: painlessScriptId,
+      },
+      refresh: true,
+    });
+
+    expect(result).toEqual({
+      state: {
+        lastSyncSuccess: undefined,
+        lastSyncAttempt: newAttemptTime,
+        syncTaskId,
+      },
+    });
+  });
+
+  it('returns the previous state if the previous task is still running', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: false,
+      task: {} as TasksTaskInfo,
+    });
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toEqual({
+      state: taskInstance.state,
+    });
+  });
+
+  it('reindexes when the previous sync task failed', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: true,
+      task: {} as TasksTaskInfo,
+      response: { error: 'error' },
+    });
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).toBeCalledWith({
+      source: {
+        index: sourceIndex,
+        /*
+         * The previous attempt was unsuccessful so we will reindex with
+         * the old lastSyncSuccess. And updated the attempt time.
+         *
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncSuccess)
+         */
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  type: 'cases',
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        'cases.created_at': {
+                          gte: lastSyncSuccess.toISOString(),
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        'cases.updated_at': {
+                          gte: lastSyncSuccess.toISOString(),
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      dest: { index: destIndex },
+      script: {
+        id: painlessScriptId,
+      },
+      refresh: true,
+    });
+
+    expect(result).toEqual({
+      state: {
+        // because the previous sync task failed we do not update this value
+        lastSyncSuccess,
+        // we set a new value for lastSyncAttempt
+        lastSyncAttempt: newAttemptTime,
+        syncTaskId,
+      },
+    });
   });
 
   describe('Error handling', () => {
-    it('calls throwRetryableError if the esClient throws a retryable error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.cluster.health.mockRejectedValueOnce(
-        new esErrors.ConnectionError('My retryable error')
+    it('An error is thrown for invalid task state', async () => {
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance: {
+          ...taskInstance,
+          state: {
+            // A missing syncTaskId should have missing sync times
+            lastSyncAttempt: 'some-time',
+          },
+        },
+      });
+
+      try {
+        await taskRunner.run();
+      } catch (e) {
+        expect(isRetryableError(e)).toBe(null);
+      }
+
+      expect(logger.error).toBeCalledWith(
+        '[.internal.cases] Synchronization reindex failed. Error: Invalid task state.',
+        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
+    });
+
+    it('calls throwRetryableError if the esClient throws a retryable error', async () => {
+      esClient.tasks.get.mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error'));
 
       const getESClient = async () => esClient;
 
@@ -106,22 +379,14 @@ describe('SynchronizationTaskRunner', () => {
         expect(isRetryableError(e)).toBe(true);
       }
 
-      expect(esClient.cluster.health).toBeCalledWith({
-        index: destIndex,
-        wait_for_status: 'green',
-        timeout: '300ms',
-        wait_for_active_shards: 'all',
-      });
-
       expect(logger.error).toBeCalledWith(
-        'Synchronization reindex of .dest-index failed. Error: My retryable error',
-        { tags: ['synchronization-run-failed', 'framework-error'] }
+        '[.internal.cases] Synchronization reindex failed. Error: My retryable error',
+        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
     });
 
     it('calls throwUnrecoverableError if execution throws a non-retryable error', async () => {
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.cluster.health.mockRejectedValueOnce(new Error('My unrecoverable error'));
+      esClient.tasks.get.mockRejectedValueOnce(new Error('My unrecoverable error'));
 
       const getESClient = async () => esClient;
 
@@ -138,8 +403,8 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        'Synchronization reindex of .dest-index failed. Error: My unrecoverable error',
-        { tags: ['synchronization-run-failed', 'framework-error'] }
+        '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
+        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
     });
   });

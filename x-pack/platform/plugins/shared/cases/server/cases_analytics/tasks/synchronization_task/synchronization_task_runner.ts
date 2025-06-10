@@ -80,35 +80,41 @@ export class SynchronizationTaskRunner implements CancellableTask {
          * updates.
          **/
         state = this.getSyncState();
-      } else if (
-        previousReindexStatus === ReindexStatus.COMPLETED ||
-        /*
-         * A missing task id can happen in two scenarios:
-         * - This is the first task execution.
-         * - The previous reindex executed immediately.
-         **/
-        previousReindexStatus === ReindexStatus.MISSING_TASK_ID
-      ) {
-        if (await this.isIndexAvailable(esClient)) {
-          this.updateLastSyncTimes({});
-          state = await this.synchronizeIndex({ esClient });
-        } else {
-          /*
-           * If the index is not available we return the
-           * same state and the next run will cover any
-           * missing updates.
-           **/
-          state = this.getSyncState();
-        }
-      } else {
-        this.updateLastSyncTimes({ previousTaskFailed: true });
-        /*
-         * If the previous task failed (ReindexStatus.FAILED)
-         * we try again using the same lastSyncSuccess value
-         * to cover any updates that might have been missed.
-         * Only lastSyncAttempt and syncTaskId get updated.
-         **/
+      } else if (previousReindexStatus === ReindexStatus.COMPLETED) {
+        await this.isIndexAvailable(esClient);
+        this.updateLastSyncTimes({ updateSuccessTime: true });
         state = await this.synchronizeIndex({ esClient });
+      } else if (
+        /*
+         * A missing task id can only happen if this is
+         * the first task execution.
+         **/
+        (previousReindexStatus === ReindexStatus.MISSING_TASK_ID &&
+          !this.lastSyncAttempt &&
+          !this.lastSyncSuccess) ||
+        previousReindexStatus === ReindexStatus.FAILED
+      ) {
+        await this.isIndexAvailable(esClient);
+
+        /*
+         * There are two possible scenarios here:
+         * 1. If the previous task failed (ReindexStatus.FAILED)
+         * 2. If the state is missing
+         *
+         * In both cases we try to reindex without updating lastSyncSuccess.
+         * This will ensure the reindex query is built with the correct value.
+         **/
+        this.updateLastSyncTimes({ updateSuccessTime: false });
+        state = await this.synchronizeIndex({ esClient });
+      } else {
+        /*
+         * This should never happen, this else can only be reached if the
+         * the condition (previousReindexStatus === ReindexStatus.MISSING_TASK_ID &&
+         * !this.lastSyncAttempt && !this.lastSyncSuccess) fails.
+         *
+         * That would mean, we have an invalid task state
+         **/
+        throw new Error('Invalid task state.');
       }
 
       return {
@@ -117,23 +123,20 @@ export class SynchronizationTaskRunner implements CancellableTask {
     } catch (e) {
       if (isRetryableEsClientError(e)) {
         throwRetryableError(
-          createTaskRunError(new Error(this.getErrorMessage(e.message)), this.errorSource),
+          createTaskRunError(new Error(this.handleErrorMessage(e.message)), this.errorSource),
           true
         );
       }
 
+      this.handleErrorMessage(e.message);
       throwUnrecoverableError(createTaskRunError(e, this.errorSource));
     }
   }
 
-  private updateLastSyncTimes({ previousTaskFailed }: { previousTaskFailed?: boolean }) {
+  private updateLastSyncTimes({ updateSuccessTime }: { updateSuccessTime?: boolean }) {
     this.handleDebug('Updating lastSyncAttempt and lastSyncSuccess before synchronization.');
 
-    if (!previousTaskFailed) {
-      /*
-       * If the reindexing operation failed
-       * this.lastSyncSuccess is not changed.
-       **/
+    if (updateSuccessTime) {
       this.lastSyncSuccess = this.lastSyncAttempt;
     }
     this.lastSyncAttempt = new Date(Date.now());
@@ -179,72 +182,10 @@ export class SynchronizationTaskRunner implements CancellableTask {
       };
     } else {
       throw createTaskRunError(
-        new Error(this.getErrorMessage('Painless script not found.')),
+        new Error(this.handleErrorMessage('Painless script not found.')),
         this.errorSource
       );
     }
-  }
-
-  private buildSourceQuery(): QueryDslQueryContainer {
-    /**
-     * Ideally the different getSourceQuery functions would be part of the
-     * task instance parameters. This is not possible since the task instance
-     * is stored in ES and the function gets converted into string.
-     */
-    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.destIndex](
-      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW) // TODO
-    );
-  }
-
-  private async getPainlessScript(esClient: ElasticsearchClient) {
-    const painlessScriptId = await this.getPainlessScriptId(esClient);
-
-    this.handleDebug(`Getting painless script with id ${painlessScriptId}.`);
-
-    return esClient.getScript({
-      id: painlessScriptId,
-    });
-  }
-
-  private getSyncState(): SynchronizationTaskState {
-    return {
-      lastSyncSuccess: this.lastSyncSuccess,
-      lastSyncAttempt: this.lastSyncAttempt,
-      syncTaskId: this.syncTaskId,
-    };
-  }
-
-  private async getPainlessScriptId(esClient: ElasticsearchClient): Promise<string> {
-    const mapping = await this.getMapping(esClient);
-    const painlessScriptId = mapping[this.destIndex].mappings._meta?.painless_script_id;
-
-    if (!painlessScriptId) {
-      throw createTaskRunError(
-        new Error(this.getErrorMessage('Painless script id missing from mapping.')),
-        this.errorSource
-      );
-    }
-
-    return painlessScriptId;
-  }
-
-  private async getMapping(esClient: ElasticsearchClient): Promise<IndicesGetMappingResponse> {
-    this.handleDebug('Getting index mapping.');
-
-    return esClient.indices.getMapping({
-      index: this.destIndex,
-    });
-  }
-
-  private async isIndexAvailable(esClient: ElasticsearchClient) {
-    this.handleDebug('Checking index availability.');
-
-    return esClient.cluster.health({
-      index: this.destIndex,
-      wait_for_status: 'green',
-      timeout: '300ms', // this is probably too much
-      wait_for_active_shards: 'all',
-    });
   }
 
   private async getPreviousReindexStatus(esClient: ElasticsearchClient): Promise<ReindexStatus> {
@@ -252,7 +193,6 @@ export class SynchronizationTaskRunner implements CancellableTask {
 
     if (this.syncTaskId) {
       const taskResponse = await esClient.tasks.get({ task_id: this.syncTaskId.toString() });
-
       if (!taskResponse.completed) {
         return ReindexStatus.RUNNING;
       } else {
@@ -266,13 +206,70 @@ export class SynchronizationTaskRunner implements CancellableTask {
     return ReindexStatus.MISSING_TASK_ID;
   }
 
+  private buildSourceQuery(): QueryDslQueryContainer {
+    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.destIndex](
+      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW)
+    );
+  }
+
+  private getSyncState(): SynchronizationTaskState {
+    return {
+      lastSyncSuccess: this.lastSyncSuccess,
+      lastSyncAttempt: this.lastSyncAttempt,
+      syncTaskId: this.syncTaskId,
+    };
+  }
+
+  private async getMapping(esClient: ElasticsearchClient): Promise<IndicesGetMappingResponse> {
+    this.handleDebug('Getting index mapping.');
+
+    return esClient.indices.getMapping({
+      index: this.destIndex,
+    });
+  }
+
+  private async getPainlessScript(esClient: ElasticsearchClient) {
+    const painlessScriptId = await this.getPainlessScriptId(esClient);
+
+    this.handleDebug(`Getting painless script with id ${painlessScriptId}.`);
+
+    return esClient.getScript({
+      id: painlessScriptId,
+    });
+  }
+
+  private async getPainlessScriptId(esClient: ElasticsearchClient): Promise<string> {
+    const mapping = await this.getMapping(esClient);
+    const painlessScriptId = mapping[this.destIndex].mappings._meta?.painless_script_id;
+
+    if (!painlessScriptId) {
+      throw createTaskRunError(
+        new Error(this.handleErrorMessage('Painless script id missing from mapping.')),
+        this.errorSource
+      );
+    }
+
+    return painlessScriptId;
+  }
+
+  private async isIndexAvailable(esClient: ElasticsearchClient) {
+    this.handleDebug('Checking index availability.');
+
+    return esClient.cluster.health({
+      index: this.destIndex,
+      wait_for_status: 'green',
+      timeout: '300ms', // this is probably too much
+      wait_for_active_shards: 'all',
+    });
+  }
+
   public handleDebug(message: string) {
     this.logger.debug(`[${this.destIndex}] ${message}`, {
       tags: ['cai-synchronization', this.destIndex],
     });
   }
 
-  public getErrorMessage(message: string) {
+  public handleErrorMessage(message: string) {
     const errorMessage = `[${this.destIndex}] Synchronization reindex failed. Error: ${message}`;
 
     this.logger.error(errorMessage, {
