@@ -17,4 +17,6 @@ export type {
 export type { SignificantEventsTimeline, SignificantEvent } from './tasks/generate_timeline';
 export type { EntityInvestigation } from './tasks/investigate_entity';
 
+export { callTools } from './util/call_tools';
+
 export { runRootCauseAnalysis } from './run_root_cause_analysis';
