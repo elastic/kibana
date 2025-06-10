@@ -14,6 +14,7 @@ import { hasAnyFieldWithPrefixes } from '../../utils/has_any_field_with_prefixes
 const attributesPrefixes = ['attributes.', 'scope.attributes.', 'resource.attributes.'];
 const hasAnyAttributesField = hasAnyFieldWithPrefixes(attributesPrefixes);
 
+const ATTRIBUTES_FEATURE_FLAG_ENABLED = false; // TODO replace with actual feature flag check
 export const withAttributesDocViewerTab = <
   TProvider extends DocumentProfileProvider<TContext>,
   TContext = TProvider extends DocumentProfileProvider<infer T> ? T : never
@@ -30,7 +31,7 @@ export const withAttributesDocViewerTab = <
       return {
         ...prevDocViewer,
         docViewsRegistry: (registry) => {
-          if (hasAnyAttributesField(params.record)) {
+          if (hasAnyAttributesField(params.record) && ATTRIBUTES_FEATURE_FLAG_ENABLED) {
             registry.add({
               id: 'doc_view_obs_attributes_overview',
               title: i18n.translate('discover.docViews.observability.attributesOverview.title', {
