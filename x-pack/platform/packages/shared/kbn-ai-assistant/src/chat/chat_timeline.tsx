@@ -22,6 +22,7 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
+import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -55,6 +56,7 @@ export interface ChatTimelineProps {
   isConversationOwnedByCurrentUser: boolean;
   isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  showElasticLlmCalloutInChat: boolean;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -69,6 +71,16 @@ export interface ChatTimelineProps {
   }) => void;
 }
 
+const euiCommentListClassName = css`
+  padding-bottom: 32px;
+`;
+
+const stickyElasticLlmCalloutContainerClassName = css`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`;
+
 export function ChatTimeline({
   conversationId,
   messages,
@@ -77,6 +89,7 @@ export function ChatTimeline({
   currentUser,
   isConversationOwnedByCurrentUser,
   isArchived,
+  showElasticLlmCalloutInChat,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -131,11 +144,12 @@ export function ChatTimeline({
   ]);
 
   return (
-    <EuiCommentList
-      className={css`
-        padding-bottom: 32px;
-      `}
-    >
+    <EuiCommentList className={euiCommentListClassName}>
+      {showElasticLlmCalloutInChat ? (
+        <div className={stickyElasticLlmCalloutContainerClassName}>
+          <ElasticLlmConversationCallout />
+        </div>
+      ) : null}
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems
