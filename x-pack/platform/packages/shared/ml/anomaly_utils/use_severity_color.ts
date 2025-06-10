@@ -38,6 +38,25 @@ export function getThemeResolvedSeverityColor(
   }
 }
 
+export function getThemeResolvedSeverityStrokeColor(
+  normalizedScore: number,
+  euiTheme: EuiThemeComputed
+): string {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
+    return euiTheme.colors.danger;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
+    return '#fc8544'; // TODO: euiPaletteOrange(6)[5]
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
+    return '#eaae01'; // TODO: euiPaletteYellow(6)[5]
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
+    return '#89cee7'; // TODO: euiPaletteSkyBlue(6)[3]
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
+    return '#c2e3f1'; // TODO: euiPaletteSkyBlue(6)[0]
+  } else {
+    return euiTheme.colors.severity.unknown;
+  }
+}
+
 /**
  * A React hook to get a theme-aware severity color string directly.
  * This hook computes the color based on the normalized score and the current EUI theme.

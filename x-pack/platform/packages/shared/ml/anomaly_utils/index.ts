@@ -91,7 +91,11 @@ export {
 
 export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';
-export { useSeverityColor, getThemeResolvedSeverityColor } from './use_severity_color';
+export {
+  useSeverityColor,
+  getThemeResolvedSeverityColor,
+  getThemeResolvedSeverityStrokeColor,
+} from './use_severity_color';
 export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
 

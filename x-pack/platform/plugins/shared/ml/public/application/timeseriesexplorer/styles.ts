@@ -9,7 +9,11 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
-import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
+import {
+  ML_ANOMALY_THRESHOLD,
+  getThemeResolvedSeverityColor,
+  getThemeResolvedSeverityStrokeColor,
+} from '@kbn/ml-anomaly-utils';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
@@ -118,31 +122,27 @@ export const useTimeseriesExplorerStyles = () => {
 
             '&.critical': {
               fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
-              // TODO: RED80
-              stroke: '#DA3737',
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
             },
 
             '&.major': {
               fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
-              // TODO: ORANGE60
-              stroke: '#FC8544',
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
             },
 
             '&.minor': {
               fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
-              // TODO: YELLOW40
-              stroke: '#FACB3D',
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
             },
 
             '&.warning': {
               fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
-              // TODO: SKY50
-              stroke: '#63C8E3',
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
             },
 
             '&.low': {
               fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
-              stroke: euiTheme.colors.severity.neutral,
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
             },
           },
 
