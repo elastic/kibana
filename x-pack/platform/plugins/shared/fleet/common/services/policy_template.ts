@@ -68,8 +68,7 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
 
 export const getNormalizedDataStreams = (
   packageInfo: PackageInfo | InstallablePackage,
-  datasetName?: string,
-  dataStreamType?: string
+  datasetName?: string
 ): RegistryDataStream[] => {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
@@ -85,7 +84,7 @@ export const getNormalizedDataStreams = (
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     const dataStream: RegistryDataStream = {
-      type: dataStreamType || policyTemplate.type,
+      type: policyTemplate.type,
       dataset,
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
