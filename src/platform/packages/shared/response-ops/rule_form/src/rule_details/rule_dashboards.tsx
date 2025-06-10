@@ -115,7 +115,9 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     });
   };
 
-  const onSearchChange = useCallback(
+  // Debounced search change handler to avoid excessive API calls
+  // useMemo is used instead of useCallback to avoid an eslint warning about exhaustive dependencies
+  const onSearchChange = useMemo(
     () =>
       debounce((value: string) => {
         setSearchValue(value);
