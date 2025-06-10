@@ -20,7 +20,6 @@ import {
   createExampleRootProfileProvider,
 } from './example/example_root_profile';
 import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
-import { createObservabilityLogDocumentProfileProvider } from './observability/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import type { ProfileProviderServices } from './profile_provider_services';
 import { createProfileProviderServices } from './profile_provider_services';
@@ -29,9 +28,6 @@ import { createObservabilityRootProfileProvider } from './observability/observab
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
-import { createObservabilityTracesSpanDocumentProfileProvider } from './observability/traces_document_profile/span_document_profile';
-import { createObservabilityTracesTransactionDocumentProfileProvider } from './observability/traces_document_profile/transaction_document_profile';
-import { createBaseObservabilityDocumentProfileProvider } from './observability/observability_document_profile';
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_provides';
 
 /**
@@ -152,8 +148,4 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
   ...createObservabilityDocumentProfileProviders(providerServices),
-  // createObservabilityLogDocumentProfileProvider(providerServices),
-  // createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-  // createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
-  // createBaseObservabilityDocumentProfileProvider(providerServices),
 ];
