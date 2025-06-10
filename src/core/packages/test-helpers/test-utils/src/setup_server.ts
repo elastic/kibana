@@ -57,8 +57,15 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   });
 
   return {
-    server,
-    httpSetup,
+    server: {
+      listener: httpSetup.server.listener,
+      start: server.start.bind(server),
+      stop: server.stop.bind(server),
+    },
+    createRouter: httpSetup.createRouter.bind(httpSetup),
+    registerRouteHandlerContext: httpSetup.registerRouteHandlerContext.bind(httpSetup),
     handlerContext,
   };
 };
+
+export type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

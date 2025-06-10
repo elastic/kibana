@@ -9,7 +9,7 @@ import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
@@ -30,14 +30,13 @@ import { ReportingRequestHandlerContext } from '../../../types';
 import { EventTracker } from '../../../usage';
 import { registerGenerationRoutesPublic } from '../generate_from_jobparams';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
-
 describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let store: ReportingStore;
@@ -58,8 +57,8 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   );
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(reportingSymbol));
+    registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
@@ -67,7 +66,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     const mockSetupDeps = createMockPluginSetup({
       security: { license: { isEnabled: () => true, getFeature: () => true } },
-      router: httpSetup.createRouter(''),
+      router: createRouter(''),
     });
 
     const mockStartDeps = await createMockPluginStart(
@@ -124,7 +123,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .expect(400)
       .then(({ body }) =>
@@ -139,7 +138,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -150,7 +149,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: `foo:` })
       .expect(400)
@@ -162,7 +161,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
@@ -176,7 +175,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
@@ -192,7 +191,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
@@ -203,7 +202,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({
@@ -243,7 +242,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
       .send({
         jobParams: rison.encode({
@@ -285,7 +284,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
         .send({
           jobParams: rison.encode({
@@ -308,7 +307,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
         .send({
           jobParams: rison.encode({
