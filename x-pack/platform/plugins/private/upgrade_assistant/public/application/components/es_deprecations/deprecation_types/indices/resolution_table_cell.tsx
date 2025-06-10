@@ -126,7 +126,7 @@ const i18nTexts = {
       tooltipText: i18n.translate(
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexReasonReadonly',
         {
-          defaultMessage: 'This index is already read-only. You can still reindex it.',
+          defaultMessage: 'This index is read-only. You can still reindex it.',
         }
       ),
     },
