@@ -7514,32 +7514,7 @@
                                       },
                                       "panelConfig": {
                                         "additionalProperties": true,
-                                        "properties": {
-                                          "description": {
-                                            "description": "The description of the panel",
-                                            "type": "string"
-                                          },
-                                          "enhancements": {
-                                            "additionalProperties": {},
-                                            "type": "object"
-                                          },
-                                          "hidePanelTitles": {
-                                            "description": "Set to true to hide the panel title in its container.",
-                                            "type": "boolean"
-                                          },
-                                          "savedObjectId": {
-                                            "description": "The unique id of the library item to construct the embeddable.",
-                                            "type": "string"
-                                          },
-                                          "title": {
-                                            "description": "The title of the panel",
-                                            "type": "string"
-                                          },
-                                          "version": {
-                                            "description": "The version of the embeddable in the panel.",
-                                            "type": "string"
-                                          }
-                                        },
+                                        "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
@@ -7639,32 +7614,7 @@
                                             },
                                             "panelConfig": {
                                               "additionalProperties": true,
-                                              "properties": {
-                                                "description": {
-                                                  "description": "The description of the panel",
-                                                  "type": "string"
-                                                },
-                                                "enhancements": {
-                                                  "additionalProperties": {},
-                                                  "type": "object"
-                                                },
-                                                "hidePanelTitles": {
-                                                  "description": "Set to true to hide the panel title in its container.",
-                                                  "type": "boolean"
-                                                },
-                                                "savedObjectId": {
-                                                  "description": "The unique id of the library item to construct the embeddable.",
-                                                  "type": "string"
-                                                },
-                                                "title": {
-                                                  "description": "The title of the panel",
-                                                  "type": "string"
-                                                },
-                                                "version": {
-                                                  "description": "The version of the embeddable in the panel.",
-                                                  "type": "string"
-                                                }
-                                              },
+                                              "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
@@ -8318,32 +8268,7 @@
                                 },
                                 "panelConfig": {
                                   "additionalProperties": true,
-                                  "properties": {
-                                    "description": {
-                                      "description": "The description of the panel",
-                                      "type": "string"
-                                    },
-                                    "enhancements": {
-                                      "additionalProperties": {},
-                                      "type": "object"
-                                    },
-                                    "hidePanelTitles": {
-                                      "description": "Set to true to hide the panel title in its container.",
-                                      "type": "boolean"
-                                    },
-                                    "savedObjectId": {
-                                      "description": "The unique id of the library item to construct the embeddable.",
-                                      "type": "string"
-                                    },
-                                    "title": {
-                                      "description": "The title of the panel",
-                                      "type": "string"
-                                    },
-                                    "version": {
-                                      "description": "The version of the embeddable in the panel.",
-                                      "type": "string"
-                                    }
-                                  },
+                                  "properties": {},
                                   "type": "object"
                                 },
                                 "panelIndex": {
@@ -8445,32 +8370,7 @@
                                       },
                                       "panelConfig": {
                                         "additionalProperties": true,
-                                        "properties": {
-                                          "description": {
-                                            "description": "The description of the panel",
-                                            "type": "string"
-                                          },
-                                          "enhancements": {
-                                            "additionalProperties": {},
-                                            "type": "object"
-                                          },
-                                          "hidePanelTitles": {
-                                            "description": "Set to true to hide the panel title in its container.",
-                                            "type": "boolean"
-                                          },
-                                          "savedObjectId": {
-                                            "description": "The unique id of the library item to construct the embeddable.",
-                                            "type": "string"
-                                          },
-                                          "title": {
-                                            "description": "The title of the panel",
-                                            "type": "string"
-                                          },
-                                          "version": {
-                                            "description": "The version of the embeddable in the panel.",
-                                            "type": "string"
-                                          }
-                                        },
+                                        "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
@@ -9007,32 +8907,7 @@
                                       },
                                       "panelConfig": {
                                         "additionalProperties": true,
-                                        "properties": {
-                                          "description": {
-                                            "description": "The description of the panel",
-                                            "type": "string"
-                                          },
-                                          "enhancements": {
-                                            "additionalProperties": {},
-                                            "type": "object"
-                                          },
-                                          "hidePanelTitles": {
-                                            "description": "Set to true to hide the panel title in its container.",
-                                            "type": "boolean"
-                                          },
-                                          "savedObjectId": {
-                                            "description": "The unique id of the library item to construct the embeddable.",
-                                            "type": "string"
-                                          },
-                                          "title": {
-                                            "description": "The title of the panel",
-                                            "type": "string"
-                                          },
-                                          "version": {
-                                            "description": "The version of the embeddable in the panel.",
-                                            "type": "string"
-                                          }
-                                        },
+                                        "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
@@ -9132,32 +9007,7 @@
                                             },
                                             "panelConfig": {
                                               "additionalProperties": true,
-                                              "properties": {
-                                                "description": {
-                                                  "description": "The description of the panel",
-                                                  "type": "string"
-                                                },
-                                                "enhancements": {
-                                                  "additionalProperties": {},
-                                                  "type": "object"
-                                                },
-                                                "hidePanelTitles": {
-                                                  "description": "Set to true to hide the panel title in its container.",
-                                                  "type": "boolean"
-                                                },
-                                                "savedObjectId": {
-                                                  "description": "The unique id of the library item to construct the embeddable.",
-                                                  "type": "string"
-                                                },
-                                                "title": {
-                                                  "description": "The title of the panel",
-                                                  "type": "string"
-                                                },
-                                                "version": {
-                                                  "description": "The version of the embeddable in the panel.",
-                                                  "type": "string"
-                                                }
-                                              },
+                                              "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
@@ -9783,32 +9633,7 @@
                                 },
                                 "panelConfig": {
                                   "additionalProperties": true,
-                                  "properties": {
-                                    "description": {
-                                      "description": "The description of the panel",
-                                      "type": "string"
-                                    },
-                                    "enhancements": {
-                                      "additionalProperties": {},
-                                      "type": "object"
-                                    },
-                                    "hidePanelTitles": {
-                                      "description": "Set to true to hide the panel title in its container.",
-                                      "type": "boolean"
-                                    },
-                                    "savedObjectId": {
-                                      "description": "The unique id of the library item to construct the embeddable.",
-                                      "type": "string"
-                                    },
-                                    "title": {
-                                      "description": "The title of the panel",
-                                      "type": "string"
-                                    },
-                                    "version": {
-                                      "description": "The version of the embeddable in the panel.",
-                                      "type": "string"
-                                    }
-                                  },
+                                  "properties": {},
                                   "type": "object"
                                 },
                                 "panelIndex": {
@@ -9910,32 +9735,7 @@
                                       },
                                       "panelConfig": {
                                         "additionalProperties": true,
-                                        "properties": {
-                                          "description": {
-                                            "description": "The description of the panel",
-                                            "type": "string"
-                                          },
-                                          "enhancements": {
-                                            "additionalProperties": {},
-                                            "type": "object"
-                                          },
-                                          "hidePanelTitles": {
-                                            "description": "Set to true to hide the panel title in its container.",
-                                            "type": "boolean"
-                                          },
-                                          "savedObjectId": {
-                                            "description": "The unique id of the library item to construct the embeddable.",
-                                            "type": "string"
-                                          },
-                                          "title": {
-                                            "description": "The title of the panel",
-                                            "type": "string"
-                                          },
-                                          "version": {
-                                            "description": "The version of the embeddable in the panel.",
-                                            "type": "string"
-                                          }
-                                        },
+                                        "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
@@ -10466,32 +10266,7 @@
                                       },
                                       "panelConfig": {
                                         "additionalProperties": true,
-                                        "properties": {
-                                          "description": {
-                                            "description": "The description of the panel",
-                                            "type": "string"
-                                          },
-                                          "enhancements": {
-                                            "additionalProperties": {},
-                                            "type": "object"
-                                          },
-                                          "hidePanelTitles": {
-                                            "description": "Set to true to hide the panel title in its container.",
-                                            "type": "boolean"
-                                          },
-                                          "savedObjectId": {
-                                            "description": "The unique id of the library item to construct the embeddable.",
-                                            "type": "string"
-                                          },
-                                          "title": {
-                                            "description": "The title of the panel",
-                                            "type": "string"
-                                          },
-                                          "version": {
-                                            "description": "The version of the embeddable in the panel.",
-                                            "type": "string"
-                                          }
-                                        },
+                                        "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
@@ -10591,32 +10366,7 @@
                                             },
                                             "panelConfig": {
                                               "additionalProperties": true,
-                                              "properties": {
-                                                "description": {
-                                                  "description": "The description of the panel",
-                                                  "type": "string"
-                                                },
-                                                "enhancements": {
-                                                  "additionalProperties": {},
-                                                  "type": "object"
-                                                },
-                                                "hidePanelTitles": {
-                                                  "description": "Set to true to hide the panel title in its container.",
-                                                  "type": "boolean"
-                                                },
-                                                "savedObjectId": {
-                                                  "description": "The unique id of the library item to construct the embeddable.",
-                                                  "type": "string"
-                                                },
-                                                "title": {
-                                                  "description": "The title of the panel",
-                                                  "type": "string"
-                                                },
-                                                "version": {
-                                                  "description": "The version of the embeddable in the panel.",
-                                                  "type": "string"
-                                                }
-                                              },
+                                              "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
@@ -50548,6 +50298,274 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "manual_ingest_pipeline": {
+                                                          "allOf": [
+                                                            {
+                                                              "properties": {
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "if": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "anyOf": [
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "operator": {
+                                                                              "enum": [
+                                                                                "exists",
+                                                                                "notExists"
+                                                                              ],
+                                                                              "type": "string"
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field",
+                                                                            "operator"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        },
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "operator": {
+                                                                              "enum": [
+                                                                                "eq",
+                                                                                "neq",
+                                                                                "lt",
+                                                                                "lte",
+                                                                                "gt",
+                                                                                "gte",
+                                                                                "contains",
+                                                                                "startsWith",
+                                                                                "endsWith"
+                                                                              ],
+                                                                              "type": "string"
+                                                                            },
+                                                                            "value": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field",
+                                                                            "operator",
+                                                                            "value"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "and": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "and"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "or": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "or"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "never": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "never"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "always": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "always"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                }
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "properties": {
+                                                                "on_failure": {
+                                                                  "items": {
+                                                                    "additionalProperties": {},
+                                                                    "type": "object"
+                                                                  },
+                                                                  "type": "array"
+                                                                },
+                                                                "processors": {
+                                                                  "items": {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                      "append": {},
+                                                                      "attachment": {},
+                                                                      "bytes": {},
+                                                                      "circle": {},
+                                                                      "community_id": {},
+                                                                      "convert": {},
+                                                                      "csv": {},
+                                                                      "date": {},
+                                                                      "date_index_name": {},
+                                                                      "dissect": {},
+                                                                      "dot_expander": {},
+                                                                      "drop": {},
+                                                                      "enrich": {},
+                                                                      "fail": {},
+                                                                      "fingerprint": {},
+                                                                      "foreach": {},
+                                                                      "geo_grid": {},
+                                                                      "geoip": {},
+                                                                      "grok": {},
+                                                                      "gsub": {},
+                                                                      "html_strip": {},
+                                                                      "inference": {},
+                                                                      "ip_location": {},
+                                                                      "join": {},
+                                                                      "json": {},
+                                                                      "kv": {},
+                                                                      "lowercase": {},
+                                                                      "network_direction": {},
+                                                                      "pipeline": {},
+                                                                      "redact": {},
+                                                                      "registered_domain": {},
+                                                                      "remove": {},
+                                                                      "rename": {},
+                                                                      "reroute": {},
+                                                                      "script": {},
+                                                                      "set": {},
+                                                                      "set_security_user": {},
+                                                                      "sort": {},
+                                                                      "split": {},
+                                                                      "terminate": {},
+                                                                      "trim": {},
+                                                                      "uppercase": {},
+                                                                      "uri_parts": {},
+                                                                      "urldecode": {},
+                                                                      "user_agent": {}
+                                                                    },
+                                                                    "required": [
+                                                                      "append",
+                                                                      "attachment",
+                                                                      "bytes",
+                                                                      "circle",
+                                                                      "community_id",
+                                                                      "convert",
+                                                                      "csv",
+                                                                      "date",
+                                                                      "date_index_name",
+                                                                      "dissect",
+                                                                      "dot_expander",
+                                                                      "drop",
+                                                                      "enrich",
+                                                                      "fail",
+                                                                      "fingerprint",
+                                                                      "foreach",
+                                                                      "ip_location",
+                                                                      "geo_grid",
+                                                                      "geoip",
+                                                                      "grok",
+                                                                      "gsub",
+                                                                      "html_strip",
+                                                                      "inference",
+                                                                      "join",
+                                                                      "json",
+                                                                      "kv",
+                                                                      "lowercase",
+                                                                      "network_direction",
+                                                                      "pipeline",
+                                                                      "redact",
+                                                                      "registered_domain",
+                                                                      "remove",
+                                                                      "rename",
+                                                                      "reroute",
+                                                                      "script",
+                                                                      "set",
+                                                                      "set_security_user",
+                                                                      "sort",
+                                                                      "split",
+                                                                      "terminate",
+                                                                      "trim",
+                                                                      "uppercase",
+                                                                      "urldecode",
+                                                                      "uri_parts",
+                                                                      "user_agent"
+                                                                    ],
+                                                                    "type": "object"
+                                                                  },
+                                                                  "type": "array"
+                                                                },
+                                                                "tag": {
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "processors"
+                                                              ],
+                                                              "type": "object"
+                                                            }
+                                                          ]
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "manual_ingest_pipeline"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
                                                         "kv": {
                                                           "allOf": [
                                                             {
@@ -52372,6 +52390,274 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
+                                                    "manual_ingest_pipeline": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "on_failure": {
+                                                              "items": {
+                                                                "additionalProperties": {},
+                                                                "type": "object"
+                                                              },
+                                                              "type": "array"
+                                                            },
+                                                            "processors": {
+                                                              "items": {
+                                                                "additionalProperties": false,
+                                                                "properties": {
+                                                                  "append": {},
+                                                                  "attachment": {},
+                                                                  "bytes": {},
+                                                                  "circle": {},
+                                                                  "community_id": {},
+                                                                  "convert": {},
+                                                                  "csv": {},
+                                                                  "date": {},
+                                                                  "date_index_name": {},
+                                                                  "dissect": {},
+                                                                  "dot_expander": {},
+                                                                  "drop": {},
+                                                                  "enrich": {},
+                                                                  "fail": {},
+                                                                  "fingerprint": {},
+                                                                  "foreach": {},
+                                                                  "geo_grid": {},
+                                                                  "geoip": {},
+                                                                  "grok": {},
+                                                                  "gsub": {},
+                                                                  "html_strip": {},
+                                                                  "inference": {},
+                                                                  "ip_location": {},
+                                                                  "join": {},
+                                                                  "json": {},
+                                                                  "kv": {},
+                                                                  "lowercase": {},
+                                                                  "network_direction": {},
+                                                                  "pipeline": {},
+                                                                  "redact": {},
+                                                                  "registered_domain": {},
+                                                                  "remove": {},
+                                                                  "rename": {},
+                                                                  "reroute": {},
+                                                                  "script": {},
+                                                                  "set": {},
+                                                                  "set_security_user": {},
+                                                                  "sort": {},
+                                                                  "split": {},
+                                                                  "terminate": {},
+                                                                  "trim": {},
+                                                                  "uppercase": {},
+                                                                  "uri_parts": {},
+                                                                  "urldecode": {},
+                                                                  "user_agent": {}
+                                                                },
+                                                                "required": [
+                                                                  "append",
+                                                                  "attachment",
+                                                                  "bytes",
+                                                                  "circle",
+                                                                  "community_id",
+                                                                  "convert",
+                                                                  "csv",
+                                                                  "date",
+                                                                  "date_index_name",
+                                                                  "dissect",
+                                                                  "dot_expander",
+                                                                  "drop",
+                                                                  "enrich",
+                                                                  "fail",
+                                                                  "fingerprint",
+                                                                  "foreach",
+                                                                  "ip_location",
+                                                                  "geo_grid",
+                                                                  "geoip",
+                                                                  "grok",
+                                                                  "gsub",
+                                                                  "html_strip",
+                                                                  "inference",
+                                                                  "join",
+                                                                  "json",
+                                                                  "kv",
+                                                                  "lowercase",
+                                                                  "network_direction",
+                                                                  "pipeline",
+                                                                  "redact",
+                                                                  "registered_domain",
+                                                                  "remove",
+                                                                  "rename",
+                                                                  "reroute",
+                                                                  "script",
+                                                                  "set",
+                                                                  "set_security_user",
+                                                                  "sort",
+                                                                  "split",
+                                                                  "terminate",
+                                                                  "trim",
+                                                                  "uppercase",
+                                                                  "urldecode",
+                                                                  "uri_parts",
+                                                                  "user_agent"
+                                                                ],
+                                                                "type": "object"
+                                                              },
+                                                              "type": "array"
+                                                            },
+                                                            "tag": {
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "processors"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "manual_ingest_pipeline"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
                                                     "kv": {
                                                       "allOf": [
                                                         {
@@ -53951,6 +54237,274 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
+                                                        "manual_ingest_pipeline": {
+                                                          "allOf": [
+                                                            {
+                                                              "properties": {
+                                                                "description": {
+                                                                  "type": "string"
+                                                                },
+                                                                "if": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "anyOf": [
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "operator": {
+                                                                              "enum": [
+                                                                                "exists",
+                                                                                "notExists"
+                                                                              ],
+                                                                              "type": "string"
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field",
+                                                                            "operator"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        },
+                                                                        {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {
+                                                                            "field": {
+                                                                              "minLength": 1,
+                                                                              "type": "string"
+                                                                            },
+                                                                            "operator": {
+                                                                              "enum": [
+                                                                                "eq",
+                                                                                "neq",
+                                                                                "lt",
+                                                                                "lte",
+                                                                                "gt",
+                                                                                "gte",
+                                                                                "contains",
+                                                                                "startsWith",
+                                                                                "endsWith"
+                                                                              ],
+                                                                              "type": "string"
+                                                                            },
+                                                                            "value": {
+                                                                              "anyOf": [
+                                                                                {
+                                                                                  "type": "string"
+                                                                                },
+                                                                                {
+                                                                                  "type": "number"
+                                                                                },
+                                                                                {
+                                                                                  "type": "boolean"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          },
+                                                                          "required": [
+                                                                            "field",
+                                                                            "operator",
+                                                                            "value"
+                                                                          ],
+                                                                          "type": "object"
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "and": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "and"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "or": {
+                                                                          "items": {},
+                                                                          "type": "array"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "or"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "never": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "never"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "always": {
+                                                                          "additionalProperties": false,
+                                                                          "properties": {},
+                                                                          "type": "object"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "always"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "ignore_failure": {
+                                                                  "type": "boolean"
+                                                                }
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "properties": {
+                                                                "on_failure": {
+                                                                  "items": {
+                                                                    "additionalProperties": {},
+                                                                    "type": "object"
+                                                                  },
+                                                                  "type": "array"
+                                                                },
+                                                                "processors": {
+                                                                  "items": {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                      "append": {},
+                                                                      "attachment": {},
+                                                                      "bytes": {},
+                                                                      "circle": {},
+                                                                      "community_id": {},
+                                                                      "convert": {},
+                                                                      "csv": {},
+                                                                      "date": {},
+                                                                      "date_index_name": {},
+                                                                      "dissect": {},
+                                                                      "dot_expander": {},
+                                                                      "drop": {},
+                                                                      "enrich": {},
+                                                                      "fail": {},
+                                                                      "fingerprint": {},
+                                                                      "foreach": {},
+                                                                      "geo_grid": {},
+                                                                      "geoip": {},
+                                                                      "grok": {},
+                                                                      "gsub": {},
+                                                                      "html_strip": {},
+                                                                      "inference": {},
+                                                                      "ip_location": {},
+                                                                      "join": {},
+                                                                      "json": {},
+                                                                      "kv": {},
+                                                                      "lowercase": {},
+                                                                      "network_direction": {},
+                                                                      "pipeline": {},
+                                                                      "redact": {},
+                                                                      "registered_domain": {},
+                                                                      "remove": {},
+                                                                      "rename": {},
+                                                                      "reroute": {},
+                                                                      "script": {},
+                                                                      "set": {},
+                                                                      "set_security_user": {},
+                                                                      "sort": {},
+                                                                      "split": {},
+                                                                      "terminate": {},
+                                                                      "trim": {},
+                                                                      "uppercase": {},
+                                                                      "uri_parts": {},
+                                                                      "urldecode": {},
+                                                                      "user_agent": {}
+                                                                    },
+                                                                    "required": [
+                                                                      "append",
+                                                                      "attachment",
+                                                                      "bytes",
+                                                                      "circle",
+                                                                      "community_id",
+                                                                      "convert",
+                                                                      "csv",
+                                                                      "date",
+                                                                      "date_index_name",
+                                                                      "dissect",
+                                                                      "dot_expander",
+                                                                      "drop",
+                                                                      "enrich",
+                                                                      "fail",
+                                                                      "fingerprint",
+                                                                      "foreach",
+                                                                      "ip_location",
+                                                                      "geo_grid",
+                                                                      "geoip",
+                                                                      "grok",
+                                                                      "gsub",
+                                                                      "html_strip",
+                                                                      "inference",
+                                                                      "join",
+                                                                      "json",
+                                                                      "kv",
+                                                                      "lowercase",
+                                                                      "network_direction",
+                                                                      "pipeline",
+                                                                      "redact",
+                                                                      "registered_domain",
+                                                                      "remove",
+                                                                      "rename",
+                                                                      "reroute",
+                                                                      "script",
+                                                                      "set",
+                                                                      "set_security_user",
+                                                                      "sort",
+                                                                      "split",
+                                                                      "terminate",
+                                                                      "trim",
+                                                                      "uppercase",
+                                                                      "urldecode",
+                                                                      "uri_parts",
+                                                                      "user_agent"
+                                                                    ],
+                                                                    "type": "object"
+                                                                  },
+                                                                  "type": "array"
+                                                                },
+                                                                "tag": {
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "processors"
+                                                              ],
+                                                              "type": "object"
+                                                            }
+                                                          ]
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "manual_ingest_pipeline"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
                                                         "kv": {
                                                           "allOf": [
                                                             {
@@ -55516,6 +56070,274 @@
                                                   },
                                                   "required": [
                                                     "grok"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "manual_ingest_pipeline": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "on_failure": {
+                                                              "items": {
+                                                                "additionalProperties": {},
+                                                                "type": "object"
+                                                              },
+                                                              "type": "array"
+                                                            },
+                                                            "processors": {
+                                                              "items": {
+                                                                "additionalProperties": false,
+                                                                "properties": {
+                                                                  "append": {},
+                                                                  "attachment": {},
+                                                                  "bytes": {},
+                                                                  "circle": {},
+                                                                  "community_id": {},
+                                                                  "convert": {},
+                                                                  "csv": {},
+                                                                  "date": {},
+                                                                  "date_index_name": {},
+                                                                  "dissect": {},
+                                                                  "dot_expander": {},
+                                                                  "drop": {},
+                                                                  "enrich": {},
+                                                                  "fail": {},
+                                                                  "fingerprint": {},
+                                                                  "foreach": {},
+                                                                  "geo_grid": {},
+                                                                  "geoip": {},
+                                                                  "grok": {},
+                                                                  "gsub": {},
+                                                                  "html_strip": {},
+                                                                  "inference": {},
+                                                                  "ip_location": {},
+                                                                  "join": {},
+                                                                  "json": {},
+                                                                  "kv": {},
+                                                                  "lowercase": {},
+                                                                  "network_direction": {},
+                                                                  "pipeline": {},
+                                                                  "redact": {},
+                                                                  "registered_domain": {},
+                                                                  "remove": {},
+                                                                  "rename": {},
+                                                                  "reroute": {},
+                                                                  "script": {},
+                                                                  "set": {},
+                                                                  "set_security_user": {},
+                                                                  "sort": {},
+                                                                  "split": {},
+                                                                  "terminate": {},
+                                                                  "trim": {},
+                                                                  "uppercase": {},
+                                                                  "uri_parts": {},
+                                                                  "urldecode": {},
+                                                                  "user_agent": {}
+                                                                },
+                                                                "required": [
+                                                                  "append",
+                                                                  "attachment",
+                                                                  "bytes",
+                                                                  "circle",
+                                                                  "community_id",
+                                                                  "convert",
+                                                                  "csv",
+                                                                  "date",
+                                                                  "date_index_name",
+                                                                  "dissect",
+                                                                  "dot_expander",
+                                                                  "drop",
+                                                                  "enrich",
+                                                                  "fail",
+                                                                  "fingerprint",
+                                                                  "foreach",
+                                                                  "ip_location",
+                                                                  "geo_grid",
+                                                                  "geoip",
+                                                                  "grok",
+                                                                  "gsub",
+                                                                  "html_strip",
+                                                                  "inference",
+                                                                  "join",
+                                                                  "json",
+                                                                  "kv",
+                                                                  "lowercase",
+                                                                  "network_direction",
+                                                                  "pipeline",
+                                                                  "redact",
+                                                                  "registered_domain",
+                                                                  "remove",
+                                                                  "rename",
+                                                                  "reroute",
+                                                                  "script",
+                                                                  "set",
+                                                                  "set_security_user",
+                                                                  "sort",
+                                                                  "split",
+                                                                  "terminate",
+                                                                  "trim",
+                                                                  "uppercase",
+                                                                  "urldecode",
+                                                                  "uri_parts",
+                                                                  "user_agent"
+                                                                ],
+                                                                "type": "object"
+                                                              },
+                                                              "type": "array"
+                                                            },
+                                                            "tag": {
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "processors"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "manual_ingest_pipeline"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -57499,6 +58321,274 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
+                                        "manual_ingest_pipeline": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "on_failure": {
+                                                  "items": {
+                                                    "additionalProperties": {},
+                                                    "type": "object"
+                                                  },
+                                                  "type": "array"
+                                                },
+                                                "processors": {
+                                                  "items": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "append": {},
+                                                      "attachment": {},
+                                                      "bytes": {},
+                                                      "circle": {},
+                                                      "community_id": {},
+                                                      "convert": {},
+                                                      "csv": {},
+                                                      "date": {},
+                                                      "date_index_name": {},
+                                                      "dissect": {},
+                                                      "dot_expander": {},
+                                                      "drop": {},
+                                                      "enrich": {},
+                                                      "fail": {},
+                                                      "fingerprint": {},
+                                                      "foreach": {},
+                                                      "geo_grid": {},
+                                                      "geoip": {},
+                                                      "grok": {},
+                                                      "gsub": {},
+                                                      "html_strip": {},
+                                                      "inference": {},
+                                                      "ip_location": {},
+                                                      "join": {},
+                                                      "json": {},
+                                                      "kv": {},
+                                                      "lowercase": {},
+                                                      "network_direction": {},
+                                                      "pipeline": {},
+                                                      "redact": {},
+                                                      "registered_domain": {},
+                                                      "remove": {},
+                                                      "rename": {},
+                                                      "reroute": {},
+                                                      "script": {},
+                                                      "set": {},
+                                                      "set_security_user": {},
+                                                      "sort": {},
+                                                      "split": {},
+                                                      "terminate": {},
+                                                      "trim": {},
+                                                      "uppercase": {},
+                                                      "uri_parts": {},
+                                                      "urldecode": {},
+                                                      "user_agent": {}
+                                                    },
+                                                    "required": [
+                                                      "append",
+                                                      "attachment",
+                                                      "bytes",
+                                                      "circle",
+                                                      "community_id",
+                                                      "convert",
+                                                      "csv",
+                                                      "date",
+                                                      "date_index_name",
+                                                      "dissect",
+                                                      "dot_expander",
+                                                      "drop",
+                                                      "enrich",
+                                                      "fail",
+                                                      "fingerprint",
+                                                      "foreach",
+                                                      "ip_location",
+                                                      "geo_grid",
+                                                      "geoip",
+                                                      "grok",
+                                                      "gsub",
+                                                      "html_strip",
+                                                      "inference",
+                                                      "join",
+                                                      "json",
+                                                      "kv",
+                                                      "lowercase",
+                                                      "network_direction",
+                                                      "pipeline",
+                                                      "redact",
+                                                      "registered_domain",
+                                                      "remove",
+                                                      "rename",
+                                                      "reroute",
+                                                      "script",
+                                                      "set",
+                                                      "set_security_user",
+                                                      "sort",
+                                                      "split",
+                                                      "terminate",
+                                                      "trim",
+                                                      "uppercase",
+                                                      "urldecode",
+                                                      "uri_parts",
+                                                      "user_agent"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "type": "array"
+                                                },
+                                                "tag": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "processors"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "manual_ingest_pipeline"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
                                         "kv": {
                                           "allOf": [
                                             {
@@ -59178,6 +60268,274 @@
                                       },
                                       "required": [
                                         "grok"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "manual_ingest_pipeline": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "on_failure": {
+                                                  "items": {
+                                                    "additionalProperties": {},
+                                                    "type": "object"
+                                                  },
+                                                  "type": "array"
+                                                },
+                                                "processors": {
+                                                  "items": {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                      "append": {},
+                                                      "attachment": {},
+                                                      "bytes": {},
+                                                      "circle": {},
+                                                      "community_id": {},
+                                                      "convert": {},
+                                                      "csv": {},
+                                                      "date": {},
+                                                      "date_index_name": {},
+                                                      "dissect": {},
+                                                      "dot_expander": {},
+                                                      "drop": {},
+                                                      "enrich": {},
+                                                      "fail": {},
+                                                      "fingerprint": {},
+                                                      "foreach": {},
+                                                      "geo_grid": {},
+                                                      "geoip": {},
+                                                      "grok": {},
+                                                      "gsub": {},
+                                                      "html_strip": {},
+                                                      "inference": {},
+                                                      "ip_location": {},
+                                                      "join": {},
+                                                      "json": {},
+                                                      "kv": {},
+                                                      "lowercase": {},
+                                                      "network_direction": {},
+                                                      "pipeline": {},
+                                                      "redact": {},
+                                                      "registered_domain": {},
+                                                      "remove": {},
+                                                      "rename": {},
+                                                      "reroute": {},
+                                                      "script": {},
+                                                      "set": {},
+                                                      "set_security_user": {},
+                                                      "sort": {},
+                                                      "split": {},
+                                                      "terminate": {},
+                                                      "trim": {},
+                                                      "uppercase": {},
+                                                      "uri_parts": {},
+                                                      "urldecode": {},
+                                                      "user_agent": {}
+                                                    },
+                                                    "required": [
+                                                      "append",
+                                                      "attachment",
+                                                      "bytes",
+                                                      "circle",
+                                                      "community_id",
+                                                      "convert",
+                                                      "csv",
+                                                      "date",
+                                                      "date_index_name",
+                                                      "dissect",
+                                                      "dot_expander",
+                                                      "drop",
+                                                      "enrich",
+                                                      "fail",
+                                                      "fingerprint",
+                                                      "foreach",
+                                                      "ip_location",
+                                                      "geo_grid",
+                                                      "geoip",
+                                                      "grok",
+                                                      "gsub",
+                                                      "html_strip",
+                                                      "inference",
+                                                      "join",
+                                                      "json",
+                                                      "kv",
+                                                      "lowercase",
+                                                      "network_direction",
+                                                      "pipeline",
+                                                      "redact",
+                                                      "registered_domain",
+                                                      "remove",
+                                                      "rename",
+                                                      "reroute",
+                                                      "script",
+                                                      "set",
+                                                      "set_security_user",
+                                                      "sort",
+                                                      "split",
+                                                      "terminate",
+                                                      "trim",
+                                                      "uppercase",
+                                                      "urldecode",
+                                                      "uri_parts",
+                                                      "user_agent"
+                                                    ],
+                                                    "type": "object"
+                                                  },
+                                                  "type": "array"
+                                                },
+                                                "tag": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "processors"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "manual_ingest_pipeline"
                                       ],
                                       "type": "object"
                                     },
