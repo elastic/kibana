@@ -286,8 +286,13 @@ export const checkOverwriteInvestigationFieldsCheckbox = () => {
 };
 
 // edit alert suppression
-const clickAlertSuppressionMenuItem = () => {
+
+export const clickBulkActionsButton = () => {
   cy.get(BULK_ACTIONS_BTN).click();
+};
+
+const clickAlertSuppressionMenuItem = () => {
+  clickBulkActionsButton();
   cy.get(ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).click();
 };
 
