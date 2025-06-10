@@ -49,7 +49,7 @@ const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
 });
 const ESCAPED_DEFAULT_TAB_LABEL = escapeRegExp(DEFAULT_TAB_LABEL);
 const DEFAULT_TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL}( \\d+)?$`); // tab without a number
-const DEFAULT_TAB_NUMBER_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (\\d+)$`); // tab with a number
+const DEFAULT_TAB_NUMBER_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (?<tabNumber>\\d+)$`); // tab with a number
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
@@ -58,7 +58,8 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
     .filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim()))
     .map((tab) => {
       const match = tab.label.trim().match(DEFAULT_TAB_NUMBER_REGEX);
-      return match && match[1] ? Number(match[1]) : 1;
+      const tabNumber = match?.groups?.tabNumber;
+      return tabNumber ? Number(tabNumber) : 1;
     });
 
   const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : null;
