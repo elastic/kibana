@@ -1,24 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
-import * as i18n from '../translations';
-import type { MaintenanceWindowFrequency } from '../constants';
 import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from '../constants';
 import { monthDayDate } from './month_day_date';
 import { getNthByWeekday } from './get_nth_by_weekday';
-import type { RecurringScheduleFormProps } from '../components/schema';
+import {
+  RECURRING_SCHEDULE_FORM_FREQUENCY_SUMMARY,
+  RECURRING_SCHEDULE_FORM_WEEKLY_SUMMARY,
+  RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT,
+  RECURRING_SCHEDULE_FORM_MONTHLY_BY_DAY_SUMMARY,
+  RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY,
+  RECURRING_SCHEDULE_FORM_UNTIL_DATE_SUMMARY,
+  RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY,
+  RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY,
+} from '../translations';
+import type { RecurrenceFrequency, RecurringSchedule } from '../types';
 
 export const recurringSummary = (
   startDate: Moment,
-  recurringSchedule: RecurringScheduleFormProps | undefined,
-  presets: Record<MaintenanceWindowFrequency, Partial<RecurringScheduleFormProps>>
+  recurringSchedule: RecurringSchedule | undefined,
+  presets: Record<RecurrenceFrequency, Partial<RecurringSchedule>>
 ) => {
   if (!recurringSchedule) return '';
 
@@ -27,9 +37,9 @@ export const recurringSummary = (
     schedule = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
   }
 
-  const frequency = schedule.customFrequency ?? (schedule.frequency as MaintenanceWindowFrequency);
+  const frequency = schedule.customFrequency ?? (schedule.frequency as RecurrenceFrequency);
   const interval = schedule.interval || 1;
-  const frequencySummary = i18n.CREATE_FORM_FREQUENCY_SUMMARY(interval)[frequency];
+  const frequencySummary = RECURRING_SCHEDULE_FORM_FREQUENCY_SUMMARY(interval)[frequency];
 
   // daily and weekly
   let weeklySummary = null;
@@ -42,7 +52,7 @@ export const recurringSummary = (
       .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)]);
     const formattedWeekdays = weekdays.map((weekday) => toWeekdayName(weekday)).join(', ');
 
-    weeklySummary = i18n.CREATE_FORM_WEEKLY_SUMMARY(formattedWeekdays);
+    weeklySummary = RECURRING_SCHEDULE_FORM_WEEKLY_SUMMARY(formattedWeekdays);
     dailyWeekdaySummary = formattedWeekdays;
 
     dailyWithWeekdays = frequency === Frequency.DAILY;
@@ -55,15 +65,15 @@ export const recurringSummary = (
     if (bymonth === 'weekday') {
       const nthWeekday = getNthByWeekday(startDate);
       const nth = nthWeekday.startsWith('-1') ? 0 : Number(nthWeekday[1]);
-      monthlySummary = i18n.CREATE_FORM_WEEKDAY_SHORT(toWeekdayName(nthWeekday))[nth];
+      monthlySummary = RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT(toWeekdayName(nthWeekday))[nth];
       monthlySummary = monthlySummary[0].toLocaleLowerCase() + monthlySummary.slice(1);
     } else if (bymonth === 'day') {
-      monthlySummary = i18n.CREATE_FORM_MONTHLY_BY_DAY_SUMMARY(startDate.date());
+      monthlySummary = RECURRING_SCHEDULE_FORM_MONTHLY_BY_DAY_SUMMARY(startDate.date());
     }
   }
 
   // yearly
-  const yearlyByMonthSummary = i18n.CREATE_FORM_YEARLY_BY_MONTH_SUMMARY(
+  const yearlyByMonthSummary = RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY(
     monthDayDate(moment().month(startDate.month()).date(startDate.date()))
   );
 
@@ -78,18 +88,16 @@ export const recurringSummary = (
     : null;
 
   const untilSummary = schedule.until
-    ? i18n.CREATE_FORM_UNTIL_DATE_SUMMARY(moment(schedule.until).format('LL'))
+    ? RECURRING_SCHEDULE_FORM_UNTIL_DATE_SUMMARY(moment(schedule.until).format('LL'))
     : schedule.count
-    ? i18n.CREATE_FORM_OCURRENCES_SUMMARY(schedule.count)
+    ? RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY(schedule.count)
     : null;
 
-  const every = i18n
-    .CREATE_FORM_RECURRING_SUMMARY(
-      !dailyWithWeekdays ? frequencySummary : null,
-      onSummary,
-      untilSummary
-    )
-    .trim();
+  const every = RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY(
+    !dailyWithWeekdays ? frequencySummary : null,
+    onSummary,
+    untilSummary
+  ).trim();
 
   return every;
 };

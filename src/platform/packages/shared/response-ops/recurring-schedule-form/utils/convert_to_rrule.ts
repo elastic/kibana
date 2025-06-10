@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
-import { getNthByWeekday } from './get_nth_by_weekday';
-import type { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
-import type { RRuleParams } from '../../../../common';
 import { parseSchedule } from './parse_schedule';
+import { getNthByWeekday } from './get_nth_by_weekday';
+import type { RRuleParams, RecurringSchedule } from '../types';
 
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
-  recurringSchedule?: RecurringScheduleFormProps
+  recurringSchedule?: RecurringSchedule
 ): RRuleParams => {
   const presets = getPresets(startDate);
 
