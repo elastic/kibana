@@ -65,7 +65,7 @@ export function formatFieldValue(
 
   // If we have a duration field, override config and provide our own formatter if
   // one isn't available from the data view.
-  if (field.name.includes('duration.us')) {
+  if (field.name.endsWith('duration.us')) {
     const format =
       dataView.getFormatterForFieldNoDefault(field.name) ??
       fieldFormats.getInstance('duration', DURATION_CONFIG);
