@@ -13,10 +13,10 @@ import {
 import { omit } from 'lodash';
 import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 
 function cleanupSerializedState({
   rawState,
@@ -61,19 +61,17 @@ export function initializeIntegrations(
         const cleanedState = cleanupSerializedState(
           attributeService.extractReferences(currentState)
         );
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } = serializeDynamicActions?.() ?? {};
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          serializeDynamicActions?.() ?? {};
         if (cleanedState.rawState.savedObjectId) {
           return {
             rawState: {
               ...cleanedState.rawState,
               ...dynamicActionsState,
-              attributes: undefined
+              attributes: undefined,
             },
-            references: [
-              ...cleanedState.references,
-              ...(dynamicActionsReferences ?? [])
-            ]
-        };
+            references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+          };
         }
         return cleanedState;
       },

@@ -205,6 +205,7 @@ export function makeEmbeddableServices(
               enhancements: jest.fn(),
             },
             getLatestState: jest.fn(),
+            serializeState: jest.fn(),
             reinitializeState: jest.fn(),
             startDynamicActions: jest.fn(),
           } as EmbeddableDynamicActionsManager)
