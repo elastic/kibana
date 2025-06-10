@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
+import { ML_ANOMALY_THRESHOLD, getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
@@ -116,33 +117,31 @@ export const useTimeseriesExplorerStyles = () => {
             strokeWidth: 1,
 
             '&.critical': {
-              fill: euiTheme.colors.severity.danger,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
               // TODO: RED80
               stroke: '#DA3737',
             },
 
             '&.major': {
-              fill: euiTheme.colors.severity.risk,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
               // TODO: ORANGE60
               stroke: '#FC8544',
             },
 
             '&.minor': {
-              fill: euiTheme.colors.severity.warning,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
               // TODO: YELLOW40
               stroke: '#FACB3D',
             },
 
             '&.warning': {
-              // TODO: SKY40
-              fill: '#94D8EB',
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
               // TODO: SKY50
               stroke: '#63C8E3',
             },
 
             '&.low': {
-              // TODO: SKY20
-              fill: '#CFEEF7',
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
               stroke: euiTheme.colors.severity.neutral,
             },
           },
