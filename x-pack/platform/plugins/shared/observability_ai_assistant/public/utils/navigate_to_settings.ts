@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 
-export function getConnectorsManagementHref(http: HttpStart) {
-  return http!.basePath.prepend(
-    `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
-  );
+export function navigateToSettingsManagementApp(application: ApplicationStart) {
+  application.navigateToApp('management', {
+    path: '/kibana/observabilityAiAssistantManagement',
+  });
 }
