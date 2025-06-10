@@ -126,7 +126,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 
   public supportsAccessControl(type: string): boolean {
-    return this.accessControlTypesMap.has(type) ?? false;
+    return this.accessControlTypesMap.has(type);
   }
 }
 
