@@ -13,8 +13,8 @@ import { join } from 'path';
 import _ from 'lodash';
 import {
   FunctionDefinition,
-  FunctionParameterType,
   FunctionDefinitionTypes,
+  FunctionParameterType,
   Location,
 } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
@@ -178,6 +178,7 @@ const enrichOperators = (
         Location.SORT,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.COMPLETION,
       ]);
       // Adding comparison operator signatures for ip and version types
       signatures.push(...comparisonOperatorSignatures);
@@ -192,6 +193,7 @@ const enrichOperators = (
         Location.STATS,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.COMPLETION,
       ]);
 
       // taking care the `...EVAL col = @timestamp + 1 year` cases
@@ -206,6 +208,7 @@ const enrichOperators = (
         Location.SORT,
         Location.ROW,
         Location.STATS_WHERE,
+        Location.COMPLETION,
       ];
     }
     if (isInOperator) {

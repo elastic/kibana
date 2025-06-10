@@ -83,6 +83,7 @@ export const defaultScalarFunctionLocations: Location[] = [
   Location.STATS,
   Location.STATS_BY,
   Location.STATS_WHERE,
+  Location.COMPLETION,
 ];
 
 export const defaultAggFunctionLocations: Location[] = [Location.STATS];
