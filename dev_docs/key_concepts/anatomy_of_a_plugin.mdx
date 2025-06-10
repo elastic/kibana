@@ -63,7 +63,7 @@ plugins/
 
 `id` - [Required] The unique package ID for the plugin, used during build and packaging. According to the [manifest handler](https://github.com/elastic/kibana/blob/043ebe521e43b95d70dba1785096af7962ba63e1/src/platform/packages/private/kbn-repo-packages/modern/parse_package_manifest.js#L250-L252), id must be a string that starts with @kbn/` - in the form @scope/name.
 
-`owner` - [Required] The owner field, previously structured as an object with name and githubTeam, is now simplified to a single string referencing the full GitHub team (e.g., "@elastic/kibana-core"). This change streamlines ownership resolution and aligns with GitHub-based tooling. The logical team responsibility and [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file alignment remain just as important.
+`owner` - [Required] The owner field, previously structured as an object with name and githubTeam, is now simplified to an array of strings or a single string referencing the full GitHub team (e.g., "@elastic/kibana-core"). The type expects an array, but there is a handler for single string as well. This change streamlines ownership resolution and aligns with GitHub-based tooling. The logical team responsibility and [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file alignment remain just as important.
 
 `description` - [Required] Give your plugin a description to help other developers understand what it does. This is required for internal plugins.
 
