@@ -13,6 +13,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { omit } from 'lodash';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -733,7 +734,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         objectRemover.add(space1, createdRule.id, 'rule', 'alerting');
 
         const searchRule = () =>
-          es.search<{ references: unknown }>({
+          es.search<{ 'alert.params': unknown; references: unknown }>({
             index: '.kibana*',
             query: {
               bool: {
@@ -765,10 +766,23 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           hits: { hits: alertHitsV2 },
         } = await searchRule();
 
-        expect(alertHitsV1[0].fields).to.eql(alertHitsV2[0].fields);
-        expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
-          alertHitsV2[0]?._source?.references ?? false
+        // `indexRefName` contains a UUID and should not be compared
+        const alertParamsV1 = omit(
+          alertHitsV1[0].fields?.['alert.params'][0],
+          'searchConfiguration.indexRefName'
         );
+        const alertParamsV2 = omit(
+          alertHitsV2[0].fields?.['alert.params'][0],
+          'searchConfiguration.indexRefName'
+        );
+        expect(alertParamsV1).to.be.ok();
+        expect(alertParamsV1).to.eql(alertParamsV2);
+
+        // `name` contains a UUID and should not be compared
+        const alertReferencesV1 = omit((alertHitsV1[0]?._source?.references as any)[0], 'name');
+        const alertReferencesV2 = omit((alertHitsV2[0]?._source?.references as any)[0], 'name');
+        expect(alertReferencesV1).to.be.ok();
+        expect(alertReferencesV1).to.eql(alertReferencesV2);
       });
     });
 

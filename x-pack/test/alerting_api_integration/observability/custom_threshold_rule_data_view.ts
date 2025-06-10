@@ -10,6 +10,7 @@ import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_r
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { omit } from 'lodash';
 import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../common/lib';
 import { createRule } from './helpers/alerting_api_helper';
@@ -120,21 +121,40 @@ export default function ({ getService }: FtrProviderContext) {
           hits: { hits: alertHitsV2 },
         } = await searchRule();
 
-        expect(alertHitsV1[0]?._source?.references).to.eql([
-          {
-            name: 'param:kibanaSavedObjectMeta.searchSourceJSON.index',
-            type: 'index-pattern',
-            id: 'data-view-id',
-          },
-        ]);
-        expect(alertHitsV1[0]?._source?.alert?.params?.searchConfiguration).to.eql({
-          query: { query: '', language: 'kuery' },
-          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        const references = alertHitsV1[0]?._source?.references as any[];
+        expect(references).to.be.an('array');
+        expect(references).to.have.length(1);
+        const [{ name, ...reference }] = references;
+        expect(reference).to.eql({
+          type: 'index-pattern',
+          id: 'data-view-id',
         });
-        expect(alertHitsV1[0].fields).to.eql(alertHitsV2[0].fields);
-        expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
-          alertHitsV2[0]?._source?.references ?? false
+
+        const { indexRefName, ...searchConfiguration } =
+          alertHitsV1[0]?._source?.alert?.params?.searchConfiguration;
+        expect(searchConfiguration).to.eql({
+          query: { query: '', language: 'kuery' },
+        });
+
+        expect(name).to.be(`param:${indexRefName}`);
+
+        // `indexRefName` contains a UUID and should not be compared
+        const alertParamsV1 = omit(
+          alertHitsV1[0].fields?.['alert.params'][0],
+          'searchConfiguration.indexRefName'
         );
+        const alertParamsV2 = omit(
+          alertHitsV2[0].fields?.['alert.params'][0],
+          'searchConfiguration.indexRefName'
+        );
+        expect(alertParamsV1).to.be.ok();
+        expect(alertParamsV1).to.eql(alertParamsV2);
+
+        // `name` contains a UUID and should not be compared
+        const alertReferencesV1 = omit((alertHitsV1[0]?._source?.references as any)[0], 'name');
+        const alertReferencesV2 = omit((alertHitsV2[0]?._source?.references as any)[0], 'name');
+        expect(alertReferencesV1).to.be.ok();
+        expect(alertReferencesV1).to.eql(alertReferencesV2);
       });
     });
   });
