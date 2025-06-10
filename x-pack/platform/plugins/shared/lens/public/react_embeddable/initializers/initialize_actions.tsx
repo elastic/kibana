@@ -20,7 +20,11 @@ import {
   StateComparators,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { DynamicActionsSerializedState, EmbeddableDynamicActionsManager, HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import {
+  DynamicActionsSerializedState,
+  EmbeddableDynamicActionsManager,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TracksOverlays, tracksOverlays } from '@kbn/presentation-containers';
@@ -247,7 +251,7 @@ export function initializeActionApi(
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  dynamicActionsManager?: EmbeddableDynamicActionsManager,
+  dynamicActionsManager?: EmbeddableDynamicActionsManager
 ): {
   api: ViewInDiscoverCallbacks &
     HasDynamicActions &

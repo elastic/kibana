@@ -72,20 +72,22 @@ export const getStatsOverviewEmbeddableFactory = (
       const filters$ = new BehaviorSubject(initialState.rawState.filters);
 
       const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
-        initialState.rawState
+        initialState
       );
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       function serializeState() {
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
             filters: filters$.getValue(),
-            ...(dynamicActionsManager?.getLatestState() ?? {}),
+            ...dynamicActionsState,
           },
+          references: dynamicActionsReferences ?? []
         };
       }
 

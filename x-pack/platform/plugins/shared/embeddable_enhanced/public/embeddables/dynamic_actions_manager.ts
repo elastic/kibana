@@ -27,7 +27,7 @@ export function initializeDynamicActionsManager(
 ): EmbeddableDynamicActionsManager {
   const enhancement = services.embeddable.getEnhancement('dynamicActions');
   const initialEnhancementsState =
-    state.rawState.enhancements?.dynamicActions && enhancement
+    enhancement && state.rawState.enhancements?.dynamicActions
       ? {
           dynamicActions: enhancement.inject(
             state.rawState.enhancements.dynamicActions,
@@ -54,6 +54,10 @@ export function initializeDynamicActionsManager(
     uiActions: services.uiActionsEnhanced,
   });
 
+  function getLatestState() {
+    return { enhancements: dynamicActionsState$.getValue() };
+  }
+
   return {
     api: { ...api, enhancements: { dynamicActions } },
     comparators: {
@@ -62,8 +66,21 @@ export function initializeDynamicActionsManager(
       },
     } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
-    getLatestState: () => {
-      return { enhancements: dynamicActionsState$.getValue() };
+    getLatestState,
+    serializeState: () => {
+      const latestState = getLatestState();
+      if (!enhancement || !latestState.enhancements?.dynamicActions) {
+        return { 
+          rawState: latestState,
+          references: []
+        };
+      }
+
+      const extractResults = enhancement.extract(latestState.enhancements.dynamicActions);
+      return {
+        rawState: extractResults.state,
+        references: extractResults.references
+      };
     },
     reinitializeState: (lastState: DynamicActionsSerializedState) => {
       api.setDynamicActions(lastState.enhancements);

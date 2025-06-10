@@ -116,14 +116,17 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     }
 
     function serializeState() {
-      const rawState = getLatestState();
+      const { rawState: dynamicActionsState, references: dynamicActionsReferences } = dynamicActionsManager?.serializeState() ?? {};
+      const rawState = {
+        ...getLatestState(),
+        ...dynamicActionsState
+      };
 
       // by-reference embeddable
       if (rawState.savedObjectId) {
-        // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
         return {
           rawState: getByReferenceState(rawState, rawState.savedObjectId),
-          references: [],
+          references: dynamicActionsReferences,
         };
       }
 
@@ -144,7 +147,10 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
 
       return {
         rawState: getByValueState(rawState, attributes),
-        references,
+        references: [
+          ...references,
+          ...(dynamicActionsReferences ?? []),
+        ],
       };
     }
 

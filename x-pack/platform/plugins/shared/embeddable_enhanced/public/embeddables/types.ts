@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 import { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
 import { Observable } from 'rxjs';
 import { HasDynamicActions } from './interfaces/has_dynamic_actions';
@@ -15,6 +15,7 @@ export interface EmbeddableDynamicActionsManager {
   comparators: StateComparators<DynamicActionsSerializedState>;
   anyStateChange$: Observable<void>;
   getLatestState: () => DynamicActionsSerializedState;
+  serializeState: () => SerializedPanelState<DynamicActionsSerializedState>;
   reinitializeState: (lastState: DynamicActionsSerializedState) => void;
   startDynamicActions: () => { stopDynamicActions: () => void };
 }

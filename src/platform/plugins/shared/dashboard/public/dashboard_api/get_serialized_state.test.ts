@@ -11,7 +11,6 @@ import type { DashboardPanelState } from '../../common';
 
 import {
   dataService,
-  embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
@@ -29,10 +28,6 @@ dataService.query.timefilter.timefilter.getTime = jest
 dataService.query.timefilter.timefilter.getRefreshInterval = jest
   .fn()
   .mockReturnValue({ pause: true, value: 0 });
-
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
 if (savedObjectsTaggingService) {
   savedObjectsTaggingService.getTaggingApi = jest.fn().mockReturnValue({

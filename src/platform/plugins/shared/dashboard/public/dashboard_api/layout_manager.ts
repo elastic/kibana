@@ -104,6 +104,18 @@ export function initializeLayoutManager(
         ...layout.panels[panelId],
         explicitInput: currentChildState[panelId]?.rawState ?? {},
       };
+
+      // TODO move savedObjectRef extraction into embeddable implemenations
+      const savedObjectId = (panels[panelId].explicitInput as { savedObjectId?: string }).savedObjectId;
+      if (savedObjectId) {
+        panels[panelId].panelRefName = `panel_${panelId}`;
+
+        references.push({
+          name: `${panelId}:panel_${panelId}`,
+          type: panels[panelId].type,
+          id: savedObjectId,
+        });
+      }
     }
     return { panels, sections: { ...layout.sections }, references };
   };

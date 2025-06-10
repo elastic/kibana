@@ -12,7 +12,6 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import {
   convertPanelSectionMapsToPanelsArray,
   generateNewPanelIds,
@@ -27,7 +26,6 @@ import {
 } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import {
   dataService,
-  embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
 import { DashboardApi } from './types';
@@ -120,7 +118,7 @@ export const getSerializedState = ({
       ]) as RefreshInterval)
     : undefined;
 
-  const rawDashboardAttributes: DashboardAttributes = {
+  const attributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
@@ -134,23 +132,12 @@ export const getSerializedState = ({
     timeTo,
   };
 
-  /**
-   * Extract references from raw attributes and tags into the references array.
-   */
-  const { attributes, references: dashboardReferences } = extractReferences(
-    {
-      attributes: rawDashboardAttributes,
-      references: searchSourceReferences ?? [],
-    },
-    { embeddablePersistableStateService: embeddableService }
-  );
-
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(dashboardReferences, tags)
-    : dashboardReferences;
+    ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
+    : searchSourceReferences ?? [];
 
   const allReferences = [
     ...references,

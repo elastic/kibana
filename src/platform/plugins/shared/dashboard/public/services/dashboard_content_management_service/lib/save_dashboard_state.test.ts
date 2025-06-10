@@ -12,7 +12,6 @@ import {
   contentManagementService,
   coreServices,
   dataService,
-  embeddableService,
 } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
 import { DashboardPanelMap } from '../../../../common/dashboard_container/types';
@@ -35,10 +34,6 @@ contentManagementService.client.update = jest.fn().mockImplementation(({ id }) =
 dataService.query.timefilter.timefilter.getTime = jest
   .fn()
   .mockReturnValue({ from: 'then', to: 'now' });
-
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
 describe('Save dashboard state', () => {
   beforeEach(() => {

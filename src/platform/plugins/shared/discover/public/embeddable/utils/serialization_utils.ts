@@ -92,12 +92,14 @@ export const serializeState = ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
-  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
+  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
   savedObjectId?: string;
 }): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
+
+  const { rawState: dynamicActionsState, references: dynamicActionsReferences } = serializeDynamicActions?.() ?? {};
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
@@ -116,11 +118,10 @@ export const serializeState = ({
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
-        ...serializeDynamicActions?.(),
+        ...dynamicActionsState,
         ...overwriteState,
       },
-      // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-      references: [],
+      references: dynamicActionsReferences ?? [],
     };
   }
 
@@ -136,9 +137,12 @@ export const serializeState = ({
     rawState: {
       ...serializeTitles(),
       ...serializeTimeRange(),
-      ...serializeDynamicActions?.(),
+      ...dynamicActionsState,
       ...(state as unknown as SavedSearchAttributes),
     },
-    references,
+    references: [
+      ...references,
+      ...(dynamicActionsReferences ?? []),
+    ],
   };
 };
