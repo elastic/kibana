@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { map, of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -27,20 +27,14 @@ function createNavTree({
 }) {
   // TODO use kubernetesDashboardIds
   console.log('kubernetesDashboardIds', kubernetesDashboardIds);
-  const kubernetesDashboardIdsMock = [
-    'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-    'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
-    'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
-    'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-    'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  ];
+
   const childrenK =
-    kubernetesDashboardIdsMock?.map((id) => ({
+    kubernetesDashboardIds?.map((id) => ({
       link: (id.startsWith('kubernetes')
         ? `metrics:${id}`
         : `metrics:kubernetes_${id}`) as AppDeepLinkId,
       title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetesDashboard', {
-        defaultMessage: '{id}',
+        defaultMessage: `${id}`,
         values: { id: id.substring(0, 15) },
       }),
     })) ?? [];
@@ -210,29 +204,15 @@ function createNavTree({
                       }
                     ),
                   },
-                ],
-              },
-              {
-                id: 'kubernetes',
-                renderAs: 'accordion',
-                defaultIsCollapsed: false,
-                title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
-                  defaultMessage: 'Kubernetes',
-                }),
-                children: [
-                  // {
-                  //   link: 'metrics:kubernetes',
-                  //   getIsActive: ({ pathNameSerialized, prepend }) => {
-                  //     return pathNameSerialized.startsWith(prepend('/app/metrics/kubernetes'));
-                  //   },
-                  //   title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
-                  //     defaultMessage: 'Kubernetes Dashboards List',
-                  //   }),
-                  // },
-                  // {
-                  //   link: 'metrics:kubernetes_otel-cluster-overview',
-                  // },
-                  ...childrenK,
+                  {
+                    id: 'kubernetes',
+                    renderAs: 'accordion',
+                    defaultIsCollapsed: false,
+                    title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
+                      defaultMessage: 'Kubernetes',
+                    }),
+                    children: childrenK,
+                  },
                 ],
               },
               {
@@ -513,6 +493,8 @@ function createNavTree({
     ],
   };
 
+  console.log('navTree', JSON.stringify(navTree, null, 2));
+
   return navTree;
 }
 
@@ -524,10 +506,17 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
-    map(({ status }) =>
-      createNavTree({ streamsAvailable: status === 'enabled', kubernetesDashboardIds })
-    )
+  navigationTree$: combineLatest({
+    fleet: pluginsStart.fleet?.sideNav$ ?? of(undefined),
+    streams: pluginsStart.streams?.status$ || of({ status: 'disabled' as const }),
+  }).pipe(
+    map(({ fleet, streams }) => {
+      console.log('fleet?.kubernetes', fleet?.kubernetes);
+      return createNavTree({
+        streamsAvailable: streams.status === 'enabled',
+        kubernetesDashboardIds: fleet?.kubernetes,
+      });
+    })
   ),
   dataTestSubj: 'observabilitySideNav',
 });

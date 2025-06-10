@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/obs-ux-management-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observability",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -57,7 +52,8 @@
       "guidedOnboarding",
       "observabilityAIAssistant",
       "investigate",
-      "streams"
+      "streams",
+      "fleet"
     ],
     "requiredBundles": [
       "data",
@@ -68,8 +64,6 @@
       "stackAlerts",
       "spaces"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
