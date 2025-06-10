@@ -57,16 +57,15 @@ export default function (providerContext: FtrProviderContext) {
         const HOST_NAME: string = 'host-transform-test-backfill';
 
         // Create documents first:
-        const { result } = await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.1' }, { ip: '1.1.1.2' }], new Date().toISOString()));
-        expect(result).to.eql('created');
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.1' }, new Date().toISOString()));
 
         // This document should be ingested and transformed as well.
         const fourHoursAgo: string = new Date(Date.now() - 4 * 60 * 60 * 1000);
-        await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.4' }], fourHoursAgo));
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.2' }, fourHoursAgo));
 
         const twentyFiveHoursAgo: string = new Date(Date.now() - 25 * 60 * 60 * 1000);
         // We expect this document to be skipped, since 25h ago is outside of lookback window
-        await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.8' }], twentyFiveHoursAgo));
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.3' }, twentyFiveHoursAgo));
 
         // Now enable the Entity Store...
         const response = await supertest
@@ -86,8 +85,6 @@ export default function (providerContext: FtrProviderContext) {
           return true;
         });
 
-        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, [{ ip: '1.1.1.1' }], new Date().toISOString());
-
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           TIMEOUT_MS,
@@ -104,11 +101,8 @@ export default function (providerContext: FtrProviderContext) {
             expect(total.value).to.eql(1);
             const hit = result.hits.hits[0] as SearchHit<Ecs>;
             expect(hit._source).ok();
-            console.log(hit._source.host);
-            // KUBA DEBUG
-            // WHY AM I ONLY GETTING 1.1.1.1 there? Is the index wiped on entity store start?
             expect(hit._source?.host?.name).to.eql(HOST_NAME);
-            expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '1.1.1.2', '1.1.1.4']);
+            expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '1.1.1.2']);
 
             return true;
           }
