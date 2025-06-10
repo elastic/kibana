@@ -155,7 +155,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
    * Public method to get a session for a specific role.
    * Returns undefined if no session exists for the role.
    */
-  public getSessionForRole(role: string): SessionInfo {
+  public getSessionInfoForRole(role: string): SessionInfo {
     const sessionInfo = this.sessionCache.get(role);
     if (!sessionInfo) {
       throw new Error(`No session found for role: ${role}`);
