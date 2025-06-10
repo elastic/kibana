@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const sorter = require('sort-package-json');
-
-module.exports = { sortPackageJson };
+import sorter from 'sort-package-json';
 
 /**
  * @param {string | Record<string, any>} json
  * @returns
  */
-function sortPackageJson(json) {
+export function sortPackageJson(json) {
   return sorter(
     // always parse and stringify the json to make sure it's using 2 space indentation
     JSON.stringify(typeof json === 'string' ? JSON.parse(json) : json, null, 2),

@@ -5,7 +5,7 @@ $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 # extends: './shared/toolchain.yml'
 
 node:
-  version: 20.18.2
+  version: 20.19.2
   packageManager: yarn
   yarn:
     version: 1.22.21

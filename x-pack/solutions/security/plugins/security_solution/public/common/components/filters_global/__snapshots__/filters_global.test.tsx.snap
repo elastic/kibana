@@ -18,14 +18,13 @@ exports[`rendering renders correctly 1`] = `
     color="subdued"
     paddingSize="none"
   >
-    <FiltersGlobalContainer
+    <header
       data-test-subj="filters-global-container"
-      show={true}
     >
       <p>
         Additional filters here.
       </p>
-    </FiltersGlobalContainer>
+    </header>
   </EuiPanel>
 </InPortal>
 `;

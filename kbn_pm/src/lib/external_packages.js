@@ -26,6 +26,7 @@ module.exports = {
   },
 
   ['@kbn/sort-package-json']() {
+    require('@kbn/babel-register').install();
     return require('@kbn/sort-package-json');
   },
 
