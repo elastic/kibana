@@ -37,8 +37,12 @@ import useAsync from 'react-use/lib/useAsync';
 import { Query, TimeRange } from '@kbn/es-query';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isSchema } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EnrichmentDataSource } from '../../../../../common/url_schema';
+import {
+  EnrichmentDataSource,
+  customSamplesDataSourceDocumentsSchema,
+} from '../../../../../common/url_schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentEvents,
@@ -55,6 +59,7 @@ import {
   KqlSamplesDataSourceWithUIAttributes,
 } from '../types';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
+import { deserializeJson, serializeXJson } from '../helpers';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -386,19 +391,18 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
       >
         <CodeEditor
           height={200}
-          languageId="json"
-          value={JSON.stringify(dataSource.documents, null, 2)}
+          value={serializeXJson(dataSource.documents, '[]')}
+          onChange={(value) => {
+            const documents = deserializeJson(value);
+            if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
+              handleChange({ documents });
+            }
+          }}
+          languageId="xjson"
           options={{
             tabSize: 2,
             automaticLayout: true,
             readOnly: isDisabled,
-          }}
-          onChange={(value) => {
-            try {
-              handleChange({ documents: JSON.parse(value) });
-            } catch (error: unknown) {
-              // no-op
-            }
           }}
         />
       </EuiFormRow>

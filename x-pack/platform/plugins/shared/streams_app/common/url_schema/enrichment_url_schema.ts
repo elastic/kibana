@@ -73,9 +73,11 @@ export interface CustomSamplesDataSource extends BaseDataSource {
   documents: SampleDocument[];
 }
 
-const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
+export const customSamplesDataSourceDocumentsSchema = z.array(sampleDocument);
+
+export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('custom-samples'),
-  documents: z.array(sampleDocument),
+  documents: customSamplesDataSourceDocumentsSchema,
 }) satisfies z.Schema<CustomSamplesDataSource>;
 
 /**
