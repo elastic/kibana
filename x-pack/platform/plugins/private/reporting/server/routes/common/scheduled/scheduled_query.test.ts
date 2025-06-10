@@ -533,8 +533,7 @@ describe('scheduledQueryFactory', () => {
         errors: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            message:
-              'Insufficient privileges to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4".',
+            message: `Not found.`,
             status: 404,
           },
         ],

@@ -209,7 +209,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
             // check if user is allowed to update this scheduled report
             if (so.attributes.createdBy !== username && !canManageReporting) {
               bulkErrors.push({
-                message: `Insufficient privileges to disable scheduled report "${so.id}".`,
+                message: `Not found.`,
                 status: 404,
                 id: so.id,
               });
