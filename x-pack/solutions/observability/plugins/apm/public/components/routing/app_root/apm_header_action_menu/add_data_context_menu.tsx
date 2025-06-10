@@ -43,7 +43,7 @@ export function AddDataContextMenu() {
 
   const button = (
     <EuiHeaderLink
-      color="text"
+      color="primary"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
