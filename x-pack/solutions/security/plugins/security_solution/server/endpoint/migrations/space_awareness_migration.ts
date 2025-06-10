@@ -48,12 +48,12 @@ const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
   'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
 const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 
-interface MigrationState {
+export type MigrationStateReferenceData = ReferenceDataSavedObject<{
   started: string;
   finished: string;
   status: 'not-started' | 'complete' | 'pending';
   data?: unknown;
-}
+}>;
 
 type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
   agent: Pick<LogsEndpointAction['agent'], 'policy'>;
@@ -80,9 +80,9 @@ const getMigrationState = async (
   soClient: SavedObjectsClientContract,
   logger: Logger,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
-): Promise<ReferenceDataSavedObject<MigrationState>> => {
+): Promise<MigrationStateReferenceData> => {
   return soClient
-    .get<ReferenceDataSavedObject<MigrationState>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id)
+    .get<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id)
     .then((response) => {
       logger.debug(`Retrieved migration state for [${id}]\n${stringify(response)}`);
       return response.attributes;
@@ -92,7 +92,7 @@ const getMigrationState = async (
         logger.debug(`Creating migration state for [${id}]`);
 
         const createResponse = await soClient
-          .create<ReferenceDataSavedObject<MigrationState>>(
+          .create<MigrationStateReferenceData>(
             REFERENCE_DATA_SAVED_OBJECT_TYPE,
             {
               id,
@@ -119,15 +119,12 @@ const getMigrationState = async (
 const updateMigrationState = async (
   soClient: SavedObjectsClientContract,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
-  update: ReferenceDataSavedObject<MigrationState>
-): Promise<ReferenceDataSavedObject<MigrationState>> => {
+  update: MigrationStateReferenceData
+): Promise<MigrationStateReferenceData> => {
   await soClient
-    .update<ReferenceDataSavedObject<MigrationState>>(
-      REFERENCE_DATA_SAVED_OBJECT_TYPE,
-      id,
-      update,
-      { refresh: 'wait_for' }
-    )
+    .update<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id, update, {
+      refresh: 'wait_for',
+    })
     .catch(catchAndWrapError);
 
   return update;
@@ -213,7 +210,9 @@ const migrateArtifactsToSpaceAware = async (
     .findExceptionListsItemPointInTimeFinder({
       listId: listIds,
       namespaceType: listIds.map(() => 'agnostic'),
-      filter: [],
+      filter: listIds.map(
+        () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
+      ),
       perPage: undefined,
       sortField: undefined,
       sortOrder: undefined,
@@ -258,7 +257,7 @@ const migrateArtifactsToSpaceAware = async (
   await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
-    `migration of endpoint artifacts in support of space done.\n${JSON.stringify(
+    `migration of endpoint artifacts in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
       2
