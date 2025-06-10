@@ -8,7 +8,12 @@
 import { StructuredTool, tool as toTool } from '@langchain/core/tools';
 import { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { toolDescriptorToIdentifier, toSerializedToolIdentifier } from '@kbn/onechat-common';
+import {
+  toolDescriptorToIdentifier,
+  toStructuredToolIdentifier,
+  type ToolIdentifier,
+  type StructuredToolIdentifier,
+} from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 
 export const providerToLangchainTools = async ({
@@ -28,6 +33,25 @@ export const providerToLangchainTools = async ({
   );
 };
 
+/**
+ * LLM provider have a specific format for toolIds, to we must convert to use allowed characters.
+ */
+export const toolIdToLangchain = (toolIdentifier: ToolIdentifier): string => {
+  const { toolId, providerId } = toStructuredToolIdentifier(toolIdentifier);
+  return `${toolId}__${providerId}`;
+};
+
+export const toolIdFromLangchain = (toolId: string): StructuredToolIdentifier => {
+  const splits = toolId.split('__');
+  if (splits.length !== 2) {
+    throw new Error('Tool id must be in the format of <toolId>__<providerId>');
+  }
+  return {
+    toolId: splits[0],
+    providerId: splits[1],
+  };
+};
+
 export const toLangchainTool = ({
   tool,
   logger,
@@ -42,12 +66,12 @@ export const toLangchainTool = ({
         const toolReturn = await tool.execute({ toolParams: input });
         return JSON.stringify(toolReturn.result);
       } catch (e) {
-        logger.warn(`error calling tool ${tool.name}: ${e.message}`);
+        logger.warn(`error calling tool ${tool.id}: ${e.message}`);
         throw e;
       }
     },
     {
-      name: toSerializedToolIdentifier(toolId),
+      name: toolIdToLangchain(toolId),
       description: tool.description,
       schema: tool.schema,
     }
