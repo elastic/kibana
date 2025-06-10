@@ -653,7 +653,6 @@ describe('DocumentMigrator', () => {
             '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
             '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
             '10.4.0': {
-              // @ts-expect-error
               deferred: true,
               transform: (doc: SavedObjectUnsanitizedDoc) => doc,
             },
