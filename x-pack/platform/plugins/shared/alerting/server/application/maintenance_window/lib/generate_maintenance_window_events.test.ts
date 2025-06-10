@@ -119,7 +119,7 @@ describe('generateMaintenanceWindowEvents', () => {
         freq: Frequency.WEEKLY,
         interval: 1,
         byweekday: ['TU', 'TH'],
-        dtstart: '2023-02-28T00:00:00.000Z',
+        dtstart: '2023-02-27T00:00:00.000Z',
       },
     });
 

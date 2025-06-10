@@ -37,7 +37,10 @@ export const generateMaintenanceWindowEvents = ({
   });
 
   try {
-    const recurrenceRule = new RRule(rRuleOptions);
+    // Maintenance window start date sometimes does not match the maintenance window schedule, e.g. if today is Friday and the
+    // user creates a schedule to run on Saturday and Sunday. Use RRule.strict to make sure we exclude the start date if it
+    // does not match the schedule
+    const recurrenceRule = RRule.strict(rRuleOptions);
     const occurrenceDates = recurrenceRule.between(startDate, endDate, { inclusive: true });
 
     return occurrenceDates.map((date) => {
