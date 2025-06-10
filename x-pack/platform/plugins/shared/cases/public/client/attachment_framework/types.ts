@@ -19,21 +19,21 @@ export enum AttachmentActionType {
 }
 
 interface BaseAttachmentAction {
-  type: AttachmentActionType;
+  type: AttachmentActionType | 'custom' | 'button';
   isPrimary?: boolean;
   disabled?: boolean;
 }
 
 interface ButtonAttachmentAction extends BaseAttachmentAction {
   label: string;
-  type: AttachmentActionType.BUTTON;
+  type: AttachmentActionType.BUTTON | 'button';
   onClick: () => void;
   iconType: string;
   color?: EuiButtonProps['color'];
 }
 
 interface CustomAttachmentAction extends BaseAttachmentAction {
-  type: AttachmentActionType.CUSTOM;
+  type: AttachmentActionType.CUSTOM | 'custom';
   render: () => JSX.Element;
 }
 

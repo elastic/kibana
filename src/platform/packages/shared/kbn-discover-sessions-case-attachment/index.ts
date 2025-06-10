@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
-
-export * from './data_types/logs/components';
-
-export const LazySummaryColumn = dynamic(
-  () => import('./data_types/logs/components/summary_column/summary_column')
-);
+export * from './src';

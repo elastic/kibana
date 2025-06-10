@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-utils';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { type SearchEmbeddableApi } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import {
   type EmbeddableApiContext,
   type PublishesDataViews,
@@ -23,6 +21,7 @@ import {
   getInheritedViewMode,
   apiPublishesTimeRange,
 } from '@kbn/presentation-publishing';
+import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch, type SearchEmbeddableApi } from '../..';
 
 type SearchEmbeddableApiWithAtLeastOneDataView = Omit<
   SearchEmbeddableApi,

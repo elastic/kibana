@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { isLensApi } from '@kbn/lens-plugin/public';
-import { isSavedSearchApi } from '@kbn/discover-contextual-components/src/actions/saved_search_compatibility_check';
+import { isSavedSearchApi } from '@kbn/discover-utils';
 import { apiPublishesTimeRange, hasBlockingError } from '@kbn/presentation-publishing';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';

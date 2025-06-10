@@ -30,6 +30,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/inspector-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/embeddable-enhanced-plugin"
   ]
 }

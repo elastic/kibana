@@ -11,7 +11,7 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { isSavedSearchApi } from '@kbn/discover-contextual-components/src/actions/saved_search_compatibility_check';
+import { isSavedSearchApi } from '@kbn/discover-utils';
 import type { DiscoverAppLocator } from '../../../common';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ACTION_VIEW_SAVED_SEARCH } from '../constants';

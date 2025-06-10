@@ -17,7 +17,6 @@ import {
   type AttachmentAction,
   type PersistableStateAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { AttachmentActionType } from '@kbn/cases-plugin/public';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -47,12 +46,12 @@ const getSavedSearchAttachmentActions = (
   state: SavedSearchCasesAttachmentPersistedState
 ): AttachmentAction[] => [
   {
-    type: AttachmentActionType.CUSTOM as const,
+    type: 'custom' as const,
     render: () => getGoToDiscoverButton({ state, isIcon: true }),
     isPrimary: true,
   },
   {
-    type: AttachmentActionType.CUSTOM as const,
+    type: 'custom' as const,
     render: () => getGoToDiscoverButton({ state, isIcon: false }),
     isPrimary: false,
   },

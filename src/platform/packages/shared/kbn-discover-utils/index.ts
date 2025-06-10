@@ -60,6 +60,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  isSavedSearchApi,
 } from './src';
 
 export type { LogsContextService, TracesContextService } from './src';
