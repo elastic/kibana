@@ -55,7 +55,7 @@ export class DashboardPlugin
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
