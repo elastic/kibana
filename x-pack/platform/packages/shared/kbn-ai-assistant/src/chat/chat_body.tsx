@@ -29,6 +29,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -49,6 +50,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { deserializeMessage } from '../utils/deserialize_message';
 import { useKibana } from '../hooks/use_kibana';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -274,6 +276,15 @@ export function ChatBody({
 
     navigator.clipboard?.writeText(content || '');
   };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
 
   const handleActionClick = useCallback(
     ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
