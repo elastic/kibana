@@ -131,7 +131,3 @@ console.ui.embeddedEnabled: false
 
 # Disable role management (custom roles)
 xpack.security.roleManagementEnabled: false
-
-## Enable Kibana Product Intercept
-xpack.product_intercept.enabled: true
-xpack.product_intercept.interval: '90d'

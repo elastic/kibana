@@ -121,7 +121,3 @@ xpack.searchQueryRules.enabled: false
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false
-
-## Enable Kibana Product Intercept
-xpack.product_intercept.enabled: true
-xpack.product_intercept.interval: '90d'
