@@ -11,7 +11,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiThemeProvider } from '@elastic/eui';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
@@ -20,6 +20,9 @@ import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter'
 const docLinks = coreMock.createStart().docLinks;
 
 describe('UnifiedFieldList <FieldTypeFilter />', () => {
+  const mountComponent = async (component: React.ReactElement) =>
+    await mountWithIntl(<EuiThemeProvider>{component}</EuiThemeProvider>);
+
   async function openPopover(wrapper: ReactWrapper, props: FieldTypeFilterProps<DataViewField>) {
     act(() => {
       wrapper
@@ -54,7 +57,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
       getCustomFieldType: jest.fn((field) => field.type),
       onChange: jest.fn(),
     };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
+    const wrapper = await mountComponent(<FieldTypeFilter {...props} />);
     expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
     expect(props.getCustomFieldType).not.toBeCalled();
 
@@ -84,7 +87,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
       onSupportedFieldFilter: (field) => ['number', 'date'].includes(field.type),
       onChange: jest.fn(),
     };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
+    const wrapper = await mountComponent(<FieldTypeFilter {...props} />);
     expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
 
     await openPopover(wrapper, props);
@@ -106,7 +109,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
       'data-test-subj': 'filters',
       onChange: jest.fn(),
     };
-    const wrapper = await mountWithIntl(<FieldTypeFilter {...props} />);
+    const wrapper = await mountComponent(<FieldTypeFilter {...props} />);
     expect(wrapper.find(EuiContextMenuItem)?.length).toBe(0);
 
     await openPopover(wrapper, props);
