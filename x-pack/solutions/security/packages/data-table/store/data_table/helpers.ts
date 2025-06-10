@@ -434,23 +434,3 @@ export const setSelectedTableEvents = ({
     },
   };
 };
-
-export const updateTableGraphEventId = ({
-  id,
-  graphEventId,
-  tableById,
-}: {
-  id: string;
-  graphEventId: string;
-  tableById: TableById;
-}): TableById => {
-  const table = tableById[id];
-
-  return {
-    ...tableById,
-    [id]: {
-      ...table,
-      graphEventId,
-    },
-  };
-};
