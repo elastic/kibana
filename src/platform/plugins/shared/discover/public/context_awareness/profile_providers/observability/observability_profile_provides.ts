@@ -9,20 +9,34 @@
 
 import type { ProfileProviderServices } from '../profile_provider_services';
 import { createObservabilityLogDocumentProfileProvider } from './log_document_profile';
-import { createObservabilityBaseDocumentProfileProvider } from './observability_base_document_profile/profile';
+import { createObservabilityBaseDocumentProfileProvider } from './observability_base_document_profile';
+import { withAttributesDocViewerTab } from './observability_base_document_profile/accessors/with_attributes_doc_viewer_tab';
 import { createObservabilityTracesSpanDocumentProfileProvider } from './traces_document_profile/span_document_profile';
+import { createObservabilityTracesTransactionDocumentProfileProvider } from './traces_document_profile/transaction_document_profile';
 
 export const createObservabilityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
-  const observabilityBaseProfileProvider =
-    createObservabilityBaseDocumentProfileProvider(providerServices);
+  const extendedLogDocumentProfileProvider = withAttributesDocViewerTab(
+    createObservabilityLogDocumentProfileProvider(providerServices)
+  );
 
-  console.log('registering observability document profile providers');
+  const extendedTracesSpanDocumentProfileProvider = withAttributesDocViewerTab(
+    createObservabilityTracesSpanDocumentProfileProvider(providerServices)
+  );
+
+  const extendedTracesTransactionDocumentProfileProvider = withAttributesDocViewerTab(
+    createObservabilityTracesTransactionDocumentProfileProvider(providerServices)
+  );
+
+  const baseDocumentProfileProvider = withAttributesDocViewerTab(
+    createObservabilityBaseDocumentProfileProvider()
+  );
+
   return [
-    createObservabilityLogDocumentProfileProvider(observabilityBaseProfileProvider),
-    // createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-    // createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
-    observabilityBaseProfileProvider,
+    extendedLogDocumentProfileProvider,
+    extendedTracesSpanDocumentProfileProvider,
+    extendedTracesTransactionDocumentProfileProvider,
+    baseDocumentProfileProvider,
   ];
 };
