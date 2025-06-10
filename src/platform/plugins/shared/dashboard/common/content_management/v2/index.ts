@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { GridData, DashboardItem, SavedDashboardPanel } from '../v1/types'; // no changes made to types from v1 to v2
-export type { ControlGroupAttributes, DashboardCrudTypes, DashboardAttributes } from './types';
+export type { DashboardItem } from '../v1/types'; // no changes made to types from v1 to v2
+export type {
+  ControlGroupAttributes,
+  DashboardCrudTypes,
+  DashboardAttributes,
+  GridData,
+  SavedDashboardPanel,
+} from './types';

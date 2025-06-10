@@ -17,6 +17,7 @@ import { ProcessorFormState } from '../types';
 import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { useStreamsEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
@@ -41,10 +42,13 @@ export const ProcessorTypeSelector = ({
 
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+
   const handleChange = (type: ProcessorType) => {
     const formState = getDefaultFormStateByType(
       type,
-      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context)
+      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      { grokCollection }
     );
     reset(formState);
   };
@@ -134,6 +138,16 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   ...configDrivenProcessors,
+  manual_ingest_pipeline: {
+    type: 'manual_ingest_pipeline',
+    inputDisplay: 'Manual pipeline configuration',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+        defaultMessage="Specify an array of ingest pipeline processors using JSON."
+      />
+    ),
+  },
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>

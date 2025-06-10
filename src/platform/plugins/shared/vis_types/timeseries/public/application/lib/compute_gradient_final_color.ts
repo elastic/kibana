@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Color from 'color';
+import { getValidColor } from '@kbn/coloring';
+import chroma from 'chroma-js';
 
 export const computeGradientFinalColor = (color: string): string => {
-  let inputColor = new Color(color);
-  const hsl = inputColor.hsl().object();
-  hsl.l -= inputColor.luminosity() * 100;
-  inputColor = Color.hsl(hsl);
-  return inputColor.rgb().toString();
+  const inputColor = getValidColor(color, { shouldBeCompatibleWithColorJs: true });
+  const [h, s, l] = inputColor.hsl();
+  const lightness = l - inputColor.luminance();
+  return chroma.hsl(h, s, lightness).css();
 };
