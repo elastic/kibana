@@ -12,6 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverAppStateProvider } from './discover_app_state_container';
 import type { DiscoverStateContainer } from './discover_state';
+import { InternalStateProvider } from './redux';
 
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
@@ -61,7 +62,13 @@ export const DiscoverMainProvider = ({
 }>) => {
   return (
     <DiscoverStateProvider value={value}>
-      <DiscoverAppStateProvider value={value.appState}>{children}</DiscoverAppStateProvider>
+      <DiscoverAppStateProvider value={value.appState}>
+        {/**
+         * InternalStateProvider should only render in DiscoverMainRoute, and this be removed,
+         * but it's being duplicated during the refactoring to avoid breaking every Jest test
+         */}
+        <InternalStateProvider store={value.internalState}>{children}</InternalStateProvider>
+      </DiscoverAppStateProvider>
     </DiscoverStateProvider>
   );
 };
