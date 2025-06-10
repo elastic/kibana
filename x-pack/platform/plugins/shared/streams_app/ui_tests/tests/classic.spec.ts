@@ -10,7 +10,7 @@ import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
 
-test.describe.skip('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Classic Streams', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await esClient.indices.putIndexTemplate({
@@ -68,9 +68,8 @@ test.describe.skip('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByText('Add a processor').click();
 
     await page.locator('input[name="field"]').fill('body.text');
-    await page
-      .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:attributes.method} %{URIPATH:attributes.request}');
+    await page.getByTestId('streamsAppPatternExpression').click();
+    await page.keyboard.type('%{WORD:attributes.method}', { delay: 150 }); // Simulate real typing
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
 
