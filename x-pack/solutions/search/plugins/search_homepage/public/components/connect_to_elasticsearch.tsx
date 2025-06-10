@@ -113,7 +113,7 @@ export const ConnectToElasticsearch = () => {
                           <EuiButtonEmpty iconType="gear">Manage API keys</EuiButtonEmpty>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiBadge>0 active</EuiBadge>
+                          <EuiBadge color="warning">0 active</EuiBadge>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
