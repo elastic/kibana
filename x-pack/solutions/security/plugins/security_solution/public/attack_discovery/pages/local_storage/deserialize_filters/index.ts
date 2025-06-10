@@ -13,7 +13,7 @@ const filtersSchema = z.array(
     $state: z
       .union([
         z.object({
-          store: z.nativeEnum(FilterStateStore),
+          store: z.enum(['appState', 'globalState']),
         }),
         z.undefined(),
       ])

@@ -8,7 +8,6 @@
 import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -114,7 +113,7 @@ const luceneSavedSearch: SavedSearch = {
         },
         query: {},
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
       },
     ],
@@ -167,7 +166,7 @@ const kqlSavedSearch: SavedSearch = {
           params: { query: 'ASA', type: 'phrase' },
         },
         query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
       },
     ],
   }),
@@ -362,7 +361,7 @@ describe('getEsQueryFromSavedSearch()', () => {
               },
             },
             $state: {
-              store: 'appState' as FilterStateStore,
+              store: 'appState',
             },
           },
         ],

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FilterStateStore } from '@kbn/es-query';
 import { buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
@@ -30,7 +29,7 @@ export function buildMetadataFilter({
     : buildPhraseFilter(indexField, Array.isArray(value) ? value[0] : value, dataView);
 
   filter.meta.type = areMultipleValues ? 'phrases' : 'phrase';
-  filter.$state = { store: 'appState' as FilterStateStore.APP_STATE };
+  filter.$state = { store: 'appState' };
 
   filter.meta.value = Array.isArray(value)
     ? !areMultipleValues
