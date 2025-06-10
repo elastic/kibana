@@ -8,6 +8,8 @@
  */
 
 import { parse } from '..';
+import { EsqlQuery } from '../../query';
+import { ESQLAstRerankCommand } from '../../types';
 import { Walker } from '../../walker';
 
 describe('Comments', () => {
@@ -1048,6 +1050,79 @@ FROM a
           },
         },
       ]);
+    });
+  });
+
+  describe('many comments', () => {
+    test('can attach all possible inline comments in basic RERANK command', () => {
+      const src = `
+        FROM a
+          | /*0*/ RERANK /*1*/ "query" /*2*/
+                ON /*3*/ field /*4*/
+                WITH /*5*/ id /*6*/`;
+      const query = EsqlQuery.fromSrc(src, { withFormatting: true });
+      const cmd = query.ast.commands[1] as ESQLAstRerankCommand;
+
+      expect(cmd.formatting).toMatchObject({
+        left: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '0',
+          },
+        ],
+      });
+
+      expect(cmd.query.formatting).toMatchObject({
+        left: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '1',
+          },
+        ],
+        right: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '2',
+          },
+        ],
+      });
+
+      expect(cmd.fields[0].formatting).toMatchObject({
+        left: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '3',
+          },
+        ],
+        right: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '4',
+          },
+        ],
+      });
+
+      expect(cmd.inferenceId.formatting).toMatchObject({
+        left: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '5',
+          },
+        ],
+        right: [
+          {
+            type: 'comment',
+            subtype: 'multi-line',
+            text: '6',
+          },
+        ],
+      });
     });
   });
 });

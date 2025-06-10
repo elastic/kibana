@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
@@ -55,33 +55,25 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
 
   if (dataViewIsLoading) {
     return (
-      <>
-        <EuiSpacer size="l" />
-        <EuiFlexItem grow={true}>
-          <FilterGroupLoading />
-        </EuiFlexItem>
-        <EuiSpacer size="l" />
-      </>
+      <EuiFlexItem grow={true}>
+        <FilterGroupLoading />
+      </EuiFlexItem>
     );
   }
 
   return (
-    <>
-      <EuiSpacer size="l" />
-      <FilterGroup
-        dataViewId={dataView.id || null}
-        onFiltersChange={(filters: Filter[]) => {
-          setQuery({ filters });
-        }}
-        ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
-        Storage={Storage}
-        defaultControls={DEFAULT_ASSET_INVENTORY_FILTERS}
-        chainingSystem="HIERARCHICAL"
-        spaceId={spaceId}
-        ControlGroupRenderer={ControlGroupRenderer}
-        maxControls={4}
-      />
-      <EuiSpacer size="l" />
-    </>
+    <FilterGroup
+      dataViewId={dataView.id || null}
+      onFiltersChange={(pageFilters: Filter[]) => {
+        setQuery({ pageFilters });
+      }}
+      ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
+      Storage={Storage}
+      defaultControls={DEFAULT_ASSET_INVENTORY_FILTERS}
+      chainingSystem="HIERARCHICAL"
+      spaceId={spaceId}
+      ControlGroupRenderer={ControlGroupRenderer}
+      maxControls={4}
+    />
   );
 };

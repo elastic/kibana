@@ -436,6 +436,62 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryColor",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryColor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendVisuals",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryTrendVisuals",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendBaseline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryTrendBaseline",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.secondaryTrendPalette",
+            "type": "Object",
+            "tags": [],
+            "label": "secondaryTrendPalette",
+            "description": [],
+            "signature": [
+              "[string, string, string] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.progressDirection",
             "type": "CompoundType",
             "tags": [],
@@ -732,6 +788,34 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryColor",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryColor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.secondaryTrend",
+            "type": "Object",
+            "tags": [],
+            "label": "secondaryTrend",
+            "description": [],
+            "signature": [
+              "{ visuals?: string | undefined; baseline?: string | number | undefined; palette?: [string, string, string] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,

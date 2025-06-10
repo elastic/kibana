@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('Knowledge base: when upgrading from 8.10 to 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
-    this.tags(['skipServerless']);
+    this.tags(['skipServerless', 'skipCloud']);
 
     before(async () => {
       // in a real environment we will use the ELSER inference endpoint (`.elser-2-elasticsearch`) which is pre-installed
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       log.info('Restoring index assets');
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
 
       log.info('Tearing down tiny ELSER model and inference endpoint');
       await teardownTinyElserModelAndInferenceEndpoint(getService);
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('before running migrations', () => {
       before(async () => {
         log.info('Delete index assets');
-        await deleteIndexAssets(es);
+        await deleteIndexAssets(getService);
 
         log.info('Restoring snapshot');
         await restoreKbSnapshot({
@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('after running migrations', () => {
       beforeEach(async () => {
-        await deleteIndexAssets(es);
+        await deleteIndexAssets(getService);
         await restoreKbSnapshot({
           log,
           es,

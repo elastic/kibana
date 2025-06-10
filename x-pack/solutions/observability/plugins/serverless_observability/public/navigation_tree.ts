@@ -109,35 +109,35 @@ export const createNavigationTree = ({
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
                   { link: 'apm:settings' },
+                ],
+              },
+              {
+                id: 'synthetics',
+                title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+                  defaultMessage: 'Synthetics',
+                }),
+                children: [
                   {
-                    id: 'synthetics',
-                    title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
-                      defaultMessage: 'Synthetics',
-                    }),
-                    children: [
+                    title: i18n.translate(
+                      'xpack.serverlessObservability.nav.synthetics.overviewItem',
                       {
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.nav.synthetics.overviewItem',
-                          {
-                            defaultMessage: 'Overview',
-                          }
-                        ),
-                        id: 'synthetics-overview',
-                        link: 'synthetics:overview',
-                        breadcrumbStatus: 'hidden',
-                      },
+                        defaultMessage: 'Overview',
+                      }
+                    ),
+                    id: 'synthetics-overview',
+                    link: 'synthetics:overview',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'synthetics:certificates',
+                    title: i18n.translate(
+                      'xpack.serverlessObservability.nav.synthetics.certificatesItem',
                       {
-                        link: 'synthetics:certificates',
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.nav.synthetics.certificatesItem',
-                          {
-                            defaultMessage: 'TLS certificates',
-                          }
-                        ),
-                        id: 'synthetics-certificates',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                    id: 'synthetics-certificates',
+                    breadcrumbStatus: 'hidden',
                   },
                 ],
               },
@@ -163,7 +163,6 @@ export const createNavigationTree = ({
                   },
                   { link: 'metrics:hosts' },
                   { link: 'metrics:settings' },
-                  { link: 'metrics:assetDetails' },
                 ],
               },
             ],
@@ -218,7 +217,7 @@ export const createNavigationTree = ({
               {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [

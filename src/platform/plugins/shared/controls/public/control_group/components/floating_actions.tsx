@@ -9,14 +9,16 @@
 
 import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
 
 import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { uiActionsService } from '../../services/kibana_services';
-import './floating_actions.scss';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
 
 export interface FloatingActionsProps {
@@ -27,6 +29,7 @@ export interface FloatingActionsProps {
   api?: unknown;
   viewMode?: ViewMode;
   disabledActions?: string[];
+  isTwoLine?: boolean;
 }
 
 export type FloatingActionItem = AnyApiAction & {
@@ -40,6 +43,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   api,
   className = '',
   disabledActions,
+  isTwoLine,
 }) => {
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
@@ -115,15 +119,22 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
   }, [api, viewMode, disabledActions]);
 
+  const styles = useMemoizedStyles(floatingActionsStyles);
+
   return (
-    <div className="presentationUtil__floatingActionsWrapper">
+    <div css={styles.wrapper}>
       {children}
       {isEnabled && floatingActions.length > 0 && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()
           }`}
-          className={classNames('presentationUtil__floatingActions', className)}
+          className={classNames(
+            'presentationUtil__floatingActions',
+            `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
+            className
+          )}
+          css={styles.floatingActions}
         >
           <>
             {floatingActions.map((action) =>
@@ -137,4 +148,38 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       )}
     </div>
   );
+};
+
+const floatingActionsStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      '&:hover, &:focus-within': {
+        '.presentationUtil__floatingActions': {
+          opacity: 1,
+          visibility: 'visible',
+          transition: `visibility ${euiTheme.animation.fast}, opacity ${euiTheme.animation.fast}`,
+        },
+      },
+    }),
+  floatingActions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      opacity: 0,
+      visibility: 'hidden',
+      // slower transition on hover leave in case the user accidentally stops hover
+      transition: `opacity ${euiTheme.animation.slow}`,
+      position: 'absolute',
+      right: euiTheme.size.xs,
+      top: `-${euiTheme.size.l}`,
+      zIndex: euiTheme.levels.toast,
+      '&.controlFrameFloatingActions--oneLine': {
+        padding: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.medium,
+        backgroundColor: euiTheme.colors.emptyShade,
+        boxShadow: `0 0 0 1px ${euiTheme.colors.lightShade}`,
+      },
+      '&.controlFrameFloatingActions--twoLine': {
+        top: `-${euiTheme.size.xs} !important`,
+      },
+    }),
 };

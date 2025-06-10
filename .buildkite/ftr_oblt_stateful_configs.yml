@@ -24,10 +24,9 @@ enabled:
   - x-pack/test/alerting_api_integration/observability/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/logs_ui/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/logs_shared/config.ts
-  - x-pack/test/api_integration/apis/metrics_ui/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/synthetics/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/uptime/config.ts
-  - x-pack/test/api_integration/apis/entity_manager/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/basic/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/cloud/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/rules/config.ts
@@ -48,3 +47,5 @@ enabled:
   # stateful configs that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts

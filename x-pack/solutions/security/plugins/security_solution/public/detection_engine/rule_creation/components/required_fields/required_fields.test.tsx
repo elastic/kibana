@@ -13,6 +13,11 @@ import { Form, useForm } from '../../../../shared_imports';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { RequiredFields } from './required_fields';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
+import {
+  addRequiredFieldRow,
+  createIndexPatternField,
+  getSelectToggleButtonForName,
+} from './required_fields.test_helpers';
 
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
 const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
@@ -560,15 +565,6 @@ describe('RequiredFields form part', () => {
   });
 });
 
-export function createIndexPatternField(overrides: Partial<DataViewFieldBase>): DataViewFieldBase {
-  return {
-    name: 'one',
-    type: 'string',
-    esTypes: [],
-    ...overrides,
-  };
-}
-
 async function getDropdownOptions(dropdownToggleButton: HTMLElement): Promise<string[]> {
   await showEuiComboBoxOptions(dropdownToggleButton);
 
@@ -577,12 +573,6 @@ async function getDropdownOptions(dropdownToggleButton: HTMLElement): Promise<st
   fireEvent.click(dropdownToggleButton);
 
   return options;
-}
-
-export function addRequiredFieldRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add required field'));
-  });
 }
 
 async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
@@ -668,12 +658,6 @@ function getLastSelectToggleButtonForName(): HTMLElement {
   const lastNameSelect = allNameSelects[allNameSelects.length - 1];
 
   return lastNameSelect.querySelector('[data-test-subj="comboBoxToggleListButton"]') as HTMLElement;
-}
-
-export function getSelectToggleButtonForName(value: string): HTMLElement {
-  return screen
-    .getByTestId(`requiredFieldNameSelect-${value}`)
-    .querySelector('[data-test-subj="comboBoxToggleListButton"]') as HTMLElement;
 }
 
 function getSelectToggleButtonForType(value: string): HTMLElement {

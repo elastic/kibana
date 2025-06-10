@@ -32,6 +32,9 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     client,
     logger,
     refreshAfterIndex: true,
+    pipeline: {
+      includeSerialization: false,
+    },
   });
 
   const apmSynthtraceEsClient = new ApmSynthtraceEsClient({
@@ -39,35 +42,28 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     logger,
     refreshAfterIndex: true,
     version: config.env.APM_PACKAGE_VERSION,
+    pipeline: {
+      includeSerialization: false,
+    },
   });
 
   const logsSynthtraceEsClient = new LogsSynthtraceEsClient({
     client,
     logger,
     refreshAfterIndex: true,
+    pipeline: {
+      includeSerialization: false,
+    },
   });
 
   const infraSynthtraceEsClient = new InfraSynthtraceEsClient({
     client,
     logger,
     refreshAfterIndex: true,
+    pipeline: {
+      includeSerialization: false,
+    },
   });
-
-  entitiesSynthtraceEsClient.pipeline(
-    entitiesSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  apmSynthtraceEsClient.pipeline(
-    apmSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  logsSynthtraceEsClient.pipeline(
-    logsSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  infraSynthtraceEsClient.pipeline(
-    infraSynthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
 
   initPlugin(on, config);
 

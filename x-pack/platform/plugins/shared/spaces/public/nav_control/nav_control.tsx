@@ -11,7 +11,6 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initTour } from './solution_view_tour';
@@ -41,7 +40,7 @@ export function initSpacesNavControl(
       );
 
       ReactDOM.render(
-        <KibanaRenderContextProvider {...core}>
+        core.rendering.addContext(
           <Suspense
             fallback={
               <EuiSkeletonRectangle
@@ -66,7 +65,7 @@ export function initSpacesNavControl(
               onFinishTour={onFinishTour}
             />
           </Suspense>
-        </KibanaRenderContextProvider>,
+        ),
         targetDomElement
       );
 

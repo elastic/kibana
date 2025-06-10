@@ -38,11 +38,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       const req = await observabilityOnboardingApiClient.logMonitoringUser({
         endpoint: 'POST /internal/observability_onboarding/flow',
-        params: {
-          body: {
-            name: 'test-onboarding',
-          },
-        },
       });
 
       onboardingId = req.body.onboardingFlow.id;

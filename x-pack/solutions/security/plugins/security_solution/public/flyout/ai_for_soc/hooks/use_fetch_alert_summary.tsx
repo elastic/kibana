@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
+import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useQuery } from '@tanstack/react-query';
 import {
   API_VERSIONS,

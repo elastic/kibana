@@ -45,7 +45,7 @@ export const DeleteConversationResponse = ConversationResponse;
 export type ReadConversationRequestParams = z.infer<typeof ReadConversationRequestParams>;
 export const ReadConversationRequestParams = z.object({
   /**
-   * The conversation's `id` value.
+   * The conversation's `id` value, a unique identifier for the conversation.
    */
   id: NonEmptyString,
 });

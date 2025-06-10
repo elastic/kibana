@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
 
   const start = moment().subtract(30, 'minutes').valueOf();
-  const end = moment().valueOf();
+  const end = moment().add(30, 'minutes').valueOf();
 
   const searchQuery = 'error.stack_trace : * and _ignored : *';
 
@@ -33,17 +33,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.index([
         timerange(start, end)
           .interval('1m')
-          .rate(2)
+          .rate(5)
           .generator((timestamp: number, index: number) =>
             log
               .create()
               .message('This is a log message')
               .timestamp(timestamp)
-              .dataset('synth.1')
+              .dataset('synth.discover')
               .namespace('default')
               .logLevel(index % 2 === 0 ? MORE_THAN_1024_CHARS : 'This is a log message')
               .defaults({
-                'service.name': 'synth-service',
+                'service.name': 'synth-discover',
                 ...(index % 2 === 0 && { 'error.stack_trace': STACKTRACE_MESSAGE }),
               })
           ),
