@@ -11,7 +11,7 @@ import {
   getGenAiConfig,
 } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import type { StartServices } from '../../../types';
-import * as i18n from '../../translations';
+import * as i18n from './translations';
 
 export const getConnectorDescription = ({
   connector,
