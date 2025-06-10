@@ -151,7 +151,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionReadonlyReasonFreeze',
         {
           defaultMessage:
-            'To ensure compatibility with the next major version, unfreeze is recommended. It will also be set as read-only.',
+            'To ensure compatibility with the next major version, unfreeze is recommended. It will also be set to read-only.',
         }
       ),
     },
