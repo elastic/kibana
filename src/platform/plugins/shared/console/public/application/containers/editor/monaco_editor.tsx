@@ -117,7 +117,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   useEffect(() => {
     async function fetchLicense() {
       try {
-        const ls = await licensing.getLicense();
+        const ls = await licensing?.getLicense();
         if (!isEqual(license, ls)) {
           setLicense(ls);
         }
