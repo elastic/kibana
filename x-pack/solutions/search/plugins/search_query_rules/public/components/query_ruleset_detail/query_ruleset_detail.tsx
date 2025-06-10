@@ -220,7 +220,11 @@ export const QueryRulesetDetail: React.FC = () => {
           color="primary"
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
-            <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              key="queryRulesetDetailHeaderButtons"
+            >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="queryRulesetDetailApiReferenceButton"
