@@ -5,39 +5,42 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import {
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-} from '@elastic/eui';
 import { useKibana } from '../../../utils/kibana_react';
-import { TopAlert } from '../../..';
+import { Dashboards } from './related_dashboards/dashboards';
+import { useSuggestedDashboards } from '../hooks/use_suggested_dashboards';
 
 interface RelatedDashboardsProps {
-  alert: TopAlert;
+  alertId: string;
   relatedDashboards: Array<{ id: string }>;
 }
 
-export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboardsProps) {
+export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboardsProps) {
   const [dashboardsMeta, setDashboardsMeta] = useState<
     Array<{ id: string; title: string; description: string }>
   >([]);
+  const [isLoadingLinkedDashboards, setIsLoadingLinkedDashboards] = useState(true);
+
+  const { isLoadingSuggestedDashboards, suggestedDashboards } = useSuggestedDashboards(alertId);
+
+  const isLoading = isLoadingLinkedDashboards || isLoadingSuggestedDashboards;
+
+  // Filter out suggested dashboards that are already in dashboardsMeta
+  const filteredSuggestedDashboards = useMemo(
+    () =>
+      suggestedDashboards
+        ? suggestedDashboards.filter(
+            (suggestedDashboard) =>
+              !dashboardsMeta.some((dashboard) => dashboard.id === suggestedDashboard.id)
+          )
+        : [],
+    [dashboardsMeta, suggestedDashboards]
+  );
 
   const {
-    services: {
-      share: { url: urlService },
-      dashboard: dashboardService,
-    },
+    services: { dashboard: dashboardService },
   } = useKibana();
-
-  const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
   useEffect(() => {
     if (!relatedDashboards?.length || !dashboardService) {
@@ -74,6 +77,7 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
       }>;
 
       setDashboardsMeta(validDashboards);
+      setIsLoadingLinkedDashboards(false);
     };
 
     fetchDashboards();
@@ -81,51 +85,20 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
 
   return (
     <div>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.observability.alertDetails.relatedDashboards', {
-                defaultMessage: 'Linked dashboards',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-      {dashboardsMeta.map((dashboard) => (
-        <>
-          <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
-            <EuiFlexItem key={dashboard.id}>
-              <EuiText size="s">
-                <a
-                  href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (dashboardLocator) {
-                      const url = await dashboardLocator.getUrl({
-                        dashboardId: dashboard.id,
-                      });
-                      window.open(url, '_blank');
-                    } else {
-                      console.error('Dashboard locator is not available');
-                    }
-                  }}
-                >
-                  {dashboard.title}
-                </a>
-              </EuiText>
-              <EuiText color={'subdued'} size="s">
-                {dashboard.description}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      ))}
+      <Dashboards
+        title={i18n.translate('xpack.observability.alertDetails.relatedDashboards', {
+          defaultMessage: 'Linked dashboards',
+        })}
+        isLoadingDashboards={isLoading}
+        dashboards={dashboardsMeta}
+      />
+      <Dashboards
+        title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
+          defaultMessage: 'Suggested dashboards',
+        })}
+        isLoadingDashboards={isLoading}
+        dashboards={filteredSuggestedDashboards}
+      />
     </div>
   );
 }
