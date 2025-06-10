@@ -28,14 +28,6 @@ export interface MetadataRecord {
   [key: string]: string[] | MetadataRecord | string;
 }
 
-export interface EntityV2 {
-  'entity.id': string;
-  'entity.type': string;
-  'entity.display_name': string;
-  'entity.last_seen_timestamp'?: string;
-  [metadata: string]: any;
-}
-
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 
 type Literal = z.infer<typeof literalSchema>;
