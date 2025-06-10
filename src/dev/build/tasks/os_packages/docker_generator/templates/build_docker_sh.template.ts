@@ -72,7 +72,7 @@ function generator({
   docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 
   ${dockerPush} && docker image push ${dockerTargetName}
-  exit 0
+  exit 1
   `);
 }
 
