@@ -133,7 +133,7 @@ export const Actions = ({
       : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
+    <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       {showToggleSearch && (
         <EuiFlexItem grow={false}>
           <EuiTourStep
@@ -209,7 +209,11 @@ export const Actions = ({
           </EuiTourStep>
         </EuiFlexItem>
       )}
-      {showToggleSearch && showInvestigateInTimeline && <EuiHorizontalRule margin="xs" />}
+      {showToggleSearch && showInvestigateInTimeline && (
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+      )}
       {showInvestigateInTimeline && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={investigateInTimelineTooltip} position="left">
