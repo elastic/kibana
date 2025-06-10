@@ -30,9 +30,9 @@ export function getThemeResolvedSeverityColor(
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return euiTheme.colors.severity.warning;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
-    return '#94D8EB'; // TODO: Corresponds to SKY/40
+    return '#a6d8ec'; // TODO: euiPaletteSkyBlue(6)[2]
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-    return '#CFEEF7'; // TODO: Corresponds to SKY/20
+    return '#dceef7'; // TODO: euiPaletteSkyBlue(6)[0]
   } else {
     return euiTheme.colors.severity.unknown;
   }

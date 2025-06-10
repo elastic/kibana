@@ -7,6 +7,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { getThemeResolvedSeverityColor } from './use_severity_color';
 
 export interface ColorRampStop {
   stop: number;
@@ -22,18 +23,18 @@ export interface ColorRampStop {
 export const getMlSeverityColorRampValue = (euiTheme: EuiThemeComputed): ColorRampStop[] => [
   {
     stop: ML_ANOMALY_THRESHOLD.LOW,
-    color: euiTheme.colors.severity.neutral,
+    color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
   },
   {
     stop: ML_ANOMALY_THRESHOLD.MINOR,
-    color: euiTheme.colors.severity.warning,
+    color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
   },
   {
     stop: ML_ANOMALY_THRESHOLD.MAJOR,
-    color: euiTheme.colors.severity.risk,
+    color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
   },
   {
     stop: ML_ANOMALY_THRESHOLD.CRITICAL,
-    color: euiTheme.colors.severity.danger,
+    color: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
   },
 ];
