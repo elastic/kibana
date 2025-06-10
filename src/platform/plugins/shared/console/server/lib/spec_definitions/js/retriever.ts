@@ -105,6 +105,28 @@ export const retriever = (specService: SpecDefinitionsService) => {
       match_criteria: {},
       rank_window_size: 10,
     },
+    pinned: {
+      __template: {
+        retriever: {},
+        ids: [],
+        docs: [],
+        match_criteria: {},
+      },
+      retriever: {
+        __scope_link: '.',
+      },
+      // Only one of 'ids' or 'docs' should be used at a time
+      ids: {
+        __description: "Specify an array of document IDs to pin. Only one of 'ids' or 'docs' can be used.",
+        __any_of: [],
+      },
+      docs: {
+        __description: "Specify an array of full documents to pin. Only one of 'ids' or 'docs' can be used.",
+        __any_of: [],
+      },
+      match_criteria: {},
+      rank_window_size: 10,
+    },
     standard: {
       __template: {
         query: {},
