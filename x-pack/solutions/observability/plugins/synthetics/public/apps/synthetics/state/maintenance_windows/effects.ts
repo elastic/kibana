@@ -24,6 +24,6 @@ export function* getMaintenanceWindowsEffect() {
   );
 }
 
-const getFailMessage = i18n.translate('xpack.synthetics.settings.getParams.failed', {
-  defaultMessage: 'Failed to get global parameters.',
+const getFailMessage = i18n.translate('xpack.synthetics.settings.mws.failed', {
+  defaultMessage: 'Failed to fetch maintenance windows.',
 });

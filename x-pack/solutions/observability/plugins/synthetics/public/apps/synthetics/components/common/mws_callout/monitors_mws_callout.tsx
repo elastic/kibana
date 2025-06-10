@@ -8,9 +8,8 @@
 import React from 'react';
 import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import { MwsCalloutContent } from './mws_callout_content';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
@@ -26,35 +25,9 @@ export const MonitorsMWsCallout = () => {
   const hasMonitorMWs = monitorMWs && monitorMWs.size > 0;
 
   if (data?.length && hasMonitorMWs) {
-    const hasActiveMWs = data.filter((mw) => monitorMWs.has(mw.id));
-    if (hasActiveMWs.length) {
-      return (
-        <>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActive.monitors',
-              {
-                defaultMessage: 'Maintence windows are active',
-              }
-            )}
-            color="warning"
-            iconType="iInCircle"
-            data-test-subj="maintenanceWindowCallout"
-          >
-            {i18n.translate(
-              'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActiveDescription.monitors',
-              {
-                defaultMessage:
-                  'Monitors are stopped while maintenance windows are running. Active maintenance windows are {titles}.',
-                values: {
-                  titles: hasActiveMWs.map((mw) => mw.title).join(', '),
-                },
-              }
-            )}
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      );
+    const activeMWs = data.filter((mw) => monitorMWs.has(mw.id));
+    if (activeMWs.length) {
+      return <MwsCalloutContent activeMWs={activeMWs} />;
     }
   }
 

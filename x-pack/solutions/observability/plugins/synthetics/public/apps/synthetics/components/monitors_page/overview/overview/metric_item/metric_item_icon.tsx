@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSkeletonText,
+  EuiIcon,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
@@ -96,12 +97,7 @@ export const MetricItemIcon = ({
             }
           )}
         >
-          <EuiButtonIcon
-            color="warning"
-            data-test-subj="syntheticsMetricItemIconButton"
-            iconType="pause"
-            onClick={() => {}}
-          />
+          <EuiIcon color="warning" data-test-subj="syntheticsMetricItemIconButton" type="pause" />
         </EuiToolTip>
       </Container>
     );
