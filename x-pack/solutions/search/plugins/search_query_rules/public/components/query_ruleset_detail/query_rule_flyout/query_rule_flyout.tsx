@@ -174,6 +174,27 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onSave(updatedRule);
     }
   };
+  const CRITERIA_CALLOUT_STORAGE_KEY = 'queryRules.criteriaCalloutState';
+  const [criteriaCalloutActive, setCriteriaCalloutActive] = useState<boolean>(() => {
+    try {
+      const savedState = localStorage.getItem(CRITERIA_CALLOUT_STORAGE_KEY);
+      if (savedState === null) {
+        localStorage.setItem(CRITERIA_CALLOUT_STORAGE_KEY, 'true');
+        return true;
+      }
+      return savedState !== 'false';
+    } catch (e) {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CRITERIA_CALLOUT_STORAGE_KEY, criteriaCalloutActive ? 'true' : 'false');
+    } catch (e) {
+      // If localStorage is not available, we can ignore the error
+    }
+  }, [criteriaCalloutActive]);
 
   return (
     <EuiFlyout
@@ -535,6 +556,24 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
+              {criteriaCalloutActive && !isAlways ? (
+                <>
+                  <EuiCallOut
+                    iconType="iInCircle"
+                    size="s"
+                    onDismiss={() => {
+                      setCriteriaCalloutActive(false);
+                    }}
+                    title={
+                      <FormattedMessage
+                        id="xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
+                        defaultMessage="All criteria must be met for the rule to be applied"
+                      />
+                    }
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              ) : null}
               {ruleFromRuleset &&
                 !isAlways &&
                 fields.map((field, index) => (
