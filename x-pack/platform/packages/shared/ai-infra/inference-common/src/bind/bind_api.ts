@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FunctionCallingMode } from '../chat_complete';
 
 export interface BoundOptions {
@@ -35,10 +34,12 @@ export function bindApi<T extends BindableAPI, U extends BoundOptions>(
 ): BoundAPI<T>;
 
 export function bindApi(api: BindableAPI, boundParams: BoundOptions) {
+  const { functionCalling, connectorId } = boundParams;
   return (params: UnboundOptions<BoundOptions>) => {
     return api({
       ...params,
-      ...boundParams,
+      functionCalling,
+      connectorId,
     });
   };
 }
