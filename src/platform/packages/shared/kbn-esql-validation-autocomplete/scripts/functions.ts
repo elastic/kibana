@@ -71,8 +71,8 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   date_trunc: {
     signatures: [
       {
-        // override the first param to be of type time_literal
-        params: [{ type: 'time_literal' }],
+        // override the first param to be of type time_duration
+        params: [{ type: 'time_duration' }],
       },
     ],
   },
