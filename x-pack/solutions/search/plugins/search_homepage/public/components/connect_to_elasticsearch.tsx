@@ -21,6 +21,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
+import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 
 const LOCALHOST_URL = 'http://localhost:9200/';
 
@@ -120,6 +121,12 @@ export const ConnectToElasticsearch = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHorizontalRule />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AISearchCapabilities />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
