@@ -38,8 +38,8 @@
     "@kbn/expressions-plugin",
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
-    "@kbn/tracing",
-    "@kbn/safer-lodash-set",
-    "@kbn/std"
+    "@kbn/sse-utils-client",
+    "@kbn/zod",
+    "@kbn/inference-tracing"
   ]
 }
