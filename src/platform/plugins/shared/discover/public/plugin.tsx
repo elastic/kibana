@@ -26,6 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { generateAttachmentType } from '@kbn/discover-sessions-case-attachment';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -428,6 +429,8 @@ export class DiscoverPlugin
         discoverServices,
       });
     });
+
+    plugins.cases.attachmentFramework.registerPersistableState(generateAttachmentType());
   }
 }
 

@@ -105,7 +105,9 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
-    "@kbn/alerts-ui-shared"
+    "@kbn/cases-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/saved-search-component",
   ],
   "exclude": ["target/**/*"]
 }

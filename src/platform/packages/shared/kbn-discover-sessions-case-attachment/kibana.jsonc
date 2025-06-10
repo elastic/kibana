@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/discover-sessions-case-attachment",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

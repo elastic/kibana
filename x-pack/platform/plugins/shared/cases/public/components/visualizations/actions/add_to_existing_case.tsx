@@ -35,8 +35,9 @@ export const createAddToExistingCaseLensAction = (
       return isCompatible(embeddable, currentAppId, services.core);
     },
     execute: async ({ embeddable }) => {
-      const { isLensApi } = await import('@kbn/lens-plugin/public');
-      if (!isLensApi(embeddable)) throw new IncompatibleActionError();
+      const { isCompatible } = await import('./is_compatible');
+      if (!isCompatible(embeddable, currentAppId, services.core))
+        throw new IncompatibleActionError();
       const { openModal } = await import('./open_modal');
       openModal(embeddable, currentAppId, casesActionContextProps, services);
     },

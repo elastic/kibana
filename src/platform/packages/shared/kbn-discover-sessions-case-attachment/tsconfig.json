@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": []
+}

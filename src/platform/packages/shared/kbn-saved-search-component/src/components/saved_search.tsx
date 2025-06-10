@@ -96,10 +96,10 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   }, [
     dataViews,
     documentViewerEnabled,
-    filters,
     filtersEnabled,
     index,
     query,
+    filters,
     searchSourceService,
     solutionNavIdOverride,
     timeRange,
@@ -132,8 +132,8 @@ const SavedSearchComponentTable: React.FC<
   const {
     dependencies: { dataViews },
     initialSerializedState,
-    filters,
     query,
+    filters,
     timeRange,
     timestampField,
     index,

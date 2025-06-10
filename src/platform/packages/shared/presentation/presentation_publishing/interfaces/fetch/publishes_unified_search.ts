@@ -37,6 +37,10 @@ export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
 }
 
+export interface PublishesQuery {
+  query$: PublishingSubject<Query | AggregateQuery | undefined>;
+}
+
 export type PublishesUnifiedSearch = PublishesTimeRange &
   PublishesFilters & {
     isCompatibleWithUnifiedSearch?: () => boolean;
@@ -64,6 +68,10 @@ export const apiPublishesTimeRange = (
 
 export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
   return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
+};
+
+export const apiPublishesQuery = (unknownApi: null | unknown): unknownApi is PublishesQuery => {
+  return Boolean(unknownApi && (unknownApi as PublishesQuery)?.query$ !== undefined);
 };
 
 export const apiPublishesUnifiedSearch = (

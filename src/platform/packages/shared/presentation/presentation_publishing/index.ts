@@ -39,6 +39,7 @@ export {
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
+  apiPublishesQuery,
   apiPublishesPartialUnifiedSearch,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
@@ -46,6 +47,7 @@ export {
   apiPublishesWritableUnifiedSearch,
   useSearchApi,
   type PublishesFilters,
+  type PublishesQuery,
   type PublishesTimeRange,
   type PublishesTimeslice,
   type PublishesUnifiedSearch,

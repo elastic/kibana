@@ -23,3 +23,7 @@ export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath } from './common/navigation';
+
+export type { CasesPublicStartDependencies } from './types';
+
+export { AttachmentActionType } from './client/attachment_framework/types';

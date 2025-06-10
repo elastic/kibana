@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { SavedSearchCasesAttachmentPersistedState } from '@kbn/discover-utils';
+import { SAVED_SEARCH_ATTACHMENT_TYPE } from '@kbn/discover-utils';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
 import type { PersistableStateAttachmentPayload } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
@@ -26,3 +28,24 @@ export const getLensCaseAttachment = ({
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
     type: AttachmentType.persistableState,
   } as unknown as PersistableStateAttachmentWithoutOwner);
+
+export const getSavedSearchCaseAttachment = ({
+  index,
+  timeRange,
+  query,
+  filters,
+  timestampField,
+}: SavedSearchCasesAttachmentPersistedState): PersistableStateAttachmentWithoutOwner => {
+  const persistableStateAttachmentState: SavedSearchCasesAttachmentPersistedState = {
+    index,
+    timeRange,
+    query,
+    filters,
+    timestampField,
+  };
+  return {
+    persistableStateAttachmentState,
+    persistableStateAttachmentTypeId: SAVED_SEARCH_ATTACHMENT_TYPE,
+    type: AttachmentType.persistableState,
+  } as unknown as PersistableStateAttachmentWithoutOwner;
+};

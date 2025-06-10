@@ -31,7 +31,8 @@
       "unifiedDocViewer",
       "unifiedSearch",
       "contentManagement",
-      "discoverShared"
+      "discoverShared",
+      "cases"
     ],
     "optionalPlugins": [
       "dataVisualizer",

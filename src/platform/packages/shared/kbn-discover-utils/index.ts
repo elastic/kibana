@@ -26,6 +26,7 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  SAVED_SEARCH_ATTACHMENT_TYPE,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -59,6 +60,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  isSavedSearchApi,
 } from './src';
 
 export type { LogsContextService, TracesContextService } from './src';

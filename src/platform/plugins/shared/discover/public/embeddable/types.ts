@@ -17,7 +17,11 @@ import type {
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDescription,
+  // PublishesDescription,
+  PublishesFilters,
+  PublishesQuery,
+  PublishesDataViews,
+  PublishesTimeRange,
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
@@ -103,9 +107,12 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  Required<PublishesWritableTitle> &
-  Required<PublishesDescription> &
+  PublishesWritableTitle &
   PublishesSavedSearch &
+  PublishesDataViews &
+  PublishesQuery &
+  PublishesFilters &
+  PublishesTimeRange &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &

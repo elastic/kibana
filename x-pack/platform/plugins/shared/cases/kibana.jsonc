@@ -27,6 +27,7 @@
       "fieldFormats",
       "management",
       "security",
+      "share",
       "notifications",
       "ruleRegistry",
       "files",

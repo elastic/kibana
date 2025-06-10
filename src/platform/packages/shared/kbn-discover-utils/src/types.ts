@@ -9,6 +9,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 export type {
@@ -162,4 +163,12 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
+}
+
+export interface SavedSearchCasesAttachmentPersistedState {
+  index: string;
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  timestampField?: string;
 }
