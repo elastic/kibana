@@ -77,10 +77,12 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
+        const esClient = core.elasticsearch.client.asScoped(options.request).asCurrentUser;
         return createInferenceClient({
           ...options,
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
+          esClient,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 

@@ -26,6 +26,7 @@ import {
   type ToolOptions,
   ChatCompleteOptions,
   type InferenceConnector,
+  RedactionConfiguration,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createOutputApi } from '../../common/output/create_output_api';
@@ -179,7 +180,8 @@ export class KibanaClient {
 
     const chatCompleteApi: ChatCompleteAPI = <
       TToolOptions extends ToolOptions = ToolOptions,
-      TStream extends boolean = false
+      TStream extends boolean = false,
+      TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
     >({
       connectorId: chatCompleteConnectorId,
       messages,
@@ -188,7 +190,11 @@ export class KibanaClient {
       tools,
       functionCalling,
       stream,
-    }: ChatCompleteOptions<TToolOptions, TStream>) => {
+    }: ChatCompleteOptions<
+      TToolOptions,
+      TStream,
+      TRedactionConfiguration
+    >): ChatCompleteCompositeResponse<TToolOptions, TStream, TRedactionConfiguration> => {
       const body: ChatCompleteRequestBody = {
         connectorId: chatCompleteConnectorId,
         system,
@@ -207,7 +213,7 @@ export class KibanaClient {
             body,
             { responseType: 'stream', timeout: NaN }
           )
-        ) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+        ) as ChatCompleteCompositeResponse<TToolOptions, TStream, TRedactionConfiguration>;
       } else {
         return this.axios
           .post(
@@ -219,7 +225,7 @@ export class KibanaClient {
           )
           .then((response) => {
             return response.data;
-          }) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+          }) as ChatCompleteCompositeResponse<TToolOptions, TStream, TRedactionConfiguration>;
       }
     };
 

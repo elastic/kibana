@@ -6,6 +6,7 @@
  */
 
 import type { ChatCompleteOptions, ChatCompleteCompositeResponse } from './api';
+import { RedactionConfiguration } from './redaction/types';
 import type { ToolOptions } from './tools';
 
 /**
@@ -13,23 +14,32 @@ import type { ToolOptions } from './tools';
  */
 export type BoundChatCompleteOptions<
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = Pick<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
+> = Pick<
+  ChatCompleteOptions<TToolOptions, TStream, TRedactionConfiguration>,
+  'connectorId' | 'functionCalling'
+>;
 
 /**
  * Options used to call the {@link BoundChatCompleteAPI}
  */
 export type UnboundChatCompleteOptions<
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = Omit<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
+> = Omit<
+  ChatCompleteOptions<TToolOptions, TStream, TRedactionConfiguration>,
+  'connectorId' | 'functionCalling'
+>;
 
 /**
  * Version of {@link ChatCompleteAPI} that got pre-bound to a set of static parameters
  */
 export type BoundChatCompleteAPI = <
   TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
+  TStream extends boolean = false,
+  TRedactionConfiguration extends RedactionConfiguration | undefined = undefined
 >(
-  options: UnboundChatCompleteOptions<TToolOptions, TStream>
-) => ChatCompleteCompositeResponse<TToolOptions, TStream>;
+  options: UnboundChatCompleteOptions<TToolOptions, TStream, TRedactionConfiguration>
+) => ChatCompleteCompositeResponse<TToolOptions, TStream, TRedactionConfiguration>;
