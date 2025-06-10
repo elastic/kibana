@@ -31,7 +31,12 @@ import {
   FunctionReturnType,
   SupportedDataType,
 } from '../../definitions/types';
-import { joinIndices, timeseriesIndices, editorExtensions } from '../../__tests__/helpers';
+import {
+  joinIndices,
+  timeseriesIndices,
+  editorExtensions,
+  inferenceEndpoints,
+} from '../../__tests__/helpers';
 
 export interface Integration {
   name: string;
@@ -310,6 +315,7 @@ export function createCustomCallbackMocks(
       }
       return [];
     }),
+    getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
 }
 
