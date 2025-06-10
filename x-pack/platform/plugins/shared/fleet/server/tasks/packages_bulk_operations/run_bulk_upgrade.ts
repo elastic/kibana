@@ -12,7 +12,9 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { installPackage } from '../../services/epm/packages';
 import { appContextService, packagePolicyService } from '../../services';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { getPackagePolicySavedObjectType } from '../../services/package_policy';
+import { SO_SEARCH_LIMIT } from '../../constants';
+
 import { scheduleBulkOperationTask, formatError } from './utils';
 
 export interface BulkUpgradeTaskParams {
@@ -120,10 +122,11 @@ async function bulkUpgradePackagePolicies({
   esClient: ElasticsearchClient;
   pkgName: string;
 }) {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+    kuery: `${packagePolicySavedObjectType}.package.name:${pkgName}`,
   });
 
   if (policyIdsToUpgrade.items.length) {

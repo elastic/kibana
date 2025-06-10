@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const agentPolicyRes = await apiClient.createAgentPolicy();
 
-        await es.bulk({
+        const bulkRes = await es.bulk({
           index: INGEST_SAVED_OBJECT_INDEX,
           refresh: 'wait_for',
           operations: [...new Array(10).keys()].flatMap((_, index) => [

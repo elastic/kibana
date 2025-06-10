@@ -9,18 +9,18 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getMaxPackageName } from '../../../common/services';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
-import { packagePolicyService } from '../package_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../package_policy';
 
 export async function incrementPackageName(
   soClient: SavedObjectsClientContract,
   packageName: string
 ): Promise<string> {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
+    kuery: `${packagePolicySavedObjectType}.package.name: "${packageName}"`,
   });
 
   return getMaxPackageName(packageName, packagePolicyData?.items);
@@ -36,11 +36,13 @@ export async function incrementPackagePolicyCopyName(
     packageName = packageNameMatches[1];
   }
 
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
+
   // find all pacakge policies starting with the same name and increment the name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
     // split package name on first space as KQL do not support wildcard and space
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${packageName.split(' ')[0]}*`,
+    kuery: `${packagePolicySavedObjectType}.name: ${packageName.split(' ')[0]}*`,
   });
 
   const maxVersion =
