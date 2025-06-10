@@ -52,7 +52,7 @@
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
     "@kbn/core-http-browser",
-    "@kbn/i18n-react",
+    "@kbn/i18n-react"
   ],
   "exclude": ["target/**/*"]
 }
