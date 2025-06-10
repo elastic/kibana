@@ -75,7 +75,7 @@ describe('GET /api/status', () => {
 
     incrementUsageCounter = jest.fn();
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.router.create('');
     registerStatusRoute({
       router,
       config: {
