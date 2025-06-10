@@ -280,36 +280,6 @@ export const buildDatasourceStates = async (
   return layers;
 };
 
-export function fromDatasourceStates(
-  datasourceStates: LensAttributes['state']['datasourceStates']
-): (LensConfig) {
-  const formBased = datasourceStates.formBased;
-  
-  const dataset = {
-    index: '',
-    timeFieldName: undefined,
-  }
-
-  const layers: any = {};
-  if (formBased) {
-    Object.entries(formBased.layers).forEach(([layerId, layer]) => {
-      layers[layerId] = {
-        columns: layer.columns,
-        columnOrder: layer.columnOrder,
-        indexPatternId: '',
-        timeFieldName: '',
-      };
-    });
-  }
-
-  return {
-    chartType: 'xy',
-    title: '',
-    dataset,
-    layers,
-  }
-}
-
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
