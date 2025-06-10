@@ -96,7 +96,9 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentStateContainer ||
-    !currentDataView
+    !currentScopedProfilesManager ||
+    !currentDataView ||
+    !currentTabRuntimeState
   ) {
     return null;
   }
