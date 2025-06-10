@@ -21,6 +21,7 @@ import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
 import { IndexFlyout, IndexFlyoutProps } from './flyout';
 import { IndexStatusProvider, useIndexContext } from './context';
+import { ReindexActionCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -73,22 +74,20 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [showFlyout]);
 
   return (
-    <EuiTableRow
-      data-test-subj="deprecationTableRow"
-      key={`deprecation-row-${index}`}
-      onClick={() => setShowFlyout(true)}
-    >
+    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
             key={field}
             truncateText={false}
             data-test-subj={`reindexTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
               deprecation={deprecation}
               resolutionTableCell={<ReindexResolutionCell />}
+              actionsTableCell={<ReindexActionCell openFlyout={() => setShowFlyout(true)} />}
             />
           </EuiTableRowCell>
         );

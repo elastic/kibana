@@ -494,6 +494,7 @@ src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
