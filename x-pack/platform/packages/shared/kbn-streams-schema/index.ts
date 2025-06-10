@@ -131,4 +131,9 @@ export {
   isCondition,
 } from './src/conditions';
 
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+} from './src/api/significant_events';
+
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
