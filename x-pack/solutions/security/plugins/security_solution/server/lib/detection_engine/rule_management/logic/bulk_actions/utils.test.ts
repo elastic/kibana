@@ -12,21 +12,24 @@ import { hasAlertSuppressionBulkEditAction } from './utils';
 describe('hasAlertSuppressionBulkEditAction', () => {
   it('returns true if actions include set_alert_suppression_for_threshold', () => {
     const actions: BulkActionEditPayload[] = [
-      { type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold, value: {} },
+      {
+        type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+        value: { duration: { unit: 'm', value: 4 } },
+      },
     ];
     expect(hasAlertSuppressionBulkEditAction(actions)).toBe(true);
   });
 
   it('returns true if actions include delete_alert_suppression', () => {
     const actions: BulkActionEditPayload[] = [
-      { type: BulkActionEditTypeEnum.delete_alert_suppression, value: {} },
+      { type: BulkActionEditTypeEnum.delete_alert_suppression },
     ];
     expect(hasAlertSuppressionBulkEditAction(actions)).toBe(true);
   });
 
   it('returns true if actions include set_alert_suppression', () => {
     const actions: BulkActionEditPayload[] = [
-      { type: BulkActionEditTypeEnum.set_alert_suppression, value: {} },
+      { type: BulkActionEditTypeEnum.set_alert_suppression, value: { group_by: ['test-'] } },
     ];
     expect(hasAlertSuppressionBulkEditAction(actions)).toBe(true);
   });
@@ -42,7 +45,7 @@ describe('hasAlertSuppressionBulkEditAction', () => {
   it('returns true if at least one action is a suppression action among others', () => {
     const actions: BulkActionEditPayload[] = [
       { type: BulkActionEditTypeEnum.add_tags, value: ['tag1'] },
-      { type: BulkActionEditTypeEnum.set_alert_suppression, value: {} },
+      { type: BulkActionEditTypeEnum.set_alert_suppression, value: { group_by: ['test-'] } },
     ];
     expect(hasAlertSuppressionBulkEditAction(actions)).toBe(true);
   });
