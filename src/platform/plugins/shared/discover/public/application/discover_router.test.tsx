@@ -9,7 +9,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 
-
 // Mock dependencies to avoid issues with external modules like monaco
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   KibanaContextProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -62,7 +61,6 @@ const renderWithRouter = (path: string) => {
 
   return history;
 };
-
 
 describe('DiscoverRouter', () => {
   it('should show DiscoverMainRoute component for / route', () => {
