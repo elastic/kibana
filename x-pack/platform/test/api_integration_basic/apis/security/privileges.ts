@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
             inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+            manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
@@ -312,6 +313,7 @@ export default function ({ getService }: FtrProviderContext) {
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+            manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
             discover: [
               'all',

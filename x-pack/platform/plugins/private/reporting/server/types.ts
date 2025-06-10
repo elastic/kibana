@@ -21,7 +21,7 @@ import type {
   PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   RruleSchedule,
@@ -73,6 +73,7 @@ export interface ReportingStartDeps {
   licensing: LicensingPluginStart;
   notifications: NotificationsPluginStart;
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
   screenshotting?: ScreenshottingStart;
 }
 
@@ -121,6 +122,20 @@ export interface ScheduledReportingJobResponse {
 export type ScheduledReportType = Omit<RawScheduledReport, 'schedule'> & {
   schedule: RruleSchedule;
 };
+
+export interface ListScheduledReportApiJSON {
+  id: string;
+  created_at: RawScheduledReport['createdAt'];
+  created_by: RawScheduledReport['createdBy'];
+  enabled: RawScheduledReport['enabled'];
+  jobtype: RawScheduledReport['jobType'];
+  object_type: RawScheduledReport['meta']['objectType'];
+  last_run: string | undefined;
+  next_run: string | undefined;
+  notification: RawScheduledReport['notification'];
+  schedule: RruleSchedule;
+  title: RawScheduledReport['title'];
+}
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];

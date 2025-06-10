@@ -37,7 +37,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -63,6 +63,7 @@ import {
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
+import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
   actions: ActionsPluginSetupContract;
@@ -92,6 +93,7 @@ export interface ReportingInternalStart {
   logger: Logger;
   notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
+  security?: SecurityPluginStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
@@ -301,6 +303,18 @@ export class ReportingCore {
     };
   }
 
+  public async canManageReportingForSpace(req: KibanaRequest): Promise<boolean> {
+    const { security } = await this.getPluginStartDeps();
+    const spaceId = this.getSpaceId(req);
+    const result = await security?.authz
+      .checkPrivilegesWithRequest(req)
+      .atSpace(spaceId ?? DEFAULT_SPACE_ID, {
+        kibana: [security?.authz.actions.api.get(API_PRIVILEGES.MANAGE_SCHEDULED_REPORTING)],
+      });
+
+    return result?.hasAllRequested ?? false;
+  }
+
   /*
    * Gives synchronous access to the config
    */
@@ -422,6 +436,11 @@ export class ReportingCore {
   public async getInternalSoClient() {
     const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
+  }
+
+  public async getTaskManager() {
+    const { taskManager } = await this.getPluginStartDeps();
+    return taskManager;
   }
 
   public async getDataService() {
