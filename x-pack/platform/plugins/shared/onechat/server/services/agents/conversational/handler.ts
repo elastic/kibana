@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { from, filter, shareReplay, firstValueFrom, map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { StreamEvent } from '@langchain/core/tracers/log_stream';
-import { isRoundCompleteEvent } from '@kbn/onechat-common';
 import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
-import { providerToLangchainTools, conversationLangchainMessages } from './utils';
-import { createAgentGraph } from './graph';
-import { convertGraphEvents, addRoundCompleteEvent } from './convert_graph_events';
+import { runChatAgent } from './run_chat_agent';
 
 export interface CreateConversationalAgentHandlerParams {
   logger: Logger;
@@ -30,54 +25,29 @@ export const createHandler = ({
     { agentParams: { nextInput, conversation = [] }, runId },
     { request, modelProvider, toolProvider, events, runner }
   ) => {
-    const model = await modelProvider.getDefaultModel();
-    const tools = await providerToLangchainTools({ request, toolProvider, runner, logger });
-    const initialMessages = conversationLangchainMessages({
-      nextInput,
-      previousRounds: conversation,
-    });
-    const agentGraph = await createAgentGraph({ logger, chatModel: model.chatModel, tools });
-
-    const eventStream = agentGraph.streamEvents(
-      { initialMessages },
+    const completedRound = await runChatAgent(
       {
-        version: 'v2',
-        runName: defaultAgentGraphName,
-        metadata: {
-          graphName: defaultAgentGraphName,
-          runId,
+        nextInput,
+        conversation,
+        agentGraphName: defaultAgentGraphName,
+        runId,
+        onEvent: (event) => {
+          events.emit(event);
         },
-        recursionLimit: 10,
-        callbacks: [],
+        tools: toolProvider,
+      },
+      {
+        logger,
+        runner,
+        request,
+        modelProvider,
       }
-    );
-
-    const events$ = from(eventStream).pipe(
-      filter(isStreamEvent),
-      convertGraphEvents({ graphName: defaultAgentGraphName, runName: defaultAgentGraphName }),
-      addRoundCompleteEvent({ userInput: nextInput }),
-      shareReplay()
-    );
-
-    events$.subscribe((event) => {
-      events.emit(event);
-    });
-
-    const round = await firstValueFrom(
-      events$.pipe(
-        filter(isRoundCompleteEvent),
-        map((event) => event.data.round)
-      )
     );
 
     return {
       result: {
-        round,
+        round: completedRound,
       },
     };
   };
-};
-
-const isStreamEvent = (input: any): input is StreamEvent => {
-  return 'event' in input;
 };
