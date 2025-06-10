@@ -89,9 +89,7 @@ EXPOSE 5601
 {{#ubi}}
 RUN microdnf install --setopt=tsflags=nodocs -y \
       fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
-      microdnf clean all && \
-      # This command will fail and stop the build
-      cat /this-file-does-not-exist
+      microdnf clean all
 {{/ubi}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
