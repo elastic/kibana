@@ -23,6 +23,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -219,12 +220,23 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
                 <FormattedMessage
                   defaultMessage="Rule ID: {ruleId}"
                   id="xpack.search.queryRulesetDetail.queryRuleFlyout.ruleId"
                   values={{ ruleId }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      defaultMessage="The unique identifier of the query rule within the specified ruleset to retrieve"
+                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.ruleIdTooltip"
+                    />
+                  }
+                  position="right"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
