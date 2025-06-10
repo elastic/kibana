@@ -795,6 +795,7 @@
     "@kbn/response-ops-alerts-fields-browser": "link:src/platform/packages/shared/response-ops/alerts-fields-browser",
     "@kbn/response-ops-alerts-filters-form": "link:src/platform/packages/shared/response-ops/alerts-filters-form",
     "@kbn/response-ops-alerts-table": "link:src/platform/packages/shared/response-ops/alerts-table",
+    "@kbn/response-ops-recurring-schedule-form": "link:src/platform/packages/shared/response-ops/recurring-schedule-form",
     "@kbn/response-ops-rule-form": "link:src/platform/packages/shared/response-ops/rule_form",
     "@kbn/response-ops-rule-params": "link:src/platform/packages/shared/response-ops/rule_params",
     "@kbn/response-ops-rules-apis": "link:src/platform/packages/shared/response-ops/rules-apis",
