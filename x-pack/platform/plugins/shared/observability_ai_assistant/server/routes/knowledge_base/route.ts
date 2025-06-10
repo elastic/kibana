@@ -215,8 +215,6 @@ const knowledgeBaseEntryRt = t.intersection([
     text: nonEmptyStringRt,
   }),
   t.partial({
-    confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-    is_correction: toBooleanRt,
     public: toBooleanRt,
     labels: t.record(t.string, t.string),
     role: t.union([

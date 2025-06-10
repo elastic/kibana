@@ -77,6 +77,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
+      it('does not retrieve deprecated properties', async () => {
+        const entries = await getEntries();
+        const entry = entries[0];
+
+        expect(entry).not.to.have.property('confidence');
+        expect(entry).not.to.have.property('is_correction');
+      });
+
       it('generates sparse embeddings', async () => {
         const hits = await getKnowledgeBaseEntriesFromEs(es);
         const embeddings =
