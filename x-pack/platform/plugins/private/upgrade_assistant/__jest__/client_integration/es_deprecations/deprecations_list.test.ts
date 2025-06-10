@@ -353,7 +353,7 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
-      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended to unfreeze');
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: unfreeze');
     });
     it('recommends set as read-only if index is a follower index', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
@@ -381,7 +381,7 @@ describe('ES deprecations table', () => {
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
       expect(find('reindexTableCell-correctiveAction').text()).toContain(
-        'Recommended to set to read-only'
+        'Recommended: set to read-only'
       );
     });
 
@@ -437,7 +437,7 @@ describe('ES deprecations table', () => {
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
       expect(find('reindexTableCell-correctiveAction').text()).toContain(
-        'Recommended to set to read-only'
+        'Recommended: set to read-only'
       );
     });
 
@@ -466,7 +466,7 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
-      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended to reindex');
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
     });
 
     it('recommends set as read-only if reindexing is excluded', async () => {
@@ -520,13 +520,13 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
-      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended to reindex');
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
     });
 
     it('recommends reindexing by default', async () => {
       const { find } = testBed;
       expect(find('reindexTableCell-correctiveAction').length).toBe(1);
-      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended to reindex');
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
     });
   });
   describe('recommended actions for data streams', () => {
@@ -534,7 +534,7 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('dataStreamReindexTableCell-correctiveAction').at(0).text()).toContain(
-        'Recommended to set to read-only'
+        'Recommended: set to read-only'
       );
     });
 
@@ -542,7 +542,7 @@ describe('ES deprecations table', () => {
       const { find } = testBed;
 
       expect(find('dataStreamReindexTableCell-correctiveAction').at(1).text()).toContain(
-        'Recommended to reindex'
+        'Recommended: reindex'
       );
     });
   });
