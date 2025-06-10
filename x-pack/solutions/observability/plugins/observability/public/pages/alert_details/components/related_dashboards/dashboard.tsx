@@ -8,13 +8,20 @@
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiButton } from '@elastic/eui';
 import { useKibana } from '../../../../utils/kibana_react';
+export interface DashboardMetadata {
+  id: string;
+  title: string;
+  description: string;
+}
 
 export function Dashboard({
   dashboard,
+  actionButtonProps,
 }: {
-  dashboard: { id: string; title: string; description: string };
+  dashboard: DashboardMetadata;
+  actionButtonProps?: { onClick: (dashboard: DashboardMetadata) => void; label: string };
 }) {
   const {
     services: {
@@ -49,6 +56,16 @@ export function Dashboard({
             {dashboard.description}
           </EuiText>
         </EuiFlexItem>
+        {actionButtonProps ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="add-suggested-dashboard"
+              onClick={() => actionButtonProps.onClick(dashboard)}
+            >
+              <EuiText>{actionButtonProps.label}</EuiText>
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
     </>

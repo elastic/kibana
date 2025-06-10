@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import { Dashboards } from './related_dashboards/dashboards';
 import { useSuggestedDashboards } from '../hooks/use_suggested_dashboards';
+import { DashboardMetadata } from './related_dashboards/dashboard';
 
 interface RelatedDashboardsProps {
   alertId: string;
@@ -17,9 +18,7 @@ interface RelatedDashboardsProps {
 }
 
 export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboardsProps) {
-  const [dashboardsMeta, setDashboardsMeta] = useState<
-    Array<{ id: string; title: string; description: string }>
-  >([]);
+  const [dashboardsMeta, setDashboardsMeta] = useState<DashboardMetadata[]>([]);
   const [isLoadingLinkedDashboards, setIsLoadingLinkedDashboards] = useState(true);
 
   const { isLoadingSuggestedDashboards, suggestedDashboards } = useSuggestedDashboards(alertId);
@@ -98,6 +97,17 @@ export function RelatedDashboards({ alertId, relatedDashboards }: RelatedDashboa
         })}
         isLoadingDashboards={isLoading}
         dashboards={filteredSuggestedDashboards}
+        actionButtonProps={{
+          label: i18n.translate(
+            'xpack.observability.alertDetails.suggestedDashboards.buttonLabel',
+            {
+              defaultMessage: 'Add to linked dashboards',
+            }
+          ),
+          onClick: (d) => {
+            setDashboardsMeta((value) => [...value, d]);
+          },
+        }}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
+import { DashboardMetadata } from '../components/related_dashboards/dashboard';
 
 export const fetchRelatedDashboards = async ({
   alertId,
@@ -25,7 +26,7 @@ export const fetchRelatedDashboards = async ({
 
 interface SuggestedDashboardResponse {
   isLoadingSuggestedDashboards: boolean;
-  suggestedDashboards?: Array<{ id: string; title: string }>;
+  suggestedDashboards?: DashboardMetadata[];
 }
 
 export const useSuggestedDashboards = (alertId: string): SuggestedDashboardResponse => {
@@ -41,7 +42,7 @@ export const useSuggestedDashboards = (alertId: string): SuggestedDashboardRespo
   return {
     isLoadingSuggestedDashboards: isLoading,
     suggestedDashboards: data?.suggestedDashboards
-      ? data.suggestedDashboards.map(({ id, title }) => ({ id, title }))
+      ? data.suggestedDashboards.map(({ id, title }) => ({ id, title, description: '' }))
       : undefined,
   };
 };
