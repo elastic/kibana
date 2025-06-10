@@ -250,7 +250,9 @@ export class ObservabilityAIAssistantClient {
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
           })
         ),
         shareReplay()
