@@ -96,7 +96,7 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
-  const isBulkEditAlertSuppressionEnabled = useIsExperimentalFeatureEnabled(
+  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
     'bulkEditAlertSuppressionEnabled'
   );
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
@@ -368,6 +368,7 @@ export const useBulkActions = ({
       const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
       const isEditDisabled =
         missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
+      const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
 
       return [
         {
@@ -420,13 +421,13 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
-            ...(isBulkEditAlertSuppressionEnabled
+            ...(isBulkEditAlertSuppressionFeatureEnabled
               ? [
                   {
                     key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+                    disabled: isAlertSuppressionDisabled,
                     toolTipContent: isAlertSuppressionLicenseValid
                       ? undefined
                       : alertSuppressionUpsellingMessage,
@@ -607,7 +608,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
               'data-test-subj': 'setAlertSuppressionBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression),
-              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+              disabled: isAlertSuppressionDisabled,
               toolTipProps: { position: 'right' },
             },
             {
@@ -615,7 +616,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
               'data-test-subj': 'setAlertSuppressionBulkEditRuleForThreshold',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression_for_threshold),
-              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+              disabled: isAlertSuppressionDisabled,
               toolTipProps: { position: 'right' },
             },
             {
@@ -623,7 +624,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
               'data-test-subj': 'deleteAlertSuppressionBulkEditRule',
               onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_alert_suppression),
-              disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+              disabled: isAlertSuppressionDisabled,
               toolTipProps: { position: 'right' },
             },
           ],
@@ -653,7 +654,7 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      isBulkEditAlertSuppressionEnabled,
+      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
       isAlertSuppressionLicenseValid,
