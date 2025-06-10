@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiPageTemplate,
-  EuiTitle,
-  EuiImage,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiImage, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import SearchHomePageImage from '../assets/search_homepage.svg';
