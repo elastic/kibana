@@ -346,7 +346,7 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -363,7 +363,7 @@ const addDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -5082,7 +5082,7 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -5099,7 +5099,7 @@ const subDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',

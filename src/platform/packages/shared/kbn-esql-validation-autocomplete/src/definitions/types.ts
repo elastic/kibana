@@ -70,7 +70,6 @@ export const isFieldType = (type: string | FunctionParameterType): type is Field
 export const dataTypes = [
   ...fieldTypes,
   'null',
-  'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
   'param', // Defines a named param such as ?value or ??field
