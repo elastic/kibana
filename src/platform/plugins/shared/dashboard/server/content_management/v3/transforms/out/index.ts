@@ -8,6 +8,8 @@
  */
 
 export { transformControlGroupOut } from './control_group_out_transforms';
-export { transformSearchSourceOut } from './search_source_out_transforms';
 export { transformOptionsOut } from './options_out_transforms';
 export { transformPanelsOut } from './panels_out_transforms';
+export { transformRefreshInterval } from './refresh_interval_out_transforms';
+export { transformSearchSourceOut } from './search_source_out_transforms';
+export { transformTimeProperties } from './time_properties_out_transforms';

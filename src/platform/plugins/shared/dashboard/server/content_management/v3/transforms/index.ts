@@ -11,7 +11,9 @@ export {
   transformControlGroupOut,
   transformOptionsOut,
   transformPanelsOut,
+  transformRefreshInterval,
   transformSearchSourceOut,
+  transformTimeProperties,
 } from './out';
 
 export { transformControlGroupIn, transformPanelsIn, transformSearchSourceIn } from './in';

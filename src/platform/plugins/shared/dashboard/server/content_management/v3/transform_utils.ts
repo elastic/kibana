@@ -21,11 +21,11 @@ import {
   transformOptionsOut,
   transformPanelsIn,
   transformPanelsOut,
+  transformRefreshInterval,
   transformSearchSourceIn,
   transformSearchSourceOut,
+  transformTimeProperties,
 } from './transforms';
-import { transformRefreshInterval } from './transforms/out/refresh_interval_out_transforms';
-import { transformTimeProperties } from './transforms/out/time_properties_out_transforms';
 import type {
   DashboardAttributes,
   DashboardGetOut,

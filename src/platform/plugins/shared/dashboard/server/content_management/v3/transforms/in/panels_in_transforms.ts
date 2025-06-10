@@ -9,6 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
+
 import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
@@ -18,10 +20,10 @@ export function transformPanelsIn(
   dropSections: boolean = false
 ): {
   panelsJSON: string;
-  sections: any[];
+  sections: Serializable[];
 } {
-  const panels: any[] = [];
-  const sections: any[] = [];
+  const panels: Serializable[] = [];
+  const sections: Serializable[] = [];
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
@@ -43,7 +45,9 @@ export function transformPanelsIn(
   return { panelsJSON: JSON.stringify(panels), sections };
 }
 
-function transformPanel(panel: DashboardPanel): { gridData: any; [key: string]: any } {
+function transformPanel(
+  panel: DashboardPanel
+): SerializableRecord & { gridData: SerializableRecord } {
   const { panelIndex, gridData, panelConfig, ...restPanel } = panel;
   const idx = panelIndex ?? uuidv4();
   return {
