@@ -149,7 +149,6 @@ export const getXyVisualization = ({
   data,
   paletteService,
   fieldFormats,
-  useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
@@ -162,7 +161,6 @@ export const getXyVisualization = ({
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
-  useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
@@ -743,7 +741,7 @@ export const getXyVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
+    return <XyToolbar {...props} />;
   },
 
   DimensionEditorComponent(props) {

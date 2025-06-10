@@ -338,6 +338,13 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=min(b) by /', expected);
       });
 
+      test('no grouping functions as args to scalar function', async () => {
+        const suggestions = await suggest('FROM a | STATS a=MIN(b) BY ACOS(/)');
+        expect(
+          suggestions.some((s) => allGroupingFunctions.map((f) => f.text).includes(s.text))
+        ).toBe(false);
+      });
+
       test('on partial column name', async () => {
         const expected = [
           'col0 = ',
@@ -472,10 +479,14 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getLiteralsByType('time_duration'),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ]
         );
       });
