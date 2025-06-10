@@ -33,15 +33,19 @@ export const registerTestHealthDiagnosticRoute = (
       validate: {
         body: schema.object({
           url: schema.string(),
+          pubKey: schema.string(),
         }),
       },
     },
     async (_, request, response) => {
-      const { url } = request.body;
+      const { url, pubKey } = request.body;
 
       log.info('Updating health diagnostic task cdn url', { url } as LogMeta);
 
-      await healthDiagnostic.updateCdnUrl(url);
+      await healthDiagnostic.updateCdnUrl({
+        url,
+        pubKey,
+      });
 
       return response.ok({
         body: {

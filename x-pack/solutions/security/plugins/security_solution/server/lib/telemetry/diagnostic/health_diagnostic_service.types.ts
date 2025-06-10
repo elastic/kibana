@@ -13,6 +13,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryReceiver } from '../receiver';
+import type { CdnConfig } from '../artifact';
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
@@ -39,7 +40,7 @@ export interface HealthDiagnosticService {
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]>;
   // TODO: remove before merge, for testing purposes
-  updateCdnUrl(cdnUrl: string): Promise<void>;
+  updateCdnUrl(cdn: CdnConfig): Promise<void>;
 }
 
 export interface HealthDiagnosticQuery {

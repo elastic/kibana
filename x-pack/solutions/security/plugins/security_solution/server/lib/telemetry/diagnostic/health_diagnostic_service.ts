@@ -32,7 +32,7 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
-import { Artifact } from '../artifact';
+import { Artifact, type CdnConfig } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
 import type { ITelemetryReceiver } from '../receiver';
 
@@ -179,12 +179,12 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     return statistics;
   }
 
-  public async updateCdnUrl(cdnUrl: string): Promise<void> {
+  public async updateCdnUrl(cdn: CdnConfig): Promise<void> {
     if (this.receiver === undefined) {
       this.logger.warn('Receiver is not started');
       return;
     }
-    await this.artifactService.start(this.receiver, cdnUrl);
+    await this.artifactService.start(this.receiver, cdn);
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
