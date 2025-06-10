@@ -14,7 +14,6 @@ import { UseKnowledgeBaseResult } from '../hooks';
 import { KnowledgeBaseInstallationStatusPanel } from './knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
-import { KnowledgeBaseReindexingCallout } from './knowledge_base_reindexing_callout';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
@@ -40,10 +39,6 @@ export function WelcomeMessageKnowledgeBase({
   }
 
   if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
-    if (knowledgeBase.status.value?.isReIndexing) {
-      return <KnowledgeBaseReindexingCallout />;
-    }
-
     return showSuccessBanner ? (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
