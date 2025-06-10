@@ -46,6 +46,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 125
     key: build
     timeout_in_minutes: 60
     retry:

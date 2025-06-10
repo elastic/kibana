@@ -11,7 +11,7 @@ steps:
       - linting
       - linting_with_types
       - check_types
-    timeout_in_minutes: 30
+    timeout_in_minutes: 60
     soft_fail: true
     retry:
       automatic:

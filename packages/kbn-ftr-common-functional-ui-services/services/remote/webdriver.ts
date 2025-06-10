@@ -51,6 +51,7 @@ const chromiumUserPrefs = {
       setting: 1,
     },
   },
+  'profile.password_manager_leak_detection': false,
 };
 
 const sleep$ = (ms: number) => Rx.timer(ms).pipe(ignoreElements());
