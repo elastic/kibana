@@ -35,9 +35,6 @@ jest.mock('../../lib/rule_api/update_query_delay_settings', () => ({
   updateQueryDelaySettings: jest.fn(),
 }));
 jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
