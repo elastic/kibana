@@ -26,7 +26,7 @@ import {
   LEVEL_2_RESOURCE_FIELDS,
   PROMINENT_LOG_ECS_FIELDS,
 } from './constants';
-import { reduceAsyncChunks } from '../../utils/reduce_async_chunks';
+import { processAsyncInChunks } from '../../utils/process_async_in_chunks';
 
 /**
  * Retrieves all indices and data streams for each stream of logs.
@@ -108,7 +108,7 @@ export function addMappingsToIndices({
 }): Observable<IndexBasicInfo[]> {
   const patterns = logsIndexPatterns.map((pattern) => pattern.pattern);
   return from(
-    reduceAsyncChunks(patterns, (patternChunk) => safeMappingCall(esClient, patternChunk))
+    processAsyncInChunks(patterns, (patternChunk) => safeMappingCall(esClient, patternChunk))
   ).pipe(
     map((mappings) => {
       return dataStreamsInfo.map((info) => {
@@ -236,7 +236,7 @@ export function getIndexBasicStats({
   const indexNames = indices.map((info) => info.name);
 
   return from(
-    reduceAsyncChunks(indexNames, (indexChunk) =>
+    processAsyncInChunks(indexNames, (indexChunk) =>
       safeEsCall(() =>
         esClient.indices.stats({
           index: indexChunk,
@@ -249,7 +249,7 @@ export function getIndexBasicStats({
     delay(breatheDelay),
     concatMap((allIndexStats) =>
       from(
-        reduceAsyncChunks(indexNames, (chunk) =>
+        processAsyncInChunks(indexNames, (chunk) =>
           getFailureStoreStats({ esClient, indexName: chunk.join(',') })
         )
       ).pipe(
@@ -355,7 +355,7 @@ async function getIndicesInfoForPattern({
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
   const indices = Array.isArray(pattern.pattern) ? pattern.pattern : [pattern.pattern];
-  const resp = await reduceAsyncChunks(indices, (indexChunk) =>
+  const resp = await processAsyncInChunks(indices, (indexChunk) =>
     safeEsCall(() =>
       esClient.indices.get({
         index: indexChunk,
