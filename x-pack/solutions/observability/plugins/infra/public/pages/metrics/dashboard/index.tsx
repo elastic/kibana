@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
@@ -13,6 +13,8 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
@@ -20,6 +22,7 @@ import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
 export const Dashboard = () => {
   const {
     services: {
+      share,
       observabilityShared: {
         navigation: { PageTemplate },
       },
@@ -37,6 +40,27 @@ export const Dashboard = () => {
       getInitialInput,
     });
   }, []);
+
+  const getLocatorParams = useCallback(
+    (params: SerializableRecord) => {
+      return {
+        dashboardId: params?.dashboardId ?? dashboardId,
+      };
+    },
+    [dashboardId]
+  );
+
+  const locator = useMemo(() => {
+    const baseLocator = share.url.locators.get(KUBERNETES_DASHBOARD_LOCATOR_ID);
+    if (!baseLocator) return;
+
+    return {
+      ...baseLocator,
+      getRedirectUrl: (params: SerializableRecord) =>
+        baseLocator.getRedirectUrl(getLocatorParams(params)),
+      navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
+    };
+  }, [share, getLocatorParams]);
 
   const kubernetesLinkProps = useLinkProps({
     app: 'metrics',
@@ -85,8 +109,7 @@ export const Dashboard = () => {
         data-test-subj="infraKubernetesPage"
       >
         <DashboardRenderer
-          // TODO: Uncomment when locator is available
-          // locator={locator}
+          locator={locator}
           savedObjectId={dashboardId}
           getCreationOptions={getCreationOptions}
           onApiAvailable={setDashboard}
