@@ -38,7 +38,7 @@ export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
  * @param editAction {@link BulkActionEditType}
  * @returns {boolean}
  */
-export const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType) => {
+const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType) => {
   const indexPatternsActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
     BulkActionEditTypeEnum.delete_alert_suppression,
