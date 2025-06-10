@@ -17,7 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDescription,
+  // PublishesDescription,
   PublishesFilters,
   PublishesQuery,
   PublishesDataViews,

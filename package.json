@@ -481,6 +481,7 @@
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/platform/plugins/private/discover_enhanced",
     "@kbn/discover-plugin": "link:src/platform/plugins/shared/discover",
+    "@kbn/discover-sessions-case-attachment": "link:src/platform/packages/shared/kbn-discover-sessions-case-attachment",
     "@kbn/discover-shared-plugin": "link:src/platform/plugins/shared/discover_shared",
     "@kbn/discover-utils": "link:src/platform/packages/shared/kbn-discover-utils",
     "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
