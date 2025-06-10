@@ -20,35 +20,6 @@ export type {
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
 export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import type {
-  HasEditCapabilities,
-  HasLibraryTransforms,
-  HasSupportedTriggers,
-  PublishesBlockingError,
-  PublishesDataLoading,
-  PublishesSavedObjectId,
-  PublishesWritableTitle,
-  PublishesWritableUnifiedSearch,
-  PublishingSubject,
-  PublishesDataViews,
-  SerializedTimeRange,
-  SerializedTitles,
-  PublishesFilters,
-  PublishesTimeRange,
-  PublishesQuery,
-} from '@kbn/presentation-publishing';
-import type {
-  SavedSearch,
-  SavedSearchAttributes,
-  SerializableSavedSearch,
-} from '@kbn/saved-search-plugin/common/types';
-import type { BehaviorSubject } from 'rxjs';
-import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -194,93 +165,6 @@ export interface UserAgentFields {
   'user_agent.version': string;
 }
 
-export type SearchEmbeddableState = Pick<
-  SerializableSavedSearch,
-  | 'rowHeight'
-  | 'rowsPerPage'
-  | 'headerRowHeight'
-  | 'columns'
-  | 'sort'
-  | 'sampleSize'
-  | 'viewMode'
-  | 'grid'
-  | 'density'
-> & {
-  rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
-  totalHitCount: number | undefined;
-  inspectorAdapters: Record<string, unknown>;
-};
-
-export type SearchEmbeddableStateManager = {
-  [key in keyof Required<SearchEmbeddableState>]: BehaviorSubject<SearchEmbeddableState[key]>;
-};
-
-export type SearchEmbeddableSerializedAttributes = Omit<
-  SearchEmbeddableState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
-> &
-  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
-
-// These are options that are not persisted in the saved object, but can be used by solutions
-// when utilising the SavedSearchComponent package outside of dashboard contexts.
-export interface NonPersistedDisplayOptions {
-  solutionNavIdOverride?: 'oblt' | 'security' | 'search';
-  enableDocumentViewer?: boolean;
-  enableFilters?: boolean;
-}
-
-export type EditableSavedSearchAttributes = Partial<
-  Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
->;
-
-export type SearchEmbeddableSerializedState = SerializedTitles &
-  SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> &
-  EditableSavedSearchAttributes & {
-    // by value
-    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
-    // by reference
-    savedObjectId?: string;
-    nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-  };
-
-export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
-  SerializedTitles &
-  SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> & {
-    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
-    savedObjectTitle?: string;
-    savedObjectId?: string;
-    savedObjectDescription?: string;
-    nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-  };
-
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
-  PublishesSavedObjectId &
-  PublishesDataLoading &
-  PublishesBlockingError &
-  PublishesWritableTitle &
-  PublishesSavedSearch &
-  PublishesDataViews &
-  PublishesQuery &
-  PublishesFilters &
-  PublishesTimeRange &
-  PublishesWritableDataViews &
-  PublishesWritableUnifiedSearch &
-  HasLibraryTransforms &
-  HasTimeRange &
-  HasInspectorAdapters &
-  Partial<HasEditCapabilities & PublishesSavedObjectId> &
-  HasDynamicActions &
-  HasSupportedTriggers;
-
-export interface PublishesSavedSearch {
-  savedSearch$: PublishingSubject<SavedSearch>;
-}
-export interface HasTimeRange {
-  hasTimeRange(): boolean;
-}
 export interface SavedSearchCasesAttachmentPersistedState {
   index: string;
   timeRange: TimeRange;

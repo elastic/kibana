@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { type SearchEmbeddableApi } from '@kbn/discover-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
   type EmbeddableApiContext,
@@ -16,12 +17,13 @@ import {
   apiCanAccessViewMode,
   apiPublishesQuery,
   apiPublishesFilters,
+  apiPublishesSavedSearch,
   apiHasType,
   apiIsOfType,
   getInheritedViewMode,
   apiPublishesTimeRange,
 } from '@kbn/presentation-publishing';
-import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch, type SearchEmbeddableApi } from '../..';
+import { SEARCH_EMBEDDABLE_TYPE } from '../..';
 
 type SearchEmbeddableApiWithAtLeastOneDataView = Omit<
   SearchEmbeddableApi,
@@ -29,13 +31,6 @@ type SearchEmbeddableApiWithAtLeastOneDataView = Omit<
 > & {
   dataViews$: PublishingSubject<DataView[]>;
   timeRange$: PublishingSubject<TimeRange>;
-};
-
-export const apiPublishesSavedSearch = (
-  api: EmbeddableApiContext['embeddable']
-): api is PublishesSavedSearch => {
-  const embeddable = api as PublishesSavedSearch;
-  return Boolean(embeddable.savedSearch$);
 };
 
 export const apiPublishesDataViews = (
