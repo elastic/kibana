@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { ResultFieldProps } from './result_types';
 import { ResultFields } from './results_fields';
 
@@ -73,13 +74,24 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                     }
                   }}
                   fullWidth
+                  placeholder={i18n.translate(
+                    'xpack.sharedKbnSearchIndexDocuments.editableResult.documentIdPlaceholder',
+                    {
+                      defaultMessage: 'Document ID',
+                    }
+                  )}
                 />
               </EuiFlexItem>
               {hasIndexSelector && (
                 <EuiFlexItem grow={false}>
                   <EuiComboBox
                     data-test-subj="editableResultIndexSelector"
-                    placeholder="Select index"
+                    placeholder={i18n.translate(
+                      'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
+                      {
+                        defaultMessage: 'Select index',
+                      }
+                    )}
                     singleSelection={{ asPlainText: true }}
                     options={indices.map((i) => ({ label: i, value: 'index' }))}
                     isClearable={false}
