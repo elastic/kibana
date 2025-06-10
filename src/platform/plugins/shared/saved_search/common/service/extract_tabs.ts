@@ -10,27 +10,33 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { SCHEMA_SEARCH_MODEL_VERSION_5, SCHEMA_SEARCH_MODEL_VERSION_6 } from './schema';
+import type {
+  SCHEMA_SEARCH_MODEL_VERSION_5,
+  SCHEMA_SEARCH_MODEL_VERSION_6,
+} from '../../server/saved_objects/schema';
 
-/**
- * Extract tab attributes into a separate array since multiple tabs are supported
- * @param prevDoc The previous document to be transformed (version 5)
- */
 export const extractTabsTransformFn: SavedObjectModelUnsafeTransformFn<
   TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>,
   TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6>
 > = (prevDoc) => {
-  const { title, description, ...tabAttrs } = prevDoc.attributes;
-  const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> = {
-    title,
-    description,
-    tabs: [
-      {
-        id: uuidv4(),
-        label: `Untitled session 1`,
-        attributes: tabAttrs,
-      },
-    ],
-  };
+  const attributes = extractTabs(prevDoc.attributes);
   return { document: { ...prevDoc, attributes } };
+};
+
+/**
+ * Extract tab attributes into a separate array since multiple tabs are supported
+ * @param attributes The previous attributes to be transformed (version 5)
+ */
+export const extractTabs = (
+  attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
+): TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> => {
+  const { title, description, ...tabAttrs } = attributes;
+  const tabs = [
+    {
+      id: uuidv4(),
+      label: `Untitled session 1`,
+      attributes: tabAttrs,
+    },
+  ];
+  return { title, description, tabs };
 };

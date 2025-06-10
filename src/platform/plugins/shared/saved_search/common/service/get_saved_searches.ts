@@ -15,8 +15,8 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
-import type { SavedSearch, SerializableSavedSearch } from '../types';
-import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
+import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import { extractTabs, SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
 
@@ -60,6 +60,12 @@ export const getSearchSavedObject = async (
   return so;
 };
 
+function isDiscoverSessionAttributes(
+  attributes: DiscoverSessionAttributes | SavedSearchAttributes
+): attributes is DiscoverSessionAttributes {
+  return Boolean((attributes as DiscoverSessionAttributes).tabs);
+}
+
 export const convertToSavedSearch = async <
   Serialized extends boolean = false,
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
@@ -72,7 +78,7 @@ export const convertToSavedSearch = async <
     managed,
   }: {
     savedSearchId: string | undefined;
-    attributes: DiscoverSessionAttributes;
+    attributes: DiscoverSessionAttributes | SavedSearchAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
@@ -80,8 +86,12 @@ export const convertToSavedSearch = async <
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
   serialized?: Serialized
 ): Promise<ReturnType> => {
+  // TODO: This should be unnecessary once https://github.com/elastic/kibana/pull/221975 is merged
+  const savedObjectAttributes: DiscoverSessionAttributes = !isDiscoverSessionAttributes(attributes)
+    ? extractTabs(attributes)
+    : attributes;
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    attributes.tabs[0].attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    savedObjectAttributes.tabs[0].attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
@@ -100,7 +110,7 @@ export const convertToSavedSearch = async <
 
   const returnVal = fromSavedSearchAttributes(
     savedSearchId,
-    attributes,
+    savedObjectAttributes,
     tags,
     references,
     searchSource,

@@ -20,8 +20,99 @@ const mockServices = {
 };
 
 describe('toSavedSearch', () => {
-  it('succesfully converts attributes to saved search', async () => {
-    const attributes: SavedSearchByValueAttributes = {
+  it('succesfully converts SavedSearchAttributes to saved search', async () => {
+    const attributes = {
+      title: 'saved-search-title',
+      sort: [['@timestamp', 'desc']],
+      columns: ['message', 'extension'],
+      grid: {},
+      hideChart: false,
+      isTextBasedQuery: false,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{}',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'ref_0',
+          type: 'index-pattern',
+        },
+      ],
+    } as SavedSearchByValueAttributes;
+    const savedSearch = await byValueToSavedSearch({ attributes }, mockServices);
+    expect(savedSearch).toMatchInlineSnapshot(`
+      Object {
+        "breakdownField": undefined,
+        "columns": Array [
+          "message",
+          "extension",
+        ],
+        "density": undefined,
+        "description": "",
+        "grid": Object {},
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": false,
+        "id": undefined,
+        "isTextBasedQuery": false,
+        "managed": false,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "ref_0",
+            "type": "index-pattern",
+          },
+        ],
+        "refreshInterval": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "searchSource": Object {
+          "create": [MockFunction],
+          "createChild": [MockFunction],
+          "createCopy": [MockFunction],
+          "destroy": [MockFunction],
+          "fetch": [MockFunction],
+          "fetch$": [MockFunction],
+          "getActiveIndexFilter": [MockFunction],
+          "getField": [MockFunction],
+          "getFields": [MockFunction],
+          "getId": [MockFunction],
+          "getOwnField": [MockFunction],
+          "getParent": [MockFunction],
+          "getSearchRequestBody": [MockFunction],
+          "getSerializedFields": [MockFunction],
+          "history": Array [],
+          "loadDataViewFields": [MockFunction],
+          "onRequestStart": [MockFunction],
+          "parseActiveIndexPatternFromQueryString": [MockFunction],
+          "removeField": [MockFunction],
+          "serialize": [MockFunction],
+          "setField": [MockFunction],
+          "setOverwriteDataViewType": [MockFunction],
+          "setParent": [MockFunction],
+          "toExpressionAst": [MockFunction],
+        },
+        "sharingSavedObjectProps": undefined,
+        "sort": Array [
+          Array [
+            "@timestamp",
+            "desc",
+          ],
+        ],
+        "tags": undefined,
+        "timeRange": undefined,
+        "timeRestore": undefined,
+        "title": "saved-search-title",
+        "usesAdHocDataView": undefined,
+        "viewMode": undefined,
+        "visContext": undefined,
+      }
+    `);
+  });
+
+  it('succesfully converts DiscoverSessionAttributes to saved search', async () => {
+    const attributes = {
       title: 'saved-search-title',
       tabs: [
         {
@@ -46,7 +137,7 @@ describe('toSavedSearch', () => {
           type: 'index-pattern',
         },
       ],
-    };
+    } as SavedSearchByValueAttributes;
     const savedSearch = await byValueToSavedSearch({ attributes }, mockServices);
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
