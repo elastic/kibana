@@ -7,56 +7,42 @@
 
 import expect from 'expect';
 import {
-  SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS,
-  combineArrayToNdJson,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
+  getCustomQueryRuleParams,
+  installMockPrebuiltRulesPackage,
+  reviewPrebuiltRulesToUpgrade,
+  performUpgradePrebuiltRules,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { importRulesWithSuccess, assertImportedRule } from './utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
   const securitySolutionApi = getService('securitySolutionApi');
-  const retryService = getService('retry');
 
-  const RULE_ID = 'prebuilt-rule';
+  const PREBUILT_RULE_ID = 'prebuilt-rule';
   const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
-    rule_id: RULE_ID,
+    rule_id: PREBUILT_RULE_ID,
     version: 1,
     name: 'Stock name',
     description: 'Stock description',
   });
 
-  const importRule = async ({ rule, overwrite }: { rule: unknown; overwrite: boolean }) => {
-    const buffer = Buffer.from(combineArrayToNdJson([rule]));
-
-    return securitySolutionApi
-      .importRules({
-        query: { overwrite },
-      })
-      .attach('file', buffer, 'rules.ndjson')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .expect(200);
-  };
-
-  const prebuiltRules = SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS.map(
-    (prebuiltRule) => prebuiltRule['security-rule']
-  );
-  const prebuiltRuleIds = [...new Set(prebuiltRules.map((rule) => rule.rule_id))];
-
-  describe('@ess @serverless @skipInServerlessMKI Import prebuilt rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI Import single prebuilt rule', () => {
     before(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
+      await installMockPrebuiltRulesPackage(es, supertest);
     });
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+      await deleteAllPrebuiltRuleAssets(es, log);
+      await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
     });
 
     after(async () => {
@@ -65,53 +51,33 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('importing a single non-customized prebuilt rule', () => {
-      const PREBUILT_RULE_TO_IMPORT = PREBUILT_RULE_ASSET['security-rule'];
+      const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
+        ...PREBUILT_RULE_ASSET['security-rule'],
+        immutable: true,
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+        },
+      };
 
       describe('without overwriting', () => {
         it('imports a non-customized prebuilt rule', async () => {
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: false,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: false,
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
             },
-          });
-        });
-
-        it('imports non-customized prebuilt rule fields', async () => {
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
-            overwrite: false,
-          });
-
-          expect(importResponse.success).toBeTruthy();
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            ...PREBUILT_RULE_TO_IMPORT,
           });
         });
       });
@@ -120,51 +86,22 @@ export default ({ getService }: FtrProviderContext): void => {
         it('imports a non-customized prebuilt rule on top of an installed non-customized prebuilt rule', async () => {
           await installPrebuiltRules(es, supertest);
 
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: true,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: false,
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
             },
-          });
-        });
-
-        it('imports non-customized prebuilt rule fields on top of an installed non-customized prebuilt rule', async () => {
-          await installPrebuiltRules(es, supertest);
-
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
-            overwrite: true,
-          });
-
-          expect(importResponse.success).toBeTruthy();
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            ...PREBUILT_RULE_TO_IMPORT,
           });
         });
 
@@ -173,65 +110,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await securitySolutionApi.patchRule({
             body: {
-              rule_id: RULE_ID,
+              rule_id: PREBUILT_RULE_ID,
               name: 'Customized Rule',
             },
           });
 
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: true,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: false,
-            },
-          });
-        });
-
-        it('imports non-customized prebuilt rule fields on top of an installed customized prebuilt rule', async () => {
-          await installPrebuiltRules(es, supertest);
-
-          await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: RULE_ID,
-                name: 'Customized Rule',
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
               },
-            })
-            .expect(200);
-
-          const { body: importResponse } = await importRule({
-            rule: PREBUILT_RULE_TO_IMPORT,
-            overwrite: true,
-          });
-
-          expect(importResponse.success).toBeTruthy();
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            ...PREBUILT_RULE_TO_IMPORT,
+            },
           });
         });
       });
@@ -241,53 +140,31 @@ export default ({ getService }: FtrProviderContext): void => {
       const CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
         ...PREBUILT_RULE_ASSET['security-rule'],
         name: 'Customized Prebuilt Rule',
+        immutable: true,
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
       };
 
       describe('without overwriting', () => {
         it('imports a customized prebuilt rule', async () => {
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: false,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: true,
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
             },
-          });
-        });
-
-        it('imports customized prebuilt rule fields', async () => {
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
-            overwrite: false,
-          });
-
-          expect(importResponse.success).toBeTruthy();
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
           });
         });
       });
@@ -296,51 +173,22 @@ export default ({ getService }: FtrProviderContext): void => {
         it('imports a customized prebuilt rule on top of an installed non-customized prebuilt rule', async () => {
           await installPrebuiltRules(es, supertest);
 
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: true,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: true,
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
             },
-          });
-        });
-
-        it('imports customized prebuilt rule fields on top of an installed non-customized prebuilt rule', async () => {
-          await installPrebuiltRules(es, supertest);
-
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
-            overwrite: true,
-          });
-
-          expect(importResponse.success).toBeTruthy();
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
           });
         });
 
@@ -349,34 +197,26 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await securitySolutionApi.patchRule({
             body: {
-              rule_id: RULE_ID,
+              rule_id: PREBUILT_RULE_ID,
               description: 'Customized Rule',
             },
           });
 
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: true,
           });
 
-          expect(importResponse).toMatchObject({
-            rules_count: 1,
-            success: true,
-            success_count: 1,
-            errors: [],
-          });
-
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
-
-          expect(importedRule).toMatchObject({
-            immutable: true,
-            rule_source: {
-              type: 'external',
-              is_customized: true,
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
             },
           });
         });
@@ -387,27 +227,482 @@ export default ({ getService }: FtrProviderContext): void => {
           await securitySolutionApi
             .patchRule({
               body: {
-                rule_id: RULE_ID,
+                rule_id: PREBUILT_RULE_ID,
                 name: 'Customized Rule',
               },
             })
             .expect(200);
 
-          const { body: importResponse } = await importRule({
-            rule: CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          await importRulesWithSuccess({
+            getService,
+            rules: [CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
             overwrite: true,
           });
 
-          expect(importResponse.success).toBeTruthy();
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
+            },
+          });
+        });
+      });
+    });
 
-          const { body: importedRule } = await securitySolutionApi
-            .readRule({
-              query: { rule_id: RULE_ID },
-            })
-            .expect(200);
+    describe('importing a single custom rule', () => {
+      const CUSTOM_RULE_TO_IMPORT = getCustomQueryRuleParams({
+        rule_id: 'custom-rule',
+        version: 1,
+      });
 
-          expect(importedRule).toMatchObject({
-            ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+      it('imports a custom rule', async () => {
+        await importRulesWithSuccess({
+          getService,
+          rules: [CUSTOM_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...CUSTOM_RULE_TO_IMPORT,
+            immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
+          },
+        });
+      });
+
+      it('importing a custom rule on top of an existing custom rule', async () => {
+        await securitySolutionApi
+          .createRule({
+            body: CUSTOM_RULE_TO_IMPORT,
+          })
+          .expect(200);
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [CUSTOM_RULE_TO_IMPORT],
+          overwrite: true,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...CUSTOM_RULE_TO_IMPORT,
+            immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
+          },
+        });
+      });
+    });
+
+    describe('converting between prebuilt and custom rules', () => {
+      it('converts a custom rule to a customized prebuilt rule on import', async () => {
+        const CUSTOM_RULE_TO_IMPORT = {
+          ...getCustomQueryRuleParams({
+            rule_id: PREBUILT_RULE_ID,
+            version: 1,
+          }),
+          immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [CUSTOM_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...CUSTOM_RULE_TO_IMPORT,
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: true,
+            },
+          },
+        });
+      });
+
+      it('converts a custom rule to a non-customized prebuilt rule on import', async () => {
+        const CUSTOM_RULE_TO_IMPORT = {
+          ...PREBUILT_RULE_ASSET['security-rule'],
+          rule_id: PREBUILT_RULE_ID,
+          version: 1,
+          immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [CUSTOM_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...CUSTOM_RULE_TO_IMPORT,
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          },
+        });
+      });
+
+      it('converts a prebuilt rule to a custom rule on import when rule_id does not match prebuilt rule assets', async () => {
+        const UNKNOWN_PREBUILT_RULE_TO_IMPORT = {
+          ...PREBUILT_RULE_ASSET['security-rule'],
+          rule_id: 'non-existent-prebuilt-rule',
+          version: 1,
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [UNKNOWN_PREBUILT_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...UNKNOWN_PREBUILT_RULE_TO_IMPORT,
+            immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
+          },
+        });
+      });
+
+      // The test fails since the current behavior doesn't match the expectations
+      // There is a bug ticket to track it https://github.com/elastic/kibana/issues/223099
+      it.skip('makes an imported custom rule upgradeable to a prebuilt rule', async () => {
+        const RULE_ID = 'future-upgradable-prebuilt-rule';
+        const FUTURE_UPGRADABLE_RULE_FIELDS = {
+          ...PREBUILT_RULE_ASSET['security-rule'],
+          rule_id: RULE_ID,
+          version: 1,
+        };
+        const FUTURE_UPGRADABLE_RULE_TO_IMPORT = {
+          ...FUTURE_UPGRADABLE_RULE_FIELDS,
+          immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [FUTURE_UPGRADABLE_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        const UPGRADE_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          rule_id: RULE_ID,
+          version: 2,
+          name: 'New name',
+        });
+
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [UPGRADE_PREBUILT_RULE_ASSET]);
+
+        const upgradeReviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+
+        expect(upgradeReviewResponse.rules).toEqual([
+          expect.objectContaining({
+            rule_id: RULE_ID,
+            version: 1,
+          }),
+        ]);
+
+        await performUpgradePrebuiltRules(es, supertest, { mode: 'ALL_RULES' });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...UPGRADE_PREBUILT_RULE_ASSET,
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          },
+        });
+      });
+    });
+
+    describe('handling historical base versions', () => {
+      describe('without overwriting', () => {
+        it('imports an old non-customized prebuilt rule', async () => {
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: false,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            },
+          });
+        });
+
+        it('imports an old customized prebuilt rule', async () => {
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            name: 'Customized Prebuilt Rule',
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: false,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
+            },
+          });
+        });
+      });
+
+      describe('with overwriting non-customized prebuilt rule', () => {
+        it('imports an old non-customized prebuilt rule', async () => {
+          await installPrebuiltRules(es, supertest);
+
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: true,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            },
+          });
+        });
+
+        it('imports an old customized prebuilt rule', async () => {
+          await installPrebuiltRules(es, supertest);
+
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            name: 'Customized Prebuilt Rule',
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: true,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
+            },
+          });
+        });
+      });
+
+      describe('with overwriting customized prebuilt rule', () => {
+        it('imports an old non-customized prebuilt rule', async () => {
+          await installPrebuiltRules(es, supertest);
+
+          await securitySolutionApi.patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              description: 'Customized Rule',
+            },
+          });
+
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: true,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            },
+          });
+        });
+
+        it('imports an old customized prebuilt rule', async () => {
+          await installPrebuiltRules(es, supertest);
+
+          await securitySolutionApi.patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              name: 'Customized Rule',
+            },
+          });
+
+          const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+            rule_id: PREBUILT_RULE_ID,
+            version: 2,
+            name: 'New name',
+          });
+
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [NEW_PREBUILT_RULE_ASSET]);
+
+          const PREBUILT_RULE_TO_IMPORT = {
+            ...PREBUILT_RULE_ASSET['security-rule'],
+            name: 'Customized Prebuilt Rule',
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: false,
+            },
+          };
+
+          await importRulesWithSuccess({
+            getService,
+            rules: [PREBUILT_RULE_TO_IMPORT],
+            overwrite: true,
+          });
+
+          await assertImportedRule({
+            getService,
+            expectedRule: {
+              ...PREBUILT_RULE_TO_IMPORT,
+              immutable: true,
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+              },
+            },
           });
         });
       });

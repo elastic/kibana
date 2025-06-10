@@ -11,4 +11,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   loadTestFile(require.resolve('./export_prebuilt_rules'));
   loadTestFile(require.resolve('./import_prebuilt_rules'));
   loadTestFile(require.resolve('./import_single_prebuilt_rule'));
+  loadTestFile(require.resolve('./import_multiple_prebuilt_rules'));
+  loadTestFile(require.resolve('./import_outdated_prebuilt_rules'));
+  loadTestFile(require.resolve('./import_with_missing_base_version'));
+  loadTestFile(require.resolve('./import_with_missing_fields'));
 };
