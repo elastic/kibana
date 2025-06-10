@@ -19,7 +19,6 @@
     "@kbn/actions-plugin",
     "@kbn/config-schema",
     "@kbn/inference-plugin",
-    "@kbn/utility-types",
     "@kbn/onechat-server",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
@@ -28,6 +27,13 @@
     "@kbn/core-security-server",
     "@kbn/inference-common",
     "@kbn/logging-mocks",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/inference-langchain",
+    "@kbn/storage-adapter",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils-server",
+    "@kbn/core-http-browser",
+    "@kbn/features-plugin"
   ]
 }
