@@ -17,7 +17,12 @@ import {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps, ESQLFieldWithMetadata } from '../validation/types';
+import type {
+  ESQLPolicy,
+  ReferenceMaps,
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -251,6 +256,11 @@ export enum Location {
    * In the SHOW command
    */
   SHOW = 'show',
+
+  /**
+   * In the COMPLETION command
+   */
+  COMPLETION = 'completion',
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {
@@ -266,6 +276,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
+  completion: Location.COMPLETION,
 };
 
 /**
@@ -375,6 +386,10 @@ export interface CommandSuggestParams<CommandName extends string> {
   callbacks?: ESQLCallbacks;
   getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
+  references?: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  };
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
