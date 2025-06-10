@@ -96,10 +96,11 @@ describe('WelcomeMessage', () => {
         knowledgeBase={knowledgeBase}
         connectors={mockConnectors}
         onSelectPrompt={jest.fn()}
+        showElasticLlmCalloutInChat={false}
       />
     );
 
-    // Banner is shown during re-indexing
+    // Callout is shown during re-indexing
     expect(screen.queryByText(/Re-indexing in progress/i)).toBeInTheDocument();
     expect(
       screen.queryByText(/Knowledge base is currently being re-indexed./i)
@@ -127,11 +128,12 @@ describe('WelcomeMessage', () => {
           knowledgeBase={updatedKnowledgeBase}
           connectors={mockConnectors}
           onSelectPrompt={jest.fn()}
+          showElasticLlmCalloutInChat={false}
         />
       );
     });
 
-    // Banner is no longer shown
+    // Callout is no longer shown
     expect(screen.queryByText(/Re-indexing in progress/i)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Knowledge base is currently being re-indexed./i)

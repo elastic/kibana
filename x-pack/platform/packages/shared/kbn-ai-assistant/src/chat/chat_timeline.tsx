@@ -7,7 +7,7 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCode, EuiCommentList } from '@elastic/eui';
+import { EuiCode, EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import {
@@ -105,15 +105,6 @@ function highlightContent(
   }
   return parts;
 }
-const euiCommentListClassName = css`
-  padding-bottom: 32px;
-`;
-
-const stickyCalloutContainerClassName = css`
-  position: sticky;
-  top: 0;
-  z-index: 1;
-`;
 
 export function ChatTimeline({
   conversationId,
@@ -147,6 +138,21 @@ export function ChatTimeline({
       return { anonymizationEnabled: false };
     }
   }, [uiSettings]);
+  const { euiTheme } = useEuiTheme();
+
+  const euiCommentListClassName = css`
+    padding-bottom: 32px;
+  `;
+
+  const stickyCalloutContainerClassName = css`
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    &:empty {
+      display: none;
+    }
+  `;
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
@@ -207,12 +213,8 @@ export function ChatTimeline({
     <EuiCommentList className={euiCommentListClassName}>
       <div className={stickyCalloutContainerClassName}>
         {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
       </div>
-      {showElasticLlmCalloutInChat ? (
-        <div className={stickyCalloutContainerClassName}>
-          <ElasticLlmConversationCallout />
-        </div>
-      ) : null}
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems

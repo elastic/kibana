@@ -6,27 +6,32 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const KnowledgeBaseReindexingCallout = () => {
+  const { euiTheme } = useEuiTheme();
+
+  const knowledgeBaseReindexingCalloutName = css`
+    margin-bottom: ${euiTheme.size.s};
+    width: 100%;
+  `;
+
   return (
-    <EuiFlexGroup justifyContent="center" gutterSize="s">
-      <EuiFlexItem grow>
-        <EuiCallOut
-          title={i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutTitle', {
-            defaultMessage: 'Re-indexing in progress.',
-          })}
-          color="warning"
-          iconType="alert"
-          data-test-subj="knowledgeBaseReindexingCallOut"
-        >
-          {i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {
-            defaultMessage:
-              'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
-          })}
-        </EuiCallOut>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiCallOut
+      className={knowledgeBaseReindexingCalloutName}
+      title={i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutTitle', {
+        defaultMessage: 'Re-indexing in progress.',
+      })}
+      color="warning"
+      iconType="alert"
+      data-test-subj="knowledgeBaseReindexingCallOut"
+    >
+      {i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {
+        defaultMessage:
+          'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
+      })}
+    </EuiCallOut>
   );
 };

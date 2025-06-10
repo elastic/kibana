@@ -85,7 +85,7 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
-        {showKnowledgeBaseReIndexingCallout && <KnowledgeBaseReindexingCallout />}
+        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
         {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
