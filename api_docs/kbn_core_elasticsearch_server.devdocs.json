@@ -412,7 +412,7 @@
             "label": "verificationMode",
             "description": [],
             "signature": [
-              "\"none\" | \"full\" | \"certificate\" | undefined"
+              "\"none\" | \"certificate\" | \"full\" | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
             "deprecated": false,
@@ -912,7 +912,7 @@
             "label": "verificationMode",
             "description": [],
             "signature": [
-              "\"none\" | \"full\" | \"certificate\""
+              "\"none\" | \"certificate\" | \"full\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
             "deprecated": false,
