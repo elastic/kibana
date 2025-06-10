@@ -282,17 +282,7 @@ export class KnowledgeBaseService {
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {
-          includes: [
-            'title',
-            'doc_id',
-            'text',
-            'labels',
-            'public',
-            '@timestamp',
-            'role',
-            'user.name',
-            'type',
-          ],
+          excludes: ['confidence', 'is_correction'],
         },
       });
 
