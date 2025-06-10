@@ -420,13 +420,6 @@ export class FindService extends FtrService {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
         // await element.moveMouseTo();
-        const isDisplayed = await element.isDisplayed();
-        const isEnabled = await element.isEnabled();
-        const content = await element.parseDomContent();
-        this.log.debug(
-          `Element with css='${selector}' isDisplayed=${isDisplayed}, isEnabled=${isEnabled}, content=${content.html()}`
-        );
-
         await element.click(topOffset);
       } else {
         throw new Error(`Element with css='${selector}' is not found`);
