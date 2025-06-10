@@ -388,6 +388,10 @@ export interface UnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
+   * Disable cell actions for the table.
+   */
+  disableCellActions?: boolean;
+  /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
   externalCustomRenderers?: CustomCellRenderer;
@@ -433,6 +437,11 @@ export interface UnifiedDataTableProps {
    *
    */
   renderCellPopover?: EuiDataGridProps['renderCellPopover'];
+
+  /**
+   * Disables the cell popover for the grid.
+   */
+  disableCellPopover?: boolean;
   /**
    * When specified, this function will be called to determine the color of the row indicator.
    * @param row
@@ -514,6 +523,8 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
   onUpdatePageIndex,
+  disableCellActions = false,
+  disableCellPopover = false,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -774,10 +785,12 @@ export const UnifiedDataTable = ({
     pagination: paginationObj,
   });
 
-  const renderCustomPopover = useMemo(
-    () => renderCellPopover ?? getCustomCellPopoverRenderer(),
-    [renderCellPopover]
-  );
+  const renderCustomPopover = useMemo(() => {
+    if (disableCellPopover) {
+      return;
+    }
+    return renderCellPopover ?? getCustomCellPopoverRenderer();
+  }, [renderCellPopover, disableCellPopover]);
 
   /**
    * Render variables
@@ -845,6 +858,7 @@ export const UnifiedDataTable = ({
     triggerId: cellActionsTriggerId,
     dataGridRef,
     metadata: allCellActionsMetadata,
+    disableCellActions,
   });
 
   const {
@@ -900,6 +914,7 @@ export const UnifiedDataTable = ({
         customGridColumnsConfiguration,
         onResize,
         sortedColumns,
+        disableCellActions,
       }),
     [
       cellActionsHandling,
@@ -924,6 +939,7 @@ export const UnifiedDataTable = ({
       visibleCellActions,
       visibleColumns,
       sortedColumns,
+      disableCellActions,
     ]
   );
 

@@ -42,6 +42,10 @@ export interface UseDataGridColumnsCellActionsProps
    * ref to the EuiDataGrid instance
    */
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  /**
+   * If true, disables all cell actions
+   */
+  disableCellActions?: boolean;
 }
 export type UseDataGridColumnsCellActions<
   P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
@@ -56,6 +60,7 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   metadata,
   dataGridRef,
   disabledActionTypes = [],
+  disableCellActions = false,
 }) => {
   const [cellActions, setCellActions] = useState<EuiDataGridColumnCellAction[][]>(emptyActions);
 
@@ -101,6 +106,10 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
       )
     );
   }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+
+  if (disableCellActions) {
+    return emptyActions; // Return empty actions if cell actions are disabled
+  }
 
   return cellActions;
 };

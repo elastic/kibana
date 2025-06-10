@@ -255,11 +255,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         onUpdateRowHeight={setRowHeight}
         controlColumnIds={props.controlColumnIds}
         renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
-        cellActionsHandling={'replace'}
-        // cellActionsTriggerId={INDEX_EDITOR_CELL_ACTION_TRIGGER_ID}
-        visibleCellActions={0}
-        renderCellPopover={customPopoverRenderer}
-        expandable
+        disableCellActions
+        disableCellPopover
       />
     </>
   );

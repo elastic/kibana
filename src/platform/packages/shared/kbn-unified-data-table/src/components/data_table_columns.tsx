@@ -115,6 +115,7 @@ function buildEuiGridColumn({
   columnDisplay,
   onResize,
   sortedColumns,
+  disableCellActions = false,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -139,6 +140,7 @@ function buildEuiGridColumn({
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  disableCellActions?: boolean;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -180,26 +182,31 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (columnCellActions?.length && cellActionsHandling === 'replace') {
-    cellActions = columnCellActions;
+  if (disableCellActions) {
+    cellActions = [];
   } else {
-    cellActions = dataViewField
-      ? buildCellActions(
-          dataViewField,
-          isPlainRecord,
-          toastNotifications,
-          valueToStringConverter,
-          onFilter
-        )
-      : [];
+    if (columnCellActions?.length && cellActionsHandling === 'replace') {
+      cellActions = columnCellActions;
+    } else {
+      cellActions = dataViewField
+        ? buildCellActions(
+            dataViewField,
+            isPlainRecord,
+            toastNotifications,
+            valueToStringConverter,
+            onFilter
+          )
+        : [];
 
-    if (columnCellActions?.length && cellActionsHandling === 'append') {
-      cellActions.push(...columnCellActions);
+      if (columnCellActions?.length && cellActionsHandling === 'append') {
+        cellActions.push(...columnCellActions);
+      }
     }
   }
 
   const columnType = dataViewField?.type;
 
+  // EUI columns
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
@@ -291,6 +298,12 @@ function buildEuiGridColumn({
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
+
+  // if (disableCellActions) {
+  if (true) {
+    column.isExpandable = false;
+  }
+
   return column;
 }
 
@@ -311,6 +324,7 @@ export function getEuiGridColumns({
   dataView,
   defaultColumns,
   isSortEnabled,
+  disableCellActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -334,6 +348,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
+  disableCellActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -379,6 +394,7 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
+      disableCellActions,
     })
   );
 }
