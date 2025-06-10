@@ -397,6 +397,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
@@ -540,7 +541,7 @@ async function getFunctionArgsSuggestions(
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
     const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || /_literal/.test(p.type as string)
+      (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -571,6 +572,7 @@ async function getFunctionArgsSuggestions(
     };
 
     // Fields
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
