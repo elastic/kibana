@@ -86,6 +86,7 @@
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
     "@kbn/esql-ast",
+    "@kbn/response-ops-alerts-delete",
     "@kbn/content-management-plugin",
     "@kbn/esql-types",
     "@kbn/presentation-containers"
