@@ -13,20 +13,20 @@ describe('getAlertUrl', () => {
   });
 
   it('should return undefined if `basePath` is undefined', async () => {
-    const detailsUrl = getAlertUrl({ alertId: 'attack-1' });
+    const detailsUrl = getAlertUrl({ alertDocId: 'attack-1' });
 
     expect(detailsUrl).toBeUndefined();
   });
 
   it('should return URL pointing to default space if `spaceId` is undefined', async () => {
-    const detailsUrl = getAlertUrl({ alertId: 'attack-2', basePath: 'http://test.com' });
+    const detailsUrl = getAlertUrl({ alertDocId: 'attack-2', basePath: 'http://test.com' });
 
     expect(detailsUrl).toEqual('http://test.com/app/security/attack_discovery?id=attack-2');
   });
 
   it('should return URL pointing to default space if `spaceId` is `default`', async () => {
     const detailsUrl = getAlertUrl({
-      alertId: 'attack-3',
+      alertDocId: 'attack-3',
       basePath: 'http://test.com',
       spaceId: 'default',
     });
@@ -36,7 +36,7 @@ describe('getAlertUrl', () => {
 
   it('should return URL pointing to correct space if `spaceId` is passed', async () => {
     const detailsUrl = getAlertUrl({
-      alertId: 'attack-4',
+      alertDocId: 'attack-4',
       basePath: 'http://test.com',
       spaceId: 'fake-space',
     });

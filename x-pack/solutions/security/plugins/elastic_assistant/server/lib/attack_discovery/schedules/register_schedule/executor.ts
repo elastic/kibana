@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -24,7 +23,12 @@ import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
 import { AttackDiscoveryExecutorOptions } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
-import { transformToBaseAlertDocument } from '../../persistence/transforms/transform_to_alert_documents';
+import {
+  generateAttackDiscoveryAlertUuid,
+  transformToBaseAlertDocument,
+} from '../../persistence/transforms/transform_to_alert_documents';
+import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -114,28 +118,44 @@ export const attackDiscoveryScheduleExecutor = async ({
       replacements,
     };
 
-    attackDiscoveries?.forEach((attack) => {
-      const { id, ...restAttack } = attack;
-      const alertId = uuidv4();
-      const { uuid } = alertsClient.report({
-        id: alertId,
-        actionGroup: 'default',
-      });
-
-      const payload = transformToBaseAlertDocument({
-        alertId: uuid,
-        attackDiscovery: attack,
-        alertsParams,
-        publicBaseUrl,
-        spaceId,
-      });
-
-      alertsClient.setAlertData({
-        id: alertId,
-        payload,
-        context: { attack: { ...restAttack, detailsUrl: payload[ALERT_URL] } },
-      });
+    // Deduplicate attackDiscoveries before creating alerts
+    const indexPattern = getScheduledIndexPattern(spaceId);
+    const dedupedDiscoveries = await deduplicateAttackDiscoveries({
+      esClient,
+      attackDiscoveries: attackDiscoveries ?? [],
+      indexPattern,
+      logger,
+      spaceId,
     });
+
+    await Promise.all(
+      dedupedDiscoveries.map(async (attackDiscovery) => {
+        const alertInstanceId = generateAttackDiscoveryAlertUuid({
+          attackDiscovery,
+          spaceId,
+        });
+        const { uuid: alertDocId } = alertsClient.report({
+          id: alertInstanceId,
+          actionGroup: 'default',
+        });
+
+        const baseAlertDocument = transformToBaseAlertDocument({
+          alertDocId,
+          alertInstanceId,
+          attackDiscovery,
+          alertsParams,
+          publicBaseUrl,
+          spaceId,
+        });
+
+        const { id, ...restAttack } = attackDiscovery;
+        alertsClient.setAlertData({
+          id: alertInstanceId,
+          payload: baseAlertDocument,
+          context: { attack: { ...restAttack, detailsUrl: baseAlertDocument[ALERT_URL] } },
+        });
+      })
+    );
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);

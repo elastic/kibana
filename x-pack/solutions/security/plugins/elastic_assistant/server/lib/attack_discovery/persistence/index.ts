@@ -38,7 +38,7 @@ import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
 import { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
-import { getScheduledAndAdHocIndexPattern } from './get_scheduled_and_ad_hoc_index_pattern';
+import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
 
 const FIRST_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
@@ -104,6 +104,16 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       attackDiscoveryCreate,
     });
+  };
+
+  public getScheduledAndAdHocIndexPattern = () => {
+    const adhocAlertsIndex = this.adhocAttackDiscoveryDataClient?.indexNameWithNamespace(
+      this.spaceId
+    );
+    return [
+      getScheduledIndexPattern(this.spaceId), // scheduled
+      ...(adhocAlertsIndex ? [adhocAlertsIndex] : []), // ad-hoc
+    ].join(',');
   };
 
   public createAttackDiscoveryAlerts = async ({
@@ -211,8 +221,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       perPage = DEFAULT_PER_PAGE,
     } = findAttackDiscoveryAlertsParams;
 
-    const spaceId = this.spaceId;
-    const index = getScheduledAndAdHocIndexPattern(spaceId, this.adhocAttackDiscoveryDataClient);
+    const index = this.getScheduledAndAdHocIndexPattern();
 
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,
@@ -336,10 +345,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const indexPattern = getScheduledAndAdHocIndexPattern(
-      this.spaceId,
-      this.adhocAttackDiscoveryDataClient
-    );
+    const indexPattern = this.getScheduledAndAdHocIndexPattern();
 
     if (ids.length === 0) {
       logger.debug(

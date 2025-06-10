@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { EcsVersion } from '@elastic/ecs';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { AuthenticatedUser } from '@kbn/core/server';
@@ -34,7 +35,6 @@ import {
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getAlertRiskScore } from './get_alert_risk_score';
 import {
@@ -61,17 +61,32 @@ import { getAlertUrl } from './get_alert_url';
 
 type AttackDiscoveryAlertDocumentBase = Omit<
   AttackDiscoveryAlertDocument,
-  keyof Omit<Alert, typeof ALERT_URL>
+  keyof Omit<Alert, typeof ALERT_URL | typeof ALERT_UUID | typeof ALERT_INSTANCE_ID>
 >;
 
+export const generateAttackDiscoveryAlertUuid = ({
+  attackDiscovery,
+  spaceId,
+}: {
+  attackDiscovery: AttackDiscovery;
+  spaceId: string;
+}) => {
+  return createHash('sha256')
+    .update(attackDiscovery.alertIds.sort().join())
+    .update(spaceId)
+    .digest('hex');
+};
+
 export const transformToBaseAlertDocument = ({
-  alertId,
+  alertDocId,
+  alertInstanceId,
   attackDiscovery,
   alertsParams,
   publicBaseUrl,
   spaceId,
 }: {
-  alertId: string;
+  alertDocId: string;
+  alertInstanceId: string;
   attackDiscovery: AttackDiscovery;
   alertsParams: Omit<CreateAttackDiscoveryAlertsParams, 'attackDiscoveries' | 'generationUuid'>;
   publicBaseUrl?: string;
@@ -89,14 +104,16 @@ export const transformToBaseAlertDocument = ({
     title,
   } = attackDiscovery;
 
-  return {
+  const baseAlertDocument = {
     // Alert base fields
     [ECS_VERSION]: EcsVersion,
+    [ALERT_INSTANCE_ID]: alertInstanceId,
+    [ALERT_UUID]: alertDocId, // IMPORTANT: the document _id should be the same as this field when it's bulk inserted
     [ALERT_RISK_SCORE]: getAlertRiskScore({
       alertIds,
       anonymizedAlerts,
     }),
-    [ALERT_URL]: getAlertUrl({ alertId, basePath: publicBaseUrl, spaceId }),
+    [ALERT_URL]: getAlertUrl({ alertDocId, basePath: publicBaseUrl, spaceId }),
 
     // Attack discovery fields
     [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds,
@@ -141,6 +158,8 @@ export const transformToBaseAlertDocument = ({
       replacements,
     }),
   };
+
+  return baseAlertDocument;
 };
 
 export const transformToAlertDocuments = ({
@@ -157,10 +176,11 @@ export const transformToAlertDocuments = ({
   const { attackDiscoveries, generationUuid, ...restParams } = createAttackDiscoveryAlertsParams;
 
   return attackDiscoveries.map((attackDiscovery) => {
-    const alertUuid = uuidv4();
+    const alertUuid = generateAttackDiscoveryAlertUuid({ attackDiscovery, spaceId });
 
     const baseAlertDocument = transformToBaseAlertDocument({
-      alertId: alertUuid,
+      alertDocId: alertUuid,
+      alertInstanceId: alertUuid,
       attackDiscovery,
       alertsParams: restParams,
       spaceId,
@@ -179,7 +199,6 @@ export const transformToAlertDocuments = ({
         },
       ],
       [ALERT_RULE_EXECUTION_UUID]: generationUuid,
-      [ALERT_INSTANCE_ID]: alertUuid,
       [ALERT_RULE_CATEGORY]: 'Attack discovery ad hoc (placeholder rule category)',
       [ALERT_RULE_CONSUMER]: 'siem',
       [ALERT_RULE_NAME]: 'Attack discovery ad hoc (placeholder rule name)',
@@ -188,7 +207,6 @@ export const transformToAlertDocuments = ({
       [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID, // sentinel value
       [ALERT_RULE_UUID]: ATTACK_DISCOVERY_AD_HOC_RULE_ID, // sentinel value
       [ALERT_STATUS]: 'active',
-      [ALERT_UUID]: alertUuid, // IMPORTANT: the document _id should be the same as this field when it's bulk inserted
       [ALERT_WORKFLOW_STATUS]: 'open',
       [EVENT_KIND]: 'signal',
       [SPACE_IDS]: [spaceId],
