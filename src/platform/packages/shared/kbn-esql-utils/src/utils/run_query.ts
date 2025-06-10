@@ -123,9 +123,12 @@ export async function getESQLQueryColumns({
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {
-    // An error is thrown if the query does not contain an index or data stream to query
-    // In these cases we return an empty array
-    return [];
+    throw new Error(
+      i18n.translate('esqlUtils.columnsErrorMsg', {
+        defaultMessage: 'Unable to load columns. {errorMessage}',
+        values: { errorMessage: error.message },
+      })
+    );
   }
 }
 
