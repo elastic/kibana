@@ -401,10 +401,13 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                             hasInteractiveChildren={true}
                             draggableId={'queryRuleDocumentDraggable-' + doc + '-' + index}
                             key={doc + '-' + index}
+                            isDragDisabled={getValues('type') === 'exclude'}
                           >
                             {() => (
                               <DocumentSelector
                                 initialDocId={doc}
+                                indexDoc={index}
+                                type={getValues('type')}
                                 hasIndexSelector={false}
                                 onDeleteDocument={() => {
                                   if (ruleFromRuleset) {
@@ -436,10 +439,13 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                             hasInteractiveChildren={true}
                             draggableId={'queryRuleDocumentDraggable-' + doc._id + '-' + index}
                             key={doc._id}
+                            isDragDisabled={getValues('type') === 'exclude'}
                           >
                             {() => (
                               <DocumentSelector
                                 initialDocId={doc._id}
+                                indexDoc={index}
+                                type={getValues('type')}
                                 index={doc._index}
                                 onDeleteDocument={() => {
                                   setIsFlyoutDirty(true);
