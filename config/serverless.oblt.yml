@@ -21,8 +21,6 @@ xpack.features.overrides:
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover_v2.category: 'observability'
-  ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
-  infrastructure.name: 'Infrastructure'
   ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
   ml:
     category: 'observability'
