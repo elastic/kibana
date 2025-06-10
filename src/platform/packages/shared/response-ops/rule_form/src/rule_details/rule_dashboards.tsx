@@ -115,7 +115,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     });
   };
 
-  const onSearchChange = useMemo(
+  const onSearchChange = useCallback(
     () =>
       debounce((value: string) => {
         setSearchValue(value);
