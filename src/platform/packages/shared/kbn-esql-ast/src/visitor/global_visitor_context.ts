@@ -11,6 +11,7 @@ import * as contexts from './contexts';
 import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
+  ESQLAstCompletionCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
@@ -196,6 +197,18 @@ export class GlobalVisitorContext<
       case 'fork': {
         if (!this.methods.visitForkCommand) break;
         return this.visitForkCommand(parent, commandNode, input as any);
+      }
+      case 'completion': {
+        if (!this.methods.visitCompletionCommand) break;
+        return this.visitCompletionCommand(
+          parent,
+          commandNode as ESQLAstCompletionCommand,
+          input as any
+        );
+      }
+      case 'sample': {
+        if (!this.methods.visitSampleCommand) break;
+        return this.visitSampleCommand(parent, commandNode, input as any);
       }
       case 'rrf': {
         if (!this.methods.visitRrfCommand) break;
@@ -419,6 +432,24 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitForkCommand'> {
     const context = new contexts.ForkCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitForkCommand', context, input);
+  }
+
+  public visitCompletionCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCompletionCommand,
+    input: types.VisitorInput<Methods, 'visitCompletionCommand'>
+  ): types.VisitorOutput<Methods, 'visitCompletionCommand'> {
+    const context = new contexts.CompletionCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitCompletionCommand', context, input);
+  }
+
+  public visitSampleCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitSampleCommand'>
+  ): types.VisitorOutput<Methods, 'visitSampleCommand'> {
+    const context = new contexts.ForkCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitSampleCommand', context, input);
   }
 
   public visitRrfCommand(

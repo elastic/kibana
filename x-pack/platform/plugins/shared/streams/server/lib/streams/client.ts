@@ -11,22 +11,22 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, getAncestors, getParentId, Streams } from '@kbn/streams-schema';
+import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
-import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { migrateOnRead } from './helpers/migrate_on_read';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { StreamsStorageClient } from './service';
+import { State } from './state_management/state';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -60,6 +60,7 @@ export class StreamsClient {
     private readonly dependencies: {
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
@@ -207,19 +208,18 @@ export class StreamsClient {
 
     const { dashboards, queries } = request;
 
-    const queryLinks = queries.map((query) => ({
-      [ASSET_ID]: query.id,
-      [ASSET_TYPE]: 'query' as const,
-      query,
-    }));
-
-    await this.dependencies.assetClient.syncAssetList(stream.name, [
-      ...dashboards.map((dashboard) => ({
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      stream.name,
+      dashboards.map((dashboard) => ({
         [ASSET_ID]: dashboard,
         [ASSET_TYPE]: 'dashboard' as const,
       })),
-      ...queryLinks,
-    ]);
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(stream.name, queries);
 
     return {
       acknowledged: true,
@@ -329,9 +329,7 @@ export class StreamsClient {
     if (!source) {
       throw new DefinitionNotFoundError(`Cannot find stream definition`);
     }
-    const migratedSource = migrateOnRead(source);
-    Streams.all.Definition.asserts(migratedSource);
-    return migratedSource;
+    return source;
   }
 
   /**
@@ -629,7 +627,7 @@ export class StreamsClient {
       throw result.error;
     }
 
-    await this.dependencies.assetClient.syncAssetList(definition.name, []);
+    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

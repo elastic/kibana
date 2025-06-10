@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { AbortableAsyncState, useAbortableAsync } from '@kbn/react-hooks';
 import { TimeState } from '@kbn/es-query';
+import { NotificationsStart } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 
@@ -46,37 +47,8 @@ export function useStreamsAppFetch<
   const { timeState, timeState$ } = useTimefilter();
 
   const onError = (error: Error) => {
-    let requestUrl: string | undefined;
-
     if (!disableToastOnError && !isRequestAbortedError(error)) {
-      if (
-        'body' in error &&
-        typeof error.body === 'object' &&
-        !!error.body &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-      ) {
-        error.message = error.body.message;
-      }
-
-      if (
-        'request' in error &&
-        typeof error.request === 'object' &&
-        !!error.request &&
-        'url' in error.request &&
-        typeof error.request.url === 'string'
-      ) {
-        requestUrl = error.request.url;
-      }
-
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.streams.failedToFetchError', {
-          defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
-          values: {
-            requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
-          },
-        }),
-      });
+      showErrorToast(notifications, error);
 
       // log to console to get the actual stack trace
       // eslint-disable-next-line no-console
@@ -127,4 +99,36 @@ export function useStreamsAppFetch<
   }, [timeState$, withTimeRange, withRefresh]);
 
   return state;
+}
+
+export function showErrorToast(notifications: NotificationsStart, error: Error) {
+  if (
+    'body' in error &&
+    typeof error.body === 'object' &&
+    !!error.body &&
+    'message' in error.body &&
+    typeof error.body.message === 'string'
+  ) {
+    error.message = error.body.message;
+  }
+
+  let requestUrl: string | undefined;
+  if (
+    'request' in error &&
+    typeof error.request === 'object' &&
+    !!error.request &&
+    'url' in error.request &&
+    typeof error.request.url === 'string'
+  ) {
+    requestUrl = error.request.url;
+  }
+
+  return notifications.toasts.addError(error, {
+    title: i18n.translate('xpack.streams.failedToFetchError', {
+      defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
+      values: {
+        requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
+      },
+    }),
+  });
 }
