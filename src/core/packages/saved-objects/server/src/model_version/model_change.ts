@@ -10,9 +10,8 @@
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
 import type {
   SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationFn,
   SavedObjectModelUnsafeTransformFn,
-  SavedObjectModelTransformationContext,
-  SavedObjectModelTransformationDoc,
 } from './transformations';
 
 /**
@@ -145,15 +144,26 @@ export interface SavedObjectsModelDataRemovalChange {
 
 /**
  * A {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.
- *
+ * Please define your transform function on a separate const.
+ * Use explicit types for the generic arguments, as shown below.
+ * This will reduce the chances of introducing bugs.
  * @example
  * ```ts
- * let change: SavedObjectsModelUnsafeTransformChange = {
+ * const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+ *   doc: SavedObjectModelTransformationDoc<BeforeType>
+ * ) => {
+ *   const attributes: AfterType = {
+ *     ...doc.attributes,
+ *     someAddedField: 'defaultValue',
+ *   };
+ *
+ *   return { document: { ...doc, attributes } };
+ * };
+ *
+ * // this is how you would specify a change in the changes: []
+ * const change: SavedObjectsModelUnsafeTransformChange = {
  *   type: 'unsafe_transform',
- *   transformFn: (document) => {
- *     document.attributes.someAddedField = 'defaultValue';
- *     return { document };
- *   },
+ *   transformFn: (sanitize) => sanitize(transformFn),
  * };
  * ```
  *
@@ -162,26 +172,14 @@ export interface SavedObjectsModelDataRemovalChange {
  *         Those should only be used when there's no other way to cover one's migration needs.
  *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
  */
-export interface SavedObjectsModelUnsafeTransformChange<
-  PreviousAttributes = any,
-  NewAttributes = any
-> {
+export interface SavedObjectsModelUnsafeTransformChange {
   type: 'unsafe_transform';
   /**
    * The transform function to execute.
    */
-  transformFn: UnsafeTransformFunction<PreviousAttributes, NewAttributes>;
-}
-
-export class UnsafeTransformFunction<A, B> extends Function {
-  private constructor(private fn: SavedObjectModelUnsafeTransformFn<A, B>) {
-    super('...args', 'return this.fn(...args)');
-    return this.bind(this);
-  }
-
-  public static createTransformFunction<InputType = unknown, OutputType = unknown>(
-    fn: SavedObjectModelUnsafeTransformFn<InputType, OutputType>
-  ) {
-    return new UnsafeTransformFunction(fn);
-  }
+  transformFn: (
+    sanitize: <PreviousAttributes, NewAttributes>(
+      fn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>
+    ) => SavedObjectModelTransformationFn
+  ) => SavedObjectModelTransformationFn;
 }

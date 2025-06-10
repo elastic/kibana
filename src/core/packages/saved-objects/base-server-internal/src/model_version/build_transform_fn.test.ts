@@ -203,11 +203,20 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn: (document, ctx) => {
-            delete document.attributes.oldProp;
-            document.attributes.newProp = 'newValue';
-            return { document };
-          },
+          transformFn: (sanitize) =>
+            sanitize(
+              (
+                document: SavedObjectModelTransformationDoc<{
+                  oldProp?: string;
+                  newProp: string;
+                }>,
+                ctx
+              ) => {
+                delete document.attributes.oldProp;
+                document.attributes.newProp = 'newValue';
+                return { document };
+              }
+            ),
         },
       ];
 
@@ -305,10 +314,17 @@ describe('buildModelVersionTransformFn', () => {
         },
         {
           type: 'unsafe_transform',
-          transformFn: (document) => {
-            document.attributes.unsafeNewProp = 'unsafeNewValue';
-            return { document };
-          },
+          transformFn: (sanitize) =>
+            sanitize(
+              (
+                document: SavedObjectModelTransformationDoc<{
+                  unsafeNewProp: string;
+                }>
+              ) => {
+                document.attributes.unsafeNewProp = 'unsafeNewValue';
+                return { document };
+              }
+            ),
         },
       ];
 

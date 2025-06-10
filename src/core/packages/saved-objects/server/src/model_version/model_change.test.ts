@@ -8,8 +8,9 @@
  */
 
 import { SavedObjectDoc } from '../serialization';
-import { SavedObjectsModelUnsafeTransformChange, UnsafeTransformFunction } from './model_change';
+import { SavedObjectsModelUnsafeTransformChange } from './model_change';
 import {
+  SavedObjectModelTransformationContext,
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,
 } from './transformations';
@@ -22,48 +23,38 @@ interface AfterType extends BeforeType {
   aString: string;
 }
 
-const untypedTransformFn: SavedObjectModelUnsafeTransformFn = (doc) => {
-  const attributes: AfterType = {
-    ...doc.attributes,
-    aString: doc.attributes.a ? 'true' : 'false',
-  };
-
-  return { document: { ...doc, attributes } };
-};
-
-const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
-  doc: SavedObjectModelTransformationDoc<BeforeType>
-) => {
-  const attributes: AfterType = {
-    ...doc.attributes,
-    aString: doc.attributes.a ? 'true' : 'false',
-  };
-
-  return { document: { ...doc, attributes } };
-};
-
 describe('test', () => {
-  it('allows executing', () => {
-    const doc: SavedObjectDoc<BeforeType> = {
-      id: 'someType:docId',
-      type: 'someType',
-      attributes: {
-        a: false,
-      },
+  const testDoc: SavedObjectDoc<BeforeType> = {
+    id: 'someType:docId',
+    type: 'someType',
+    attributes: {
+      a: false,
+    },
+  };
+  const testContext: SavedObjectModelTransformationContext = {
+    log: {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
+    modelVersion: 1,
+    namespaceType: 'agnostic',
+  };
+
+  it('TS fails if users try to define untyped transform functions', () => {
+    const untypedTransformFn: SavedObjectModelUnsafeTransformFn = (doc) => {
+      const attributes: AfterType = {
+        // @ts-expect-error
+        ...doc.attributes,
+        // @ts-expect-error
+        aString: doc.attributes.a ? 'true' : 'false',
+      };
+
+      return { document: { ...doc, attributes } };
     };
-    const context = {};
 
-    const utf = UnsafeTransformFunction.createTransformFunction(transformFn);
-
-    const res = utf(doc, context);
-
-    // this is how you would specify a change in the changes: []
-    // const change: SavedObjectsModelUnsafeTransformChange = {
-    //   type: 'unsafe_transform',
-    //   transformFn: utf,
-    // };
-
-    expect(res).toMatchInlineSnapshot(`
+    expect(untypedTransformFn(testDoc, testContext)).toMatchInlineSnapshot(`
       Object {
         "document": Object {
           "attributes": Object {
@@ -73,6 +64,32 @@ describe('test', () => {
           "id": "someType:docId",
           "type": "someType",
         },
+      }
+    `);
+  });
+
+  it('allows defining transform changes', () => {
+    const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+      doc: SavedObjectModelTransformationDoc<BeforeType>
+    ) => {
+      const attributes: AfterType = {
+        ...doc.attributes,
+        aString: doc.attributes.a ? 'true' : 'false',
+      };
+
+      return { document: { ...doc, attributes } };
+    };
+
+    // this is how you would specify a change in the changes: []
+    const change: SavedObjectsModelUnsafeTransformChange = {
+      type: 'unsafe_transform',
+      transformFn: (sanitize) => sanitize(transformFn),
+    };
+
+    expect(change).toMatchInlineSnapshot(`
+      Object {
+        "transformFn": [Function],
+        "type": "unsafe_transform",
       }
     `);
   });

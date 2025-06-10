@@ -350,12 +350,24 @@ Used to execute an arbitrary transformation function.
 *Usage example:*
 
 ```ts
-let change: SavedObjectsModelUnsafeTransformChange = {
+// Please define your transform function on a separate const.
+// Use explicit types for the generic arguments, as shown below.
+// This will reduce the chances of introducing bugs.
+const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+  doc: SavedObjectModelTransformationDoc<BeforeType>
+) => {
+  const attributes: AfterType = {
+    ...doc.attributes,
+    someAddedField: 'defaultValue',
+  };
+
+  return { document: { ...doc, attributes } };
+};
+
+// this is how you would specify a change in the changes: []
+const change: SavedObjectsModelUnsafeTransformChange = {
   type: 'unsafe_transform',
-  transformFn: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
-  },
+  transformFn: (sanitize) => sanitize(transformFn),
 };
 ```
 

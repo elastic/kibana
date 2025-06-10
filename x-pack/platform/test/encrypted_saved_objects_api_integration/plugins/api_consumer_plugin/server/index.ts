@@ -13,6 +13,7 @@ import type {
   SavedObjectsNamespaceType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import type { SavedObjectModelTransformationDoc } from '@kbn/core-saved-objects-server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -337,13 +338,22 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => {
-                const {
-                  attributes: { nonEncryptedAttribute },
-                } = document;
-                document.attributes.nonEncryptedAttribute = `${nonEncryptedAttribute}-migrated`;
-                return { document };
-              },
+              transformFn: (sanitize) =>
+                sanitize(
+                  // ideally, we should use generic types for the whole function, defining it on a separate const
+                  (
+                    document: SavedObjectModelTransformationDoc<{
+                      additionalEncryptedAttribute: string;
+                      nonEncryptedAttribute: string;
+                    }>
+                  ) => {
+                    const {
+                      attributes: { nonEncryptedAttribute },
+                    } = document;
+                    document.attributes.nonEncryptedAttribute = `${nonEncryptedAttribute}-migrated`;
+                    return { document };
+                  }
+                ),
             },
           ],
         },
@@ -356,11 +366,20 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => {
-                // clone and modify the non encrypted field
-                document.attributes.additionalEncryptedAttribute = `${document.attributes.nonEncryptedAttribute}-encrypted`;
-                return { document };
-              },
+              transformFn: (sanitize) =>
+                sanitize(
+                  // ideally, we should use generic types for the whole function, defining it on a separate const
+                  (
+                    document: SavedObjectModelTransformationDoc<{
+                      additionalEncryptedAttribute: string;
+                      nonEncryptedAttribute: string;
+                    }>
+                  ) => {
+                    // clone and modify the non encrypted field
+                    document.attributes.additionalEncryptedAttribute = `${document.attributes.nonEncryptedAttribute}-encrypted`;
+                    return { document };
+                  }
+                ),
             },
           ],
         },

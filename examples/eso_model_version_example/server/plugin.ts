@@ -104,9 +104,10 @@ export class EsoModelVersionExample
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (document) => {
-                  return { document };
-                },
+                transformFn: (sanitize) =>
+                  sanitize((document) => {
+                    return { document };
+                  }),
               },
             ],
             schemas: {

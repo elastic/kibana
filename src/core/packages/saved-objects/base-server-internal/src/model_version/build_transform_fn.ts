@@ -14,6 +14,10 @@ import type {
   SavedObjectsModelUnsafeTransformChange,
   SavedObjectsModelDataBackfillChange,
   SavedObjectsModelDataRemovalChange,
+  SavedObjectModelUnsafeTransformFn,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationResult,
 } from '@kbn/core-saved-objects-server';
 
 /**
@@ -59,11 +63,25 @@ export const dataBackfillChangeToTransformFn = (
   };
 };
 
+// we must force 'any' type on the generic arguments of the received function
+// otherwise they are 'unknown' and they cannot be cast to the PreviousAttributes and NewAttributes
+// generic arguments needed by the sanitize functions
+type SanitizeUnsafeTransformFn = (
+  fn: SavedObjectModelUnsafeTransformFn<any, any>
+) => SavedObjectModelUnsafeTransformFn;
+
+const sanitize: SanitizeUnsafeTransformFn = (
+  fn: SavedObjectModelUnsafeTransformFn
+): SavedObjectModelTransformationFn => {
+  return (
+    document: SavedObjectModelTransformationDoc,
+    context: SavedObjectModelTransformationContext
+  ): SavedObjectModelTransformationResult => fn(document, context);
+};
+
 export const unsafeTransformChangeToTransformFn = (
   change: SavedObjectsModelUnsafeTransformChange
-): SavedObjectModelTransformationFn => {
-  return change.transformFn;
-};
+): SavedObjectModelTransformationFn => change.transformFn(sanitize);
 
 const mergeTransformFunctions = (
   transformFns: SavedObjectModelTransformationFn[]

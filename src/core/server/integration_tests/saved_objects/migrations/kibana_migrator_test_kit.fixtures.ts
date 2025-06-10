@@ -8,7 +8,10 @@
  */
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelUnsafeTransformFn,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 import {
@@ -44,6 +47,18 @@ const defaultType: SavedObjectsType<any> = {
 };
 
 export const REMOVED_TYPES = ['deprecated', 'server'];
+
+interface ComplexTypeV0 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
+
+interface ComplexTypeV1 {
+  name: string;
+  value: number;
+  firstHalf: boolean;
+}
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
@@ -123,8 +138,18 @@ export const getCompatibleBaselineTypes = (removedTypes: string[]) =>
     }
   });
 
-export const getReindexingBaselineTypes = (removedTypes: string[]) =>
-  getUpToDateBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
+export const getReindexingBaselineTypes = (removedTypes: string[]) => {
+  const transformComplex: SavedObjectModelUnsafeTransformFn<ComplexTypeV0, ComplexTypeV1> = (
+    doc
+  ) => {
+    if (doc.attributes.value % 100 === 0) {
+      throw new Error(
+        `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
+      );
+    }
+    return { document: doc };
+  };
+  return getUpToDateBaselineTypes(removedTypes).map<SavedObjectsType>((type) => {
     // introduce an incompatible change
     if (type.name === 'complex') {
       return {
@@ -152,14 +177,7 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) =>
               },
               {
                 type: 'unsafe_transform',
-                transformFn: (doc) => {
-                  if (doc.attributes.value % 100 === 0) {
-                    throw new Error(
-                      `Cannot convert 'complex' objects with values that are multiple of 100 ${doc.id}`
-                    );
-                  }
-                  return { document: doc };
-                },
+                transformFn: (sanitize) => sanitize(transformComplex),
               },
             ],
           },
@@ -192,6 +210,7 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) =>
       return type;
     }
   });
+};
 
 export interface GetBaselineDocumentsParams {
   documentsPerType?: number;
