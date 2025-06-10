@@ -20,7 +20,7 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { Immutable } from '../common/endpoint/types';
@@ -43,6 +43,7 @@ import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inven
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
+import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -69,6 +70,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
+  getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
