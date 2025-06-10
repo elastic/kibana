@@ -8,8 +8,9 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
+
 import { USAGE_SERVICE_USAGE_URL } from './constants';
-import { productTypes } from '../common/config';
+import { commonConfigSchema, exposeToBrowser } from '../common/config';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
@@ -29,9 +30,8 @@ const usageApiConfig = schema.object({
 });
 export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
 
-export const configSchema = schema.object({
+export const serverConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  productTypes,
   /**
    * Usage Reporting: the interval between runs of the endpoint task
    */
@@ -41,7 +41,6 @@ export const configSchema = schema.object({
   /**
    * Usage Reporting: the interval between runs of the cloud security task
    */
-
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
 
   /**
@@ -59,31 +58,18 @@ export const configSchema = schema.object({
    * Usage Reporting: the URL to send usage data to
    */
   usageReportingApiUrl: schema.string({ defaultValue: USAGE_SERVICE_USAGE_URL }),
-  /**
-   * For internal use. A list of string values (comma delimited) that will enable experimental
-   * type of functionality that is not yet released. Valid values for this settings need to
-   * be defined in:
-   * `x-pack/solutions/security/plugins/security_solution_serverless/common/experimental_features.ts`
-   * under the `allowedExperimentalValues` object
-   *
-   * @example
-   * xpack.securitySolutionServerless.enableExperimental:
-   *   - someCrazyServerlessFeature
-   *   - someEvenCrazierServerlessFeature
-   */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
   }),
 
   usageApi: usageApiConfig,
 });
+const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);
+
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ServerlessSecuritySchema> = {
-  exposeToBrowser: {
-    enableExperimental: true,
-    productTypes: true,
-  },
+  exposeToBrowser,
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(

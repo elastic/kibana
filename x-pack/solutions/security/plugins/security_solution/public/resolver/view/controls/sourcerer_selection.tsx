@@ -11,6 +11,8 @@ import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
 import { Sourcerer } from '../../../sourcerer/components';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const nodeLegendButtonTitle = i18n.translate(
   'xpack.securitySolution.resolver.graphControls.sourcererButtonTitle',
@@ -31,10 +33,11 @@ export const SourcererButton = memo(
     setActivePopover: (value: 'sourcererSelection') => void;
     isOpen: boolean;
   }) => {
-    const setAsActivePopover = useCallback(
-      () => setActivePopover('sourcererSelection'),
-      [setActivePopover]
-    );
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+    const setAsActivePopover = useCallback(() => {
+      setActivePopover('sourcererSelection');
+    }, [setActivePopover]);
     const colorMap = useColors();
 
     return (
@@ -56,7 +59,11 @@ export const SourcererButton = memo(
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        <Sourcerer scope={SourcererScopeName.analyzer} />
+        {newDataViewPickerEnabled ? (
+          <DataViewPicker scope={SourcererScopeName.analyzer} onClosePopover={closePopover} />
+        ) : (
+          <Sourcerer scope={SourcererScopeName.analyzer} />
+        )}
       </EuiPopover>
     );
   }

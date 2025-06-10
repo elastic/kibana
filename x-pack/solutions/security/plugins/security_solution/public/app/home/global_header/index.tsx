@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SECURITY_FEATURE_ID } from '../../../../common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
@@ -30,6 +32,7 @@ import {
   showSourcererByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
+import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -82,6 +85,17 @@ export const GlobalHeader = React.memo(() => {
     }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const dataViewPicker = newDataViewPickerEnabled ? (
+    <DataViewPicker
+      scope={sourcererScope}
+      disabled={sourcererScope === DataViewManagerScopeName.detections}
+    />
+  ) : (
+    <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
+  );
+
   return (
     <InPortal node={portalNode}>
       <EuiHeaderSection side="right">
@@ -104,9 +118,7 @@ export const GlobalHeader = React.memo(() => {
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
             )}
-            {showSourcerer && !showTimeline && (
-              <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-            )}
+            {showSourcerer && !showTimeline && dataViewPicker}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>

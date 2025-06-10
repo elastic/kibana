@@ -48,6 +48,7 @@
     "@kbn/logging",
     "@kbn/integration-assistant-plugin",
     "@kbn/cloud-security-posture-common",
+    "@kbn/core-application-browser",
     "@kbn/inference-common",
     "@kbn/dev-utils"
   ]
