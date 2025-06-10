@@ -37,7 +37,6 @@ interface CreateTestConfigOptions {
   maxScheduledPerMinute?: number;
   experimentalFeatures?: ExperimentalConfigKeys;
   disabledRuleTypes?: string[];
-  enableWebhookSslWithPfx?: boolean;
   enabledRuleTypes?: string[];
 }
 
@@ -222,7 +221,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     enableFooterInEmail = true,
     maxScheduledPerMinute,
     experimentalFeatures = [],
-    enableWebhookSslWithPfx = true,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -382,7 +380,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
-          `--xpack.actions.webhook.ssl.ptx=${enableWebhookSslWithPfx}`,
         ],
       },
     };
