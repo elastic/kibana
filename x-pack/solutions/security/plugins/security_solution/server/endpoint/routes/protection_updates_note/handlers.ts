@@ -19,6 +19,7 @@ import type {
 } from '../../../../common/api/endpoint/protection_updates_note';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
+import { errorHandler } from '../error_handler';
 
 const getProtectionNote = async (SOClient: SavedObjectsClientContract, packagePolicyId: string) => {
   return SOClient.find<{ note: string }>({
@@ -97,20 +98,33 @@ export const postProtectionUpdatesNoteHandler = function (
 > {
   return async (context, request, response) => {
     const { package_policy_id: packagePolicyId } = request.params;
-    const SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
+    let SOClient: SavedObjectsClientContract;
+    let soClientResponse: Awaited<ReturnType<typeof getProtectionNote>>;
+
+    const logger = endpointContext.logFactory.get('protectionUpdatesNote');
+
+    try {
+      SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
+      soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
+    } catch (err) {
+      return errorHandler(logger, response, err);
+    }
+
     const { note } = request.body;
-
-    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
-
     if (soClientResponse.saved_objects[0]) {
       const { references } = soClientResponse.saved_objects[0];
+      let updatedNoteSO: Awaited<ReturnType<typeof updateProtectionNote>>;
 
-      const updatedNoteSO = await updateProtectionNote(
-        SOClient,
-        soClientResponse.saved_objects[0].id,
-        note,
-        references
-      );
+      try {
+        updatedNoteSO = await updateProtectionNote(
+          SOClient,
+          soClientResponse.saved_objects[0].id,
+          note,
+          references
+        );
+      } catch (err) {
+        return errorHandler(logger, response, err);
+      }
 
       const { attributes } = updatedNoteSO;
 
@@ -125,7 +139,12 @@ export const postProtectionUpdatesNoteHandler = function (
       },
     ];
 
-    const noteSO = await createProtectionNote(SOClient, note, references);
+    let noteSO: Awaited<ReturnType<typeof createProtectionNote>>;
+    try {
+      noteSO = await createProtectionNote(SOClient, note, references);
+    } catch (err) {
+      return errorHandler(logger, response, err);
+    }
 
     const { attributes } = noteSO;
 
@@ -143,9 +162,16 @@ export const getProtectionUpdatesNoteHandler = function (
 > {
   return async (context, request, response) => {
     const { package_policy_id: packagePolicyId } = request.params;
-    const SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
+    let SOClient: SavedObjectsClientContract;
+    let soClientResponse: Awaited<ReturnType<typeof getProtectionNote>>;
 
-    const soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
+    try {
+      SOClient = await getSavedObjectClient(context, endpointContext, packagePolicyId);
+      soClientResponse = await getProtectionNote(SOClient, packagePolicyId);
+    } catch (err) {
+      const logger = endpointContext.logFactory.get('protectionUpdatesNote');
+      return errorHandler(logger, response, err);
+    }
 
     if (!soClientResponse.saved_objects[0] || !soClientResponse.saved_objects[0].attributes) {
       return response.notFound({ body: { message: 'No note found for this policy' } });

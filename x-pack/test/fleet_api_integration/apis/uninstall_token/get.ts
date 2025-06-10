@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Uninstall Token API', () => {
+  describe.only('Uninstall Token API', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
