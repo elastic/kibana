@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+
 export interface InferenceEndpointsAutocompleteResult {
   inferenceEndpoints: InferenceEndpointAutocompleteItem[];
 }
@@ -14,10 +16,3 @@ export interface InferenceEndpointAutocompleteItem {
   inference_id: string;
   task_type: InferenceTaskType;
 }
-
-export type InferenceTaskType =
-  | 'sparse_embedding'
-  | 'text_embedding'
-  | 'rerank'
-  | 'completion'
-  | 'chat_completion';
