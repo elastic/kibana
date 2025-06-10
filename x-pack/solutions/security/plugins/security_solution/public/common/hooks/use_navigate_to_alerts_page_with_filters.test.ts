@@ -8,13 +8,22 @@
 import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '../../app/types';
 import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 
 const mockNavigateTo = jest.fn();
 jest.mock('../lib/kibana', () => ({
   useNavigation: () => ({ navigateTo: mockNavigateTo }),
 }));
-
+jest.mock('@kbn/elastic-assistant');
 describe('useNavigateToAlertsPageWithFilters', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      assistantAvailability: {
+        hasSearchAILakeConfigurations: false,
+      },
+    });
+  });
   it('navigates to alerts page with single filter', () => {
     const filter = {
       title: 'test filter',
@@ -128,6 +137,32 @@ describe('useNavigateToAlertsPageWithFilters', () => {
       deepLinkId: SecurityPageName.alerts,
       path: `?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))&timerange=(global:(timerange:(from:"2024-12-12T17:03:23.481Z",kind:absolute,to:"2025-01-04T07:59:59.999Z")))`,
       openInNewTab: true,
+    });
+  });
+  it('navigates to alert summary page when AI4DSOC', () => {
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      assistantAvailability: {
+        hasSearchAILakeConfigurations: true,
+      },
+    });
+    const filter = {
+      title: 'test filter',
+      selectedOptions: ['test value'],
+      fieldName: 'test field',
+      exclude: false,
+      existsSelected: false,
+    };
+
+    const {
+      result: { current: navigateToAlertsPageWithFilters },
+    } = renderHook(() => useNavigateToAlertsPageWithFilters());
+
+    navigateToAlertsPageWithFilters(filter);
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({
+      deepLinkId: SecurityPageName.alertSummary,
+      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))",
+      openInNewTab: false,
     });
   });
 });
