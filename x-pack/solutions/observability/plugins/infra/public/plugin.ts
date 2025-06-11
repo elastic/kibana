@@ -187,7 +187,6 @@ export class Plugin implements InfraClientPluginClass {
                               path: '/kubernetes',
                               deepLinks: integrations.kubernetes.map((dashboardId) => ({
                                 id: dashboardId,
-                                // TODO Add title (proposal)
                                 title: `Dashboard: ${dashboardId}`,
                                 path: `/kubernetes/${dashboardId}`,
                               })),

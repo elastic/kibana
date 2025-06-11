@@ -25,21 +25,20 @@ function createNavTree({
   streamsAvailable?: boolean;
   kubernetesDashboardIds?: string[];
 }) {
-  // TODO use kubernetesDashboardIds
-  console.log('kubernetesDashboardIds', kubernetesDashboardIds);
+  const k8sSubItems =
+    kubernetesDashboardIds?.map((id) => {
+      const shortenedId = id.substring(0, 15);
+      return {
+        link: (id.startsWith('kubernetes')
+          ? `metrics:${id}`
+          : `metrics:kubernetes_${id}`) as AppDeepLinkId,
+        title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetesDashboard', {
+          defaultMessage: `${shortenedId}`,
+          values: { id: shortenedId },
+        }),
+      };
+    }) ?? [];
 
-  const childrenK =
-    kubernetesDashboardIds?.map((id) => ({
-      link: (id.startsWith('kubernetes')
-        ? `metrics:${id}`
-        : `metrics:kubernetes_${id}`) as AppDeepLinkId,
-      title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetesDashboard', {
-        defaultMessage: `${id}`,
-        values: { id: id.substring(0, 15) },
-      }),
-    })) ?? [];
-
-  console.log('tree childrenK', childrenK);
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -211,7 +210,7 @@ function createNavTree({
                     title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
                       defaultMessage: 'Kubernetes',
                     }),
-                    children: childrenK,
+                    children: k8sSubItems,
                   },
                 ],
               },
@@ -511,7 +510,6 @@ export const createDefinition = (
     streams: pluginsStart.streams?.status$ || of({ status: 'disabled' as const }),
   }).pipe(
     map(({ fleet, streams }) => {
-      console.log('fleet?.kubernetes', fleet?.kubernetes);
       return createNavTree({
         streamsAvailable: streams.status === 'enabled',
         kubernetesDashboardIds: fleet?.kubernetes,
