@@ -6,10 +6,10 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { Message } from '../../../common';
+import { Message } from '../../../../common';
 import { FunctionRegistrationParameters } from '..';
-import { FunctionVisibility } from '../../../common/functions/types';
-import { FunctionCallChatFunction, RespondFunctionResources } from '../../service/types';
+import { FunctionVisibility } from '../../../../common/functions/types';
+import { FunctionCallChatFunction, RespondFunctionResources } from '../../../service/types';
 import { getRelevantFieldNames } from './get_relevant_field_names';
 
 export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';

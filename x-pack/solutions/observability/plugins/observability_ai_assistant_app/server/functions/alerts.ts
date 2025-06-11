@@ -9,7 +9,7 @@ import datemath from '@elastic/datemath';
 import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
-import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
+import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/tools/functions/get_dataset_info/get_relevant_field_names';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,

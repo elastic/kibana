@@ -14,7 +14,7 @@ import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType } from '../runtime_types';
-import { getDatasetInfo } from '../../functions/get_dataset_info';
+import { getDatasetInfo } from '../../tools/functions/get_dataset_info';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',

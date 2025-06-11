@@ -25,10 +25,10 @@ import {
   SlackWebhookConnectorTypeId,
   WebhookConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { CompatibleJSONSchema } from '../../common/functions/types';
-import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
+import { CompatibleJSONSchema } from '../../../common/functions/types';
+import { convertSchemaToOpenApi } from '../../utils/convert_schema_to_open_api';
 import { FunctionRegistrationParameters } from '.';
-import { FunctionVisibility } from '../../common';
+import { FunctionVisibility } from '../../../common';
 
 export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';
 
