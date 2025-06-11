@@ -81,7 +81,6 @@ export const createAttackDiscoveryAlerts = async ({
 
     const resp = await writeDataClient.bulk({
       body,
-      index: attackDiscoveryAlertsIndex,
       refresh: true,
     });
 
