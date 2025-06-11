@@ -43,6 +43,7 @@ import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
+import { ConfigureFailureStoreModal } from '../configure_failure_store_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import {
@@ -129,6 +130,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const [isManagePopOverOpen, setManagePopOver] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isEditingDataRetention, setIsEditingDataRetention] = useState<boolean>(false);
+  const [isConfiguringFailureStore, setIsConfiguringFailureStore] = useState<boolean>(false);
 
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
@@ -520,6 +522,21 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               },
             ]
           : []),
+        {
+          key: 'configureFailureStore',
+          name: i18n.translate(
+            'xpack.idxMgmt.dataStreamDetailPanel.configureFailureStore',
+            {
+              defaultMessage: 'Configure failure store',
+            }
+          ),
+          'data-test-subj': 'configureFailureStoreButton',
+          icon: <EuiIcon type="gear" size="m" />,
+          onClick: () => {
+            closePopover();
+            setIsConfiguringFailureStore(true);
+          },
+        },
         ...(dataStream?.privileges?.delete_index
           ? [
               {
@@ -562,6 +579,22 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               onClose(true);
             } else {
               setIsEditingDataRetention(false);
+            }
+          }}
+          ilmPolicyName={dataStream?.ilmPolicyName}
+          ilmPolicyLink={ilmPolicyLink}
+          dataStreams={[dataStream]}
+          isBulkEdit={false}
+        />
+      )}
+
+      {isConfiguringFailureStore && dataStream && (
+        <ConfigureFailureStoreModal
+          onClose={(data) => {
+            if (data && data?.hasUpdatedFailureStore) {
+              onClose(true);
+            } else {
+              setIsConfiguringFailureStore(false);
             }
           }}
           ilmPolicyName={dataStream?.ilmPolicyName}
