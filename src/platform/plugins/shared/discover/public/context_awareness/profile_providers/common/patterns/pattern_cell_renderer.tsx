@@ -9,16 +9,23 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface Props {
   row: DataTableRecord;
   columnId: string;
+  isDetails?: boolean;
 }
 
-export const PatternCellRenderer: FC<Props> = ({ row, columnId }) => {
+export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => {
   const { euiTheme } = useEuiTheme();
+
+  const pattern = String(row.flattened[columnId]);
+
+  if (isDetails) {
+    return <EuiText size="s">{pattern}</EuiText>;
+  }
 
   const keywordStyle = {
     marginRight: euiTheme.size.xs,
@@ -30,7 +37,7 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId }) => {
     color: euiTheme.colors.textPrimary,
   };
 
-  const keywords = extractGenericKeywords(String(row.flattened[columnId]));
+  const keywords = extractGenericKeywords(pattern);
   return (
     <>
       {keywords.map((keyword, index) => {
