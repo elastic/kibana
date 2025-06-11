@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildkiteClient } from '#pipeline-utils';
+import { BuildkiteClient, BuildkiteGroup } from '#pipeline-utils';
 import { expandAgentQueue } from '#pipeline-utils';
 
 export async function pickTestGroupRunOrder() {
@@ -29,7 +29,11 @@ export async function pickTestGroupRunOrder() {
     });
   }
 
-  bk.uploadSteps(dummySteps);
+  const group: BuildkiteGroup = {
+    group: 'Dummy tasks',
+    steps: dummySteps,
+  };
+  bk.uploadSteps([group]);
 }
 
 pickTestGroupRunOrder()
