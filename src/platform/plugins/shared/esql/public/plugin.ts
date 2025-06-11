@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -20,15 +20,17 @@ import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
+import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
-  esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
+  esqlControlTrigger,
 } from './triggers/esql_controls/esql_control_trigger';
 import {
-  updateESQLQueryTrigger,
   UPDATE_ESQL_QUERY_TRIGGER,
+  updateESQLQueryTrigger,
 } from './triggers/update_esql_query/update_esql_query_trigger';
-import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
+import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
@@ -51,6 +53,9 @@ interface EsqlPluginStartDependencies {
 export interface EsqlPluginStart {
   getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getInferenceEndpointsAutocomplete?: (
+    taskType: InferenceTaskType
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
 }
 
@@ -145,10 +150,22 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
 
+    const getInferenceEndpointsAutocomplete = cacheParametrizedAsyncFunction(
+      async (taskType: InferenceTaskType) => {
+        return await core.http.get<InferenceEndpointsAutocompleteResult>(
+          `/internal/esql/autocomplete/inference_endpoints/${taskType}`
+        );
+      },
+      (taskType: InferenceTaskType) => taskType,
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
     const start = {
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
+      getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };

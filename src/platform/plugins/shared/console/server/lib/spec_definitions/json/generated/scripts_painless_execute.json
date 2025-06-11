@@ -13,7 +13,7 @@
     "patterns": [
       "_scripts/painless/_execute"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/painless/master/painless-execute-api.html",
+    "documentation": "https://www.elastic.co/docs/reference/scripting-languages/painless/painless-api-examples",
     "availability": {
       "stack": true,
       "serverless": true
