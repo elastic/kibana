@@ -84,7 +84,6 @@ export default function oAuthAccessTokenTest({ getService }: FtrProviderContext)
             scope: 'https://graph.microsoft.com/.default',
             config: {
               clientId: 'abc',
-              tenantId: '98765',
             },
             secrets: {
               clientSecret: 'xyz',
@@ -131,7 +130,6 @@ export default function oAuthAccessTokenTest({ getService }: FtrProviderContext)
             scope: 'https://graph.microsoft.com/.default',
             config: {
               clientId: 'abc',
-              tenantId: '98765',
             },
             secrets: {
               clientSecret: 'xyz',

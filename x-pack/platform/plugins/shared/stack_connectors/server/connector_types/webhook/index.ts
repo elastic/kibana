@@ -11,7 +11,7 @@ import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
-
+import Boom from '@hapi/boom';
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -26,6 +26,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
+import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import type {
   WebhookConnectorType,
   ActionParamsType,
@@ -39,7 +40,8 @@ import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
-import { SecretConfigurationSchema } from '../../../common/auth/schema';
+import { AuthType } from '../../../common/auth/constants';
+import { WebhookSecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
 
@@ -62,7 +64,7 @@ export function getConnectorType(): WebhookConnectorType {
         customValidator: validateConnectorTypeConfig,
       },
       secrets: {
-        schema: SecretConfigurationSchema,
+        schema: WebhookSecretConfigurationSchema,
       },
       params: {
         schema: ParamsSchema,
@@ -130,9 +132,47 @@ function validateConnectorTypeConfig(
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, params, configurationUtilities, logger, connectorUsageCollector } =
-    execOptions;
-  const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
+  const {
+    actionId,
+    config,
+    params,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+    services,
+  } = execOptions;
+
+  const connectorTokenClient = services.connectorTokenClient;
+
+  const {
+    method,
+    url,
+    headers = {},
+    hasAuth,
+    authType,
+    ca,
+    accessTokenUrl,
+    clientId,
+    scope,
+    verificationMode,
+    additionalFields,
+  } = config;
+
+  let parsedAdditionalFields: Record<string, unknown> | undefined;
+  if (additionalFields) {
+    try {
+      parsedAdditionalFields = JSON.parse(additionalFields);
+
+      if (typeof parsedAdditionalFields !== 'object' || Array.isArray(parsedAdditionalFields)) {
+        throw new Error(`additionalFields must be a valid JSON object in connector ${actionId}.`);
+      }
+    } catch (e) {
+      const errorMessage = `Invalid JSON format provided for additionalFields in connector ${actionId}.`;
+      logger.error(errorMessage, e);
+      throw Boom.badRequest(errorMessage);
+    }
+  }
+
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
@@ -143,10 +183,61 @@ export async function executor(
     verificationMode,
     ca,
   });
-
+  const clientSecret = secrets.clientSecret;
   const axiosInstance = axios.create();
 
-  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+  if (authType === AuthType.OAuth2) {
+    if (!connectorTokenClient) {
+      const serviceMessage = 'ConnectorTokenClient is not available for OAuth2 flow.';
+      const errorMessage = `Error executing webhook action "${actionId}": ${serviceMessage}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+    if (!accessTokenUrl || !clientId || !clientSecret) {
+      const missingItems = [];
+      if (!accessTokenUrl) missingItems.push('Access Token URL');
+      if (!clientId) missingItems.push('Client ID');
+      if (!clientSecret) missingItems.push('Client Secret');
+
+      const serviceMessage = `Missing required OAuth2 configuration: ${missingItems.join(', ')}`;
+      const errorMessage = `Error executing webhook action "${actionId}": ${serviceMessage}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    axiosInstance.interceptors.request.use(
+      async (axiosConfig) => {
+        const accessToken = await getOAuthClientCredentialsAccessToken({
+          connectorId: actionId,
+          logger,
+          configurationUtilities,
+          oAuthScope: scope ?? '',
+          credentials: {
+            secrets: { clientSecret },
+            config: {
+              clientId,
+              ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
+            },
+          },
+          tokenUrl: accessTokenUrl,
+          connectorTokenClient,
+        });
+
+        if (!accessToken) {
+          throw new Error(`Unable to retrieve access token for connectorId: ${actionId}`);
+        }
+
+        logger.debug(`Successfully obtained OAuth2 token for connector "${actionId}"`);
+        axiosConfig.headers.Authorization = accessToken;
+
+        return axiosConfig;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  }
+  const headersWithAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
     headers,
@@ -158,7 +249,7 @@ export async function executor(
       method,
       url,
       logger,
-      headers: headersWithBasicAuth,
+      headers: headersWithAuth,
       data,
       configurationUtilities,
       sslOverrides,

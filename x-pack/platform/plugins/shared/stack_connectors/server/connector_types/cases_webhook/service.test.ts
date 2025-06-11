@@ -72,7 +72,13 @@ const sslConfig: CasesWebhookPublicConfigurationType = {
   certType: SSLCertType.CRT,
   hasAuth: true,
 };
-const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
+const sslSecrets = {
+  crt: CRT_FILE,
+  key: KEY_FILE,
+  password: 'foobar',
+  user: null,
+  pfx: null,
+};
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('Cases webhook service', () => {
