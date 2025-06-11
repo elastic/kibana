@@ -16,4 +16,32 @@ xpack.fleet.internal.registry.excludePackages: [
   'synthetics',
   'uptime',
   'synthetics_dashboards',
+  # Security integrations
+  'endpoint',
+  'beaconing',
+  'cloud_security_posture',
+  'cloud_defend',
+  'security_detection_engine',
+
+  # Deprecated security integrations
+  'bluecoat',
+  'cisco',
+  'cyberark',
+  'cylance',
+  'f5',
+  'fortinet_forticlient',
+  'juniper_junos',
+  'juniper_netscreen',
+  'microsoft',
+  'netscout',
+  'radware',
+  'symantec',
+  'tomcat',
+
+  # ML integrations
+  'dga',
+
+  # Profiling integrations
+  'profiler_agent',
+  'synthetics_dashboards',
 ]
