@@ -66,7 +66,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       <p>
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.connectors.tour.elasticLlmDescription"
-          defaultMessage="Elastic requires a large language model (LLM) to power the AI Assistant and AI features. By default, it uses the Elastic Managed LLM connector ({costLink}). You can change it by configuring your own {connectorLink} in {settingsLink}."
+          defaultMessage="Elastic Al Assistant and other Al features are powered by an LLM. The Elastic Managed LLM connector is used by default ({costLink}) when no custom connectors are available. You can configure a {customConnector} if you prefer."
           values={{
             costLink: (
               <EuiLink
@@ -82,7 +82,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
                 />
               </EuiLink>
             ),
-            connectorLink: (
+            customConnector: (
               <EuiLink
                 data-test-subj="elasticLlmConnectorLink"
                 href={getUrlForApp('management', {
@@ -94,23 +94,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
               >
                 <FormattedMessage
                   id="xpack.elasticAssistant.assistant.eisCallout.connector.label"
-                  defaultMessage="connector"
-                />
-              </EuiLink>
-            ),
-            settingsLink: (
-              <EuiLink
-                data-test-subj="elasticLlmSettingsLink"
-                href={getUrlForApp('management', {
-                  path: `/kibana/spaces/edit/${spaceId}`,
-                })}
-                target="_blank"
-                rel="noopener noreferrer"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.elasticAssistant.assistant.eisCallout.settings.label"
-                  defaultMessage="Settings"
+                  defaultMessage="custom connector"
                 />
               </EuiLink>
             ),

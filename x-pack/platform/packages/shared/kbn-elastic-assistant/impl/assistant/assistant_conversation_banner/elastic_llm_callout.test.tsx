@@ -52,7 +52,6 @@ describe('ElasticLlmCallout', () => {
     );
     expect(queryByTestId('elasticLlmUsageCostLink')).toHaveTextContent('additional costs incur');
     expect(queryByTestId('elasticLlmConnectorLink')).toHaveTextContent('connector');
-    expect(queryByTestId('elasticLlmSettingsLink')).toHaveTextContent('Settings');
   });
 
   it('should show callout when showEISCallout changes to true', () => {

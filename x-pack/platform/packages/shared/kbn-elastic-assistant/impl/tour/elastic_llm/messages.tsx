@@ -25,7 +25,7 @@ export const CostAwareness = () => {
   return (
     <FormattedMessage
       id="xpack.elasticAssistant.elasticLLM.tour.content"
-      defaultMessage="The Elastic Managed LLM connector provides a default, pre-configured LLM that helps you make the most of Elastic's AI features. Learn about its {usageCost}. You can continue to use other LLM connectors as normal. {learnMore}"
+      defaultMessage="This new default LLM connector is optimized for Elastic Al features ({usageCost}). You can continue using existing LLM connectors if you prefer. {learnMore}"
       values={{
         usageCost: (
           <EuiLink
