@@ -10,7 +10,6 @@
 import { DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { createGetDocViewer } from '../observability_document_profile/accessors/get_doc_viewer';
 import { createGetAppMenu, getDefaultAdHocDataViews } from './accessors';
 import type { ObservabilityRootProfileProvider } from './types';
 
