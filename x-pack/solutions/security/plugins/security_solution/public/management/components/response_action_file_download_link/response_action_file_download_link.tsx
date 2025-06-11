@@ -181,7 +181,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           iconType="download"
           data-test-subj={getTestId('downloadButton')}
           flush="left"
-          css={STYLE_INHERIT_FONT_FAMILY}
+          style={STYLE_INHERIT_FONT_FAMILY}
           iconSize="s"
           download
         >
