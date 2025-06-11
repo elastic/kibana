@@ -455,17 +455,26 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   ): Promise<Stream> {
     // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/get-live-response-result
 
-    const result = await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
-      {
-        url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
-        method: 'GET',
-      },
-      connectorUsageCollector
+    const resultDownloadLink =
+      await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
+        {
+          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+          method: 'GET',
+        },
+        connectorUsageCollector
+      );
+    this.logger.debug(
+      () => `script results for machineId [${id}]:\n${JSON.stringify(resultDownloadLink)}`
     );
 
+    const fileUrl = resultDownloadLink.value;
+
+    if (!fileUrl) {
+      throw new Error(`Download URL for script results of machineId [${id}] not found`);
+    }
     const downloadConnection = await this.request(
       {
-        url: result.value,
+        url: resultDfileUrl,
         method: 'get',
         responseType: 'stream',
         responseSchema: DownloadActionResultsResponseSchema,
