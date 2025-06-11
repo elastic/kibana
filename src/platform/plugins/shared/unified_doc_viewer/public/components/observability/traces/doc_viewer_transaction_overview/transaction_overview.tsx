@@ -29,6 +29,7 @@ import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { DataSourcesProvider } from '../hooks/use_data_sources';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
@@ -67,63 +68,68 @@ export function TransactionOverview({
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
-    <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
-      <FieldActionsProvider
-        columns={columns}
-        filter={filter}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
-      >
-        <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <TransactionSummaryTitle
-                serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
-                formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                id={transactionId}
-                formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
-                showActions={showActions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {transactionFields.map((fieldId) => (
-                <TransactionSummaryField
-                  key={fieldId}
-                  fieldId={fieldId}
-                  fieldConfiguration={fieldConfigurations[fieldId]}
-                  showActions={showActions}
-                />
-              ))}
-            </EuiFlexItem>
-            {transactionDuration !== undefined && (
+    <DataSourcesProvider
+      tracesIndexPattern={tracesIndexPattern}
+      apmErrorsIndexPattern={apmErrorsIndexPattern}
+    >
+      <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
+        <FieldActionsProvider
+          columns={columns}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+        >
+          <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <TransactionDurationSummary
-                  transactionDuration={transactionDuration}
-                  transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                  transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
-                  serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+                <TransactionSummaryTitle
+                  serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                  transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
+                  formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                  id={transactionId}
+                  formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
+                  showActions={showActions}
                 />
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              {traceId && transactionId && (
-                <Trace
-                  fields={fieldConfigurations}
-                  traceId={traceId}
-                  docId={transactionId}
-                  displayType="transaction"
-                  dataView={dataView}
-                  tracesIndexPattern={tracesIndexPattern}
-                  showWaterfall={showWaterfall}
-                  showActions={showActions}
-                />
+              <EuiFlexItem>
+                {transactionFields.map((fieldId) => (
+                  <TransactionSummaryField
+                    key={fieldId}
+                    fieldId={fieldId}
+                    fieldConfiguration={fieldConfigurations[fieldId]}
+                    showActions={showActions}
+                  />
+                ))}
+              </EuiFlexItem>
+              {transactionDuration !== undefined && (
+                <EuiFlexItem>
+                  <TransactionDurationSummary
+                    transactionDuration={transactionDuration}
+                    transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                    transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
+                    serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+                  />
+                </EuiFlexItem>
               )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </FieldActionsProvider>
-    </RootTransactionProvider>
+              <EuiFlexItem>
+                {traceId && transactionId && (
+                  <Trace
+                    fields={fieldConfigurations}
+                    traceId={traceId}
+                    docId={transactionId}
+                    displayType="transaction"
+                    dataView={dataView}
+                    tracesIndexPattern={tracesIndexPattern}
+                    showWaterfall={showWaterfall}
+                    showActions={showActions}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </FieldActionsProvider>
+      </RootTransactionProvider>
+    </DataSourcesProvider>
   );
 }
