@@ -204,6 +204,19 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
   return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
 };
 
+/**
+ * Converts and combined KQL Queries, filters and lucene queries to a single ES Query
+ * Given operator is used to combine KQL and lucene queries irrespective of filters
+ *
+ * It works under 3 assumptions:
+ *  - buildESQuery puts KQL queries in the `filter` clause
+ *  - buildESQuery puts  filters in the `filter` clause
+ *  - buildESQuery puts lucene queries in the `must` clause
+ *
+ * This assumptions are true as of writing of this change and are being tested. In case those change,
+ * and this function breaks, please update the function to reflect the changes in buildESQuery
+ *
+ * */
 export const convertToBuildEsQuery = ({
   config,
   dataViewSpec,
@@ -217,7 +230,7 @@ export const convertToBuildEsQuery = ({
   queries: Query[];
   filters: Filter[];
   luceneQuery?: Query;
-  /* Combined provided KQL Query and Lucene Query */
+  /* Combines provided KQL Query and Lucene Query */
   operator?: 'and' | 'or';
 }): [string, undefined] | [undefined, Error] => {
   try {
@@ -229,6 +242,11 @@ export const convertToBuildEsQuery = ({
         nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
         ...config,
         dateFormatTZ: undefined,
+        /*
+         * `filtersInMustClause` puts kql query in `must` instead of `filter` clause and helps us differentiate between kql query and actual filters
+         * ⚠️  Contrary to the name of config, it does not touch filters at all.
+         */
+        filtersInMustClause: true,
       }
     );
 
@@ -243,10 +261,11 @@ export const convertToBuildEsQuery = ({
         }
       );
       if (operator === 'or') {
-        esDslQuery.bool.should = [...esDslQuery.bool.filter, ...luceneDslQuery.bool.must];
-        esDslQuery.bool.filter = [];
+        // move `must` clause to `should`
+        esDslQuery.bool.should = [...esDslQuery.bool.must, ...luceneDslQuery.bool.must];
+        esDslQuery.bool.must = [];
       } else {
-        esDslQuery.bool.filter = [...esDslQuery.bool.filter, ...luceneDslQuery.bool.must];
+        esDslQuery.bool.must = [...esDslQuery.bool.must, ...luceneDslQuery.bool.must];
       }
     }
 

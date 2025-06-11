@@ -293,14 +293,14 @@ describe('convertToBuildEsQuery', () => {
     });
   });
 
-  it('should combine lucene query & multiple kqlQueries with AND operator correctly', () => {
+  it('should combine lucene query, multiple kqlQueries and Filters with AND operator correctly', () => {
     const luceneQuery = {
       query: 'host.name: va1 OR val2',
       language: 'lucene',
     };
 
     const kqlQuery1 = {
-      query: 'user.name: "val1" OR user.name: "val2"',
+      query: 'NOT user.name: "val1"',
       language: 'kuery',
     };
 
@@ -313,42 +313,27 @@ describe('convertToBuildEsQuery', () => {
       config,
       queries: [kqlQuery1, kqlQuery2],
       dataViewSpec: mockDataViewSpec,
-      filters: [],
+      filters,
       luceneQuery,
     });
 
     expect(JSON.parse(converted ?? '')).toMatchObject({
       bool: {
-        filter: [
+        must: [
           {
             bool: {
-              should: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        match_phrase: {
-                          'user.name': 'val1',
-                        },
+              must_not: {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'user.name': 'val1',
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        match_phrase: {
-                          'user.name': 'val2',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
+              },
             },
           },
           {
@@ -389,11 +374,18 @@ describe('convertToBuildEsQuery', () => {
             },
           },
         ],
+        filter: [
+          {
+            exists: {
+              field: '_id',
+            },
+          },
+        ],
       },
     });
   });
 
-  it('should combine lucene query & kqlQuery with OR operator correctly', () => {
+  it('should combine lucene query, kqlQuery and Filters with OR operator correctly', () => {
     const luceneQuery = {
       query: 'host.name: va1 OR val2',
       language: 'lucene',
@@ -408,7 +400,7 @@ describe('convertToBuildEsQuery', () => {
       config,
       queries: [kqlQuery],
       dataViewSpec: mockDataViewSpec,
-      filters: [],
+      filters,
       luceneQuery,
       operator: 'or',
     });
@@ -454,6 +446,13 @@ describe('convertToBuildEsQuery', () => {
             },
           },
         ],
+        filter: [
+          {
+            exists: {
+              field: '_id',
+            },
+          },
+        ],
       },
     });
   });
@@ -474,14 +473,14 @@ describe('combineQueries', () => {
           dataProviders: [dataProviders],
           kqlQuery: luceneQuery,
           kqlMode,
-          filters: [],
+          filters,
           dataViewSpec: mockDataViewSpec,
           browserFields: {},
         });
 
         expect(JSON.parse(combinedQueries?.filterQuery as string)).toMatchObject({
           bool: {
-            filter: [
+            must: [
               {
                 bool: {
                   should: [
@@ -520,6 +519,17 @@ describe('combineQueries', () => {
                 },
               },
             ],
+            filter: {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: '_id',
+                    },
+                  },
+                ],
+              },
+            },
           },
         });
       });
