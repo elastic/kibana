@@ -7,4 +7,3 @@ xpack.slo.enabled: true
 xpack.features.overrides:
   ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
   infrastructure.name: 'Infrastructure'
-  ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
