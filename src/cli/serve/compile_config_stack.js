@@ -62,9 +62,7 @@ export function compileConfigStack({
   // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
-    const serverlessSecurityTier =
-      _.get(unknownOptions, 'xpack.securitySolutionServerless.productTypes[0].product_tier') ||
-      getSecurityTierFromCfg(configs);
+    const serverlessSecurityTier = getServerlessSecurityTier(configs, unknownOptions);
     if (serverlessSecurityTier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
       if (dev && devConfig !== false) {
@@ -106,9 +104,16 @@ function getServerlessModeFromCfg(configs) {
 /** @typedef {'search_ai_lake' | 'essentials' | 'complete'} ServerlessSecurityTier */
 /**
  * @param {string[]} configs List of configuration file paths
+ * @param {Record<string, unknown>} unknownOptions
  * @returns {ServerlessSecurityTier|undefined} The serverless security tier in the summed configs
  */
-function getSecurityTierFromCfg(configs) {
+function getServerlessSecurityTier(configs, unknownOptions) {
+  const productTypeOverride = _.get(
+    unknownOptions,
+    'xpack.securitySolutionServerless.productTypes[0].product_tier'
+  );
+  if (productTypeOverride) return productTypeOverride;
+
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
   // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
