@@ -81,12 +81,10 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
-  private isServerlessEnv: boolean;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
-    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
       LOGS_RULES_ALERT_CONTEXT,
