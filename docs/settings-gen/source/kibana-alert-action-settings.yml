@@ -290,7 +290,7 @@ groups:
         # deprecation_details: ""
         # note: ""
         # tip: ""
-        warning: "This setting alone is insufficient to override system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
+        warning: "This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
         # important: ""
         datatype: string
         default: "email-smtp.us-east-1.amazonaws.com"

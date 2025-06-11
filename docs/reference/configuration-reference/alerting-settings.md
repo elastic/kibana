@@ -138,7 +138,7 @@ $$$action-config-email-domain-allowlist$$$
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     ::::{warning}
-    This setting alone is insufficient to override system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
     ::::
 
     Data type: `string`
