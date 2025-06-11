@@ -170,9 +170,11 @@ export const ESQLEditor = memo(function ESQLEditor({
   });
   const onQueryUpdate = useCallback(
     (value: string) => {
+      setCode(value);
+      setCodeStateOnSubmission(value);
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setCode]
   );
 
   const onQuerySubmit = useCallback(() => {
@@ -224,11 +226,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== fixedQuery) {
+      if (code !== fixedQuery && fixedQuery !== codeWhenSubmitted) {
         setCode(fixedQuery);
       }
     }
-  }, [code, fixedQuery]);
+  }, [code, fixedQuery, codeWhenSubmitted]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
