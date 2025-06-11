@@ -156,39 +156,6 @@ export interface ToolDescriptor {
   meta: ToolDescriptorMeta;
 }
 
-export interface EsqlTool extends ToolDescriptor {
-
-  /**
-   * The ESQL query to be executed.
-   */
-  query: string;
-  
-  /**
-   * Parameters that can be used in the query.
-   * Each parameter has a key identifier and metadata about its type and usage.
-   */
-  params: Record<string, {
-    /**
-     * The data type of the parameter.
-     */
-    type: string;
-    
-    /**
-     * Description of the parameter's purpose or expected values.
-     */
-    description: string;
-  }>;
-  /**
-   * Zod schema for validating tool parameters
-   */
-  schema: ZodObject<any, UnknownKeysParam, ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>;
-
-  /**
-   * Handler function to execute the tool
-   */
-  handler: (params: any) => Promise<any>;
-}
-
 
 /**
  * Metadata associated with a tool.

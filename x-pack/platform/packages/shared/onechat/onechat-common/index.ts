@@ -8,7 +8,6 @@
 export type { OnechatEvent } from './base/events';
 export {
   type ToolDescriptor,
-  type EsqlTool,
   type ToolDescriptorMeta,
   type PlainIdToolIdentifier,
   type SerializedToolIdentifier,

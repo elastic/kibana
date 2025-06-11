@@ -5,39 +5,34 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { EsqlToolStorage } from './storage';
 import {
     esqlToolProviderId,
-    PlainIdToolIdentifier,
-    type EsqlTool,
   } from '@kbn/onechat-common';
-import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 import { logger } from 'elastic-apm-node';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { esqlToolIndexName } from './storage';
-import { RegisteredTool, RegisteredToolProvider } from '@kbn/onechat-server';
-import { RegisteredToolProviderWithId } from '../types';
-import { UnknownKeysParam, z, ZodObject, ZodTypeAny } from 'zod';
-import { schema } from '@kbn/config-schema';
+import { EsqlTool } from '@kbn/onechat-server';
+import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 
-export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
-    register(esqlTool: EsqlToolCreateRequest): void;
+export interface EsqlToolClient{
+    get(toolId: string): Promise<EsqlToolCreateRequest>;
+    list(): Promise<EsqlTool[]>;
+    create(esqlTool: EsqlToolCreateRequest): Promise<EsqlToolCreateRequest>;
     execute(name: string, params: Record<string, any>): Promise<any>;
   }
 
-export const createEsqlToolRegistry = ({
+export const createClient = ({
     storage,
     esClient,
   }: {
     storage: EsqlToolStorage;
     esClient: ElasticsearchClient;
-  }): EsqlToolRegistry => {
-    return new EsqlToolRegistryImpl({ storage, esClient });
+  }): EsqlToolClient => {
+    return new EsqlToolClientImpl({ storage, esClient });
   };
 
-
-  class EsqlToolRegistryImpl {
+  class EsqlToolClientImpl {
     public readonly id = esqlToolProviderId;
     private readonly storage: EsqlToolStorage;
     private readonly esClient: ElasticsearchClient;
@@ -47,55 +42,22 @@ export const createEsqlToolRegistry = ({
         this.esClient = esClient;
     }
 
-    async has(options: { toolId: string; request: KibanaRequest }): Promise<boolean> {
-        const { toolId } = options;
-        
+    async get( id: string ): Promise<EsqlToolCreateRequest> {
         try {
-          await this.get({ toolId, request: options.request });
-          return true;
+            const document = await this.storage.getClient().get({ id: id });
+            const tool = document._source as EsqlTool;
+            return tool
+            
         } catch (error) {
-          if (error.message?.includes('not found') || error.statusCode === 404) {
-            return false;
-          }
-          console.error(`Error checking if ESQL tool ${toolId} exists:`, error);
-          return false;
-        }
-      }
-
-      async get(options: { 
-        toolId: string; 
-        request: KibanaRequest<unknown, unknown, unknown, any>; 
-      }): Promise<RegisteredTool> {
-        const { toolId } = options;
-        
-        try {
-          const document = await this.storage.getClient().get({ id: toolId });
-          const tool = document._source as EsqlTool;
-          
-          return {
-            id: tool.id,
-            description: tool.description,
-            meta: {
-              providerId: tool.meta.providerId,
-              tags: tool.meta?.tags || [],
-            },
-            schema: z.object({
-              query: z.string().describe('ESQL query to execute').default(tool.query),
-            }),
-            handler: async (params) => {
-              return this.execute(tool.id, params);
+            if (error.statusCode === 404) {
+                throw new Error(`Tool with ID ${id} not found`);
             }
-          };
-        } catch (error) {
-          if (error.statusCode === 404) {
-            throw new Error(`Tool with ID ${toolId} not found`);
-          }
-          logger.error(`Error retrieving ESQL tool with ID ${toolId}: ${error}`);
-          throw error;
+            logger.error(`Error retrieving ESQL tool with ID ${id}: ${error}`);
+            throw error;
         }
       }
 
-    async list(options: { request: KibanaRequest }): Promise<EsqlTool[]> {
+    async list(): Promise<EsqlTool[]> {
         try {
             const document = await this.storage.getClient().search({
                 index: esqlToolIndexName,
@@ -113,30 +75,33 @@ export const createEsqlToolRegistry = ({
         }
     }
 
-    async register(tool: EsqlToolCreateRequest): Promise<void> {
+    async create(tool: EsqlToolCreateRequest): Promise<EsqlToolCreateRequest> {
         try {
             const now = new Date();
-            const id = tool.id ?? uuidv4();
-        
-            const attributes = {
-                id,
+            if (!tool.id){
+                throw new Error('Tool ID is required');
+            }
+
+            const document = {
+                id: tool.id,
                 description: tool.description,
                 query: tool.query,
                 params: tool.params,
                 meta: {
-                    providerId: tool.meta.providerId,
-                    tags: tool.meta?.tags || [],
+                    providerId: esqlToolProviderId,
+                    tags: [],
                 },
                 created_at: now.toISOString(),
                 updated_at: now.toISOString(),
-                
             };
-        
+
             await this.storage.getClient().index({
-                id,
-                document: attributes,
+                id: tool.id,
+                document: document,
             });
-        
+
+            return this.get(tool.id);
+
         } catch (error: any) {
             logger.info(error);
             throw error; 
@@ -145,6 +110,7 @@ export const createEsqlToolRegistry = ({
 
     async execute(id: string, params: Record<string, any>): Promise<any> {
         try {
+            logger.info(`Executing ESQL tool with ID: ${id} and params: ${JSON.stringify(params)}`);
             const document = await this.storage.getClient().search({
                 index: esqlToolIndexName,
                 query: {
@@ -155,6 +121,11 @@ export const createEsqlToolRegistry = ({
                 size: 1,
                 track_total_hits: true  
             });
+            logger.info(`ESQL tool search result: ${JSON.stringify(document)}`);
+
+            if (document.hits.total.value === 0) {
+                throw new Error(`ESQL tool not found: ${id}`);
+            }
             const tool = document.hits.hits[0]._source  
 
             if (!tool) {
@@ -165,12 +136,12 @@ export const createEsqlToolRegistry = ({
                 if (!(key in tool.params)) { 
                     throw new Error(`Parameter ${key} not found in tool params`);
                 }
-                
+
                 const value = params[key];
                 if (value === undefined || value === null) {
                     throw new Error(`Parameter ${key} is required but was not provided`);
                 }
-                
+
                 return typeof value === 'string' ? `"${value}"` : value;
             });
 
@@ -181,13 +152,14 @@ export const createEsqlToolRegistry = ({
                   query: filledQuery
                 }
               });
-    
+
             return esqlResponse;
         } catch (error) {
-            logger.error(`Error executing ESQL tool with name ${name}: ${error}`);
+            logger.error(`Error executing ESQL tool with name ${id}: ${error}`);
             throw error;
         }
-        
       }
+
+      
   }
     

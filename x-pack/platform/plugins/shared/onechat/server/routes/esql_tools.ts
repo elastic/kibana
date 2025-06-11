@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { esqlToolProviderId } from '@kbn/onechat-common';
+import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 
 export function registerESQLToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -32,10 +33,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       try {
         const { esql: esqlToolClientService } = getInternalServices();
         const client = await esqlToolClientService.getScopedClient({ request });
-        const tool = await client.get({ 
-          toolId: request.params.id, 
-          request: request 
-        });
+        const tool = client.get(request.params.id);
 
         return response.ok({
           body: {
@@ -63,7 +61,8 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       try {
         const { esql: esqlToolClientService } = getInternalServices();
         const client = await esqlToolClientService.getScopedClient({ request });
-        const tools = await client.list({ request });
+
+        const tools = await client.list();
 
         return response.ok({
           body: {
@@ -140,13 +139,19 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       try {
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
-        await client.register({
-          ...request.body,
+
+        const tool: EsqlToolCreateRequest = {
+          id: request.body.id || 'esql',
+          description: request.body.description || 'Tool for executing ESQL queries',
+          query: request.body.query,
+          params: request.body.params || {},
           meta: {
-            ...request.body.meta,
+            tags: request.body.meta.tags || [],
             providerId: esqlToolProviderId,
           },
-        });
+        };
+        
+        await client.create(tool);
 
         return response.ok({
           body: {

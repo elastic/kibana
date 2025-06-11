@@ -45,6 +45,40 @@ export interface RegisteredTool<
   meta?: RegisteredToolMeta;
 }
 
+export interface EsqlTool extends RegisteredTool {
+
+  /**
+   * The ESQL id to be executed.
+   */
+  id: string;
+
+  /**
+   * The ESQL tool description to be executed.
+   */
+  description: string;
+
+  /**
+   * The ESQL query to be executed.
+   */
+  query: string;
+  
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: Record<string, {
+    /**
+     * The data type of the parameter.
+     */
+    type: string;
+    
+    /**
+     * Description of the parameter's purpose or expected values.
+     */
+    description: string;
+  }>;
+}
+
 /**
  * Tool provider interface, as registered by API consumers.
  */

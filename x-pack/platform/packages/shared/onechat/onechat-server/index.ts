@@ -9,6 +9,7 @@ export type {
   RegisteredToolMeta,
   RegisteredTool,
   RegisteredToolProvider,
+  EsqlTool,
   ToolHandlerFn,
   ToolHandlerContext,
   ToolProvider,

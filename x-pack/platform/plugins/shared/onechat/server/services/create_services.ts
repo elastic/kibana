@@ -15,11 +15,8 @@ import type {
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
-import { EsqlToolServiceImpl } from './tools/esql/esql_tool_service';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
-import { z } from 'zod';
-import { Parser } from 'expr-eval';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -41,21 +38,6 @@ export class ServiceManager {
       tools: this.services.tools.setup(),
       agents: this.services.agents.setup({ logger }),
     };
-
-    this.internalSetup.tools.register({
-      id: 'calculator',
-      description: `A simple calculator. Useful for getting the result of a math expression.`,
-      schema: z.object({
-        input: z.string().describe('the expression to evaluate'),
-      }),
-      handler: async ({ input }) => {
-        try {
-          return Parser.evaluate(input).toString();
-        } catch (e) {
-          throw new Error(`Error evaluating expression: ${e.message}`);
-        }
-      },
-    });
 
     return this.internalSetup;
   }
@@ -82,6 +64,8 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      logger,
+      elasticsearch
     });
 
     const agents = this.services.agents.start({
@@ -99,11 +83,6 @@ export class ServiceManager {
     });
     runner = runnerFactory.getRunner();
 
-    const esql = new EsqlToolServiceImpl({
-      logger: logger.get('esql'),
-      elasticsearch,
-    });
-
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -117,16 +96,17 @@ export class ServiceManager {
       conversationService: conversations,
       agentService: agents,
     });
-
+    
     this.internalStart = {
       tools,
       agents,
       conversations,
       runnerFactory,
-      esql,
+      esql: tools.esql,
       chat,
     };
 
     return this.internalStart;
   }
 }
+

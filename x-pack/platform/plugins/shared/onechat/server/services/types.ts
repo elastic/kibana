@@ -27,8 +27,8 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   conversations: ConversationService;
   chat: ChatService;
-  runnerFactory: RunnerFactory;
   esql: EsqlToolService;
+  runnerFactory: RunnerFactory;
 }
 
 export interface ServiceSetupDeps {

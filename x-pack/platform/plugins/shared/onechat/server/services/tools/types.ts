@@ -17,6 +17,7 @@ import type {
   ToolProviderListOptions,
   ExecutableTool,
 } from '@kbn/onechat-server';
+import { EsqlToolService } from './esql/esql_tool_service';
 
 export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>, RunOutput = unknown>(
@@ -30,6 +31,7 @@ export interface ToolsServiceStart {
    * Internal tool registry, exposing internal APIs to interact with tool providers.
    */
   registry: InternalToolRegistry;
+  esql: EsqlToolService;
 }
 
 /**

@@ -8,7 +8,6 @@
 export {
   type ToolDescriptor,
   type ToolDescriptorMeta,
-  type EsqlTool,
   type PlainIdToolIdentifier,
   type SerializedToolIdentifier,
   type StructuredToolIdentifier,
