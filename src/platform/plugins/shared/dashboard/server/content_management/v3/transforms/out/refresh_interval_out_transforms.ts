@@ -9,20 +9,18 @@
 
 import { schema } from '@kbn/config-schema';
 
+const refreshIntervalSavedObjectSchema = schema.object({
+  pause: schema.boolean(),
+  value: schema.number(),
+  display: schema.maybe(schema.string()),
+  section: schema.maybe(schema.number()),
+});
+
 const isRefreshIntervalSavedObject = (
   refreshInterval: unknown
 ): refreshInterval is { pause: boolean; value: number } => {
   try {
-    return Boolean(
-      schema
-        .object({
-          pause: schema.boolean(),
-          value: schema.number(),
-          display: schema.maybe(schema.string()),
-          section: schema.maybe(schema.number()),
-        })
-        .validate(refreshInterval)
-    );
+    return Boolean(refreshIntervalSavedObjectSchema.validate(refreshInterval));
   } catch {
     return false;
   }
