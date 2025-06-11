@@ -15,7 +15,7 @@ export const UsageCostMessage: React.FC = () => {
   return (
     <EuiText size="xs">
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.descriptionText"
+        id="xpack.stackConnectors.inference.elasticLLM.descriptionText"
         defaultMessage="Learn more about {elasticLLM} and its {usageCost}."
         values={{
           elasticLLM: (
@@ -40,7 +40,7 @@ export const UsageCostMessage: React.FC = () => {
               external
             >
               <FormattedMessage
-                id="xpack.stackConnectors.inference.usageCost.link"
+                id="xpack.stackConnectors.inference.elasticLLM.usageCost.link"
                 defaultMessage="usage cost"
               />
             </EuiLink>
