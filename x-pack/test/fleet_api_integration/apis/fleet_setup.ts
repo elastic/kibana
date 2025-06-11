@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common/constants';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -71,6 +74,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('upgrade managed package policies', () => {
       const apiClient = new SpaceTestApiClient(supertest);
+      let packagePolicySavedObjectType: string;
       before(async () => {
         await apiClient.setup();
         const pkgRes = await apiClient.getPackage({
@@ -89,6 +93,16 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
+        const statusRes = await supertest
+          .get('/api/fleet/agents/setup')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        packagePolicySavedObjectType =
+          statusRes.body.is_space_awareness_enabled === true
+            ? PACKAGE_POLICY_SAVED_OBJECT_TYPE
+            : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+
         const agentPolicyRes = await apiClient.createAgentPolicy();
 
         await es.bulk({
@@ -97,12 +111,13 @@ export default function (providerContext: FtrProviderContext) {
           operations: [...new Array(10).keys()].flatMap((_, index) => [
             {
               create: {
-                _id: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
+                _id: `${packagePolicySavedObjectType}:${uuidV4()}`,
               },
             },
             {
-              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-              [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+              type: packagePolicySavedObjectType,
+              namespaces: ['default'],
+              [packagePolicySavedObjectType]: {
                 name: `test-${index}`,
                 policy_ids: [agentPolicyRes.item.id],
                 inputs: [],
@@ -131,12 +146,12 @@ export default function (providerContext: FtrProviderContext) {
                 bool: {
                   must: {
                     term: {
-                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
+                      [`${packagePolicySavedObjectType}.package.version`]: '1.2.1',
                     },
                   },
                   filter: {
                     term: {
-                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
+                      [`${packagePolicySavedObjectType}.package.name`]: 'synthetics',
                     },
                   },
                 },
