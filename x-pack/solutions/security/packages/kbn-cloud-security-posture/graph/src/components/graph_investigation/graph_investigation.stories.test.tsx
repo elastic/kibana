@@ -87,7 +87,7 @@ const showActionsByNode = (container: HTMLElement, nodeId: string) => {
   expandNode(container, nodeId);
 
   const btn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(btn).toHaveTextContent('Show actions by this entity');
+  expect(btn).toHaveTextContent("Show this entity's actions");
   btn.click();
 };
 
@@ -95,7 +95,7 @@ const hideActionsByNode = (container: HTMLElement, nodeId: string) => {
   expandNode(container, nodeId);
 
   const hideBtn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(hideBtn).toHaveTextContent('Hide actions by this entity');
+  expect(hideBtn).toHaveTextContent("Hide this entity's actions");
   hideBtn.click();
 };
 
@@ -254,7 +254,7 @@ describe('GraphInvestigation Component', () => {
 
       expandNode(container, 'admin@example.com');
       expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        'Show actions by this entity'
+        "Show this entity's actions"
       );
     });
 
@@ -272,7 +272,7 @@ describe('GraphInvestigation Component', () => {
 
       expandNode(container, 'admin@example.com');
       expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        'Show actions by this entity'
+        "Show this entity's actions"
       );
     });
   });
