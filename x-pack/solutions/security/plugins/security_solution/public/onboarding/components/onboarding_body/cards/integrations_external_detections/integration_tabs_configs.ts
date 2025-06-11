@@ -21,5 +21,4 @@ export const INTEGRATION_TABS: Tab[] = [
     sortByFeaturedIntegrations: false,
     featuredCardIds: SEARCH_AI_LAKE_PACKAGES,
     height: `${INTEGRATION_CARD_HEIGHT * 1.8}px`,
-  },
-];
+  }]

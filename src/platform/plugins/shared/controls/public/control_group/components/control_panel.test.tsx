@@ -11,12 +11,17 @@ import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { render, waitFor } from '@testing-library/react';
+import { render as rtlRender, waitFor, screen, act } from '@testing-library/react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlLabelPosition, ControlWidth } from '../../../common';
 import { uiActionsService } from '../../services/kibana_services';
 import { ControlPanel } from './control_panel';
+import { EuiThemeProvider } from '@elastic/eui';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('render', () => {
   let mockApi = {};
@@ -40,6 +45,7 @@ describe('render', () => {
 
   beforeEach(() => {
     mockApi = {};
+    jest.clearAllMocks();
   });
 
   describe('control width', () => {
@@ -55,12 +61,13 @@ describe('render', () => {
     test('should use small class when using small width', async () => {
       mockApi = {
         uuid: 'control1',
-        width: new BehaviorSubject<ControlWidth>('small'),
+        width$: new BehaviorSubject<ControlWidth>('small'),
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
       });
     });
   });
@@ -73,15 +80,9 @@ describe('render', () => {
           labelPosition: new BehaviorSubject<ControlLabelPosition>('oneLine'),
         },
       };
-      const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
-      await waitFor(() => {
-        const floatingActions = controlPanel.getByTestId(
-          'presentationUtil__floatingActions__control1'
-        );
-        expect(floatingActions.getAttribute('class')).toContain(
-          'controlFrameFloatingActions--oneLine'
-        );
-      });
+      await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
+      const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
+      expect(floatingActions).toHaveClass('controlFrameFloatingActions--oneLine');
     });
 
     test('should use two line layout class when using two line layout', async () => {
@@ -91,15 +92,9 @@ describe('render', () => {
           labelPosition: new BehaviorSubject<ControlLabelPosition>('twoLine'),
         },
       };
-      const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
-      await waitFor(() => {
-        const floatingActions = controlPanel.getByTestId(
-          'presentationUtil__floatingActions__control1'
-        );
-        expect(floatingActions.getAttribute('class')).toContain(
-          'controlFrameFloatingActions--twoLine'
-        );
-      });
+      await act(async () => render(<ControlPanel uuid="control1" Component={Component} />));
+      const floatingActions = screen.getByTestId('presentationUtil__floatingActions__control1');
+      expect(floatingActions).toHaveClass('controlFrameFloatingActions--twoLine');
     });
   });
 });

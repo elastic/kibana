@@ -15,6 +15,7 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -101,7 +102,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -128,7 +129,11 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
                 '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
                 '--xpack.uptime.service.devUrl=mockDevUrl',
                 '--xpack.uptime.service.manifestUrl=mockDevUrl',
+                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
               ]
+            : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
         ],
       },

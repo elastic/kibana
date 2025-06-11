@@ -33,7 +33,7 @@ export async function suggest({
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args.filter(isColumnItem).map((arg) => arg.name);
+  const alreadyDeclaredFields = command.args.filter(isColumnItem).map((arg) => arg.parts.join('.'));
   const fieldSuggestions = await getColumnsByType('any', alreadyDeclaredFields);
 
   return handleFragment(
@@ -55,12 +55,7 @@ export async function suggest({
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // KEEP field<suggest>
       const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      if (fieldSuggestions.length > 1)
-        // when we fix the editor marker, this should probably be checked against 0 instead of 1
-        // this is because the last field in the AST is currently getting removed (because it contains
-        // the editor marker) so it is not included in the ignored list which is used to filter out
-        // existing fields above.
-        finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+      if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
       return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
         ...s,

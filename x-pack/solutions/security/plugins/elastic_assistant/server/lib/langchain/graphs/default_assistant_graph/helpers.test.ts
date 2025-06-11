@@ -15,6 +15,7 @@ import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { waitFor } from '@testing-library/react';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { DefaultAssistantGraph } from './graph';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 jest.mock('elastic-apm-node');
 
@@ -63,6 +64,10 @@ describe('streamGraph', () => {
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
     request: mockRequest,
+    isEnabledKnowledgeBase: false,
+    telemetry: {
+      reportEvent: jest.fn(),
+    } as unknown as AnalyticsServiceSetup,
   };
 
   beforeEach(() => {

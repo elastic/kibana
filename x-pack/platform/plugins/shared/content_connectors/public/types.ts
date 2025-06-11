@@ -18,6 +18,7 @@ import type {
   IndexManagementPluginStart,
   IndexMappingProps,
 } from '@kbn/index-management-shared-types';
+import type { HomePublicPluginStart } from '@kbn/home-plugin/public';
 
 export interface SearchConnectorsPluginSetup {
   // we don't have docLinks here yet
@@ -33,6 +34,7 @@ export interface SearchConnectorsPluginSetupDependencies {
 }
 
 export interface SearchConnectorsPluginStartDependencies {
+  home: HomePublicPluginStart;
   share?: SharePublicStart;
   console?: ConsolePluginStart;
   discover?: DiscoverStart;
