@@ -18,7 +18,6 @@ jest.mock('@elastic/eui', () => ({
           risk: '#ff9900',
           warning: '#ffcc00',
           unknown: '#ffffff',
-          // TODO: ADD SKY/40 and SKY/20
         },
       },
     },
@@ -28,21 +27,21 @@ jest.mock('@elastic/eui', () => ({
 describe('useSeverityColor', () => {
   test('returns correct hex code for low for 0 <= score < 3', () => {
     const { result } = renderHook(() => useSeverityColor(0));
-    expect(result.current).toBe('#CFEEF7');
+    expect(result.current).toBe('#dceef7');
 
     const { result: result2 } = renderHook(() => useSeverityColor(0.001));
-    expect(result2.current).toBe('#CFEEF7');
+    expect(result2.current).toBe('#dceef7');
 
     const { result: result3 } = renderHook(() => useSeverityColor(2.99));
-    expect(result3.current).toBe('#CFEEF7');
+    expect(result3.current).toBe('#dceef7');
   });
 
   test('returns correct hex code for warning for 3 <= score < 25', () => {
     const { result } = renderHook(() => useSeverityColor(3));
-    expect(result.current).toBe('#94D8EB');
+    expect(result.current).toBe('#a6d8ec');
 
     const { result: result2 } = renderHook(() => useSeverityColor(24.99));
-    expect(result2.current).toBe('#94D8EB');
+    expect(result2.current).toBe('#a6d8ec');
   });
 
   test('returns correct hex code for minor for 25 <= score < 50', () => {
