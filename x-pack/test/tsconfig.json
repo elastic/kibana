@@ -140,7 +140,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/mock-idp-utils",
