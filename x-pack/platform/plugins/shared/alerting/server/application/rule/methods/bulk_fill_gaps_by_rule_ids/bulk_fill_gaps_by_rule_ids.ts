@@ -37,7 +37,7 @@ export const bulkFillGapsByRuleIds = async (
     options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY;
 
   // Make sure user has access to these rules
-  const alertTypes = mapValues(
+  const rulesByAlertType = mapValues(
     groupBy(rules, (rule) => `${rule.alertTypeId}<>${rule.consumer}`),
     (groupedRules) => ({
       alertTypeId: groupedRules[0].alertTypeId,
@@ -47,7 +47,7 @@ export const bulkFillGapsByRuleIds = async (
   );
 
   const authorizedRules: typeof rules = [];
-  for (const { alertTypeId, consumer, rules: rulesBatch } of Object.values(alertTypes)) {
+  for (const { alertTypeId, consumer, rules: rulesBatch } of Object.values(rulesByAlertType)) {
     try {
       await context.authorization.ensureAuthorized({
         ruleTypeId: alertTypeId,
