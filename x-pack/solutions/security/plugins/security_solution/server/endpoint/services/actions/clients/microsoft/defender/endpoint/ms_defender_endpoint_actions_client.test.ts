@@ -57,8 +57,8 @@ describe('MS Defender response actions client', () => {
     scan: false,
     execute: false,
     getFile: false,
-    getFileDownload: false,
-    getFileInfo: false,
+    getFileDownload: true,
+    getFileInfo: true,
     killProcess: false,
     runningProcesses: false,
     runscript: true,
@@ -424,7 +424,7 @@ describe('MS Defender response actions client', () => {
       });
 
       await expect(msClientMock.getCustomScripts()).rejects.toThrow(
-        'Failed to fetch Crowdstrike scripts, failed with: Microsoft Defender API error'
+        'Failed to fetch Microsoft Defender for Endpoint scripts, failed with: Microsoft Defender API error'
       );
     });
 
@@ -467,7 +467,7 @@ describe('MS Defender response actions client', () => {
       });
 
       await expect(msClientMock.getCustomScripts()).rejects.toThrow(
-        'Failed to fetch Crowdstrike scripts, failed with: Microsoft Defender API error'
+        'Failed to fetch Microsoft Defender for Endpoint scripts, failed with: Microsoft Defender API error'
       );
     });
   });
@@ -647,20 +647,6 @@ describe('MS Defender response actions client', () => {
           connectorActionsMock,
           MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
           msGetActionResultsApiResponse
-        );
-      });
-
-      it('should include script execution results when fetchResult is true', async () => {
-        // Test that runscript actions fetch results (unlike isolate/release)
-        await msClientMock.processPendingActions(processPendingActionsOptions);
-
-        // Verify that GET_ACTION_RESULTS was called for runscript actions
-        expect(connectorActionsMock.execute).toHaveBeenCalledWith(
-          expect.objectContaining({
-            params: expect.objectContaining({
-              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
-            }),
-          })
         );
       });
     });
