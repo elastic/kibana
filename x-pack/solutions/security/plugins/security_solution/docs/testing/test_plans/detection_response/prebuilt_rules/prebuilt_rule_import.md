@@ -1,6 +1,6 @@
 # Test plan: importing prebuilt rules <!-- omit from toc -->
 
-**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+**Status**: `implemented`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
 > [!TIP]
 > If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
@@ -35,7 +35,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Importing a non-customized rule on top of an installed non-customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a non-customized rule on top of an installed customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing a single customized prebuilt rule](#importing-a-single-customized-prebuilt-rule)
-    - [**Scenario: Importing a customized rule when it's not installed**](#scenario-importing-a-customized-rule-when-its-not-installed)
+    - [**Scenario: Importing a customized rule without overwriting**](#scenario-importing-a-customized-rule-without-overwriting)
     - [**Scenario: Importing a customized rule on top of an installed non-customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a customized rule on top of an installed customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
   - [Importing a single custom rule](#importing-a-single-custom-rule)
