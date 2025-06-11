@@ -100,7 +100,7 @@ export const Controls = ({
   };
 
   const btnCss = css`
-    border-radius: none;
+    border-radius: 0;
   `;
 
   const groupCss = css`
