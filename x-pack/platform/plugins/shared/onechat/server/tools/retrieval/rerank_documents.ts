@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { BaseMessageLike } from '@langchain/core/messages';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
 
@@ -24,7 +25,21 @@ const rerankDocumentsSchema = z.object({
     .describe('Documents to rerank'),
 });
 
-export const rerankDocumentsTool = (): RegisteredTool<typeof rerankDocumentsSchema> => {
+interface DocumentWithRating {
+  id: string;
+  index?: string;
+  snippet: string;
+  rating: number;
+}
+
+interface RerankResponse {
+  documents: DocumentWithRating[];
+}
+
+export const rerankDocumentsTool = (): RegisteredTool<
+  typeof rerankDocumentsSchema,
+  RerankResponse
+> => {
   return {
     id: OnechatToolIds.rerankDocuments,
     description: 'Score and rerank documents based their relevance against a text query.',
@@ -37,40 +52,25 @@ export const rerankDocumentsTool = (): RegisteredTool<typeof rerankDocumentsSche
         content: doc.snippet,
       }));
 
-      const analysisModel = chatModel.withStructuredOutput(
-        z.object({
-          ratings: z
-            .array(
-              z.object({
-                id: z.string().describe('ID of the document'),
-                grade: z.number().describe('Score of the document, between 0 and 10'),
-                reason: z
-                  .string()
-                  .optional()
-                  .describe('Optional reason for the rating. Keep it short and concise.'),
-              })
-            )
-            .describe('the ratings, one per document using the "{id, grade, reason}" format.'),
+      const docsWithRatings = await rerankDocuments({
+        query,
+        documents: rerankDocs,
+        chatModel,
+      });
+
+      const rerankedDocs = docsWithRatings
+        .map<DocumentWithRating>((doc) => {
+          const matchingDoc = documents.find((d) => d.id === doc.id)!;
+          return {
+            ...matchingDoc,
+            rating: doc.rating,
+          };
         })
-      );
+        .sort((a, b) => b.rating - a.rating);
 
-      const { ratings } = await analysisModel.invoke(
-        getAnalysisPrompt({ query, documents: rerankDocs })
-      );
-
-      const ratingMap = ratings.reduce((acc, rating) => {
-        acc[rating.id] = {
-          grade: rating.grade,
-        };
-        return acc;
-      }, {} as Record<string, any>);
-
-      const documentsWithRatings = documents.map((doc) => ({
-        ...doc,
-        rating: ratingMap[doc.id] ?? 'n/a',
-      }));
-
-      return documentsWithRatings;
+      return {
+        documents: rerankedDocs,
+      };
     },
     meta: {
       tags: [OnechatToolTags.retrieval],
@@ -78,12 +78,61 @@ export const rerankDocumentsTool = (): RegisteredTool<typeof rerankDocumentsSche
   };
 };
 
+export const rerankDocuments = async ({
+  query,
+  documents,
+  chatModel,
+}: {
+  query: string;
+  documents: RerankingDoc[];
+  chatModel: InferenceChatModel;
+}): Promise<RerankedDoc[]> => {
+  const analysisModel = chatModel.withStructuredOutput(
+    z.object({
+      ratings: z
+        .array(
+          z.object({
+            id: z.string().describe('ID of the document'),
+            grade: z.number().describe('Score of the document, between 0 and 10'),
+            reason: z
+              .string()
+              .optional()
+              .describe('Optional reason for the rating. Keep it short and concise.'),
+          })
+        )
+        .describe('the ratings, one per document using the "{id, grade, reason}" format.'),
+    })
+  );
+
+  const { ratings } = await analysisModel.invoke(getRerankingPrompt({ query, documents }));
+
+  const ratingMap = ratings.reduce((acc, rating) => {
+    acc[rating.id] = {
+      grade: rating.grade,
+    };
+    return acc;
+  }, {} as Record<string, any>);
+
+  const documentsWithRatings = documents.map<RerankedDoc>((doc) => ({
+    ...doc,
+    rating: ratingMap[doc.id] ?? 0,
+  }));
+
+  return documentsWithRatings;
+};
+
 interface RerankingDoc {
   id: string;
   content: unknown;
 }
 
-export const getAnalysisPrompt = ({
+interface RerankedDoc {
+  id: string;
+  content: unknown;
+  rating: number;
+}
+
+export const getRerankingPrompt = ({
   query,
   documents,
 }: {
