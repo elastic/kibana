@@ -49,6 +49,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
+  'onechat:mcpServer:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
@@ -149,7 +150,6 @@ export interface UsageStats {
   isDefaultIndexMigrated: boolean;
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
-  'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:entityCentricExperience': boolean;

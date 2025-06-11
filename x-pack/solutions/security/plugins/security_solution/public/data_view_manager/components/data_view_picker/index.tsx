@@ -46,6 +46,12 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const {
     services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
+
+  const canEditDataView = useMemo(
+    () => Boolean(dataViewEditor?.userPermissions.editDataView()),
+    [dataViewEditor]
+  );
+
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -117,17 +123,22 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
-  const handleDataViewModified = useCallback(
-    (updatedDataView: DataView) => {
+  const handleDataViewModified = useMemo(() => {
+    if (!canEditDataView) {
+      return undefined;
+    }
+    return (updatedDataView: DataView) => {
       if (!updatedDataView.id) {
         return;
       }
       handleChangeDataView(updatedDataView.id, updatedDataView.getIndexPattern());
-    },
-    [handleChangeDataView]
-  );
+    };
+  }, [canEditDataView, handleChangeDataView]);
 
-  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
+  const handleAddField = useMemo(
+    () => (canEditDataView ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
+  );
 
   const triggerConfig = useMemo(() => {
     if (status === 'loading') {

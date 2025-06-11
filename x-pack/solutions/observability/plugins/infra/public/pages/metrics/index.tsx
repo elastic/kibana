@@ -92,9 +92,6 @@ export const InfrastructurePage = () => {
                   <EuiFlexGroup responsive={false} gutterSize="s">
                     <EuiFlexItem>
                       <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
                         <Routes>
                           <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
                           <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
@@ -103,6 +100,9 @@ export const InfrastructurePage = () => {
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
+                        <EuiHeaderLink color={'primary'} {...settingsLinkProps}>
+                          {settingsTabTitle}
+                        </EuiHeaderLink>
                         <Routes>
                           <HeaderLinkAddDataRoute
                             path="/hosts"
@@ -197,7 +197,6 @@ const HeaderLinkAddDataRoute = ({
             category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
           })}
           color="primary"
-          iconType="indexOpen"
         >
           {ADD_DATA_LABEL}
         </EuiHeaderLink>
