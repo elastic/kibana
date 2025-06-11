@@ -17,8 +17,14 @@ export const useFetchIndexNames = (searchQuery: string) => {
   return useQuery({
     queryKey: ['fetchIndexNames', searchQuery],
     queryFn: async () => {
-      const response = await http.post<string[]>(APIRoutes.FETCH_INDICES, {
-        body: JSON.stringify({ searchQuery }),
+      const response = await http.get<string[]>(APIRoutes.FETCH_INDICES, {
+        ...(searchQuery.trim() === ''
+          ? {}
+          : {
+              query: {
+                searchQuery,
+              },
+            }),
       });
       return response;
     },

@@ -143,6 +143,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
         }),
+        // TODO: body is not going to be nullable. It will be fixed in the followup PR
         body: schema.nullable(
           schema.maybe(
             schema.object({
@@ -348,7 +349,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
     })
   );
 
-  router.post(
+  router.get(
     {
       path: APIRoutes.FETCH_INDICES,
       options: {
@@ -360,13 +361,13 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         },
       },
       validate: {
-        body: schema.object({
+        query: schema.object({
           searchQuery: schema.maybe(schema.string()),
         }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      const { searchQuery } = request.body;
+      const { searchQuery } = request.query;
       const core = await context.core;
       const {
         client: { asCurrentUser },
@@ -522,7 +523,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         }
       }
       return response.customError({
-        statusCode: 500,
+        statusCode: 409,
         body: i18n.translate('xpack.search.rules.api.routes.generateRuleIdErrorMessage', {
           defaultMessage: 'Failed to generate a unique rule ID after 100 attempts.',
         }),

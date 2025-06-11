@@ -98,7 +98,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
   );
   const isIdRule = Boolean(actionFields.length === 0 && actionIdsFields?.length);
-  const isDocRule = Boolean(actionFields.length > 0 && !actionIdsFields?.length);
+  const isDocRule = Boolean(actionFields.length > 0);
 
   useEffect(() => {
     if (ruleFromRuleset) {
@@ -149,6 +149,17 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
           },
         ]);
       }
+      let actions = {};
+      if (isDocRule) {
+        actions = {
+          docs: actionFields.map((doc) => ({
+            _id: doc._id,
+            _index: doc._index,
+          })),
+        };
+      } else if (isIdRule) {
+        actions = { ids: actionIdsFields };
+      }
       const updatedRule = {
         rule_id: ruleId,
         criteria: fields.map((criteria) => {
@@ -160,17 +171,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
           return normalizedCriteria;
         }),
         type: getValues('type'),
-        actions: {
-          // if there is docs, use them, otherwise use ids make sure docs doesn't exist when using ids
-          ...((isDocRule && {
-            docs: actionFields.map((doc) => ({
-              _id: doc._id,
-              _index: doc._index,
-            })),
-          }) ||
-            (isIdRule && { ids: actionIdsFields }) ||
-            {}),
-        },
+        actions,
       };
       onSave(updatedRule);
     }
@@ -345,6 +346,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
                   defaultMessage="Find your documents IDs into "
                 />
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiLink
                   data-test-subj="searchQueryRulesQueryRuleFlyoutLink"
                   external

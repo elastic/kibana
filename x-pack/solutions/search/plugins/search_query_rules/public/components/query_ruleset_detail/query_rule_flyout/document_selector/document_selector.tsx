@@ -64,7 +64,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
       onIdSelectorChange={onIdSelectorChange}
       onIndexSelectorChange={onIndexSelectorChange}
       onDeleteDocument={onDeleteDocument}
-      isLoading={Boolean(index && initialDocId && isLoading)}
+      isLoading={isLoading}
       error={isError ? error?.body?.message : undefined}
     />
   );
