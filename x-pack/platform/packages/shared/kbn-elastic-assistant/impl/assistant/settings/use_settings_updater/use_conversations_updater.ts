@@ -12,7 +12,18 @@ import {
   ConversationsBulkActions,
   bulkUpdateConversations,
 } from '../../api/conversations/bulk_update_actions_conversations';
+import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 
+export type SaveConversationsSettingsParams =
+  | {
+      isDeleteAll: true;
+      bulkActions?: undefined;
+    }
+  | {
+      isDeleteAll?: false;
+      bulkActions: ConversationsBulkActions;
+    }
+  | undefined;
 interface UseConversationsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
@@ -25,7 +36,7 @@ interface UseConversationsUpdater {
     React.SetStateAction<ConversationsBulkActions>
   >;
   setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  saveConversationsSettings: (bulkActions?: ConversationsBulkActions) => Promise<boolean>;
+  saveConversationsSettings: (params?: SaveConversationsSettingsParams) => Promise<boolean>;
 }
 
 export const useConversationsUpdater = (
@@ -117,12 +128,15 @@ export const useConversationsUpdater = (
    * Save all pending settings
    */
   const saveConversationsSettings = useCallback(
-    async (bulkActions?: ConversationsBulkActions): Promise<boolean> => {
+    async (params?: SaveConversationsSettingsParams): Promise<boolean> => {
+      const { isDeleteAll, bulkActions } = params ?? {};
       // had trouble with conversationsSettingsBulkActions not updating fast enough
       // from the setConversationsSettingsBulkActions in saveSystemPromptSettings
       const bulkUpdates = bulkActions ?? conversationsSettingsBulkActions;
       const hasBulkConversations = bulkUpdates.create || bulkUpdates.update || bulkUpdates.delete;
-      const bulkResult = hasBulkConversations
+      const bulkResult = isDeleteAll
+        ? await deleteAllConversations({ http, toasts })
+        : hasBulkConversations
         ? await bulkUpdateConversations(http, bulkUpdates, toasts)
         : undefined;
       const didUpdateAssistantStreamingEnabled =
@@ -139,9 +153,9 @@ export const useConversationsUpdater = (
       return bulkResult?.success ?? didUpdateAssistantStreamingEnabled ?? false;
     },
     [
+      conversationsSettingsBulkActions,
       http,
       toasts,
-      conversationsSettingsBulkActions,
       assistantStreamingEnabled,
       updatedAssistantStreamingEnabled,
       setAssistantStreamingEnabled,

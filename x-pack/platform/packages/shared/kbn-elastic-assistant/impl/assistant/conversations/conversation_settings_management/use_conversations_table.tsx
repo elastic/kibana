@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiCheckbox, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
@@ -34,6 +34,84 @@ export type ConversationTableItem = Conversation & {
   systemPromptTitle?: string | null;
 };
 
+const InputCheckbox = ({
+  conversation,
+  deletedConversationsIds,
+  setDeletedConversations,
+  isDeleteAll,
+}: {
+  conversation: ConversationTableItem;
+  deletedConversationsIds: string[];
+  setDeletedConversations: React.Dispatch<React.SetStateAction<ConversationTableItem[]>>;
+  isDeleteAll: boolean;
+}) => {
+  const [checked, setChecked] = useState(
+    isDeleteAll || deletedConversationsIds.includes(conversation.id)
+  );
+
+  useEffect(() => {
+    setChecked(isDeleteAll || deletedConversationsIds.includes(conversation.id));
+  }, [isDeleteAll, deletedConversationsIds, conversation.id]);
+
+  return (
+    <EuiCheckbox
+      data-test-subj={`conversationSelect-${conversation.id}`}
+      id={`conversationSelect-${conversation.id}`}
+      checked={checked}
+      onChange={(e) => {
+        if (e.target.checked) {
+          setChecked(true);
+          setDeletedConversations((prev) => [...prev, conversation]);
+        } else {
+          setChecked(false);
+          setDeletedConversations((prev) => prev.filter(({ id }) => id !== conversation.id));
+        }
+      }}
+    />
+  );
+};
+
+const PageSelectionCheckbox = ({
+  conversationOptionsIds,
+  deletedConversationsIds,
+  handlePageSelection,
+  handlePageUnselecting,
+  isDeleteAll,
+}: {
+  conversationOptionsIds: string[];
+  deletedConversationsIds: string[];
+  handlePageSelection: () => void;
+  handlePageUnselecting: () => void;
+  isDeleteAll: boolean;
+}) => {
+  const [pageSelectionChecked, setPageSelectionChecked] = useState(
+    isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
+  );
+
+  useEffect(() => {
+    setPageSelectionChecked(
+      isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
+    );
+  }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds]);
+
+  return (
+    <EuiCheckbox
+      data-test-subj={`conversationPageSelect`}
+      id={`conversationPageSelect`}
+      checked={pageSelectionChecked}
+      onChange={(e) => {
+        if (e.target.checked) {
+          setPageSelectionChecked(true);
+          handlePageSelection();
+        } else {
+          setPageSelectionChecked(false);
+          handlePageUnselecting();
+        }
+      }}
+    />
+  );
+};
+
 export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
@@ -42,13 +120,46 @@ export const useConversationsTable = () => {
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
+      handlePageSelection,
+      handlePageUnselecting,
+      conversationOptionsIds,
+      deletedConversationsIds,
+      setDeletedConversations,
+      isDeleteAll,
     }: {
       isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
       isEditEnabled: (conversation: ConversationTableItem) => boolean;
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;
       onEditActionClicked: (conversation: ConversationTableItem) => void;
+      handlePageSelection: () => void;
+      handlePageUnselecting: () => void;
+      conversationOptionsIds: string[];
+      deletedConversationsIds: string[];
+      setDeletedConversations: React.Dispatch<React.SetStateAction<ConversationTableItem[]>>;
+      isDeleteAll: boolean;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
+        {
+          name: (
+            <PageSelectionCheckbox
+              isDeleteAll={isDeleteAll}
+              conversationOptionsIds={conversationOptionsIds}
+              deletedConversationsIds={deletedConversationsIds}
+              handlePageSelection={handlePageSelection}
+              handlePageUnselecting={handlePageUnselecting}
+            />
+          ),
+          render: (conversation: ConversationTableItem) => (
+            <InputCheckbox
+              conversation={conversation}
+              deletedConversationsIds={deletedConversationsIds}
+              setDeletedConversations={setDeletedConversations}
+              isDeleteAll={isDeleteAll}
+            />
+          ),
+          width: '70px',
+          sortable: false,
+        },
         {
           name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
           render: (conversation: ConversationTableItem) => (

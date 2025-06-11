@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiText,
   EuiLoadingSpinner,
-  EuiTableSelectionType,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { snakeCase } from 'lodash';
@@ -27,7 +26,11 @@ import { ConversationStreamingSwitch } from '../conversation_settings/conversati
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
+import {
+  ConversationsBulkActions,
+  useFetchCurrentUserConversations,
+  useFetchPrompts,
+} from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
@@ -48,6 +51,7 @@ interface Props {
 }
 
 const DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
+const EMPTY_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
@@ -64,6 +68,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const { data: allPrompts, refetch: refetchPrompts } = useFetchPrompts();
   const [totalItemCount, setTotalItemCount] = useState(5);
+
+  const [deletedConversations, setDeletedConversations] = useState(EMPTY_CONVERSATIONS_ARRAY);
+
   const { onTableChange, pagination, sorting } = useSessionPagination<Conversation, false>({
     nameSpace,
     storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
@@ -113,22 +120,28 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useConversationsUpdater(conversations, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-
+  const [isDeleteAll, setIsSelectedAll] = useState(false);
   const handleSave = useCallback(
-    async (param?: { callback?: () => void }) => {
-      const isSuccess = await saveConversationsSettings();
+    async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
+      const { bulkActions, callback } = param ?? {};
+      const saveConversationsSettingsParams = isDeleteAll
+        ? { isDeleteAll: true }
+        : { isDeleteAll: false, bulkActions };
+      const isSuccess = await saveConversationsSettings(saveConversationsSettingsParams);
       if (isSuccess) {
         toasts?.addSuccess({
           iconType: 'check',
           title: SETTINGS_UPDATED_TOAST_TITLE,
         });
         setHasPendingChanges(false);
-        param?.callback?.();
+        setIsSelectedAll(false);
+        setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+        callback?.();
       } else {
         resetConversationsSettings();
       }
     },
-    [resetConversationsSettings, saveConversationsSettings, toasts]
+    [isDeleteAll, resetConversationsSettings, saveConversationsSettings, toasts]
   );
 
   const setAssistantStreamingEnabled = useCallback(
@@ -157,9 +170,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     openFlyout: openEditFlyout,
     closeFlyout: closeEditFlyout,
   } = useFlyoutModalVisibility();
-  const [deletedConversations, setDeletedConversations] = useState<ConversationTableItem[]>(
-    DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY
-  );
 
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -224,22 +234,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     defaultConnector,
   });
 
-  const onSelectionChange = (selectedItems: ConversationTableItem[]) => {
-    setDeletedConversations(selectedItems);
-  };
+  const handlePageSelection = useCallback(() => {
+    setDeletedConversations(conversationOptions);
+  }, [conversationOptions]);
 
-  const selection: EuiTableSelectionType<ConversationTableItem> = {
-    selectable: (conversation: ConversationTableItem) => !!conversation.id,
-    onSelectionChange,
-    initialSelected: [],
-    selected: deletedConversations,
-  };
+  const handlePageUnselecting = useCallback(() => {
+    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+  }, []);
 
   const onSelectAll = useCallback(() => {
+    setIsSelectedAll(true);
     setDeletedConversations(conversationOptions);
   }, [conversationOptions]);
 
   const handleUnselectAll = useCallback(() => {
+    setIsSelectedAll(false);
     setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
   }, []);
 
@@ -261,8 +270,23 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         isEditEnabled: () => true,
         onDeleteActionClicked,
         onEditActionClicked,
+        handlePageSelection,
+        handlePageUnselecting,
+        conversationOptionsIds: conversationOptions.map((item) => item.id),
+        deletedConversationsIds: deletedConversations.map((item) => item.id),
+        setDeletedConversations,
+        isDeleteAll,
       }),
-    [getColumns, onDeleteActionClicked, onEditActionClicked]
+    [
+      conversationOptions,
+      deletedConversations,
+      getColumns,
+      handlePageSelection,
+      handlePageUnselecting,
+      isDeleteAll,
+      onDeleteActionClicked,
+      onEditActionClicked,
+    ]
   );
 
   const confirmationTitle = useMemo(() => {
@@ -273,8 +297,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       ? deletedConversations[0]?.title
         ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversations[0]?.title)
         : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE
-      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(deletedConversations.length);
-  }, [deletedConversations]);
+      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(
+          isDeleteAll ? totalItemCount : deletedConversations.length
+        );
+  }, [deletedConversations, isDeleteAll, totalItemCount]);
 
   if (!conversationsLoaded) {
     return null;
@@ -303,7 +329,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onSelectAll={onSelectAll}
           handleUnselectAll={handleUnselectAll}
           selected={deletedConversations}
-          totalConversations={conversationOptions.length}
+          totalConversations={totalItemCount}
+          isDeleteAll={isDeleteAll}
         />
         <EuiBasicTable
           items={conversationOptions}
@@ -311,7 +338,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           pagination={pagination}
           sorting={sorting}
           onChange={onTableChange}
-          selection={selection}
           itemId="id"
         />
       </EuiPanel>

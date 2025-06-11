@@ -16,6 +16,7 @@ export interface Props {
   handleUnselectAll: () => void;
   selected: ConversationTableItem[];
   totalConversations: number;
+  isDeleteAll: boolean;
 }
 
 const ToolbarComponent: React.FC<Props> = ({
@@ -24,24 +25,23 @@ const ToolbarComponent: React.FC<Props> = ({
   handleUnselectAll,
   selected,
   totalConversations,
+  isDeleteAll,
 }) => {
-  const allSelected = selected.length === totalConversations && totalConversations > 0;
-
   if (totalConversations === 0) {
     return null;
   }
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
-      {selected.length > 0 && (
+      {(selected.length > 0 || isDeleteAll) && (
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
-            {i18n.SELECTED_CONVERSATIONS(selected.length)}
+            {i18n.SELECTED_CONVERSATIONS(isDeleteAll ? totalConversations : selected.length)}
           </EuiText>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {!allSelected && (
+        {!isDeleteAll && (
           <EuiButtonEmpty
             data-test-subj="selectAllConversations"
             iconType="pagesSelect"
@@ -51,7 +51,7 @@ const ToolbarComponent: React.FC<Props> = ({
             {i18n.SELECT_ALL_CONVERSATIONS(totalConversations)}
           </EuiButtonEmpty>
         )}
-        {allSelected && (
+        {isDeleteAll && (
           <EuiButtonEmpty
             data-test-subj="unselectAllConversations"
             onClick={handleUnselectAll}
