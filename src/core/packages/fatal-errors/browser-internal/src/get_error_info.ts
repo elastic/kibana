@@ -8,7 +8,17 @@
  */
 
 import { inspect } from 'util';
-import type { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
+
+/**
+ * Represents the `message` and `stack` of a fatal Error
+ *
+ * @public
+ * */
+export interface FatalErrorInfo {
+  message: string;
+  stack: string | undefined;
+}
+
 /**
  * Produce a string version of an error,
  */

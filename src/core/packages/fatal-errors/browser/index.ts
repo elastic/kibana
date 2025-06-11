@@ -8,4 +8,3 @@
  */
 
 export type { FatalErrorsSetup, FatalErrorsStart } from './src/contract';
-export type { FatalErrorInfo } from './src/get_error_info';
