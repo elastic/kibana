@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import {
   EuiPopover,
   EuiButton,
@@ -15,11 +15,17 @@ import {
   EuiContextMenuItem,
   EuiContextMenu,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
+import type { RecommendedQuery } from '@kbn/esql-types';
+import {
+  getRecommendedQueries,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
 
@@ -35,10 +41,58 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { docLinks, http, chrome } = kibana.services;
 
-  const { docLinks } = kibana.services;
+  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+  const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
+    RecommendedQuery[]
+  >([]);
+
+  const { queryForRecommendedQueries, timeFieldName } = useMemo(() => {
+    if (adHocDataview && typeof adHocDataview !== 'string') {
+      return {
+        queryForRecommendedQueries: `FROM ${adHocDataview.name}`,
+        timeFieldName:
+          adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name,
+      };
+    }
+    return {
+      queryForRecommendedQueries: '',
+      timeFieldName: undefined,
+    };
+  }, [adHocDataview]);
+
+  useEffect(() => {
+    const getESQLExtensions = async () => {
+      try {
+        // Fetch ESQL solutions recommended queries from the registry
+        const queriesFromRegistry: RecommendedQuery[] = await http.get(
+          `/internal/esql_registry/extensions/${activeSolutionId}/${queryForRecommendedQueries}`
+        );
+        if (
+          Array.isArray(queriesFromRegistry) &&
+          !isEqual(queriesFromRegistry, solutionsRecommendedQueries)
+        ) {
+          setSolutionsRecommendedQueries(queriesFromRegistry);
+        }
+      } catch (error) {
+        // Do nothing if the extensions are not available
+      }
+    };
+    if (activeSolutionId && queryForRecommendedQueries) {
+      // The ESQL extensions are fetched only when the active solution ID is available
+      // as they are solution-specific.
+      getESQLExtensions();
+    }
+  }, [
+    activeSolutionId,
+    http,
+    isLanguageComponentOpen,
+    queryForRecommendedQueries,
+    solutionsRecommendedQueries,
+  ]);
 
   const toggleLanguageComponent = useCallback(async () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
@@ -55,17 +109,29 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const esqlContextMenuPanels = useMemo(() => {
     const recommendedQueries = [];
-    if (adHocDataview && typeof adHocDataview !== 'string') {
-      const queryString = `FROM ${adHocDataview.name}`;
-      const timeFieldName =
-        adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name;
+    // If there are specific recommended queries for the current solution, process them.
+    if (solutionsRecommendedQueries.length) {
+      // Extract the core query templates by removing the 'FROM' clause.
+      const recommendedQueriesTemplatesFromExtensions =
+        getRecommendedQueriesTemplatesFromExtensions(solutionsRecommendedQueries);
 
+      // Construct the full recommended queries by prepending the base 'FROM' command
+      // and add them to the main list of recommended queries.
       recommendedQueries.push(
-        ...getRecommendedQueries({
-          fromCommand: queryString,
-          timeField: timeFieldName,
-        })
+        ...recommendedQueriesTemplatesFromExtensions.map((template) => ({
+          label: template.label,
+          queryString: `${queryForRecommendedQueries}${template.text}`,
+        }))
       );
+    }
+    // Handle the static recommended queries, no solutions specific
+    if (queryForRecommendedQueries && timeFieldName) {
+      const recommendedQueriesFromStaticTemplates = getRecommendedQueries({
+        fromCommand: queryForRecommendedQueries,
+        timeField: timeFieldName,
+      });
+
+      recommendedQueries.push(...recommendedQueriesFromStaticTemplates);
     }
     const panels = [
       {
@@ -160,7 +226,14 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       },
     ];
     return panels as EuiContextMenuPanelDescriptor[];
-  }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, toggleLanguageComponent]);
+  }, [
+    docLinks.links.query.queryESQL,
+    onESQLQuerySubmit,
+    queryForRecommendedQueries,
+    timeFieldName,
+    toggleLanguageComponent,
+    solutionsRecommendedQueries,
+  ]);
 
   return (
     <>
