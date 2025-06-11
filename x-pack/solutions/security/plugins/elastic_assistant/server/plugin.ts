@@ -113,21 +113,19 @@ export class ElasticAssistantPlugin
     core
       .getStartServices()
       .then(([{ featureFlags }]) => {
-        // read all feature flags:
-        void Promise.all([
-          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
-          // add more feature flags here
-        ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
-          if (assistantAttackDiscoverySchedulingEnabled) {
-            // Register Attack Discovery Schedule type
-            plugins.alerting.registerType(
-              getAttackDiscoveryScheduleType({
-                logger: this.logger,
-                telemetry: core.analytics,
-              })
-            );
-          }
-        });
+        featureFlags
+          .getBooleanValue$(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false)
+          .subscribe((assistantAttackDiscoverySchedulingEnabled) => {
+            if (assistantAttackDiscoverySchedulingEnabled) {
+              // Register Attack Discovery Schedule type
+              plugins.alerting.registerType(
+                getAttackDiscoveryScheduleType({
+                  logger: this.logger,
+                  telemetry: core.analytics,
+                })
+              );
+            }
+          });
       })
       .catch((error) => {
         this.logger.error(`error in security assistant plugin setup: ${error}`);
