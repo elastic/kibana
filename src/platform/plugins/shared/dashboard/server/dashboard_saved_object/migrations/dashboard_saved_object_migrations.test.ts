@@ -9,7 +9,10 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import {
+  createEmbeddableSetupMock,
+  createEmbeddableStartMock,
+} from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
@@ -45,7 +48,8 @@ embeddableSetupMock.inject.mockImplementation(injectImplementation);
 embeddableSetupMock.getAllMigrations.mockImplementation(() => ({}));
 
 const migrations = createDashboardSavedObjectTypeMigrations({
-  embeddable: embeddableSetupMock,
+  embeddableSetup: embeddableSetupMock,
+  getEmbeddableStart: () => createEmbeddableStartMock(),
 });
 
 const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -704,7 +708,8 @@ describe('dashboard', () => {
         },
       }));
       const migrationsList = createDashboardSavedObjectTypeMigrations({
-        embeddable: newEmbeddableSetupMock,
+        embeddableSetup: newEmbeddableSetupMock,
+        getEmbeddableStart: () => createEmbeddableStartMock(),
       });
       expect(migrationsList['7.13.0']).toBeDefined();
       const migratedDoc = SavedObjectsUtils.getMigrationFunction(migrationsList['7.13.0'])(

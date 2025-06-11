@@ -11,7 +11,10 @@ import {
   createModelVersionTestMigrator,
   type ModelVersionTestMigrator,
 } from '@kbn/core-test-helpers-model-versions';
-import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import {
+  createEmbeddableSetupMock,
+  createEmbeddableStartMock,
+} from '@kbn/embeddable-plugin/server/mocks';
 
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 
@@ -22,7 +25,12 @@ describe('dashboard saved object model version transformations', () => {
 
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({
-      type: createDashboardSavedObjectType({ migrationDeps: { embeddable: embeddableSetupMock } }),
+      type: createDashboardSavedObjectType({
+        migrationDeps: {
+          embeddableSetup: embeddableSetupMock,
+          getEmbeddableStart: () => createEmbeddableStartMock(),
+        },
+      }),
     });
   });
 
