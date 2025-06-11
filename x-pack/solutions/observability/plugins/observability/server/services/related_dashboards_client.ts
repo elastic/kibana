@@ -155,6 +155,7 @@ export class RelatedDashboardsClient {
         relevantDashboards.push({
           id: d.id,
           title: d.attributes.title,
+          description: d.attributes.description,
           matchedBy: { index: [index] },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -204,6 +205,7 @@ export class RelatedDashboardsClient {
         relevantDashboards.push({
           id: d.id,
           title: d.attributes.title,
+          description: d.attributes.description,
           matchedBy: { fields: Array.from(allMatchingFields) },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({

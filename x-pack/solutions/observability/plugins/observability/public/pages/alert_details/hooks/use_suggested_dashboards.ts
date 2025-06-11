@@ -40,7 +40,7 @@ export const useSuggestedDashboards = (alertId: string): SuggestedDashboardRespo
   return {
     isLoadingSuggestedDashboards: isLoading,
     suggestedDashboards: data?.suggestedDashboards
-      ? data.suggestedDashboards.map(({ id, title }) => ({ id, title, description: '' }))
+      ? data.suggestedDashboards.map(({ id, title, description }) => ({ id, title, description }))
       : undefined,
   };
 };
