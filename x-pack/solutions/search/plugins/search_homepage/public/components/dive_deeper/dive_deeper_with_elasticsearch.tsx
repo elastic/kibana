@@ -8,11 +8,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SearchLabs } from './search_labs';
+import { PythonNotebooks } from './python_notebooks';
+import { ElasticsearchDocumentation } from './elasticsearch_documentation';
 
 export const DiveDeeperWithElasticsearch: React.FC = () => (
   <EuiFlexGroup direction="column" gutterSize="m">
     <EuiFlexItem grow={false}>
-      <EuiTitle size="l">
+      <EuiTitle size="s">
         <span>
           {i18n.translate('xpack.searchHomepage.diveDeeper.title', {
             defaultMessage: 'Dive Deeper with Elasticsearch',
@@ -21,24 +24,17 @@ export const DiveDeeperWithElasticsearch: React.FC = () => (
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText>
-        <span>
-          {i18n.translate('xpack.searchHomepage.diveDeeper.description', {
-            defaultMessage:
-              "Learn more about Elasticsearch's powerful search and analytics features. Explore tutorials, guides, and community stories.",
-          })}
-        </span>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiSpacer size="m" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiLink href="https://www.elastic.co/guide/index.html" target="_blank">
-        {i18n.translate('xpack.searchHomepage.diveDeeper.link', {
-          defaultMessage: 'Learn More',
-        })}
-      </EuiLink>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <SearchLabs />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <PythonNotebooks />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ElasticsearchDocumentation />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
