@@ -53,7 +53,7 @@ export class CasesIncrementalIdService {
 
   public async getCases({
     filter,
-    perPage = 10000,
+    perPage = 1000,
     page = 1,
     sortOrder = 'asc',
     sortField = 'created_at',
