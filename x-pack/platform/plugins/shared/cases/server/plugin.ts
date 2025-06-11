@@ -262,7 +262,7 @@ export class CasePlugin
             savedObjectsService: savedObjects,
           });
         },
-        scheduleIdCrementerTask: () => {
+        scheduleIdIncrementerTask: () => {
           void this.incrementalIdTaskManager?.scheduleIdCrementerTask();
         },
       };
