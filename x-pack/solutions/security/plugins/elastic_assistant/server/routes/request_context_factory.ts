@@ -178,6 +178,16 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
+      getAlertSummaryDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createAlertSummaryDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
       getAIAssistantAnonymizationFieldsDataClient: memoize(async () => {
         const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
