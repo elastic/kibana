@@ -121,7 +121,8 @@
     "@kbn/deeplinks-analytics",
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-pricing-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
