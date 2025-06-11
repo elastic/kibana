@@ -25,30 +25,42 @@ export const createCompletionCommand = (
 
   const withCtx = ctx.WITH();
 
-  const inferenceIdCtx = ctx._inferenceId;
-  const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+  let inferenceId: ESQLSingleAstItem;
+  let withIncomplete = true;
 
-  if (inferenceId.text.includes(EDITOR_MARKER)) {
-    inferenceId.incomplete = true;
+  const withText = withCtx?.getText();
+  const inferenceIdText = ctx._inferenceId?.getText();
+  if (withText?.includes('missing') && /(?:w|wi|wit|with)$/i.test(inferenceIdText)) {
+    // This case is when the WITH keyword is partially typed, and no inferenceId has been provided e.g. 'COMPLETION "prompt" WI'
+    // (the parser incorrectly recognizes the partial WITH keyword as the inferenceId)
+    inferenceId = Builder.identifier('', { incomplete: true });
+  } else {
+    if (!inferenceIdText) {
+      inferenceId = Builder.identifier('', { incomplete: true });
+    } else {
+      withIncomplete = false;
+      inferenceId = createIdentifierOrParam(ctx._inferenceId)!;
+    }
   }
+
+  command.inferenceId = inferenceId;
 
   const optionWith = Builder.option(
     {
       name: 'with',
       args: [inferenceId],
     },
-    withCtx && inferenceIdCtx
-      ? {
-          location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
-        }
-      : undefined
+    {
+      incomplete: withIncomplete,
+      ...(withCtx && ctx._inferenceId
+        ? {
+            location: getPosition(withCtx.symbol, ctx._inferenceId.stop),
+          }
+        : undefined),
+    }
   );
 
-  optionWith.incomplete = withCtx && inferenceId.incomplete;
-
   command.args.push(optionWith);
-  command.inferenceId = inferenceId;
 
   if (ctx._targetField) {
     const targetField = createColumn(ctx._targetField);
