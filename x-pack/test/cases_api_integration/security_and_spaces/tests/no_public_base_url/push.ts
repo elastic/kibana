@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  RecordingServiceNowSimulator,
-  ServiceNowRequest,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import type { RecordingServiceNowSimulator } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
@@ -114,13 +111,11 @@ export default ({ getService }: FtrProviderContext): void => {
          * it is a create comment request
          */
         const allCommentRequests = serviceNowServer.allRequestData.filter(
-          (request): request is { work_notes: string } => 
+          (request): request is { work_notes: string } =>
             typeof request.work_notes === 'string' && request.work_notes.length > 0
         );
 
-        const allWorkNotes: string[] = allCommentRequests.map(
-          (request) => request.work_notes
-        );
+        const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
           'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
