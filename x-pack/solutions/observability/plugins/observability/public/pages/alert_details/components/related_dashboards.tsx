@@ -9,9 +9,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import { Dashboards } from './related_dashboards/dashboards';
+import { DashboardTiles } from './related_dashboards/dashboard_tiles';
 import { useSuggestedDashboards } from '../hooks/use_suggested_dashboards';
-import { ActionButtonProps, DashboardMetadata } from './related_dashboards/dashboard';
+import { ActionButtonProps, DashboardMetadata } from './related_dashboards/dashboard_tile';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
@@ -113,14 +113,14 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
 
   return (
     <div>
-      <Dashboards
+      <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.relatedDashboards', {
           defaultMessage: 'Linked dashboards',
         })}
         isLoadingDashboards={isLoading}
         dashboards={dashboardsMeta}
       />
-      <Dashboards
+      <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
           defaultMessage: 'Suggested dashboards',
         })}

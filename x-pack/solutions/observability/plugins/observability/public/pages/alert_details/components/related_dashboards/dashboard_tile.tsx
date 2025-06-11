@@ -23,7 +23,7 @@ export interface ActionButtonProps {
   isDisabled: boolean;
 }
 
-export function Dashboard({
+export function DashboardTile({
   dashboard,
   actionButtonProps,
 }: {

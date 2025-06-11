@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard';
+import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 export const fetchRelatedDashboards = async ({
   alertId,

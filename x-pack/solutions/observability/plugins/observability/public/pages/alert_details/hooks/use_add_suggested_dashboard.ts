@@ -11,7 +11,7 @@ import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard';
+import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 export const useAddSuggestedDashboards = ({
   rule,

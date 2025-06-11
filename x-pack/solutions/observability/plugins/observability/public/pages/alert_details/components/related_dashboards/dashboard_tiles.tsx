@@ -16,9 +16,9 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { ActionButtonProps, Dashboard, DashboardMetadata } from './dashboard';
+import { ActionButtonProps, DashboardTile, DashboardMetadata } from './dashboard_tile';
 
-export function Dashboards({
+export function DashboardTiles({
   title,
   isLoadingDashboards,
   dashboards,
@@ -58,7 +58,7 @@ export function Dashboards({
 
   return wrapWithHeader(
     dashboards.map(({ actionButtonProps, ...rest }) => (
-      <Dashboard key={rest.id} dashboard={rest} actionButtonProps={actionButtonProps} />
+      <DashboardTile key={rest.id} dashboard={rest} actionButtonProps={actionButtonProps} />
     ))
   );
 }
