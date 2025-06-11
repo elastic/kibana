@@ -32,7 +32,6 @@ jest.mock('./build', () => ({
   Build: jest.fn().mockImplementation(() => ({
     getBufferLogs: jest.fn().mockReturnValue(true),
     getBuildDesc: jest.fn().mockReturnValue('test-build'),
-    getBuildArch: jest.fn().mockReturnValue('x64'),
   })),
 }));
 

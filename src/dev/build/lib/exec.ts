@@ -42,7 +42,7 @@ const outputBufferedLogs = (
   logs: LogLine[] | undefined,
   success: boolean
 ) => {
-  log.write(`--- ${success ? '✅' : '❌'} ${build.getBuildDesc()} [${build.getBuildArch()}]`);
+  log.write(`--- ${success ? '✅' : '❌'} ${build.getBuildDesc()}`);
 
   log.indent(4, () => {
     logBuildCmd();
