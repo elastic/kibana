@@ -50,6 +50,8 @@ export class AddControlPanelAction implements Action<EmbeddableApiContext> {
             eighth: { width: 'medium' },
             ninth: { width: 'medium' },
             tenth: { width: 'small' },
+            eleventh: { width: 'small' },
+            twelth: { width: 'small' },
           },
         },
       },

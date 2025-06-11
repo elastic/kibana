@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { map } from 'rxjs';
 
-import { UseEuiTheme } from '@elastic/eui';
+import { UseEuiTheme, EuiPopover, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -62,13 +62,13 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: () => {
+        const [compressControls, setCompressControls] = useState<boolean>(false);
+        const [popoverOpen, setPopoverOpen] = useState<boolean>(false);
+
         const onResizeObserver = useMemo(() => {
           return new ResizeObserver((entries) => {
             for (const entry of entries) {
-              if (Math.ceil(entry.contentRect.width) < 224) console.log(entry.contentRect.width);
-              entry.target.classList[Math.ceil(entry.contentRect.width) < 224 ? 'add' : 'remove'](
-                'controlGroup--truncated'
-              );
+              setCompressControls(entry.contentRect.width < 220);
             }
           });
         }, []);
@@ -84,16 +84,52 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
             css={styles}
             className={'eui-yScroll'}
             ref={(ref) => {
-              if (ref) onResizeObserver.observe(ref);
+              /**
+               * we have to observe the parent element here so that we don't get into an infinite
+               * scrollbar vs no scrollbar resize loop
+               */
+              if (ref && ref.parentElement) onResizeObserver.observe(ref.parentElement);
             }}
           >
-            {Object.values(initialState.rawState.controls).map(({ width }, i) => {
-              return (
-                <div key={`control-${i}`} className={`singleControl singleControl-${width}`}>
-                  {width}
+            {compressControls ? (
+              <EuiPopover
+                button={
+                  <EuiButton
+                    iconType="controls"
+                    iconSide="left"
+                    fullWidth={true}
+                    onClick={() => {
+                      setPopoverOpen(!popoverOpen);
+                    }}
+                  >
+                    Controls
+                  </EuiButton>
+                }
+                isOpen={popoverOpen}
+                closePopover={() => {
+                  setPopoverOpen(false);
+                }}
+                repositionOnScroll={false}
+              >
+                <div css={styles}>
+                  {Object.values(initialState.rawState.controls).map(({ width }, i) => {
+                    return (
+                      <div key={`control-${i}`} className={`singleControl singleControl-${width}`}>
+                        {width}
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </EuiPopover>
+            ) : (
+              Object.values(initialState.rawState.controls).map(({ width }, i) => {
+                return (
+                  <div key={`control-${i}`} className={`singleControl singleControl-${width}`}>
+                    {width}
+                  </div>
+                );
+              })
+            )}
           </div>
         );
       },
