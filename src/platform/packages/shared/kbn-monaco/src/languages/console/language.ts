@@ -8,6 +8,7 @@
  */
 
 import { type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
+import { MutableRefObject } from 'react';
 import { setupConsoleErrorsProvider } from './console_errors_provider';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { monaco } from '../../monaco_imports';
@@ -65,8 +66,8 @@ export const ConsoleLang: LangModuleType = {
   },
   languageThemeResolver: buildConsoleTheme,
   getSuggestionProvider: (
-    actionsProvider: MutableRefObject<MonacoEditorActionsProvider | null>,
-    esqlCallbacks: Pick<ESQLCallbacks, 'getSources' | 'getPolicies'>
+    esqlCallbacks: Pick<ESQLCallbacks, 'getSources' | 'getPolicies'>,
+    actionsProvider: MutableRefObject<any>
   ): monaco.languages.CompletionItemProvider => {
     return {
       // force suggestions when these characters are used
@@ -90,7 +91,6 @@ export const ConsoleLang: LangModuleType = {
             esqlCallbacks
           );
           return {
-            // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
             suggestions: wrapAsMonacoSuggestions(esqlSuggestions, queryText),
           };
         } else if (actionsProvider.current) {

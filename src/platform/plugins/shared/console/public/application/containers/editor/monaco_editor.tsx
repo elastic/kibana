@@ -165,18 +165,24 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
-          return (
-            await getESQLQueryColumns({
+          try {
+            const columns = await getESQLQueryColumns({
               esqlQuery: queryToExecute,
               search: data.search.search,
-            })
-          ).map((c) => {
-            return {
-              name: c.name,
-              type: c.meta.esType as FieldType,
-              hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
-            };
-          });
+            });
+            return (
+              columns?.map((c) => {
+                return {
+                  name: c.name,
+                  type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+                };
+              }) || []
+            );
+          } catch (error) {
+            // Handle error
+            return [];
+          }
         }
         return [];
       },
@@ -185,8 +191,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [license, dataViews, application, http, data.search.search]);
 
   const suggestionProvider = useMemo(
-    () => ConsoleLang.getSuggestionProvider?.(actionsProvider, esqlCallbacks),
-    [actionsProvider, esqlCallbacks]
+    () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
+    [esqlCallbacks]
   );
 
   useSetInitialValue({ localStorageValue, setValue, toasts });
