@@ -34,8 +34,8 @@ export const bulkMigrateLegacyActions = async ({
 }: BulkMigrateLegacyActionsParams): Promise<string[]> => {
   try {
     const siemRules = rules.filter((rule) => rule.attributes.consumer === AlertConsumers.SIEM);
-    const siemRulesMap: Record<string, SavedObject<RawRule>> = {};
-    siemRules.forEach((rule) => (siemRulesMap[rule.id] = rule));
+    const siemRulesMap: Map<string, SavedObject<RawRule>> = new Map();
+    siemRules.forEach((rule) => siemRulesMap.set(rule.id, rule));
 
     const transformed = await transformAndDeleteLegacyActions(
       context,
@@ -44,7 +44,13 @@ export const bulkMigrateLegacyActions = async ({
     );
 
     Object.keys(transformed).forEach((ruleId) => {
-      const rule = siemRulesMap[ruleId];
+      const rule = siemRulesMap.get(ruleId);
+      if (rule == null) {
+        context.logger.debug(
+          `bulkMigrateLegacyActions(): Failed to find SIEM rule by ID in map: ${ruleId}`
+        );
+        return;
+      }
       const { transformedActions, transformedReferences } = transformed[ruleId];
       // fix references for a case when non-legacy actions present in a rule before the migration
       const actions = rule.attributes.actions;
