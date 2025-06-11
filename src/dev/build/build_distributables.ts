@@ -190,6 +190,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     artifactTasks.map(async (task) => await createRunner({ config, log, bufferLogs: true })(task))
   );
 
+  log.write('--- Finalizing Kibana artifacts');
+
   if (results.some((result) => result.status === 'rejected')) {
     throw new Error('One or more artifact tasks failed. Check the logs for details.');
   }
@@ -197,6 +199,5 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
    */
-  log.write('--- Finalizing Kibana artifacts');
   await globalRun(Tasks.WriteShaSums);
 }
