@@ -1631,7 +1631,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/minimist": "^1.2.5",
     "@types/mock-fs": "^4.13.1",
-    "@types/moment-duration-format": "^2.2.3",
+    "@types/moment-duration-format": "^2.2.6",
     "@types/mustache": "^4.2.5",
     "@types/nock": "^10.0.3",
     "@types/node": "20.10.5",
