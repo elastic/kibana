@@ -123,7 +123,7 @@ export const createDashboardSavedObjectType = ({
 
       /**
        * As of v4, we shouldn't need the following mappings - however, saved object schemas do not **currently**
-       * allow the removal of these fields, so we need to keep them around for legacy purposes.
+       * allow the removal of these mappings, so we need to keep them around for legacy purposes.
        * See https://github.com/elastic/kibana/blob/main/docs/extend/saved-objects-service.md#mappings_deprecation-_mappings_deprecation
        */
       hits: { type: 'integer', index: false, doc_values: false },
