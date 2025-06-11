@@ -79,7 +79,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <h2>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.title"
-                    defaultMessage="Improve your search experience with targeted business logic"
+                    defaultMessage="Add custom business logic with query rules"
                   />
                 </h2>
               </EuiTitle>
@@ -88,7 +88,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <p>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.subtitle"
-                    defaultMessage="Add business logic to your queries to get customized results under different conditions."
+                    defaultMessage="Enhance search experiences with custom rules to filter and prioritize results based on your business logic."
                   />
                 </p>
               </EuiText>
