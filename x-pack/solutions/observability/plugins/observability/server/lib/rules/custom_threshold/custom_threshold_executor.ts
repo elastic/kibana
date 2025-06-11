@@ -20,7 +20,6 @@ import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/ser
 import { getEcsGroups, getFormattedGroups, unflattenGrouping } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getDataViewSpecFromSearchConfig } from '../../../../common/custom_threshold_rule/helpers/get_data_view_spec';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -286,7 +285,6 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
-        const dataViewSpec = getDataViewSpecFromSearchConfig(params.searchConfiguration);
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -312,7 +310,6 @@ export const createCustomThresholdExecutor = ({
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
-              dataViewSpec,
             }),
             ...additionalContext,
           },
@@ -331,7 +328,6 @@ export const createCustomThresholdExecutor = ({
       const grouping = recoveredAlert.hit?.[ALERT_GROUPING];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
-      const dataViewSpec = getDataViewSpecFromSearchConfig(params.searchConfiguration);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
@@ -340,7 +336,6 @@ export const createCustomThresholdExecutor = ({
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
-          dataViewSpec,
           groups: group,
           logsLocator,
           metrics: params.criteria[0]?.metrics,

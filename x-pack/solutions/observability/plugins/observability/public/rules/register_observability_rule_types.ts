@@ -18,7 +18,6 @@ import {
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { getDataViewSpecFromSearchConfig } from '../../common/custom_threshold_rule/helpers/get_data_view_spec';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
@@ -100,7 +99,7 @@ export const registerObservabilityRuleTypes = (
         criteria.length === 1 ? criteria[0].metrics : [];
 
       const dataViewId = getDataViewId(searchConfiguration);
-      const dataViewSpec = getDataViewSpecFromSearchConfig(searchConfiguration);
+
       return {
         reason: fields[ALERT_REASON] ?? '-',
         link: getViewInAppUrl({
@@ -110,7 +109,6 @@ export const registerObservabilityRuleTypes = (
           metrics,
           searchConfiguration,
           startedAt: fields[ALERT_START],
-          dataViewSpec,
         }),
         hasBasePath: true,
       };

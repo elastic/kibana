@@ -143,7 +143,6 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
             ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
           startedAt: alertStart,
           endedAt: alertEnd,
-          dataViewSpec: dataView?.toSpec(),
         });
 
         return (

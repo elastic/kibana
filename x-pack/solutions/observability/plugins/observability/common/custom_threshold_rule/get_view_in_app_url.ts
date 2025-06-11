@@ -10,11 +10,11 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { isEmpty } from 'lodash';
 import { getGroupFilters } from './helpers/get_group';
 import { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { CustomThresholdExpressionMetric } from './types';
 import { Group } from '../typings';
-
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   dataViewId?: string;
@@ -24,7 +24,6 @@ export interface GetViewInAppUrlArgs {
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
   spaceId?: string;
-  dataViewSpec?: DataViewSpec;
 }
 
 export const getViewInAppUrl = ({
@@ -36,7 +35,6 @@ export const getViewInAppUrl = ({
   searchConfiguration,
   startedAt = new Date().toISOString(),
   spaceId,
-  dataViewSpec,
 }: GetViewInAppUrlArgs) => {
   if (!logsLocator) return '';
 
@@ -59,10 +57,14 @@ export const getViewInAppUrl = ({
   } else if (searchConfigurationQuery) {
     query.query = searchConfigurationQuery;
   }
+  let dataViewSpecTest;
+  if (searchConfiguration?.index && !isEmpty(searchConfiguration?.index)) {
+    dataViewSpecTest = searchConfiguration.index as DataViewSpec;
+  }
   return logsLocator.getRedirectUrl(
     {
       dataViewId,
-      dataViewSpec,
+      dataViewSpec: dataViewSpecTest,
       timeRange,
       query,
       filters: [...searchConfigurationFilters, ...groupFilters],

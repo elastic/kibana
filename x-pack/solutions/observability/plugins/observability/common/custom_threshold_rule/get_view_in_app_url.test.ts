@@ -316,18 +316,18 @@ describe('getViewInAppUrl', () => {
       allowHidden: false,
     };
     const args: GetViewInAppUrlArgs = {
-      metrics: [
-        {
-          name: 'A',
-          aggType: Aggregators.COUNT,
-          filter: 'mockedCountFilter',
+      searchConfiguration: {
+        index: dataViewSpec,
+        query: {
+          language: '',
+          query: 'mockedFilter',
         },
-      ],
+        filter: [],
+      },
       logsLocator,
       startedAt,
       endedAt,
       spaceId,
-      dataViewSpec,
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
@@ -338,7 +338,7 @@ describe('getViewInAppUrl', () => {
         timeRange: returnedTimeRange,
         filters: [],
         query: {
-          query: 'mockedCountFilter',
+          query: 'mockedFilter',
           language: 'kuery',
         },
       },
