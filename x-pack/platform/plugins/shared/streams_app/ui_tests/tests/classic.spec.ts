@@ -10,7 +10,7 @@ import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
 
-test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Classic Streams', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await esClient.indices.putIndexTemplate({
