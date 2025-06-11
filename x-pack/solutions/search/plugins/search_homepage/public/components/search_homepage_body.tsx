@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { ThreatDetectionSolutions } from './threat_detection/threat_detection_solutions';
 import { DiveDeeperWithElasticsearch } from './dive_deeper/dive_deeper_with_elasticsearch';
+import { Footer } from './footer/footer';
 
 export const SearchHomepageBody = () => (
   <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
@@ -32,6 +33,9 @@ export const SearchHomepageBody = () => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Footer />
       </EuiFlexItem>
     </EuiFlexGroup>
   </KibanaPageTemplate.Section>

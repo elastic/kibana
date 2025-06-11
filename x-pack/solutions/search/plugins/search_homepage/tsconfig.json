@@ -14,6 +14,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
+    "@kbn/doc-links",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-utility",
@@ -23,7 +24,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
     "@kbn/cloud",
-    "@kbn/analytics",
+    "@kbn/analytics"
   ],
   "exclude": [
     "target/**/*",
