@@ -5438,6 +5438,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-assistant-ml-interfaces@link:x-pack/packages/elastic-assistant-ml-interfaces":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-assistant-plugin@link:x-pack/solutions/security/plugins/elastic_assistant":
   version "0.0.0"
   uid ""

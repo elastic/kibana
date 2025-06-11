@@ -1,0 +1,10 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/elastic-assistant-ml-interfaces",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "shared",
+  "description": "Interfaces for ML functionality used by Elastic Assistant to prevent circular dependencies"
+}
