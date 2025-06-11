@@ -230,11 +230,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== fixedQuery && fixedQuery !== codeWhenSubmitted) {
+      if (code !== fixedQuery && (!editorIsInline || fixedQuery !== codeWhenSubmitted)) {
         setCode(fixedQuery);
       }
     }
-  }, [code, fixedQuery, codeWhenSubmitted]);
+  }, [code, fixedQuery, codeWhenSubmitted, editorIsInline]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
