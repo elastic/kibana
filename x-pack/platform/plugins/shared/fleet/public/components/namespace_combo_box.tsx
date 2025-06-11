@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -51,21 +51,19 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
       );
     }
 
-    const learnMoreLink = docLinks?.links?.fleet?.datastreamsNamingScheme ? (
-      <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
+    const learnMoreLink = (
+      <EuiLink
+        href={
+          docLinks?.links?.fleet?.datastreamsNamingScheme ||
+          'https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme'
+        }
+        target="_blank"
+      >
         {i18n.translate(
           'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
           { defaultMessage: 'Learn more' }
         )}
       </EuiLink>
-    ) : (
-      <a
-        href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn more <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
-      </a>
     );
 
     return (
