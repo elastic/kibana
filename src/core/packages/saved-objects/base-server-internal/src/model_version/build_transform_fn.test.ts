@@ -185,7 +185,7 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn,
+          transformFn: (sanitize) => sanitize(transformFn),
         },
       ];
 
