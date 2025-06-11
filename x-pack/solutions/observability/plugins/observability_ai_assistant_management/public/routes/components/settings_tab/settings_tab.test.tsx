@@ -6,42 +6,73 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useKnowledgeBase, useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
 
 jest.mock('../../../hooks/use_app_context');
+jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/ai-assistant/src/hooks');
 
 const useAppContextMock = useAppContext as jest.Mock;
+const useKibanaMock = useKibana as jest.Mock;
+const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
+const useGenAIConnectorsMock = useGenAIConnectors as jest.Mock;
 
 describe('SettingsTab', () => {
-  useAppContextMock.mockReturnValue({ config: { spacesEnabled: true, visibilityEnabled: true } });
-  it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
-    const navigateToAppMock = jest.fn(() => Promise.resolve());
-    const { getByTestId } = render(<SettingsTab />, {
-      coreStart: {
-        application: { navigateToApp: navigateToAppMock },
+  const getUrlForAppMock = jest.fn();
+  const prependMock = jest.fn();
+
+  beforeEach(() => {
+    useAppContextMock.mockReturnValue({
+      config: { spacesEnabled: true, visibilityEnabled: true },
+    });
+    useKibanaMock.mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: getUrlForAppMock,
+          capabilities: {
+            advancedSettings: { save: true },
+          },
+        },
+        http: {
+          basePath: { prepend: prependMock },
+        },
+        productDocBase: undefined,
       },
     });
+    useKnowledgeBaseMock.mockReturnValue({
+      status: { value: { enabled: true } },
+      isInstalling: false,
+      isPolling: false,
+      isWarmingUpModel: false,
+    });
+    useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
 
-    fireEvent.click(getByTestId('settingsTabGoToSpacesButton'));
-
-    expect(navigateToAppMock).toBeCalledWith('management', { path: '/kibana/spaces' });
+    getUrlForAppMock.mockReset();
+    prependMock.mockReset();
   });
 
-  it('should offer a way to configure Gen AI connectors', () => {
-    const navigateToAppMock = jest.fn(() => Promise.resolve());
-    const { getByTestId } = render(<SettingsTab />, {
-      coreStart: {
-        application: { navigateToApp: navigateToAppMock },
-      },
-    });
+  it('should render a “Go to spaces” button with the correct href', () => {
+    const expectedSpacesUrl = '/app/management/kibana/spaces';
+    getUrlForAppMock.mockReturnValue(expectedSpacesUrl);
 
-    fireEvent.click(getByTestId('settingsTabGoToConnectorsButton'));
+    const { getAllByTestId } = render(<SettingsTab />);
+    const [firstSpacesButton] = getAllByTestId('settingsTabGoToSpacesButton');
 
-    expect(navigateToAppMock).toBeCalledWith('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
+    expect(firstSpacesButton).toHaveAttribute('href', expectedSpacesUrl);
+  });
+
+  it('should render a “Manage connectors” button with the correct href', () => {
+    const expectedConnectorsUrl =
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
+    prependMock.mockReturnValue(expectedConnectorsUrl);
+
+    const { getByTestId } = render(<SettingsTab />);
+    const connectorsButton = getByTestId('settingsTabGoToConnectorsButton');
+
+    expect(connectorsButton).toHaveAttribute('href', expectedConnectorsUrl);
   });
 });
