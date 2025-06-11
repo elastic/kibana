@@ -850,11 +850,7 @@ describe('AlertsTable', () => {
       await userEvent.click(fieldCheckbox);
       await userEvent.click(screen.getByTestId('close'));
 
-      await waitFor(() => {
-        expect(
-          screen.queryByTestId(`dataGridHeaderCellSortingIcon-${AlertsField.name}`)
-        ).toBeNull();
-      });
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ sort: [] }));
     });
   });
 
