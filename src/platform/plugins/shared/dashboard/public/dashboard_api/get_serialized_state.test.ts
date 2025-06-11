@@ -113,7 +113,6 @@ describe('getSerializedState', () => {
           "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
-          "version": undefined,
         },
       ]
     `);
@@ -208,7 +207,6 @@ describe('getSerializedState', () => {
               "panelConfig": Object {},
               "panelIndex": "54321",
               "type": "visualization",
-              "version": undefined,
             },
           ],
           "title": "Section One",
