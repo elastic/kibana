@@ -317,7 +317,7 @@ export const AwsCredentialsFormAgentless = ({
     : false;
 
   const disabled =
-    isEditPage &&
+    !!isEditPage &&
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     showCloudConnectors;
 
