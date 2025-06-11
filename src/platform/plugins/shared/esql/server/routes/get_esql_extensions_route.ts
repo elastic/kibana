@@ -77,8 +77,9 @@ export const registerESQLExtensionsRoute = (
         })) as ResolveIndexResponse;
 
         const sources = {
-          ...localSources,
-          ...ccsSources,
+          indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
+          aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
+          data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
         };
 
         // Validate solutionId
