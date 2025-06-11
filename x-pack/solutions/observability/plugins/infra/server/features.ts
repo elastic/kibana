@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
-  AlertConsumers,
   DEPRECATED_ALERTING_CONSUMERS,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -35,20 +34,9 @@ const metricRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
-export const getMetricsAlertingFeatures = (
-  isServerlessEnv: boolean = false
-): KibanaFeatureConfig => {
+export const getMetricsAlertingFeatures = (): KibanaFeatureConfig => {
   const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => {
-    const consumers = [
-      METRICS_FEATURE_ID,
-      ALERTING_FEATURE_ID,
-      ...DEPRECATED_ALERTING_CONSUMERS,
-      // Add STACK_ALERTS only in serverless for observability threshold and ES query rules
-      ...(isServerlessEnv &&
-      (ruleTypeId === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID || ruleTypeId === ES_QUERY_ID)
-        ? [AlertConsumers.STACK_ALERTS]
-        : []),
-    ];
+    const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
 
     return {
       ruleTypeId,
@@ -124,18 +112,9 @@ const logsRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
-export const getLogsAlertingFeatures = (isServerlessEnv: boolean = false): KibanaFeatureConfig => {
+export const getLogsAlertingFeatures = (): KibanaFeatureConfig => {
   const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
-    const consumers = [
-      LOGS_FEATURE_ID,
-      ALERTING_FEATURE_ID,
-      ...DEPRECATED_ALERTING_CONSUMERS,
-      // Add STACK_ALERTS only in serverless for observability threshold and ES query rules
-      ...(isServerlessEnv &&
-      (ruleTypeId === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID || ruleTypeId === ES_QUERY_ID)
-        ? [AlertConsumers.STACK_ALERTS]
-        : []),
-    ];
+    const consumers = [LOGS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
 
     return {
       ruleTypeId,

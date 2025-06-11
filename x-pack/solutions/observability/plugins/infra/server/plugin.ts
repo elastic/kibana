@@ -181,8 +181,8 @@ export class InfraServerPlugin
       plugins: libsPlugins,
     };
 
-    plugins.features.registerKibanaFeature(getMetricsAlertingFeatures(this.isServerlessEnv));
-    plugins.features.registerKibanaFeature(getLogsAlertingFeatures(this.isServerlessEnv));
+    plugins.features.registerKibanaFeature(getMetricsAlertingFeatures());
+    plugins.features.registerKibanaFeature(getLogsAlertingFeatures());
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {

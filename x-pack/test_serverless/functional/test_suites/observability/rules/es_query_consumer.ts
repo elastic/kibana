@@ -25,7 +25,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   function createESQueryRule({ ruleName }: { ruleName: string }) {
     it('navigates to the rules page', async () => {
-      await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
       await testSubjects.click('manageRulesPageButton');
     });

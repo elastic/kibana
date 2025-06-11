@@ -304,68 +304,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    /* Skip until we add backwards compatibility support for `stackAlerts` consumer in serverless */
     describe('Rule creation - stackAlerts consumer', () => {
       const consumer = 'stackAlerts';
 
-      it('creates rule successfully', async () => {
-        const createdRule = await alertingApi.helpers.createEsQueryRule({
-          roleAuthc: editorRoleAuthc,
-          ...getESQueryRuleConfiguration({ consumer }),
-        });
-        ruleId = createdRule.id;
-        expect(ruleId).not.to.be(undefined);
-      });
-
-      it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
-        expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be(consumer);
-      });
-
-      it('should be active and visible from the editor role', async () => {
-        const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: editorRoleAuthc,
-          ruleId,
-          expectedStatus: 'active',
-        });
-        expect(executionStatus).to.be('active');
-      });
-
       if (isServerless) {
-        it('should be visible from logs role', async () => {
-          await samlAuth.setCustomRole(ROLES.logs_only);
-
-          const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-
-          const executionStatus = await alertingApi.waitForRuleStatus({
-            roleAuthc: logsOnlyRole,
-            ruleId,
-            expectedStatus: 'active',
-            timeout: 1000 * 3,
+        it('is forbidden', async () => {
+          const createdRule = await alertingApi.helpers.createEsQueryRule({
+            roleAuthc: editorRoleAuthc,
+            ...getESQueryRuleConfiguration({ consumer }),
           });
-          expect(executionStatus).to.be('active');
-          await samlAuth.invalidateM2mApiKeyWithRoleScope(logsOnlyRole);
-          await samlAuth.deleteCustomRole();
-        });
-
-        it('should be visible from infra role', async () => {
-          await samlAuth.setCustomRole(ROLES.infra_only);
-
-          const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-
-          const executionStatus = await alertingApi.waitForRuleStatus({
-            roleAuthc: infraOnlyRole,
-            ruleId,
-            expectedStatus: 'active',
-            timeout: 1000 * 3,
-          });
-          expect(executionStatus).to.be('active');
-
-          await samlAuth.invalidateM2mApiKeyWithRoleScope(infraOnlyRole);
-          await samlAuth.deleteCustomRole();
+          expect(createdRule.statusCode).to.be(403);
         });
       } else {
+        it('creates rule successfully', async () => {
+          const createdRule = await alertingApi.helpers.createEsQueryRule({
+            roleAuthc: editorRoleAuthc,
+            ...getESQueryRuleConfiguration({ consumer }),
+          });
+          ruleId = createdRule.id;
+          expect(ruleId).not.to.be(undefined);
+        });
+
+        it('should find the created rule with correct information about the consumer', async () => {
+          const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+          expect(match).not.to.be(undefined);
+          expect(match.consumer).to.be(consumer);
+        });
+
+        it('should be active and visible from the editor role', async () => {
+          const executionStatus = await alertingApi.waitForRuleStatus({
+            roleAuthc: editorRoleAuthc,
+            ruleId,
+            expectedStatus: 'active',
+          });
+          expect(executionStatus).to.be('active');
+        });
+
         it('should NOT be visible from logs only role', async () => {
           await samlAuth.setCustomRole(ROLES.logs_only);
 

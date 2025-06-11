@@ -413,61 +413,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Custom threshold - Rule execution - consumer stackAlerts', () => {
       const consumer = 'stackAlerts';
-      it('creates rule successfully', async () => {
-        const createdRule = await alertingApi.createRule({
-          roleAuthc,
-          ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
-        });
-        ruleId = createdRule.id;
-        expect(ruleId).not.to.be(undefined);
-      });
-
-      it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(roleAuthc, ruleId);
-        expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be(consumer);
-      });
-
-      it('should be active and visible from editor role', async () => {
-        const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc,
-          ruleId,
-          expectedStatus: 'active',
-        });
-        expect(executionStatus).to.be('active');
-      });
 
       if (isServerless) {
-        it('should be visible from logs role', async () => {
-          await samlAuth.setCustomRole(ROLES.logs_only);
-          const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-
-          const executionStatus = await alertingApi.waitForRuleStatus({
-            roleAuthc: logsOnlyRole,
-            ruleId,
-            expectedStatus: 'active',
-            timeout: 1000 * 3,
+        it('is forbidden', async () => {
+          const createdRule = await alertingApi.createRule({
+            roleAuthc,
+            ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
           });
-          expect(executionStatus).to.be('active');
-          await samlAuth.invalidateM2mApiKeyWithRoleScope(logsOnlyRole);
-          await samlAuth.deleteCustomRole();
-        });
-
-        it('should visible from infra role', async () => {
-          await samlAuth.setCustomRole(ROLES.infra_only);
-          const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
-          const executionStatus = await alertingApi.waitForRuleStatus({
-            roleAuthc: infraOnlyRole,
-            ruleId,
-            expectedStatus: 'active',
-            timeout: 1000 * 3,
-          });
-
-          expect(executionStatus).to.be('active');
-          await samlAuth.invalidateM2mApiKeyWithRoleScope(infraOnlyRole);
-          await samlAuth.deleteCustomRole();
+          expect(createdRule.statusCode).to.be(403);
         });
       } else {
+        it('creates rule successfully', async () => {
+          const createdRule = await alertingApi.createRule({
+            roleAuthc,
+            ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
+          });
+          ruleId = createdRule.id;
+          expect(ruleId).not.to.be(undefined);
+        });
+
+        it('should find the created rule with correct information about the consumer', async () => {
+          const match = await alertingApi.findInRules(roleAuthc, ruleId);
+          expect(match).not.to.be(undefined);
+          expect(match.consumer).to.be(consumer);
+        });
+
+        it('should be active and visible from editor role', async () => {
+          const executionStatus = await alertingApi.waitForRuleStatus({
+            roleAuthc,
+            ruleId,
+            expectedStatus: 'active',
+          });
+          expect(executionStatus).to.be('active');
+        });
+
         it('should NOT be visible from logs role', async () => {
           await samlAuth.setCustomRole(ROLES.logs_only);
           const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
