@@ -386,44 +386,41 @@ interface ExceptionListEntry {
   namespace_type: string;
 }
 
+export interface ResponseActionsRuleResponseAggregations {
+  actionTypes: {
+    buckets: Array<{
+      key: '.endpoint' | '.osquery';
+      doc_count: number;
+      rulesInfo: {
+        buckets: Array<{
+          key: string; // rule ID
+          doc_count: number;
+        }>;
+      };
+    }>;
+  };
+}
+
+interface ResponseActionsRuleTelemetry {
+  ids: string[];
+  count: number;
+}
+
 export interface ResponseActionsRuleTelemetryTemplate {
   '@timestamp': string;
   cluster_uuid: string;
   cluster_name: string;
   license_id: string | undefined;
-  response_actions?: {
-    rules: ResponseActionRules;
-    endpoint_rules_count: number;
-    osquery_rules_count: number;
+  response_actions: {
+    endpoint: ResponseActionsRuleTelemetry;
+    osquery: ResponseActionsRuleTelemetry;
   };
 }
-export interface RulesParamsResponseActionsEntry {
-  actionTypeId: '.endpoint' | '.osquery';
-  params:
-    | {
-        command: string;
-        comment?: string;
-      }
-    | {
-        query: string;
-      };
+
+export interface ResponseActionRules {
+  endpoint: string[];
+  osquery: string[];
 }
-
-export type ResponseActionRules = Array<{
-  id: string;
-  attributes: {
-    consumer: string;
-    createdAt: string;
-    name: string;
-    enabled: boolean;
-    immutable: boolean;
-    params: {
-      responseActions: RulesParamsResponseActionsEntry[];
-    };
-    updatedAt: string;
-  };
-}>;
-
 interface DetectionRuleParms {
   ruleId: string;
   version: number;

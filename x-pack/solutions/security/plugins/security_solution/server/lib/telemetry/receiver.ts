@@ -54,12 +54,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
-import { findRulesSo } from '@kbn/alerting-plugin/server/data/rule';
-import {
-  buildFilter,
-  buildConsumersFilter,
-  combineFilters,
-} from '@kbn/alerting-plugin/server/rules_client/common/filters';
+
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -69,7 +64,6 @@ import {
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
   newTelemetryLogger,
-  stringToKueryNode,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -226,7 +220,9 @@ export interface ITelemetryReceiver {
     >
   >;
 
-  fetchResponseActionsRules(): ReturnType<typeof findRulesSo>;
+  fetchResponseActionsRules(): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
 
   fetchDetectionExceptionList(
     listId: string,
@@ -763,46 +759,72 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    * @returns custom elastic rules SOs with response actions enabled
    */
   public async fetchResponseActionsRules() {
-    if (this.soClient === undefined || this.soClient === null) {
-      throw Error(
-        'saved object client is unavailable: cannot retrieve custom detection rules with response actions enabled'
-      );
-    }
-
-    const timeFrom = stringToKueryNode(
-      `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`
-    );
-    const consumersFilter = buildConsumersFilter(['siem', 'securitySolution']);
-    const enabledFilter = stringToKueryNode('alert.attributes.enabled: true');
-    const customRulesFilter = stringToKueryNode('alert.attributes.params.immutable: false');
-    const responseActionsFilter = buildFilter({
-      filters: ['.endpoint', '.osquery'],
-      field: 'params.responseActions.actionTypeId',
-      operator: 'or',
-    });
-
-    const combinedFilter = combineFilters(
-      [consumersFilter, enabledFilter, customRulesFilter, responseActionsFilter, timeFrom],
-      'and'
-    );
-
-    return findRulesSo({
-      savedObjectsClient: this.soClient,
-      savedObjectsFindOptions: {
-        filter: combinedFilter,
-        fields: [
-          'alert.updated_at',
-          'alert.attributes.consumer',
-          'alert.attributes.enabled',
-          'alert.attributes.params.immutable',
-          'alert.attributes.params.responseActions.actionTypeId',
-        ],
-        perPage: this.maxRecords,
-        page: 1,
-        sortField: 'updated_at',
-        sortOrder: 'desc',
+    const query: SearchRequest = {
+      index: `${this.getAlertsIndex()}*`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      from: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'kibana.alert.rule.immutable': false,
+              },
+            },
+            {
+              term: {
+                'kibana.alert.rule.enabled': true,
+              },
+            },
+            {
+              terms: {
+                'kibana.alert.rule.consumer': ['siem', 'securitySolution'],
+              },
+            },
+            {
+              terms: {
+                'kibana.alert.rule.parameters.response_actions.action_type_id': [
+                  '.endpoint',
+                  '.osquery',
+                ],
+              },
+            },
+            {
+              range: {
+                'kibana.alert.rule.updated_at': {
+                  gte: 'now-24h/h',
+                  lte: 'now',
+                },
+              },
+            },
+          ],
+        },
       },
-    });
+      sort: [
+        {
+          'kibana.alert.rule.updated_at': {
+            order: 'desc',
+          },
+        },
+      ],
+      aggs: {
+        actionTypes: {
+          terms: {
+            field: 'kibana.alert.rule.parameters.response_actions.action_type_id',
+          },
+          aggs: {
+            rulesInfo: {
+              terms: {
+                field: 'kibana.alert.rule.uuid',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient().search<unknown>(query, { meta: true });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {

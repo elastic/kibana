@@ -17,7 +17,7 @@ import {
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ResponseActionRules } from '../types';
+import type { ResponseActionRules, ResponseActionsRuleResponseAggregations } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -41,7 +41,14 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
       const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
       const log = newTelemetryLogger(logger.get('response_actions_rules'), mdc);
       const usageCollector = sender.getTelemetryUsageCluster();
-      const usageLabelPrefix: string[] = ['security_telemetry', 'response-actions-rules'];
+      const usageLabelEndpointPrefix: string[] = [
+        'security_telemetry',
+        'endpoint-response-actions-rules',
+      ];
+      const usageLabelOsqueryPrefix: string[] = [
+        'security_telemetry',
+        'osquery-response-actions-rules',
+      ];
       const trace = taskMetricsService.start(taskType);
 
       log.l('Running response actions rules telemetry task');
@@ -55,72 +62,77 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         const clusterInfo = safeValue(clusterInfoPromise);
         const licenseInfo = safeValue(licenseInfoPromise);
 
-        const { saved_objects: customRules } = await receiver.fetchResponseActionsRules();
+        const {
+          body: { aggregations },
+        } = (await receiver.fetchResponseActionsRules()) ?? {};
 
-        if (!customRules.length) {
+        if (!aggregations || !aggregations.actionTypes) {
           log.debug('no custom response action rules found');
           await taskMetricsService.end(trace);
           return 0;
         }
 
-        const responseActionRulesArray = customRules.reduce<ResponseActionRules>((acc, rule) => {
-          const ruleId = rule.id;
-
-          const shouldNotProcessTelemetry =
-            rule === null ||
-            rule === undefined ||
-            ruleId === null ||
-            ruleId === undefined ||
-            rule.attributes.params.responseActions.length === 0;
-
-          if (shouldNotProcessTelemetry) {
-            return acc;
+        const responseActionRules = (
+          aggregations as unknown as ResponseActionsRuleResponseAggregations
+        ).actionTypes.buckets.reduce<ResponseActionRules>((acc, agg) => {
+          if (agg.key === '.endpoint') {
+            acc.endpoint = agg.rulesInfo.buckets.map((rule) => rule.key);
+          } else if (agg.key === '.osquery') {
+            acc.osquery = agg.rulesInfo.buckets.map((rule) => rule.key);
           }
-
-          acc.push({
-            id: ruleId,
-            attributes: {
-              consumer: rule.attributes.consumer,
-              createdAt: rule.attributes.createdAt,
-              name: rule.attributes.name,
-              enabled: rule.attributes.enabled,
-              immutable: rule.attributes.params.immutable,
-              params: {
-                responseActions: rule.attributes.params.responseActions,
-              },
-              updatedAt: rule.attributes.updatedAt,
-            },
-          });
           return acc;
-        }, []);
+        }, {} as ResponseActionRules);
 
-        const responseActionsRulesTelemetryEvent = responseActionsCustomRuleTelemetryData(
-          responseActionRulesArray,
+        const shouldNotProcessTelemetry =
+          responseActionRules.endpoint === undefined ||
+          responseActionRules.osquery === undefined ||
+          responseActionRules.endpoint.length === 0 ||
+          responseActionRules.osquery.length === 0;
+
+        if (shouldNotProcessTelemetry) {
+          return 0;
+        }
+
+        const responseActionsRulesTelemetryData = responseActionsCustomRuleTelemetryData(
+          responseActionRules,
           clusterInfo,
           licenseInfo
         );
-        log.l('Custom response actions rule json length', {
-          length: responseActionsRulesTelemetryEvent.length,
+
+        log.l('Custom response actions rules data', {
+          data: JSON.stringify(responseActionsRulesTelemetryData),
         });
 
         usageCollector?.incrementCounter({
-          counterName: createUsageCounterLabel(usageLabelPrefix),
+          counterName: createUsageCounterLabel(usageLabelEndpointPrefix),
           counterType: 'response_actions_rules_count',
-          incrementBy: responseActionsRulesTelemetryEvent.length,
+          incrementBy: responseActionsRulesTelemetryData.response_actions.endpoint.count,
+        });
+
+        usageCollector?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelOsqueryPrefix),
+          counterType: 'response_actions_rules_count',
+          incrementBy: responseActionsRulesTelemetryData.response_actions.osquery.count,
         });
 
         const batches = batchTelemetryRecords(
-          cloneDeep(responseActionsRulesTelemetryEvent),
+          cloneDeep(Object.values(responseActionsRulesTelemetryData)),
           maxTelemetryBatch
         );
+
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
         await taskMetricsService.end(trace);
 
-        log.l('Task executed', { length: responseActionsRulesTelemetryEvent.length });
+        const totalCount = Object.values(responseActionsRulesTelemetryData.response_actions)
+          .map((r) => r.count)
+          .reduce((a, b) => a + b, 0);
+        log.l('Response actions rules telemetry task executed', {
+          totalCount,
+        });
 
-        return responseActionsRulesTelemetryEvent.length;
+        return totalCount;
       } catch (err) {
         await taskMetricsService.end(trace, err);
         return 0;

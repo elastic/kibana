@@ -13,7 +13,6 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type { estypes } from '@elastic/elasticsearch';
-import { fromKueryExpression, type KueryNode } from '@kbn/es-query';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -32,7 +31,6 @@ import type {
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
-  RulesParamsResponseActionsEntry,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
@@ -247,36 +245,37 @@ export const responseActionsCustomRuleTelemetryData = (
   responseActionsRules: ResponseActionRules,
   clusterInfo: ESClusterInfo,
   licenseInfo: Nullable<ESLicense>
-): ResponseActionsRuleTelemetryTemplate[] => {
-  return responseActionsRules.map((item) => {
-    const baseTelemetryData: ResponseActionsRuleTelemetryTemplate = {
-      '@timestamp': moment().toISOString(),
-      cluster_uuid: clusterInfo.cluster_uuid,
-      cluster_name: clusterInfo.cluster_name,
-      license_id: licenseInfo?.uid,
-    };
-
-    return {
-      ...baseTelemetryData,
-      response_actions: {
-        rules: responseActionsRules,
-        endpoint_rules_count: getRulesCountForActionType(responseActionsRules, '.endpoint'),
-        osquery_rules_count: getRulesCountForActionType(responseActionsRules, '.osquery'),
+): ResponseActionsRuleTelemetryTemplate => {
+  const baseTelemetryData: ResponseActionsRuleTelemetryTemplate = {
+    '@timestamp': moment().toISOString(),
+    cluster_uuid: clusterInfo.cluster_uuid,
+    cluster_name: clusterInfo.cluster_name,
+    license_id: licenseInfo?.uid,
+    response_actions: {
+      endpoint: {
+        ids: [],
+        count: 0,
       },
-    };
-  });
-};
+      osquery: {
+        ids: [],
+        count: 0,
+      },
+    },
+  };
 
-const getRulesCountForActionType = (
-  responseActionsRules: ResponseActionRules,
-  actionTypeId: RulesParamsResponseActionsEntry['actionTypeId']
-): number => {
-  return responseActionsRules.filter(
-    (rule) =>
-      rule.attributes.params.responseActions.filter(
-        (action) => action.actionTypeId === actionTypeId
-      ).length
-  ).length;
+  return {
+    ...baseTelemetryData,
+    response_actions: {
+      endpoint: {
+        ids: responseActionsRules.endpoint,
+        count: responseActionsRules.endpoint.length,
+      },
+      osquery: {
+        ids: responseActionsRules.osquery,
+        count: responseActionsRules.osquery.length,
+      },
+    },
+  };
 };
 
 /**
@@ -420,14 +419,6 @@ export const copyLicenseFields = (lic: ESLicense) => {
     ...(lic.issuer ? { issuer: lic.issuer } : {}),
   };
 };
-
-export function stringToKueryNode(expression?: string): KueryNode | undefined {
-  if (!expression) {
-    return;
-  }
-
-  return fromKueryExpression(expression);
-}
 
 export class TelemetryTimelineFetcher {
   private receiver: ITelemetryReceiver;
