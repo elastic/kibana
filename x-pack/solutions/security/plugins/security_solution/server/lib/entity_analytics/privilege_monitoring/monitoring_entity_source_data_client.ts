@@ -10,7 +10,7 @@ import type {
   MonitoringEntitySourceDescriptor,
   MonitoringEntitySourceResponse,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { MonitoringEntitySourceDescriptorClient } from './saved_object/monitoring_entity_source';
+import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;

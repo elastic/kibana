@@ -9,3 +9,5 @@ export * from './privilege_monitoring';
 export * from './privilege_monitoring_type';
 export * from './privilege_monitoring_index_source';
 export * from './privilege_monitoring_index_source_type';
+export * from './monitoring_entity_source_type';
+export * from './monitoring_entity_source';
