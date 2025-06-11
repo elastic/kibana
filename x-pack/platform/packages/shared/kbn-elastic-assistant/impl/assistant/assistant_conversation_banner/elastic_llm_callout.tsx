@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import { useAssistantContext } from '../../assistant_context';
-import { useAssistantSpaceId } from '../use_space_aware_context';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 import { useTourStorageKey } from '../../tour/common/hooks/use_tour_storage_key';
 
@@ -25,7 +24,6 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       },
     },
   } = useAssistantContext();
-  const spaceId = useAssistantSpaceId();
   const { euiTheme } = useEuiTheme();
   const tourStorageKey = useTourStorageKey(
     NEW_FEATURES_TOUR_STORAGE_KEYS.CONVERSATION_CONNECTOR_ELASTIC_LLM
