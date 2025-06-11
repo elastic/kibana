@@ -120,31 +120,19 @@ export class CasesIncrementalIdService {
   /**
    * Increments the case ids for the given cases.
    * @param casesWithoutIncrementalId The cases we want to apply IDs to
-   * @param maxDurationMs A maximum timeout to run this task for
    * @returns The amount of processed cases.
    */
   public async incrementCaseIds(
-    casesWithoutIncrementalId: Array<SavedObjectsFindResult<CasePersistedAttributes>>,
-    maxDurationMs = 10 * 60 * 1000
+    casesWithoutIncrementalId: Array<SavedObjectsFindResult<CasePersistedAttributes>>
   ): Promise<number> {
     let countProcessedCases = 0;
     /** In-memory cache of the incremental ID SO changes that we will need to apply */
     const incIdSoCache: Map<string, SavedObject<CaseIdIncrementerPersistedAttributes>> = new Map();
 
     let hasAppliedAnId = false;
-    const startTime = Date.now();
 
     for (let index = 0; index < casesWithoutIncrementalId.length && !this.isStopped; index++) {
       try {
-        const elapsedTimeMs = Date.now() - startTime;
-
-        // Stop processing if we've exceeded the max duration.
-        // We will still sync the incIdSoCache at the end.
-        if (elapsedTimeMs > maxDurationMs) {
-          this.logger.warn(`Stopping ID incrementing due to time limit.`);
-          break;
-        }
-
         const caseSo = casesWithoutIncrementalId[index];
         const namespaceOfCase = caseSo.namespaces?.[0];
         if (!namespaceOfCase) {
