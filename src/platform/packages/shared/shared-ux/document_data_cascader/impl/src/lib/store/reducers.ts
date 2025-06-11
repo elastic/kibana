@@ -7,10 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface IDispatchAction {
-  type: string;
-  payload: any;
-}
+type DispatchActionType =
+  | 'UPDATE_QUERY'
+  | 'SET_GROUP_BY_COLUMN'
+  | 'SET_INITIAL_STATE'
+  | 'EMPTY_GROUP_BY_COLUMN_SELECTION'
+  | 'UPDATE_ROW_DATA';
+
+export type IDispatchAction =
+  | {
+      type: Extract<DispatchActionType, 'UPDATE_QUERY'>;
+      payload: string;
+    }
+  | {
+      type: Extract<DispatchActionType, 'SET_GROUP_BY_COLUMN'>;
+      payload: string | null;
+    }
+  | {
+      type: Extract<DispatchActionType, 'SET_INITIAL_STATE'>;
+      payload: Array<Record<string, any>>;
+    }
+  | {
+      type: Extract<DispatchActionType, 'EMPTY_GROUP_BY_COLUMN_SELECTION'>;
+      payload?: never;
+    }
+  | {
+      type: Extract<DispatchActionType, 'UPDATE_ROW_DATA'>;
+      payload: {
+        id: string;
+        data: Record<string, any>;
+      };
+    };
 
 export interface IStoreState {
   data: Array<Record<string, any>>;
@@ -41,6 +68,17 @@ export const storeReducer = (state: IStoreState, action: IDispatchAction) => {
         ...state,
         currentGroupByColumn: state.groupByColumns ? state?.groupByColumns[0] : null,
       };
+    case 'UPDATE_ROW_DATA': {
+      return {
+        ...state,
+        data: state.data.map((row) => {
+          if (row.id === action.payload.id) {
+            return { ...row, children: action.payload.data || [] };
+          }
+          return row;
+        }),
+      };
+    }
     default:
       return state;
   }
