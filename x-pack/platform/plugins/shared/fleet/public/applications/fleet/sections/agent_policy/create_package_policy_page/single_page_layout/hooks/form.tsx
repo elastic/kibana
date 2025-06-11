@@ -159,6 +159,17 @@ export const updateAgentlessCloudConnectorConfig = (
       targetCsp = 'azure';
     }
 
+    if (targetCsp !== 'aws') {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: undefined,
+        },
+      });
+      return;
+    }
+
     if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
       setNewAgentPolicy({
         ...newAgentPolicy,

@@ -600,6 +600,9 @@
           }
         }
       },
+      "incremental_id": {
+        "type": "unsigned_long"
+      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -730,6 +733,20 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-incrementing-id": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "last_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },
@@ -906,6 +923,7 @@
     }
   },
   "dashboard": {
+    "dynamic": false,
     "properties": {
       "controlGroupInput": {
         "properties": {
@@ -1041,6 +1059,37 @@
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "entity-analytics-monitoring-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "error": {
+        "type": "keyword"
+      },
+      "filter": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "integrationName": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+        "matchers": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
   },
   "entity-definition": {
     "dynamic": false,
