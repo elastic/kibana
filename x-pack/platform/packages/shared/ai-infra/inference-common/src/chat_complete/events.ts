@@ -35,7 +35,16 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
       toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
     }
   >;
-
+// with unredactions
+export interface ChatCompletionUnredactedMessageEvent<
+  TToolOptions extends ToolOptions = ToolOptions
+> extends ChatCompletionMessageEvent<TToolOptions> {
+  unredactions: Array<{
+    entity: string;
+    class_name: string;
+    hash: string;
+  }>;
+}
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -97,6 +106,10 @@ export interface ChatCompletionTokenCount {
    * Total token count
    */
   total: number;
+  /**
+   * Cached prompt tokens
+   */
+  cached?: number;
 }
 
 /**
