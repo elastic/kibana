@@ -9,7 +9,6 @@
     "@emotion/react": "^11.0.0",
     "classnames": "2.2.6",
     "react": "^17",
-    "monaco-editor": "^0.44.0",
     "react-markdown": "^6.0.3",
     "react-dom": "~18.2.0",
     "lodash": "^4.17.21",

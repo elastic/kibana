@@ -8,31 +8,42 @@
  */
 
 import { useRef } from 'react';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { monaco } from '@kbn/monaco';
+import { debounce } from 'lodash';
 
 /**
- * Hook that returns functions for setting up and destroying a {@link ResizeChecker}
+ * Hook that returns functions for setting up and destroying a ResizeObserver
  * for a Monaco editor.
  */
 export const useResizeCheckerUtils = () => {
-  const resizeChecker = useRef<ResizeChecker | null>(null);
+  const resizeObserver = useRef<ResizeObserver | null>(null);
 
   const setupResizeChecker = (
     divElement: HTMLDivElement,
     editor: monaco.editor.IStandaloneCodeEditor
   ) => {
-    if (resizeChecker.current) {
-      resizeChecker.current.destroy();
+    if (resizeObserver.current) {
+      resizeObserver.current.disconnect();
     }
-    resizeChecker.current = new ResizeChecker(divElement);
-    resizeChecker.current.on('resize', () => {
-      editor.layout();
-    });
+    
+    // Debounce the resize handler to prevent infinite loops
+    const debouncedLayout = debounce(() => {
+      try {
+        editor.layout();
+      } catch (error) {
+        // Ignore layout errors that might occur during rapid resizing
+        console.warn('Monaco editor layout error:', error);
+      }
+    }, 100);
+    
+    resizeObserver.current = new ResizeObserver(debouncedLayout);
+    resizeObserver.current.observe(divElement);
   };
 
   const destroyResizeChecker = () => {
-    resizeChecker.current!.destroy();
+    if (resizeObserver.current) {
+      resizeObserver.current.disconnect();
+    }
   };
 
   return { setupResizeChecker, destroyResizeChecker };

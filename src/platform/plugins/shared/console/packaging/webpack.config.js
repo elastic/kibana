@@ -27,6 +27,8 @@ module.exports = {
     libraryTarget: 'commonjs',
     path: path.resolve(__dirname, '../target'),
     filename: 'index.js',
+    publicPath: '',
+    chunkLoadingGlobal: 'webpackChunk_console_bundle',
   },
   devtool: 'source-map',
   externals: [
@@ -39,7 +41,7 @@ module.exports = {
       "lodash": 'commonjs lodash',
       "react-dom": 'commonjs react-dom',
       "react-markdown": "commonjs react-markdown",
-      "monaco-editor": 'commonjs monaco-editor',
+      // "monaco-editor": 'commonjs monaco-editor',
       "moment": 'commonjs moment',
       "@elastic/eui": 'commonjs @elastic/eui',
       "rxjs": "commonjs rxjs",
@@ -47,11 +49,8 @@ module.exports = {
       "moment-timezone": 'commonjs moment-timezone',
       "@elastic/datemath": 'commonjs @elastic/datemath',
     },
-    // Handle monaco and react-dom internal imports
+    // Handle react-dom internal imports only
     function (context, request, callback) {
-      if (/^monaco-editor\/esm\/vs\//.test(request)) {
-        return callback(null, 'commonjs ' + request);
-      }
       if (/^react-dom\//.test(request)) {
         return callback(null, 'commonjs ' + request);
       }
@@ -203,6 +202,7 @@ module.exports = {
   optimization: {
     minimize: false,
     noEmitOnErrors: true,
+    splitChunks: false,
   },
 
   plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin(), /* new BundleAnalyzerPlugin() */],

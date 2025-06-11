@@ -10,7 +10,8 @@
 import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
+// Import CodeEditor directly to avoid lazy loading
+import { CodeEditor } from '@kbn/code-editor/code_editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { useSetInputEditor } from '../../hooks';

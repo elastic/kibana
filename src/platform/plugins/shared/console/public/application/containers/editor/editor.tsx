@@ -68,20 +68,20 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
-  useEffect(() => {
-    const debouncedSetFechingAutocompleteEntities = debounce(
-      setFetchingAutocompleteEntities,
-      DEBOUNCE_DELAY
-    );
-    const subscription = getAutocompleteInfo().isLoading$.subscribe(
-      debouncedSetFechingAutocompleteEntities
-    );
+  // useEffect(() => {
+    // const debouncedSetFechingAutocompleteEntities = debounce(
+      // setFetchingAutocompleteEntities,
+      // DEBOUNCE_DELAY
+    // );
+    // const subscription = getAutocompleteInfo().isLoading$.subscribe(
+      // debouncedSetFechingAutocompleteEntities
+    // );
 
-    return () => {
-      subscription.unsubscribe();
-      debouncedSetFechingAutocompleteEntities.cancel();
-    };
-  }, []);
+    // return () => {
+      // subscription.unsubscribe();
+      // debouncedSetFechingAutocompleteEntities.cancel();
+    // };
+  // }, []);
 
   const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
     INITIAL_PANEL_SIZE,

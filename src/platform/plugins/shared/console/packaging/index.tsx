@@ -33,6 +33,7 @@ import { type HttpSetup } from '@kbn/core/public';
 import { loadActiveApi } from '../public/lib/kb';
 import * as localStorageObjectClient from '../public/lib/local_storage_object_client';
 import { Main } from '../public/application/containers';
+
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from '../public/application/contexts';
 import { createApi, createEsHostService } from '../public/application/lib';
 import { ConsoleStartServices } from '../public/types';
