@@ -1222,7 +1222,7 @@
     "https-proxy-agent": "^5.0.1",
     "i18n-iso-countries": "^7.14.0",
     "icalendar": "0.7.1",
-    "immer": "^9.0.21",
+    "immer": "^10.1.1",
     "inquirer": "^7.3.3",
     "io-ts": "^2.2.22",
     "ipaddr.js": "2.0.0",
