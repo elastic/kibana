@@ -29,7 +29,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useAIConnectors } from '../../../../../common/hooks/use_get_ai_connectors';
+import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
 import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from '../translations';

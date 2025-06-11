@@ -13,7 +13,7 @@ import { fireEvent, render, screen, act } from '@testing-library/react';
 import { DATA_TEST_SUBJ_PREFIX, StartRuleMigrationModal } from './start_rule_migration_modal';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { useAIConnectors } from '../../../../../common/hooks/use_get_ai_connectors';
+import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
 
 jest.mock('../../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -42,7 +42,7 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
-jest.mock('../../../../../common/hooks/use_get_ai_connectors');
+jest.mock('../../../../../common/hooks/use_ai_connectors');
 const useAIConnectorsMock = useAIConnectors as jest.MockedFunction<typeof useAIConnectors>;
 
 const renderTestComponent = (
