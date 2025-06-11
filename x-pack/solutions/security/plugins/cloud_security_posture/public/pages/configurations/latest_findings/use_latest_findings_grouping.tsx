@@ -16,7 +16,7 @@ import {
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
   buildMutedRulesFilter,
 } from '@kbn/cloud-security-posture-common';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
@@ -208,7 +208,7 @@ export const useLatestFindingsGrouping = ({
     groupByField: currentSelectedGroup,
     uniqueValue,
     timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
       to: 'now',
     },
     pageNumber: activePageIndex * pageSize,
