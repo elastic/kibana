@@ -445,6 +445,14 @@ export const postEvaluateRoute = (
                   logger,
                   actionsClient,
                   savedObjectsClient,
+                  telemetry: ctx.elasticAssistant.telemetry,
+                  telemetryParams: {
+                    assistantStreamingEnabled: false,
+                    actionTypeId: connector.actionTypeId,
+                    model: connector.config?.defaultModel,
+                    isEnabledKnowledgeBase,
+                    eventType: 'unused but required', // stub value
+                  },
                   tools,
                   replacements: {},
                   getFormattedTime: () =>

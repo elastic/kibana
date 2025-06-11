@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerPluginSetup {}
@@ -14,8 +15,9 @@ export interface ObservabilityLogsExplorerPluginStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogsExplorerStartDeps {}
+export interface ObservabilityLogsExplorerStartDeps {
+  discover: DiscoverStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityLogsExplorerStartServices {}

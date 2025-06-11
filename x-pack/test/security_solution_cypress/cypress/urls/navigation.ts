@@ -94,6 +94,7 @@ export const FLEET_URL = '/app/fleet';
 export const VISUALIZE_URL = '/app/visualize';
 export const MAPS_URL = '/app/maps';
 export const LENS_URL = '/app/lens';
+export const APP_DASHBOARDS_URL = '/app/dashboards';
 
 // Entity Analytics
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
@@ -107,3 +108,5 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';

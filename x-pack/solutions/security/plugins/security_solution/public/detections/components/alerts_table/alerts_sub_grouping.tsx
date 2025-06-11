@@ -68,7 +68,7 @@ interface OwnProps {
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
-  signalIndexName: string | null;
+  signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
 }

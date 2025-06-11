@@ -1,0 +1,39 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/actions-plugin",
+    "@kbn/config-schema",
+    "@kbn/inference-plugin",
+    "@kbn/onechat-server",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-mocks",
+    "@kbn/onechat-common",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-server",
+    "@kbn/inference-common",
+    "@kbn/logging-mocks",
+    "@kbn/zod",
+    "@kbn/inference-langchain",
+    "@kbn/storage-adapter",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils-server",
+    "@kbn/core-http-browser",
+    "@kbn/features-plugin"
+  ]
+}

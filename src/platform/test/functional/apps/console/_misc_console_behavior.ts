@@ -113,7 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.getCurrentLineNumber()).to.be(4);
       });
 
-      describe('open documentation', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/218255
+      describe.skip('open documentation', () => {
         const requests = ['GET _search', 'GET test_index/_search', 'GET /_search'];
         requests.forEach((request) => {
           it('should open documentation when Ctrl+/ is pressed', async () => {

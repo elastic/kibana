@@ -28,6 +28,10 @@ import {
   DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
   DENSE_PIPELINE_FIELD_CAPS,
   DENSE_OLD_PIPELINE_DOCS,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE_FIELD_CAPS,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE_FIELD_CAPS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -501,7 +505,72 @@ describe('fetch_query_source_fields', () => {
           },
         });
       });
-
+      it('should return the correct fields for semantic text -  object type - sparse', () => {
+        expect(
+          parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE_FIELD_CAPS, [
+            {
+              index: 'test-index-2',
+              doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: SPARSE_SEMANTIC_FIELD_MAPPINGS_OBJECT_TYPE,
+            },
+          ])
+        ).toEqual({
+          'test-index-2': {
+            bm25_query_fields: [],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'sparse_vector',
+                field: 'title.semanticTextField',
+                inferenceId: 'elser-endpoint',
+                indices: ['test-index-2'],
+              },
+            ],
+            skipped_fields: 1,
+            source_fields: [
+              'title',
+              'title.semanticTextField',
+              'title.semanticTextField.inference',
+              'title.semanticTextField.inference.chunks',
+              'title.semanticTextField.inference.chunks.offset',
+            ],
+          },
+        });
+      });
+      it('should return the correct fields for semantic text - multi field type - sparse', () => {
+        expect(
+          parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE_FIELD_CAPS, [
+            {
+              index: 'test-index-2',
+              doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: SPARSE_SEMANTIC_FIELD_MAPPINGS_MULTI_FIELD_TYPE,
+            },
+          ])
+        ).toEqual({
+          'test-index-2': {
+            bm25_query_fields: [],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'sparse_vector',
+                field: 'title.semanticTextField',
+                inferenceId: 'elser-endpoint',
+                indices: ['test-index-2'],
+              },
+            ],
+            skipped_fields: 1,
+            source_fields: [
+              'title',
+              'title.semanticTextField',
+              'title.semanticTextField.inference',
+              'title.semanticTextField.inference.chunks',
+              'title.semanticTextField.inference.chunks.offset',
+            ],
+          },
+        });
+      });
       it('skips if the semantic_text field not setup correctly', () => {
         expect(
           parseFieldsCapabilities(DENSE_SEMANTIC_FIELD_FIELD_CAPS, [

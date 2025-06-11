@@ -48,6 +48,26 @@
             "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser",
+            "id": "def-public.AnalyticsClientInitContext.getTraceContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getTraceContext",
+            "description": [
+              "\nA function to get trace.id"
+            ],
+            "signature": [
+              "(() => ",
+              "TraceContext",
+              " | undefined) | undefined"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -190,6 +210,23 @@
             ],
             "signature": [
               "EventContext"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser",
+            "id": "def-public.Event.trace",
+            "type": "Object",
+            "tags": [],
+            "label": "trace",
+            "description": [
+              "\nThe trace context."
+            ],
+            "signature": [
+              "TraceContext",
+              " | undefined"
             ],
             "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
@@ -751,6 +788,22 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
               },
@@ -788,19 +841,23 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/helpers/handle_graph_error/index.tsx"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/helpers/handle_graph_error/index.tsx"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -1567,6 +1624,22 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/telemetry.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
               },
@@ -2025,12 +2098,12 @@
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "licensing",
                 "path": "x-pack/platform/plugins/shared/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "telemetry",
