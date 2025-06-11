@@ -66,8 +66,8 @@ export const DefaultEdge = memo(
           interactionWidth={0}
           style={{
             stroke: euiTheme.colors[color],
-            // Defaults to dashed when type is not available
-            ...(!data?.type || data?.type === 'dashed' ? dashedStyle : {}),
+            // Defaults to solid when type is not available
+            ...(data?.type === 'dashed' ? dashedStyle : {}),
           }}
           markerEnd={markerEnd}
         />
