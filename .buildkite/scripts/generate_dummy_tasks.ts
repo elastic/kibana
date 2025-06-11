@@ -15,7 +15,7 @@ export async function pickTestGroupRunOrder() {
 
   // upload the step definitions to Buildkite
   const dummySteps = [];
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     dummySteps.push({
       label: 'Dummy bootstrap step',
       command: '.buildkite/scripts/bootstrap.sh && sleep 10',
