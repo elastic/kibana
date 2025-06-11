@@ -14,8 +14,10 @@ import {
   type EuiContextMenuPanelDescriptor,
   EuiContextMenuItem,
   EuiContextMenu,
+  useEuiScrollBar,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -252,7 +254,12 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',
-          css: { width: 240 },
+          css: css`
+            width: 240px;
+            max-height: 350px;
+            overflow-y: auto;
+            ${useEuiScrollBar()};
+          `,
         }}
         isOpen={isESQLMenuPopoverOpen}
         closePopover={() => setIsESQLMenuPopoverOpen(false)}
