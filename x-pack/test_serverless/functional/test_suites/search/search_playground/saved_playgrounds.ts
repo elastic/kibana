@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { createPlayground, deletePlayground } from './utils/create_playground';
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('Search Playground - Saved Playgrounds', function () {
-    let supertest: SupertestWithRoleScope;
+    let supertest: SupertestWithRoleScopeType;
     let testPlaygroundId: string;
     before(async () => {
       supertest = await roleScopedSupertest.getSupertestWithRoleScope('developer', {

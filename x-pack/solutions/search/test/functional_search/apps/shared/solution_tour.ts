@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const log = getService('log');
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
   describe('Close Solution Tour', function () {

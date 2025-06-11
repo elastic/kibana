@@ -9,7 +9,7 @@ import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ToolingLog } from '@kbn/tooling-log';
-import { type SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 
 function prefixApiRouteWithSpace(route: string, space?: string) {
   if (!space) return route;
@@ -24,7 +24,7 @@ export async function createPlayground(
     space,
   }: {
     log: ToolingLog;
-    supertest: SuperTest.Agent | SupertestWithRoleScope;
+    supertest: SuperTest.Agent | SupertestWithRoleScopeType;
     space?: string;
   }
 ): Promise<string> {
@@ -54,7 +54,7 @@ export async function deletePlayground(
     space,
   }: {
     log: ToolingLog;
-    supertest: SuperTest.Agent | SupertestWithRoleScope;
+    supertest: SuperTest.Agent | SupertestWithRoleScopeType;
     space?: string;
   }
 ): Promise<void> {
