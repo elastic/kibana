@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import * as http from 'http';
 import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupMockServer } from './helpers/mock_agentless_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const es = getService('es');
+  const mockAgentlessApiService = setupMockServer();
   let elasticAgentpkgVersion: string;
 
   describe('fleet_list_agent', () => {
+    let mockApiServer: http.Server;
+
     before(async () => {
+      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
@@ -34,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
     after(async () => {
+      mockApiServer.close();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
@@ -265,6 +272,73 @@ export default function ({ getService }: FtrProviderContext) {
         updating: 0,
         uninstalled: 0,
       });
+    });
+
+    it('should not return agentless agents when showAgentless=false', async () => {
+      // Set up default Fleet Server host, needed during agentless agent creation
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'default-agentless-fleet-server-host',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+        })
+        .expect(200);
+
+      // Create an agentless agent policy
+      const { body: policyRes } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Agentless Policy',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+        .expect(200);
+
+      const agentlessPolicyId = policyRes.item.id;
+
+      // Enroll an agent into the agentless policy
+      const agentId = 'agentless-agent-1';
+      await es.index({
+        index: AGENTS_INDEX,
+        id: agentId,
+        refresh: 'wait_for',
+        document: {
+          type: 'PERMANENT',
+          active: true,
+          enrolled_at: new Date().toISOString(),
+          local_metadata: { elastic: { agent: { id: agentId, version: '9.0.0' } } },
+          status: 'online',
+          policy_id: agentlessPolicyId,
+        },
+      });
+
+      // Call the agent list API without showAgentless parameter
+      const { body: apiResponseWithAgentless } = await supertest.get('/api/fleet/agents');
+
+      // Assert that the agentless agent is returned
+      const agentIdsWithAgentless = apiResponseWithAgentless.items.map((agent: any) => agent.id);
+      expect(agentIdsWithAgentless).to.contain(agentId);
+
+      // Call the agent list API with showAgentless=false
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?showAgentless=false')
+        .expect(200);
+
+      // Assert that the agentless agent is not returned
+      const agentIds = apiResponse.items.map((agent: any) => agent.id);
+      expect(agentIds).not.contain(agentId);
+
+      // Cleanup: delete the agent and policy
+      await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId: agentlessPolicyId })
+        .expect(200);
     });
 
     describe('advanced search params', () => {

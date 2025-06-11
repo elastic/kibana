@@ -17,15 +17,15 @@ import { outputService } from '../../services';
 import { FleetError, FleetNotFoundError } from '../../errors';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
 
 export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   soClient: SavedObjectsClientContract,
   outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
   try {

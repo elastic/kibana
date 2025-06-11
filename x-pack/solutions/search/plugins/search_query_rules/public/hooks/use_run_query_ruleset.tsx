@@ -14,12 +14,14 @@ export interface UseRunQueryRulesetProps {
   rulesetId: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   content?: string;
+  onClick?: () => void;
 }
 
 export const UseRunQueryRuleset = ({
   rulesetId,
   type = 'emptyButton',
   content,
+  onClick,
 }: UseRunQueryRulesetProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
@@ -111,6 +113,7 @@ export const UseRunQueryRuleset = ({
       type={type}
       content={content}
       showIcon
+      onClick={onClick}
     />
   );
 };

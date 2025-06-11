@@ -2569,9 +2569,9 @@
               },
               "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; modelStats?: Partial<",
+              " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
               "> | undefined; kbState: ",
               {
@@ -3651,9 +3651,9 @@
               },
               "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; modelStats?: Partial<",
+              " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
               "> | undefined; kbState: ",
               {
@@ -5505,9 +5505,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
@@ -6883,9 +6883,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
@@ -9764,6 +9764,66 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.ObservabilityAIAssistantClient.addKnowledgeBaseBulkEntries",
+            "type": "Function",
+            "tags": [],
+            "label": "addKnowledgeBaseBulkEntries",
+            "description": [],
+            "signature": [
+              "({ entries, }: { entries: Omit<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.KnowledgeBaseEntry",
+                "text": "KnowledgeBaseEntry"
+              },
+              ", \"type\" | \"@timestamp\">[]; }) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-server.ObservabilityAIAssistantClient.addKnowledgeBaseBulkEntries.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    entries,\n  }",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.addKnowledgeBaseBulkEntries.$1.entries",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "entries",
+                    "description": [],
+                    "signature": [
+                      "Omit<",
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.KnowledgeBaseEntry",
+                        "text": "KnowledgeBaseEntry"
+                      },
+                      ", \"type\" | \"@timestamp\">[]"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
             "id": "def-server.ObservabilityAIAssistantClient.getKnowledgeBaseEntries",
             "type": "Function",
             "tags": [],
@@ -10465,9 +10525,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
