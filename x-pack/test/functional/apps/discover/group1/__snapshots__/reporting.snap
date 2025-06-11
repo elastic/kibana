@@ -916,25 +916,6 @@ exports[`discover - group 1 Discover CSV Export Generate CSV: new search generat
 "
 `;
 
-exports[`discover - group 1 Discover CSV Export Generate CSV: new search generate a report using ES|QL for relative time range as absolute dates and time params 1`] = `
-"name,numberValue
-\\"test-487\\",486
-\\"test-488\\",487
-\\"test-489\\",488
-\\"test-490\\",489
-\\"test-491\\",490
-\\"test-492\\",491
-\\"test-493\\",492
-\\"test-494\\",493
-\\"test-495\\",494
-\\"test-496\\",495
-\\"test-497\\",496
-\\"test-498\\",497
-\\"test-499\\",498
-\\"test-500\\",499
-"
-`;
-
 exports[`discover - group 1 Discover CSV Export Generate CSV: new search generates a large export 1`] = `
 "\\"_id\\",\\"_ignored\\",\\"_index\\",\\"_score\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
 3AMtOW0BH63Xcmy432DJ,\\"-\\",ecommerce,\\"-\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,\\"(empty)\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"POINT (54.4 24.5)\\",\\"Abu Dhabi\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Jul 12, 2019 @ 00:00:00.000\\",716724,\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0, 0, 0\\",\\"0, 0, 0, 0\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"42.375, 33, 10.344, 6.109\\",\\"80, 60, 21.984, 11.992\\",\\"23,975, 6,338, 14,116, 15,290\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"1, 1, 1, 1\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",\\"0, 0, 0, 0\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"0, 0, 0, 0\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",174,174,4,4,order,sultan
