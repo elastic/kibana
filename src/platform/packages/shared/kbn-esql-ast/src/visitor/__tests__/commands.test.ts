@@ -164,3 +164,26 @@ test('can visit RERANK command', () => {
 
   expect(list).toEqual(['RERANK']);
 });
+
+test('can visit COMPLETION command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM index
+      | COMPLETION "test" WITH inferenceId
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitCompletionCommand', (ctx) => {
+      return 'COMPLETION';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['COMPLETION']);
+});

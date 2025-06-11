@@ -14,7 +14,6 @@ import { TableSectionContextProvider } from './table_section_context';
 import { groupStatsRenderer } from './group_stats_renderers';
 import { groupingOptions } from './grouping_options';
 import { groupTitleRenderers } from './group_title_renderers';
-import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { Table } from './table';
 import { inputsSelectors } from '../../../../common/store';
@@ -24,8 +23,6 @@ import { groupStatsAggregations } from './group_stats_aggregations';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const GROUPED_TABLE_TEST_ID = 'alert-summary-grouped-table';
-
-const runtimeMappings: RunTimeMappings = {};
 
 export interface TableSectionProps {
   /**
@@ -56,7 +53,7 @@ export interface TableSectionProps {
  * This component leverages the GroupedAlertsTable and the ResponseOps AlertsTable also used in the alerts page.
  */
 export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSectionProps) => {
-  const indexNames = useMemo(() => dataView.getIndexPattern(), [dataView]);
+  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
   const { to, from } = useGlobalTime();
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -91,14 +88,13 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
         <GroupedAlertsTable
           accordionButtonContent={groupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+          dataViewSpec={dataViewSpec}
           defaultGroupingOptions={groupingOptions}
           from={from}
           globalFilters={filters}
           globalQuery={globalQuery}
           loading={false}
           renderChildComponent={renderChildComponent}
-          runtimeMappings={runtimeMappings}
-          signalIndexName={indexNames}
           tableId={TableId.alertsOnAlertSummaryPage}
           to={to}
         />

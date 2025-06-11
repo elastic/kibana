@@ -34,6 +34,8 @@ import { useKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
+import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
+import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
@@ -68,7 +70,7 @@ import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
-const gridStyle: EuiDataGridStyle = {
+const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'shade',
   footer: 'shade',
@@ -501,6 +503,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       };
     }
   }, [columnConfig.columns, alignments, props.data, columns]);
+
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...DATA_GRID_STYLE_DEFAULT,
+      ...(props.args.density
+        ? DATA_GRID_DENSITY_STYLE_MAP[props.args.density]
+        : DATA_GRID_STYLE_NORMAL),
+    }),
+    [props.args.density]
+  );
 
   if (isEmpty) {
     return (

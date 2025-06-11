@@ -9,6 +9,7 @@ import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { get } from 'lodash/fp';
 import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
 import type {
+  AssetCriticalityRecord,
   AssetCriticalityUpsert,
   CriticalityLevel,
 } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -78,6 +79,12 @@ type AssetCriticalityUpsertWithDeleted = {
     : AssetCriticalityUpsert[K];
 };
 
+type AssetCriticalityRecordWithDeleted = {
+  [K in keyof AssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
+
 const entityTypeByIdField = {
   'host.name': 'host',
   'user.name': 'user',
@@ -85,8 +92,26 @@ const entityTypeByIdField = {
   'entity.id': 'generic',
 } as const;
 
-export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
+/**
+ * Returns the implicit Asset Criticality fields for the given entity according to the identifier field.
+ */
+export const getImplicitEntityFields = (
+  record: AssetCriticalityUpsert
+): Partial<AssetCriticalityRecord> => {
   const entityType = entityTypeByIdField[record.idField];
+
+  // Generic entity has a different treatment since it uses entity.id as identifier
+  if (entityType === 'generic') {
+    return {
+      entity: {
+        asset: {
+          criticality: record.criticalityLevel,
+        },
+        id: record.idValue,
+      },
+    };
+  }
+
   return {
     [entityType]: {
       asset: {
@@ -95,6 +120,15 @@ export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDelete
       name: record.idValue,
     },
   };
+};
+
+export const getImplicitEntityFieldsWithDeleted = (
+  record: AssetCriticalityUpsertWithDeleted
+): Partial<AssetCriticalityRecordWithDeleted> => {
+  // Type assertion to satisfy the compiler as we know the deleted criticality handling is done correctly in the appropriate context
+  return getImplicitEntityFields(
+    record as AssetCriticalityUpsert
+  ) as Partial<AssetCriticalityRecordWithDeleted>;
 };
 
 /**

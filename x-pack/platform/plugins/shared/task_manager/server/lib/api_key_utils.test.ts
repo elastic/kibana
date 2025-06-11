@@ -13,8 +13,6 @@ import {
 } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/core/server';
 
 const mockTask = {
@@ -156,13 +154,8 @@ describe('api_key_utils', () => {
 
   describe('getUserScope', () => {
     test('should return the users scope based on their request', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ path: '/s/test-space' });
       const coreStart = coreMock.createStart();
-      const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
-
-      spacesStart.spacesService.getActiveSpace = jest.fn().mockResolvedValue({
-        id: 'testSpace',
-      });
 
       const mockUser = {
         authentication_type: 'basic',
@@ -178,18 +171,13 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        request,
-        coreStart.security,
-        spacesStart
-      );
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'testSpace',
+          spaceId: 'test-space',
           apiKeyCreatedByUser: false,
         },
       });
@@ -198,7 +186,6 @@ describe('api_key_utils', () => {
     test('should default space to default if space is not found', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
-      const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
 
       const mockUser = {
         authentication_type: 'basic',
@@ -214,12 +201,7 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        request,
-        coreStart.security,
-        spacesStart
-      );
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
@@ -240,7 +222,6 @@ describe('api_key_utils', () => {
       });
 
       const coreStart = coreMock.createStart();
-      const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
       const mockUser = {
         authentication_type: 'api_key',
         username: 'testUser',
@@ -249,12 +230,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        request,
-        coreStart.security,
-        spacesStart
-      );
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
