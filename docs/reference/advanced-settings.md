@@ -489,13 +489,6 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 ### Visualization [kibana-visualization-settings]
 
-$$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
-:   :::{admonition} Deprecated in 8.10.0
-    This setting was deprecated in 8.10.0.
-    :::
-
-    Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
-
 $$$visualization-heatmap-maxbuckets$$$`visualization:heatmap:maxBuckets`
 :   The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
