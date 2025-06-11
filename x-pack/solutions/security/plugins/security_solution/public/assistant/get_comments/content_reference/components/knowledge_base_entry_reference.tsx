@@ -51,7 +51,7 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceN
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="KnowledgeBaseEntryReference"
     >
-      <EuiLink onClick={onClick}>
+      <EuiLink onClick={onClick} data-test-subj="knowledgeBaseEntryReferenceLink">
         {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${contentReferenceNode.contentReference.knowledgeBaseEntryName}`}
       </EuiLink>
     </PopoverReference>
