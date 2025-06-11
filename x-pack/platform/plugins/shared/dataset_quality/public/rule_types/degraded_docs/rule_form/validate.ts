@@ -13,10 +13,7 @@ import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 const invalidThresholdValue = (value?: number) =>
   !value || (value && (isNaN(value) || value < 0 || value > 100));
 
-export function validate(
-  ruleParams: DegradedDocsRuleParams,
-  isServerless?: boolean | undefined
-): ValidationResult {
+export function validate(ruleParams: DegradedDocsRuleParams): ValidationResult {
   const errors: { [key: string]: string[] } = {};
 
   if (!ruleParams.threshold || invalidThresholdValue(ruleParams.threshold?.[0])) {

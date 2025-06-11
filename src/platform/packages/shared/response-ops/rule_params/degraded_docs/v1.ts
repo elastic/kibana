@@ -14,13 +14,17 @@ import { oneOfLiterals } from '../common/utils';
 
 const comparators = Object.values(COMPARATORS);
 
+const searchConfigSchema = schema.object({
+  index: schema.string(),
+});
+
 export const degradedDocsParamsSchema = schema.object({
-  name: schema.string(),
   timeUnit: schema.string(),
   timeSize: schema.number(),
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  searchConfiguration: searchConfigSchema,
 });
 
 export type DegradedDocsRuleParams = TypeOf<typeof degradedDocsParamsSchema>;

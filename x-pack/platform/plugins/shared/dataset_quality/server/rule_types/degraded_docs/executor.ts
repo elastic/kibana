@@ -48,133 +48,128 @@ export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar)
   }
 };
 
-export const getRuleExecutor = () =>
-  async function executor(
-    options: RuleExecutorOptions<
-      DatasetQualityRuleParams,
-      DatasetQualityRuleTypeState,
-      DatasetQualityAlertState,
-      DatasetQualityAlertContext,
-      DatasetQualityAllowedActionGroups,
-      DatasetQualityAlert
-    >
-  ): ReturnType<
-    ExecutorType<
-      DatasetQualityRuleParams,
-      DatasetQualityRuleTypeState,
-      DatasetQualityAlertState,
-      DatasetQualityAlertContext,
-      DatasetQualityAllowedActionGroups
-    >
-  > {
-    {
-      const {
-        rule: { name },
-        services,
-        params,
-        logger,
-        getTimeRange,
-      } = options;
-      const { alertsClient, scopedClusterClient } = services;
+export const executor = async (
+  options: RuleExecutorOptions<
+    DatasetQualityRuleParams,
+    DatasetQualityRuleTypeState,
+    DatasetQualityAlertState,
+    DatasetQualityAlertContext,
+    DatasetQualityAllowedActionGroups,
+    DatasetQualityAlert
+  >
+): ReturnType<
+  ExecutorType<
+    DatasetQualityRuleParams,
+    DatasetQualityRuleTypeState,
+    DatasetQualityAlertState,
+    DatasetQualityAlertContext,
+    DatasetQualityAllowedActionGroups
+  >
+> => {
+  const {
+    rule: { name },
+    services,
+    params,
+    logger,
+    getTimeRange,
+  } = options;
+  const { alertsClient, scopedClusterClient } = services;
 
-      if (!alertsClient) {
-        throw new AlertsClientError();
-      }
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
 
-      const alertLimit = alertsClient.getAlertLimitValue();
+  const alertLimit = alertsClient.getAlertLimitValue();
 
-      const { dateStart, dateEnd } = getTimeRange(`${params.timeSize}${params.timeUnit}`);
-      const index = params.name;
+  const { dateStart, dateEnd } = getTimeRange(`${params.timeSize}${params.timeUnit}`);
+  const index = params.searchConfiguration.index;
 
-      const datasetQualityDegradedResults = await getDocsStats({
-        index,
-        dateStart,
-        groupBy: params.groupBy ?? [],
-        query: {
-          must: { exists: { field: _IGNORED } },
+  const datasetQualityDegradedResults = await getDocsStats({
+    index,
+    dateStart,
+    groupBy: params.groupBy ?? [],
+    query: {
+      must: { exists: { field: _IGNORED } },
+    },
+    scopedClusterClient,
+  });
+
+  const unmetGroupValues: Record<string, string> = {};
+  const compareFn = ComparatorFns.get(params.comparator as Comparator);
+  if (compareFn == null) {
+    throw new Error(
+      i18n.translate('xpack.datasetQuality.rule.invalidComparatorErrorMessage', {
+        defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+        values: {
+          comparator: params.comparator,
         },
-        scopedClusterClient,
-      });
+      })
+    );
+  }
 
-      const unmetGroupValues: Record<string, string> = {};
-      const compareFn = ComparatorFns.get(params.comparator as Comparator);
-      if (compareFn == null) {
-        throw new Error(
-          i18n.translate('xpack.datasetQuality.rule.invalidComparatorErrorMessage', {
-            defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-            values: {
-              comparator: params.comparator,
-            },
-          })
-        );
-      }
+  let generatedAlerts = 0;
+  for (const groupResult of datasetQualityDegradedResults) {
+    const { bucketKey, percentage } = groupResult;
+    const alertId = bucketKey.join(ALERT_KEY_JOINER);
+    const met = compareFn(percentage, params.threshold);
 
-      let generatedAlerts = 0;
-      for (const groupResult of datasetQualityDegradedResults) {
-        const { bucketKey, percentage } = groupResult;
-        const alertId = bucketKey.join(ALERT_KEY_JOINER);
-        const met = compareFn(percentage, params.threshold);
-
-        if (!met) {
-          unmetGroupValues[alertId] = percentage.toFixed(2);
-          continue;
-        }
-
-        const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
-          const fieldName = (params.groupBy ?? [])[i];
-          return {
-            ...acc,
-            [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
-          };
-        }, {});
-
-        if (generatedAlerts < alertLimit) {
-          const context = generateContext(name, alertId, dateEnd, percentage.toFixed(2), params);
-          alertsClient.report({
-            id: alertId,
-            actionGroup: THRESHOLD_MET_GROUP.id,
-            state: {},
-            context,
-            payload: {
-              [ALERT_REASON]: context.message,
-              [ALERT_TITLE]: context.title,
-              [ALERT_EVALUATION_VALUES]: `${context.value}`,
-              [ALERT_EVALUATION_CONDITIONS]: context.conditions,
-              [ALERT_EVALUATION_THRESHOLD]:
-                params.threshold?.length === 1 ? params.threshold[0] : null,
-              ...groupByFields,
-            },
-          });
-        }
-
-        generatedAlerts++;
-      }
-
-      alertsClient.setAlertLimitReached(generatedAlerts >= alertLimit);
-
-      // Handle recovered alerts context
-      const { getRecoveredAlerts } = alertsClient;
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const alertId = recoveredAlert.alert.getId();
-        logger.debug(`setting context for recovered alert ${alertId}`);
-
-        const percentage = unmetGroupValues[alertId] ?? '0';
-        const recoveryContext = generateContext(name, alertId, dateEnd, percentage, params, true);
-
-        alertsClient.setAlertData({
-          id: alertId,
-          context: recoveryContext,
-          payload: {
-            [ALERT_REASON]: recoveryContext.message,
-            [ALERT_TITLE]: recoveryContext.title,
-            [ALERT_EVALUATION_VALUES]: `${recoveryContext.value}`,
-            [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
-            [ALERT_EVALUATION_THRESHOLD]:
-              params.threshold?.length === 1 ? params.threshold[0] : null,
-          },
-        });
-      }
-
-      return { state: {} };
+    if (!met) {
+      unmetGroupValues[alertId] = percentage.toFixed(2);
+      continue;
     }
-  };
+
+    const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
+      const fieldName = (params.groupBy ?? [])[i];
+      return {
+        ...acc,
+        [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
+      };
+    }, {});
+
+    if (generatedAlerts < alertLimit) {
+      const context = generateContext(name, alertId, dateEnd, percentage.toFixed(2), params);
+      alertsClient.report({
+        id: alertId,
+        actionGroup: THRESHOLD_MET_GROUP.id,
+        state: {},
+        context,
+        payload: {
+          [ALERT_REASON]: context.message,
+          [ALERT_TITLE]: context.title,
+          [ALERT_EVALUATION_VALUES]: `${context.value}`,
+          [ALERT_EVALUATION_CONDITIONS]: context.conditions,
+          [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+          ...groupByFields,
+        },
+      });
+    }
+
+    generatedAlerts++;
+  }
+
+  alertsClient.setAlertLimitReached(generatedAlerts >= alertLimit);
+
+  // Handle recovered alerts context
+  const { getRecoveredAlerts } = alertsClient;
+  for (const recoveredAlert of getRecoveredAlerts()) {
+    const alertId = recoveredAlert.alert.getId();
+    logger.debug(`setting context for recovered alert ${alertId}`);
+
+    const percentage = unmetGroupValues[alertId] ?? '0';
+    const recoveryContext = generateContext(name, alertId, dateEnd, percentage, params, true);
+
+    alertsClient.setAlertData({
+      id: alertId,
+      context: recoveryContext,
+      payload: {
+        [ALERT_REASON]: recoveryContext.message,
+        [ALERT_TITLE]: recoveryContext.title,
+        [ALERT_EVALUATION_VALUES]: `${recoveryContext.value}`,
+        [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+      },
+    });
+  }
+
+  return { state: {} };
+};

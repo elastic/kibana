@@ -19,7 +19,7 @@ import {
   DegradedDocsRuleParams,
   degradedDocsParamsSchema,
 } from '@kbn/response-ops-rule-params/degraded_docs';
-import { getRuleExecutor } from './executor';
+import { executor } from './executor';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
@@ -61,7 +61,7 @@ export function DegradedDocsRuleType(): RuleType<
     producer: STACK_ALERTS_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: getRuleExecutor(),
+    executor,
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
@@ -99,7 +99,7 @@ export function DegradedDocsRuleType(): RuleType<
 export const actionVariableContextReasonLabel = i18n.translate(
   'xpack.datasetQuality.alerting.actionVariableContextReasonLabel',
   {
-    defaultMessage: 'A reason for the alert.',
+    defaultMessage: 'A concise description of the reason for the alert.',
   }
 );
 

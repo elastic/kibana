@@ -26,11 +26,13 @@ export function AlertFlyout(props: Props) {
     },
   } = useKibanaContextForPlugin();
 
-  const [initialValues, setInitialValues] = useState<{ name?: string }>({});
+  const [initialValues, setInitialValues] = useState<{ searchConfiguration?: { index: string } }>(
+    {}
+  );
 
   useEffect(() => {
     if (dataStream) {
-      setInitialValues({ name: dataStream });
+      setInitialValues({ searchConfiguration: { index: dataStream } });
     }
   }, [dataStream]);
 

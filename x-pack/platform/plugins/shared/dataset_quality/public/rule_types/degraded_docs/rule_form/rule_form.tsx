@@ -54,7 +54,7 @@ export const RuleForm: React.FunctionComponent<
   } = useKibanaContextForPlugin();
 
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
-  const { comparator, threshold, timeSize, timeUnit, groupBy } = ruleParams;
+  const { searchConfiguration, comparator, threshold, timeSize, timeUnit, groupBy } = ruleParams;
 
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewError, setDataViewError] = useState<string>();
@@ -79,7 +79,7 @@ export const RuleForm: React.FunctionComponent<
 
   useEffect(() => {
     const initDataView = async () => {
-      if (!ruleParams.name) {
+      if (!searchConfiguration?.index) {
         setDataViewError(
           i18n.translate('xpack.datasetQuality.rule.dataViewErrorNoTimestamp', {
             defaultMessage: 'A data view is required.',
@@ -87,9 +87,11 @@ export const RuleForm: React.FunctionComponent<
         );
         return;
       }
-      if (ruleParams.name && !dataView) {
+      if (searchConfiguration?.index && !dataView) {
         const savedDataViews = await dataViews.getIdsWithTitle();
-        const savedDataViewId = savedDataViews.find((dv) => dv.title === ruleParams.name)?.id;
+        const savedDataViewId = savedDataViews.find(
+          (dv) => dv.title === searchConfiguration?.index
+        )?.id;
 
         if (savedDataViewId) {
           setDataView(await dataViews.get(savedDataViewId));
@@ -97,13 +99,13 @@ export const RuleForm: React.FunctionComponent<
         }
 
         let currentDataView: DataView;
-        const adHocDataView = adHocDataViews.find((dv) => dv.title === ruleParams.name);
+        const adHocDataView = adHocDataViews.find((dv) => dv.title === searchConfiguration?.index);
 
         if (adHocDataView) {
           currentDataView = adHocDataView;
         } else {
           currentDataView = await dataViews.create({
-            title: ruleParams.name,
+            title: searchConfiguration?.index,
             timeFieldName: '@timestamp',
           });
 
@@ -115,37 +117,29 @@ export const RuleForm: React.FunctionComponent<
     };
 
     initDataView();
-  }, [adHocDataViews, dataView, dataViews, ruleParams.name]);
+  }, [adHocDataViews, dataView, dataViews, searchConfiguration?.index]);
 
   useEffect(() => {
-    if (!ruleParams.comparator) {
+    if (!comparator) {
       preFillProperty('comparator');
     }
 
-    if (!ruleParams.threshold) {
+    if (!threshold) {
       preFillProperty('threshold');
     }
 
-    if (!ruleParams.timeSize) {
+    if (!timeSize) {
       preFillProperty('timeSize');
     }
 
-    if (!ruleParams.timeUnit) {
+    if (!timeUnit) {
       preFillProperty('timeUnit');
     }
 
-    if (!ruleParams.groupBy) {
+    if (!groupBy) {
       preFillProperty('groupBy');
     }
-  }, [
-    preFillProperty,
-    ruleParams.comparator,
-    ruleParams.groupBy,
-    ruleParams.name,
-    ruleParams.threshold,
-    ruleParams.timeSize,
-    ruleParams.timeUnit,
-  ]);
+  }, [preFillProperty, comparator, groupBy, threshold, timeSize, timeUnit]);
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
@@ -166,7 +160,7 @@ export const RuleForm: React.FunctionComponent<
   const onSelectDataView = useCallback(
     (newDataView: DataView) => {
       setDataViewError(undefined);
-      updateProperty('name', newDataView.getIndexPattern());
+      updateProperty('searchConfiguration', { index: newDataView.getIndexPattern() });
       setDataView(newDataView);
     },
     [updateProperty]
@@ -204,13 +198,13 @@ export const RuleForm: React.FunctionComponent<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.datasetQuality.rule.alertCondition"
-            defaultMessage="Alert condition"
+            id="xpack.datasetQuality.rule.dataView"
+            defaultMessage="Select a data view"
           />
         </h5>
       </EuiTitle>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
@@ -229,6 +223,19 @@ export const RuleForm: React.FunctionComponent<
           <EuiSpacer size="s" />
         </>
       )}
+
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.datasetQuality.rule.alertCondition"
+            defaultMessage="Set rule conditions"
+          />
+        </h5>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
 
       <EuiExpression
         data-test-subj="datasetQualityRuleCountExpression"
@@ -249,6 +256,18 @@ export const RuleForm: React.FunctionComponent<
         unit={'%'}
       />
 
+      <RuleConditionChart
+        threshold={threshold}
+        comparator={comparator as COMPARATORS}
+        timeSize={timeSize}
+        timeUnit={timeUnit as TimeUnitChar}
+        dataView={dataView}
+        groupBy={groupBy}
+        timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+      />
+
+      <EuiSpacer size="l" />
+
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
@@ -261,37 +280,7 @@ export const RuleForm: React.FunctionComponent<
         display="fullWidth"
       />
 
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.datasetQuality.rule.rulePreview"
-            defaultMessage="Rule preview"
-          />
-        </h5>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
-      <RuleConditionChart
-        threshold={threshold}
-        comparator={comparator as COMPARATORS}
-        timeSize={timeSize}
-        timeUnit={timeUnit as TimeUnitChar}
-        dataView={dataView}
-        groupBy={groupBy}
-        timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
-      />
-
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.datasetQuality.rule.alertGrouping"
-            defaultMessage="Alert grouping"
-          />
-        </h5>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiFormRow
         label={i18n.translate('xpack.datasetQuality.rule.createAlertPerText', {
