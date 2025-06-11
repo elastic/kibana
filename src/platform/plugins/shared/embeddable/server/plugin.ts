@@ -21,9 +21,9 @@ import {
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
-  EmbeddableStateWithType,
   EmbeddableRegistryDefinition,
 } from './types';
+import { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
   getInjectFunction,
