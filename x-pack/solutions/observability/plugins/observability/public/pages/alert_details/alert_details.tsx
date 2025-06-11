@@ -102,7 +102,9 @@ export function AlertDetails() {
     uiSettings,
     serverless,
     contentManagement,
+    application: { navigateToUrl },
   } = services;
+  const { basePath } = http;
   const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
@@ -198,6 +200,15 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
+  const showRelatedAlertsFromCallout = () => {
+    handleSetTabId(RELATED_ALERTS_TAB_ID);
+    navigateToUrl(
+      `${basePath.prepend(
+        paths.observability.alerts
+      )}/${alertId}?tabId=related_alerts&filterProximal=true`
+    );
+  };
+
   useEffect(() => {
     if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
       onPageReady();
@@ -266,7 +277,10 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
-          <ProximalAlertsCallout alertDetail={alertDetail} />
+          <ProximalAlertsCallout
+            alertDetail={alertDetail}
+            switchTabs={showRelatedAlertsFromCallout}
+          />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
@@ -287,7 +301,10 @@ export function AlertDetails() {
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
         <EuiSpacer size="l" />
-        <ProximalAlertsCallout alertDetail={alertDetail} />
+        <ProximalAlertsCallout
+          alertDetail={alertDetail}
+          switchTabs={showRelatedAlertsFromCallout}
+        />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />

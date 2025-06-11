@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -52,9 +53,11 @@ const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
 
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
-  const esQuery = useBuildRelatedAlertsQuery({ alert });
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const filterProximal = searchParams.get('filterProximal') === 'true';
+  const esQuery = useBuildRelatedAlertsQuery({ alert, filterProximal });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-
   const services = useKibana().services;
 
   return (

@@ -6,64 +6,50 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
-import moment from 'moment';
-import { useKibana } from '../../utils/kibana_react';
-import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
+import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
+import { useFindProximalAlerts } from './hooks/use_find_proximal_alerts';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 interface Props {
   alertDetail: AlertData;
+  switchTabs: () => void;
 }
 
-export const ProximalAlertsCallout = ({ alertDetail }: Props) => {
+export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
 
-  const esQuery = {
-    bool: {
-      filter: [
-        {
-          range: {
-            'kibana.alert.start': {
-              gte: moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString(),
-              lte: moment(alertDetail.formatted.start).add(30, 'minutes').toISOString(),
-            },
-          },
-        },
-      ],
-    },
+  const handleClick = () => {
+    switchTabs();
   };
 
-  const { data, isError, isLoading } = useSearchAlertsQuery({
-    data: services.data,
-    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-    consumers: observabilityAlertFeatureIds,
-    query: esQuery,
-    useDefaultContext: true,
-    pageSize: 100,
-  });
+  const { data, isError, isLoading } = useFindProximalAlerts(alertDetail);
 
-  if (isLoading || isError || !data.querySnapshot?.response[0]) {
+  const count = data?.total;
+
+  if (isLoading || isError || !count || count <= 0) {
     return null;
   }
 
-  const count = JSON.parse(data.querySnapshot.response[0]).hits.total;
-
   return (
     <EuiCallOut>
-      {i18n.translate('xpack.observability.alertDetails.proximalAlert', {
-        defaultMessage: '{count} alerts triggered around the same time',
+      {i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
+        defaultMessage: '{count} alerts were triggered around the same time.',
         values: {
           count,
         },
       })}
-      {count > 0 && <EuiLink css={{ marginLeft: euiTheme.size.s }}>See more</EuiLink>}
+      {count > 0 && (
+        <EuiLink
+          data-test-subj="see-proximal-alerts"
+          css={{ marginLeft: euiTheme.size.s }}
+          onClick={() => handleClick()}
+        >
+          {i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
+            defaultMessage: 'See more',
+          })}{' '}
+          <EuiIcon type={'arrowRight'} fontSize={'xs'} />
+        </EuiLink>
+      )}
     </EuiCallOut>
   );
-};
+}

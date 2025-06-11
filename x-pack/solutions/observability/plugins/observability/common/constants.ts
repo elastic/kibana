@@ -35,6 +35,8 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
 
 export const EventsAsUnit = 'events';
 
+export const PROXIMAL_DURATION_LOOKUP = [30, 'minutes'];
+
 export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
   ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
