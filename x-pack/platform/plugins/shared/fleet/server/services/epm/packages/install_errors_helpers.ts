@@ -84,8 +84,9 @@ export const createOrUpdateFailedInstallStatus = async ({
       error,
       targetVersion: pkgVersion,
       createdAt: new Date().toISOString(),
-      latestAttempts: installation?.attributes.latest_install_failed_attempts,
+      latestAttempts: installation?.attributes?.latest_install_failed_attempts,
     });
+
     try {
       return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         latest_install_failed_attempts: latestInstallFailedAttempts,
@@ -131,7 +132,7 @@ export const createOrUpdateFailedInstallStatus = async ({
       );
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        logger.error(`Failed to create package installation:${err}`);
+        logger.error(`Failed to create package installation: ${err}`);
       }
     }
   }

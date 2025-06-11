@@ -8,14 +8,20 @@
 import { PackageNotFoundError } from '../../errors';
 import { outputService } from '../../services';
 
+import { createOrUpdateFailedInstallStatus } from '../../services/epm/packages/install_errors_helpers';
+
 import { installCustomAsset } from './custom_assets';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
 jest.mock('./custom_assets');
+jest.mock('../../services/epm/packages/install_errors_helpers');
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
+const createOrUpdateFailedInstallStatusMock = createOrUpdateFailedInstallStatus as jest.Mocked<
+  typeof createOrUpdateFailedInstallStatus
+>;
 
 describe('syncIntegrationsOnRemote', () => {
   const abortController = new AbortController();
@@ -93,6 +99,11 @@ describe('syncIntegrationsOnRemote', () => {
                 {
                   package_name: 'system',
                   package_version: '2.2.0',
+                  updated_at: '2021-01-01T00:00:00.000Z',
+                },
+                {
+                  package_name: 'custom-pkg',
+                  package_version: '1.0.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
                 },
               ],
@@ -401,6 +412,47 @@ describe('syncIntegrationsOnRemote', () => {
     );
 
     expect(packageClientMock.installPackage).toHaveBeenCalled();
+  });
+
+  it('should call createOrUpdateFailedInstallStatus if installation failed', async () => {
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+      packageName === 'custom-pkg'
+        ? undefined
+        : {
+            install_status: 'installed',
+            version: '2.2.0',
+          }
+    );
+    packageClientMock.installPackage.mockImplementation(({ pkgName, pkgVersion }: any) => {
+      if (pkgName === 'custom-pkg') {
+        throw new PackageNotFoundError('package not found in registry');
+      }
+      return {
+        status: 'installed',
+      };
+    });
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      soClientMock,
+      packageClientMock,
+      abortController,
+      loggerMock
+    );
+
+    expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+    expect(createOrUpdateFailedInstallStatusMock).toHaveBeenCalledWith({
+      error: new PackageNotFoundError('package not found in registry'),
+      installSource: 'registry',
+      pkgName: 'custom-pkg',
+      pkgVersion: '1.0.0',
+      logger: expect.anything(),
+      savedObjectsClient: expect.anything(),
+    });
   });
 
   it('should do nothing if sync enabled and the package is installing', async () => {
