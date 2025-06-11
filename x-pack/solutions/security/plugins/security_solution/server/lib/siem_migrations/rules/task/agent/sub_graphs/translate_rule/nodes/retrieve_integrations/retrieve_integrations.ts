@@ -30,8 +30,8 @@ export const getRetrieveIntegrationsNode = ({
   telemetryClient,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   return async (state) => {
-    const query = state.rule_summary;
-    const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
+    const query = state.keywords;
+    const integrations = await ruleMigrationsRetriever.integrations.search(query);
     if (integrations.length === 0) {
       telemetryClient.reportIntegrationsMatch({
         preFilterIntegrations: [],

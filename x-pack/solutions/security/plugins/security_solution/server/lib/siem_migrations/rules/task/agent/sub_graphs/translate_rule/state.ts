@@ -31,7 +31,7 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  rule_summary: Annotation<string>({
+  keywords: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),

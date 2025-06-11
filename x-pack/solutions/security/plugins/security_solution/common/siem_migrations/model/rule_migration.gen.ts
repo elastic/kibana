@@ -118,7 +118,7 @@ export const ElasticRule = z.object({
   /**
    * The thread information associated with this rule.
    */
-  threat: ThreatArray.optional(),
+  threat: ThreatArray.nullable().optional(),
   /**
    * The Elastic rule id installed as a result.
    */
