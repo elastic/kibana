@@ -13,21 +13,16 @@ import type { UpdateRuleBody } from '../apis/update_rule';
 import { updateRule } from '../apis/update_rule';
 import type { Rule } from '../types';
 
-export interface UseUpdateRuleVars {
-  id: string;
-  formData: UpdateRuleBody;
-}
-
 export interface UseUpdateRuleProps {
   http: HttpStart;
   onSuccess?: (rule: Rule) => void;
-  onError?: (error: IHttpFetchError<{ message: string }>, variables: UseUpdateRuleVars) => void;
+  onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 
 export const useUpdateRule = (props: UseUpdateRuleProps) => {
   const { http, onSuccess, onError } = props;
 
-  const mutationFn = ({ id, formData }: UseUpdateRuleVars) => {
+  const mutationFn = ({ id, formData }: { id: string; formData: UpdateRuleBody }) => {
     return updateRule({
       id,
       http,

@@ -11,7 +11,7 @@ import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { Dashboards } from './related_dashboards/dashboards';
 import { useSuggestedDashboards } from '../hooks/use_suggested_dashboards';
-import { DashboardMetadata } from './related_dashboards/dashboard';
+import { ActionButtonProps, DashboardMetadata } from './related_dashboards/dashboard';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
@@ -44,20 +44,15 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
     services: { dashboard: dashboardService },
   } = useKibana();
 
-  const onAddSuggestedDashboard = (d: DashboardMetadata) => {
-    // We are doing an optimistic update here, without waiting for the API result
-    setDashboardsMeta((value) => [...value, d]);
+  const onSuccessAddSuggestedDashboard = (addedDashboardId: string) => {
+    const suggestedDashboard = suggestedDashboards?.find(({ id }) => id === addedDashboardId);
+    if (!suggestedDashboard) throw Error('Suggested dashboard not found, this should never happen');
+    setDashboardsMeta((value) => [...value, suggestedDashboard]);
   };
 
-  const onFailAddSuggestedDashboard = (dashboardId: string) => {
-    // If the update fails we need to revert the change
-    setDashboardsMeta((value) => value.filter(({ id }) => id !== dashboardId));
-  };
-
-  const { onClickAddSuggestedDashboard } = useAddSuggestedDashboards({
+  const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
     rule,
-    onAddSuggestedDashboard,
-    onFailAddSuggestedDashboard,
+    onSuccessAddSuggestedDashboard,
   });
 
   useEffect(() => {
@@ -101,6 +96,21 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
     fetchDashboards();
   }, [relatedDashboards, dashboardService, setDashboardsMeta]);
 
+  const filteredSuggestedDashboardsWithButtonProps = filteredSuggestedDashboards.map((d) => {
+    const actionButtonProps: ActionButtonProps = {
+      isDisabled: addingDashboardId !== undefined && addingDashboardId !== d.id,
+      isLoading: addingDashboardId === d.id,
+      label: i18n.translate('xpack.observability.alertDetails.suggestedDashboards.buttonLabel', {
+        defaultMessage: 'Add to linked dashboards',
+      }),
+      onClick: onClickAddSuggestedDashboard,
+    };
+    return {
+      ...d,
+      actionButtonProps,
+    };
+  });
+
   return (
     <div>
       <Dashboards
@@ -115,16 +125,7 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
           defaultMessage: 'Suggested dashboards',
         })}
         isLoadingDashboards={isLoading}
-        dashboards={filteredSuggestedDashboards}
-        actionButtonProps={{
-          label: i18n.translate(
-            'xpack.observability.alertDetails.suggestedDashboards.buttonLabel',
-            {
-              defaultMessage: 'Add to linked dashboards',
-            }
-          ),
-          onClick: onClickAddSuggestedDashboard,
-        }}
+        dashboards={filteredSuggestedDashboardsWithButtonProps}
       />
     </div>
   );

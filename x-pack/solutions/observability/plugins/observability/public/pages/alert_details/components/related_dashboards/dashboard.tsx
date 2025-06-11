@@ -16,12 +16,19 @@ export interface DashboardMetadata {
   description: string;
 }
 
+export interface ActionButtonProps {
+  onClick: (dashboard: DashboardMetadata) => void;
+  label: string;
+  isLoading: boolean;
+  isDisabled: boolean;
+}
+
 export function Dashboard({
   dashboard,
   actionButtonProps,
 }: {
   dashboard: DashboardMetadata;
-  actionButtonProps?: { onClick: (dashboard: DashboardMetadata) => void; label: string };
+  actionButtonProps?: ActionButtonProps;
 }) {
   const {
     services: {
@@ -61,6 +68,8 @@ export function Dashboard({
             <EuiButton
               data-test-subj="add-suggested-dashboard"
               onClick={() => actionButtonProps.onClick(dashboard)}
+              isLoading={actionButtonProps.isLoading}
+              isDisabled={actionButtonProps.isDisabled}
             >
               <EuiText>{actionButtonProps.label}</EuiText>
             </EuiButton>

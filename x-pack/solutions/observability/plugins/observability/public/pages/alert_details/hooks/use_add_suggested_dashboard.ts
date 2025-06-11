@@ -5,36 +5,29 @@
  * 2.0.
  */
 
-import { UseUpdateRuleVars, useUpdateRule } from '@kbn/response-ops-rule-form/src/common/hooks';
+import { useUpdateRule } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
 import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useState } from 'react';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard';
 
 export const useAddSuggestedDashboards = ({
   rule,
-  onAddSuggestedDashboard,
-  onFailAddSuggestedDashboard,
+  onSuccessAddSuggestedDashboard,
 }: {
   rule: Rule;
-  onAddSuggestedDashboard: (d: DashboardMetadata) => void;
-  onFailAddSuggestedDashboard: (dashboardId: string) => void;
+  onSuccessAddSuggestedDashboard: (addedDashboardId: string) => void;
 }) => {
   const {
     services: { http, notifications },
   } = useKibana();
 
-  const onError = (error: IHttpFetchError<{ message: string }>, variables: UseUpdateRuleVars) => {
-    // This function is returning the variables we set, so we're sure that there's at least one dashboard
-    const addedDashboard = variables.formData.artifacts?.dashboards?.length
-      ? variables.formData.artifacts?.dashboards[
-          variables.formData.artifacts?.dashboards.length - 1
-        ]
-      : undefined;
-    if (addedDashboard) {
-      onFailAddSuggestedDashboard(addedDashboard.id);
-    }
+  const [addingDashboardId, setAddingDashboardId] = useState<string>();
+
+  const onError = (error: IHttpFetchError<{ message: string }>) => {
+    setAddingDashboardId(undefined);
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardError', {
         defaultMessage: 'Error adding suggested dashboard',
@@ -42,7 +35,14 @@ export const useAddSuggestedDashboards = ({
     });
   };
 
-  const { mutateAsync: updateRule } = useUpdateRule({ http, onError });
+  const onSuccess = () => {
+    if (!addingDashboardId)
+      throw new Error('Adding dashboard id not defined, this should never occur');
+    onSuccessAddSuggestedDashboard(addingDashboardId);
+    setAddingDashboardId(undefined);
+  };
+
+  const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
 
   const onClickAddSuggestedDashboard = (d: DashboardMetadata) => {
     const updatedRule: UpdateRuleBody = {
@@ -53,8 +53,8 @@ export const useAddSuggestedDashboards = ({
       },
     };
     updateRule({ id: rule.id, formData: updatedRule });
-    onAddSuggestedDashboard(d);
+    setAddingDashboardId(d.id);
   };
 
-  return { onClickAddSuggestedDashboard };
+  return { onClickAddSuggestedDashboard, addingDashboardId };
 };

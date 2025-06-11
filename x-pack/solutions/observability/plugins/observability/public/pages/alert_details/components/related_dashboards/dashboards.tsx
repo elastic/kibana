@@ -16,18 +16,16 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { Dashboard, DashboardMetadata } from './dashboard';
+import { ActionButtonProps, Dashboard, DashboardMetadata } from './dashboard';
 
 export function Dashboards({
   title,
   isLoadingDashboards,
   dashboards,
-  actionButtonProps,
 }: {
   title: string;
   isLoadingDashboards: boolean;
-  dashboards?: DashboardMetadata[];
-  actionButtonProps?: { onClick: (dashboard: DashboardMetadata) => void; label: string };
+  dashboards?: Array<DashboardMetadata & { actionButtonProps?: ActionButtonProps }>;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (
@@ -59,8 +57,8 @@ export function Dashboards({
     );
 
   return wrapWithHeader(
-    dashboards.map((d) => (
-      <Dashboard key={d.id} dashboard={d} actionButtonProps={actionButtonProps} />
+    dashboards.map(({ actionButtonProps, ...rest }) => (
+      <Dashboard key={rest.id} dashboard={rest} actionButtonProps={actionButtonProps} />
     ))
   );
 }
