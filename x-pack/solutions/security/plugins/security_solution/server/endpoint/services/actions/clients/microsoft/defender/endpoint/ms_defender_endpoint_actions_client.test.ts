@@ -986,6 +986,76 @@ describe('MS Defender response actions client', () => {
           msGetActionResultsApiResponse
         );
       });
+
+      it('should generate action response docs for completed runscript actions', async () => {
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'runscript' },
+            input_type: 'microsoft_defender_endpoint',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: undefined,
+          meta: expect.objectContaining({
+            machineActionId: expect.any(String),
+            createdAt: expect.any(String),
+            filename: expect.any(String),
+          }),
+        });
+      });
+
+      it.each<MicrosoftDefenderEndpointMachineAction['status']>(['Pending', 'InProgress'])(
+        'should NOT generate action responses if runscript action in MS Defender has a status of %s',
+        async (machineActionStatus) => {
+          msMachineActionsApiResponse.value[0].status = machineActionStatus;
+          await msClientMock.processPendingActions(processPendingActionsOptions);
+
+          expect(processPendingActionsOptions.addToQueue).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each`
+        msStatusValue  | responseState
+        ${'Failed'}    | ${'failure'}
+        ${'TimeOut'}   | ${'failure'}
+        ${'Cancelled'} | ${'failure'}
+        ${'Succeeded'} | ${'success'}
+      `(
+        'should generate $responseState action response if MS runscript machine action status is $msStatusValue',
+        async ({ msStatusValue, responseState }) => {
+          msMachineActionsApiResponse.value[0].status = msStatusValue;
+          const expectedResult: LogsEndpointActionResponse = {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              completed_at: expect.any(String),
+              data: { command: 'runscript' },
+              input_type: 'microsoft_defender_endpoint',
+              started_at: expect.any(String),
+            },
+            agent: { id: 'agent-uuid-1' },
+            error: undefined,
+            meta: expect.objectContaining({
+              machineActionId: expect.any(String),
+              createdAt: expect.any(String),
+              filename: expect.any(String),
+            }),
+          };
+          if (responseState === 'failure') {
+            expectedResult.error = {
+              message: expect.any(String),
+            };
+          }
+          await msClientMock.processPendingActions(processPendingActionsOptions);
+
+          expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
+        }
+      );
     });
   });
 

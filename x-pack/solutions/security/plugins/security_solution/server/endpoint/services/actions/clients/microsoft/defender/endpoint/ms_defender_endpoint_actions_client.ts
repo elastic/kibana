@@ -595,7 +595,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           case 'isolate':
           case 'unisolate':
             addResponsesToQueueIfAny(
-              await this.checkPendingIsolateReleaseActions(
+              await this.checkPendingIsolateReleaseRunScriptActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
@@ -607,7 +607,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           case 'runscript':
             addResponsesToQueueIfAny(
-              await this.checkPendingIsolateReleaseActions(
+              await this.checkPendingIsolateReleaseRunScriptActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
@@ -623,7 +623,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
   }
 
-  private async checkPendingIsolateReleaseActions(
+  private async checkPendingIsolateReleaseRunScriptActions(
     actionRequests: Array<
       ResponseActionsClientPendingAction<
         undefined,
