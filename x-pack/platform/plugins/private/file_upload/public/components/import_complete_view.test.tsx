@@ -123,7 +123,6 @@ test('Should render error when upload fails from elasticsearch request failure',
     );
   });
 
-
   expect(screen.getByText('Unable to upload file')).toBeInTheDocument();
   expect(screen.getByText('Error: simulated elasticsearch request failure')).toBeInTheDocument();
 });

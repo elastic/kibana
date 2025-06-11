@@ -36,10 +36,7 @@ describe('render', () => {
     };
 
     render(
-      <ShardsView
-        failures={[{} as unknown as estypes.ShardFailure]}
-        shardStats={shardStats}
-      />
+      <ShardsView failures={[{} as unknown as estypes.ShardFailure]} shardStats={shardStats} />
     );
 
     expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent(/shards/i);

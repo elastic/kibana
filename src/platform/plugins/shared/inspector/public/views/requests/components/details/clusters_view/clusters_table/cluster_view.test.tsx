@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ClusterView } from './cluster_view';
@@ -19,8 +28,10 @@ describe('render', () => {
     } as estypes.ClusterDetails;
 
     render(<ClusterView clusterDetails={clusterDetails} />);
-    expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('3 of 3 successful');
-    expect(screen.getByText(/3 total shards/i)).toBeInTheDocument(); 
+    expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+      '3 of 3 successful'
+    );
+    expect(screen.getByText(/3 total shards/i)).toBeInTheDocument();
   });
 
   describe('partial', () => {
@@ -56,7 +67,9 @@ describe('render', () => {
       } as estypes.ClusterDetails;
 
       render(<ClusterView clusterDetails={clusterDetails} />);
-      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('1 of 2 successful');
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+        '1 of 2 successful'
+      );
       expect(screen.getByText(/failed/i)).toBeInTheDocument();
     });
 
@@ -75,7 +88,9 @@ describe('render', () => {
       } as estypes.ClusterDetails;
 
       render(<ClusterView clusterDetails={clusterDetails} />);
-      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Request timed out before completion');
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+        'Request timed out before completion'
+      );
     });
   });
 
@@ -98,7 +113,9 @@ describe('render', () => {
       } as unknown as estypes.ClusterDetails;
 
       render(<ClusterView clusterDetails={clusterDetails} />);
-      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Search failed');
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+        'Search failed'
+      );
       expect(screen.getByText(/no_such_remote_cluster_exception/)).toBeInTheDocument();
     });
 
@@ -149,7 +166,9 @@ describe('render', () => {
       } as unknown as estypes.ClusterDetails;
 
       render(<ClusterView clusterDetails={clusterDetails} />);
-      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Search failed');
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+        'Search failed'
+      );
       expect(screen.getByText(/all shards failed/)).toBeInTheDocument();
       expect(screen.getByRole('button')).toHaveTextContent(/view/i); // Flyout button
     });
