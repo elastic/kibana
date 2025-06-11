@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+const root = 'reporting';
 export const queryKeys = {
-  root: 'reporting',
-  getHealth: () => [queryKeys.root, 'health'] as const,
+  getScheduledList: () => [root, 'scheduledList'],
+  getHealth: () => [root, 'health'] as const,
+};
+
+export const mutationKeys = {
+  bulkDisableScheduledReports: () => [root, 'bulkDisableScheduledReports'] as const,
 };

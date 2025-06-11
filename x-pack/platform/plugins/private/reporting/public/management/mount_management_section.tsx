@@ -24,11 +24,11 @@ import {
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../query_client';
-import { PolicyStatusContextProvider } from '../lib/default_status_context';
-import { Section } from '../constants';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { Redirect } from 'react-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Section } from '../constants';
+import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 const ReportingTabs = lazy(() => import('./components/reporting_tabs'));
 
@@ -80,14 +80,6 @@ export async function mountManagementSection({
                   <Route
                     path={`/:section(${sectionsRegex})`}
                     render={(routerProps) => {
-                      console.log('Redirecting to Reporting Home', {
-                        routerProps: params,
-                        history,
-                        coreStart,
-                        config,
-                        apiClient,
-                        license$,
-                      });
                       return (
                         <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
                           <ReportingTabs
