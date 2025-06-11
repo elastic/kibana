@@ -944,7 +944,6 @@ x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
-x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/onechat @elastic/workchat-eng
