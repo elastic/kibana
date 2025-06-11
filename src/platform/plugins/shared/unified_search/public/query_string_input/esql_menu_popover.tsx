@@ -73,10 +73,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         const queriesFromRegistry: RecommendedQuery[] = await http.get(
           `/internal/esql_registry/extensions/${activeSolutionId}/${queryForRecommendedQueries}`
         );
-        if (
-          Array.isArray(queriesFromRegistry) &&
-          !isEqual(queriesFromRegistry, solutionsRecommendedQueries)
-        ) {
+        if (!isEqual(queriesFromRegistry, solutionsRecommendedQueries)) {
           setSolutionsRecommendedQueries(queriesFromRegistry);
         }
       } catch (error) {
