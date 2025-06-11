@@ -126,7 +126,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         version={item.version}
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                    <EuiFlexItem
+                      data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
+                      grow={false}
+                    >
+                      {item.title}
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiLink>
               );
