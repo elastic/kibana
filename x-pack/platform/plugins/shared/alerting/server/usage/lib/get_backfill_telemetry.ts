@@ -54,6 +54,7 @@ async function getBackfillExecutionCount({
     const query = {
       index: eventLogIndex,
       size: 0,
+      track_total_hits: true,
       query: getProviderAndActionFilterForTimeRange('execute-backfill'),
       aggs: {
         by_execution_status: {
@@ -100,6 +101,7 @@ async function getGapInfo({
   try {
     const query = {
       index: eventLogIndex,
+      track_total_hits: true,
       size: 0,
       query: getProviderAndActionFilterForTimeRange('gap'),
       aggs: {
