@@ -96,7 +96,7 @@ export const AlertsProgressBarPanel: React.FC<AlertsProgressBarPanelProps> = ({
             onSelect={onSelect}
             prepend={''}
             width={DEFAULT_COMBOBOX_WIDTH}
-            dropDownoptions={dropDownOptions}
+            dropDownOptions={dropDownOptions}
           />
         </HeaderSection>
         <AlertsProgressBar

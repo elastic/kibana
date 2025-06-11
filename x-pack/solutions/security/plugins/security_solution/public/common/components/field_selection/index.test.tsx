@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
-
 import { TestProviders } from '../../mock';
 import type { Props } from '.';
 import { FieldSelection } from '.';
@@ -31,23 +30,23 @@ const defaultProps: Props = {
 
 describe('FieldSelection', () => {
   test('it renders the (first) "Group by" selection', () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <FieldSelection {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.getByRole('combobox', { name: GROUP_BY_LABEL })).toBeInTheDocument();
+    expect(getByTestId('groupBy')).toHaveTextContent(GROUP_BY_LABEL);
   });
 
   test('it renders the (second) "Group by top" selection', () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <FieldSelection {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.getByRole('combobox', { name: GROUP_BY_TOP_LABEL })).toBeInTheDocument();
+    expect(getByTestId('groupByTop')).toHaveTextContent(GROUP_BY_TOP_LABEL);
   });
 
   test('it renders the chart options context menu using the provided `uniqueQueryId`', () => {
@@ -56,22 +55,22 @@ describe('FieldSelection', () => {
       chartOptionsContextMenu: (queryId: string) => <div>{queryId}</div>,
     };
 
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <FieldSelection {...propsWithContextMenu} />
       </TestProviders>
     );
 
-    expect(screen.getByText(defaultProps.uniqueQueryId)).toBeInTheDocument();
+    expect(getByTestId('chartOptions')).toHaveTextContent(defaultProps.uniqueQueryId);
   });
 
   test('it does NOT render the chart options context menu when `chartOptionsContextMenu` is undefined', () => {
-    render(
+    const { queryByTestId } = render(
       <TestProviders>
         <FieldSelection {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.queryByText(defaultProps.uniqueQueryId)).not.toBeInTheDocument();
+    expect(queryByTestId('chartOptions')).not.toBeInTheDocument();
   });
 });

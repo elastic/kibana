@@ -9,7 +9,6 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsProgressBarPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
-import { STACK_BY_ARIA_LABEL } from '../common/translations';
 import type { GroupBySelection } from './types';
 import { useStackByFields } from '../common/hooks';
 
@@ -84,12 +83,12 @@ describe('Alert by grouping', () => {
     });
 
     test('combo box renders corrected options', async () => {
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
         </TestProviders>
       );
-      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      const comboBox = getByTestId('comboBoxSearchInput');
       act(() => {
         if (comboBox) {
           comboBox.focus(); // display the combo box options
@@ -104,12 +103,12 @@ describe('Alert by grouping', () => {
 
     test('it invokes setGroupBySelection when an option is selected', async () => {
       const toBeSelected = 'user.name';
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
         </TestProviders>
       );
-      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      const comboBox = getByTestId('comboBoxSearchInput');
       act(() => {
         if (comboBox) {
           comboBox.focus(); // display the combo box options

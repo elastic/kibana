@@ -53,7 +53,7 @@ export const KpiPanel = styled(EuiPanel)<{
 interface StackedBySelectProps {
   'aria-label'?: string;
   'data-test-subj'?: string;
-  dropDownoptions?: Array<EuiComboBoxOptionOption<string>>;
+  dropDownOptions?: Array<EuiComboBoxOptionOption<string>>;
   inputRef?: (inputRef: HTMLInputElement | null) => void;
   isDisabled?: boolean;
   onSelect: (selected: string) => void;
@@ -79,7 +79,7 @@ export const StackByComboBox = React.forwardRef(
       selected,
       inputRef,
       width = DEFAULT_WIDTH,
-      dropDownoptions,
+      dropDownOptions,
       useLensCompatibleFields,
     }: StackedBySelectProps,
     ref
@@ -101,8 +101,8 @@ export const StackByComboBox = React.forwardRef(
     const getExpensiveFields = useStackByFields(useLensCompatibleFields);
 
     const options = useMemo(
-      () => dropDownoptions ?? getExpensiveFields(),
-      [dropDownoptions, getExpensiveFields]
+      () => dropDownOptions ?? getExpensiveFields(),
+      [dropDownOptions, getExpensiveFields]
     );
 
     const singleSelection = useMemo(() => {

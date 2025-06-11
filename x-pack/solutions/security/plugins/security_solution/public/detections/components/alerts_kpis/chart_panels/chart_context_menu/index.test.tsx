@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
-
-import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
-import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../../common/components/chart_settings_popover/translations';
-import { INSPECT } from '../../../../../common/components/inspect/translations';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/config';
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
@@ -21,7 +17,7 @@ describe('ChartContextMenu', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('it renders the chart context menu button', () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <ChartContextMenu
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
@@ -33,13 +29,11 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    expect(
-      screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL })
-    ).toBeInTheDocument();
+    expect(getByTestId('chart-settings-popover-button')).toBeInTheDocument();
   });
 
   test('it renders the Inspect menu item', async () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <ChartContextMenu
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
@@ -51,18 +45,18 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
+    const menuButton = getByTestId('chart-settings-popover-button');
     menuButton.click();
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('button', { name: INSPECT })).toBeInTheDocument();
+    expect(getByTestId('inspect')).toBeInTheDocument();
   });
 
   test('it invokes `setStackBy` and `setStackByField1` when the Reset group by fields menu item selected', async () => {
     const setStackBy = jest.fn();
     const setStackByField1 = jest.fn();
 
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <ChartContextMenu
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
@@ -74,11 +68,11 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
+    const menuButton = getByTestId('chart-settings-popover-button');
     menuButton.click();
     await waitForEuiPopoverOpen();
 
-    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+    const resetMenuItem = getByTestId('reset-group-by');
     resetMenuItem.click();
 
     expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
@@ -88,7 +82,7 @@ describe('ChartContextMenu', () => {
   test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
     const onReset = jest.fn();
 
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <ChartContextMenu
           defaultStackByField={DEFAULT_STACK_BY_FIELD}
@@ -101,11 +95,11 @@ describe('ChartContextMenu', () => {
       </TestProviders>
     );
 
-    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
+    const menuButton = getByTestId('chart-settings-popover-button');
     fireEvent.click(menuButton);
     await waitForEuiPopoverOpen();
 
-    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+    const resetMenuItem = getByTestId('reset-group-by');
     fireEvent.click(resetMenuItem);
 
     expect(onReset).toBeCalled();

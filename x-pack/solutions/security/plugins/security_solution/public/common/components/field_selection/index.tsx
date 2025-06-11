@@ -77,7 +77,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       {chartOptionsContextMenu != null && (
-        <ChartOptionsFlexItem grow={false}>
+        <ChartOptionsFlexItem grow={false} data-test-subj="chartOptions">
           {chartOptionsContextMenu(uniqueQueryId)}
         </ChartOptionsFlexItem>
       )}
