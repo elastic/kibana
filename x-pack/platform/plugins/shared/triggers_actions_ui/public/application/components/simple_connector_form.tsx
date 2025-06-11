@@ -155,7 +155,6 @@ const FormRow: React.FC<FormRowProps> = ({
                 defaultValue,
                 type,
                 isRequired,
-                customUrlFieldValidator,
               })}
               helpText={helpText}
               componentProps={{
