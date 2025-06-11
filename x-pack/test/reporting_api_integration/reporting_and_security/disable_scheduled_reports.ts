@@ -91,8 +91,8 @@ export default function ({ getService }: FtrProviderContext) {
         scheduled_report_ids: [],
         errors: [
           {
-            message: `Insufficient privileges to disable scheduled report "${reportId}".`,
-            status: 403,
+            message: `Not found.`,
+            status: 404,
             id: reportId,
           },
         ],

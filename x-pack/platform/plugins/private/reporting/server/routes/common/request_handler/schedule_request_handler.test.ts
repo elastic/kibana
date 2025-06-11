@@ -104,6 +104,12 @@ describe('Handle request to schedule', () => {
       params: {},
     });
 
+    jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+      areNotificationsEnabled: true,
+    });
+
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
       user: { username: 'testymcgee' },
@@ -605,8 +611,31 @@ describe('Handle request to schedule', () => {
       `);
     });
 
+    test('disallows scheduling when user is "false"', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: false,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        // @ts-ignore
+        req: mockRequest,
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "body": "User must be authenticated to schedule a report",
+        }
+      `);
+    });
+
     test('disallows scheduling when reportingHealth.hasPermanentEncryptionKey = false', async () => {
-      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
+      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
         isSufficientlySecure: true,
         hasPermanentEncryptionKey: false,
         areNotificationsEnabled: true,
@@ -625,7 +654,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows scheduling when reportingHealth.isSufficientlySecure=false', async () => {
-      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
+      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: true,
         areNotificationsEnabled: true,

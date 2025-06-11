@@ -458,10 +458,7 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockResolvedValueOnce(mockResponse);
 
-      const result = await connector.getRTRCloudScripts(
-        { ids: ['script1', 'script2'] },
-        connectorUsageCollector
-      );
+      const result = await connector.getRTRCloudScripts({}, connectorUsageCollector);
 
       expect(mockedRequest).toHaveBeenNthCalledWith(
         1,

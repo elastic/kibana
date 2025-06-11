@@ -144,7 +144,7 @@ const lastRunResponse: CreatedAtSearchResponse = {
           created_at: '2025-05-06T21:12:07.198Z',
         },
         fields: {
-          'scheduled_report_id.keyword': ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+          scheduled_report_id: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         },
         sort: [1746565930198],
       },
@@ -156,7 +156,7 @@ const lastRunResponse: CreatedAtSearchResponse = {
           created_at: '2025-05-06T12:00:00.500Z',
         },
         fields: {
-          'scheduled_report_id.keyword': ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+          scheduled_report_id: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
         },
         sort: [1746565930198],
       },
@@ -227,14 +227,14 @@ describe('scheduledQueryFactory', () => {
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
         _source: ['created_at'],
-        collapse: { field: 'scheduled_report_id.keyword' },
+        collapse: { field: 'scheduled_report_id' },
         index: '.reporting-*,.kibana-reporting*',
         query: {
           bool: {
             filter: [
               {
                 terms: {
-                  'scheduled_report_id.keyword': [
+                  scheduled_report_id: [
                     'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
                     '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
                   ],
@@ -258,6 +258,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'elastic',
             enabled: true,
             jobtype: 'printable_pdf_v2',
+            object_type: 'dashboard',
             last_run: '2025-05-06T12:00:00.500Z',
             next_run: expect.any(String),
             schedule: {
@@ -277,6 +278,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
+            object_type: 'dashboard',
             last_run: '2025-05-06T21:12:07.198Z',
             next_run: expect.any(String),
             notification: {
@@ -317,14 +319,14 @@ describe('scheduledQueryFactory', () => {
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({
         _source: ['created_at'],
-        collapse: { field: 'scheduled_report_id.keyword' },
+        collapse: { field: 'scheduled_report_id' },
         index: '.reporting-*,.kibana-reporting*',
         query: {
           bool: {
             filter: [
               {
                 terms: {
-                  'scheduled_report_id.keyword': [
+                  scheduled_report_id: [
                     'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
                     '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
                   ],
@@ -401,6 +403,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'elastic',
             enabled: true,
             jobtype: 'printable_pdf_v2',
+            object_type: 'dashboard',
             next_run: expect.any(String),
             schedule: {
               rrule: {
@@ -419,6 +422,7 @@ describe('scheduledQueryFactory', () => {
             created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
+            object_type: 'dashboard',
             next_run: expect.any(String),
             notification: {
               email: {
@@ -529,13 +533,15 @@ describe('scheduledQueryFactory', () => {
         errors: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            message:
-              'Insufficient privileges to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4".',
-            status: 403,
+            message: `Not found.`,
+            status: 404,
           },
         ],
         total: 2,
       });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "elastic" attempted to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4" created by "not-elastic" without sufficient privileges.`
+      );
     });
 
     it('should handle errors in bulk get', async () => {
@@ -882,6 +888,7 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
+          object_type: 'dashboard',
           last_run: '2025-05-06T12:00:00.500Z',
           next_run: expect.any(String),
           schedule: {
@@ -901,6 +908,7 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
+          object_type: 'dashboard',
           last_run: '2025-05-06T21:12:07.198Z',
           next_run: expect.any(String),
           notification: {
@@ -941,6 +949,7 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
+          object_type: 'dashboard',
           last_run: undefined,
           next_run: expect.any(String),
           schedule: {
@@ -960,6 +969,7 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
+          object_type: 'dashboard',
           last_run: '2025-05-06T21:12:07.198Z',
           next_run: expect.any(String),
           notification: {
@@ -992,6 +1002,7 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
+          object_type: 'dashboard',
           last_run: undefined,
           next_run: expect.any(String),
           schedule: {
@@ -1011,6 +1022,7 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
+          object_type: 'dashboard',
           last_run: undefined,
           next_run: expect.any(String),
           notification: {
