@@ -51,6 +51,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -91,6 +92,7 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   dashboard: DashboardStart;
   embeddable?: EmbeddableStart;
+  fleet?: FleetStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;
