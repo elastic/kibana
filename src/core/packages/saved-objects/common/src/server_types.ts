@@ -128,5 +128,11 @@ export interface SavedObject<T = unknown> {
    */
   managed?: boolean;
 
+  /**
+   * Access control information of the saved object.
+   * This can be be used to customize access to the object in addition to RBAC, e.g.
+   * to set an object to read-only mode, where it is only editable by the owner of 
+   * the object (or an admin), even if other users are granted write access via a role.
+   */
   accessControl?: SavedObjectAccessControl;
 }
