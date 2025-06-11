@@ -23,6 +23,7 @@ import {
   type MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
+import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
@@ -39,9 +40,11 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   MicrosoftDefenderEndpointActionRequestCommonMeta,
+  MicrosoftDefenderEndpointActionRequestFileMeta,
   MicrosoftDefenderEndpointLogEsDoc,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  UploadedFileInfo,
 } from '../../../../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
@@ -58,10 +61,14 @@ import {
   type ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';
 import { stringify } from '../../../../../../utils/stringify';
-import { ResponseActionsClientError } from '../../../errors';
+import {
+  ResponseActionAgentResponseEsDocNotFound,
+  ResponseActionsClientError,
+} from '../../../errors';
 import type {
   CommonResponseActionMethodOptions,
   CustomScriptsResponse,
+  GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
 import { catchAndWrapError } from '../../../../../../utils';
@@ -608,7 +615,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                     MicrosoftDefenderEndpointActionRequestCommonMeta
                   >
                 >,
-                { fetchResult: true }
+                { downloadResult: true }
               )
             );
         }
@@ -624,7 +631,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         MicrosoftDefenderEndpointActionRequestCommonMeta
       >
     >,
-    options: { fetchResult?: boolean } = { fetchResult: false }
+    options: { downloadResult?: boolean } = { downloadResult: false }
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const warnings: string[] = [];
@@ -682,22 +689,13 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
           for (const actionRequest of pendingActionRequests) {
             let additionalData = {};
-            // Getting the live response result
-            if (options.fetchResult) {
-              const { data: result } =
-                await this.sendAction<MicrosoftDefenderEndpointGetActionsResponse>(
-                  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
-                  { id: machineAction.id }
-                );
-
+            // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
+            if (options.downloadResult) {
               additionalData = {
-                output: {
-                  content: {
-                    stdout: result?.value ?? '', // Store the download link in stdout
-                    stderr: '',
-                    code: '200',
-                  },
-                  type: 'text' as const,
+                meta: {
+                  machineActionId: machineAction.id,
+                  filename: `runscript-output-${machineAction.id}.json`,
+                  createdAt: new Date().toISOString(),
                 },
               };
             }
@@ -707,8 +705,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 agentId: Array.isArray(actionRequest.agent.id)
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
-                data: { command: actionRequest.EndpointActions.data.command, ...additionalData },
+                data: { command: actionRequest.EndpointActions.data.command },
                 error: isError ? { message } : undefined,
+                ...additionalData,
               })
             );
           }
@@ -789,12 +788,159 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       return { data } as CustomScriptsResponse;
     } catch (err) {
       const error = new ResponseActionsClientError(
-        `Failed to fetch Crowdstrike scripts, failed with: ${err.message}`,
+        `Failed to fetch Microsoft Defender for Endpoint scripts, failed with: ${err.message}`,
         500,
         err
       );
       this.log.error(error);
       throw error;
     }
+  }
+
+  async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
+    await this.ensureValidActionId(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
+
+    const { microsoftDefenderEndpointRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
+    if (command === 'runscript' && !microsoftDefenderEndpointRunScriptEnabled) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const fileInfo: UploadedFileInfo = {
+      actionId,
+      agentId,
+      id: agentId,
+      agentType: this.agentType,
+      status: 'AWAITING_UPLOAD',
+      created: '',
+      name: '',
+      size: 0,
+      mimeType: '',
+    };
+
+    try {
+      switch (command) {
+        case 'runscript':
+          {
+            const agentResponse = await this.fetchEsResponseDocForAgentId<
+              {},
+              MicrosoftDefenderEndpointActionRequestFileMeta
+            >(actionId, agentId);
+
+            fileInfo.status = 'READY';
+            fileInfo.created = agentResponse.meta?.createdAt ?? '';
+            fileInfo.name = agentResponse.meta?.filename ?? '';
+            fileInfo.mimeType = 'application/octet-stream';
+          }
+          break;
+
+        default:
+          throw new ResponseActionsClientError(`${command} does not support file downloads`, 400);
+      }
+    } catch (e) {
+      // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
+      if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
+        throw e;
+      }
+    }
+
+    return fileInfo;
+  }
+
+  async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    await this.ensureValidActionId(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
+
+    const { microsoftDefenderEndpointRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
+    if (command === 'runscript' && !microsoftDefenderEndpointRunScriptEnabled) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    let downloadStream: Readable | undefined;
+    let fileName: string = 'download.json';
+
+    try {
+      switch (command) {
+        case 'runscript':
+          {
+            const runscriptAgentResponse = await this.fetchEsResponseDocForAgentId<
+              {},
+              MicrosoftDefenderEndpointActionRequestFileMeta
+            >(actionId, agentId);
+
+            if (!runscriptAgentResponse.meta?.machineActionId) {
+              throw new ResponseActionsClientError(
+                `Unable to retrieve file from Microsoft Defender for Endpoint. Response ES document is missing [meta.machineActionId]`
+              );
+            }
+
+            const { data } = await this.sendAction<Readable>(
+              MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+              { id: runscriptAgentResponse.meta?.machineActionId }
+            );
+
+            if (data) {
+              downloadStream = data;
+              fileName = runscriptAgentResponse.meta.filename;
+            }
+          }
+          break;
+      }
+
+      if (!downloadStream) {
+        throw new ResponseActionsClientError(
+          `Unable to establish a file download Readable stream with Microsoft Defender for Endpoint for response action [${command}] [${actionId}]`
+        );
+      }
+    } catch (e) {
+      this.log.debug(
+        () =>
+          `Attempt to get file download stream from Microsoft Defender for Endpoint for response action failed with:\n${stringify(
+            e
+          )}`
+      );
+
+      throw e;
+    }
+
+    return {
+      stream: downloadStream,
+      mimeType: undefined,
+      fileName,
+    };
+  }
+
+  private async fetchEsResponseDocForAgentId<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string, agentId: string): Promise<LogsEndpointActionResponse<TOutputContent, TMeta>> {
+    const agentResponse = (
+      await this.fetchActionResponseEsDocs<TOutputContent, TMeta>(actionId, [agentId])
+    )[agentId];
+
+    if (!agentResponse) {
+      throw new ResponseActionAgentResponseEsDocNotFound(
+        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        404
+      );
+    }
+
+    return agentResponse;
   }
 }

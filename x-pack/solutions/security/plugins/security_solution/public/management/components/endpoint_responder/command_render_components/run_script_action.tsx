@@ -120,7 +120,9 @@ export const RunScriptActionResult = memo<
         agentId={command.commandDefinition?.meta?.endpointId}
         textSize="s"
         data-test-subj="console"
-        hideFile={true}
+        // Currently file is not supported for CrowdStrike
+        hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
+        showPasscode={false}
         hideContext={true}
       />
     </ResultComponent>

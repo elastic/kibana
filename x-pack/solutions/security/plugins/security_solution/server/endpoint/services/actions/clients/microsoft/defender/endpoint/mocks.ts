@@ -219,7 +219,7 @@ const createMicrosoftGetActionResultsApiResponseMock =
   (): MicrosoftDefenderEndpointGetActionResultsResponse => {
     return {
       '@odata.context': 'some-context',
-      value: ['http://example.com'],
+      value: 'http://example.com',
     };
   };
 
