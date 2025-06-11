@@ -49,7 +49,7 @@ describe('EmailNotificationService', () => {
       reporting: mockCore,
       index: '.reporting-test-1234',
       id: '1234',
-      jobType: 'pdf',
+      extension: 'pdf',
       contentType: 'test-content-type',
       relatedObject: {
         id: 'report-so-id',
@@ -95,7 +95,7 @@ describe('EmailNotificationService', () => {
         reporting: mockCore,
         index: '.reporting-test-1234',
         id: '1234',
-        jobType: 'pdf',
+        extension: 'pdf',
         contentType: 'test-content-type',
         relatedObject: {
           id: 'report-so-id',

@@ -12,7 +12,7 @@ export interface NotifyArgs {
   index: string;
   id: string;
   contentType?: string | null;
-  jobType: string;
+  extension: string;
   relatedObject: RelatedSavedObject;
   emailParams: {
     to?: string[];

@@ -144,6 +144,7 @@ describe('Run Scheduled Report Task', () => {
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
       jobContentEncoding: 'base64',
+      jobContentExtension: 'pdf',
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
@@ -488,9 +489,9 @@ describe('Run Scheduled Report Task', () => {
           subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
           to: ['test1@test.com'],
         },
+        extension: 'pdf',
         id: '290357209345723095',
         index: '.reporting-fantastic',
-        jobType: 'test1',
         relatedObject: {
           id: 'report-so-id',
           namespace: 'default',
@@ -528,9 +529,9 @@ describe('Run Scheduled Report Task', () => {
           subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
           to: ['test1@test.com'],
         },
+        extension: 'pdf',
         id: '290357209345723095',
         index: '.reporting-fantastic',
-        jobType: 'test1',
         relatedObject: {
           id: 'report-so-id',
           namespace: 'default',
@@ -628,9 +629,9 @@ describe('Run Scheduled Report Task', () => {
           subject: 'Test Report [2025-06-04T00:00:00.000Z] scheduled report',
           to: ['test1@test.com'],
         },
+        extension: 'pdf',
         id: '290357209345723095',
         index: '.reporting-fantastic',
-        jobType: 'test1',
         relatedObject: {
           id: 'report-so-id',
           namespace: 'default',

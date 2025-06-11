@@ -189,6 +189,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     return exportType.jobContentEncoding;
   }
 
+  protected getJobContentExtension(jobType: string) {
+    const exportType = this.exportTypesRegistry.getByJobType(jobType);
+    return exportType.jobContentExtension;
+  }
+
   protected async failJob(
     report: SavedReport,
     error?: ReportingError

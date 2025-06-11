@@ -123,11 +123,13 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
         const email = notification.email;
         const title = reportSO.attributes.title;
+        const extension = this.getJobContentExtension(report.jobtype);
+
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          jobType: report.jobtype,
+          extension,
           contentType: output.content_type,
           relatedObject: {
             id: reportSO.id,
