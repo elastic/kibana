@@ -20,14 +20,18 @@ const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span
 export const createObservabilityTracesSpanDocumentProfileProvider = ({
   tracesContextService,
   apmErrorsContextService,
+  logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   profile: {
-    getDocViewer: createGetDocViewer(
-      tracesContextService.getAllTracesIndexPattern(),
-      apmErrorsContextService.getErrorsIndexPattern()
-    ),
+    getDocViewer: createGetDocViewer({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+    }),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID;

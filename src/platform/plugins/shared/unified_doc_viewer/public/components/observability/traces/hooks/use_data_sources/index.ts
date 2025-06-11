@@ -9,26 +9,19 @@
 
 import createContainer from 'constate';
 
-interface UseDataSourcesParams {
-  tracesIndexPattern: string;
-  apmErrorsIndexPattern: string;
-}
+type UseDataSourcesParams = DataSources;
 
 export interface DataSources {
-  logs: string;
-  apm: {
-    errors: string;
+  indexes: {
+    logs: string;
+    apm: {
+      errors: string;
+    };
   };
 }
 
-const useDataSources = ({ tracesIndexPattern, apmErrorsIndexPattern }: UseDataSourcesParams) => {
-  return {
-    logs: tracesIndexPattern, // TODO add logs index pattern when available
-    apm: {
-      errors: apmErrorsIndexPattern,
-      traces: tracesIndexPattern,
-    },
-  };
+const useDataSources = ({ indexes }: UseDataSourcesParams) => {
+  return { indexes };
 };
 
 export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);

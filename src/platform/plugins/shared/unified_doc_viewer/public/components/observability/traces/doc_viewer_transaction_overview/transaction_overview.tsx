@@ -32,8 +32,13 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
-  tracesIndexPattern: string;
-  apmErrorsIndexPattern: string;
+  indexes: {
+    apm: {
+      traces: string;
+      errors: string;
+    };
+    logs: string;
+  };
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -44,8 +49,7 @@ export function TransactionOverview({
   filter,
   onAddColumn,
   onRemoveColumn,
-  tracesIndexPattern,
-  apmErrorsIndexPattern,
+  indexes,
   showWaterfall = true,
   showActions = true,
   dataView,
@@ -68,11 +72,8 @@ export function TransactionOverview({
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
-    <DataSourcesProvider
-      tracesIndexPattern={tracesIndexPattern}
-      apmErrorsIndexPattern={apmErrorsIndexPattern}
-    >
-      <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
+    <DataSourcesProvider indexes={indexes}>
+      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
         <FieldActionsProvider
           columns={columns}
           filter={filter}
@@ -120,7 +121,7 @@ export function TransactionOverview({
                     docId={transactionId}
                     displayType="transaction"
                     dataView={dataView}
-                    tracesIndexPattern={tracesIndexPattern}
+                    tracesIndexPattern={indexes.apm.traces}
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />

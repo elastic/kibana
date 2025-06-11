@@ -33,8 +33,13 @@ import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hook
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 
 export type SpanOverviewProps = DocViewRenderProps & {
-  tracesIndexPattern: string;
-  apmErrorsIndexPattern: string;
+  indexes: {
+    apm: {
+      traces: string;
+      errors: string;
+    };
+    logs: string;
+  };
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -45,8 +50,7 @@ export function SpanOverview({
   filter,
   onAddColumn,
   onRemoveColumn,
-  tracesIndexPattern,
-  apmErrorsIndexPattern,
+  indexes,
   showWaterfall = true,
   showActions = true,
   dataView,
@@ -68,15 +72,12 @@ export function SpanOverview({
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
-    <DataSourcesProvider
-      tracesIndexPattern={tracesIndexPattern}
-      apmErrorsIndexPattern={apmErrorsIndexPattern}
-    >
+    <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider
         traceId={flattenedDoc[TRACE_ID_FIELD]}
-        indexPattern={tracesIndexPattern}
+        indexPattern={indexes.apm.traces}
       >
-        <TransactionProvider transactionId={transactionId} indexPattern={tracesIndexPattern}>
+        <TransactionProvider transactionId={transactionId} indexPattern={indexes.apm.traces}>
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -123,7 +124,7 @@ export function SpanOverview({
                     docId={flattenedDoc[SPAN_ID_FIELD]}
                     displayType="span"
                     dataView={dataView}
-                    tracesIndexPattern={tracesIndexPattern}
+                    tracesIndexPattern={indexes.apm.traces}
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />
