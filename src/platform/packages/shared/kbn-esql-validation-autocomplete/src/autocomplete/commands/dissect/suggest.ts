@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EDITOR_MARKER } from '../../../shared/constants';
 import { isSingleItem } from '../../../..';
 import { ESQL_STRING_TYPES } from '../../../shared/esql_types';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -22,12 +21,10 @@ export async function suggest({
   innerText,
   getColumnsByType,
 }: CommandSuggestParams<'dissect'>): Promise<SuggestionRawDefinition[]> {
-  const commandArgs = command.args.filter(
-    (arg) => isSingleItem(arg) && arg.text !== EDITOR_MARKER && arg.text !== ''
-  );
+  const commandArgs = command.args.filter((arg) => isSingleItem(arg) && arg.type !== 'unknown');
 
-  // DISSECT field /
-  if (commandArgs.length === 1) {
+  // DISSECT field/
+  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
       i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
