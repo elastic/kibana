@@ -28,7 +28,7 @@ export interface Props {
   isAutoRefreshing: boolean;
 }
 
-export function SLODetailsHistory({ slo, isAutoRefreshing }: Props) {
+export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
   const { uiSettings } = useKibana().services;
   const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
