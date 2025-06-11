@@ -203,6 +203,7 @@
         "playwright",
         "playwright-chromium",
         "pngjs",
+        "qs",
         "react-test-renderer",
         "rxjs-marbles",
         "sharp",
