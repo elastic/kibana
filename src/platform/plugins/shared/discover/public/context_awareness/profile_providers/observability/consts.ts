@@ -8,4 +8,3 @@
  */
 
 export const OBSERVABILITY_ROOT_PROFILE_ID = 'observability-root-profile';
-export const OBSERVABILITY_DOCUMENT_PROFILE_ID = 'observability-document-profile';
