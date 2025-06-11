@@ -8,6 +8,9 @@
 import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { KNOWLEDGE_BASE_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
@@ -19,16 +22,28 @@ interface Props {
 
 export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
-
+  const { assistantAvailability } = useAssistantContext();
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
-        openInNewTab: true,
-      });
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
+        navigateToApp('securitySolutionUI', {
+          deepLinkId: SecurityPageName.configurationsAiSettings,
+          path: `?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
+          openInNewTab: true,
+        });
+      } else {
+        navigateToApp('management', {
+          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
+          openInNewTab: true,
+        });
+      }
     },
-    [navigateToApp, contentReferenceNode]
+    [
+      assistantAvailability.hasSearchAILakeConfigurations,
+      navigateToApp,
+      contentReferenceNode.contentReference.knowledgeBaseEntryId,
+    ]
   );
 
   return (

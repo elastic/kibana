@@ -8,7 +8,6 @@
 import { encode } from '@kbn/rison';
 
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { useAssistantContext } from '@kbn/elastic-assistant';
 import { SecurityPageName } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import { useNavigation } from '../lib/kibana';
@@ -17,7 +16,6 @@ import { URL_PARAM_KEY } from './use_url_state';
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
-  const { assistantAvailability } = useAssistantContext();
   return (
     /**
      * Pass one or more filter control configurations to be applied to the alerts page filters
@@ -37,9 +35,7 @@ export const useNavigateToAlertsPageWithFilters = () => {
     );
     const timerangePath = timerange ? `&timerange=${timerange}` : '';
     navigateTo({
-      deepLinkId: assistantAvailability.hasSearchAILakeConfigurations
-        ? SecurityPageName.alertSummary
-        : SecurityPageName.alerts,
+      deepLinkId: SecurityPageName.alerts,
       path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}${timerangePath}`,
       openInNewTab,
     });
