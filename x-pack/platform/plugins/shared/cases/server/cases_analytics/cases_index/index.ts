@@ -53,17 +53,15 @@ export const scheduleCasesAnalyticsSyncTask = ({
   taskManager: TaskManagerStartContract;
   logger: Logger;
 }) => {
-  try {
-    scheduleCAISynchronizationTask({
-      taskId: CAI_CASES_SYNCHRONIZATION_TASK_ID,
-      sourceIndex: CAI_CASES_SOURCE_INDEX,
-      destIndex: CAI_CASES_INDEX_NAME,
-      taskManager,
-      logger,
-    });
-  } catch (e) {
+  scheduleCAISynchronizationTask({
+    taskId: CAI_CASES_SYNCHRONIZATION_TASK_ID,
+    sourceIndex: CAI_CASES_SOURCE_INDEX,
+    destIndex: CAI_CASES_INDEX_NAME,
+    taskManager,
+    logger,
+  }).catch((e) => {
     logger.error(
       `Error scheduling ${CAI_CASES_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
     );
-  }
+  });
 };

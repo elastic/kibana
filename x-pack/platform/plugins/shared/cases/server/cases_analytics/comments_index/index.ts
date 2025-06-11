@@ -53,17 +53,15 @@ export const scheduleCommentsAnalyticsSyncTask = ({
   taskManager: TaskManagerStartContract;
   logger: Logger;
 }) => {
-  try {
-    scheduleCAISynchronizationTask({
-      taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
-      sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-      destIndex: CAI_COMMENTS_INDEX_NAME,
-      taskManager,
-      logger,
-    });
-  } catch (e) {
+  scheduleCAISynchronizationTask({
+    taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+    sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
+    destIndex: CAI_COMMENTS_INDEX_NAME,
+    taskManager,
+    logger,
+  }).catch((e) => {
     logger.error(
       `Error scheduling ${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
     );
-  }
+  });
 };

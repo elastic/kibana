@@ -206,7 +206,7 @@ export class CasePlugin
       scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
     }
 
-    createCasesAnalyticsIndexes({
+    void createCasesAnalyticsIndexes({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
       isServerless: this.isServerless,
