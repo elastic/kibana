@@ -170,11 +170,15 @@ export const ESQLEditor = memo(function ESQLEditor({
   });
   const onQueryUpdate = useCallback(
     (value: string) => {
-      setCode(value);
-      setCodeStateOnSubmission(value);
+      if (!editorIsInline) {
+        // preventing a race condition in the inline editor mode
+        // making sure functional tests don't fail in the non-inline mode mode, because resetting the query doesn't work
+        setCode(value);
+        setCodeStateOnSubmission(value);
+      }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange, setCode]
+    [onTextLangQueryChange, setCode, editorIsInline]
   );
 
   const onQuerySubmit = useCallback(() => {
