@@ -57,13 +57,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return (
-      <SLODetailsHistory
-        slo={slo}
-        isAutoRefreshing={isAutoRefreshing}
-        selectedTabId={selectedTabId}
-      />
-    );
+    return <SLODetailsHistory slo={slo} isAutoRefreshing={isAutoRefreshing} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
@@ -82,11 +76,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
       <EuiFlexGroup direction="column" gutterSize="l">
         <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
 
-        <HistoricalDataCharts
-          slo={slo}
-          selectedTabId={selectedTabId}
-          isAutoRefreshing={isAutoRefreshing}
-        />
+        <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
 
         <EventsChartPanel slo={slo} range={range} />
       </EuiFlexGroup>

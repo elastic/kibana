@@ -22,15 +22,13 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
-import { SloTabId } from '../slo_details';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
-  selectedTabId: SloTabId;
 }
 
-export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
+export function SLODetailsHistory({ slo, isAutoRefreshing }: Props) {
   const { uiSettings } = useKibana().services;
   const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
   const [end, setEnd] = useState('now');
@@ -105,7 +103,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
 
       <HistoricalDataCharts
         slo={slo}
-        selectedTabId={selectedTabId}
+        hideMetadata={true}
         isAutoRefreshing={isAutoRefreshing}
         range={range}
         onBrushed={onBrushed}
