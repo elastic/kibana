@@ -21,11 +21,9 @@ import {
   STORAGE_CLEAR_ACTION,
   NOTIFICATIONS_SHOW_ACTION,
   NOTIFICATIONS_SUCCESS_ACTION,
-  NOTIFICATIONS_WARNING_ACTION,
   NOTIFICATIONS_DANGER_ACTION,
   NOTIFICATIONS_ADD_ERROR_ACTION,
   NOTIFICATIONS_ADD_SUCCESS_ACTION,
-  NOTIFICATIONS_ADD_WARNING_ACTION,
   NOTIFICATIONS_REMOVE_ACTION,
   EDIT_DATA_VIEW_ACTION,
 } from '../constants';
@@ -138,14 +136,11 @@ const services: Partial<KibanaServices> = {
     toasts: {
       show: action(NOTIFICATIONS_SHOW_ACTION),
       success: action(NOTIFICATIONS_SUCCESS_ACTION),
-      warning: action(NOTIFICATIONS_WARNING_ACTION),
       danger: action(NOTIFICATIONS_DANGER_ACTION),
       // @ts-ignore
       addError: action(NOTIFICATIONS_ADD_ERROR_ACTION),
       // @ts-ignore
       addSuccess: action(NOTIFICATIONS_ADD_SUCCESS_ACTION),
-      // @ts-ignore
-      addWarning: action(NOTIFICATIONS_ADD_WARNING_ACTION),
       remove: action(NOTIFICATIONS_REMOVE_ACTION),
     },
   },
