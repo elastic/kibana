@@ -64,16 +64,16 @@ export class RelatedDashboardsClient {
       (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
     );
     return {
-      suggestedDashboards: filteredSuggestedDashboards,
+      suggestedDashboards: filteredSuggestedDashboards.slice(0, 10), // limit to 10 suggested dashboards
       linkedDashboards,
     };
   }
 
   async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
+    const alert = this.checkAlert();
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
     const index = await this.getRuleQueryIndex();
-    const alert = this.checkAlert();
     const allRelevantFields = alert.getAllRelevantFields();
 
     if (index) {
@@ -81,7 +81,7 @@ export class RelatedDashboardsClient {
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
     if (allRelevantFields.length > 0) {
-      const { dashboards } = this.getDashboardsByField(Array.from(allRelevantFields));
+      const { dashboards } = this.getDashboardsByField(allRelevantFields);
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
     allSuggestedDashboards.forEach((dashboard) => {
@@ -104,7 +104,7 @@ export class RelatedDashboardsClient {
     const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
       return b.score - a.score;
     });
-    return sortedDashboards.slice(0, 10);
+    return sortedDashboards;
   }
 
   async fetchDashboards({

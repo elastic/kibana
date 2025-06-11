@@ -476,7 +476,7 @@ describe('RelatedDashboardsClient', () => {
         client.setAlert(null);
 
         await expect(client.getLinkedDashboards()).rejects.toThrow(
-          'Alert not found. Could not get linked dashboards.'
+          `Alert with id ${alertId} not found. Could not fetch related dashboards.`
         );
       });
 
