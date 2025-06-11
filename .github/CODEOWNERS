@@ -1852,11 +1852,13 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/solutions/observability/test/api_integration/config.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/solutions/observability/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/kibana.jsonc @elastic/appex-qa
 /x-pack/solutions/security/test/tsconfig.json @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/config.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
+/x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery

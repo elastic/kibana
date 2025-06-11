@@ -17,7 +17,7 @@ import {
   tinesStory1,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
 
-interface ServiceNowRequest {
+export interface ServiceNowRequest {
   work_notes?: string;
 }
 
@@ -29,5 +29,4 @@ export {
   RecordingServiceNowSimulator,
   tinesAgentWebhook,
   tinesStory1,
-  ServiceNowRequest,
 };
