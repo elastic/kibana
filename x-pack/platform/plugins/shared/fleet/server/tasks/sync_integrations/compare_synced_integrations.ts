@@ -234,9 +234,7 @@ const compareIntegrations = (
               },
             };
           } else {
-            latestFailedAttempt = latestInstallFailedAttempts.error?.message
-              ? `error: ${latestInstallFailedAttempts.error?.message}`
-              : '';
+            latestFailedAttempt = latestInstallFailedAttempts.error?.message ?? '';
           }
         }
         return {
@@ -264,9 +262,7 @@ const compareIntegrations = (
           latestUninstallFailedAttemptTime = `at ${new Date(
             latestInstallFailedAttempts.created_at
           ).toUTCString()}`;
-          latestUninstallFailedAttempt = latestInstallFailedAttempts.error?.message
-            ? `${latestInstallFailedAttempts.error?.message}`
-            : '';
+          latestUninstallFailedAttempt = latestInstallFailedAttempts.error?.message ?? '';
         }
         return {
           ...baseIntegrationData,

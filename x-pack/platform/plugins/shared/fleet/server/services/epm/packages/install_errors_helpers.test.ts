@@ -47,13 +47,13 @@ describe('Install error helpers', () => {
       generateFailedAttempt('0.1.0'),
       generateFailedAttempt('0.2.0'),
     ];
-    it('should clear previous error on succesful upgrade', () => {
+    it('should clear previous error on successful upgrade', () => {
       const currentFailedAttemps = clearLatestFailedAttempts('0.2.0', previousFailedAttemps);
 
       expect(mapFailedAttempsToTargetVersion(currentFailedAttemps)).toEqual([]);
     });
 
-    it('should not clear previous upgrade error on succesful rollback', () => {
+    it('should not clear previous upgrade error on successful rollback', () => {
       const currentFailedAttempts = clearLatestFailedAttempts('0.1.0', previousFailedAttemps);
 
       expect(mapFailedAttempsToTargetVersion(currentFailedAttempts)).toEqual(['0.2.0']);
@@ -89,11 +89,6 @@ describe('Install error helpers', () => {
   describe('createOrUpdateFailedInstallStatus', () => {
     const soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
-
-    const previousFailedAttemps: InstallFailedAttempt[] = [
-      generateFailedAttempt('0.1.0'),
-      generateFailedAttempt('0.2.0'),
-    ];
 
     it('should create installation object with latest_install_failed_attempts if none was found', async () => {
       getInstallationObjectMock.mockResolvedValue(undefined);
