@@ -13,7 +13,7 @@ import classNames from 'classnames';
 
 import useRafState from 'react-use/lib/useRafState';
 import { UseEuiTheme, euiShadow, euiShadowFlat } from '@elastic/eui';
-import { EmotionStyles, useMemoizedStyles } from '@kbn/core/public';
+import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { css } from '@emotion/react';
 import { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
@@ -169,7 +169,7 @@ const ResizableSuggestionsListDiv: React.FC<{
   const inputContainer = props.inputContainer;
 
   const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);
-  const styles = useMemoizedStyles(suggestionsStyles);
+  const styles = useMemoCss(suggestionsStyles);
 
   if (!containerRect) return null;
 

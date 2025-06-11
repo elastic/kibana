@@ -10,7 +10,7 @@
 import { EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { EmotionStyles, useMemoizedStyles } from '@kbn/core/public';
+import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { css } from '@emotion/react';
 import { QuerySuggestion } from '../autocomplete';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
@@ -60,7 +60,7 @@ export const SuggestionComponent = React.memo(function SuggestionComponent(props
     onMouseEnter(suggestion, index);
   }, [index, onMouseEnter, suggestion]);
 
-  const styles = useMemoizedStyles(suggestionStyles);
+  const styles = useMemoCss(suggestionStyles);
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus

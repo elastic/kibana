@@ -33,10 +33,11 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { useMemoizedStyles, type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
+import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { useMemoCss } from '../../use_memo_css';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { FilterPanelOption } from '../../types';
@@ -91,7 +92,7 @@ function FilterItemComponent(props: FilterItemProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
-  const styles = useMemoizedStyles(filterItemStyles);
+  const styles = useMemoCss(filterItemStyles);
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);

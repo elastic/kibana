@@ -11,7 +11,7 @@ import React from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '../use_memo_css';
 
 const queryStringInputStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
@@ -92,7 +92,7 @@ const queryStringInputStyles = {
 };
 
 export const StyledDiv = ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
-  const styles = useMemoizedStyles(queryStringInputStyles);
+  const styles = useMemoCss(queryStringInputStyles);
   return (
     <div css={styles.container} {...props}>
       {children}

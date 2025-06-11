@@ -39,7 +39,7 @@ import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '../use_memo_css';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 import { PanelTitle } from '../query_string_input/panel_title';
@@ -222,7 +222,7 @@ export const SavedQueryManagementList = ({
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
 
-  const styles = useMemoizedStyles(savedQueryListStyles);
+  const styles = useMemoCss(savedQueryListStyles);
 
   const debouncedSetSearchTerm = useMemo(() => {
     return debounce((newSearchTerm: string) => {

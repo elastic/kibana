@@ -11,7 +11,7 @@ import React, { FC, ReactNode } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '../../use_memo_css';
 
 interface Props {
   items: ReactNode[];
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
-  const styles = useMemoizedStyles(filterButtonStyles);
+  const styles = useMemoCss(filterButtonStyles);
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {
