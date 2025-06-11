@@ -22,7 +22,7 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
     modelId === 'rainbow-sprinkles' ||
-    modelId === '.elser-v2'
+    modelId === 'elser-v2'
   ) {
     return true;
   }

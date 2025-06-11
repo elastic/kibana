@@ -93,7 +93,7 @@ const inferenceEndpoints = [
     task_type: 'sparse_embedding',
     service: 'elastic',
     service_settings: {
-      model_id: '.elser-v2',
+      model_id: 'elser-v2',
     },
   },
 ] as InferenceAPIConfigResponse[];
