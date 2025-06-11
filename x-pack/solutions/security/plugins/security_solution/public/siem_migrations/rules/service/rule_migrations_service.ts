@@ -206,19 +206,11 @@ export class SiemRulesMigrationsService {
       const result = await api.startRuleMigration(params);
       this.startPolling();
 
-      this.telemetry.reportStartTranslation({
-        migrationId,
-        connectorId,
-        skipPrebuiltRulesMatching,
-        retry,
-      });
+      this.telemetry.reportStartTranslation(params);
       return result;
     } catch (error) {
       this.telemetry.reportStartTranslation({
-        migrationId,
-        connectorId,
-        skipPrebuiltRulesMatching,
-        retry,
+        ...params,
         error,
       });
       throw error;

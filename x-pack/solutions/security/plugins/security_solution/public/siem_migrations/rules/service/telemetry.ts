@@ -7,7 +7,6 @@
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
-import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import type {
   RuleMigrationResourceType,
   RuleMigrationRule,
@@ -18,6 +17,7 @@ import type {
   ReportTranslatedRuleInstallActionParams,
 } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { SiemMigrationsEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
+import type { StartRuleMigrationParams } from '../api';
 
 export class SiemRulesMigrationsTelemetry {
   constructor(private readonly telemetryService: TelemetryServiceStart) {}
@@ -106,14 +106,17 @@ export class SiemRulesMigrationsTelemetry {
     });
   };
 
-  reportStartTranslation = (params: {
-    migrationId: string;
-    connectorId: string;
-    skipPrebuiltRulesMatching?: boolean;
-    retry?: SiemMigrationRetryFilter;
-    error?: Error;
-  }) => {
-    const { migrationId, connectorId, skipPrebuiltRulesMatching = false, retry, error } = params;
+  reportStartTranslation = (
+    params: StartRuleMigrationParams & {
+      error?: Error;
+    }
+  ) => {
+    const {
+      migrationId,
+      settings: { connectorId, skipPrebuiltRulesMatching = false },
+      retry,
+      error,
+    } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.StartMigration, {
       migrationId,
       connectorId,
