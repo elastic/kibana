@@ -11,7 +11,7 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
   AssistantFeatures,
 } from '@kbn/elastic-assistant-common';
-import { ReplaySubject, type Subject } from 'rxjs';
+import { ReplaySubject, filter, type Subject, take } from 'rxjs';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -115,16 +115,18 @@ export class ElasticAssistantPlugin
       .then(([{ featureFlags }]) => {
         featureFlags
           .getBooleanValue$(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false)
-          .subscribe((assistantAttackDiscoverySchedulingEnabled) => {
-            if (assistantAttackDiscoverySchedulingEnabled) {
-              // Register Attack Discovery Schedule type
-              plugins.alerting.registerType(
-                getAttackDiscoveryScheduleType({
-                  logger: this.logger,
-                  telemetry: core.analytics,
-                })
-              );
-            }
+          .pipe(
+            filter((value) => value === true),
+            take(1) // It can only apply once because alerting rules can only be registered once
+          )
+          .subscribe(() => {
+            // Register Attack Discovery Schedule type
+            plugins.alerting.registerType(
+              getAttackDiscoveryScheduleType({
+                logger: this.logger,
+                telemetry: core.analytics,
+              })
+            );
           });
       })
       .catch((error) => {
