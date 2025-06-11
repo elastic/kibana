@@ -114,11 +114,12 @@ export default ({ getService }: FtrProviderContext): void => {
          * it is a create comment request
          */
         const allCommentRequests = serviceNowServer.allRequestData.filter(
-          (request: ServiceNowRequest) => Boolean(request.work_notes)
+          (request): request is { work_notes: string } => 
+            typeof request.work_notes === 'string' && request.work_notes.length > 0
         );
 
         const allWorkNotes: string[] = allCommentRequests.map(
-          (request: { work_notes: string }) => request.work_notes
+          (request) => request.work_notes
         );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
