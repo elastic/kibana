@@ -49,7 +49,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           port: registryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       })
     : undefined;
@@ -86,10 +86,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
-        `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'enableAutomaticAgentUpgrades',
-          'installedIntegrationsTabularUI',
-        ])}`,
+        `--xpack.fleet.enableExperimental=${JSON.stringify(['enableAutomaticAgentUpgrades'])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
