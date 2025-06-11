@@ -9,7 +9,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { StreamsServer } from '../types';
 import { AssetService } from '../lib/streams/assets/asset_service';
 import { AssetClient } from '../lib/streams/assets/asset_client';

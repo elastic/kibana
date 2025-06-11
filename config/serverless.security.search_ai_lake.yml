@@ -5,6 +5,13 @@ xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 
+## Plugins that are inaccessible in the UI
+xpack.securitySolutionServerless.inaccessibleApps:
+  - dashboards
+  - visualize
+  - maps
+  - lens
+
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
 xpack.alerting.rulesSettings.enabled: false

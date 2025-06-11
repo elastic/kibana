@@ -852,5 +852,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
       );
     });
+
+    describe('Area/Line pointVisibility', () => {
+      before(async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+      });
+
+      describe('Line Chart', () => {
+        before(async () => {
+          await lens.switchToVisualization('line');
+          await lens.waitForVisualization('xyVisChart');
+          await lens.openVisualOptions();
+        });
+        it(`points should be visible when Point visibility is 'Auto'`, async () => {
+          await testSubjects.click('xy_point_visibility_auto');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(true);
+        });
+        it(`points should be visible when Point visibility is 'Show'`, async () => {
+          await testSubjects.click('xy_point_visibility_show');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(true);
+        });
+        it(`points should not be visible when Point visibility is 'Hide'`, async () => {
+          await testSubjects.click('xy_point_visibility_hide');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(false);
+        });
+      });
+
+      describe('Area Chart', () => {
+        before(async () => {
+          await lens.switchToVisualization('area');
+          await lens.waitForVisualization('xyVisChart');
+          await lens.openVisualOptions();
+        });
+        it(`points should be visible when Point visibility is 'Auto'`, async () => {
+          await testSubjects.click('xy_point_visibility_auto');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(true);
+        });
+        it(`points should be visible when Point visibility is 'Show'`, async () => {
+          await testSubjects.click('xy_point_visibility_show');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(true);
+        });
+        it(`points should not be visible when Point visibility is 'Hide'`, async () => {
+          await testSubjects.click('xy_point_visibility_hide');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(false);
+        });
+      });
+    });
   });
 }
