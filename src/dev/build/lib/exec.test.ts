@@ -76,7 +76,7 @@ describe('exec', () => {
 
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
-        "--- ✅ test-build [x64]",
+        "--- ✅ test-build",
         "   │ debg $ <nodedir>/node -e console.log(\\"buffered output\\")",
         "   │ debg buffered output",
       ]
@@ -105,7 +105,7 @@ describe('exec', () => {
 
     expect(testWriter.messages).toMatchInlineSnapshot(`
       Array [
-        "--- ✅ test-build [x64]",
+        "--- ✅ test-build",
         "   │ debg $ <nodedir>/node -e console.error(\\"error output: exit code 123\\")",
         "   │ERROR error output: exit code 123",
       ]
