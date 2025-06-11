@@ -163,48 +163,13 @@ describe('Microsoft Defender for Endpoint Connector', () => {
     });
 
     it.each`
-      title | options | expectedParams
-      ${'single value filters'} | ${{
-  id: '123',
-  status: 'Succeeded',
-  machineId: 'abc',
-  page: 2,
-}} | ${{
-  $count: true,
-  $filter: "id eq '123' AND status eq 'Succeeded' AND machineId eq 'abc'",
-  $skip: 20,
-  $top: 20,
-}}
-      ${'multiple value filters'} | ${{
-  id: ['123', '321'],
-  type: ['Isolate', 'Unisolate'],
-  page: 1,
-  pageSize: 100,
-}} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
-      ${'page and page size'} | ${{
-  id: ['123', '321'],
-  type: ['Isolate', 'Unisolate'],
-  page: 3,
-  pageSize: 100,
-}} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
-      ${'with sortDirection but no sortField'} | ${{
-  id: '123',
-  sortDirection: 'asc',
-}} | ${{ $count: true, $filter: "id eq '123'", $top: 20 }}
-      ${'with sortField and no sortDirection (desc is default)'} | ${{
-  id: '123',
-  sortField: 'type',
-}} | ${{
-  $count: true,
-  $filter: "id eq '123'",
-  $top: 20,
-  $orderby: 'type desc',
-}}
-      ${'with sortField and sortDirection'} | ${{
-  id: '123',
-  sortField: 'type',
-  sortDirection: 'asc',
-}} | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type asc' }}
+      title                                                      | options                                                                           | expectedParams
+      ${'single value filters'}                                  | ${{ id: '123', status: 'Succeeded', machineId: 'abc', page: 2 }}                  | ${{ $count: true, $filter: "id eq '123' AND status eq 'Succeeded' AND machineId eq 'abc'", $skip: 20, $top: 20 }}
+      ${'multiple value filters'}                                | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 1, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
+      ${'page and page size'}                                    | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 3, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
+      ${'with sortDirection but no sortField'}                   | ${{ id: '123', sortDirection: 'asc' }}                                            | ${{ $count: true, $filter: "id eq '123'", $top: 20 }}
+      ${'with sortField and no sortDirection (desc is default)'} | ${{ id: '123', sortField: 'type' }}                                               | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type desc' }}
+      ${'with sortField and sortDirection'}                      | ${{ id: '123', sortField: 'type', sortDirection: 'asc' }}                         | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type asc' }}
     `(
       'should correctly build the oData URL params: $title',
       async ({ options, expectedParams }) => {
@@ -287,7 +252,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
       const actionId = 'test-action-123';
       const mockDownloadUrl = 'https://download.microsoft.com/mock-download-url/results.json';
 
-      // Mock only the external download URL (Microsoft Defender API is mocked in mocks.ts)
+      // Mock external download URL to return a stream (Microsoft Defender API uses default mock)
       const mockStream = { pipe: jest.fn(), on: jest.fn(), read: jest.fn() };
       connectorMock.apiMock[mockDownloadUrl] = () =>
         microsoftDefenderEndpointConnectorMocks.createAxiosResponseMock(mockStream);
