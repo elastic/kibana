@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
+import { ALERT_LINK_DASHBOARDS_PLACEHOLDER } from '../translations';
 
 const mockOnChange = jest.fn();
 
@@ -55,7 +56,7 @@ describe('RuleDashboards', () => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
       formData: {
-        params: {
+        artifacts: {
           dashboards: [],
         },
       },
@@ -154,6 +155,46 @@ describe('RuleDashboards', () => {
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
+    });
+  });
+
+  it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        artifacts: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
+        },
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+
+    const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
+    fireEvent.change(searchInput, { target: { value: 'Dashboard 1' } });
+
+    // Advance timers to trigger debounce
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(searchInput).toHaveValue('Dashboard 1');
+    // Assert that fetchDashboards was called with the correct search value
+    // Wait for the next tick to allow state update and effect to run
+    await waitFor(() => {
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
+      );
+
+      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
     });
   });
 });
