@@ -8,7 +8,13 @@
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiButton } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { useKibana } from '../../../../utils/kibana_react';
 export interface DashboardMetadata {
   id: string;
@@ -66,14 +72,15 @@ export function DashboardTile({
         </EuiFlexItem>
         {actionButtonProps ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
               onClick={() => actionButtonProps.onClick(dashboard)}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}
+              iconType="plus"
             >
               <EuiText>{actionButtonProps.label}</EuiText>
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

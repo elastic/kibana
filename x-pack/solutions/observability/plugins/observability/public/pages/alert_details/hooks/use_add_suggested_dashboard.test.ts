@@ -12,7 +12,7 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-let capturedOnSuccess: (() => void) | undefined;
+let capturedOnSuccess: ((data: Rule) => void) | undefined;
 let capturedOnError: ((error: any) => void) | undefined;
 
 // Test constants
@@ -34,11 +34,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 const mockUpdateRule = jest.fn();
 
 jest.mock('@kbn/response-ops-rule-form/src/common/hooks', () => ({
-  useUpdateRule: jest.fn((params: { onSuccess: () => void; onError: (error: any) => void }) => {
-    capturedOnSuccess = params.onSuccess;
-    capturedOnError = params.onError;
-    return { mutateAsync: mockUpdateRule };
-  }),
+  useUpdateRule: jest.fn(
+    (params: { onSuccess: (data: Rule) => void; onError: (error: any) => void }) => {
+      capturedOnSuccess = params.onSuccess;
+      capturedOnError = params.onError;
+      return { mutateAsync: mockUpdateRule };
+    }
+  ),
 }));
 
 const mockRule = {
@@ -120,8 +122,16 @@ describe('useAddSuggestedDashboards', () => {
     expect(result.current.addingDashboardId).toBe(TEST_DASHBOARD.id);
 
     // Now trigger the onSuccess callback
+    const updatedRule = {
+      id: TEST_RULE_ID,
+      ruleTypeId: 'apm',
+      name: TEST_RULE_NAME,
+      artifacts: {
+        dashboards: [{ id: EXISTING_DASHBOARD_ID }, { id: TEST_DASHBOARD.id }],
+      },
+    } as unknown as Rule;
     act(() => {
-      capturedOnSuccess!();
+      capturedOnSuccess!(updatedRule);
     });
 
     // Check that onSuccessAddSuggestedDashboard was called with the correct dashboard ID
@@ -129,6 +139,12 @@ describe('useAddSuggestedDashboards', () => {
 
     // Check that addingDashboardId is reset to undefined
     expect(result.current.addingDashboardId).toBeUndefined();
+
+    // Check that notifications.toasts.addSuccess was called
+    expect(mockUseKibanaReturnValue.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'Added to linked dashboard',
+      text: `From now on this dashboard will be linked to all alerts related to ${TEST_RULE_NAME}`,
+    });
   });
 
   it('should reset addingDashboardId and show error notification on error', () => {

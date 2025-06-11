@@ -35,11 +35,23 @@ export const useAddSuggestedDashboards = ({
     });
   };
 
-  const onSuccess = () => {
+  const onSuccess = (data: Rule) => {
     if (!addingDashboardId)
       throw new Error('Adding dashboard id not defined, this should never occur');
     onSuccessAddSuggestedDashboard(addingDashboardId);
     setAddingDashboardId(undefined);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.title', {
+        defaultMessage: 'Added to linked dashboard',
+      }),
+      text: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.text', {
+        defaultMessage:
+          'From now on this dashboard will be linked to all alerts related to {ruleName}',
+        values: {
+          ruleName: data.name,
+        },
+      }),
+    });
   };
 
   const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
