@@ -1,11 +1,10 @@
 {
-  "indices.unfreeze": {
+  "indices.delete_data_stream_options": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "allow_no_indices": "__flag__",
       "expand_wildcards": [
         "all",
         "open",
@@ -13,28 +12,22 @@
         "hidden",
         "none"
       ],
-      "ignore_unavailable": "__flag__",
       "master_timeout": [
-        "30s",
         "-1",
         "0"
       ],
       "timeout": [
-        "30s",
         "-1",
         "0"
-      ],
-      "wait_for_active_shards": [
-        "1"
       ]
     },
     "methods": [
-      "POST"
+      "DELETE"
     ],
     "patterns": [
-      "{index}/_unfreeze"
+      "_data_stream/{name}/_options"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/unfreeze-index-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
     "availability": {
       "stack": true,
       "serverless": false
