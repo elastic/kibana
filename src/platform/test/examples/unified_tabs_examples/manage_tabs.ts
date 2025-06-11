@@ -54,18 +54,28 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     it('should show tabs in a responsive way', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect(await unifiedTabs.isScrollable()).to.be(false);
-      expect((await unifiedTabs.getTabWidths()).every((width) => width > 140)).to.be(true);
-      await unifiedTabs.createNewTab();
-      await unifiedTabs.createNewTab();
-      await unifiedTabs.createNewTab();
-      expect((await unifiedTabs.getTabWidths()).every((width) => width < 140 && width > 96)).to.be(
+      expect((await unifiedTabs.getTabWidths()).every((width) => width === 112)).to.be(true);
+
+      await unifiedTabs.editTabLabel(0, 'Very long tab label');
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.equal(148);
+      expect((await unifiedTabs.getTabWidths()).slice(1).every((width) => width === 112)).to.be(
         true
       );
+
+      await unifiedTabs.createNewTab();
+      await unifiedTabs.createNewTab();
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(112);
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.lessThan(148);
+      expect((await unifiedTabs.getTabWidths()).slice(1).every((width) => width === 112)).to.be(
+        true
+      );
+
+      await unifiedTabs.createNewTab();
       await unifiedTabs.createNewTab();
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(12);
       await unifiedTabs.waitForScrollButtons();
-      expect((await unifiedTabs.getTabWidths()).every((width) => width === 96)).to.be(true);
+      expect((await unifiedTabs.getTabWidths()).every((width) => width === 112)).to.be(true);
     });
 
     it('can edit tab label', async () => {

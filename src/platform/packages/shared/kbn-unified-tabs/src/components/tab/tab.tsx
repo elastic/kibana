@@ -39,6 +39,7 @@ import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../
 import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview } from '../tab_preview';
+import { MAX_TAB_WIDTH } from '../../constants';
 
 export interface TabProps {
   item: TabItem;
@@ -206,7 +207,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
               <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                <EuiTextTruncate text={item.label} truncation="middle" />
+                <EuiTextTruncate text={item.label} width={MAX_TAB_WIDTH} truncation="middle" />
               </EuiText>
             </div>
           )}
