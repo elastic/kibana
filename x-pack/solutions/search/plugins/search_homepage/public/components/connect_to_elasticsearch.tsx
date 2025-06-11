@@ -134,7 +134,6 @@ export const ConnectToElasticsearch = () => {
           <ConnectToElasticsearchSidePanel />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule />
     </>
   );
 };
