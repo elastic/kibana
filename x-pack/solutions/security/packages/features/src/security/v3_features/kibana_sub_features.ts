@@ -716,43 +716,56 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   ],
 });
 
-const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: false,
-  privilegesTooltip: undefined,
-  name: i18n.translate(
+const globalArtifactManagementSubFeature = (
+  experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
+): SubFeatureConfig => {
+  const GLOBAL_ARTIFACT_MANAGEMENT = i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement',
-    {
-      defaultMessage: 'Global Artifact Management',
-    }
-  ),
-  description: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
-    {
-      defaultMessage:
-        'Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) ' +
-        'across all policies. This privilege controls global assignment rights only; privileges for each ' +
-        'artifact type are required for full artifact management.',
-    }
-  ),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          api: [`${APP_ID}-writeGlobalArtifacts`],
-          id: 'global_artifact_management_all',
-          includeIn: 'none',
-          name: TRANSLATIONS.all,
-          savedObject: {
-            all: [],
-            read: [],
+    { defaultMessage: 'Global Artifact Management' }
+  );
+
+  const COMING_SOON = i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.comingSoon',
+    { defaultMessage: '(Coming Soon)' }
+  );
+
+  const name = experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ? GLOBAL_ARTIFACT_MANAGEMENT
+    : `${GLOBAL_ARTIFACT_MANAGEMENT} ${COMING_SOON}`;
+
+  return {
+    requireAllSpaces: false,
+    privilegesTooltip: undefined,
+    name,
+    description: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
+      {
+        defaultMessage:
+          'Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) ' +
+          'across all policies. This privilege controls global assignment rights only; privileges for each ' +
+          'artifact type are required for full artifact management.',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-writeGlobalArtifacts`],
+            id: 'global_artifact_management_all',
+            includeIn: 'none',
+            name: TRANSLATIONS.all,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['writeGlobalArtifacts'],
           },
-          ui: ['writeGlobalArtifacts'],
-        },
-      ],
-    },
-  ],
-});
+        ],
+      },
+    ],
+  };
+};
 
 /**
  * Sub-features that will always be available for Security
@@ -786,14 +799,10 @@ export const getSecurityV3SubFeaturesMap = ({
       enableSpaceAwarenessIfNeeded(endpointExceptionsSubFeature()),
     ],
 
-    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-      ? [
-          [
-            SecuritySubFeatureId.globalArtifactManagement,
-            enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature()),
-          ],
-        ]
-      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
+    [
+      SecuritySubFeatureId.globalArtifactManagement,
+      enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature(experimentalFeatures)),
+    ],
 
     [
       SecuritySubFeatureId.trustedApplications,

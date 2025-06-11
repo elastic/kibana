@@ -82,9 +82,7 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
   ],
 });
 
-const trustedApplicationsSubFeature = (
-  experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
-): SubFeatureConfig => ({
+const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
@@ -113,12 +111,7 @@ const trustedApplicationsSubFeature = (
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: [
-                'trusted_applications_all',
-                ...(experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-                  ? ['global_artifact_management_all']
-                  : []),
-              ],
+              privileges: ['trusted_applications_all', 'global_artifact_management_all'],
             },
           ],
           api: [
@@ -155,9 +148,7 @@ const trustedApplicationsSubFeature = (
     },
   ],
 });
-const hostIsolationExceptionsBasicSubFeature = (
-  experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
-): SubFeatureConfig => ({
+const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
@@ -186,12 +177,7 @@ const hostIsolationExceptionsBasicSubFeature = (
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: [
-                'host_isolation_exceptions_all',
-                ...(experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-                  ? ['global_artifact_management_all']
-                  : []),
-              ],
+              privileges: ['host_isolation_exceptions_all', 'global_artifact_management_all'],
             },
           ],
           api: [
@@ -228,9 +214,7 @@ const hostIsolationExceptionsBasicSubFeature = (
     },
   ],
 });
-const blocklistSubFeature = (
-  experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
-): SubFeatureConfig => ({
+const blocklistSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.privilegesTooltip',
@@ -256,12 +240,7 @@ const blocklistSubFeature = (
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: [
-                'blocklist_all',
-                ...(experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-                  ? ['global_artifact_management_all']
-                  : []),
-              ],
+              privileges: ['blocklist_all', 'global_artifact_management_all'],
             },
           ],
           api: [
@@ -296,9 +275,7 @@ const blocklistSubFeature = (
     },
   ],
 });
-const eventFiltersSubFeature = (
-  experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
-): SubFeatureConfig => ({
+const eventFiltersSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
@@ -327,12 +304,7 @@ const eventFiltersSubFeature = (
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: [
-                'event_filters_all',
-                ...(experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-                  ? ['global_artifact_management_all']
-                  : []),
-              ],
+              privileges: ['event_filters_all', 'global_artifact_management_all'],
             },
           ],
           api: [
@@ -877,20 +849,14 @@ export const getSecurityV2SubFeaturesMap = ({
 
     [
       SecuritySubFeatureId.trustedApplications,
-      enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature(experimentalFeatures)),
+      enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
     ],
     [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
-      enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature(experimentalFeatures)),
+      enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature()),
     ],
-    [
-      SecuritySubFeatureId.blocklist,
-      enableSpaceAwarenessIfNeeded(blocklistSubFeature(experimentalFeatures)),
-    ],
-    [
-      SecuritySubFeatureId.eventFilters,
-      enableSpaceAwarenessIfNeeded(eventFiltersSubFeature(experimentalFeatures)),
-    ],
+    [SecuritySubFeatureId.blocklist, enableSpaceAwarenessIfNeeded(blocklistSubFeature())],
+    [SecuritySubFeatureId.eventFilters, enableSpaceAwarenessIfNeeded(eventFiltersSubFeature())],
 
     [
       SecuritySubFeatureId.policyManagement,
