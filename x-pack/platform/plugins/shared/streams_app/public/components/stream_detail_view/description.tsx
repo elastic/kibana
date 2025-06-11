@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
 
@@ -36,41 +37,58 @@ export function StreamDescription({ definition }: Props) {
   };
 
   return (
-    <EuiInlineEditText
-      data-test-subj="streamDescriptionEdit"
-      editModeProps={{
-        inputProps: {},
-        formRowProps: {},
-        saveButtonProps: {
-          color: 'primary',
-        },
-        cancelButtonProps: {
-          display: 'empty',
-        },
-      }}
-      isReadOnly={definition.privileges.manage !== true}
-      placeholder={EMPTY_DESCRIPTION_LABEL}
-      value={description}
-      onChange={onChange}
-      onCancel={(previousValue) => {
-        setDescription(previousValue);
-      }}
-      inputAriaLabel={i18n.translate('xpack.streams.streamDescription.inputAriaLabel', {
-        defaultMessage: 'Edit Stream description',
-      })}
-      size="xs"
-      onSave={async (value) => {
-        const sanitized = value.trim();
-        setDescription(sanitized);
+    <div>
+      <EuiInlineEditText
+        data-test-subj="streamDescriptionEdit"
+        css={css`
+          .euiButtonEmpty {
+            block-size: auto;
+            white-space: normal;
+            overflow: visible;
+            vertical-align: baseline;
+            text-align: start;
+          }
 
-        await updateStream({
-          queries: definition.queries,
-          dashboards: definition.dashboards,
-          stream: { ...omit(definition.stream, ['name']), description: sanitized },
-        } as Streams.all.UpsertRequest);
+          .eui-textTruncate {
+            overflow: visible !important;
+            text-overflow: clip !important;
+            white-space: normal !important;
+          }
+        `}
+        editModeProps={{
+          inputProps: {},
+          formRowProps: {},
+          saveButtonProps: {
+            color: 'primary',
+          },
+          cancelButtonProps: {
+            display: 'empty',
+          },
+        }}
+        isReadOnly={definition.privileges.manage !== true}
+        placeholder={EMPTY_DESCRIPTION_LABEL}
+        value={description}
+        onChange={onChange}
+        onCancel={(previousValue) => {
+          setDescription(previousValue);
+        }}
+        inputAriaLabel={i18n.translate('xpack.streams.streamDescription.inputAriaLabel', {
+          defaultMessage: 'Edit Stream description',
+        })}
+        size="xs"
+        onSave={async (value) => {
+          const sanitized = value.trim();
+          setDescription(sanitized);
 
-        refresh();
-      }}
-    />
+          await updateStream({
+            queries: definition.queries,
+            dashboards: definition.dashboards,
+            stream: { ...omit(definition.stream, ['name']), description: sanitized },
+          } as Streams.all.UpsertRequest);
+
+          refresh();
+        }}
+      />
+    </div>
   );
 }
