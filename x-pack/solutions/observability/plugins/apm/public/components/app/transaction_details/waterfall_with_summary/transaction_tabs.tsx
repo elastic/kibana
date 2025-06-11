@@ -206,7 +206,7 @@ function LogsTabContent({
       index={logSources.value}
       timeRange={timeRange}
       query={query}
-      height={'60vh'}
+      height="60vh"
       displayOptions={{
         solutionNavIdOverride: 'oblt',
         enableDocumentViewer: true,

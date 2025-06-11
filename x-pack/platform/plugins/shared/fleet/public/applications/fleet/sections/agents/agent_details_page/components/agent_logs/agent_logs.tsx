@@ -312,7 +312,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                   to: state.end,
                 }}
                 query={logStreamQuery}
-                height={'60vh'}
+                height="60vh"
                 displayOptions={{
                   solutionNavIdOverride: null,
                   enableDocumentViewer: true,

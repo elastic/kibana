@@ -66,7 +66,7 @@ export const LogsSavedSearchComponent = () => {
       index={logSources.value}
       timeRange={{ from, to }}
       query={hostsFilterQuery}
-      height={'60vh'}
+      height="60vh"
       displayOptions={{
         solutionNavIdOverride: 'oblt',
         enableDocumentViewer: true,
