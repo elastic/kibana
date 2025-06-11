@@ -269,6 +269,16 @@ export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   return res.hits.hits;
 }
 
+export async function addKnowledgeBaseEntryToEs(es: Client, entry: KnowledgeBaseEntry) {
+  const result = await es.index({
+    index: resourceNames.writeIndexAlias.kb,
+    document: entry,
+    refresh: true,
+  });
+
+  return result;
+}
+
 export function getKnowledgeBaseEntriesFromApi({
   observabilityAIAssistantAPIClient,
   query = '',

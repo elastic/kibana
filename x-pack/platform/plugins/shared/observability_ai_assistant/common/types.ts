@@ -106,6 +106,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
