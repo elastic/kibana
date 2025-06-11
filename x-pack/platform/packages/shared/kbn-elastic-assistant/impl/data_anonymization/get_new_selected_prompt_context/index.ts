@@ -20,7 +20,6 @@ export async function getNewSelectedPromptContext({
   promptContext: PromptContext;
 }): Promise<SelectedPromptContext> {
   const rawData = await promptContext.getPromptContext();
-
   if (typeof rawData === 'string') {
     return {
       contextAnonymizationFields: undefined,

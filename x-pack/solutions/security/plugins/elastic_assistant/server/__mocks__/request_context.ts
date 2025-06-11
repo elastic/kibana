@@ -56,6 +56,7 @@ export const createMockClients = () => {
       getAttackDiscoverySchedulingDataClient: attackDiscoveryScheduleDataClientMock.create(),
       getDefendInsightsDataClient: dataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
+      getAlertSummaryDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
       inference: jest.fn(),
@@ -130,6 +131,10 @@ const createElasticAssistantRequestContextMock = (
       (() => Promise<AIAssistantDataClient | null>),
     getAIAssistantPromptsDataClient: jest.fn(
       () => clients.elasticAssistant.getAIAssistantPromptsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
+    getAlertSummaryDataClient: jest.fn(
+      () => clients.elasticAssistant.getAlertSummaryDataClient
     ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
       (() => Promise<AIAssistantDataClient | null>),
     getAttackDiscoveryDataClient: jest.fn(
