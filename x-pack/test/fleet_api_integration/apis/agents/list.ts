@@ -189,9 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(4);
 
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
-
-      expect(agent1.metrics?.memory_size_byte_avg).to.eql('25510920');
-      expect(agent1.metrics?.cpu_avg).to.eql('0.01666');
+      //  As both of the indexed items have the same agent id, and each one has its own memory/cpu item, the metrics should include both values combined as each is now uniquely counted towards total memory/cpu usage
+      expect(agent1.metrics?.memory_size_byte_avg).to.eql('51021840');
+      expect(agent1.metrics?.cpu_avg).to.eql('0.06664');
 
       const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
       expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
