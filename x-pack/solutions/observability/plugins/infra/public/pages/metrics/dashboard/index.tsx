@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
+import { DatePicker } from './components/date_picker/date_picker';
+import { DatePickerProvider } from './hooks/use_date_picker';
+import { RenderDashboard } from './components/dashboard/render_dashboard';
 
 export const Dashboard = () => {
   const {
@@ -26,15 +27,7 @@ export const Dashboard = () => {
   } = useKibanaContextForPlugin();
 
   const { dashboardId } = useParams<{ dashboardId: string }>();
-  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const getInitialInput = () => ({
-      viewMode: 'view' as ViewMode,
-      timeRange: { from: 'now', to: 'now-15m' },
-    });
-    return Promise.resolve<DashboardCreationOptions>({
-      getInitialInput,
-    });
-  }, []);
+  const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
 
   const kubernetesLinkProps = useLinkProps({
     app: 'metrics',
@@ -53,38 +46,36 @@ export const Dashboard = () => {
     },
   ]);
 
-  const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
+  const [pageDashTitle, setPageTitle] = useState<string | undefined>(
+    i18n.translate('xpack.infra.kubernetes.pageTitle', {
+      defaultMessage: 'Kubernetes Dashboard',
+    })
+  );
 
   useEffect(() => {
-    if (!dashboard) return;
-    dashboard.setTimeRange({ from: 'now', to: 'now-15m' });
-    dashboard.setQuery({ query: '', language: 'kuery' });
-  }, [dashboard]);
+    if (dashboardData && dashboardData.status === 'success') {
+      const dashboardTitle = dashboardData?.attributes?.title;
+      setPageTitle(dashboardTitle);
+    }
+  }, [dashboardData]);
+
+  if (status === FETCH_STATUS.LOADING && !dashboardData) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
-    <EuiErrorBoundary>
-      <PageTemplate
-        pageHeader={{
-          pageTitle: i18n.translate('xpack.infra.kubernetes.pageTitle', {
-            defaultMessage: 'Kubernetes',
-          }),
-        }}
-        data-test-subj="infraKubernetesPage"
-      >
-        <p>
-          {i18n.translate('xpack.infra.kubernetes.p.dashboardsLabel', {
-            defaultMessage: 'Dashboard:',
-          })}{' '}
-          <span data-test-subj="infraKubernetesDashboardId">{dashboardId}</span>
-        </p>
-        <DashboardRenderer
-          // TODO: Uncomment when locator is available
-          // locator={locator}
-          savedObjectId={dashboardId}
-          getCreationOptions={getCreationOptions}
-          onApiAvailable={setDashboard}
-        />
-      </PageTemplate>
-    </EuiErrorBoundary>
+    <DatePickerProvider dateRange={undefined}>
+      <EuiErrorBoundary>
+        <PageTemplate
+          pageHeader={{
+            pageTitle: pageDashTitle,
+            rightSideItems: [<DatePicker />],
+          }}
+          data-test-subj="infraKubernetesPage"
+        >
+          <RenderDashboard />
+        </PageTemplate>
+      </EuiErrorBoundary>
+    </DatePickerProvider>
   );
 };

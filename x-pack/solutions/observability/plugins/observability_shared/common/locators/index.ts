@@ -15,6 +15,7 @@ export * from './infra/asset_details_locator';
 export * from './infra/hosts_locator';
 export * from './infra/inventory_locator';
 export * from './infra/metrics_explorer_locator';
+export * from './infra/kubernetes_dashboard_locator';
 export * from './profiling/flamegraph_locator';
 export * from './profiling/stacktraces_locator';
 export * from './profiling/topn_functions_locator';

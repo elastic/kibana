@@ -11,6 +11,7 @@ import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_loca
 import { HostsLocatorDefinition } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
 import querystring from 'querystring';
+import { KubernetesDashboardLocatorDefinition } from './kubernetes_dashboard_locator';
 
 const setupAssetDetailsLocator = async () => {
   const assetDetailsLocator = new AssetDetailsLocatorDefinition();
@@ -22,6 +23,13 @@ const setupAssetDetailsLocator = async () => {
   };
 };
 
+const setupKubernetesDashboardLocator = async () => {
+  const kubernetesDashboardLocator = new KubernetesDashboardLocatorDefinition();
+
+  return {
+    kubernetesDashboardLocator,
+  };
+};
 const setupHostsLocator = async () => {
   const hostsLocator = new HostsLocatorDefinition();
 
@@ -243,6 +251,35 @@ describe('Infra Locators', () => {
       expect(path).toBe(`/inventory?${queryStringParams}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
+    });
+  });
+  describe('Kubernetes Dashboards Locator', () => {
+    const params = {
+      dashboardId: 'kubernetes_cluster',
+    };
+    it('should create a link to a specific Kubernetes Dashboard', async () => {
+      const { kubernetesDashboardLocator } = await setupKubernetesDashboardLocator();
+      const { app, path, state } = await kubernetesDashboardLocator.getLocation(params);
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(
+        `/kubernetes/${params.dashboardId}?dashboardParams=${rison.encodeUnknown({
+          dateRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        })}`
+      );
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+
+    it('should return a link to the Kubernetes Dashboards page', async () => {
+      const { kubernetesDashboardLocator } = await setupKubernetesDashboardLocator();
+      const { app, path } = await kubernetesDashboardLocator.getLocation();
+
+      expect(app).toBe('metrics');
+      expect(path).toBe('/kubernetes');
     });
   });
 });
