@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { createEntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -14,9 +15,23 @@ import { hasEntitiesData } from './has_historical_entities_data';
 const hasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/has_data',
   security: { authz: { requiredPrivileges: ['apm'] } },
+  params: t.partial({
+    query: t.partial({
+      start: t.string,
+      end: t.string,
+    }),
+  }),
   handler: async (resources): Promise<{ hasData: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const hasData = await hasHistoricalAgentData(apmEventClient);
+
+    const range = resources.params?.query?.start
+      ? {
+          gte: resources.params?.query?.start,
+          lte: resources.params?.query?.end,
+        }
+      : undefined;
+
+    const hasData = await hasHistoricalAgentData(apmEventClient, range);
     return { hasData };
   },
 });

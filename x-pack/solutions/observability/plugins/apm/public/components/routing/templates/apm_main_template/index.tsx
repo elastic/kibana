@@ -21,6 +21,7 @@ import { KibanaEnvironmentContext } from '../../../../context/kibana_environment
 import { getPathForFeedback } from '../../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
@@ -74,14 +75,21 @@ export function ApmMainTemplate({
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services');
   const { serviceEntitySummary } = useApmServiceContext();
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/apm/has_data');
-  }, []);
+  const { data, status } = useFetcher(
+    (callApmApi) =>
+      callApmApi('GET /internal/apm/has_data', {
+        params: { query: { start: rangeFrom, end: rangeTo } },
+      }),
+    [rangeFrom, rangeTo]
+  );
 
   // create static data view on initial load
   useFetcher(
