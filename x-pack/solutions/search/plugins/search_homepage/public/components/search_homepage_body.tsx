@@ -9,12 +9,16 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
+import { ThreatDetectionSolutions } from './threat_detection/threat_detection_solutions';
 
 export const SearchHomepageBody = () => (
   <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="l" direction="column">
       <EuiFlexItem grow={false}>
         <ConnectToElasticsearch />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ThreatDetectionSolutions />
       </EuiFlexItem>
     </EuiFlexGroup>
   </KibanaPageTemplate.Section>
