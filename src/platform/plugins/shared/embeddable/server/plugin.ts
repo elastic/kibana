@@ -31,24 +31,28 @@ import {
   EmbeddableStateWithType,
   CommonEmbeddableStartContract,
   EmbeddableRegistryDefinition,
-  CanGetEmbeddableContentManagementDefinition,
+  EmbeddableContentManagementDefinition,
 } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { EmbeddableContentManagementRegistry } from '../common/embeddable_content_management/registry';
+import { EmbeddableContentManagementRegistryServer } from '../common/embeddable_content_management/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  registerEmbeddableContentManagementDefinition: EmbeddableContentManagementRegistry['registerContentManagementDefinition'];
+  registerEmbeddableContentManagementDefinition: EmbeddableContentManagementRegistryServer['registerContentManagementDefinition'];
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
-  CanGetEmbeddableContentManagementDefinition;
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  getEmbeddableContentManagementDefinition: (
+    id: string
+  ) => EmbeddableContentManagementDefinition | undefined;
+};
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly embeddableContentManagementRegistry = new EmbeddableContentManagementRegistry();
+  private readonly embeddableContentManagementRegistry =
+    new EmbeddableContentManagementRegistryServer();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
 

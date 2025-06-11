@@ -18,5 +18,7 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   registerEmbeddableContentManagementDefinition: jest.fn(),
 });
 
-export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> =>
-  createEmbeddablePersistableStateServiceMock();
+export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
+  ...createEmbeddablePersistableStateServiceMock(),
+  getEmbeddableContentManagementDefinition: jest.fn(),
+});

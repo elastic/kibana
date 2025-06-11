@@ -14,5 +14,4 @@ export type {
   EmbeddableRegistryDefinition,
   EmbeddableContentManagementDefinition,
   VersionableEmbeddableObject,
-  CanGetEmbeddableContentManagementDefinition,
 } from './types';

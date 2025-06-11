@@ -44,8 +44,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerEmbeddableContentManagementDefinition('book', () =>
-      Promise.resolve(bookCmDefinitionsWithSchemas)
+    embeddable.registerEmbeddableContentManagementDefinition(
+      'book',
+      () => bookCmDefinitionsWithSchemas
     );
 
     return {};

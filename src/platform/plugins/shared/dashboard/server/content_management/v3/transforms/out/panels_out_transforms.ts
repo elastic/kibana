@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asyncForEachWithLimit } from '@kbn/std';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
@@ -21,27 +20,27 @@ export interface TransformPanelsOutOptions {
   references?: SavedObjectReference[];
 }
 
-export async function transformPanelsOut({
+export function transformPanelsOut({
   panelsJSON = '[]',
   sections = [],
   embeddable,
   references,
-}: TransformPanelsOutOptions): Promise<DashboardAttributes['panels']> {
+}: TransformPanelsOutOptions): DashboardAttributes['panels'] {
   // Step 1: Parse the panelsJSON
   const panels = JSON.parse(panelsJSON);
 
   // Step 2: Inject sections into panels and transform properties
-  const panelsWithSections = await injectSections(panels, sections, embeddable);
+  const panelsWithSections = injectSections(panels, sections, embeddable);
 
   // Step 3: Inject panel references
   return injectPanelReferences(panelsWithSections, embeddable, references);
 }
 
-async function injectSections(
+function injectSections(
   panels: SavedDashboardPanel[],
   sections: SavedDashboardSection[],
   embeddable: EmbeddableStart
-): Promise<Array<DashboardPanel | DashboardSection>> {
+): Array<DashboardPanel | DashboardSection> {
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
     (prev, section) => {
       const sectionId = section.gridData.i;
@@ -49,30 +48,29 @@ async function injectSections(
     },
     {}
   );
-  // TODO - 30 is an arbitrary limit. We might want to revise this based on analytics or performance.
-  await asyncForEachWithLimit(panels, 30, async (panel: SavedDashboardPanel) => {
+  panels.forEach((panel: SavedDashboardPanel) => {
     const { sectionId } = panel.gridData;
     if (sectionId) {
       (sectionsMap[sectionId] as DashboardSection).panels.push(
-        await transformPanelProperties(panel, embeddable)
+        transformPanelProperties(panel, embeddable)
       );
     } else {
-      sectionsMap[panel.panelIndex] = await transformPanelProperties(panel, embeddable);
+      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, embeddable);
     }
   });
   return Object.values(sectionsMap);
 }
 
-async function transformPanelProperties(
+function transformPanelProperties(
   panel: SavedDashboardPanel,
   embeddable: EmbeddableStart
-): Promise<DashboardPanel> {
+): DashboardPanel {
   const { embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version } = panel;
   const { sectionId, ...restOfGridData } = gridData; // drop section ID, if it exists
   return {
     gridData: restOfGridData,
     id,
-    panelConfig: await savedPanelToItem(embeddableConfig, type, embeddable),
+    panelConfig: savedPanelToItem(embeddableConfig, type, embeddable),
     panelIndex,
     panelRefName,
     title,
@@ -90,9 +88,11 @@ function injectPanelReferences(
     if (isDashboardSection(widget)) {
       const { panels: sectionPanels, ...restOfSection } = widget;
       // Only keep DashboardPanel in panels
-      const injectedPanels = injectPanelReferences(sectionPanels, embeddable, references).filter(
-        (p): p is DashboardPanel => !isDashboardSection(p)
-      );
+      const injectedPanels = injectPanelReferences(
+        sectionPanels as DashboardPanel[],
+        embeddable,
+        references
+      ).filter((p): p is DashboardPanel => !isDashboardSection(p));
       return {
         ...restOfSection,
         panels: injectedPanels,
@@ -144,14 +144,12 @@ function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObject
   };
 }
 
-async function savedPanelToItem(
+function savedPanelToItem(
   embeddableConfig: SavedDashboardPanel['embeddableConfig'],
   panelType: SavedDashboardPanel['type'],
   embeddable: EmbeddableStart
 ) {
-  const embeddableCmDefintions = await embeddable.getEmbeddableContentManagementDefinition(
-    panelType
-  );
+  const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
   if (!embeddableCmDefintions) return embeddableConfig;
   const { savedObjectToItem } =
     embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
