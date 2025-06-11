@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
+import { getFlattenedObject } from '@kbn/std';
 import {
   type Client,
   OpenFeature,
@@ -23,7 +24,7 @@ import {
   NOOP_PROVIDER,
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
-import { filter, switchMap, startWith, Subject } from 'rxjs';
+import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise } from 'rxjs';
 import { get } from 'lodash';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
@@ -47,7 +48,7 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
-  private overrides: Record<string, unknown> = {};
+  private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private context: MultiContextEvaluationContext = { kind: 'multi' };
 
   /**
@@ -70,11 +71,11 @@ export class FeatureFlagsService {
     this.core.configService
       .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
       .subscribe(({ overrides = {} }) => {
-        this.overrides = overrides;
+        this.overrides$.next(getFlattenedObject(overrides));
       });
 
     return {
-      getOverrides: () => this.overrides,
+      getOverrides: () => this.overrides$.value,
       setProvider: (provider) => {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
@@ -94,6 +95,9 @@ export class FeatureFlagsService {
       if (event?.flagsChanged) {
         featureFlagsChanged$.next(event.flagsChanged);
       }
+    });
+    this.overrides$.pipe(pairwise()).subscribe(([prev, next]) => {
+      featureFlagsChanged$.next(Object.keys({ ...prev, ...next })); // Assume that all keys are changed just in case
     });
     const observeFeatureFlag$ = (flagName: string) =>
       featureFlagsChanged$.pipe(
@@ -168,7 +172,7 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
-    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
+    const override = get(this.overrides$.value, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
     const value =
       typeof override !== 'undefined'
         ? (override as T)

@@ -273,7 +273,7 @@ describe('FeatureFlagsService Server', () => {
     expect(getOverrides()).toStrictEqual({
       'my-overridden-flag': true,
       'myPlugin.myOverriddenFlag': true,
-      myDestructuredObjPlugin: { myOverriddenFlag: true },
+      'myDestructuredObjPlugin.myOverriddenFlag': true,
     });
   });
 });
