@@ -69,8 +69,14 @@ export async function runDockerGenerator(
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
-  const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
-  const filebeatTarball = `filebeat-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const metricbeatTarball = `metricbeat-${version.replace(
+    '-SNAPSHOT',
+    ''
+  )}-linux-${beatsArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat-${version.replace(
+    '-SNAPSHOT',
+    ''
+  )}-linux-${beatsArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
