@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const allWorkNotes: string[] = allCommentRequests.map(
-          (request: ServiceNowRequest) => request.work_notes
+          (request: { work_notes: string }) => request.work_notes
         );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
