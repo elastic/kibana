@@ -19,6 +19,7 @@ export default createTestConfig('spaces_only', {
   preconfiguredAlertHistoryEsIndex: true,
   emailDomainsAllowed: EmailDomainsAllowed,
   useDedicatedTaskRunner: true,
-  testFiles: [require.resolve('.')],
-  reportName: 'X-Pack Alerting API Integration Tests - Alerting - group4',
+  testFiles: [require.resolve('./builtin_alert_types/circuit_breaker')],
+  reportName: 'X-Pack Alerting API Integration Tests - Alerting Circuit Breaker - group4',
+  maxAlerts: 110,
 });

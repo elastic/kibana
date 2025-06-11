@@ -222,7 +222,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     enableFooterInEmail = true,
     maxScheduledPerMinute,
     experimentalFeatures = [],
-    maxAlerts = 110,
+    maxAlerts = 20,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
