@@ -12,7 +12,6 @@ import { RoleCredentials } from '../../../../shared/services';
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
-  const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const retry = getService('retry');
