@@ -96,6 +96,7 @@ describe('RelatedDashboardsClient', () => {
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
 
+      // @ts-ignore next-line
       client.setAlert(mockAlert);
 
       dashboardClient.search.mockResolvedValue({
@@ -300,6 +301,7 @@ describe('RelatedDashboardsClient', () => {
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
 
+      // @ts-ignore next-line
       client.setAlert(mockAlert);
 
       dashboardClient.search.mockResolvedValue({
@@ -497,7 +499,8 @@ describe('RelatedDashboardsClient', () => {
         // @ts-ignore next-line
         client.setAlert(mockAlert);
 
-        expect(client.getLinkedDashboards()).rejects.toThrow(
+        // @ts-ignore next-line
+        await expect(client.getLinkedDashboards()).rejects.toThrow(
           `Alert with id ${alertId} does not have a rule ID. Could not fetch linked dashboards.`
         );
       });
@@ -512,7 +515,7 @@ describe('RelatedDashboardsClient', () => {
         alertsClient.getRuleById = jest.fn().mockResolvedValue(null);
 
         // @ts-ignore next-line
-        expect(client.getLinkedDashboards()).rejects.toThrow(
+        await expect(client.getLinkedDashboards()).rejects.toThrow(
           `Rule with id rule-id not found. Could not fetch linked dashboards for alert with id ${alertId}.`
         );
       });
@@ -560,7 +563,7 @@ describe('RelatedDashboardsClient', () => {
           .mockResolvedValueOnce({
             result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
           });
-
+        // @ts-ignore next-line
         const result = await client.getLinkedDashboardsByIds(['dashboard1', 'dashboard2']);
 
         expect(result).toEqual([
@@ -574,6 +577,7 @@ describe('RelatedDashboardsClient', () => {
 
       it('should handle empty IDs array gracefully', async () => {
         dashboardClient.get = jest.fn();
+        // @ts-ignore next-line
         const result = await client.getLinkedDashboardsByIds([]);
 
         expect(result).toEqual([]);
@@ -583,6 +587,7 @@ describe('RelatedDashboardsClient', () => {
       it('should handle errors when fetching dashboards', async () => {
         dashboardClient.get = jest.fn().mockRejectedValue(new Error('Dashboard fetch failed'));
 
+        // @ts-ignore next-line
         await expect(client.getLinkedDashboardsByIds(['dashboard1'])).rejects.toThrow(
           'Dashboard fetch failed'
         );
