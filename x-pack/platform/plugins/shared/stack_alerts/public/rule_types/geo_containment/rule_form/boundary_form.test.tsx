@@ -65,7 +65,7 @@ test('should not call prop callbacks on render', async () => {
   };
 
   await act(async () => {
-    renderWithI18n(<BoundaryForm {...props} />)
+    renderWithI18n(<BoundaryForm {...props} />);
     await nextTick();
   });
 

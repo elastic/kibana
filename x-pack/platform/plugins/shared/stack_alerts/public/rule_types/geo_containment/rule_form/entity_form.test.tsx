@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EntityForm } from './entity_form';
-import {screen} from '@testing-library/react'
+import { screen } from '@testing-library/react';
 import { nextTick, renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { GeoContainmentAlertParams } from '../types';
@@ -67,7 +67,7 @@ test('should not call prop callbacks on render', async () => {
   };
 
   await act(async () => {
-    renderWithI18n(<EntityForm {...props} />)
+    renderWithI18n(<EntityForm {...props} />);
     await nextTick();
   });
 
