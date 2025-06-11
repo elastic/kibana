@@ -20157,7 +20157,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20315,7 +20315,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -25183,7 +25183,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; }"
+          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; editRule: (id: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,
