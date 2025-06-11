@@ -127,7 +127,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -138,8 +138,12 @@ export function fetchAll(
         }
 
         if (isEsqlQuery) {
+          const fetchStatus =
+            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+              ? FetchStatus.ERROR
+              : FetchStatus.COMPLETE;
           dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.COMPLETE,
+            fetchStatus,
             result: records.length,
           });
         } else {

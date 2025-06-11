@@ -124,6 +124,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
+        interceptedWarnings: [],
         result: documents,
       },
     ]);
@@ -259,6 +260,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.LOADING, query },
       {
         fetchStatus: FetchStatus.PARTIAL,
+        interceptedWarnings: [],
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
