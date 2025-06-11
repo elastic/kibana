@@ -74,6 +74,7 @@ describe('Cases Plugin', () => {
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+      taskManager: taskManagerMock.createStart(),
     };
   });
 

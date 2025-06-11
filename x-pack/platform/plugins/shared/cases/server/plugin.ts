@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndicesTasks } from './cases_analytics';
 
 export class CasePlugin
   implements
@@ -66,6 +67,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -75,9 +77,13 @@ export class CasePlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -90,6 +96,11 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
+    registerCasesAnalyticsIndicesTasks({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      core,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -189,6 +200,13 @@ export class CasePlugin
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
     }
+
+    createCasesAnalyticsIndexes({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+      isServerless: this.isServerless,
+      taskManager: plugins.taskManager,
+    });
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,
