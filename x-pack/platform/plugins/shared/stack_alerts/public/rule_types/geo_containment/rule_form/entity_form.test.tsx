@@ -8,7 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EntityForm } from './entity_form';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import {screen} from '@testing-library/react'
+import { nextTick, renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { GeoContainmentAlertParams } from '../types';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -65,27 +66,17 @@ test('should not call prop callbacks on render', async () => {
     } as unknown as UnifiedSearchPublicPluginStart,
   };
 
-  const wrapper = mountWithIntl(<EntityForm {...props} />);
   await act(async () => {
+    renderWithI18n(<EntityForm {...props} />)
     await nextTick();
-    wrapper.update();
   });
 
   // Assert that geospatial dataView fields are loaded
   // to ensure test is properly awaiting async useEffect
-  let geoFieldsLoaded = false;
-  wrapper.findWhere((n) => {
-    if (
-      n.name() === 'SingleFieldSelect' &&
-      n.props().value === 'location' &&
-      n.props().fields.length === 1
-    ) {
-      geoFieldsLoaded = true;
-    }
-    return false;
-  });
-  expect(geoFieldsLoaded).toBe(true);
+  const geoFields = screen.getAllByTestId('comboBoxInput');
+  const locationComboBox = geoFields.find((field) => field.textContent === 'location');
 
+  expect(locationComboBox).toBeInTheDocument();
   expect(props.setDataViewId).not.toHaveBeenCalled();
   expect(props.setDataViewTitle).not.toHaveBeenCalled();
   expect(props.setDateField).not.toHaveBeenCalled();
