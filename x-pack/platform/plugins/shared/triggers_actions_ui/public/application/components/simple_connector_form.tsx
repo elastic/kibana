@@ -89,31 +89,26 @@ const getFieldConfig = ({
           },
         ]
       : []),
-    ...(isUrlField && !customUrlFieldValidator
+    ...(isUrlField
       ? [
           {
-            validator: urlField(
-              i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
-                {
-                  defaultMessage: 'Invalid URL',
-                }
-              )
-            ),
-          },
-        ]
-      : []),
-    ...(isUrlField && customUrlFieldValidator
-      ? [
-          {
-            validator: customUrlFieldValidator(
-              i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
-                {
-                  defaultMessage: 'Invalid URL',
-                }
-              )
-            ),
+            validator: customUrlFieldValidator
+              ? customUrlFieldValidator(
+                  i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
+                    {
+                      defaultMessage: 'Invalid URL',
+                    }
+                  )
+                )
+              : urlField(
+                  i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
+                    {
+                      defaultMessage: 'Invalid URL',
+                    }
+                  )
+                ),
           },
         ]
       : []),
