@@ -277,8 +277,7 @@ export class SiemRulesMigrationsService {
         // automatically resume stopped migrations when all conditions are met
         if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_execution?.error) {
           const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
-          const skipPrebuiltRulesMatching =
-            result.last_execution?.skip_prebuilt_rules_matching ?? true;
+          const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
             await api.startRuleMigration({
               migrationId: result.id,
