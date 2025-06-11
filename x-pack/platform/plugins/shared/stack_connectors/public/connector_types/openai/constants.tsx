@@ -243,11 +243,12 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
-export const otherOpenAiSecrets: SecretsFieldSchema[] = [
+export const getOtherOpenAiSecrets = (isRequired = true): SecretsFieldSchema[] => [
   {
     id: 'apiKey',
     label: i18n.API_KEY_LABEL,
     isPasswordField: true,
+    isRequired,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) API key for HTTP Basic authentication. For more details about generating Other model API keys, refer to the {genAiAPIKeyDocs}."

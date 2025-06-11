@@ -62,13 +62,21 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
     const [datum, eventDetail] = params[0];
-    const isBad = eventDetail.specId === badEventId;
+    const isGoodEventClicked = eventDetail.specId === goodEventId;
+    const isBadEventClicked = eventDetail.specId === badEventId;
     const timeRange = {
       from: moment(datum.x).toISOString(),
       to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
       mode: 'absolute' as const,
     };
-    openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
+    openInDiscover({
+      slo,
+      showBad: isBadEventClicked,
+      showGood: isGoodEventClicked,
+      timeRange,
+      discover,
+      uiSettings,
+    });
   };
 
   return (
@@ -128,6 +136,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
           rect: { fill: euiTheme.colors.success },
           displayValue: { fill: euiTheme.colors.success },
         }}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
@@ -146,6 +155,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
           rect: { fill: euiTheme.colors.danger },
           displayValue: { fill: euiTheme.colors.danger },
         }}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
