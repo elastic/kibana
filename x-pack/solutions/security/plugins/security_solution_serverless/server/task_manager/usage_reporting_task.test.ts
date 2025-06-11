@@ -7,28 +7,26 @@
 
 import { assign } from 'lodash';
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { ProductLine, ProductTier } from '../../common/product';
-
-import { usageReportingService } from '../common/services';
 import type { ServerlessSecurityConfig } from '../config';
 import type { SecurityUsageReportingTaskSetupContract, UsageRecord } from '../types';
 
+import { ProductLine, ProductTier } from '../../common/product';
 import { SecurityUsageReportingTask } from './usage_reporting_task';
 import { endpointMeteringService } from '../endpoint/services';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { USAGE_SERVICE_USAGE_URL } from '../constants';
 
 describe('SecurityUsageReportingTask', () => {
   const TITLE = 'test-task-title';
@@ -45,7 +43,7 @@ describe('SecurityUsageReportingTask', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let reportUsageSpy: jest.SpyInstance;
+  let reportUsageMock: jest.Mock;
   let meteringCallbackMock: jest.Mock;
   let taskArgs: SecurityUsageReportingTaskSetupContract;
   let usageRecord: UsageRecord;
@@ -118,10 +116,23 @@ describe('SecurityUsageReportingTask', () => {
         taskTitle: TITLE,
         version: VERSION,
         meteringCallback: meteringCallbackMock,
+        usageReportingService: {
+          reportUsage: reportUsageMock,
+        },
       },
       overrides
     );
   }
+
+  const USAGE_API_CONFIG = {
+    enabled: true,
+    url: 'https://usage-api-url',
+    tls: {
+      certificate: '',
+      key: '',
+      ca: '',
+    },
+  };
 
   async function runTask(taskInstance = buildMockTaskInstance(), callNum: number = 0) {
     const mockTaskManagerStart = tmStartMock();
@@ -138,7 +149,7 @@ describe('SecurityUsageReportingTask', () => {
       .asInternalUser as jest.Mocked<ElasticsearchClient>;
     mockTaskManagerSetup = tmSetupMock();
     usageRecord = buildUsageRecord();
-    reportUsageSpy = jest.spyOn(usageReportingService, 'reportUsage');
+    reportUsageMock = jest.fn();
   }
 
   describe('meteringCallback integration', () => {
@@ -150,7 +161,7 @@ describe('SecurityUsageReportingTask', () => {
           productTypes: [
             { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
           ],
-          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
+          usageApi: USAGE_API_CONFIG,
         } as ServerlessSecurityConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
@@ -199,9 +210,9 @@ describe('SecurityUsageReportingTask', () => {
 
         await runTasksUntilNoRunAt();
 
-        expect(reportUsageSpy).toHaveBeenCalledTimes(3);
+        expect(reportUsageMock).toHaveBeenCalledTimes(3);
         batches.forEach((batch, i) => {
-          expect(reportUsageSpy).toHaveBeenNthCalledWith(
+          expect(reportUsageMock).toHaveBeenNthCalledWith(
             i + 1,
             expect.arrayContaining(
               batch.map(({ _source }) =>
@@ -209,8 +220,7 @@ describe('SecurityUsageReportingTask', () => {
                   id: `endpoint-${_source.agent.id}-2021-09-01T00:00:00.000Z`,
                 })
               )
-            ),
-            USAGE_SERVICE_USAGE_URL
+            )
           );
         });
       });
@@ -218,7 +228,7 @@ describe('SecurityUsageReportingTask', () => {
   });
 
   describe('Mocked meteringCallback', () => {
-    async function setupMocks() {
+    async function setupMocks(backfillConfig?: { enabled: boolean; maxRecords?: number }) {
       await setupBaseMocks();
       meteringCallbackMock = jest.fn().mockResolvedValueOnce({
         latestRecordTimestamp: usageRecord.usage_timestamp,
@@ -227,8 +237,9 @@ describe('SecurityUsageReportingTask', () => {
       });
       taskArgs = buildTaskArgs({
         config: {
-          usageReportingApiUrl: USAGE_SERVICE_USAGE_URL,
+          usageApi: USAGE_API_CONFIG,
         } as ServerlessSecurityConfig,
+        backfillConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
     }
@@ -273,7 +284,7 @@ describe('SecurityUsageReportingTask', () => {
 
       it('should report metering records', async () => {
         await runTask();
-        expect(reportUsageSpy).toHaveBeenCalledWith(
+        expect(reportUsageMock).toHaveBeenCalledWith(
           expect.arrayContaining([
             expect.objectContaining({
               creation_timestamp: usageRecord.creation_timestamp,
@@ -286,8 +297,7 @@ describe('SecurityUsageReportingTask', () => {
               usage: { period_seconds: 3600, quantity: 1, type: USAGE_TYPE },
               usage_timestamp: usageRecord.usage_timestamp,
             }),
-          ]),
-          USAGE_SERVICE_USAGE_URL
+          ])
         );
       });
 
@@ -296,12 +306,155 @@ describe('SecurityUsageReportingTask', () => {
 
         expect(result).toEqual(getDeleteTaskRunResult());
 
-        expect(reportUsageSpy).not.toHaveBeenCalled();
+        expect(reportUsageMock).not.toHaveBeenCalled();
         expect(meteringCallbackMock).not.toHaveBeenCalled();
       });
+
+      describe('backfill configuration', () => {
+        it('should throw error when backfill is enabled without maxRecords', async () => {
+          await expect(setupMocks({ enabled: true })).rejects.toThrow(
+            'maxRecords is required when backfill is enabled'
+          );
+        });
+
+        it('should create task successfully with valid backfill config', async () => {
+          await setupMocks({ enabled: true, maxRecords: 1000 });
+          expect(mockTask).toBeInstanceOf(SecurityUsageReportingTask);
+        });
+      });
+
+      describe('backfill functionality', () => {
+        beforeEach(async () => {
+          await setupMocks({ enabled: true, maxRecords: 1000 });
+        });
+
+        it('should store records in state when API call fails', async () => {
+          reportUsageMock.mockRejectedValueOnce(new Error('API Error'));
+
+          const task = await runTask();
+
+          expect(task?.state.backfillRecords).toEqual([usageRecord]);
+        });
+
+        it('should prepend existing backfill records to new records', async () => {
+          const oldRecord = { ...usageRecord, id: 'old-record' };
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: [oldRecord],
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          await runTask(taskInstance);
+
+          expect(reportUsageMock).toHaveBeenCalledWith(
+            expect.arrayContaining([
+              expect.objectContaining({ id: oldRecord.id }),
+              expect.objectContaining({ id: usageRecord.id }),
+            ])
+          );
+        });
+
+        it('should clear backfill records after successful API call', async () => {
+          reportUsageMock.mockResolvedValueOnce({ ok: true, status: 201 });
+          const oldRecord = { ...usageRecord, id: 'old-record' };
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: [oldRecord],
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          const task = await runTask(taskInstance);
+
+          expect(task?.state.backfillRecords).toEqual([]);
+        });
+
+        it('should send all backfill records along with new records', async () => {
+          const backfillRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `backfill-${i + 1}`,
+          }));
+
+          const newRecord = { ...usageRecord, id: 'new-record' };
+
+          reportUsageMock.mockReset();
+          reportUsageMock.mockResolvedValueOnce({ ok: true, status: 201 });
+
+          meteringCallbackMock.mockReset();
+          meteringCallbackMock.mockResolvedValueOnce({
+            latestRecordTimestamp: new Date().toISOString(),
+            records: [newRecord],
+            shouldRunAgain: false,
+          });
+
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords,
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          await runTask(taskInstance);
+
+          // Verify all records are sent
+          const expectedRecords = [
+            expect.objectContaining({ id: 'backfill-1' }),
+            expect.objectContaining({ id: 'backfill-2' }),
+            expect.objectContaining({ id: 'new-record' }),
+          ];
+
+          expect(reportUsageMock).toHaveBeenCalledWith(expect.arrayContaining(expectedRecords));
+          expect(reportUsageMock.mock.calls[0][0]).toHaveLength(3);
+        });
+
+        it('should enforce maxRecords limit on backfill records', async () => {
+          const maxRecords = 2;
+          await setupMocks({ enabled: true, maxRecords });
+
+          reportUsageMock.mockReset();
+          reportUsageMock.mockRejectedValueOnce(new Error('API Error'));
+
+          const existingBackfillRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `old-${i + 1}`,
+            usage_timestamp: new Date(Date.now() - 1000).toISOString(),
+          }));
+
+          const newRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `new-${i + 1}`,
+            usage_timestamp: new Date().toISOString(),
+          }));
+
+          meteringCallbackMock.mockReset();
+          meteringCallbackMock.mockResolvedValueOnce({
+            latestRecordTimestamp: new Date().toISOString(),
+            records: newRecords,
+            shouldRunAgain: false,
+          });
+
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: existingBackfillRecords,
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          const task = await runTask(taskInstance);
+
+          // should only keep the last 2 records
+          expect(task?.state.backfillRecords).toHaveLength(maxRecords);
+          expect(task?.state.backfillRecords).toEqual([
+            expect.objectContaining({ id: 'new-1' }),
+            expect.objectContaining({ id: 'new-2' }),
+          ]);
+        });
+      });
+
       describe('lastSuccessfulReport', () => {
         it('should set lastSuccessfulReport correctly if report success', async () => {
-          reportUsageSpy.mockResolvedValueOnce({ status: 201 });
+          reportUsageMock.mockResolvedValueOnce({ status: 201 });
           const taskInstance = buildMockTaskInstance();
           const task = await runTask(taskInstance);
           const newLastSuccessfulReport = task?.state.lastSuccessfulReport;
@@ -320,7 +473,7 @@ describe('SecurityUsageReportingTask', () => {
 
         describe('and response is NOT 201', () => {
           beforeEach(() => {
-            reportUsageSpy.mockResolvedValueOnce({ status: 500 });
+            reportUsageMock.mockResolvedValueOnce({ status: 500 });
           });
 
           it('should set lastSuccessfulReport correctly', async () => {

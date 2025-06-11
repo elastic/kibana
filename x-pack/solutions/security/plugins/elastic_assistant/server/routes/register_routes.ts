@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
@@ -52,6 +53,7 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
+import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import type { ConfigSchema } from '../config_schema';
 
 export const registerRoutes = (
@@ -125,6 +127,10 @@ export const registerRoutes = (
   deleteAttackDiscoverySchedulesRoute(router);
   disableAttackDiscoverySchedulesRoute(router);
   enableAttackDiscoverySchedulesRoute(router);
+
+  // Alert Summary
+  bulkAlertSummaryRoute(router, logger);
+  findAlertSummaryRoute(router, logger);
 
   // Defend insights
   getDefendInsightRoute(router);
