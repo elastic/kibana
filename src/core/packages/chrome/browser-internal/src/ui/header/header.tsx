@@ -112,12 +112,11 @@ export function Header({
       />
       <SkipToMainContent />
 
-      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="headerGlobalNav">
+      {/*<HeaderTopBanner headerBanner$={observables.headerBanner$} />*/}
+      <div className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
-            position="fixed"
             className="header__firstBar"
             sections={[
               {
@@ -169,7 +168,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed" className="header__secondBar">
+          <EuiHeader className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
@@ -227,7 +226,7 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </header>
+      </div>
     </>
   );
 }

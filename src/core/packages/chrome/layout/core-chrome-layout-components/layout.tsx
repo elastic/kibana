@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-};
+import { ChromeLayoutComponent, type ChromeLayoutComponentProps } from './layout.component';
+import { LayoutGlobalCSS } from './layout_global_css';
+
+export type ChromeLayoutProps = ChromeLayoutComponentProps;
+
+export const ChromeLayout = ({ children, ...props }: ChromeLayoutProps) => (
+  <>
+    <LayoutGlobalCSS {...props} />
+    <ChromeLayoutComponent {...props}>{children}</ChromeLayoutComponent>
+  </>
+);

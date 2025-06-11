@@ -15,18 +15,16 @@ import { BehaviorSubject, pairwise, startWith } from 'rxjs';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import { GlobalAppStyle } from '@kbn/core-application-common';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
+import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import { AppWrapper } from './app_containers';
+import { LayoutService } from './layout_service';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -80,11 +78,8 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, application, overlays } = renderCoreDeps;
+    const { chrome } = renderCoreDeps;
     const startServices = this.contextDeps.getValue()!;
-    const chromeHeader = chrome.getHeaderComponent();
-    const appComponent = application.getComponent();
-    const bannerComponent = overlays.banners.getComponent();
 
     const body = document.querySelector('body')!;
     chrome
@@ -95,27 +90,12 @@ export class RenderingService implements IRenderingService {
         body.classList.add(...newClasses);
       });
 
+    const layout = new LayoutService(renderCoreDeps);
+    const ChromeLayout = layout.getComponent();
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <>
-          {/* Global Styles that apply across the entire app */}
-          <GlobalAppStyle />
-
-          {/* Fixed headers */}
-          {chromeHeader}
-
-          {/* banners$.subscribe() for things like the No data banner */}
-          <div id="globalBannerList">{bannerComponent}</div>
-
-          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id={APP_FIXED_VIEWPORT_ID} />
-
-            {/* The actual plugin/app */}
-            {appComponent}
-          </AppWrapper>
-        </>
+        <ChromeLayout />
       </KibanaRootContextProvider>,
       targetDomElement
     );

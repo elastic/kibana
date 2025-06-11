@@ -167,6 +167,8 @@ export interface ChromeStart {
    */
   hasHeaderBanner$(): Observable<boolean>;
 
+  getHeaderBannerComponent(): React.ReactNode;
+
   /**
    * Sets the style type of the chrome.
    * @param style The style type to apply to the chrome.
