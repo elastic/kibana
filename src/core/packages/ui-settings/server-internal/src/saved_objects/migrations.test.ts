@@ -416,3 +416,38 @@ describe('ui_settings 8.9.0 migrations', () => {
     });
   });
 });
+
+describe('ui_settings 8.19.0 migrations', () => {
+  const migration = migrations['8.19.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+
+  test('removes "visualization:useLegacyTimeAxis" setting', () => {
+    const doc = {
+      type: 'config',
+      id: '8.19.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'visualization:useLegacyTimeAxis': true,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.19.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});
