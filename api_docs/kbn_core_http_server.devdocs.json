@@ -6045,6 +6045,14 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
                 "plugin": "@kbn/content-management-content-insights-server",
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
